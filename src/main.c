@@ -1,15 +1,23 @@
 
 #include <stdio.h>
-#include "data/mobs.h"
+#include "data/sprites.h"
 #include "data/maps.h"
 #include "graphics.h"
 #include "input.h"
+#include "mobile.h"
 
 int main( int argc, char* argv[] ) {
    uint8_t running = 1,
       in_char = 0,
       walk_offset = 0;
    uint32_t i = 0, x = 10, j = 0;
+   struct MOBILE player = {
+      &gc_sprite_player,
+      3, 
+      3,
+      4,
+      4
+   };
 
    graphics_init( GRAPHICS_MODE_320_200_4_CGA );
    //graphics_init( GRAPHICS_MODE_320_200_256_VGA );
@@ -17,14 +25,66 @@ int main( int argc, char* argv[] ) {
    while( running ) {
       in_char = 0;
 
-      tilemap_draw( &gc_map_room );
+      tilemap_draw( &gc_map_field );
 
-      graphics_string_at( "abc", 3, 10, 10, GRAPHICS_COLOR_CYAN );
+      //graphics_string_at( "abc", 3, 10, 10, GRAPHICS_COLOR_CYAN );
 
-		graphics_draw_block( x, 20, FONT_W, FONT_H + 1, GRAPHICS_COLOR_BLACK );
+      /* Draw. */
+      /* Note that sprite is drawn at prev_x/y + steps, NOT current x/y. */
+      graphics_sprite_at(
+         *player.sprites,
+         (player.tx_prev * SPRITE_W) +
+            (player.tx != player.tx_prev ? player.steps : 0),
+         (player.ty_prev * SPRITE_H) + walk_offset +
+            (player.ty != player.ty_prev ? player.steps : 0),
+         GRAPHICS_COLOR_MAGENTA, 1 );
+
+      graphics_flip();
+
+      in_char = input_poll();
+
+		/* Quit on Q. */
+      switch( in_char ) {
+      case INPUT_KEY_W:
+         if( player.ty != player.ty_prev || player.tx != player.tx_prev ) {
+            break;
+         }
+         player.ty--;
+         player.steps = -1;
+         break;
+
+      case INPUT_KEY_A:
+         if( player.ty != player.ty_prev || player.tx != player.tx_prev ) {
+            break;
+         }
+         player.tx--;
+         player.steps = -1;
+         break;
+
+      case INPUT_KEY_S:
+         if( player.ty != player.ty_prev || player.tx != player.tx_prev ) {
+            break;
+         }
+         player.ty++;
+         player.steps = 1;
+         break;
+
+      case INPUT_KEY_D:
+         if( player.ty != player.ty_prev || player.tx != player.tx_prev ) {
+            break;
+         }
+         player.tx++;
+         player.steps = 1;
+         break;
+
+      case INPUT_KEY_Q:
+			running = 0;
+         break;
+		}
+
+      /* Animate. */
       if( 10 < j ) {
          j = 0;
-         //x++;
 
          if( 0 == walk_offset ) {
             walk_offset = 1;
@@ -35,18 +95,28 @@ int main( int argc, char* argv[] ) {
       } else {
          j++;
       }
-      graphics_sprite_at(
-         (uint8_t*)&(gc_mob_sprites[0]), x, 20 + walk_offset,
-         GRAPHICS_COLOR_MAGENTA );
 
-      graphics_flip();
-
-      in_char = input_poll();
-
-		/* Quit on Q. */
-		if( INPUT_KEY_Q == in_char ) {
-			running = 0;
-		}
+      if(
+         (player.tx != player.tx_prev || player.ty != player.ty_prev) &&
+         TILEMAP_TILE_W >= player.steps &&
+         (-1 * TILEMAP_TILE_W) <= player.steps
+      ) {
+         if( 0 < player.steps ) {
+            player.steps++;
+         } else {
+            player.steps--;
+         }
+      } else if(
+         player.tx != player.tx_prev &&
+         (TILEMAP_TILE_W < player.steps || TILEMAP_TILE_W * -1 > player.steps)
+      ) {
+         player.tx_prev = player.tx;
+      } else if(
+         player.ty != player.ty_prev &&
+         (TILEMAP_TILE_W < player.steps || TILEMAP_TILE_W * -1 > player.steps)
+      ) {
+         player.ty_prev = player.ty;
+      }
 
       for( i = 0 ; 1000000 > i ; i++ ) {}
    }

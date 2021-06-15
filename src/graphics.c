@@ -5,7 +5,7 @@
 
 void graphics_sprite_at(
    const uint8_t spr[SPRITE_H], uint16_t x_orig, uint16_t y_orig,
-   GRAPHICS_COLOR color
+   GRAPHICS_COLOR color, uint8_t transparent
 ) {
 	int x = 0;
 	int y = 0;
@@ -17,10 +17,11 @@ void graphics_sprite_at(
 		for( x = 0 ; SPRITE_W > x ; x++ ) {
 			if( bitmask & 0x01 ) {
 				pixel = color;
-			} else {
-				pixel = GRAPHICS_COLOR_BLACK;
+            graphics_draw_px( x_orig + x, y_orig + y, pixel );
+			} else if( !transparent ) {
+            pixel = GRAPHICS_COLOR_BLACK;
+            graphics_draw_px( x_orig + x, y_orig + y, pixel );
 			}
-			graphics_draw_px( x_orig + x, y_orig + y, pixel );
 			bitmask >>= 1;
 		}
 	}
