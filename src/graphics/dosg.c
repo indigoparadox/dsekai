@@ -11,8 +11,11 @@
 #endif /* USE_LOOKUPS */
 
 static uint8_t g_mode = 0;
+#ifdef USE_DOUBLEBUF
 static uint8_t huge g_buffer[76800]; /* Sized for 0x13. */
-static uint8_t huge *g_buffer_p2 = NULL;
+#else
+static uint8_t far* g_buffer = NULL;
+#endif /* USE_DOUBLEBUF */
 
 typedef void (__interrupt __far* INTFUNCPTR)( void );
 INTFUNCPTR g_old_timer_interrupt;
@@ -95,9 +98,14 @@ void graphics_init( uint8_t mode ) {
    graphics_install_timer();
 
    g_mode = mode;
-   if( GRAPHICS_MODE_320_200_4_CGA == mode ) {
-      g_buffer_p2 = &(g_buffer[8192]);
+
+#ifndef USE_DOUBLEBUF
+   if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
+      g_buffer = GRAPHICS_MODE_320_200_256_VGA_ADDR;
+   } else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) {
+      g_buffer = GRAPHICS_MODE_320_200_4_CGA_ADDR;
    }
+#endif /* !USE_DOUBLEBUF */
 }
 
 void graphics_shutdown() {
@@ -105,6 +113,7 @@ void graphics_shutdown() {
 }
 
 void graphics_flip() {
+#ifdef USE_DOUBLEBUF
    if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
       _fmemcpy( (char far *)GRAPHICS_MODE_320_200_256_VGA_ADDR,
          g_buffer, SCREEN_W * SCREEN_H );
@@ -112,6 +121,7 @@ void graphics_flip() {
       /* memcpy both planes. */
       _fmemcpy( (char far *)0xB8000000, g_buffer, 16000 );
    }
+#endif /* USE_DOUBLEBUF */
 }
 
 void graphics_loop_start() {

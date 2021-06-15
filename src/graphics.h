@@ -27,7 +27,7 @@
 #define GRAPHICS_MODE_320_200_256_VGA  0x13
 
 #define GRAPHICS_MODE_320_200_256_VGA_ADDR   0xA0000000L
-#define GRAPHICS_MODE_320_200_4_CGA_ADDR     0xB0000000L
+#define GRAPHICS_MODE_320_200_4_CGA_ADDR     0xB8000000L
 
 void graphics_init( uint8_t );
 void graphics_shutdown();
