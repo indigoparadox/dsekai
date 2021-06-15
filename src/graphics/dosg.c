@@ -1,5 +1,5 @@
 
-#include "graphics.h"
+#include "../graphics.h"
 
 #include <string.h>
 #include <i86.h>
@@ -7,7 +7,7 @@
 #include <conio.h>
 
 #ifdef USE_LOOKUPS
-#include "data/offsets.h"
+#include "../data/offsets.h"
 #endif /* USE_LOOKUPS */
 
 static uint8_t g_mode = 0;

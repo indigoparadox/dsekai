@@ -6,8 +6,8 @@ LD := wcl
 CFLAGS := -0
 LDFLAGS :=
 
-DSEKAI_C_FILES := main.c graphics.c tilemap.c
-DSEKAI_O_FILES := $(DSEKAI_C_FILES:%.c=%.o)
+DSEKAI_C_FILES := main.c graphics/dosg.c tilemap.c
+DSEKAI_O_FILES := $(subst .c,.o,$(DSEKAI_O_FILES))
 
 .PHONY: clean
 
