@@ -115,31 +115,51 @@ void graphics_draw_px( uint16_t x, uint16_t y, uint8_t color ) {
 	int byte_offset = 0,
       bit_offset = 0,
       bit_mask = 0;
+#ifdef SCALE_2X
+   uint16_t scale_x_add = 0,
+      scale_y_add = 0,
+      scaled_x = 0,
+      scaled_y = 0;
+#else
+   uint16_t scaled_x = x,
+      scaled_y = y;
+#endif /* SCALE_2X */
 
    if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
       byte_offset = ((y * SCREEN_W) + x);
       g_buffer[byte_offset] = color;
    } else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) {
+#ifdef SCALE_2X
+      for( scale_x_add = 0 ; 2 > scale_x_add ; scale_x_add++ ) {
+         scaled_x = (2 * x) + scale_x_add;
+         for( scale_y_add = 0 ; 2 > scale_y_add ; scale_y_add++ ) {
+            scaled_y = (2 * y) + scale_y_add;
+#endif /* SCALE_2X */
 #ifdef USE_LOOKUPS
       /* Use pre-generated lookup tables for offsets to improve performance. */
-      byte_offset = gc_offsets_cga_bytes_p1[y][x];
-      bit_offset = gc_offsets_cga_bits_p1[y][x];
+      byte_offset = gc_offsets_cga_bytes_p1[scaled_y][scaled_x];
+      bit_offset = gc_offsets_cga_bits_p1[scaled_y][scaled_x];
 #else
       /* Divide y by 2 since both planes are SCREEN_H / 2 high. */
       /* Divide result by 4 since it's 2 bits per pixel. */
-      byte_offset = (((y / 2) * SCREEN_W) + x) / 4;
+      byte_offset = (((scaled_y / 2) * SCREEN_W) + scaled_x) / 4;
       /* Shift the bits over by the remainder. */
-      bit_offset = 6 - (((((y / 2) * SCREEN_W) + x) % 4) * 2);
+      bit_offset = 
+         6 - (((((scaled_y / 2) * SCREEN_W) + scaled_x) % 4) * 2);
 #endif /* USE_LOOKUPS */
 
       /* Clear the existing pixel. */
-      if( 1 == y % 2 ) {
+      if( 1 == scaled_y % 2 ) {
          g_buffer[0x2000 + byte_offset] &= ~(0x03 << bit_offset);
          g_buffer[0x2000 + byte_offset] |= (color << bit_offset);
       } else {
          g_buffer[byte_offset] &= ~(0x03 << bit_offset);
          g_buffer[byte_offset] |= (color << bit_offset);
       }
+#ifdef SCALE_2X
+         }
+      }
+#endif /* SCALE_2X */
    }
 
 }

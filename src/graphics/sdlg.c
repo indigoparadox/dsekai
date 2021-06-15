@@ -31,7 +31,14 @@ void graphics_flip() {
 
 void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
    SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
+#ifdef SCALE_2X
+   SDL_RenderDrawPoint( g_renderer, x * 2, y * 2 );
+   SDL_RenderDrawPoint( g_renderer, x * 2, y * 2 + 1 );
+   SDL_RenderDrawPoint( g_renderer, x * 2 + 1, y * 2 );
+   SDL_RenderDrawPoint( g_renderer, x * 2 + 1, y * 2 + 1 );
+#else
    SDL_RenderDrawPoint( g_renderer, x, y );
+#endif /* SCALE_2X */
 }
 
 void graphics_draw_block(
@@ -40,11 +47,19 @@ void graphics_draw_block(
 ) {
    SDL_Rect area;
 
+#ifdef SCALE_2X
+   area.x = x_orig * 2;
+   area.y = y_orig * 2;
+   area.w = w * 2;
+   area.h = h * 2;
+#else
    area.x = x_orig;
    area.y = y_orig;
    area.w = w;
    area.h = h;
+#endif /* SCALE_2X */
 
-   SDL_FillRect( g_screen, &area, 0x0 );
+   SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
+   SDL_RenderFillRect( g_renderer, &area );
 }
 

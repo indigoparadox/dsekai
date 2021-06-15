@@ -2,11 +2,11 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#ifdef __DOS__
+#ifdef USE_DOS
 #include "input/dosi.h"
-#else
+#elif defined( USE_SDL )
 #include "input/sdli.h"
-#endif /* __DOS__ */
+#endif /* USE_DOS, USE_SDL */
 
 int input_poll();
 

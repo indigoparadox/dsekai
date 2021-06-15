@@ -4,11 +4,11 @@
 
 #include "dstypes.h"
 
-#ifdef __DOS__
+#ifdef USE_DOS
 #include "graphics/dosg.h"
-#else
+#elif defined( USE_SDL )
 #include "graphics/sdlg.h"
-#endif /* __DOS__ */
+#endif /* USE_DOS, USE_SDL */
 
 #define SCREEN_W 320
 #define SCREEN_H 200
