@@ -4,6 +4,12 @@
 
 #include "dstypes.h"
 
+#ifdef __DOS__
+#include "graphics/dosg.h"
+#else
+#include "graphics/sdlg.h"
+#endif /* __DOS__ */
+
 #define SCREEN_W 320
 #define SCREEN_H 200
 #define FONT_W 8
@@ -21,11 +27,14 @@
 void graphics_init( uint8_t );
 void graphics_shutdown();
 void graphics_flip();
-void graphics_draw_px( uint16_t, uint16_t, uint8_t );
-void graphics_draw_block( uint16_t, uint16_t, uint16_t, uint16_t, uint8_t );
-void graphics_sprite_at( const uint8_t[SPRITE_H], uint16_t, uint16_t, uint8_t );
-void graphics_char_at( const char, uint16_t, uint16_t, uint8_t );
-void graphics_string_at( const char*, uint16_t, uint16_t, uint16_t, uint8_t );
+void graphics_draw_px( uint16_t, uint16_t, const GRAPHICS_COLOR );
+void graphics_draw_block(
+   uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
+void graphics_sprite_at(
+   const uint8_t[SPRITE_H], uint16_t, uint16_t, const GRAPHICS_COLOR );
+void graphics_char_at( const char, uint16_t, uint16_t, const GRAPHICS_COLOR );
+void graphics_string_at(
+   const char*, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
 
 #endif /* GRAPHICS_H */
 

@@ -5,12 +5,6 @@
 #include "graphics.h"
 #include "input.h"
 
-#ifdef __DOS__
-#include "input/dosi.h"
-#else
-#include "input/sdli.h"
-#endif /* __DOS__ */
-
 int main( int argc, char* argv[] ) {
    uint8_t running = 1,
       in_char = 0,
@@ -25,9 +19,9 @@ int main( int argc, char* argv[] ) {
 
       tilemap_draw( &gc_map_room );
 
-      graphics_string_at( "abc", 3, 10, 10, 1 );
+      graphics_string_at( "abc", 3, 10, 10, GRAPHICS_COLOR_CYAN );
 
-		graphics_draw_block( x, 20, FONT_W, FONT_H + 1, 0 );
+		graphics_draw_block( x, 20, FONT_W, FONT_H + 1, GRAPHICS_COLOR_BLACK );
       if( 10 < j ) {
          j = 0;
          //x++;
@@ -42,7 +36,8 @@ int main( int argc, char* argv[] ) {
          j++;
       }
       graphics_sprite_at(
-         (uint8_t*)&(gc_mob_sprites[0]), x, 20 + walk_offset, 2 );
+         (uint8_t*)&(gc_mob_sprites[0]), x, 20 + walk_offset,
+         GRAPHICS_COLOR_MAGENTA );
 
       graphics_flip();
 
