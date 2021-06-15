@@ -19,7 +19,7 @@ void tilemap_draw( const struct TILEMAP* t ) {
 
          /* Blit the tile. */
          graphics_sprite_at( t->tileset[tile_id],
-            x * 8, y * 8, GRAPHICS_COLOR_WHITE );
+            x * 8, y * 8, t->tileset_colors[tile_id] );
       }
    }
 }

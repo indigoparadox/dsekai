@@ -3,6 +3,7 @@
 #define TILEMAP_H
 
 #include "dstypes.h"
+#include "graphics.h"
 
 #define TILEMAP_TW 40
 #define TILEMAP_TH 30
@@ -13,6 +14,7 @@
 struct TILEMAP {
    const char* name;
    const uint8_t tileset[TILEMAP_TILESETS_MAX][TILEMAP_TILE_W];
+   const GRAPHICS_COLOR tileset_colors[TILEMAP_TILESETS_MAX];
    const uint8_t tiles[6][10];
 };
 
