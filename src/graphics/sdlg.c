@@ -31,14 +31,7 @@ void graphics_flip() {
 
 void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
    SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
-#ifdef SCALE_2X
-   SDL_RenderDrawPoint( g_renderer, x * 2, y * 2 );
-   SDL_RenderDrawPoint( g_renderer, x * 2, y * 2 + 1 );
-   SDL_RenderDrawPoint( g_renderer, x * 2 + 1, y * 2 );
-   SDL_RenderDrawPoint( g_renderer, x * 2 + 1, y * 2 + 1 );
-#else
    SDL_RenderDrawPoint( g_renderer, x, y );
-#endif /* SCALE_2X */
 }
 
 void graphics_draw_block(

@@ -40,7 +40,7 @@ int main( int argc, char* argv[] ) {
             (player.tx != player.tx_prev ? player.steps : 0),
          (player.ty_prev * SPRITE_H) - walk_offset +
             (player.ty != player.ty_prev ? player.steps : 0),
-         GRAPHICS_COLOR_MAGENTA );
+         GRAPHICS_COLOR_MAGENTA, 2 );
 
       graphics_flip();
 
