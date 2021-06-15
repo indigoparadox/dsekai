@@ -3,6 +3,13 @@
 #include "data/mobs.h"
 #include "data/maps.h"
 #include "graphics.h"
+#include "input.h"
+
+#ifdef __DOS__
+#include "input/dosi.h"
+#else
+#include "input/sdli.h"
+#endif /* __DOS__ */
 
 int main( int argc, char* argv[] ) {
    uint8_t running = 1,
@@ -34,16 +41,15 @@ int main( int argc, char* argv[] ) {
       } else {
          j++;
       }
-      graphics_sprite_at( &(gc_mob_sprites[0]), x, 20 + walk_offset, 2 );
+      graphics_sprite_at(
+         (uint8_t*)&(gc_mob_sprites[0]), x, 20 + walk_offset, 2 );
 
       graphics_flip();
 
-		if( kbhit() ) {
-			in_char = getch();
-		}
+      in_char = input_poll();
 
 		/* Quit on Q. */
-		if( 113 == in_char ) {
+		if( INPUT_KEY_Q == in_char ) {
 			running = 0;
 		}
 
