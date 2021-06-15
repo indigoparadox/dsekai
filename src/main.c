@@ -35,7 +35,7 @@ int main( int argc, char* argv[] ) {
          *player.sprites,
          (player.tx_prev * SPRITE_W) +
             (player.tx != player.tx_prev ? player.steps : 0),
-         (player.ty_prev * SPRITE_H) + walk_offset +
+         (player.ty_prev * SPRITE_H) - walk_offset +
             (player.ty != player.ty_prev ? player.steps : 0),
          GRAPHICS_COLOR_MAGENTA, 1 );
 
@@ -46,35 +46,27 @@ int main( int argc, char* argv[] ) {
 		/* Quit on Q. */
       switch( in_char ) {
       case INPUT_KEY_W:
-         if( player.ty != player.ty_prev || player.tx != player.tx_prev ) {
-            break;
+         if( !tilemap_collide( &gc_map_field, player.tx, player.ty - 1 ) ) {
+            mobile_walk_start( &player, 0, -1 );
          }
-         player.ty--;
-         player.steps = -1;
          break;
 
       case INPUT_KEY_A:
-         if( player.ty != player.ty_prev || player.tx != player.tx_prev ) {
-            break;
+         if( !tilemap_collide( &gc_map_field, player.tx - 1, player.ty ) ) {
+            mobile_walk_start( &player, -1, 0 );
          }
-         player.tx--;
-         player.steps = -1;
          break;
 
       case INPUT_KEY_S:
-         if( player.ty != player.ty_prev || player.tx != player.tx_prev ) {
-            break;
+         if( !tilemap_collide( &gc_map_field, player.tx, player.ty + 1 ) ) {
+            mobile_walk_start( &player, 0, 1 );
          }
-         player.ty++;
-         player.steps = 1;
          break;
 
       case INPUT_KEY_D:
-         if( player.ty != player.ty_prev || player.tx != player.tx_prev ) {
-            break;
+         if( !tilemap_collide( &gc_map_field, player.tx + 1, player.ty ) ) {
+            mobile_walk_start( &player, 1, 0 );
          }
-         player.tx++;
-         player.steps = 1;
          break;
 
       case INPUT_KEY_Q:
@@ -96,27 +88,7 @@ int main( int argc, char* argv[] ) {
          j++;
       }
 
-      if(
-         (player.tx != player.tx_prev || player.ty != player.ty_prev) &&
-         TILEMAP_TILE_W >= player.steps &&
-         (-1 * TILEMAP_TILE_W) <= player.steps
-      ) {
-         if( 0 < player.steps ) {
-            player.steps++;
-         } else {
-            player.steps--;
-         }
-      } else if(
-         player.tx != player.tx_prev &&
-         (TILEMAP_TILE_W < player.steps || TILEMAP_TILE_W * -1 > player.steps)
-      ) {
-         player.tx_prev = player.tx;
-      } else if(
-         player.ty != player.ty_prev &&
-         (TILEMAP_TILE_W < player.steps || TILEMAP_TILE_W * -1 > player.steps)
-      ) {
-         player.ty_prev = player.ty;
-      }
+      mobile_animate( &player );
 
       for( i = 0 ; 1000000 > i ; i++ ) {}
    }

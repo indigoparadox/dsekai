@@ -13,5 +13,8 @@ struct MOBILE {
    int8_t steps;
 };
 
+uint8_t mobile_walk_start( struct MOBILE*, int8_t x_mod, int8_t y_mod );
+void mobile_animate( struct MOBILE* m );
+
 #endif /* MOBILE_H */
 

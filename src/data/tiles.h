@@ -20,6 +20,21 @@ const uint8_t gc_tiles_field[TILEMAP_TILESETS_MAX][TILEMAP_TILE_W] = {
    {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}
 };
 
+const uint8_t gc_tiles_field_flags[TILEMAP_TILESETS_MAX] = {
+   0x00,
+   0x01,
+   0x01,
+   0x01,
+   0x01,
+   0x01,
+   0x01,
+   0x01,
+   0x01,
+   0x01,
+   0x01,
+   0x01
+};
+
 const GRAPHICS_COLOR gc_tiles_field_colors[TILEMAP_TILESETS_MAX] = {
    GRAPHICS_COLOR_CYAN,
    GRAPHICS_COLOR_WHITE,
