@@ -23,4 +23,4 @@ lookup: lookup.c
 	$(CC) $(CFLAGS) $(<:%.o=%)
 
 clean:
-	rm *.o *.exe lookup
+	rm *.o *.exe lookup *.err
