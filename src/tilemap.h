@@ -25,6 +25,7 @@ struct TILEMAP {
 };
 
 void tilemap_draw( const struct TILEMAP* t );
+uint8_t tilemap_collide( const struct TILEMAP*, uint8_t, uint8_t );
 
 #endif /* TILEMAP_H */
 

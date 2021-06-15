@@ -4,25 +4,32 @@
 #include "data/font8x8.h"
 
 void graphics_sprite_at(
-   const uint8_t spr[SPRITE_H], uint16_t x_orig, uint16_t y_orig,
-   GRAPHICS_COLOR color, uint8_t transparent
+   const uint8_t spr[SPRITE_H], const uint8_t spr_mask[SPRITE_H],
+   uint16_t x_orig, uint16_t y_orig, GRAPHICS_COLOR color
 ) {
 	int x = 0;
 	int y = 0;
-	int bitmask = 0;
+	int bitmask_spr = 0;
+   int bitmask_mask = 0;
 	GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
 
 	for( y = 0 ; SPRITE_H > y ; y++ ) {
-		bitmask = spr[y];
+		bitmask_spr = spr[y];
+      if( NULL != spr_mask ) {
+   		bitmask_mask = spr_mask[y];
+      }
 		for( x = 0 ; SPRITE_W > x ; x++ ) {
-			if( bitmask & 0x01 ) {
+			if( bitmask_spr & 0x01 ) {
 				pixel = color;
             graphics_draw_px( x_orig + x, y_orig + y, pixel );
-			} else if( !transparent ) {
+			} else if( NULL == spr_mask || bitmask_mask & 0x01 ) {
             pixel = GRAPHICS_COLOR_BLACK;
             graphics_draw_px( x_orig + x, y_orig + y, pixel );
 			}
-			bitmask >>= 1;
+			bitmask_spr >>= 1;
+         if( NULL != spr_mask ) {
+            bitmask_mask >>= 1;
+         }
 		}
 	}
 }

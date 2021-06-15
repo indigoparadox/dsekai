@@ -13,10 +13,12 @@ int main( int argc, char* argv[] ) {
    uint32_t i = 0, x = 10, j = 0;
    struct MOBILE player = {
       &gc_sprite_player,
+      &gc_sprite_player_mask,
       3, 
       3,
       4,
-      4
+      4,
+      SPRITE_W
    };
 
    graphics_init( GRAPHICS_MODE_320_200_4_CGA );
@@ -32,12 +34,13 @@ int main( int argc, char* argv[] ) {
       /* Draw. */
       /* Note that sprite is drawn at prev_x/y + steps, NOT current x/y. */
       graphics_sprite_at(
-         *player.sprites,
+         *player.sprite,
+         *player.sprite_mask,
          (player.tx_prev * SPRITE_W) +
             (player.tx != player.tx_prev ? player.steps : 0),
          (player.ty_prev * SPRITE_H) - walk_offset +
             (player.ty != player.ty_prev ? player.steps : 0),
-         GRAPHICS_COLOR_MAGENTA, 1 );
+         GRAPHICS_COLOR_MAGENTA );
 
       graphics_flip();
 

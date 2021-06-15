@@ -31,7 +31,8 @@ void graphics_draw_px( uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_draw_block(
    uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_sprite_at(
-   const uint8_t[SPRITE_H], uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
+   const uint8_t[SPRITE_H], const uint8_t[SPRITE_H], uint16_t, uint16_t,
+   const GRAPHICS_COLOR );
 void graphics_char_at( const char, uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_string_at(
    const char*, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );

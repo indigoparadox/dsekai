@@ -5,7 +5,8 @@
 #include "dstypes.h"
 
 struct MOBILE {
-   const uint8_t (*sprites)[8];
+   const uint8_t (*sprite)[8];
+   const uint8_t (*sprite_mask)[8];
    uint8_t tx;
    uint8_t tx_prev;
    uint8_t ty;

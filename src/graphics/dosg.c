@@ -111,7 +111,7 @@ void graphics_flip() {
    }
 }
 
-void graphics_draw_px( uint16_t x, uint16_t y, uint8_t color ) {
+void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
 	int byte_offset = 0,
       bit_offset = 0,
       bit_mask = 0;
@@ -165,7 +165,8 @@ void graphics_draw_px( uint16_t x, uint16_t y, uint8_t color ) {
 }
 
 void graphics_draw_block(
-   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h, uint8_t color
+   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
+   GRAPHICS_COLOR color
 ) {
 	int x = 0;
 	int y = 0;

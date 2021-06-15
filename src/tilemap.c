@@ -1,6 +1,7 @@
 
 #include "tilemap.h"
 
+#include "dstypes.h"
 #include "graphics.h"
 
 void tilemap_draw( const struct TILEMAP* t ) {
@@ -14,8 +15,8 @@ void tilemap_draw( const struct TILEMAP* t ) {
          tile_id = tilemap_get_tile_id( t, x, y );
 
          /* Blit the tile. */
-         graphics_sprite_at( (*t->tileset)[tile_id],
-            x * 8, y * 8, (*t->tileset_colors)[tile_id], 0 );
+         graphics_sprite_at( (*t->tileset)[tile_id], NULL,
+            x * 8, y * 8, (*t->tileset_colors)[tile_id] );
       }
    }
 }
