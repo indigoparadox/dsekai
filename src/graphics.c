@@ -6,7 +6,13 @@
 #include <dos.h>
 #include <conio.h>
 
-static uint8_t huge g_buffer[76800];
+#ifdef USE_LOOKUPS
+#include "data/offsets.h"
+#endif /* USE_LOOKUPS */
+
+static uint8_t g_mode = 0;
+static uint8_t huge g_buffer[76800]; /* Sized for 0x13. */
+static uint8_t huge *g_buffer_p2 = NULL;
 
 typedef void (__interrupt __far* INTFUNCPTR)( void );
 INTFUNCPTR g_old_timer_interrupt;
@@ -77,12 +83,18 @@ static void graphics_remove_timer() {
    _enable();
 }
 
-void graphics_init() {
+void graphics_init( uint8_t mode ) {
    union REGS r;
+
 	r.h.ah = 0;
-	r.h.al = 0x13;
+	r.h.al = mode;
 	int86( 0x10, &r, &r );
    graphics_install_timer();
+
+   g_mode = mode;
+   if( GRAPHICS_MODE_320_200_4_CGA == mode ) {
+      g_buffer_p2 = &(g_buffer[8192]);
+   }
 }
 
 void graphics_shutdown() {
@@ -90,15 +102,46 @@ void graphics_shutdown() {
 }
 
 void graphics_flip() {
-	char far* screen = (char far*)0xA0000000L;
-
-   _fmemcpy( screen, g_buffer, SCREEN_W * SCREEN_H );
+   if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
+      _fmemcpy( (char far *)GRAPHICS_MODE_320_200_256_VGA_ADDR,
+         g_buffer, SCREEN_W * SCREEN_H );
+   } else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) {
+      /* memcpy both planes. */
+      _fmemcpy( (char far *)0xB8000000, g_buffer, 16000 );
+   }
 }
 
 void graphics_draw_px( uint16_t x, uint16_t y, uint8_t color ) {
-	int offset = 0;
-	offset = (y * SCREEN_W) + x;
-	g_buffer[offset] = color;
+	int byte_offset = 0,
+      bit_offset = 0,
+      bit_mask = 0;
+
+   if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
+      byte_offset = ((y * SCREEN_W) + x);
+      g_buffer[byte_offset] = color;
+   } else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) {
+#ifdef USE_LOOKUPS
+      /* Use pre-generated lookup tables for offsets to improve performance. */
+      byte_offset = gc_offsets_cga_bytes_p1[y][x];
+      bit_offset = gc_offsets_cga_bits_p1[y][x];
+#else
+      /* Divide y by 2 since both planes are SCREEN_H / 2 high. */
+      /* Divide result by 4 since it's 2 bits per pixel. */
+      byte_offset = (((y / 2) * SCREEN_W) + x) / 4;
+      /* Shift the bits over by the remainder. */
+      bit_offset = 6 - (((((y / 2) * SCREEN_W) + x) % 4) * 2);
+#endif /* USE_LOOKUPS */
+
+      /* Clear the existing pixel. */
+      if( 1 == y % 2 ) {
+         g_buffer[0x2000 + byte_offset] &= ~(0x03 << bit_offset);
+         g_buffer[0x2000 + byte_offset] |= (color << bit_offset);
+      } else {
+         g_buffer[byte_offset] &= ~(0x03 << bit_offset);
+         g_buffer[byte_offset] |= (color << bit_offset);
+      }
+   }
+
 }
 
 void graphics_draw_block(
@@ -145,7 +188,7 @@ void graphics_char_at(
 	int pixel = 0;
 
 	for( y = 0 ; FONT_H > y ; y++ ) {
-		bitmask = font8x8_basic[c][y];
+		bitmask = gc_font8x8_basic[c][y];
 		for( x = 0 ; FONT_W > x ; x++ ) {
 			if( bitmask & 0x01 ) {
 				pixel = color;
