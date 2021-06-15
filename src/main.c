@@ -39,6 +39,8 @@ int main( int argc, char* argv[] ) {
       for( i = 0 ; 1000000 > i ; i++ ) {}
    }
 
+   graphics_shutdown();
+
    return 0;
 }
 

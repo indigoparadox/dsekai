@@ -14,6 +14,7 @@
 #define SPRITE_W 8
 
 void graphics_init();
+void graphics_shutdown();
 void graphics_draw_px( uint16_t, uint16_t, uint8_t );
 void graphics_draw_block( uint16_t, uint16_t, uint16_t, uint16_t, uint8_t );
 void graphics_char_at( char, uint16_t, uint16_t, uint8_t );
