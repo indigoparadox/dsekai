@@ -17,6 +17,7 @@
 #define FONT_SPACE 1
 #define SPRITE_H 8
 #define SPRITE_W 8
+#define TILE_W 8
 
 #define GRAPHICS_MODE_320_200_4_CGA    0x05
 #define GRAPHICS_MODE_320_200_256_VGA  0x13
@@ -30,6 +31,8 @@ void graphics_flip();
 void graphics_draw_px( uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_draw_block(
    uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
+void graphics_tile_at(
+   const uint8_t[TILE_W], uint16_t, uint16_t, GRAPHICS_COLOR );
 void graphics_sprite_at(
    const uint8_t[SPRITE_H], const uint8_t[SPRITE_H], uint16_t, uint16_t,
    const GRAPHICS_COLOR );

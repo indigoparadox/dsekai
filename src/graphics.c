@@ -3,6 +3,29 @@
 
 #include "data/font8x8.h"
 
+void graphics_tile_at(
+   const uint8_t tile[TILE_W], uint16_t x_orig, uint16_t y_orig,
+   GRAPHICS_COLOR color
+) {
+	int x = 0;
+	int y = 0;
+	int bitmask = 0;
+	GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
+
+	for( y = 0 ; TILE_W > y ; y++ ) {
+		bitmask = tile[y];
+		for( x = 0 ; TILE_W > x ; x++ ) {
+			if( bitmask & 0x01 ) {
+				pixel = color;
+         } else {
+            pixel = GRAPHICS_COLOR_BLACK;
+			}
+         graphics_draw_px( x_orig + x, y_orig + y, pixel );
+			bitmask >>= 1;
+		}
+	}
+}
+
 void graphics_sprite_at(
    const uint8_t spr[SPRITE_H], const uint8_t spr_mask[SPRITE_H],
    uint16_t x_orig, uint16_t y_orig, GRAPHICS_COLOR color
