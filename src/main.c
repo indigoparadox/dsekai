@@ -16,7 +16,6 @@ int main( int argc, char* argv[] ) {
    uint8_t tiles_flags[TILEMAP_TH][TILEMAP_TW];
    struct MOBILE player = {
       &gc_sprite_player,
-      &gc_sprite_player_mask,
       3, 
       3,
       4,
@@ -42,7 +41,6 @@ int main( int argc, char* argv[] ) {
       /* Note that sprite is drawn at prev_x/y + steps, NOT current x/y. */
       graphics_sprite_at(
          *player.sprite,
-         *player.sprite_mask,
          (player.tx_prev * SPRITE_W) +
             (player.tx != player.tx_prev ? player.steps : 0),
          (player.ty_prev * SPRITE_H) - walk_offset +

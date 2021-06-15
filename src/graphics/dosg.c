@@ -101,7 +101,7 @@ void graphics_init( uint8_t mode ) {
 
 #ifndef USE_DOUBLEBUF
    if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
-      g_buffer = GRAPHICS_MODE_320_200_256_VGA_ADDR;
+      g_buffer = (uint8_t far *)GRAPHICS_MODE_320_200_256_VGA_ADDR;
    } else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) {
       g_buffer = GRAPHICS_MODE_320_200_4_CGA_ADDR;
    }
@@ -169,6 +169,36 @@ void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
          g_buffer[byte_offset] |= (color << bit_offset);
       }
    }
+}
+
+void graphics_sprite_at(
+   const uint8_t spr[SPRITE_H],
+   uint16_t x, uint16_t y, GRAPHICS_COLOR color, uint8_t scale
+) {
+	int y_offset = 0;
+	//int bitmask_spr = 0;
+   //int bitmask_mask = 0;
+   uint16_t byte_offset = 0;
+	GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
+
+	for( y_offset = 0 ; SPRITE_H > y_offset ; y_offset++ ) {
+		//bitmask_spr = spr[y];
+      byte_offset = gc_offsets_cga_bytes_p1[y + y_offset][x];
+      memcpy( &(g_buffer[byte_offset]), &(spr[y_offset]), 8 );
+      #if 0
+		for( x = 0 ; SPRITE_W > x ; x++ ) {
+			if( bitmask_spr & 0x01 ) {
+				pixel = color;
+            graphics_draw_px( x_orig + x, y_orig + y, pixel );
+			} else {
+            pixel = GRAPHICS_COLOR_BLACK;
+
+            graphics_draw_px( x_orig + x, y_orig + y, pixel );
+			}
+			bitmask_spr >>= 1;
+		}
+      #endif
+	}
 }
 
 void graphics_draw_block(

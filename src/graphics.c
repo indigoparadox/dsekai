@@ -12,65 +12,6 @@ void graphics_draw_px_2x( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
    graphics_draw_px( x * 2 + 1, y * 2 + 1, color );
 }
 
-void graphics_tile_at(
-   const uint8_t tile[TILE_W], uint16_t x_orig, uint16_t y_orig,
-   GRAPHICS_COLOR color, uint8_t scale
-) {
-	int x = 0;
-	int y = 0;
-	int bitmask = 0;
-	GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
-   graphics_draw_px_cb draw_cb = 2 == scale ?
-      graphics_draw_px_2x : graphics_draw_px;
-
-	for( y = 0 ; TILE_W > y ; y++ ) {
-		bitmask = tile[y];
-		for( x = 0 ; TILE_W > x ; x++ ) {
-			if( bitmask & 0x01 ) {
-				pixel = color;
-         } else {
-            pixel = GRAPHICS_COLOR_BLACK;
-			}
-         draw_cb( x_orig + x, y_orig + y, pixel );
-			bitmask >>= 1;
-		}
-	}
-}
-
-void graphics_sprite_at(
-   const uint8_t spr[SPRITE_H], const uint8_t spr_mask[SPRITE_H],
-   uint16_t x_orig, uint16_t y_orig, GRAPHICS_COLOR color, uint8_t scale
-) {
-	int x = 0;
-	int y = 0;
-	int bitmask_spr = 0;
-   int bitmask_mask = 0;
-	GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
-   graphics_draw_px_cb draw_cb = 2 == scale ?
-      graphics_draw_px_2x : graphics_draw_px;
-
-	for( y = 0 ; SPRITE_H > y ; y++ ) {
-		bitmask_spr = spr[y];
-      if( NULL != spr_mask ) {
-   		bitmask_mask = spr_mask[y];
-      }
-		for( x = 0 ; SPRITE_W > x ; x++ ) {
-			if( bitmask_spr & 0x01 ) {
-				pixel = color;
-            draw_cb( x_orig + x, y_orig + y, pixel );
-			} else if( NULL == spr_mask || bitmask_mask & 0x01 ) {
-            pixel = GRAPHICS_COLOR_BLACK;
-
-            draw_cb( x_orig + x, y_orig + y, pixel );
-			}
-			bitmask_spr >>= 1;
-         if( NULL != spr_mask ) {
-            bitmask_mask >>= 1;
-         }
-		}
-	}
-}
-
 void graphics_char_at(
    const char c, uint16_t x_orig, uint16_t y_orig, GRAPHICS_COLOR color,
    uint8_t scale
