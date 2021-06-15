@@ -3,6 +3,7 @@
 #define MOBILE_H
 
 #include "dstypes.h"
+#include "tilemap.h"
 
 struct MOBILE {
    const uint8_t (*sprite)[8];
@@ -15,7 +16,8 @@ struct MOBILE {
 };
 
 uint8_t mobile_walk_start( struct MOBILE*, int8_t x_mod, int8_t y_mod );
-void mobile_animate( struct MOBILE* m );
+void mobile_animate(
+   struct MOBILE* m, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW] );
 
 #endif /* MOBILE_H */
 

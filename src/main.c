@@ -1,5 +1,7 @@
 
 #include <stdio.h>
+#include <string.h>
+
 #include "data/sprites.h"
 #include "data/maps.h"
 #include "graphics.h"
@@ -11,6 +13,7 @@ int main( int argc, char* argv[] ) {
       in_char = 0,
       walk_offset = 0;
    uint32_t i = 0, x = 10, j = 0;
+   uint8_t tiles_flags[TILEMAP_TH][TILEMAP_TW];
    struct MOBILE player = {
       &gc_sprite_player,
       &gc_sprite_player_mask,
@@ -24,12 +27,14 @@ int main( int argc, char* argv[] ) {
    graphics_init( GRAPHICS_MODE_320_200_4_CGA );
    //graphics_init( GRAPHICS_MODE_320_200_256_VGA );
 
+   memset( &tiles_flags, 0x01, TILEMAP_TH * TILEMAP_TW );
+
    while( running ) {
       graphics_loop_start();
 
       in_char = 0;
 
-      tilemap_draw( &gc_map_field );
+      tilemap_draw( &gc_map_field, &tiles_flags );
 
       //graphics_string_at( "abc", 3, 10, 10, GRAPHICS_COLOR_CYAN );
 
@@ -93,7 +98,7 @@ int main( int argc, char* argv[] ) {
          j++;
       }
 
-      mobile_animate( &player );
+      mobile_animate( &player, &tiles_flags );
 
       graphics_loop_end();
    }

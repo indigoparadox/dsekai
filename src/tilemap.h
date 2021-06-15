@@ -11,7 +11,9 @@
 #define TILEMAP_TILESETS_MAX  12
 #define TILEMAP_TILE_W        8
 
-#define TILEMAP_TILE_FLAG_BLOCK  0x01
+#define TILEMAP_TILESET_FLAG_BLOCK  0x01
+
+#define TILEMAP_TILE_FLAG_DIRTY     0x01
 
 #define tilemap_get_tile_id( t, x, y ) \
    ((t->tiles[y][x / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
@@ -24,7 +26,9 @@ struct TILEMAP {
    const uint8_t tiles[TILEMAP_TH][TILEMAP_TW / 2];
 };
 
-void tilemap_draw( const struct TILEMAP* t );
+void tilemap_draw(
+   const struct TILEMAP* t, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW]
+);
 uint8_t tilemap_collide( const struct TILEMAP*, uint8_t, uint8_t );
 
 #endif /* TILEMAP_H */
