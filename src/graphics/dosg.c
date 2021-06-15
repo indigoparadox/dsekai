@@ -16,7 +16,10 @@ static uint8_t huge *g_buffer_p2 = NULL;
 
 typedef void (__interrupt __far* INTFUNCPTR)( void );
 INTFUNCPTR g_old_timer_interrupt;
-volatile long int g_ms;
+volatile uint16_t g_ms;
+
+const uint16_t gc_ms_target = 1000 / FPS;
+static uint16_t g_ms_start = 0; 
 
 void __interrupt __far graphics_timer_handler() {
    static unsigned long count = 0;
@@ -111,6 +114,18 @@ void graphics_flip() {
    }
 }
 
+void graphics_loop_start() {
+   g_ms_start = g_ms;
+}
+
+void graphics_loop_end() {
+   int16_t delta = 0;
+   
+   do {
+      delta = gc_ms_target - (g_ms - g_ms_start);
+   } while( 0 < delta );  
+}
+
 void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
 	int byte_offset = 0,
       bit_offset = 0,
@@ -144,7 +159,6 @@ void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
          g_buffer[byte_offset] |= (color << bit_offset);
       }
    }
-
 }
 
 void graphics_draw_block(

@@ -10,6 +10,10 @@
 #include "graphics/sdlg.h"
 #endif /* USE_DOS, USE_SDL */
 
+#ifndef FPS
+#define FPS 30
+#endif /* FPS */
+
 #define SCREEN_W 320
 #define SCREEN_H 200
 #define FONT_W 8
@@ -28,6 +32,8 @@
 void graphics_init( uint8_t );
 void graphics_shutdown();
 void graphics_flip();
+void graphics_loop_start();
+void graphics_loop_end();
 void graphics_draw_px( uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_draw_block(
    uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );

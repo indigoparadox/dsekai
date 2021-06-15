@@ -25,6 +25,8 @@ int main( int argc, char* argv[] ) {
    //graphics_init( GRAPHICS_MODE_320_200_256_VGA );
 
    while( running ) {
+      graphics_loop_start();
+
       in_char = 0;
 
       tilemap_draw( &gc_map_field );
@@ -93,7 +95,7 @@ int main( int argc, char* argv[] ) {
 
       mobile_animate( &player );
 
-      for( i = 0 ; 1000000 > i ; i++ ) {}
+      graphics_loop_end();
    }
 
    graphics_shutdown();
