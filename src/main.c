@@ -23,9 +23,7 @@ int main( int argc, char* argv[] ) {
       SPRITE_W
    };
 
-   //graphics_init( GRAPHICS_MODE_320_200_4_CGA );
    graphics_init();
-   //graphics_init( GRAPHICS_MODE_320_200_256_VGA );
 
    memset( &tiles_flags, 0x01, TILEMAP_TH * TILEMAP_TW );
 
@@ -35,8 +33,6 @@ int main( int argc, char* argv[] ) {
       in_char = 0;
 
       tilemap_draw( &gc_map_field, &tiles_flags );
-
-      //graphics_string_at( "abc", 3, 10, 10, GRAPHICS_COLOR_CYAN );
 
       /* Draw. */
       /* Note that sprite is drawn at prev_x/y + steps, NOT current x/y. */

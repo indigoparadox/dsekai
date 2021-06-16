@@ -10,7 +10,6 @@
 #include "../data/offsets.h"
 #endif /* USE_LOOKUPS */
 
-//static uint8_t g_mode = 0;
 #ifdef USE_DOUBLEBUF
 static uint8_t huge g_buffer[76800]; /* Sized for 0x13. */
 #else
@@ -96,8 +95,6 @@ void graphics_init() {
 	r.h.al = GRAPHICS_MODE;
 	int86( 0x10, &r, &r );
    graphics_install_timer();
-
-   //g_mode = mode;
 }
 
 void graphics_shutdown() {
@@ -106,13 +103,13 @@ void graphics_shutdown() {
 
 void graphics_flip() {
 #ifdef USE_DOUBLEBUF
-   /*if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
+#if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
       _fmemcpy( (char far *)GRAPHICS_MODE_320_200_256_VGA_ADDR,
          g_buffer, SCREEN_W * SCREEN_H );
-   } else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) { */
+#elif GRAPHICS_MODE_320_200_4_CGA == GRAPHICS_MODE
       /* memcpy both planes. */
       _fmemcpy( (char far *)0xB8000000, g_buffer, 16000 );
-   //}
+#endif /* GRAPHICS_MODE */
 #endif /* USE_DOUBLEBUF */
 }
 
@@ -135,10 +132,10 @@ void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
    uint16_t scaled_x = x,
       scaled_y = y;
 
-   //if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
-   //   byte_offset = ((y * SCREEN_W) + x);
-   //   g_buffer[byte_offset] = color;
-   //} else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) {
+#if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
+      byte_offset = ((y * SCREEN_W) + x);
+      g_buffer[byte_offset] = color;
+#elif GRAPHICS_MODE_320_200_4_CGA == GRAPHICS_MODE
 #ifdef USE_LOOKUPS
       /* Use pre-generated lookup tables for offsets to improve performance. */
       byte_offset = gc_offsets_cga_bytes_p1[scaled_y][scaled_x];
@@ -160,12 +157,16 @@ void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
          g_buffer[byte_offset] &= ~(0x03 << bit_offset);
          g_buffer[byte_offset] |= (color << bit_offset);
       }
-   //}
+#endif /* GRAPHICS_MODE */
 }
 
 void graphics_sprite_at( const GRAPHICS_SPRITE* spr, uint16_t x, uint16_t y ) {
 	int y_offset = 0;
    uint16_t byte_offset = 0;
+
+#if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
+#error "not implemented"
+#elif GRAPHICS_MODE_320_200_4_CGA == GRAPHICS_MODE
    uint8_t y_is_odd = /* Interlacing compensation do % once to save cycles. */
       0 == y % 2 ? 0 : 1;
 
@@ -198,16 +199,25 @@ void graphics_sprite_at( const GRAPHICS_SPRITE* spr, uint16_t x, uint16_t y ) {
          break;
       }
 	}
+#endif /* GRAPHICS_MODE */
 }
 
 void graphics_tile_at( const GRAPHICS_TILE* til, uint16_t x, uint16_t y ) {
 	int y_offset = 0;
    uint16_t byte_offset = 0;
+
+#if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
+#error "not implemented"
+#elif GRAPHICS_MODE_320_200_4_CGA == GRAPHICS_MODE
    uint8_t y_is_odd = /* Interlacing compensation do % once to save cycles. */
       0 == y % 2 ? 0 : 1;
 
 	for( y_offset = 0 ; TILE_H > y_offset ; y_offset++ ) {
+#ifdef USE_LOOKUPS
       byte_offset = gc_offsets_cga_bytes_p1[y + y_offset][x];
+#else
+#error "not implemented"
+#endif /* USE_LOOKUPS */
       switch( y_offset + y_is_odd ) {
       case 0x0:
       case 0x2:
@@ -235,6 +245,7 @@ void graphics_tile_at( const GRAPHICS_TILE* til, uint16_t x, uint16_t y ) {
          break;
       }
 	}
+#endif /* GRAPHICS_MODE */
 }
 
 void graphics_draw_block(
@@ -245,10 +256,18 @@ void graphics_draw_block(
 	int y = 0;
    uint16_t byte_offset = 0;
 
+#if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
+#error "not implemented"
+#elif GRAPHICS_MODE_320_200_4_CGA == GRAPHICS_MODE
    for( y = y_orig ; y < y + h ; y++ ) {
+#ifdef USE_LOOKUPS
       byte_offset = gc_offsets_cga_bytes_p1[y][x_orig];
+#else
+#error "not implemented"
+#endif /* USE_LOOKUPS */
       _fmemset( (char far *)0xB8000000 + byte_offset, color, 2 );
       _fmemset( (char far *)0xB8002000 + byte_offset, color, 2 );
    }
+#endif /* GRAPHICS_MODE */
 }
 
