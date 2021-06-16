@@ -2,14 +2,9 @@
 #ifndef TILEMAP_H
 #define TILEMAP_H
 
+#include "config.h"
 #include "dstypes.h"
 #include "graphics.h"
-
-#define TILEMAP_TW 20
-#define TILEMAP_TH 11
-
-#define TILEMAP_TILESETS_MAX  12
-#define TILEMAP_TILE_W        8
 
 #define TILEMAP_TILESET_FLAG_BLOCK  0x01
 
@@ -20,7 +15,7 @@
 
 struct TILEMAP {
    const char* name;
-   const uint8_t (*tileset)[TILEMAP_TILESETS_MAX][TILEMAP_TILE_W];
+   const GRAPHICS_TILE (*tileset)[TILEMAP_TILESETS_MAX][TILE_W];
    const GRAPHICS_COLOR (*tileset_colors)[TILEMAP_TILESETS_MAX];
    const uint8_t (*tileset_flags)[TILEMAP_TILESETS_MAX];
    const uint8_t tiles[TILEMAP_TH][TILEMAP_TW / 2];

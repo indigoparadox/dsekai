@@ -23,7 +23,8 @@ int main( int argc, char* argv[] ) {
       SPRITE_W
    };
 
-   graphics_init( GRAPHICS_MODE_320_200_4_CGA );
+   //graphics_init( GRAPHICS_MODE_320_200_4_CGA );
+   graphics_init();
    //graphics_init( GRAPHICS_MODE_320_200_256_VGA );
 
    memset( &tiles_flags, 0x01, TILEMAP_TH * TILEMAP_TW );
@@ -40,12 +41,11 @@ int main( int argc, char* argv[] ) {
       /* Draw. */
       /* Note that sprite is drawn at prev_x/y + steps, NOT current x/y. */
       graphics_sprite_at(
-         *player.sprite,
+         player.sprite,
          (player.tx_prev * SPRITE_W) +
             (player.tx != player.tx_prev ? player.steps : 0),
          (player.ty_prev * SPRITE_H) - walk_offset +
-            (player.ty != player.ty_prev ? player.steps : 0),
-         GRAPHICS_COLOR_MAGENTA, 2 );
+            (player.ty != player.ty_prev ? player.steps : 0) );
 
       graphics_flip();
 

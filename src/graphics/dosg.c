@@ -10,11 +10,11 @@
 #include "../data/offsets.h"
 #endif /* USE_LOOKUPS */
 
-static uint8_t g_mode = 0;
+//static uint8_t g_mode = 0;
 #ifdef USE_DOUBLEBUF
 static uint8_t huge g_buffer[76800]; /* Sized for 0x13. */
 #else
-static uint8_t far* g_buffer = NULL;
+static uint8_t far* g_buffer = (uint8_t far *)GRAPHICS_ADDR;
 #endif /* USE_DOUBLEBUF */
 
 typedef void (__interrupt __far* INTFUNCPTR)( void );
@@ -89,23 +89,15 @@ static void graphics_remove_timer() {
    _enable();
 }
 
-void graphics_init( uint8_t mode ) {
+void graphics_init() {
    union REGS r;
 
 	r.h.ah = 0;
-	r.h.al = mode;
+	r.h.al = GRAPHICS_MODE;
 	int86( 0x10, &r, &r );
    graphics_install_timer();
 
-   g_mode = mode;
-
-#ifndef USE_DOUBLEBUF
-   if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
-      g_buffer = (uint8_t far *)GRAPHICS_MODE_320_200_256_VGA_ADDR;
-   } else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) {
-      g_buffer = GRAPHICS_MODE_320_200_4_CGA_ADDR;
-   }
-#endif /* !USE_DOUBLEBUF */
+   //g_mode = mode;
 }
 
 void graphics_shutdown() {
@@ -114,13 +106,13 @@ void graphics_shutdown() {
 
 void graphics_flip() {
 #ifdef USE_DOUBLEBUF
-   if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
+   /*if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
       _fmemcpy( (char far *)GRAPHICS_MODE_320_200_256_VGA_ADDR,
          g_buffer, SCREEN_W * SCREEN_H );
-   } else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) {
+   } else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) { */
       /* memcpy both planes. */
       _fmemcpy( (char far *)0xB8000000, g_buffer, 16000 );
-   }
+   //}
 #endif /* USE_DOUBLEBUF */
 }
 
@@ -143,10 +135,10 @@ void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
    uint16_t scaled_x = x,
       scaled_y = y;
 
-   if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
-      byte_offset = ((y * SCREEN_W) + x);
-      g_buffer[byte_offset] = color;
-   } else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) {
+   //if( GRAPHICS_MODE_320_200_256_VGA == g_mode ) {
+   //   byte_offset = ((y * SCREEN_W) + x);
+   //   g_buffer[byte_offset] = color;
+   //} else if( GRAPHICS_MODE_320_200_4_CGA == g_mode ) {
 #ifdef USE_LOOKUPS
       /* Use pre-generated lookup tables for offsets to improve performance. */
       byte_offset = gc_offsets_cga_bytes_p1[scaled_y][scaled_x];
@@ -168,38 +160,83 @@ void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
          g_buffer[byte_offset] &= ~(0x03 << bit_offset);
          g_buffer[byte_offset] |= (color << bit_offset);
       }
-   }
+   //}
 }
 
-void graphics_sprite_at(
-   const uint8_t spr[SPRITE_H],
-   uint16_t x, uint16_t y, GRAPHICS_COLOR color, uint8_t scale
-) {
+void graphics_sprite_at( const GRAPHICS_SPRITE* spr, uint16_t x, uint16_t y ) {
 	int y_offset = 0;
-	//int bitmask_spr = 0;
-   //int bitmask_mask = 0;
    uint16_t byte_offset = 0;
-	GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
+   uint8_t y_is_odd = /* Interlacing compensation do % once to save cycles. */
+      0 == y % 2 ? 0 : 1;
 
 	for( y_offset = 0 ; SPRITE_H > y_offset ; y_offset++ ) {
-		//bitmask_spr = spr[y];
       byte_offset = gc_offsets_cga_bytes_p1[y + y_offset][x];
-      memcpy( &(g_buffer[byte_offset]), &(spr[y_offset]), 8 );
-      #if 0
-		for( x = 0 ; SPRITE_W > x ; x++ ) {
-			if( bitmask_spr & 0x01 ) {
-				pixel = color;
-            graphics_draw_px( x_orig + x, y_orig + y, pixel );
-			} else {
-            pixel = GRAPHICS_COLOR_BLACK;
+      switch( y_offset + y_is_odd ) {
+      case 0x0:
+      case 0x2:
+      case 0x4:
+      case 0x6:
+      case 0x8:
+      case 0xa:
+      case 0xc:
+      case 0xe:
+         _fmemcpy( &(g_buffer[byte_offset]), &(spr->bits[y_offset]),
+            SPRITE_BYTES );
+         break;
 
-            graphics_draw_px( x_orig + x, y_orig + y, pixel );
-			}
-			bitmask_spr >>= 1;
-		}
-      #endif
+      case 0x1:
+      case 0x3:
+      case 0x5:
+      case 0x7:
+      case 0x9:
+      case 0xb:
+      case 0xd:
+      case 0xf:
+         _fmemcpy(
+            &(g_buffer[0x2000 + byte_offset]), &(spr->bits[y_offset]),
+               SPRITE_BYTES );
+         break;
+      }
 	}
 }
+
+void graphics_tile_at( const GRAPHICS_TILE* til, uint16_t x, uint16_t y ) {
+	int y_offset = 0;
+   uint16_t byte_offset = 0;
+   uint8_t y_is_odd = /* Interlacing compensation do % once to save cycles. */
+      0 == y % 2 ? 0 : 1;
+
+	for( y_offset = 0 ; TILE_H > y_offset ; y_offset++ ) {
+      byte_offset = gc_offsets_cga_bytes_p1[y + y_offset][x];
+      switch( y_offset + y_is_odd ) {
+      case 0x0:
+      case 0x2:
+      case 0x4:
+      case 0x6:
+      case 0x8:
+      case 0xa:
+      case 0xc:
+      case 0xe:
+         _fmemcpy( &(g_buffer[byte_offset]), &(til->bits[y_offset]),
+            TILE_BYTES );
+         break;
+
+      case 0x1:
+      case 0x3:
+      case 0x5:
+      case 0x7:
+      case 0x9:
+      case 0xb:
+      case 0xd:
+      case 0xf:
+         _fmemcpy(
+            &(g_buffer[0x2000 + byte_offset]), &(til->bits[y_offset]),
+               TILE_BYTES );
+         break;
+      }
+	}
+}
+
 
 void graphics_draw_block(
    uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
@@ -207,11 +244,12 @@ void graphics_draw_block(
 ) {
 	int x = 0;
 	int y = 0;
+   uint16_t byte_offset = 0;
 
-	for( x = x_orig ; x_orig + w > x ; x++ ) {
-		for( y = y_orig ; y_orig + h > y ; y++ ) {
-			graphics_draw_px( x, y, color );
-		}
-	}
+   for( y = y_orig ; y < y + h ; y++ ) {
+      byte_offset = gc_offsets_cga_bytes_p1[y][x_orig];
+      _fmemset( (char far *)0xB8000000 + byte_offset, color, 2 );
+      _fmemset( (char far *)0xB8002000 + byte_offset, color, 2 );
+   }
 }
 

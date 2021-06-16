@@ -2,11 +2,13 @@
 #ifndef MOBILE_H
 #define MOBILE_H
 
+#include "config.h"
 #include "dstypes.h"
+#include "graphics.h"
 #include "tilemap.h"
 
 struct MOBILE {
-   const uint8_t (*sprite)[8];
+   const GRAPHICS_SPRITE* sprite;
    uint8_t tx;
    uint8_t tx_prev;
    uint8_t ty;
