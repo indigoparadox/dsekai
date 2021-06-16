@@ -62,36 +62,58 @@ void graphics_sprite_at( const GRAPHICS_SPRITE* spr, uint16_t x, uint16_t y ) {
    uint32_t bitmask_spr = 0;
    GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
 
-   for( y_offset = 0 ; SPRITE_H > y_offset ; y_offset++ ) {
+   for( y_offset = 0 ; TILE_H > y_offset ; y_offset++ ) {
       bitmask_spr = spr->bits[y_offset];
-      for( x_offset = 0 ; SPRITE_W > x_offset ; x_offset++ ) {
+      for( x_offset = 0 ; TILE_W * 2 > x_offset ; x_offset++ ) {
          if( bitmask_spr & 0x01 ) {
+            pixel = GRAPHICS_COLOR_CYAN;
+         } else if( bitmask_spr & 0x02 ) {
+            pixel = GRAPHICS_COLOR_MAGENTA;
+         } else if( bitmask_spr & 0x03 ) {
             pixel = GRAPHICS_COLOR_WHITE;
          } else {
             pixel = GRAPHICS_COLOR_BLACK;
          }
          graphics_draw_px( x + x_offset, y + y_offset, pixel );
-         bitmask_spr >>= 1;
+         bitmask_spr >>= 2;
       }
    }
 }
 
 void graphics_tile_at( const GRAPHICS_TILE* spr, uint16_t x, uint16_t y ) {
    int x_offset = 0,
-      y_offset = 0;
+      y_offset = 0,
+      byte_offset = 0,
+      bit_offset = 0,
+      x_scr_offset = x;
    uint32_t bitmask_spr = 0;
    GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
 
-   for( y_offset = 0 ; SPRITE_H > y_offset ; y_offset++ ) {
-      bitmask_spr = spr->bits[y_offset];
-      for( x_offset = 0 ; SPRITE_W > x_offset ; x_offset++ ) {
-         if( bitmask_spr & 0x01 ) {
-            pixel = GRAPHICS_COLOR_WHITE;
-         } else {
-            pixel = GRAPHICS_COLOR_BLACK;
+   for( y_offset = 0 ; TILE_H > y_offset ; y_offset++ ) {
+      x_scr_offset = 0;
+      for( x_offset = 0 ; 4 > x_offset ; x_offset++ ) {
+         /* Start at the last byte and move backwards. */
+         for( byte_offset = 24 ; 0 <= byte_offset ; byte_offset -= 8 ) {
+            /* Get full line and shift it to the current byte. */
+            bitmask_spr = spr->bits[y_offset];
+            bitmask_spr >>= byte_offset;
+
+            /* Iterate through the line 2 bits at a time. */
+            for( bit_offset = 0 ; 4 > bit_offset ; bit_offset++ ) {
+               if( bitmask_spr & 0x01 ) {
+                  pixel = GRAPHICS_COLOR_CYAN;
+               } else if( bitmask_spr & 0x02 ) {
+                  pixel = GRAPHICS_COLOR_MAGENTA;
+               } else if( bitmask_spr & 0x03 ) {
+                  pixel = GRAPHICS_COLOR_WHITE;
+               } else {
+                  pixel = GRAPHICS_COLOR_BLACK;
+               }
+               graphics_draw_px( x + x_scr_offset, y + y_offset, pixel );
+               bitmask_spr >>= 2;
+               x_scr_offset++;
+            }
          }
-         graphics_draw_px( x + x_offset, y + y_offset, pixel );
-         bitmask_spr >>= 1;
       }
    }
 }
