@@ -20,7 +20,7 @@ void graphics_init() {
    }
 
    SDL_CreateWindowAndRenderer(
-      SCREEN_W, SCREEN_H, 0, &g_window, &g_renderer );
+      SCREEN_W * 2, SCREEN_H * 2, 0, &g_window, &g_renderer );
    assert( NULL != g_window );
    g_screen = SDL_GetWindowSurface( g_window );
 }
@@ -48,7 +48,12 @@ void graphics_loop_end() {
 
 void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
    SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
+   x *= 2;
+   y *= 2;
    SDL_RenderDrawPoint( g_renderer, x, y );
+   SDL_RenderDrawPoint( g_renderer, x + 1, y );
+   SDL_RenderDrawPoint( g_renderer, x, y + 1 );
+   SDL_RenderDrawPoint( g_renderer, x + 1, y + 1 );
 }
 
 void graphics_sprite_at( const GRAPHICS_SPRITE* spr, uint16_t x, uint16_t y ) {
