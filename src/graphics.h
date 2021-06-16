@@ -11,6 +11,9 @@
 #include "graphics/sdlg.h"
 #endif /* USE_DOS, USE_SDL */
 
+typedef struct GRAPHICS_SPRITE { uint32_t bits[SPRITE_H]; } GRAPHICS_SPRITE;
+typedef struct GRAPHICS_TILE { uint32_t bits[TILE_H]; } GRAPHICS_TILE;
+
 void graphics_init();
 void graphics_shutdown();
 void graphics_flip();
