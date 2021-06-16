@@ -19,6 +19,10 @@
 #define TILE_H 16
 #define TILE_BYTES 4
 
+#ifndef FPS
+#define FPS 30
+#endif /* FPS */
+
 #define GRAPHICS_MODE_320_200_4_CGA    0x05
 #define GRAPHICS_MODE_320_200_256_VGA  0x13
 

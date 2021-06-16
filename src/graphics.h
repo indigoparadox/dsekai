@@ -5,10 +5,6 @@
 #include "config.h"
 #include "dstypes.h"
 
-#ifndef FPS
-#define FPS 30
-#endif /* FPS */
-
 #ifdef USE_DOS
 #include "graphics/dosg.h"
 #elif defined( USE_SDL )
