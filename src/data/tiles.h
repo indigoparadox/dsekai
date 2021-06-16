@@ -5,6 +5,11 @@
 #include "../graphics.h"
 #include "../tilemap.h"
 
+/*
+These are stored as 2bpp 16x16 pixel CGA images in little-endian order.
+This makes a huge difference in performance on a real 8086.
+*/
+
 const GRAPHICS_TILE gc_tiles_field[TILEMAP_TILESETS_MAX][TILE_W] = {
    {{0x08080808, 0x40404040, 0x0, 0x02020202, 0x88888888, 0x0, 0x02020202, 0x20202020, 0x08080808, 0x40404040, 0x0, 0x02020202, 0x88888888, 0x0, 0x02020202, 0x20202020}},      /* Grass */
    {{0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff}}, 
