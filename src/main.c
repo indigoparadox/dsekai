@@ -44,7 +44,7 @@ int main( int argc, char* argv[] ) {
          player.sprite,
          (player.tx_prev * SPRITE_W) +
             (player.tx != player.tx_prev ? player.steps : 0),
-         (player.ty_prev * SPRITE_H) - walk_offset +
+         (player.ty_prev * SPRITE_H) + walk_offset +
             (player.ty != player.ty_prev ? player.steps : 0) );
 
       graphics_flip();

@@ -23,7 +23,7 @@ void tilemap_draw(
          tile_id = tilemap_get_tile_id( t, x, y );
 
          /* Blit the tile. */
-         graphics_tile_at( (*t->tileset)[tile_id], x * 8, y * 8 );
+         graphics_tile_at( (*t->tileset)[tile_id], x * TILE_W, y * TILE_H );
       }
    }
 }

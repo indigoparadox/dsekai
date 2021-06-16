@@ -15,9 +15,9 @@
 #define SPRITE_H 16
 #define SPRITE_W 16
 #define SPRITE_BYTES 4
-#define TILE_W 8
-#define TILE_H 8
-#define TILE_BYTES 1
+#define TILE_W 16
+#define TILE_H 16
+#define TILE_BYTES 4
 
 #if 0
 #define GRAPHICS_MODE_320_200_4_CGA    0x05

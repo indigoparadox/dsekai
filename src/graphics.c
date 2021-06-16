@@ -5,13 +5,6 @@
 
 typedef void (*graphics_draw_px_cb)( uint16_t, uint16_t, GRAPHICS_COLOR );
 
-void graphics_draw_px_2x( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
-   graphics_draw_px( x * 2, y * 2, color );
-   graphics_draw_px( x * 2, y * 2 + 1, color );
-   graphics_draw_px( x * 2 + 1, y * 2, color );
-   graphics_draw_px( x * 2 + 1, y * 2 + 1, color );
-}
-
 void graphics_char_at(
    const char c, uint16_t x_orig, uint16_t y_orig, GRAPHICS_COLOR color,
    uint8_t scale

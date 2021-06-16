@@ -169,7 +169,7 @@ void graphics_sprite_at( const GRAPHICS_SPRITE* spr, uint16_t x, uint16_t y ) {
    uint8_t y_is_odd = /* Interlacing compensation do % once to save cycles. */
       0 == y % 2 ? 0 : 1;
 
-	for( y_offset = 0 ; SPRITE_H > y_offset ; y_offset++ ) {
+	for( y_offset = 0 ; SPRITE_H - 1 > y_offset ; y_offset++ ) {
       byte_offset = gc_offsets_cga_bytes_p1[y + y_offset][x];
       switch( y_offset + y_is_odd ) {
       case 0x0:
@@ -236,7 +236,6 @@ void graphics_tile_at( const GRAPHICS_TILE* til, uint16_t x, uint16_t y ) {
       }
 	}
 }
-
 
 void graphics_draw_block(
    uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
