@@ -9,16 +9,19 @@
 
 struct MOBILE {
    const GRAPHICS_SPRITE* sprite;
+   uint8_t hp;
+   uint8_t mp;
    uint8_t tx;
    uint8_t tx_prev;
    uint8_t ty;
    uint8_t ty_prev;
-   int8_t steps;
+   uint8_t steps;
 };
 
 uint8_t mobile_walk_start( struct MOBILE*, int8_t x_mod, int8_t y_mod );
 void mobile_animate(
    struct MOBILE* m, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW] );
+void mobile_draw( struct MOBILE* );
 
 #endif /* MOBILE_H */
 
