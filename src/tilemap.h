@@ -13,6 +13,11 @@
 #define tilemap_get_tile_id( t, x, y ) \
    ((t->tiles[y][x / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
 
+struct TILEMAP_COORDS {
+   uint8_t x;
+   uint8_t y;
+};
+
 struct TILEMAP {
    const char* name;
    const GRAPHICS_TILE (*tileset)[TILEMAP_TILESETS_MAX][TILE_W];

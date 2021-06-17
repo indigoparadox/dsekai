@@ -18,10 +18,8 @@ int main( int argc, char* argv[] ) {
       &gc_sprite_player,
       100,
       100,
-      3, 
-      3,
-      4,
-      4,
+      {3, 4},
+      {3, 4},
       SPRITE_W
    };
 
@@ -45,25 +43,33 @@ int main( int argc, char* argv[] ) {
 		/* Quit on Q. */
       switch( in_char ) {
       case INPUT_KEY_W:
-         if( !tilemap_collide( &gc_map_field, player.tx, player.ty - 1 ) ) {
+         if( !tilemap_collide(
+            &gc_map_field, player.coords.x, player.coords.y - 1 )
+         ) {
             mobile_walk_start( &player, 0, -1 );
          }
          break;
 
       case INPUT_KEY_A:
-         if( !tilemap_collide( &gc_map_field, player.tx - 1, player.ty ) ) {
+         if( !tilemap_collide(
+            &gc_map_field, player.coords.x - 1, player.coords.y )
+         ) {
             mobile_walk_start( &player, -1, 0 );
          }
          break;
 
       case INPUT_KEY_S:
-         if( !tilemap_collide( &gc_map_field, player.tx, player.ty + 1 ) ) {
+         if( !tilemap_collide(
+            &gc_map_field, player.coords.x, player.coords.y + 1 )
+         ) {
             mobile_walk_start( &player, 0, 1 );
          }
          break;
 
       case INPUT_KEY_D:
-         if( !tilemap_collide( &gc_map_field, player.tx + 1, player.ty ) ) {
+         if( !tilemap_collide(
+            &gc_map_field, player.coords.x + 1, player.coords.y )
+         ) {
             mobile_walk_start( &player, 1, 0 );
          }
          break;
