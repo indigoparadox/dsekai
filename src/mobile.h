@@ -18,10 +18,10 @@ struct MOBILE {
    uint8_t steps;
 };
 
-uint8_t mobile_walk_start( struct MOBILE*, int8_t x_mod, int8_t y_mod );
+uint8_t mobile_walk_start( struct MOBILE*, int8_t, int8_t );
 void mobile_animate(
    struct MOBILE* m, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW] );
-void mobile_draw( struct MOBILE* );
+void mobile_draw( struct MOBILE*, int8_t );
 
 #endif /* MOBILE_H */
 

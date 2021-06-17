@@ -36,7 +36,7 @@ int main( int argc, char* argv[] ) {
 
       tilemap_draw( &gc_map_field, &tiles_flags );
 
-      mobile_draw( &player );
+      mobile_draw( &player, walk_offset );
 
       graphics_flip();
 

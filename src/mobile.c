@@ -55,7 +55,7 @@ void mobile_animate(
    }
 }
 
-void mobile_draw( struct MOBILE* m ) {
+void mobile_draw( struct MOBILE* m, int8_t walk_offset ) {
    int16_t x_offset = 0,
       y_offset = 0;
 
@@ -73,6 +73,6 @@ void mobile_draw( struct MOBILE* m ) {
    graphics_sprite_at(
       m->sprite,
       (m->tx * SPRITE_W) + x_offset,
-      (m->ty * SPRITE_H) + y_offset );
+      (m->ty * SPRITE_H) + y_offset + walk_offset );
 }
 
