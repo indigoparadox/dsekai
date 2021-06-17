@@ -23,7 +23,9 @@ void graphics_draw_px( uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_draw_block(
    uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_tile_at( const GRAPHICS_TILE*, uint16_t, uint16_t );
+#ifndef USE_SDL
 void graphics_sprite_at( const GRAPHICS_SPRITE*, uint16_t, uint16_t );
+#endif /* USE_SDL */
 void graphics_char_at(
    const char, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_string_at(
