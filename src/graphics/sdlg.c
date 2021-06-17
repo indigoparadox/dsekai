@@ -100,7 +100,9 @@ void graphics_sprite_at( const GRAPHICS_SPRITE* spr, uint16_t x, uint16_t y ) {
 extern GRAPHICS_TILE gc_tiles_field[TILEMAP_TILESETS_MAX][TILE_W];
 #endif /* DEBUG_CGA_EMU */
 
-void graphics_tile_at( const GRAPHICS_TILE* spr, uint16_t x, uint16_t y ) {
+void graphics_blit_at(
+   const void* bmp, uint16_t x, uint16_t y, uint8_t sprite
+) {
    //int x_offset = 0,
    int y_offset = 0,
       byte_offset = 0,
@@ -109,6 +111,7 @@ void graphics_tile_at( const GRAPHICS_TILE* spr, uint16_t x, uint16_t y ) {
       raw_byte = 0,
       masked_byte = 0;
    GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
+   const GRAPHICS_SPRITE* spr = (const GRAPHICS_SPRITE*)bmp;
 
 #ifdef DEBUG_CGA_EMU
    char drawn_bytes[5] = { 0, 0, 0, 0, 0 };
@@ -117,7 +120,7 @@ void graphics_tile_at( const GRAPHICS_TILE* spr, uint16_t x, uint16_t y ) {
    }*/
 #endif /* DEBUG_CGA_EMU */
 
-   for( y_offset = 0 ; TILE_H > y_offset ; y_offset++ ) {
+   for( y_offset = 0 ; TILE_H - sprite > y_offset ; y_offset++ ) {
       x_scr_offset = 0;
 #ifdef DEBUG_CGA_EMU
       printf( "line %02d (0x%08x):\n", y_offset, spr->bits[y_offset] );

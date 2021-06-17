@@ -46,13 +46,7 @@ void mobile_animate(
       m->ty_prev = m->ty;
    }
    (*tiles_flags)[m->ty][m->tx] |= TILEMAP_TILE_FLAG_DIRTY;
-   if( 0 < m->ty ) {
-      (*tiles_flags)[m->ty - 1][m->tx] |= TILEMAP_TILE_FLAG_DIRTY;
-   }
    (*tiles_flags)[m->ty_prev][m->tx_prev] |= TILEMAP_TILE_FLAG_DIRTY;
-   if( 0 < m->ty_prev ) {
-      (*tiles_flags)[m->ty_prev - 1][m->tx_prev] |= TILEMAP_TILE_FLAG_DIRTY;
-   }
 }
 
 void mobile_draw( struct MOBILE* m, int8_t walk_offset ) {
