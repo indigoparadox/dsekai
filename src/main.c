@@ -11,11 +11,11 @@
 #include "window.h"
 
 int main( int argc, char* argv[] ) {
+   uint32_t i = 0, j = 0, x = 0, y = 0;
    uint8_t running = 1,
       in_char = 0,
       window_shown = 0,
       walk_offset = 0;
-   uint32_t i = 0, x = 10, j = 0;
    uint8_t tiles_flags[TILEMAP_TH][TILEMAP_TW];
    struct WINDOW* w = NULL;
    struct MOBILE player = {
@@ -90,6 +90,15 @@ int main( int argc, char* argv[] ) {
             &gc_map_field, player.coords.x + 1, player.coords.y )
          ) {
             mobile_walk_start( &player, 1, 0 );
+         }
+         break;
+
+      case INPUT_KEY_Z:
+         window_pop();
+         for( y = 0 ; TILEMAP_TH > y ; y++ ) {
+            for( x = 0 ; TILEMAP_TW > x ; x++ ) {
+               tiles_flags[y][x] |= TILEMAP_TILE_FLAG_DIRTY;
+            }
          }
          break;
 

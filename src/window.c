@@ -70,8 +70,10 @@ struct WINDOW* window_push() {
 void window_pop() {
    int i = 0;
 
-   for( i = 0 ; g_windows_count - 1 > i ; i++ ) {
+   for( i = 0 ; g_windows_count > i ; i++ ) {
       memcpy( &(g_windows[i]), &(g_windows[i + 1]), sizeof( struct WINDOW ) );
    }
+
+   g_windows_count--;
 }
 

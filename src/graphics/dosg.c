@@ -161,8 +161,9 @@ void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
 }
 
 void graphics_blit_at(
-   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint8_t w, uint8_t h,
-   const int byte_width
+   const GRAPHICS_BITMAP* bmp, const GRAPHICS_MASK* mask,
+   uint8_t mask_o_x, uint8_t mask_o_y,
+   uint16_t x, uint16_t y, uint8_t w, uint8_t h, const int byte_width
 ) {
 	int y_offset = 0;
    uint16_t byte_offset = 0;
