@@ -26,7 +26,7 @@
 
 #define graphics_pattern_masked_at( spr, mask, mo_x, mo_y, x, y ) \
    graphics_blit_masked_at( \
-      (const GRAPHICS_BITMAP*)spr, mask, mo_x, mo_y, \
+      (const GRAPHICS_PATTERN*)spr, mask, mo_x, mo_y, \
       x, y, PATTERN_W, PATTERN_H, sizeof( PATTERN_TYPE ) )
 
 typedef struct GRAPHICS_MASK {uint8_t bits[16]; } GRAPHICS_MASK;
@@ -50,7 +50,7 @@ void graphics_string_at(
    const char*, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_blit_at( const GRAPHICS_BITMAP*,
    uint16_t, uint16_t, uint8_t, uint8_t, const int );
-void graphics_blit_masked_at( const GRAPHICS_BITMAP*, const GRAPHICS_MASK*,
+void graphics_blit_masked_at( const GRAPHICS_PATTERN*, const GRAPHICS_MASK*,
    uint8_t, uint8_t, uint16_t, uint16_t, uint8_t, uint8_t, const int );
 
 #endif /* GRAPHICS_H */

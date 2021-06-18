@@ -212,15 +212,13 @@ void graphics_blit_at(
 }
 
 void graphics_blit_masked_at(
-   const GRAPHICS_BITMAP* bmp, const GRAPHICS_MASK* mask,
+   const GRAPHICS_PATTERN* bmp, const GRAPHICS_MASK* mask,
    uint8_t mask_o_x, uint8_t mask_o_y,
    uint16_t x, uint16_t y, uint8_t w, uint8_t h, const int byte_width
 ) {
 	int y_offset = 0, x_offset = 0, i = 0;
    uint16_t byte_offset = 0;
-   const uint8_t* bits = bmp->bits;
-   uint16_t bits_masked = 0,
-      mask_mask = 0;
+   uint16_t bits_masked = 0;
 
 #if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
 #error "not implemented"
@@ -235,70 +233,22 @@ void graphics_blit_masked_at(
 #error "not implemented"
 #endif /* USE_LOOKUPS */
 
-      bits_masked = *(uint16_t*)(bits);
-      for( x_offset = 0 ; 16 > x_offset ; x_offset++ ) {
-         if( !(mask->bits[y_offset / 2] & (0x01 << x_offset)) ) {
-            mask_mask = 0xf << (x_offset);
-#ifdef DEBUG_CGA
-            printf( "bits i: %c%c%c%c%c%c%c%c\n",
-               bits_masked & 0x80 ? '1' : '0',
-               bits_masked & 0x40 ? '1' : '0',
-               bits_masked & 0x20 ? '1' : '0',
-               bits_masked & 0x10 ? '1' : '0',
-               bits_masked & 0x08 ? '1' : '0',
-               bits_masked & 0x04 ? '1' : '0',
-               bits_masked & 0x02 ? '1' : '0',
-               bits_masked & 0x01 ? '1' : '0');
-            printf( "mask: %c%c%c%c%c%c%c%c\n",
-               mask_mask & 0x80 ? '1' : '0',
-               mask_mask & 0x40 ? '1' : '0',
-               mask_mask & 0x20 ? '1' : '0',
-               mask_mask & 0x10 ? '1' : '0',
-               mask_mask & 0x08 ? '1' : '0',
-               mask_mask & 0x04 ? '1' : '0',
-               mask_mask & 0x02 ? '1' : '0',
-               mask_mask & 0x01 ? '1' : '0');
-#endif /* DEBUG_CGA */
-            bits_masked &= ~mask_mask;
-#ifdef DEBUG_CGA
-            printf( "bits o: %c%c%c%c%c%c%c%c\n",
-               bits_masked & 0x80 ? '1' : '0',
-               bits_masked & 0x40 ? '1' : '0',
-               bits_masked & 0x20 ? '1' : '0',
-               bits_masked & 0x10 ? '1' : '0',
-               bits_masked & 0x08 ? '1' : '0',
-               bits_masked & 0x04 ? '1' : '0',
-               bits_masked & 0x02 ? '1' : '0',
-               bits_masked & 0x01 ? '1' : '0');
-#endif /* DEBUG_CGA */
+      /* Apply the transparency mask to the pattern. */
+      bits_masked = bmp->bits[y_offset];
+      for( x_offset = 0 ; 8 > x_offset ; x_offset++ ) {
+         /* Perform endian "conversion" (though masks are one byte). */
+         if( x_offset >= 4 ) {
+            /* Compare each row, bit by (double) bit. */
+            if( !(mask->bits[y_offset] & (0x01 << x_offset)) ) {
+               bits_masked &= ~(0x3 << (x_offset));
+            }
+         } else {
+            /* Compare each row, bit by (double) bit. */
+            if( !(mask->bits[y_offset] & (0x01 << x_offset)) ) {
+               bits_masked &= ~(0x3 << (x_offset + 8));
+            }
          }
       }
-      /*
-      if( !(mask->bits[y_offset] & 0x01) ) {
-         bits_masked &= 0xfffc;
-      }
-      if( !(mask->bits[y_offset] & 0x02) ) {
-         bits_masked &= 0xfff3;
-      }
-      if( !(mask->bits[y_offset] & 0x04) ) {
-         bits_masked &= 0xffcf;
-      }
-      if( !(mask->bits[y_offset] & 0x08) ) {
-         bits_masked &= 0xff3f;
-      }
-      if( !(mask->bits[y_offset] & 0x10) ) {
-         bits_masked &= 0xfcff;
-      }
-      if( !(mask->bits[y_offset] & 0x20) ) {
-         bits_masked &= 0xf3ff;
-      }
-      if( !(mask->bits[y_offset] & 0x40) ) {
-         bits_masked &= 0xcfff;
-      }
-      if( !(mask->bits[y_offset] & 0x80) ) {
-         bits_masked &= 0x3fff;
-      }
-      */
 
       switch( y_offset + y_is_odd ) {
       case 0x0:
@@ -323,9 +273,6 @@ void graphics_blit_masked_at(
          _fmemcpy( &(g_buffer[0x2000 + byte_offset]), &bits_masked, byte_width );
          break;
       }
-
-      /* Advance source address by bytes per copy. */
-      bits += byte_width;
 	}
 #endif /* GRAPHICS_MODE */
 }

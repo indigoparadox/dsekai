@@ -96,7 +96,7 @@ void graphics_blit_at(
 #endif /* DEBUG_CGA_EMU */
 
    for( y_offset = 0 ; h > y_offset ; y_offset++ ) {
-      x_scr_offset = 0;
+      x_scr_offset = w - 1;
 #ifdef DEBUG_CGA_EMU
       //printf( "line %02d (0x%08x):\n", y_offset, spr->bits[y_offset] );
 #endif /* DEBUG_CGA_EMU */
@@ -183,7 +183,7 @@ void graphics_blit_at(
 #endif /* DEBUG_CGA_EMU */
 
             raw_byte >>= 2;
-            x_scr_offset++;
+            x_scr_offset--;
          }
 
 #ifdef DEBUG_CGA_EMU
@@ -192,8 +192,40 @@ void graphics_blit_at(
             x_scr_offset - 4, y_offset );
 #endif /* DEBUG_CGA_EMU */
       }
-      assert( w == x_scr_offset );
+      assert( -1 == x_scr_offset );
    }
+}
+
+void graphics_blit_masked_at(
+   const GRAPHICS_PATTERN* bmp, const GRAPHICS_MASK* mask,
+   uint8_t mask_o_x, uint8_t mask_o_y,
+   uint16_t x, uint16_t y, uint8_t w, uint8_t h, const int byte_width
+) {
+   GRAPHICS_PATTERN pattern_tmp;
+   int x_offset = 0, y_offset = 0;
+
+   memcpy( &pattern_tmp, bmp, sizeof( GRAPHICS_PATTERN ) );
+
+   /* Apply the transparency mask to the pattern. */
+   for( y_offset = 0 ; PATTERN_H > y_offset ; y_offset++ ) {
+      pattern_tmp.bits[y_offset] = bmp->bits[y_offset];
+      for( x_offset = 0 ; 8 > x_offset ; x_offset++ ) {
+         /* Perform endian "conversion" (though masks are one byte). */
+         if( x_offset >= 4 ) {
+            /* Compare each row, bit by (double) bit. */
+            if( !(mask->bits[y_offset] & (0x01 << x_offset)) ) {
+               pattern_tmp.bits[y_offset] &= ~(0x3 << (x_offset));
+            }
+         } else {
+            /* Compare each row, bit by (double) bit. */
+            if( !(mask->bits[y_offset] & (0x01 << x_offset)) ) {
+               pattern_tmp.bits[y_offset] &= ~(0x3 << (x_offset + 8));
+            }
+         }
+      }
+   }
+
+   graphics_pattern_at( &pattern_tmp, x, y );
 }
 
 void graphics_draw_block(

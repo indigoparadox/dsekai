@@ -39,7 +39,6 @@ int main( int argc, char* argv[] ) {
 
       if( 0 >= windows_visible() ) {
          tilemap_draw( &gc_map_field, &tiles_flags );
-
          mobile_draw( &player, walk_offset );
       }
 
@@ -62,6 +61,7 @@ int main( int argc, char* argv[] ) {
 		/* Quit on Q. */
       switch( in_char ) {
       case INPUT_KEY_W:
+         if( 0 < windows_visible() ) { break; }
          if( !tilemap_collide(
             &gc_map_field, player.coords.x, player.coords.y - 1 )
          ) {
@@ -70,6 +70,7 @@ int main( int argc, char* argv[] ) {
          break;
 
       case INPUT_KEY_A:
+         if( 0 < windows_visible() ) { break; }
          if( !tilemap_collide(
             &gc_map_field, player.coords.x - 1, player.coords.y )
          ) {
@@ -78,6 +79,7 @@ int main( int argc, char* argv[] ) {
          break;
 
       case INPUT_KEY_S:
+         if( 0 < windows_visible() ) { break; }
          if( !tilemap_collide(
             &gc_map_field, player.coords.x, player.coords.y + 1 )
          ) {
@@ -86,6 +88,7 @@ int main( int argc, char* argv[] ) {
          break;
 
       case INPUT_KEY_D:
+         if( 0 < windows_visible() ) { break; }
          if( !tilemap_collide(
             &gc_map_field, player.coords.x + 1, player.coords.y )
          ) {

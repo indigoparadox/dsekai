@@ -6,7 +6,7 @@
 
 #include "graphics.h"
 
-#include "data/patterns.h"
+#include "data/masks.h"
 
 static struct WINDOW g_windows[WINDOW_COUNT_MAX];
 static uint8_t g_windows_count = 0;
