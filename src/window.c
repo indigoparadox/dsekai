@@ -6,6 +6,8 @@
 
 #include "graphics.h"
 
+#include "data/patterns.h"
+
 static struct WINDOW g_windows[WINDOW_COUNT_MAX];
 static uint8_t g_windows_count = 0;
 
@@ -18,7 +20,7 @@ uint8_t windows_visible() {
 }
 
 void window_draw_all() {
-   int i = 0, x = 0, y = 0, x_max = 0, y_max = 0;
+   int i = 0, x = 0, y = 0, x_max = 0, y_max = 0, x_min = 0, y_min = 0;
 
    for( i = 0 ; g_windows_count > i ; i++ ) {
       if(
@@ -30,20 +32,28 @@ void window_draw_all() {
 
       assert( 0 == g_windows[i].w % PATTERN_W );
       assert( 0 == g_windows[i].h % PATTERN_H );
-      x_max = (SCREEN_W / 2) + (g_windows[i].w / 2) ; 
-      y_max = (SCREEN_H / 2) + (g_windows[i].h / 2) ; 
+      x_max = (SCREEN_W / 2) + (g_windows[i].w / 2); 
+      y_max = (SCREEN_H / 2) + (g_windows[i].h / 2); 
+      x_min = (SCREEN_W / 2) - (g_windows[i].w / 2);
+      y_min = (SCREEN_H / 2) - (g_windows[i].h / 2);
 
-      for(
-         y = (SCREEN_H / 2) - (g_windows[i].h / 2);
-         y < y_max;
-         y += PATTERN_H
-      ) {
-         for(
-            x = (SCREEN_W / 2) - (g_windows[i].w / 2);
-            x < x_max;
-            x += PATTERN_W
-         ) {
-            graphics_pattern_at( g_windows[i].pattern, x, y );
+      for( y = y_min ; y < y_max ; y += PATTERN_H ) {
+         for( x = x_min ; x < x_max ; x += PATTERN_W ) {
+            if( x_min == x && y_min == y ) {
+               graphics_pattern_masked_at(
+                  g_windows[i].pattern, &(gc_masks[0]), 0, 0, x, y );
+            } else if( x_max - PATTERN_W == x && y_min == y ) {
+               graphics_pattern_masked_at(
+                  g_windows[i].pattern, &(gc_masks[1]), 0, 0, x, y );
+            } else if( x_min == x && y_max - PATTERN_H == y ) {
+               graphics_pattern_masked_at(
+                  g_windows[i].pattern, &(gc_masks[2]), 0, 0, x, y );
+            } else if( x_max - PATTERN_W == x && y_max - PATTERN_H == y ) {
+               graphics_pattern_masked_at(
+                  g_windows[i].pattern, &(gc_masks[3]), 0, 0, x, y );
+            } else {
+               graphics_pattern_at( g_windows[i].pattern, x, y );
+            }
          }
 
          g_windows[i].dirty = 0;
