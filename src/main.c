@@ -19,18 +19,31 @@ int main( int argc, char* argv[] ) {
    uint8_t tiles_flags[TILEMAP_TH][TILEMAP_TW];
    struct WINDOW* w = NULL;
    struct MOBILE player = {
-      &gc_sprite_player,
+      &gc_sprite_robe,
       100,
       100,
       {3, 4},
       {3, 4},
       SPRITE_W
    };
+   struct MOBILE mobiles[MOBILES_MAX];
+   int mobiles_count = 0;
 
    graphics_init();
    window_init();
 
    memset( &tiles_flags, 0x01, TILEMAP_TH * TILEMAP_TW );
+   memset( mobiles, 0x0, sizeof( struct MOBILE ) * MOBILES_MAX );
+
+   mobiles[0].sprite = &gc_sprite_princess;
+   mobiles[0].hp = 100;
+   mobiles[0].mp = 100;
+   mobiles[0].coords.x = 5;
+   mobiles[0].coords.y = 5;
+   mobiles[0].coords_prev.x = 5;
+   mobiles[0].coords_prev.y = 5;
+   mobiles[0].steps = SPRITE_W;
+   mobiles_count++;
 
    while( running ) {
       graphics_loop_start();
@@ -40,6 +53,9 @@ int main( int argc, char* argv[] ) {
       if( 0 >= windows_visible() ) {
          tilemap_draw( &gc_map_field, &tiles_flags );
          mobile_draw( &player, walk_offset );
+         for( i = 0 ; mobiles_count > i ; i++ ) {
+            mobile_draw( &(mobiles[i]), walk_offset );
+         }
       }
 
       window_draw_all();
@@ -53,6 +69,8 @@ int main( int argc, char* argv[] ) {
          w->h = 64;
          w->dirty = 1;
          w->state = WINDOW_STATE_VISIBLE;
+         w->strings[0] = "Welcome!";
+         w->strings_count = 1;
          window_shown = 1;
       }
 
@@ -125,6 +143,9 @@ int main( int argc, char* argv[] ) {
       }
 
       mobile_animate( &player, &tiles_flags );
+      for( i = 0 ; mobiles_count > i ; i++ ) {
+         mobile_animate( &(mobiles[i]), &tiles_flags );
+      }
 
       graphics_loop_end();
    }

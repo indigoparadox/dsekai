@@ -11,7 +11,7 @@
 #define SCREEN_H 200
 #define FONT_W 8
 #define FONT_H 8
-#define FONT_SPACE 1
+#define FONT_SPACE 0
 #define SPRITE_H 16
 #define SPRITE_W 16
 #define SPRITE_TYPE uint32_t
@@ -21,6 +21,10 @@
 #define PATTERN_W 8
 #define PATTERN_H 8
 #define PATTERN_TYPE uint16_t
+
+#define MOBILES_MAX 10
+#define WINDOW_STRINGS_MAX 5
+#define WINDOW_STRING_LEN_MAX 64
 
 #ifndef SCREEN_SCALE
 #define SCREEN_SCALE 1

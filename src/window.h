@@ -18,6 +18,9 @@ struct WINDOW {
    uint16_t w;
    uint16_t h;
    const struct GRAPHICS_PATTERN* pattern;
+   const char* strings[WINDOW_STRINGS_MAX];
+   const GRAPHICS_COLOR strings_color;
+   uint8_t strings_count;
 };
 
 void window_init();

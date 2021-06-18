@@ -19,24 +19,21 @@ void graphics_char_at(
 		for( x = 0 ; FONT_W > x ; x++ ) {
 			if( bitmask & 0x01 ) {
 				pixel = color;
-			} else {
-				pixel = GRAPHICS_COLOR_BLACK;
+            graphics_draw_px( x_orig + x, y_orig + y, pixel );
 			}
-			graphics_draw_px( x_orig + x, y_orig + y, pixel );
 			bitmask >>= 1;
 		}
 	}
 }
 
 void graphics_string_at(
-   const char* s, uint16_t slen, uint16_t x_orig, uint16_t y_orig,
+   const char* s, uint16_t x_orig, uint16_t y_orig,
    GRAPHICS_COLOR color, uint8_t scale
 ) {
    uint16_t i = 0,
       x_o = 0; /* X offset. */
 
    while(
-      i < slen &&
       '\0' != s[i] &&
       x_orig + FONT_W < SCREEN_REAL_W && /* On-screen (x-axis). */
       y_orig + FONT_H < SCREEN_REAL_H    /* On-screen (y-axis). */

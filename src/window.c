@@ -20,7 +20,14 @@ uint8_t windows_visible() {
 }
 
 void window_draw_all() {
-   int i = 0, x = 0, y = 0, x_max = 0, y_max = 0, x_min = 0, y_min = 0;
+   int i = 0,
+      j = 0,
+      x = 0,
+      y = 0,
+      x_max = 0,
+      y_max = 0,
+      x_min = 0,
+      y_min = 0;
 
    for( i = 0 ; g_windows_count > i ; i++ ) {
       if(
@@ -57,9 +64,15 @@ void window_draw_all() {
                graphics_pattern_at( g_windows[i].pattern, x, y );
             }
          }
-
-         g_windows[i].dirty = 0;
       }
+
+      for( j = 0 ; g_windows[i].strings_count > j ; j++ ) {
+         graphics_string_at( g_windows[i].strings[j],
+            x_min + 10, y_min + (10 * (i + 1)),
+            g_windows[i].strings_color, 1 );
+      }
+
+      g_windows[i].dirty = 0;
    }
 }
 
