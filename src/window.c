@@ -24,8 +24,10 @@ void window_draw_all() {
 
    for( i = 0 ; g_windows_count > i ; i++ ) {
       if(
-         WINDOW_STATE_VISIBLE != g_windows[i].state ||
-         0 == g_windows[i].dirty
+         WINDOW_STATE_VISIBLE != g_windows[i].state
+#ifndef IGNORE_DIRTY
+         || 0 == g_windows[i].dirty
+#endif /* !IGNORE_DIRTY */
       ) {
          continue;
       }

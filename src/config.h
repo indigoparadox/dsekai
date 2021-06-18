@@ -22,6 +22,13 @@
 #define PATTERN_H 8
 #define PATTERN_TYPE uint16_t
 
+#ifndef SCREEN_SCALE
+#define SCREEN_SCALE 1
+#endif /* SCREEN_SCALE */
+
+#define SCREEN_REAL_W SCREEN_W * SCREEN_SCALE
+#define SCREEN_REAL_H SCREEN_H * SCREEN_SCALE
+
 #ifndef FPS
 #define FPS 30
 #endif /* FPS */

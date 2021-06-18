@@ -25,15 +25,15 @@ if( SDL_Init( SDL_INIT_EVERYTHING ) ) {
    }
 
    SDL_CreateWindowAndRenderer(
-      SCREEN_W * 2, SCREEN_H * 2, 0, &g_window, &g_renderer );
+      SCREEN_REAL_W, SCREEN_REAL_H, 0, &g_window, &g_renderer );
    assert( NULL != g_window );
    g_screen = SDL_GetWindowSurface( g_window );
 
 #ifdef DEBUG_CGA_EMU
    area.x = 0;
    area.y = 0;
-   area.w = SCREEN_W * 2;
-   area.h = SCREEN_H * 2;
+   area.w = SCREEN_REAL_W;
+   area.h = SCREEN_REAL_H;
    SDL_SetRenderDrawColor( g_renderer,  0, 0, 0, 255 );
    SDL_RenderFillRect( g_renderer, &area );
 #endif /* DEBUG_CGA_EMU */
@@ -61,13 +61,15 @@ void graphics_loop_end() {
 }
 
 void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
+   int x_s = 0, y_s = 0;
    SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
-   x *= 2;
-   y *= 2;
-   SDL_RenderDrawPoint( g_renderer, x, y );
-   SDL_RenderDrawPoint( g_renderer, x + 1, y );
-   SDL_RenderDrawPoint( g_renderer, x, y + 1 );
-   SDL_RenderDrawPoint( g_renderer, x + 1, y + 1 );
+   x *= SCREEN_SCALE;
+   y *= SCREEN_SCALE;
+   for( y_s = 0 ; SCREEN_SCALE > y_s ; y_s++ ) {
+      for( x_s = 0 ; SCREEN_SCALE > x_s ; x_s++ ) {
+         SDL_RenderDrawPoint( g_renderer, x + x_s, y + y_s );
+      }
+   }
 }
 
 #ifdef DEBUG_CGA_EMU

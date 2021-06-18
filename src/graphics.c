@@ -38,8 +38,8 @@ void graphics_string_at(
    while(
       i < slen &&
       '\0' != s[i] &&
-      x_orig + FONT_W < SCREEN_W && /* On-screen (x-axis). */
-      y_orig + FONT_H < SCREEN_H    /* On-screen (y-axis). */
+      x_orig + FONT_W < SCREEN_REAL_W && /* On-screen (x-axis). */
+      y_orig + FONT_H < SCREEN_REAL_H    /* On-screen (y-axis). */
    ) {
       graphics_char_at( s[i], x_orig + x_o, y_orig, color, scale );
       x_o += FONT_W + FONT_SPACE;

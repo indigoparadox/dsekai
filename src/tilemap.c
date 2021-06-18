@@ -13,9 +13,11 @@ void tilemap_draw(
 
    for( y = 0 ; TILEMAP_TH > y ; y++ ) {
       for( x = 0 ; TILEMAP_TW > x ; x++ ) {
+#ifndef IGNORE_DIRTY
          if( !((*tiles_flags)[y][x] & TILEMAP_TILE_FLAG_DIRTY) ) {
             continue;
          }
+#endif /* !IGNORE_DIRTY */
 
          (*tiles_flags)[y][x] &= ~TILEMAP_TILE_FLAG_DIRTY;
 
