@@ -6,7 +6,7 @@ LD := wcl
 CFLAGS := -0 -DUSE_DOS -mm -DSCALE_2X -DUSE_LOOKUPS
 LDFLAGS := $(CFLAGS)
 
-DSEKAI_C_FILES := main.c graphics/dosg.c tilemap.c input/dosi.c graphics.c mobile.c item.c
+DSEKAI_C_FILES := main.c graphics/dosg.c tilemap.c input/dosi.c graphics.c mobile.c item.c window.c
 DSEKAI_O_FILES := $(patsubst .c,.o,$(DSEKAI_C_FILES))
 
 .PHONY: clean

@@ -14,10 +14,13 @@
 #define FONT_SPACE 1
 #define SPRITE_H 16
 #define SPRITE_W 16
-#define SPRITE_BYTES 4
+#define SPRITE_TYPE uint32_t
 #define TILE_W 16
 #define TILE_H 16
-#define TILE_BYTES 4
+#define TILE_TYPE uint32_t
+#define PATTERN_W 8
+#define PATTERN_H 8
+#define PATTERN_TYPE uint16_t
 
 #ifndef FPS
 #define FPS 30

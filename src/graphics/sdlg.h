@@ -8,11 +8,6 @@
 
 typedef const SDL_Color* GRAPHICS_COLOR;
 
-#define graphics_sprite_at( spr, x, y ) \
-   graphics_blit_at( (const GRAPHICS_SPRITE*)spr, x, y, 1 )
-#define graphics_tile_at( spr, x, y ) \
-   graphics_blit_at( (const GRAPHICS_TILE*)spr, x, y, 0 )
-
 #ifdef SDLG_C
 const SDL_Color gc_black =    {0,   0,   0};
 const SDL_Color gc_cyan =     {0,   255, 255};

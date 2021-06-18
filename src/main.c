@@ -4,16 +4,20 @@
 
 #include "data/sprites.h"
 #include "data/maps.h"
+#include "data/patterns.h"
 #include "graphics.h"
 #include "input.h"
 #include "mobile.h"
+#include "window.h"
 
 int main( int argc, char* argv[] ) {
    uint8_t running = 1,
       in_char = 0,
+      window_shown = 0,
       walk_offset = 0;
    uint32_t i = 0, x = 10, j = 0;
    uint8_t tiles_flags[TILEMAP_TH][TILEMAP_TW];
+   struct WINDOW* w = NULL;
    struct MOBILE player = {
       &gc_sprite_player,
       100,
@@ -24,6 +28,7 @@ int main( int argc, char* argv[] ) {
    };
 
    graphics_init();
+   window_init();
 
    memset( &tiles_flags, 0x01, TILEMAP_TH * TILEMAP_TW );
 
@@ -32,11 +37,25 @@ int main( int argc, char* argv[] ) {
 
       in_char = 0;
 
-      tilemap_draw( &gc_map_field, &tiles_flags );
+      if( 0 >= windows_visible() ) {
+         tilemap_draw( &gc_map_field, &tiles_flags );
 
-      mobile_draw( &player, walk_offset );
+         mobile_draw( &player, walk_offset );
+      }
+
+      window_draw_all();
 
       graphics_flip();
+
+      if( !window_shown ) {
+         w = window_push();
+         w->pattern = &(gc_patterns[0]);
+         w->w = 80;
+         w->h = 64;
+         w->dirty = 1;
+         w->state = WINDOW_STATE_VISIBLE;
+         window_shown = 1;
+      }
 
       in_char = input_poll();
 

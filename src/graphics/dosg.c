@@ -160,9 +160,13 @@ void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
 #endif /* GRAPHICS_MODE */
 }
 
-void graphics_sprite_at( const GRAPHICS_SPRITE* spr, uint16_t x, uint16_t y ) {
+void graphics_blit_at(
+   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint8_t w, uint8_t h,
+   const int byte_width
+) {
 	int y_offset = 0;
    uint16_t byte_offset = 0;
+   const uint8_t* bits = bmp->bits;
 
 #if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
 #error "not implemented"
@@ -170,54 +174,13 @@ void graphics_sprite_at( const GRAPHICS_SPRITE* spr, uint16_t x, uint16_t y ) {
    uint8_t y_is_odd = /* Interlacing compensation do % once to save cycles. */
       0 == y % 2 ? 0 : 1;
 
-	for( y_offset = 0 ; SPRITE_H - 1 > y_offset ; y_offset++ ) {
-      byte_offset = gc_offsets_cga_bytes_p1[y + y_offset][x];
-      switch( y_offset + y_is_odd ) {
-      case 0x0:
-      case 0x2:
-      case 0x4:
-      case 0x6:
-      case 0x8:
-      case 0xa:
-      case 0xc:
-      case 0xe:
-         _fmemcpy( &(g_buffer[byte_offset]), &(spr->bits[y_offset]),
-            SPRITE_BYTES );
-         break;
-
-      case 0x1:
-      case 0x3:
-      case 0x5:
-      case 0x7:
-      case 0x9:
-      case 0xb:
-      case 0xd:
-      case 0xf:
-         _fmemcpy(
-            &(g_buffer[0x2000 + byte_offset]), &(spr->bits[y_offset]),
-               SPRITE_BYTES );
-         break;
-      }
-	}
-#endif /* GRAPHICS_MODE */
-}
-
-void graphics_tile_at( const GRAPHICS_TILE* til, uint16_t x, uint16_t y ) {
-	int y_offset = 0;
-   uint16_t byte_offset = 0;
-
-#if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
-#error "not implemented"
-#elif GRAPHICS_MODE_320_200_4_CGA == GRAPHICS_MODE
-   uint8_t y_is_odd = /* Interlacing compensation do % once to save cycles. */
-      0 == y % 2 ? 0 : 1;
-
-	for( y_offset = 0 ; TILE_H > y_offset ; y_offset++ ) {
+	for( y_offset = 0 ; h > y_offset ; y_offset++ ) {
 #ifdef USE_LOOKUPS
       byte_offset = gc_offsets_cga_bytes_p1[y + y_offset][x];
 #else
 #error "not implemented"
 #endif /* USE_LOOKUPS */
+
       switch( y_offset + y_is_odd ) {
       case 0x0:
       case 0x2:
@@ -227,8 +190,7 @@ void graphics_tile_at( const GRAPHICS_TILE* til, uint16_t x, uint16_t y ) {
       case 0xa:
       case 0xc:
       case 0xe:
-         _fmemcpy( &(g_buffer[byte_offset]), &(til->bits[y_offset]),
-            TILE_BYTES );
+         _fmemcpy( &(g_buffer[byte_offset]), bits, byte_width );
          break;
 
       case 0x1:
@@ -239,11 +201,12 @@ void graphics_tile_at( const GRAPHICS_TILE* til, uint16_t x, uint16_t y ) {
       case 0xb:
       case 0xd:
       case 0xf:
-         _fmemcpy(
-            &(g_buffer[0x2000 + byte_offset]), &(til->bits[y_offset]),
-               TILE_BYTES );
+         _fmemcpy( &(g_buffer[0x2000 + byte_offset]), bits, byte_width );
          break;
       }
+
+      /* Advance source address by bytes per copy. */
+      bits += byte_width;
 	}
 #endif /* GRAPHICS_MODE */
 }

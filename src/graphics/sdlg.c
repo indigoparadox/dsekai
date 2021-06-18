@@ -70,38 +70,13 @@ void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
    SDL_RenderDrawPoint( g_renderer, x + 1, y + 1 );
 }
 
-/*
-void graphics_sprite_at( const GRAPHICS_SPRITE* spr, uint16_t x, uint16_t y ) {
-   int x_offset = 0,
-      y_offset = 0;
-   uint32_t bitmask_spr = 0;
-   GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
-
-   for( y_offset = 0 ; TILE_H > y_offset ; y_offset++ ) {
-      bitmask_spr = spr->bits[y_offset];
-      for( x_offset = 0 ; TILE_W * 2 > x_offset ; x_offset++ ) {
-         if( bitmask_spr & 0x01 ) {
-            pixel = GRAPHICS_COLOR_CYAN;
-         } else if( bitmask_spr & 0x02 ) {
-            pixel = GRAPHICS_COLOR_MAGENTA;
-         } else if( bitmask_spr & 0x03 ) {
-            pixel = GRAPHICS_COLOR_WHITE;
-         } else {
-            pixel = GRAPHICS_COLOR_BLACK;
-         }
-         graphics_draw_px( x + x_offset, y + y_offset, pixel );
-         bitmask_spr >>= 2;
-      }
-   }
-}
-*/
-
 #ifdef DEBUG_CGA_EMU
 extern GRAPHICS_TILE gc_tiles_field[TILEMAP_TILESETS_MAX][TILE_W];
 #endif /* DEBUG_CGA_EMU */
 
 void graphics_blit_at(
-   const void* bmp, uint16_t x, uint16_t y, uint8_t sprite
+   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint8_t w, uint8_t h,
+   const int bytes
 ) {
    //int x_offset = 0,
    int y_offset = 0,
@@ -111,7 +86,7 @@ void graphics_blit_at(
       raw_byte = 0,
       masked_byte = 0;
    GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
-   const GRAPHICS_SPRITE* spr = (const GRAPHICS_SPRITE*)bmp;
+   const uint8_t* bits = bmp->bits;
 
 #ifdef DEBUG_CGA_EMU
    char drawn_bytes[5] = { 0, 0, 0, 0, 0 };
@@ -120,16 +95,32 @@ void graphics_blit_at(
    }*/
 #endif /* DEBUG_CGA_EMU */
 
-   for( y_offset = 0 ; TILE_H - sprite > y_offset ; y_offset++ ) {
+   for( y_offset = 0 ; h > y_offset ; y_offset++ ) {
       x_scr_offset = 0;
 #ifdef DEBUG_CGA_EMU
-      printf( "line %02d (0x%08x):\n", y_offset, spr->bits[y_offset] );
+      //printf( "line %02d (0x%08x):\n", y_offset, spr->bits[y_offset] );
 #endif /* DEBUG_CGA_EMU */
 
       /* Start at the last byte and move backwards. */
-      for( byte_offset = 24 ; 0 <= byte_offset ; byte_offset -= 8 ) {
+      for(
+         byte_offset = ((bytes - 1) * 8) ;
+         0 <= byte_offset ;
+         byte_offset -= 8
+      ) {
          /* Get full line and shift it to the current byte. */
-         raw_byte = (spr->bits[y_offset] >> byte_offset) & 0xff;
+         switch( w ) {
+         case SPRITE_W:
+            raw_byte = (((SPRITE_TYPE*)bits)[y_offset] >> byte_offset) & 0xff;
+            break;
+#if SPRITE_W != TILE_W
+         case TILE_W:
+            raw_byte = (((TILE_TYPE*)bits)[y_offset] >> byte_offset) & 0xff;
+            break;
+#endif
+         case PATTERN_W:
+            raw_byte = (((PATTERN_TYPE*)bits)[y_offset] >> byte_offset) & 0xff;
+            break;
+         }
 
 #ifdef DEBUG_CGA_EMU
          printf( " by%02d: 0x%02x:\n", byte_offset / 8, raw_byte );
@@ -201,7 +192,7 @@ void graphics_blit_at(
             x_scr_offset - 4, y_offset );
 #endif /* DEBUG_CGA_EMU */
       }
-      assert( TILE_W == x_scr_offset );
+      assert( w == x_scr_offset );
    }
 }
 
