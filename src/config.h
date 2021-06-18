@@ -22,6 +22,9 @@
 #define PATTERN_H 8
 #define PATTERN_TYPE uint16_t
 
+#define WINDOW_TEXT_X 8
+#define WINDOW_TEXT_Y 8
+
 #define MOBILES_MAX 10
 #define WINDOW_STRINGS_MAX 5
 #define WINDOW_STRING_LEN_MAX 64

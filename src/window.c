@@ -68,7 +68,7 @@ void window_draw_all() {
 
       for( j = 0 ; g_windows[i].strings_count > j ; j++ ) {
          graphics_string_at( g_windows[i].strings[j],
-            x_min + 10, y_min + (10 * (i + 1)),
+            x_min + WINDOW_TEXT_X, y_min + (WINDOW_TEXT_Y * (i + 1)),
             g_windows[i].strings_color, 1 );
       }
 
