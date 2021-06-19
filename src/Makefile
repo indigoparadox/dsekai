@@ -1,5 +1,5 @@
 
-DSEKAI_C_FILES := tilemap.c graphics.c mobile.c item.c window.c
+DSEKAI_C_FILES := tilemap.c graphics.c mobile.c item.c window.c topdown.c
 
 DSEKAI_C_FILES_LINUX := input/sdli.c graphics/sdlg.c main.c
 DSEKAI_C_FILES_DOS := input/dosi.c graphics/dosg.c main.c
@@ -13,8 +13,8 @@ BIN_PALM := $(BINDIR)/dsekai.prc
 
 MD := mkdir -p
 
-$(BIN_LINUX): CFLAGS := -DUSE_SDL -DSCREEN_SCALE=3 -DIGNORE_DIRTY $(shell pkg-config sdl2 --cflags)
-$(BIN_LINUX): LDFLAGS := $(shell pkg-config sdl2 --libs)
+$(BIN_LINUX): CFLAGS := -DUSE_SDL -DSCREEN_SCALE=3 -DIGNORE_DIRTY $(shell pkg-config sdl2 --cflags) -g
+$(BIN_LINUX): LDFLAGS := $(shell pkg-config sdl2 --libs) -g
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
@@ -27,7 +27,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/prctools/include/Core/ -I /opt/prctools/include/Core/UI/ -I /opt/prctools/include/Core/System/ -I /opt/prctools/include/Core/Hardware/ -I /opt/prctools/include/Core/International/
-$(BIN_PALM): CFLAGS := -O0 -DUSE_PALM $(INCLUDES)
+$(BIN_PALM): CFLAGS := -O0 -DUSE_PALM -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES)
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
 

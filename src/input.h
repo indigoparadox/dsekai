@@ -6,7 +6,9 @@
 #include "input/dosi.h"
 #elif defined( USE_SDL )
 #include "input/sdli.h"
-#endif /* USE_DOS, USE_SDL */
+#elif defined( USE_PALM )
+#include "input/palmi.h"
+#endif /* USE_DOS, USE_SDL, USE_PALM */
 
 int input_poll();
 
