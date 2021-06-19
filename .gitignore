@@ -3,3 +3,4 @@
 *.err
 bin
 obj
+*_v.h
