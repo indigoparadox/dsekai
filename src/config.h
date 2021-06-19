@@ -51,6 +51,9 @@
 #define WINDOW_STRINGS_MAX 5
 #define WINDOW_STRING_LEN_MAX 64
 
+#define SCREEN_TW (SCREEN_W / TILE_W)
+#define SCREEN_TH (SCREEN_H / TILE_H)
+
 #ifndef SCREEN_SCALE
 #define SCREEN_SCALE 1
 #endif /* SCREEN_SCALE */

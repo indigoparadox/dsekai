@@ -10,9 +10,6 @@
 #include "window.h"
 #include "engines.h"
 
-const int gc_screen_tile_w = SCREEN_W / TILE_W;
-const int gc_screen_tile_h = SCREEN_H / TILE_H;
-
 static int g_semi_cycles = 0;
 static int g_walk_offset = 0;
 static int g_screen_scroll_x = 0;
@@ -78,10 +75,12 @@ int topdown_loop(
          assert( 0 <= g_screen_scroll_tx );
 
          topdown_refresh_tiles( tiles_flags );
+#ifdef ANIMATE_SCREEN_MOVEMENT
          tilemap_draw( &gc_map_field, tiles_flags,
             g_screen_scroll_x, g_screen_scroll_y, 1 );
 
          graphics_flip();
+#endif /* ANIMATE_SCREEN_MOVEMENT */
          return 1;
       }
 
@@ -94,15 +93,12 @@ int topdown_loop(
          if(
             mobiles[i].coords.x < g_screen_scroll_tx ||
             mobiles[i].coords.y < g_screen_scroll_ty ||
-            mobiles[i].coords.x > g_screen_scroll_tx + gc_screen_tile_w ||
-            mobiles[i].coords.y > g_screen_scroll_ty + gc_screen_tile_h
+            mobiles[i].coords.x > g_screen_scroll_tx + SCREEN_TW ||
+            mobiles[i].coords.y > g_screen_scroll_ty + SCREEN_TH
          ) {
             /* Mobile is off-screen. */
             continue;
          }
-         assert( mobiles[i].sprite == &gc_sprite_princess );
-         assert( mobiles[i].coords_prev.x == 5 );
-         assert( mobiles[i].coords_prev.y == 5 );
          mobile_draw(
             &(mobiles[i]),
             g_walk_offset, g_screen_scroll_x, g_screen_scroll_y );
@@ -135,6 +131,10 @@ int topdown_loop(
       mobiles[0].steps = SPRITE_W;
       (*mobiles_count)++;
    }
+
+   assert( mobiles[0].sprite == &gc_sprite_princess );
+   assert( mobiles[0].coords_prev.x == 5 );
+   assert( mobiles[0].coords_prev.y == 5 );
 
    in_char = input_poll();
 
@@ -186,9 +186,9 @@ int topdown_loop(
    }
 
    /* Scroll the screen by one if the player goes off-screen. */
-   if( player->coords.x >= g_screen_scroll_tx + gc_screen_tile_w ) {
+   if( player->coords.x >= g_screen_scroll_tx + SCREEN_TW ) {
       g_screen_scroll_x_tgt = g_screen_scroll_x + SCREEN_W;
-   } else if( player->coords.y >= g_screen_scroll_y + gc_screen_tile_h ) {
+   } else if( player->coords.y >= g_screen_scroll_y + SCREEN_TH ) {
       g_screen_scroll_y_tgt = g_screen_scroll_y + SCREEN_H;
    } else if( player->coords.x < g_screen_scroll_tx ) {
       g_screen_scroll_x_tgt = g_screen_scroll_x - SCREEN_W;

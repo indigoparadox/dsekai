@@ -11,14 +11,23 @@ void tilemap_draw(
    int x = 0,
       y = 0;
    uint8_t tile_id = 0;
-   uint16_t viewport_tx = 0,
-      viewport_ty = 0;
+   uint16_t viewport_tx1 = 0,
+      viewport_ty1 = 0,
+      viewport_tx2 = 0,
+      viewport_ty2 = 0;
 
-   viewport_tx = screen_x / TILEMAP_TW;
-   viewport_ty = screen_y / TILEMAP_TH;
+   viewport_tx1 = screen_x / TILE_W;
+   viewport_ty1 = screen_y / TILE_H;
+   viewport_tx2 = TILEMAP_TW > viewport_tx1 + SCREEN_TW ?
+      viewport_tx1 + SCREEN_TW : viewport_tx1 + (TILEMAP_TW - viewport_tx1);
+   viewport_ty2 = TILEMAP_TH > viewport_ty1 + SCREEN_TH ?
+      viewport_ty1 + SCREEN_TH : viewport_tx1 + (TILEMAP_TH - viewport_ty1);
 
-   for( y = viewport_ty ; viewport_ty + TILEMAP_TH > y ; y++ ) {
-      for( x = viewport_tx ; viewport_tx + TILEMAP_TW > x ; x++ ) {
+   assert( viewport_tx2 <= TILEMAP_TW );
+   assert( viewport_ty2 <= TILEMAP_TH );
+
+   for( y = viewport_ty1 ; viewport_ty2 > y ; y++ ) {
+      for( x = viewport_tx1 ; viewport_tx2 > x ; x++ ) {
 #ifndef IGNORE_DIRTY
          if(
             !force &&
