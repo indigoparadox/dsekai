@@ -25,32 +25,34 @@ uint8_t mobile_walk_start( struct MOBILE* m, int8_t x_mod, int8_t y_mod ) {
 void mobile_animate(
    struct MOBILE* m, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW]
 ) {
+   /* If the mobile is walking, advance its steps. */
    if(
       (m->coords.x != m->coords_prev.x || 
          m->coords.y != m->coords_prev.y) &&
-      SPRITE_W > m->steps && (-1 * SPRITE_W) <= m->steps
+      SPRITE_W > m->steps
    ) {
       if( 0 < m->steps ) {
          m->steps = gc_mobile_step_table_normal_pos[m->steps];
-      } else if( 0 > m->steps ) {
-         m->steps = -1 * gc_mobile_step_table_normal_pos[m->steps];
       }
    } else if(
-      m->coords.x != m->coords_prev.x &&
-      ((SPRITE_W - 1) < m->steps || (SPRITE_W - 1) * -1 > m->steps)
+      m->coords.x != m->coords_prev.x && (SPRITE_W - 1) < m->steps
    ) {
       m->coords_prev.x = m->coords.x;
    } else if(
-      m->coords.y != m->coords_prev.y &&
-      ((SPRITE_H - 1) < m->steps || (SPRITE_H - 1) * -1 > m->steps)
+      m->coords.y != m->coords_prev.y && (SPRITE_H - 1) < m->steps
    ) {
       m->coords_prev.y = m->coords.y;
    }
+
+   /* Leave a trail of dirty tiles. */
    (*tiles_flags)[m->coords.y][m->coords.x] |= TILEMAP_TILE_FLAG_DIRTY;
    (*tiles_flags)[m->coords_prev.y][m->coords_prev.x] |= TILEMAP_TILE_FLAG_DIRTY;
 }
 
-void mobile_draw( struct MOBILE* m, int8_t walk_offset ) {
+void mobile_draw(
+   const struct MOBILE* m,
+   int8_t walk_offset, int16_t screen_x, int16_t screen_y
+) {
    int16_t x_offset = 0,
       y_offset = 0;
 
@@ -67,7 +69,7 @@ void mobile_draw( struct MOBILE* m, int8_t walk_offset ) {
    /* Note that sprite is drawn at prev_x/y + steps, NOT current x/y. */
    graphics_sprite_at(
       m->sprite,
-      (m->coords.x * SPRITE_W) + x_offset,
-      (m->coords.y * SPRITE_H) + y_offset + walk_offset );
+      ((m->coords.x * SPRITE_W) + x_offset) - screen_x,
+      (((m->coords.y * SPRITE_H) + y_offset + walk_offset ) - screen_y) );
 }
 

@@ -13,7 +13,7 @@ BIN_PALM := $(BINDIR)/dsekai.prc
 
 MD := mkdir -p
 
-$(BIN_LINUX): CFLAGS := -DUSE_SDL -DSCREEN_SCALE=3 -DIGNORE_DIRTY $(shell pkg-config sdl2 --cflags) -g
+$(BIN_LINUX): CFLAGS := -DUSE_SDL -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
 $(BIN_LINUX): LDFLAGS := $(shell pkg-config sdl2 --libs) -g
 
 $(BIN_DOS): CC := wcc

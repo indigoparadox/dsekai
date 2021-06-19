@@ -56,7 +56,6 @@ void graphics_blit_at(
       x_scr_offset = 0,
       raw_byte = 0,
       masked_byte = 0;
-   GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
    const uint8_t* bits = bmp->bits;
 
    for( y_offset = 0 ; h > y_offset ; y_offset++ ) {
@@ -87,19 +86,15 @@ void graphics_blit_at(
          for( bit_offset = 0 ; 8 > bit_offset ; bit_offset += 2 ) {
             masked_byte = raw_byte & 0x03;
             if( 0x01 == masked_byte ) {
-               pixel = GRAPHICS_COLOR_CYAN;
                graphics_draw_px(
                   x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_CYAN );
             } else if( 0x02 == masked_byte ) {
-               pixel = GRAPHICS_COLOR_MAGENTA;
                graphics_draw_px(
                   x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_MAGENTA );
             } else if( 0x03 == masked_byte ) {
-               pixel = GRAPHICS_COLOR_WHITE;
                graphics_draw_px(
                   x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_WHITE );
             } else if( 0x00 == masked_byte ) {
-               pixel = GRAPHICS_COLOR_BLACK;
                graphics_draw_px(
                   x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_BLACK );
             }

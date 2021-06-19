@@ -5,16 +5,25 @@
 #include "graphics.h"
 
 void tilemap_draw(
-   const struct TILEMAP* t, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW]
+   const struct TILEMAP* t, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW],
+   uint16_t screen_x, uint16_t screen_y, uint8_t force
 ) {
    int x = 0,
       y = 0;
    uint8_t tile_id = 0;
+   uint16_t viewport_tx = 0,
+      viewport_ty = 0;
 
-   for( y = 0 ; TILEMAP_TH > y ; y++ ) {
-      for( x = 0 ; TILEMAP_TW > x ; x++ ) {
+   viewport_tx = screen_x / TILEMAP_TW;
+   viewport_ty = screen_y / TILEMAP_TH;
+
+   for( y = viewport_ty ; viewport_ty + TILEMAP_TH > y ; y++ ) {
+      for( x = viewport_tx ; viewport_tx + TILEMAP_TW > x ; x++ ) {
 #ifndef IGNORE_DIRTY
-         if( !((*tiles_flags)[y][x] & TILEMAP_TILE_FLAG_DIRTY) ) {
+         if(
+            !force &&
+            !((*tiles_flags)[y][x] & TILEMAP_TILE_FLAG_DIRTY)
+         ) {
             continue;
          }
 #endif /* !IGNORE_DIRTY */
@@ -25,7 +34,10 @@ void tilemap_draw(
          tile_id = tilemap_get_tile_id( t, x, y );
 
          /* Blit the tile. */
-         graphics_tile_at( (*t->tileset)[tile_id], x * TILE_W, y * TILE_H );
+         graphics_tile_at(
+            (*t->tileset)[tile_id],
+            (x * TILE_W) - screen_x,
+            (y * TILE_H) - screen_y );
       }
    }
 }

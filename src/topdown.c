@@ -1,5 +1,4 @@
 
-//#include <stdio.h>
 #include <string.h>
 
 #include "data/sprites.h"
@@ -11,28 +10,102 @@
 #include "window.h"
 #include "engines.h"
 
-int g_semi_cycles = 0;
-int g_walk_offset = 0;
+const int gc_screen_tile_w = SCREEN_W / TILE_W;
+const int gc_screen_tile_h = SCREEN_H / TILE_H;
 
-int loop_topdown(
+static int g_semi_cycles = 0;
+static int g_walk_offset = 0;
+static int g_screen_scroll_x = 0;
+static int g_screen_scroll_y = 0;
+static int g_screen_scroll_tx = 0;
+static int g_screen_scroll_ty = 0;
+static int g_screen_scroll_x_tgt = 0;
+static int g_screen_scroll_y_tgt = 0;
+static uint8_t g_window_shown = 0;
+
+static
+void topdown_refresh_tiles( uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW] ) {
+   int x = 0, y = 0;
+   for( y = 0 ; TILEMAP_TH > y ; y++ ) {
+      for( x = 0 ; TILEMAP_TW > x ; x++ ) {
+         (*tiles_flags)[y][x] |= TILEMAP_TILE_FLAG_DIRTY;
+      }
+   }
+}
+
+int topdown_loop(
    struct MOBILE* player,
    struct MOBILE mobiles[MOBILES_MAX], int* mobiles_count,
    uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW]
 ) {
-   uint32_t i = 0, x = 0, y = 0;
+   uint32_t i = 0;
    uint8_t in_char = 0;
-   static uint8_t window_shown = 0;
    struct WINDOW* w = NULL;
+
+   assert( 1 >= *mobiles_count );
 
    graphics_loop_start();
 
    in_char = 0;
 
    if( 0 == windows_visible() ) {
-      tilemap_draw( &gc_map_field, tiles_flags );
-      mobile_draw( player, g_walk_offset );
+      /*
+      If the screen is scrolling, prioritize that before accepting more
+      commands or drawing mobiles.
+      */
+      if(
+         g_screen_scroll_x_tgt != g_screen_scroll_x ||
+         g_screen_scroll_y_tgt != g_screen_scroll_y 
+      ) {
+         if( g_screen_scroll_x_tgt > g_screen_scroll_x ) {
+            g_screen_scroll_x += TILE_W;
+            g_screen_scroll_tx = g_screen_scroll_x / TILE_W;
+         }
+         if( g_screen_scroll_y_tgt > g_screen_scroll_y ) {
+            g_screen_scroll_y += TILE_H;
+            g_screen_scroll_ty = g_screen_scroll_y / TILE_H;
+         }
+         if( g_screen_scroll_x_tgt < g_screen_scroll_x ) {
+            g_screen_scroll_x -= TILE_W;
+            g_screen_scroll_tx = g_screen_scroll_x / TILE_W;
+         }
+         if( g_screen_scroll_y_tgt < g_screen_scroll_y ) {
+            g_screen_scroll_y -= TILE_H;
+            g_screen_scroll_ty = g_screen_scroll_y / TILE_H;
+         }
+
+         assert( 0 <= g_screen_scroll_x );
+         assert( 0 <= g_screen_scroll_tx );
+
+         topdown_refresh_tiles( tiles_flags );
+         tilemap_draw( &gc_map_field, tiles_flags,
+            g_screen_scroll_x, g_screen_scroll_y, 1 );
+
+         graphics_flip();
+         return 1;
+      }
+
+      tilemap_draw( &gc_map_field, tiles_flags,
+         g_screen_scroll_x, g_screen_scroll_y, 0 );
+
+      mobile_draw(
+         player, g_walk_offset, g_screen_scroll_x, g_screen_scroll_y );
       for( i = 0 ; *mobiles_count > i ; i++ ) {
-         mobile_draw( &(mobiles[i]), g_walk_offset );
+         if(
+            mobiles[i].coords.x < g_screen_scroll_tx ||
+            mobiles[i].coords.y < g_screen_scroll_ty ||
+            mobiles[i].coords.x > g_screen_scroll_tx + gc_screen_tile_w ||
+            mobiles[i].coords.y > g_screen_scroll_ty + gc_screen_tile_h
+         ) {
+            /* Mobile is off-screen. */
+            continue;
+         }
+         assert( mobiles[i].sprite == &gc_sprite_princess );
+         assert( mobiles[i].coords_prev.x == 5 );
+         assert( mobiles[i].coords_prev.y == 5 );
+         mobile_draw(
+            &(mobiles[i]),
+            g_walk_offset, g_screen_scroll_x, g_screen_scroll_y );
       }
    }
 
@@ -40,7 +113,7 @@ int loop_topdown(
 
    graphics_flip();
 
-   if( !window_shown ) {
+   if( !g_window_shown ) {
       w = window_push();
       w->pattern = &(gc_patterns[0]);
       w->w = 80;
@@ -50,7 +123,17 @@ int loop_topdown(
       w->strings[0] = "Welcome!";
       w->strings_count = 1;
       w->strings_color = GRAPHICS_COLOR_BLACK;
-      window_shown = 1;
+      g_window_shown = 1;
+
+      mobiles[0].sprite = &gc_sprite_princess;
+      mobiles[0].hp = 100;
+      mobiles[0].mp = 100;
+      mobiles[0].coords.x = 5;
+      mobiles[0].coords.y = 5;
+      mobiles[0].coords_prev.x = 5;
+      mobiles[0].coords_prev.y = 5;
+      mobiles[0].steps = SPRITE_W;
+      (*mobiles_count)++;
    }
 
    in_char = input_poll();
@@ -95,15 +178,22 @@ int loop_topdown(
 
    case INPUT_KEY_Z:
       window_pop();
-      for( y = 0 ; TILEMAP_TH > y ; y++ ) {
-         for( x = 0 ; TILEMAP_TW > x ; x++ ) {
-            (*tiles_flags)[y][x] |= TILEMAP_TILE_FLAG_DIRTY;
-         }
-      }
+      topdown_refresh_tiles( tiles_flags );
       break;
 
    case INPUT_KEY_Q:
       return 0;
+   }
+
+   /* Scroll the screen by one if the player goes off-screen. */
+   if( player->coords.x >= g_screen_scroll_tx + gc_screen_tile_w ) {
+      g_screen_scroll_x_tgt = g_screen_scroll_x + SCREEN_W;
+   } else if( player->coords.y >= g_screen_scroll_y + gc_screen_tile_h ) {
+      g_screen_scroll_y_tgt = g_screen_scroll_y + SCREEN_H;
+   } else if( player->coords.x < g_screen_scroll_tx ) {
+      g_screen_scroll_x_tgt = g_screen_scroll_x - SCREEN_W;
+   } else if( player->coords.y < g_screen_scroll_ty ) {
+      g_screen_scroll_y_tgt = g_screen_scroll_y - SCREEN_H;
    }
 
    /* Animate. */
@@ -122,11 +212,12 @@ int loop_topdown(
 
    mobile_animate( player, tiles_flags );
    for( i = 0 ; *mobiles_count > i ; i++ ) {
+      assert( mobiles[i].coords_prev.x == 5 );
+      assert( mobiles[i].coords_prev.y == 5 );
       mobile_animate( &(mobiles[i]), tiles_flags );
    }
 
    graphics_loop_end();
-
 
    return 1;
 }
