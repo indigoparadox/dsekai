@@ -9,6 +9,8 @@
 #include "graphics/dosg.h"
 #elif defined( USE_SDL )
 #include "graphics/sdlg.h"
+#elif defined( USE_PALM )
+#include "graphics/palmg.h"
 #endif /* USE_DOS, USE_SDL */
 
 #define graphics_sprite_at( spr, x, y ) \

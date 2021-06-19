@@ -1,0 +1,20 @@
+
+#include "palmrsc.h"
+
+ALERT ID AboutAlert
+INFORMATION
+BEGIN
+   TITLE "About Colors"
+   MESSAGE "The Palm Color Converter lets you convert the Red-, Green-and Blue values of a color into it's hexadecimal value and vice versa."
+   BUTTONS "OK"
+END
+
+
+ALERT ID TheError
+INFORMATION
+BEGIN
+   TITLE "Error"
+   MESSAGE "^1"
+   BUTTONS "OK"
+END
+

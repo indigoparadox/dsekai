@@ -7,8 +7,18 @@
 
 #define TILEMAP_TILESETS_MAX  12
 
+#ifndef SCREEN_W
 #define SCREEN_W 320
+#endif /* SCREEN_W */
+
+#ifndef SCREEN_H
 #define SCREEN_H 200
+#endif /* SCREEN_H */
+
+#ifdef USE_PALM
+#define assert( comp )
+#endif /* USE_PALM */
+
 #define FONT_W 8
 #define FONT_H 8
 #define FONT_SPACE 0

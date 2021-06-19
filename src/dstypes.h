@@ -2,7 +2,7 @@
 #ifndef DSTYPES_H
 #define DSTYPES_H
 
-#ifdef USE_DOS
+#if defined( USE_DOS ) || defined( USE_PALM )
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
 typedef short int16_t;

@@ -2,7 +2,9 @@
 #include "window.h"
 
 #include <string.h>
+#ifndef USE_PALM
 #include <assert.h>
+#endif /* USE_PALM */
 
 #include "graphics.h"
 
