@@ -7,6 +7,10 @@
 #include "window.h"
 #include "engines.h"
 
+#include "data/sprites_v.h"
+#include "data/maps.h"
+#include "data/patterns.h"
+
 extern const GRAPHICS_SPRITE gc_sprite_princess;
 extern const GRAPHICS_SPRITE gc_sprite_robe;
 
@@ -68,7 +72,7 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
 
 
          running = 
-            loop_topdown( &player, mobiles, &mobiles_count, &tiles_flags );
+            topdown_loop( &player, mobiles, &mobiles_count, &tiles_flags );
  
       } while( event.eType != appStopEvent );
 

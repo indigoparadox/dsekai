@@ -5,6 +5,10 @@ DSEKAI_C_FILES_LINUX := input/sdli.c graphics/sdlg.c main.c
 DSEKAI_C_FILES_DOS := input/dosi.c graphics/dosg.c main.c
 DSEKAI_C_FILES_PALM := input/palmi.c graphics/palmg.c mainpalm.c
 
+DSEKAI_ASSET_HEADERS := data/sprites.h
+
+DSEKAI_ASSET_HEADERS_PALM := $(subst .h,_v.h,$(DSEKAI_ASSET_HEADERS))
+
 BINDIR := ../bin
 
 BIN_LINUX := $(BINDIR)/dsekai
@@ -59,6 +63,8 @@ $(OBJDIR_PALM)grc.stamp: $(OBJDIR_PALM)dsekai
 	cd $(OBJDIR_PALM) && $(OBJRES) dsekai
 	touch $@
 
+$(OBJDIR_PALM)mainpalm.o: $(DSEKAI_ASSET_HEADERS_PALM)
+
 $(OBJDIR_PALM)dsekai: $(DSEKAI_O_FILES_PALM)
 	$(CC) $(CFLAGS) $^ -o $@
 	
@@ -66,6 +72,9 @@ $(OBJDIR_PALM)bin.stamp: palm.rcp
 	$(PILRC) $^ $(OBJDIR_PALM)
 	touch $@
 	
+data/sprites_v.h: data/sprites.h
+	python ../scripts/cga2bmp.py -if $^ -of $@ -s 16 16
+
 $(BINDIR)/lookup: lookup.c
 	gcc -o $@ $^
 
@@ -82,5 +91,5 @@ $(BINDIR)/lookup: lookup.c
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 clean:
-	rm -rf ../obj ../bin ../lookup *.err
+	rm -rf data/*_v.h ../obj ../bin ../lookup *.err
 

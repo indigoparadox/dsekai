@@ -1,9 +1,6 @@
 
 #include <string.h>
 
-#include "data/sprites.h"
-#include "data/maps.h"
-#include "data/patterns.h"
 #include "graphics.h"
 #include "input.h"
 #include "mobile.h"
@@ -19,6 +16,10 @@ static int g_screen_scroll_ty = 0;
 static int g_screen_scroll_x_tgt = 0;
 static int g_screen_scroll_y_tgt = 0;
 static uint8_t g_window_shown = 0;
+
+extern const GRAPHICS_SPRITE gc_sprite_princess;
+extern const struct TILEMAP gc_map_field;
+extern const GRAPHICS_PATTERN gc_patterns[];
 
 static
 void topdown_refresh_tiles( uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW] ) {
@@ -39,7 +40,8 @@ int topdown_loop(
    uint8_t in_char = 0;
    struct WINDOW* w = NULL;
 
-   assert( 1 >= *mobiles_count );
+   assert( MOBILES_MAX > *mobiles_count );
+   assert( 0 <= *mobiles_count );
 
    graphics_loop_start();
 

@@ -27,7 +27,7 @@
 #elif defined( USE_PALM )
 
 #define assert( comp )
-#define USE_FAKE_CGA
+//#define USE_FAKE_CGA
 
 #endif /* USE_DOS, USE_SDL, USE_PALM */
 

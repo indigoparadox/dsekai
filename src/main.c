@@ -6,8 +6,9 @@
 #include "window.h"
 #include "engines.h"
 
-extern const GRAPHICS_SPRITE gc_sprite_princess;
-extern const GRAPHICS_SPRITE gc_sprite_robe;
+#include "data/sprites.h"
+#include "data/maps.h"
+#include "data/patterns.h"
 
 int main( int argc, char* argv[] ) {
    uint8_t running = 1;
