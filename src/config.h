@@ -15,9 +15,21 @@
 #define SCREEN_H 200
 #endif /* SCREEN_H */
 
-#ifdef USE_PALM
+#ifdef USE_DOS
+
+#include <assert.h>
+
+#elif defined( USE_SDL )
+
+#include <assert.h>
+#define USE_FAKE_CGA
+
+#elif defined( USE_PALM )
+
 #define assert( comp )
-#endif /* USE_PALM */
+#define USE_FAKE_CGA
+
+#endif /* USE_DOS, USE_SDL, USE_PALM */
 
 #define FONT_W 8
 #define FONT_H 8

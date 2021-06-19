@@ -1,7 +1,6 @@
 
 #include <string.h>
-#include <System/SysAll.h>
-#include <UI/UIAll.h>
+#include <PalmOS.h>
 
 #include "input.h"
 #include "mobile.h"
@@ -11,7 +10,7 @@
 extern const GRAPHICS_SPRITE gc_sprite_princess;
 extern const GRAPHICS_SPRITE gc_sprite_robe;
 
-DWord PilotMain( Word cmd, Ptr cmdPBP, Word launchFlags ) {
+UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
    EventType event;
    uint32_t i = 0, j = 0, x = 0, y = 0;
    uint8_t running = 1,
@@ -27,6 +26,9 @@ DWord PilotMain( Word cmd, Ptr cmdPBP, Word launchFlags ) {
    };
    struct MOBILE mobiles[MOBILES_MAX];
    int mobiles_count = 0;
+
+   //WinSetForeColor( 1 );
+   //WinPaintPixel( 10, 10 );
 
    if( cmd == sysAppLaunchCmdNormalLaunch ) {
 
@@ -47,7 +49,7 @@ DWord PilotMain( Word cmd, Ptr cmdPBP, Word launchFlags ) {
       mobiles_count++;
 
       // Display a string.
-      WinDrawChars( "Hello, world!", 13, 55, 60 );
+      //WinDrawChars( "Hello, world!", 13, 55, 60 );
 
       // Main event loop:
       do {

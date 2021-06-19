@@ -1,7 +1,23 @@
 
 #include "palmg.h"
 
+#include <PalmOS.h>
+
+static BitmapType* g_screen = NULL;
+static WinHandle g_win;
+
 void graphics_init() {
+#if PALM_USE_WIN
+   Err error;
+
+   g_screen = BmpCreate( SCREEN_W, SCREEN_H, 2, NULL, &error );
+   if( g_screen ) {
+      g_win = WinCreateBitmapWindow( g_screen, &error );
+      if( g_win ) {
+         WinSetDrawWindow( g_win );
+      }
+   }
+#endif
 }
 
 void graphics_shutdown() {
@@ -17,12 +33,27 @@ void graphics_loop_end() {
 }
 
 void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
-}
 
-void graphics_blit_at(
-   const GRAPHICS_BITMAP* bmp,
-   uint16_t x, uint16_t y, uint8_t w, uint8_t h, const int byte_width
-) {
+   if( SCREEN_H <= y || SCREEN_W <= x ) {
+      return;
+   }
+
+#if 0
+#ifdef PALM_USE_WIN
+   UInt32* display = NULL;
+
+   WinSetForeColor( color );
+   WinDrawPixel( x, y );
+#elif defined( PALM_USE_BMP )
+   display = WinGetDisplayWindow()->displayAddrV20;
+
+   *display = 0xffffffff;
+
+#else
+#endif
+#endif
+   WinSetForeColor( color );
+   WinPaintPixel( x, y );
 }
 
 void graphics_blit_masked_at(

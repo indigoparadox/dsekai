@@ -2,7 +2,16 @@
 #ifndef DSTYPES_H
 #define DSTYPES_H
 
-#if defined( USE_DOS ) || defined( USE_PALM )
+
+#ifdef USE_PALM
+#include <PalmOS.h>
+typedef UInt8 uint8_t;
+typedef Int8 int8_t;
+typedef UInt16 uint16_t;
+typedef Int16 int16_t;
+typedef UInt32 uint32_t;
+typedef Int32 int32_t;
+#elif defined( USE_DOS )
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
 typedef short int16_t;

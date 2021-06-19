@@ -44,3 +44,75 @@ void graphics_string_at(
    }
 }
 
+#ifdef USE_FAKE_CGA
+
+void graphics_blit_at(
+   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint8_t w, uint8_t h,
+   const int bytes
+) {
+   int y_offset = 0,
+      byte_offset = 0,
+      bit_offset = 0,
+      x_scr_offset = 0,
+      raw_byte = 0,
+      masked_byte = 0;
+   GRAPHICS_COLOR pixel = GRAPHICS_COLOR_BLACK;
+   const uint8_t* bits = bmp->bits;
+
+   for( y_offset = 0 ; h > y_offset ; y_offset++ ) {
+      x_scr_offset = w - 1;
+
+      /* Start at the last byte and move backwards. */
+      for(
+         byte_offset = ((bytes - 1) * 8) ;
+         0 <= byte_offset ;
+         byte_offset -= 8
+      ) {
+         /* Get full line and shift it to the current byte. */
+         switch( w ) {
+         case SPRITE_W:
+            raw_byte = (((SPRITE_TYPE*)bits)[y_offset] >> byte_offset) & 0xff;
+            break;
+#if SPRITE_W != TILE_W
+         case TILE_W:
+            raw_byte = (((TILE_TYPE*)bits)[y_offset] >> byte_offset) & 0xff;
+            break;
+#endif
+         case PATTERN_W:
+            raw_byte = (((PATTERN_TYPE*)bits)[y_offset] >> byte_offset) & 0xff;
+            break;
+         }
+
+         /* Iterate through the line 2 bits at a time. */
+         for( bit_offset = 0 ; 8 > bit_offset ; bit_offset += 2 ) {
+            masked_byte = raw_byte & 0x03;
+            if( 0x01 == masked_byte ) {
+               pixel = GRAPHICS_COLOR_CYAN;
+               graphics_draw_px(
+                  x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_CYAN );
+            } else if( 0x02 == masked_byte ) {
+               pixel = GRAPHICS_COLOR_MAGENTA;
+               graphics_draw_px(
+                  x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_MAGENTA );
+            } else if( 0x03 == masked_byte ) {
+               pixel = GRAPHICS_COLOR_WHITE;
+               graphics_draw_px(
+                  x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_WHITE );
+            } else if( 0x00 == masked_byte ) {
+               pixel = GRAPHICS_COLOR_BLACK;
+               graphics_draw_px(
+                  x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_BLACK );
+            }
+
+            raw_byte >>= 2;
+            x_scr_offset--;
+         }
+
+      }
+      assert( -1 == x_scr_offset );
+   }
+}
+
+
+#endif /* USE_FAKE_CGA */
+

@@ -26,7 +26,7 @@ $(BIN_PALM): PILRC := pilrc
 $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
-$(BIN_PALM): INCLUDES := -I /opt/prctools/include/Core/ -I /opt/prctools/include/Core/UI/ -I /opt/prctools/include/Core/System/ -I /opt/prctools/include/Core/Hardware/ -I /opt/prctools/include/Core/International/
+$(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
 $(BIN_PALM): CFLAGS := -O0 -DUSE_PALM -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES)
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK

@@ -4,7 +4,7 @@
 
 #include "../dstypes.h"
 
-typedef uint8_t GRAPHICS_COLOR;
+typedef IndexedColorType GRAPHICS_COLOR;
 
 #include "../graphics.h"
 
