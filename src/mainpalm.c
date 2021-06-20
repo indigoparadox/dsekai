@@ -7,6 +7,7 @@
 #include "window.h"
 #include "engines.h"
 #include "psprintf.h"
+#include "item.h"
 
 #define MAIN_C
 #include "data.h"
@@ -23,21 +24,12 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
    uint8_t running = 1,
       window_shown = 0;
    uint8_t tiles_flags[TILEMAP_TH][TILEMAP_TW];
-   struct MOBILE player = {
-      &gc_sprite_robe,
-      100,
-      100,
-      {3, 4},
-      {3, 4},
-      0,
-      0,
-      NULL
-   };
    struct MOBILE mobiles[MOBILES_MAX];
    int mobiles_count = 0;
 #ifndef NO_PALM_DEBUG_LINE
    char palm_debug_line[PSPRINTF_BUF_LEN + 1];
    int palm_debug_line_len = 0;
+   struct ITEM items[ITEMS_MAX];
 
    memset( palm_debug_line, '\0', PSPRINTF_BUF_LEN + 1 );
 #endif /* !NO_PALM_DEBUG_LINE */
@@ -55,17 +47,19 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
 
       while( running ) {
 
-         running = 
-            topdown_loop( &player, mobiles, &mobiles_count, &tiles_flags );
+         /* assert( NULL != &gc_sprite_princess );
+         assert( 0 != gc_sprite_princess ); */
+
+         running = topdown_loop( mobiles, &mobiles_count, &tiles_flags );
 
 #ifndef NO_PALM_DEBUG_LINE
-         /*palm_debug_line_len = psprintf( palm_debug_line, PSITOA_BUF_LEN,
+         palm_debug_line_len = psprintf( palm_debug_line, PSITOA_BUF_LEN,
             "%d, %d (%d, %d)",
             player.coords.x,
             player.coords.y,
             player.coords_prev.x,
-            player.coords_prev.y );*/
-         //WinDrawChars( palm_debug_line, palm_debug_line_len, 10, 10 );
+            player.coords_prev.y );
+         WinDrawChars( palm_debug_line, palm_debug_line_len, 10, 10 );
 #endif /* !NO_PALM_DEBUG_LINE */
 
 #ifndef NDEBUG

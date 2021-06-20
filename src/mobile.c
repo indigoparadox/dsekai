@@ -1,8 +1,6 @@
 
 #include "mobile.h"
 
-#include "graphics.h"
-
 const int8_t gc_mobile_step_table_normal_pos[16] = {
    0, 0, 0, 0,       /*  0,  1,  2,  3 */
    3, 3, 3, 3,       /*  4,  5,  6,  7 */
@@ -70,6 +68,7 @@ void mobile_draw(
 
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
+   assert( NULL != m->sprite );
 
    if( m->coords_prev.x > m->coords.x ) {
       x_offset = SPRITE_W - m->steps_x;

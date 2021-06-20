@@ -32,13 +32,13 @@ void topdown_refresh_tiles( uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW] ) {
 }
 
 int topdown_loop(
-   struct MOBILE* player,
    struct MOBILE mobiles[MOBILES_MAX], int* mobiles_count,
    uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW]
 ) {
    uint32_t i = 0;
    uint8_t in_char = 0;
    struct WINDOW* w = NULL;
+   struct MOBILE* player = &(mobiles[0]);
 
    assert( MOBILES_MAX > *mobiles_count );
    assert( 0 <= *mobiles_count );
@@ -107,8 +107,6 @@ int topdown_loop(
       tilemap_draw( &gc_map_field, tiles_flags,
          g_screen_scroll_x, g_screen_scroll_y, 0 );
 
-      mobile_draw(
-         player, g_walk_offset, g_screen_scroll_x, g_screen_scroll_y );
       for( i = 0 ; *mobiles_count > i ; i++ ) {
          if(
             mobiles[i].coords.x < g_screen_scroll_tx ||
@@ -144,21 +142,36 @@ int topdown_loop(
 
       g_window_shown = 1;
 
-      mobiles[0].sprite = &gc_sprite_princess;
+      mobiles[0].sprite = &gc_sprite_robe;
       mobiles[0].hp = 100;
       mobiles[0].mp = 100;
-      mobiles[0].coords.x = 5;
-      mobiles[0].coords.y = 5;
-      mobiles[0].coords_prev.x = 5;
-      mobiles[0].coords_prev.y = 5;
+      mobiles[0].coords.x = 3;
+      mobiles[0].coords.y = 4;
+      mobiles[0].coords_prev.x = 3;
+      mobiles[0].coords_prev.y = 4;
       mobiles[0].steps_x = 0;
       mobiles[0].steps_y = 0;
+      mobiles[0].inventory = NULL;
+      (*mobiles_count)++;
+
+      mobiles[1].sprite = &gc_sprite_princess;
+      mobiles[1].hp = 100;
+      mobiles[1].mp = 100;
+      mobiles[1].coords.x = 5;
+      mobiles[1].coords.y = 5;
+      mobiles[1].coords_prev.x = 5;
+      mobiles[1].coords_prev.y = 5;
+      mobiles[1].steps_x = 0;
+      mobiles[1].steps_y = 0;
+      mobiles[1].inventory = NULL;
       (*mobiles_count)++;
    }
 
-   assert( mobiles[0].sprite == &gc_sprite_princess );
-   assert( mobiles[0].coords_prev.x == 5 );
-   assert( mobiles[0].coords_prev.y == 5 );
+   /*
+   assert( mobiles[1].sprite == &gc_sprite_princess );
+   assert( mobiles[1].coords_prev.x == 5 );
+   assert( mobiles[1].coords_prev.y == 5 );
+   */
 
    if( g_input_blocked_countdown ) {
       g_input_blocked_countdown--;

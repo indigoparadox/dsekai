@@ -57,7 +57,6 @@
       g_assert_failed_len = psprintf( \
          g_assert_failed, 255, \
          "%s, %d: ASSERT FALED", __FUNCTION__, __LINE__ ); \
-      g_assert_failed_len = 1 / 0; \
    }
 #endif /* !NDEBUG */
 //#define USE_FAKE_CGA

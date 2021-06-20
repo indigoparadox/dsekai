@@ -16,7 +16,6 @@
 #else /* !RESOURCE_SPRITE_HEADERS */
 
 #include "palmrsc.h"
-#include "../data/palm/palm_ids.h"
 #include "../data/palm/palm_rc.h"
 
 #endif /* RESOURCE_SPRITE_HEADERS */
@@ -29,8 +28,21 @@
 extern const struct TILEMAP gc_map_field;
 extern const GRAPHICS_PATTERN gc_patterns[];
 
+#ifdef RESOURCE_SPRITE_HEADERS
+
 /* This file should be auto-generated. See Makefile for details. */
 #include "resext.h"
+
+#else /* !RESOURCE_SPRITE_HEADERS */
+
+/*
+This theoretically should be able to use the resext method, but
+PalmOS seems to ignore the extern values?
+*/
+#include "palmrsc.h"
+#include "../data/palm/palm_rc.h"
+
+#endif /* RESOURCE_SPRITE_HEADERS */
 
 #endif /* MAIN_C */
 

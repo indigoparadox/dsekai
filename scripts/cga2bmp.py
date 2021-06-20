@@ -266,8 +266,10 @@ def main():
 
     if args.resconsts:
         with open( args.resconsts, 'w' ) as res_c_file:
+            res_c_file.write( '#include "{}"\n'.format(
+                os.path.basename( args.resids ) ) )
             for res in resources:
-                res_c_file.write( 'const {} {} = {}_id;\n'.format(
+                res_c_file.write( 'static const {} {} = {}_id;\n'.format(
                     res[0], res[1], res[1] ) )
 
     if args.externs:
