@@ -1,5 +1,6 @@
 
 #include "palmrsc.h"
+#include "../data/palm/palm_ids.h"
 
 VERSION 1 "1.0"
 
@@ -20,9 +21,5 @@ BEGIN
    BUTTONS "OK"
 END
 
-BITMAP ID gc_sprite_robe_id "../data/palm/gc_sprite_robe.bmp"
-BITMAP ID gc_sprite_princess_id "../data/palm/gc_sprite_princess.bmp"
-BITMAP ID gc_tile_field_tree_id "../data/palm/gc_tile_field_tree.bmp"
-BITMAP ID gc_tile_field_grass_id "../data/palm/gc_tile_field_grass.bmp"
-BITMAP ID gc_tile_field_brick_wall_id "../data/palm/gc_tile_field_brick_wall.bmp"
+#include "../data/palm/palm.rcp"
 

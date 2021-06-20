@@ -129,7 +129,8 @@ def convert_to_bmp( out_path, grids, size, bpp, text='' ):
     logger = logging.getLogger( 'cvtbmp' )
 
     for grid in grids:
-        with open( os.path.join( out_path, grid[1] + '.bmp' ), 'wb' ) \
+        bmp_path = os.path.join( out_path, grid[1] + '.bmp' )
+        with open( bmp_path, 'wb' ) \
         as out_file:
 
             out_file.write( b'BM' )
@@ -191,6 +192,8 @@ def convert_to_bmp( out_path, grids, size, bpp, text='' ):
             out_file.seek( offset_pxo )
             out_file.write( struct.pack( '<I', offset_pxd ) )
 
+            yield (grid[0], grid[1], bmp_path)
+
 def main():
 
     parser = argparse.ArgumentParser()
@@ -203,6 +206,10 @@ def main():
     parser.add_argument( '-c', '--convert', type=str )
     parser.add_argument( '-s', '--size', nargs='+', type=int )
     parser.add_argument( '-v', '--verbose', action='store_true' )
+    parser.add_argument( '-r', '--resources' )
+    parser.add_argument( '-ri', '--resids' )
+    parser.add_argument( '-rc', '--resconsts' )
+    parser.add_argument( '-re', '--externs' )
 
     args = parser.parse_args()
 
@@ -217,6 +224,8 @@ def main():
     bppout = args.bppout
     if not args.bppout:
         bppout = args.bppin
+
+    resources = []
 
     for infile in args.infiles:
         with open( infile, 'r' ) as in_file:
@@ -234,7 +243,38 @@ def main():
             if 'header' == args.convert:
                 convert_to_header( args.outfile, grids, size, bppout, in_text )
             elif 'bitmap' == args.convert:
-                convert_to_bmp( args.outfile, grids, size, bppout, in_text )
+                for bmp_path_out in \
+                convert_to_bmp( args.outfile, grids, size, bppout, in_text ):
+                    resources.append( bmp_path_out )
+            elif 'none' == args.convert:
+                for grid in grids:
+                    resources.append( (grid[0], grid[1]) )
+
+    if args.resources:
+        with open( args.resources, 'w' ) as res_file:
+            for res in resources:
+                res_file.write( 'BITMAP ID {}_id "{}"\n'.format(
+                    res[1], res[2] ) )
+
+    if args.resids:
+        with open( args.resids, 'w' ) as res_id_file:
+            res_id_next = 5000
+            for res in resources:
+                res_id_file.write( '#define {}_id {}\n'.format(
+                    res[1], res_id_next ) )
+                res_id_next += 1
+
+    if args.resconsts:
+        with open( args.resconsts, 'w' ) as res_c_file:
+            for res in resources:
+                res_c_file.write( 'const {} {} = {}_id;\n'.format(
+                    res[0], res[1], res[1] ) )
+
+    if args.externs:
+        with open( args.externs, 'w' ) as extern_file:
+            for res in resources:
+                extern_file.write(
+                    'extern const {} {};\n'.format( res[0], res[1] ) )
 
 if '__main__' == __name__:
     main()

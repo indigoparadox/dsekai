@@ -16,12 +16,8 @@
 #else /* !RESOURCE_SPRITE_HEADERS */
 
 #include "palmrsc.h"
-
-const GRAPHICS_SPRITE gc_sprite_princess = gc_sprite_princess_id;
-const GRAPHICS_SPRITE gc_sprite_robe = gc_sprite_robe_id;
-const GRAPHICS_TILE gc_tile_field_grass = gc_tile_field_grass_id;
-const GRAPHICS_TILE gc_tile_field_brick_wall = gc_tile_field_brick_wall_id;
-const GRAPHICS_TILE gc_tile_field_tree = gc_tile_field_tree_id;
+#include "../data/palm/palm_ids.h"
+#include "../data/palm/palm_rc.h"
 
 #endif /* RESOURCE_SPRITE_HEADERS */
 
@@ -32,7 +28,9 @@ const GRAPHICS_TILE gc_tile_field_tree = gc_tile_field_tree_id;
 
 extern const struct TILEMAP gc_map_field;
 extern const GRAPHICS_PATTERN gc_patterns[];
-extern const GRAPHICS_SPRITE gc_sprite_princess;
+
+/* This file should be auto-generated. See Makefile for details. */
+#include "resext.h"
 
 #endif /* MAIN_C */
 

@@ -5,16 +5,10 @@ DSEKAI_C_FILES_LINUX := input/sdli.c graphics/sdlg.c main.c
 DSEKAI_C_FILES_DOS := input/dosi.c graphics/dosg.c main.c
 DSEKAI_C_FILES_PALM := input/palmi.c graphics/palmg.c mainpalm.c
 
-DSEKAI_ASSET_HEADERS := data/sprites.h
+DSEKAI_ASSET_HEADERS := data/sprites.h data/tilebmps.h
+DSEKAI_ASSET_DIMENSION := 16 16
 
 ASSETDIR_PALM := ../data/palm
-
-DSEKAI_ASSET_BITMAPS_PALM := \
-   $(ASSETDIR_PALM)/gc_sprite_robe.bmp \
-   $(ASSETDIR_PALM)/gc_sprite_princess.bmp \
-   $(ASSETDIR_PALM)/gc_tile_field_grass.bmp \
-   $(ASSETDIR_PALM)/gc_tile_field_brickwall.bmp \
-   $(ASSETDIR_PALM)/gc_tile_field_tree.bmp
 
 BINDIR := ../bin
 
@@ -58,19 +52,30 @@ $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
+$(OBJDIR_DOS)topdown.o: resext.h
+
 $(BIN_LINUX): $(DSEKAI_O_FILES_LINUX)
 	$(MD) $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
+
+$(OBJDIR_LINUX)topdown.o: resext.h
+
+resext.h: $(DSEKAI_ASSET_HEADERS)
+	python ../scripts/cga2bmp.py -if $^ \
+      -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c none \
+      -re resext.h
 
 $(BIN_PALM): $(OBJDIR_PALM)grc.stamp $(OBJDIR_PALM)bin.stamp
 	$(MD) $(BINDIR)
 	$(BUILDPRC) $(BIN_PALM) $(ICONTEXT) $(APPID) $(OBJDIR_PALM)*.grc $(OBJDIR_PALM)*.bin $(LINKFILES) 
 
+$(OBJDIR_PALM)topdown.o: resext.h
+
 $(OBJDIR_PALM)grc.stamp: $(OBJDIR_PALM)dsekai
 	cd $(OBJDIR_PALM) && $(OBJRES) dsekai
 	touch $@
 
-$(OBJDIR_PALM)mainpalm.o: $(DSEKAI_ASSET_BITMAPS_PALM)
+$(OBJDIR_PALM)mainpalm.o: $(ASSETDIR_PALM)/palm_ids.h $(ASSETDIR_PALM)/palm_rc.h $(ASSETDIR_PALM)/palm.rcp
 
 $(OBJDIR_PALM)dsekai: $(DSEKAI_O_FILES_PALM)
 	$(CC) $(CFLAGS) $^ -o $@
@@ -79,9 +84,13 @@ $(OBJDIR_PALM)bin.stamp: palm.rcp
 	$(PILRC) $^ $(OBJDIR_PALM)
 	touch $@
 	
-$(ASSETDIR_PALM)/gc_%.bmp: data/sprites.h data/tilebmps.h
+$(ASSETDIR_PALM)/gc_%.bmp: $(DSEKAI_ASSET_HEADERS)
 	$(MD) $(ASSETDIR_PALM)
-	python ../scripts/cga2bmp.py -if $^ -of ../data/palm -s 16 16 -ei l -bi 2 -c bitmap
+	python ../scripts/cga2bmp.py -if $^ -of $(ASSETDIR_PALM) \
+      -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c bitmap \
+      -r $(ASSETDIR_PALM)/palm.rcp \
+      -ri $(ASSETDIR_PALM)/palm_ids.h \
+      -rc $(ASSETDIR_PALM)/palm_rc.h
 
 $(BINDIR)/lookup: lookup.c
 	gcc -o $@ $^
@@ -99,5 +108,5 @@ $(BINDIR)/lookup: lookup.c
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 clean:
-	rm -rf data/*.bmp data/*_v.h ../obj ../bin ../lookup *.err
+	rm -rf resext.h data/*.bmp data/*_v.h ../obj ../bin ../lookup *.err
 
