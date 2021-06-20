@@ -4,12 +4,12 @@
 
 #include <SDL.h>
 
-#define INPUT_KEY_A SDLK_a
-#define INPUT_KEY_D SDLK_d
-#define INPUT_KEY_Q SDLK_q
-#define INPUT_KEY_S SDLK_s
-#define INPUT_KEY_W SDLK_w
-#define INPUT_KEY_Z SDLK_z
+#define INPUT_KEY_LEFT SDLK_a
+#define INPUT_KEY_RIGHT SDLK_d
+#define INPUT_KEY_QUIT SDLK_q
+#define INPUT_KEY_DOWN SDLK_s
+#define INPUT_KEY_UP SDLK_w
+#define INPUT_KEY_OK SDLK_z
 
 #endif /* SDLI_H */
 

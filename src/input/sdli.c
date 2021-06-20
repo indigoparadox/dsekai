@@ -10,6 +10,8 @@ int input_poll() {
 
    if( SDL_KEYDOWN == event.type ) {
       return event.key.keysym.sym;
+   } else if( SDL_QUIT == event.type ) {
+      return INPUT_KEY_QUIT;
    }
    return 0;
 }

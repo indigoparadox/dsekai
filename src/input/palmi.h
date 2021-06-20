@@ -2,12 +2,12 @@
 #ifndef PALMI_H
 #define PALMI_H
 
-#define INPUT_KEY_A 1
-#define INPUT_KEY_D 2
-#define INPUT_KEY_Q 3
-#define INPUT_KEY_S 4
-#define INPUT_KEY_W 5
-#define INPUT_KEY_Z 6
+#define INPUT_KEY_LEFT 1
+#define INPUT_KEY_RIGHT 2
+#define INPUT_KEY_QUIT 3
+#define INPUT_KEY_DOWN 4
+#define INPUT_KEY_UP 5
+#define INPUT_KEY_OK 6
 
 #endif /* PALMI_H */
 

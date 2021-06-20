@@ -142,7 +142,7 @@ int topdown_loop(
 
    /* Quit on Q. */
    switch( in_char ) {
-   case INPUT_KEY_W:
+   case INPUT_KEY_UP:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
          &gc_map_field, player->coords.x, player->coords.y - 1 )
@@ -151,7 +151,7 @@ int topdown_loop(
       }
       break;
 
-   case INPUT_KEY_A:
+   case INPUT_KEY_LEFT:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
          &gc_map_field, player->coords.x - 1, player->coords.y )
@@ -160,7 +160,7 @@ int topdown_loop(
       }
       break;
 
-   case INPUT_KEY_S:
+   case INPUT_KEY_DOWN:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
          &gc_map_field, player->coords.x, player->coords.y + 1 )
@@ -169,7 +169,7 @@ int topdown_loop(
       }
       break;
 
-   case INPUT_KEY_D:
+   case INPUT_KEY_RIGHT:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
          &gc_map_field, player->coords.x + 1, player->coords.y )
@@ -178,12 +178,12 @@ int topdown_loop(
       }
       break;
 
-   case INPUT_KEY_Z:
+   case INPUT_KEY_OK:
       window_pop();
       topdown_refresh_tiles( tiles_flags );
       break;
 
-   case INPUT_KEY_Q:
+   case INPUT_KEY_QUIT:
       return 0;
    }
 
