@@ -4,6 +4,15 @@ DSEKAI_C_FILES := tilemap.c graphics.c mobile.c item.c window.c topdown.c psprin
 DSEKAI_C_FILES_LINUX := input/sdli.c graphics/sdlg.c main.c
 DSEKAI_C_FILES_DOS := input/dosi.c graphics/dosg.c main.c
 DSEKAI_C_FILES_PALM := input/palmi.c graphics/palmg.c mainpalm.c
+DSEKAI_C_FILES_CHECK := \
+   tests/check.c \
+   tests/check_mobile.c \
+   tests/check_item.c \
+   tests/check_tilemap.c \
+   tests/check_window.c \
+   tests/check_psprintf.c \
+   tests/check_graphics.c \
+   tests/check_engines.c
 
 DSEKAI_ASSET_HEADERS := data/sprites.h data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
@@ -15,6 +24,8 @@ BINDIR := ../bin
 BIN_LINUX := $(BINDIR)/dsekai
 BIN_DOS := $(BINDIR)/dsekai.exe
 BIN_PALM := $(BINDIR)/dsekai.prc
+
+BIN_CHECK_LINUX := $(BINDIR)/check
 
 MD := mkdir -p
 
@@ -37,13 +48,18 @@ $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
 
+$(BIN_CHECK_LINUX): CFLAGS := -DUSE_NULL -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
+$(BIN_CHECK_LINUX): LDFLAGS := $(shell pkg-config check --libs) -g
+
 OBJDIR_LINUX := ../obj/linux/
 OBJDIR_DOS := ../obj/dos/
 OBJDIR_PALM := ../obj/palm/
+OBJDIR_CHECK_LINUX := ../obj/check_linux/
 
 DSEKAI_O_FILES_LINUX := $(addprefix $(OBJDIR_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES_LINUX)))
 DSEKAI_O_FILES_DOS := $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES_DOS)))
 DSEKAI_O_FILES_PALM := $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES_PALM)))
+DSEKAI_O_FILES_CHECK_LINUX := $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
 
 .PHONY: clean
 
@@ -100,6 +116,12 @@ $(ASSETDIR_PALM)/generate.stamp: $(DSEKAI_ASSET_HEADERS)
       -rc $(ASSETDIR_PALM)/palm_rc.h
 	touch $@
 
+$(OBJDIR_CHECK_LINUX)topdown.o: resext.h
+
+$(BIN_CHECK_LINUX): $(DSEKAI_O_FILES_CHECK_LINUX)
+	$(MD) $(BINDIR)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
 $(BINDIR)/lookup: lookup.c
 	gcc -o $@ $^
 
@@ -112,6 +134,10 @@ $(BINDIR)/lookup: lookup.c
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 ../obj/palm/%.o: %.c
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
+
+../obj/check_linux/%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 

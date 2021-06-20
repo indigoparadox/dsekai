@@ -4,7 +4,9 @@
 
 #include "config.h"
 
+/* ------ */
 #ifdef USE_PALM
+/* ------ */
 
 #include <PalmOS.h>
 typedef UInt8 uint8_t;
@@ -14,7 +16,9 @@ typedef Int16 int16_t;
 typedef UInt32 uint32_t;
 typedef Int32 int32_t;
 
+/* ------ */
 #elif defined( USE_DOS )
+/* ------ */
 
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
@@ -25,13 +29,17 @@ typedef unsigned long uint32_t;
 
 #define RESOURCE_SPRITE_HEADERS
 
+/* ------ */
 #else
+/* ------ */
 
 #include <stdint.h>
 
 #define RESOURCE_SPRITE_HEADERS
 
+/* ------ */
 #endif /* __DOS__ */
+/* ------ */
 
 typedef struct GRAPHICS_MASK {uint8_t bits[16]; } GRAPHICS_MASK;
 #ifdef RESOURCE_SPRITE_HEADERS

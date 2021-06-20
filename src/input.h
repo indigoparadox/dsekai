@@ -8,7 +8,9 @@
 #include "input/sdli.h"
 #elif defined( USE_PALM )
 #include "input/palmi.h"
-#endif /* USE_DOS, USE_SDL, USE_PALM */
+#elif defined( USE_NULL )
+#include "input/nulli.h"
+#endif /* USE_DOS, USE_SDL, USE_PALM, USE_NULL */
 
 int input_poll();
 
