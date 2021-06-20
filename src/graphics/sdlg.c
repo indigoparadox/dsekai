@@ -24,10 +24,16 @@ if( SDL_Init( SDL_INIT_EVERYTHING ) ) {
       printf( "error initializing SDL: %s\n", SDL_GetError() );
    }
 
-   SDL_CreateWindowAndRenderer(
-      SCREEN_REAL_W, SCREEN_REAL_H, 0, &g_window, &g_renderer );
+   /*SDL_CreateWindowAndRenderer(
+      SCREEN_REAL_W, SCREEN_REAL_H, 0, &g_window, &g_renderer );*/
+   g_window = SDL_CreateWindow( "dsekai",
+      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+      SCREEN_REAL_W, SCREEN_REAL_H, 0 );
    assert( NULL != g_window );
    g_screen = SDL_GetWindowSurface( g_window );
+   assert( NULL != g_screen );
+   g_renderer = SDL_CreateSoftwareRenderer( g_screen );
+   assert( NULL != g_renderer );
 
 #ifdef DEBUG_CGA_EMU
    area.x = 0;
@@ -45,7 +51,8 @@ void graphics_shutdown() {
 }
 
 void graphics_flip() {
-   SDL_RenderPresent( g_renderer );
+   /* SDL_RenderPresent( g_renderer ); */
+   SDL_UpdateWindowSurface( g_window );
 }
 
 void graphics_loop_start() {

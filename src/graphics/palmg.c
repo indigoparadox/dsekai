@@ -90,40 +90,6 @@ void graphics_blit_at(
    bitmap = MemHandleLock( bitmap_h );
    WinDrawBitmap( bitmap, x, y );
    MemHandleUnlock( bitmap_h );
-
-/*
-   MemHandle bitmap_h;
-   void* bitmap_p;
-   BitmapPtr bitmap;
-
-   if( NULL == bmp ) {
-      WinDrawChars( "Z", 1, x, y );
-      return;
-   }
-
-   if( NULL == *bmp ) {
-      WinDrawChars( "Y", 1, x, y );
-      return;
-   }
-
-   bitmap_h = DmGet1Resource( "Tbmp", *bmp );
-
-   if( NULL == bitmap_h ) {
-      WinDrawChars( "X", 1, x, y );
-      return;
-   }
-
-   bitmap_p = MemHandleLock( bitmap_h );
-
-   if( NULL == bitmap_p ) {
-      WinDrawChars( "Q", 1, x, y );
-      return;
-   }
-
-   WinDrawBitmap( bitmap_p, x, y );
-
-   MemHandleUnlock( bitmap_p );
-   */
 }
 
 void graphics_draw_block(
