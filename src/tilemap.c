@@ -34,6 +34,11 @@ void tilemap_draw(
          }
 #endif /* !IGNORE_DIRTY */
 
+         assert( y < TILEMAP_TH );
+         assert( x < TILEMAP_TW );
+         assert( y >= 0 );
+         assert( x >= 0 );
+
          (*tiles_flags)[y][x] &= ~TILEMAP_TILE_FLAG_DIRTY;
 
          /* Grab the left byte if even or the right if odd. */

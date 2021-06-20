@@ -17,6 +17,9 @@ static int g_screen_scroll_ty = 0;
 static int g_screen_scroll_x_tgt = 0;
 static int g_screen_scroll_y_tgt = 0;
 static uint8_t g_window_shown = 0;
+static uint8_t g_input_blocked_countdown = 0;
+
+#define INPUT_BLOCK_DELAY 5
 
 static
 void topdown_refresh_tiles( uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW] ) {
@@ -70,6 +73,8 @@ int topdown_loop(
             g_screen_scroll_ty = g_screen_scroll_y / TILE_H;
          }
 
+         g_input_blocked_countdown = INPUT_BLOCK_DELAY;
+
          assert( 0 <= g_screen_scroll_x );
          assert( 0 <= g_screen_scroll_tx );
 
@@ -80,6 +85,22 @@ int topdown_loop(
 
          graphics_flip();
 #endif /* ANIMATE_SCREEN_MOVEMENT */
+
+         /* Drain input. */
+         in_char = input_poll();
+
+         if(
+            g_screen_scroll_y == g_screen_scroll_y_tgt &&
+            g_screen_scroll_x == g_screen_scroll_x_tgt
+         ) {
+            /* Screen scroll finished. */
+            player->coords_prev.x = player->coords.x;
+            player->coords_prev.y = player->coords.y;
+            player->steps_x = 0;
+            player->steps_y = 0;
+
+         }
+
          return 1;
       }
 
@@ -130,7 +151,8 @@ int topdown_loop(
       mobiles[0].coords.y = 5;
       mobiles[0].coords_prev.x = 5;
       mobiles[0].coords_prev.y = 5;
-      mobiles[0].steps = SPRITE_W;
+      mobiles[0].steps_x = 0;
+      mobiles[0].steps_y = 0;
       (*mobiles_count)++;
    }
 
@@ -138,9 +160,12 @@ int topdown_loop(
    assert( mobiles[0].coords_prev.x == 5 );
    assert( mobiles[0].coords_prev.y == 5 );
 
-   in_char = input_poll();
+   if( g_input_blocked_countdown ) {
+      g_input_blocked_countdown--;
+   } else {
+      in_char = input_poll();
+   }
 
-   /* Quit on Q. */
    switch( in_char ) {
    case INPUT_KEY_UP:
       if( 0 < windows_visible() ) { break; }
@@ -187,17 +212,6 @@ int topdown_loop(
       return 0;
    }
 
-   /* Scroll the screen by one if the player goes off-screen. */
-   if( player->coords.x >= g_screen_scroll_tx + SCREEN_TW ) {
-      g_screen_scroll_x_tgt = g_screen_scroll_x + SCREEN_W;
-   } else if( player->coords.y >= g_screen_scroll_y + SCREEN_TH ) {
-      g_screen_scroll_y_tgt = g_screen_scroll_y + SCREEN_H;
-   } else if( player->coords.x < g_screen_scroll_tx ) {
-      g_screen_scroll_x_tgt = g_screen_scroll_x - SCREEN_W;
-   } else if( player->coords.y < g_screen_scroll_ty ) {
-      g_screen_scroll_y_tgt = g_screen_scroll_y - SCREEN_H;
-   }
-
    /* Animate. */
    if( 10 < g_semi_cycles ) {
       g_semi_cycles = 0;
@@ -214,9 +228,18 @@ int topdown_loop(
 
    mobile_animate( player, tiles_flags );
    for( i = 0 ; *mobiles_count > i ; i++ ) {
-      assert( mobiles[i].coords_prev.x == 5 );
-      assert( mobiles[i].coords_prev.y == 5 );
       mobile_animate( &(mobiles[i]), tiles_flags );
+   }
+
+   /* Scroll the screen by one if the player goes off-screen. */
+   if( player->coords.x >= g_screen_scroll_tx + SCREEN_TW ) {
+      g_screen_scroll_x_tgt = g_screen_scroll_x + SCREEN_W;
+   } else if( player->coords.y >= g_screen_scroll_y + SCREEN_TH ) {
+      g_screen_scroll_y_tgt = g_screen_scroll_y + SCREEN_H;
+   } else if( player->coords.x < g_screen_scroll_tx ) {
+      g_screen_scroll_x_tgt = g_screen_scroll_x - SCREEN_W;
+   } else if( player->coords.y < g_screen_scroll_ty ) {
+      g_screen_scroll_y_tgt = g_screen_scroll_y - SCREEN_H;
    }
 
    graphics_loop_end();

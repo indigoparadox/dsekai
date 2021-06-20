@@ -18,7 +18,8 @@ int main( int argc, char* argv[] ) {
       100,
       {3, 4},
       {3, 4},
-      SPRITE_W,
+      0, /* Steps X */
+      0, /* Steps Y */
       NULL
    };
    struct MOBILE mobiles[MOBILES_MAX];

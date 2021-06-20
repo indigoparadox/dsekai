@@ -26,7 +26,18 @@
 
 #elif defined( USE_PALM )
 
+#ifdef NDEBUG
 #define assert( comp )
+#else
+/* Fake assert. */
+#define assert( comp ) \
+   if( !(comp) ) { \
+      g_assert_failed_len = psprintf( \
+         g_assert_failed, 255, \
+         "%s, %d: ASSERT FALED", __FUNCTION__, __LINE__ ); \
+      g_assert_failed_len = 1 / 0; \
+   }
+#endif /* !NDEBUG */
 //#define USE_FAKE_CGA
 
 #endif /* USE_DOS, USE_SDL, USE_PALM */
@@ -80,6 +91,11 @@
 #elif GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
 #define GRAPHICS_ADDR     GRAPHICS_MODE_320_200_256_VGA_ADDR
 #endif /* GRAPHICS_MODE */
+
+#ifndef MAIN_C
+extern char g_assert_failed[];
+extern int g_assert_failed_len;
+#endif /* !MAIN_C */
 
 #endif /* CONFIG_H */
 

@@ -14,7 +14,8 @@ struct MOBILE {
    uint8_t mp;
    struct TILEMAP_COORDS coords;
    struct TILEMAP_COORDS coords_prev;
-   uint8_t steps;
+   uint8_t steps_x;
+   uint8_t steps_y;
    struct ITEM* inventory;
 };
 
