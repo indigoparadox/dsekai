@@ -83,14 +83,21 @@ $(OBJDIR_PALM)dsekai: $(DSEKAI_O_FILES_PALM)
 $(OBJDIR_PALM)bin.stamp: palm.rcp
 	$(PILRC) $^ $(OBJDIR_PALM)
 	touch $@
+
+$(ASSETDIR_PALM)/palm_ids.h: $(ASSETDIR_PALM)/generate.stamp
+
+$(ASSETDIR_PALM)/palm_rc.h: $(ASSETDIR_PALM)/generate.stamp
 	
-$(ASSETDIR_PALM)/gc_%.bmp: $(DSEKAI_ASSET_HEADERS)
+$(ASSETDIR_PALM)/gc_%.bmp: $(ASSETDIR_PALM)/generate.stamp
+
+$(ASSETDIR_PALM)/generate.stamp: $(DSEKAI_ASSET_HEADERS)
 	$(MD) $(ASSETDIR_PALM)
 	python ../scripts/cga2bmp.py -if $^ -of $(ASSETDIR_PALM) \
       -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c bitmap \
       -r $(ASSETDIR_PALM)/palm.rcp \
       -ri $(ASSETDIR_PALM)/palm_ids.h \
       -rc $(ASSETDIR_PALM)/palm_rc.h
+	touch $@
 
 $(BINDIR)/lookup: lookup.c
 	gcc -o $@ $^
@@ -108,5 +115,5 @@ $(BINDIR)/lookup: lookup.c
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 clean:
-	rm -rf resext.h data/*.bmp data/*_v.h ../obj ../bin ../lookup *.err
+	rm -rf resext.h ../data data/*.bmp data/*_v.h ../obj ../bin ../lookup *.err
 
