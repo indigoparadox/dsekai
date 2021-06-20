@@ -6,9 +6,8 @@
 #include "window.h"
 #include "engines.h"
 
-#include "data/sprites.h"
-#include "data/maps.h"
-#include "data/patterns.h"
+#define MAIN_C
+#include "data.h"
 
 int main( int argc, char* argv[] ) {
    uint8_t running = 1;

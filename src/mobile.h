@@ -2,7 +2,6 @@
 #ifndef MOBILE_H
 #define MOBILE_H
 
-#include "config.h"
 #include "dstypes.h"
 #include "graphics.h"
 #include "tilemap.h"

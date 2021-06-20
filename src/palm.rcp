@@ -1,6 +1,8 @@
 
 #include "palmrsc.h"
 
+VERSION 1 "1.0"
+
 ALERT ID AboutAlert
 INFORMATION
 BEGIN
@@ -17,4 +19,10 @@ BEGIN
    MESSAGE "^1"
    BUTTONS "OK"
 END
+
+BITMAP ID gc_sprite_robe_id "../data/palm/gc_sprite_robe.bmp"
+BITMAP ID gc_sprite_princess_id "../data/palm/gc_sprite_princess.bmp"
+BITMAP ID gc_tile_field_tree_id "../data/palm/gc_tile_field_tree.bmp"
+BITMAP ID gc_tile_field_grass_id "../data/palm/gc_tile_field_grass.bmp"
+BITMAP ID gc_tile_field_brick_wall_id "../data/palm/gc_tile_field_brick_wall.bmp"
 

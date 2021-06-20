@@ -7,12 +7,8 @@
 #include "window.h"
 #include "engines.h"
 
-#include "data/sprites_v.h"
-#include "data/maps.h"
-#include "data/patterns.h"
-
-extern const GRAPHICS_SPRITE gc_sprite_princess;
-extern const GRAPHICS_SPRITE gc_sprite_robe;
+#define MAIN_C
+#include "data.h"
 
 UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
    EventType event;
@@ -31,9 +27,6 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
    struct MOBILE mobiles[MOBILES_MAX];
    int mobiles_count = 0;
 
-   //WinSetForeColor( 1 );
-   //WinPaintPixel( 10, 10 );
-
    if( cmd == sysAppLaunchCmdNormalLaunch ) {
 
       graphics_init();
@@ -41,19 +34,6 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
 
       memset( &tiles_flags, 0x01, TILEMAP_TH * TILEMAP_TW );
       memset( mobiles, 0x0, sizeof( struct MOBILE ) * MOBILES_MAX );
-
-      mobiles[0].sprite = &gc_sprite_princess;
-      mobiles[0].hp = 100;
-      mobiles[0].mp = 100;
-      mobiles[0].coords.x = 5;
-      mobiles[0].coords.y = 5;
-      mobiles[0].coords_prev.x = 5;
-      mobiles[0].coords_prev.y = 5;
-      mobiles[0].steps = SPRITE_W;
-      mobiles_count++;
-
-      // Display a string.
-      //WinDrawChars( "Hello, world!", 13, 55, 60 );
 
       // Main event loop:
       do {
@@ -69,8 +49,6 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
 
          // Return from PilotMain when an 
          // appStopEvent is received.
-
-
          running = 
             topdown_loop( &player, mobiles, &mobiles_count, &tiles_flags );
  

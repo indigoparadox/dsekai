@@ -2,7 +2,6 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include "config.h"
 #include "dstypes.h"
 
 #ifdef USE_DOS
@@ -30,13 +29,6 @@
    graphics_blit_masked_at( \
       (const GRAPHICS_PATTERN*)spr, mask, mo_x, mo_y, \
       x, y, PATTERN_W, PATTERN_H, sizeof( PATTERN_TYPE ) )
-
-typedef struct GRAPHICS_MASK {uint8_t bits[16]; } GRAPHICS_MASK;
-typedef struct GRAPHICS_BITMAP { uint8_t bits[1]; } GRAPHICS_BITMAP;
-typedef struct GRAPHICS_SPRITE { SPRITE_TYPE bits[SPRITE_H]; } GRAPHICS_SPRITE;
-typedef struct GRAPHICS_TILE { TILE_TYPE bits[TILE_H]; } GRAPHICS_TILE;
-typedef struct GRAPHICS_PATTERN {
-   PATTERN_TYPE bits[PATTERN_H]; } GRAPHICS_PATTERN;
 
 void graphics_init();
 void graphics_shutdown();

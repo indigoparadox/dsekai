@@ -63,6 +63,69 @@ void graphics_blit_masked_at(
 ) {
 }
 
+void graphics_blit_at(
+   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint8_t w, uint8_t h,
+   const int bytes
+) {
+   MemHandle bitmap_h;
+   BitmapPtr bitmap;
+
+   if( NULL == bmp ) {
+      WinDrawChars( "Z", 1, x, y );
+      return;
+   }
+
+   if( NULL == *bmp ) {
+      WinDrawChars( "Y", 1, x, y );
+      return;
+   }
+
+   bitmap_h = DmGetResource( 'Tbmp', *bmp );
+
+   if( NULL == bitmap_h ) {
+      WinDrawChars( "X", 1, x, y );
+      return;
+   }
+
+   bitmap = MemHandleLock( bitmap_h );
+   WinDrawBitmap( bitmap, x, y );
+   MemHandleUnlock( bitmap_h );
+
+/*
+   MemHandle bitmap_h;
+   void* bitmap_p;
+   BitmapPtr bitmap;
+
+   if( NULL == bmp ) {
+      WinDrawChars( "Z", 1, x, y );
+      return;
+   }
+
+   if( NULL == *bmp ) {
+      WinDrawChars( "Y", 1, x, y );
+      return;
+   }
+
+   bitmap_h = DmGet1Resource( "Tbmp", *bmp );
+
+   if( NULL == bitmap_h ) {
+      WinDrawChars( "X", 1, x, y );
+      return;
+   }
+
+   bitmap_p = MemHandleLock( bitmap_h );
+
+   if( NULL == bitmap_p ) {
+      WinDrawChars( "Q", 1, x, y );
+      return;
+   }
+
+   WinDrawBitmap( bitmap_p, x, y );
+
+   MemHandleUnlock( bitmap_p );
+   */
+}
+
 void graphics_draw_block(
    uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
    GRAPHICS_COLOR color

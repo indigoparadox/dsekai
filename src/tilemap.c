@@ -1,9 +1,6 @@
 
 #include "tilemap.h"
 
-#include "dstypes.h"
-#include "graphics.h"
-
 void tilemap_draw(
    const struct TILEMAP* t, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW],
    uint16_t screen_x, uint16_t screen_y, uint8_t force

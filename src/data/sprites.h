@@ -2,7 +2,6 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
-#include "../dstypes.h"
 #include "../mobile.h"
 #include "../graphics.h"
 

@@ -7,7 +7,14 @@ DSEKAI_C_FILES_PALM := input/palmi.c graphics/palmg.c mainpalm.c
 
 DSEKAI_ASSET_HEADERS := data/sprites.h
 
-DSEKAI_ASSET_HEADERS_PALM := $(subst .h,_v.h,$(DSEKAI_ASSET_HEADERS))
+ASSETDIR_PALM := ../data/palm
+
+DSEKAI_ASSET_BITMAPS_PALM := \
+   $(ASSETDIR_PALM)/gc_sprite_robe.bmp \
+   $(ASSETDIR_PALM)/gc_sprite_princess.bmp \
+   $(ASSETDIR_PALM)/gc_tile_field_grass.bmp \
+   $(ASSETDIR_PALM)/gc_tile_field_brickwall.bmp \
+   $(ASSETDIR_PALM)/gc_tile_field_tree.bmp
 
 BINDIR := ../bin
 
@@ -31,7 +38,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
-$(BIN_PALM): CFLAGS := -O0 -DUSE_PALM -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES)
+$(BIN_PALM): CFLAGS := -O0 -DUSE_PALM -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DHIDE_WELCOME_DIALOG
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
 
@@ -63,7 +70,7 @@ $(OBJDIR_PALM)grc.stamp: $(OBJDIR_PALM)dsekai
 	cd $(OBJDIR_PALM) && $(OBJRES) dsekai
 	touch $@
 
-$(OBJDIR_PALM)mainpalm.o: $(DSEKAI_ASSET_HEADERS_PALM)
+$(OBJDIR_PALM)mainpalm.o: $(DSEKAI_ASSET_BITMAPS_PALM)
 
 $(OBJDIR_PALM)dsekai: $(DSEKAI_O_FILES_PALM)
 	$(CC) $(CFLAGS) $^ -o $@
@@ -72,8 +79,9 @@ $(OBJDIR_PALM)bin.stamp: palm.rcp
 	$(PILRC) $^ $(OBJDIR_PALM)
 	touch $@
 	
-data/sprites_v.h: data/sprites.h
-	python ../scripts/cga2bmp.py -if $^ -of $@ -s 16 16
+$(ASSETDIR_PALM)/gc_%.bmp: data/sprites.h data/tilebmps.h
+	$(MD) $(ASSETDIR_PALM)
+	python ../scripts/cga2bmp.py -if $^ -of ../data/palm -s 16 16 -ei l -bi 2 -c bitmap
 
 $(BINDIR)/lookup: lookup.c
 	gcc -o $@ $^
@@ -91,5 +99,5 @@ $(BINDIR)/lookup: lookup.c
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 clean:
-	rm -rf data/*_v.h ../obj ../bin ../lookup *.err
+	rm -rf data/*.bmp data/*_v.h ../obj ../bin ../lookup *.err
 

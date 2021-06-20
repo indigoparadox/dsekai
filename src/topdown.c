@@ -6,6 +6,7 @@
 #include "mobile.h"
 #include "window.h"
 #include "engines.h"
+#include "data.h"
 
 static int g_semi_cycles = 0;
 static int g_walk_offset = 0;
@@ -16,10 +17,6 @@ static int g_screen_scroll_ty = 0;
 static int g_screen_scroll_x_tgt = 0;
 static int g_screen_scroll_y_tgt = 0;
 static uint8_t g_window_shown = 0;
-
-extern const GRAPHICS_SPRITE gc_sprite_princess;
-extern const struct TILEMAP gc_map_field;
-extern const GRAPHICS_PATTERN gc_patterns[];
 
 static
 void topdown_refresh_tiles( uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW] ) {
@@ -112,6 +109,7 @@ int topdown_loop(
    graphics_flip();
 
    if( !g_window_shown ) {
+#ifndef HIDE_WELCOME_DIALOG
       w = window_push();
       w->pattern = &(gc_patterns[0]);
       w->w = 80;
@@ -121,6 +119,8 @@ int topdown_loop(
       w->strings[0] = "Welcome!";
       w->strings_count = 1;
       w->strings_color = GRAPHICS_COLOR_BLACK;
+#endif /* !HIDE_WELCOME_DIALOG */
+
       g_window_shown = 1;
 
       mobiles[0].sprite = &gc_sprite_princess;
