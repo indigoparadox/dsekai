@@ -16,7 +16,7 @@
 #else /* !RESOURCE_SPRITE_HEADERS */
 
 #include "palmrsc.h"
-#include "../data/palm/palm_rc.h"
+#include "../gen/palm/palm_rc.h"
 
 #endif /* RESOURCE_SPRITE_HEADERS */
 
@@ -40,7 +40,7 @@ This theoretically should be able to use the resext method, but
 PalmOS seems to ignore the extern values?
 */
 #include "palmrsc.h"
-#include "../data/palm/palm_rc.h"
+#include "../gen/palm/palm_rc.h"
 
 #endif /* RESOURCE_SPRITE_HEADERS */
 

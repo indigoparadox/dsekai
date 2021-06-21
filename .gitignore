@@ -3,5 +3,5 @@
 *.err
 bin
 obj
-data
+gen
 resext.h

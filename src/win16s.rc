@@ -1,6 +1,6 @@
 
 #include <windows.h>
 
-#include "../data/win16/win16_ids.h"
-#include "../data/win16/win16.rc"
+#include "../gen/win16/win16_ids.h"
+#include "../gen/win16/win16.rc"
 

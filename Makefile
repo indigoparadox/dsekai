@@ -26,9 +26,10 @@ DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
 
 RESEXT_H: src/resext.h
+TOPDOWN_O: src/topdown.o
 
-ASSETDIR_PALM := data/palm
-ASSETDIR_WIN16 := data/win16
+ASSETDIR_PALM := gen/palm
+ASSETDIR_WIN16 := gen/win16
 
 BINDIR := bin
 
@@ -61,6 +62,7 @@ $(BIN_PALM): CFLAGS := -O0 -DUSE_PALM -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) 
 $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
+$(BIN_PALM): PALMS_RCP := src/palms.rcp
 
 $(BIN_WIN16): CC := wcc
 $(BIN_WIN16): LD := wcl
@@ -91,7 +93,7 @@ $(BIN_LINUX): $(DSEKAI_O_FILES_LINUX)
 	$(MD) $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR_LINUX)topdown.o: $(RESEXT_H)
+$(OBJDIR_LINUX)$(TOPDOWN_O): $(RESEXT_H)
 
 $(RESEXT_H): $(DSEKAI_ASSET_HEADERS)
 	python $(CGA2BMP) -if $^ \
@@ -102,13 +104,13 @@ $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_DOS)topdown.o: $(RESEXT_H)
+$(OBJDIR_DOS)$(TOPDOWN_O): $(RESEXT_H)
 
 $(BIN_PALM): $(OBJDIR_PALM)grc.stamp $(OBJDIR_PALM)bin.stamp
 	$(MD) $(BINDIR)
 	$(BUILDPRC) $(BIN_PALM) $(ICONTEXT) $(APPID) $(OBJDIR_PALM)*.grc $(OBJDIR_PALM)*.bin $(LINKFILES) 
 
-$(OBJDIR_PALM)topdown.o: $(RESEXT_H) $(ASSETDIR_PALM)/palm_rc.h
+$(OBJDIR_PALM)$(TOPDOWN_O): $(RESEXT_H) $(ASSETDIR_PALM)/palm_rc.h
 
 $(OBJDIR_PALM)grc.stamp: $(OBJDIR_PALM)dsekai
 	cd $(OBJDIR_PALM) && $(OBJRES) dsekai
@@ -119,7 +121,7 @@ $(OBJDIR_PALM)mainpalm.o: $(ASSETDIR_PALM)/palm_ids.h $(ASSETDIR_PALM)/palm_rc.h
 $(OBJDIR_PALM)dsekai: $(DSEKAI_O_FILES_PALM)
 	$(CC) $(CFLAGS) $^ -o $@
 	
-$(OBJDIR_PALM)bin.stamp: palm.rcp
+$(OBJDIR_PALM)bin.stamp: src/palms.rcp
 	$(PILRC) $^ $(OBJDIR_PALM)
 	touch $@
 
@@ -142,10 +144,10 @@ $(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)win16.res
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_WIN16)topdown.o: $(RESEXT_H)
+$(OBJDIR_WIN16)$(TOPDOWN_O): $(RESEXT_H)
 
 $(OBJDIR_WIN16)win16.res: $(ASSETDIR_WIN16)/win16.rc
-	$(RC) -r -i=$(INCLUDE)/win win16s.rc -fo=$@
+	$(RC) -r -i=$(INCLUDE)/win src/win16s.rc -fo=$@
 
 $(ASSETDIR_WIN16)/win16.rc: $(DSEKAI_ASSET_HEADERS)
 	$(MD) $(ASSETDIR_WIN16)
@@ -156,7 +158,7 @@ $(ASSETDIR_WIN16)/win16.rc: $(DSEKAI_ASSET_HEADERS)
       -rc $(ASSETDIR_WIN16)/win16_rc.h
 	touch $@
 
-$(OBJDIR_CHECK_LINUX)topdown.o: $(RESEXT_H)
+$(OBJDIR_CHECK_LINUX)$(TOPDOWN_O): $(RESEXT_H)
 
 $(BIN_CHECK_LINUX): $(DSEKAI_O_FILES_CHECK_LINUX)
 	$(MD) $(BINDIR)
