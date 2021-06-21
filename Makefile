@@ -1,27 +1,36 @@
 
-DSEKAI_C_FILES := tilemap.c graphics.c mobile.c item.c window.c topdown.c psprintf.c
+DSEKAI_C_FILES := \
+   src/tilemap.c \
+   src/graphics.c \
+   src/mobile.c \
+   src/item.c \
+   src/window.c \
+   src/topdown.c \
+   src/psprintf.c
 
-DSEKAI_C_FILES_LINUX := input/sdli.c graphics/sdlg.c main.c
-DSEKAI_C_FILES_DOS := input/dosi.c graphics/dosg.c main.c
-DSEKAI_C_FILES_PALM := input/palmi.c graphics/palmg.c mainpalm.c
-DSEKAI_C_FILES_WIN16 := input/win16i.c graphics/win16g.c mainw16.c
+DSEKAI_C_FILES_LINUX := src/input/sdli.c src/graphics/sdlg.c src/main.c
+DSEKAI_C_FILES_DOS := src/input/dosi.c src/graphics/dosg.c src/main.c
+DSEKAI_C_FILES_PALM := src/input/palmi.c src/graphics/palmg.c src/mainpalm.c
+DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
 DSEKAI_C_FILES_CHECK := \
-   tests/check.c \
-   tests/check_mobile.c \
-   tests/check_item.c \
-   tests/check_tilemap.c \
-   tests/check_window.c \
-   tests/check_psprintf.c \
-   tests/check_graphics.c \
-   tests/check_engines.c
+   check/check.c \
+   check/check_mobile.c \
+   check/check_item.c \
+   check/check_tilemap.c \
+   check/check_window.c \
+   check/check_psprintf.c \
+   check/check_graphics.c \
+   check/check_engines.c
 
-DSEKAI_ASSET_HEADERS := data/sprites.h data/tilebmps.h
+DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
 
-ASSETDIR_PALM := ../data/palm
-ASSETDIR_WIN16 := ../data/win16
+RESEXT_H: src/resext.h
 
-BINDIR := ../bin
+ASSETDIR_PALM := data/palm
+ASSETDIR_WIN16 := data/win16
+
+BINDIR := bin
 
 BIN_LINUX := $(BINDIR)/dsekai
 BIN_DOS := $(BINDIR)/dsekai.exe
@@ -31,6 +40,8 @@ BIN_WIN16 := $(BINDIR)/dsekai16.exe
 BIN_CHECK_LINUX := $(BINDIR)/check
 
 MD := mkdir -p
+PYTHON := python
+CGA2BMP := scripts/cga2bmp.py
 
 $(BIN_LINUX): CFLAGS := -DUSE_SDL -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
 $(BIN_LINUX): LDFLAGS := $(shell pkg-config sdl2 --libs) -g
@@ -60,11 +71,11 @@ $(BIN_WIN16): LDFLAGS := -l=windows
 $(BIN_CHECK_LINUX): CFLAGS := -DUSE_NULL -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
 $(BIN_CHECK_LINUX): LDFLAGS := $(shell pkg-config check --libs) -g
 
-OBJDIR_LINUX := ../obj/linux/
-OBJDIR_DOS := ../obj/dos/
-OBJDIR_PALM := ../obj/palm/
-OBJDIR_WIN16 := ../obj/win16/
-OBJDIR_CHECK_LINUX := ../obj/check_linux/
+OBJDIR_LINUX := obj/linux/
+OBJDIR_DOS := obj/dos/
+OBJDIR_PALM := obj/palm/
+OBJDIR_WIN16 := obj/win16/
+OBJDIR_CHECK_LINUX := obj/check_linux/
 
 DSEKAI_O_FILES_LINUX := $(addprefix $(OBJDIR_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES_LINUX)))
 DSEKAI_O_FILES_DOS := $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES_DOS)))
@@ -74,16 +85,16 @@ DSEKAI_O_FILES_CHECK_LINUX := $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(
 
 .PHONY: clean
 
-all: $(BIN_DOS) $(BIN_LINUX) ../bin/lookup
+all: $(BIN_DOS) $(BIN_LINUX) bin/lookup
 
 $(BIN_LINUX): $(DSEKAI_O_FILES_LINUX)
 	$(MD) $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR_LINUX)topdown.o: resext.h
+$(OBJDIR_LINUX)topdown.o: $(RESEXT_H)
 
-resext.h: $(DSEKAI_ASSET_HEADERS)
-	python ../scripts/cga2bmp.py -if $^ \
+$(RESEXT_H): $(DSEKAI_ASSET_HEADERS)
+	python $(CGA2BMP) -if $^ \
       -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c none \
       -re $@
 
@@ -91,13 +102,13 @@ $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_DOS)topdown.o: resext.h
+$(OBJDIR_DOS)topdown.o: $(RESEXT_H)
 
 $(BIN_PALM): $(OBJDIR_PALM)grc.stamp $(OBJDIR_PALM)bin.stamp
 	$(MD) $(BINDIR)
 	$(BUILDPRC) $(BIN_PALM) $(ICONTEXT) $(APPID) $(OBJDIR_PALM)*.grc $(OBJDIR_PALM)*.bin $(LINKFILES) 
 
-$(OBJDIR_PALM)topdown.o: resext.h $(ASSETDIR_PALM)/palm_rc.h
+$(OBJDIR_PALM)topdown.o: $(RESEXT_H) $(ASSETDIR_PALM)/palm_rc.h
 
 $(OBJDIR_PALM)grc.stamp: $(OBJDIR_PALM)dsekai
 	cd $(OBJDIR_PALM) && $(OBJRES) dsekai
@@ -120,7 +131,7 @@ $(ASSETDIR_PALM)/gc_%.bmp: $(ASSETDIR_PALM)/generate.stamp
 
 $(ASSETDIR_PALM)/generate.stamp: $(DSEKAI_ASSET_HEADERS)
 	$(MD) $(ASSETDIR_PALM)
-	python ../scripts/cga2bmp.py -if $^ -of $(ASSETDIR_PALM) \
+	$(PYTHON) $(CGA2BMP) -if $^ -of $(ASSETDIR_PALM) \
       -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c bitmap \
       -r $(ASSETDIR_PALM)/palm.rcp -rf palm \
       -ri $(ASSETDIR_PALM)/palm_ids.h \
@@ -131,21 +142,21 @@ $(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)win16.res
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_WIN16)topdown.o: resext.h
+$(OBJDIR_WIN16)topdown.o: $(RESEXT_H)
 
 $(OBJDIR_WIN16)win16.res: $(ASSETDIR_WIN16)/win16.rc
 	$(RC) -r -i=$(INCLUDE)/win win16s.rc -fo=$@
 
 $(ASSETDIR_WIN16)/win16.rc: $(DSEKAI_ASSET_HEADERS)
 	$(MD) $(ASSETDIR_WIN16)
-	python ../scripts/cga2bmp.py -if $^ -of $(ASSETDIR_WIN16) \
+	$(PYTHON) $(CGA2BMP) -if $^ -of $(ASSETDIR_WIN16) \
       -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c bitmap \
       -r $(ASSETDIR_WIN16)/win16.rc -rf win16 \
       -ri $(ASSETDIR_WIN16)/win16_ids.h \
       -rc $(ASSETDIR_WIN16)/win16_rc.h
 	touch $@
 
-$(OBJDIR_CHECK_LINUX)topdown.o: resext.h
+$(OBJDIR_CHECK_LINUX)topdown.o: $(RESEXT_H)
 
 $(BIN_CHECK_LINUX): $(DSEKAI_O_FILES_CHECK_LINUX)
 	$(MD) $(BINDIR)
@@ -154,26 +165,26 @@ $(BIN_CHECK_LINUX): $(DSEKAI_O_FILES_CHECK_LINUX)
 $(BINDIR)/lookup: lookup.c
 	gcc -o $@ $^
 
-../obj/dos/%.o: %.c
+$(OBJDIR_DOS)%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
-../obj/linux/%.o: %.c
+$(OBJDIR_LINUX)%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
-../obj/palm/%.o: %.c
+$(OBJDIR_PALM)%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
-../obj/win16/%.o: %.c
+$(OBJDIR_WIN16)%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
-../obj/check_linux/%.o: %.c
+$(OBJDIR_CHECK_LINUX)%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 clean:
-	rm -rf resext.h ../data data/*.bmp data/*_v.h ../obj ../bin ../lookup *.err
+	rm -rf $(RESEXT_H) data obj bin *.err
 

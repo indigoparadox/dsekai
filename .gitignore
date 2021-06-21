@@ -3,6 +3,5 @@
 *.err
 bin
 obj
-*_v.h
 data
 resext.h

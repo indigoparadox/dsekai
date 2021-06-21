@@ -20,11 +20,11 @@ Compiling dsekai for MS-DOS is best achieved with the OpenWatcom compiler (this 
 
 Some targets require python in order to run the script that translates graphic resources from CGA header files to bitmaps for the target platform. Please note that this means this cannot be compiled directly on those platforms, and must be cross-compiled (preferably using OpenWatcom, as noted above).
 
-The INCLUDE environment variable must be set to the location of the OpenWatcom header files (e.g. /opt/watcom/h). Then the following targets can be built from the src subdirectory (Makefile may be moved to the root soon, in which case these will change):
+The INCLUDE environment variable must be set to the location of the OpenWatcom header files (e.g. /opt/watcom/h). Then the following targets may be built:
 
 | Platform | Make Target         | Requirements |
 |----------|---------------------|--------------
-| MS-DOS   | ../bin/dsekai.exe   | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
-| SDL      | ../bin/dsekai       | SDL2
-| PalmOS   | ../bin/dsekai.prc   | Python, [PRCTools](https://github.com/jichu4n/prc-tools-remix)
-| Win16    | ../bin/dsekai16.exe | Python, [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
+| MS-DOS   | bin/dsekai.exe   | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
+| SDL      | bin/dsekai       | SDL2
+| PalmOS   | bin/dsekai.prc   | Python, [PRCTools](https://github.com/jichu4n/prc-tools-remix)
+| Win16    | bin/dsekai16.exe | Python, [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
