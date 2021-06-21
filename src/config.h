@@ -62,13 +62,22 @@
 //#define USE_FAKE_CGA
 
 /* ------ */
-#else /* !USE_DOS, !USE_SDL, !USE_PALM */
+#elif defined( USE_WIN16 )
+/* ------ */
+
+#include <windows.h>
+
+#include <assert.h>
+#define USE_FAKE_CGA
+
+/* ------ */
+#else /* !USE_DOS, !USE_SDL, !USE_PALM, !USE_WIN16 */
 /* ------ */
 
 #include <assert.h>
 
 /* ------ */
-#endif /* USE_DOS, USE_SDL, USE_PALM */
+#endif /* USE_DOS, USE_SDL, USE_PALM, USE_WIN16 */
 /* ------ */
 
 /* Graphics Parameters */

@@ -4,6 +4,7 @@ DSEKAI_C_FILES := tilemap.c graphics.c mobile.c item.c window.c topdown.c psprin
 DSEKAI_C_FILES_LINUX := input/sdli.c graphics/sdlg.c main.c
 DSEKAI_C_FILES_DOS := input/dosi.c graphics/dosg.c main.c
 DSEKAI_C_FILES_PALM := input/palmi.c graphics/palmg.c mainpalm.c
+DSEKAI_C_FILES_WIN16 := input/win16i.c graphics/win16g.c mainw16.c
 DSEKAI_C_FILES_CHECK := \
    tests/check.c \
    tests/check_mobile.c \
@@ -24,6 +25,7 @@ BINDIR := ../bin
 BIN_LINUX := $(BINDIR)/dsekai
 BIN_DOS := $(BINDIR)/dsekai.exe
 BIN_PALM := $(BINDIR)/dsekai.prc
+BIN_WIN16 := $(BINDIR)/dsekai16.exe
 
 BIN_CHECK_LINUX := $(BINDIR)/check
 
@@ -48,28 +50,29 @@ $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
 
+$(BIN_WIN16): CC := wcc
+$(BIN_WIN16): LD := wcl
+$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DUSE_WIN16 -DSCALE_2X -DUSE_LOOKUPS
+$(BIN_WIN16): LDFLAGS := -l=windows
+
 $(BIN_CHECK_LINUX): CFLAGS := -DUSE_NULL -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
 $(BIN_CHECK_LINUX): LDFLAGS := $(shell pkg-config check --libs) -g
 
 OBJDIR_LINUX := ../obj/linux/
 OBJDIR_DOS := ../obj/dos/
 OBJDIR_PALM := ../obj/palm/
+OBJDIR_WIN16 := ../obj/win16/
 OBJDIR_CHECK_LINUX := ../obj/check_linux/
 
 DSEKAI_O_FILES_LINUX := $(addprefix $(OBJDIR_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES_LINUX)))
 DSEKAI_O_FILES_DOS := $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES_DOS)))
 DSEKAI_O_FILES_PALM := $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES_PALM)))
+DSEKAI_O_FILES_WIN16 := $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
 DSEKAI_O_FILES_CHECK_LINUX := $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
 
 .PHONY: clean
 
 all: $(BIN_DOS) $(BIN_LINUX) ../bin/lookup
-
-$(BIN_DOS): $(DSEKAI_O_FILES_DOS)
-	$(MD) $(BINDIR)
-	$(LD) $(LDFLAGS) -fe=$@ $^
-
-$(OBJDIR_DOS)topdown.o: resext.h
 
 $(BIN_LINUX): $(DSEKAI_O_FILES_LINUX)
 	$(MD) $(BINDIR)
@@ -81,6 +84,12 @@ resext.h: $(DSEKAI_ASSET_HEADERS)
 	python ../scripts/cga2bmp.py -if $^ \
       -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c none \
       -re resext.h
+
+$(BIN_DOS): $(DSEKAI_O_FILES_DOS)
+	$(MD) $(BINDIR)
+	$(LD) $(LDFLAGS) -fe=$@ $^
+
+$(OBJDIR_DOS)topdown.o: resext.h
 
 $(BIN_PALM): $(OBJDIR_PALM)grc.stamp $(OBJDIR_PALM)bin.stamp
 	$(MD) $(BINDIR)
@@ -116,6 +125,12 @@ $(ASSETDIR_PALM)/generate.stamp: $(DSEKAI_ASSET_HEADERS)
       -rc $(ASSETDIR_PALM)/palm_rc.h
 	touch $@
 
+$(BIN_WIN16): $(DSEKAI_O_FILES_WIN16)
+	$(MD) $(BINDIR)
+	$(LD) $(LDFLAGS) -fe=$@ $^
+
+$(OBJDIR_WIN16)topdown.o: resext.h
+
 $(OBJDIR_CHECK_LINUX)topdown.o: resext.h
 
 $(BIN_CHECK_LINUX): $(DSEKAI_O_FILES_CHECK_LINUX)
@@ -136,6 +151,10 @@ $(BINDIR)/lookup: lookup.c
 ../obj/palm/%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
+
+../obj/win16/%.o: %.c
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
 ../obj/check_linux/%.o: %.c
 	$(MD) $(dir $@)

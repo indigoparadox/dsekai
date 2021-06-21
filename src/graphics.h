@@ -10,9 +10,11 @@
 #include "graphics/sdlg.h"
 #elif defined( USE_PALM )
 #include "graphics/palmg.h"
+#elif defined( USE_WIN16 )
+#include "graphics/win16g.h"
 #elif defined( USE_NULL )
 #include "graphics/nullg.h"
-#endif /* USE_DOS, USE_SDL, USE_PALM, USE_NULL */
+#endif /* USE_DOS, USE_SDL, USE_PALM, USE_WIN16, USE_NULL */
 
 #define graphics_sprite_at( spr, x, y ) \
    graphics_blit_at( \
