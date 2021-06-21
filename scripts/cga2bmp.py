@@ -141,21 +141,32 @@ def convert_to_bmp( out_path, grids, size, bpp, text='' ):
 
             # Image header.
             out_file.write( struct.pack( '<IiiHHIIiiII',
-                40,
-                size[X],
-                size[Y],
-                1,
-                1,
-                0,
-                0,
-                72,
-                72,
-                0,
-                0 ) )
+                40,         # Header Size
+                size[X],    # XPx
+                size[Y],    # YPx
+                1,          # Color Planes
+                bpp,        # BPP
+                0,          # Compression
+                0,          # Image Size
+                72,         # HRes
+                72,         # VRes
+                bpp * 2,    # Colors
+                0           # Important Colors
+                ) )
 
             # Palette.
-            out_file.write( struct.pack( 'BBBB', 255, 255, 255, 0 ) ) # White
-            out_file.write( struct.pack( 'BBBB', 0, 0, 0, 0 ) ) # Black
+            if 1 == bpp:
+                out_file.write(
+                    struct.pack( 'BBBB', 255, 255, 255, 0 ) ) # White
+                out_file.write( struct.pack( 'BBBB', 0, 0, 0, 0 ) ) # Black
+            else:
+                out_file.write( struct.pack( 'BBBB', 0, 0, 0, 0 ) ) # Black
+                out_file.write(
+                    struct.pack( 'BBBB', 255, 255, 0, 0 ) ) # Cyan
+                out_file.write(
+                    struct.pack( 'BBBB', 255, 0, 255, 0 ) ) # Magenta
+                out_file.write(
+                    struct.pack( 'BBBB', 255, 255, 255, 0 ) ) # White
 
             offset_pxd = out_file.tell()
 
@@ -164,20 +175,33 @@ def convert_to_bmp( out_path, grids, size, bpp, text='' ):
                 row_byte = 0
                 logger.debug(
                     'printing row %d (%d pixels)', row_idx, len( row ) )
-                px_idx = 0
+                bit_idx = 0
+                byte_idx = 0
                 for px in row:
-                    row_byte <<= 1
-                    row_byte |= 0 if 0 == px else 1
-                    if 7 <= px_idx:
-                        logger.debug( 'writing byte: %x', row_byte )
+                    logger.debug( 'bit %d', bit_idx )
+                    if 1 == bpp:
+                        row_byte <<= 1
+                        row_byte |= 0 if 0 == px else 1
+                        logger.debug( 'px: %d', row_byte & 0x1 )
+                    else:
+                        row_byte <<= 1
+                        row_byte |= 0 if 0 == px or 1 == px else 1
+                        row_byte <<= 1
+                        row_byte |= 0 if 0== px or 2 == px else 1
+                        logger.debug( 'px: %d', row_byte & 0x3 )
+                        row_byte <<= bpp - 2
+                    if (8 - bpp) <= bit_idx:
+                        byte_idx += 1
+                        logger.debug( 'writing byte %d: %x', byte_idx, row_byte )
                         out_file.write( struct.pack( 'B', row_byte ) )
                         row_byte = 0
-                        px_idx = 0
+                        bit_idx = 0
                     else:
-                        px_idx += 1
+                        bit_idx += bpp
 
                 # Write padding so each row is 4 bytes.
-                for padding_idx in range( 0, 4 - bpp ):
+                logger.debug( 'writing %d padding bytes', (byte_idx % 4) )
+                for padding_idx in range( 0, byte_idx % 4 ):
                     out_file.write( b'\x00' )
 
                 row_idx += 1

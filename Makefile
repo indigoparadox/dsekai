@@ -89,6 +89,12 @@ DSEKAI_O_FILES_CHECK_LINUX := $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(
 
 all: $(BIN_DOS) $(BIN_LINUX) bin/lookup
 
+bin/convert: src/convert.c src/data/bmp.c src/data/pak.c src/data/cga.c
+	$(CC) -g -o $@ $^ $(LDFLAGS)
+
+bin/editor: src/editor.c src/data/bmp.c src/data/pak.c
+	$(CC) -o $@ $^ $(LDFLAGS)
+
 $(BIN_LINUX): $(DSEKAI_O_FILES_LINUX)
 	$(MD) $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)

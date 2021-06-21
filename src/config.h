@@ -2,8 +2,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define TILEMAP_TW 20
-#define TILEMAP_TH 11
+#define TILEMAP_TW 80
+#define TILEMAP_TH 44
 
 #define TILEMAP_TILESETS_MAX  12
 
