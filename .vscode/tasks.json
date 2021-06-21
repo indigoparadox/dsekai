@@ -1,0 +1,53 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"command": "make",
+			"label": "build (SDL)",
+			"args": [
+				"clean",
+				"../bin/dsekai"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/src"
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"command": "make",
+			"label": "build (DOS)",
+			"args": [
+				"clean",
+				"../bin/dsekai.exe"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/src"
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"command": "make",
+			"label": "build (Palm)",
+			"args": [
+				"clean",
+				"../bin/dsekai.prc"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/src"
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}

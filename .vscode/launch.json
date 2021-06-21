@@ -25,6 +25,15 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "name": "(gdb) Attach (POSE)",
+            "type": "gdb",
+            "gdbpath": "/usr/bin/m68k-palmos-gdb",
+            "request": "attach",
+            "remote": true,
+            "executable": "${workspaceFolder}/obj/palm/dsekai",
+            "target": "palmos",
         }
     ]
 }
