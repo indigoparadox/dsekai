@@ -207,13 +207,12 @@ def main():
     parser.add_argument( '-s', '--size', nargs='+', type=int )
     parser.add_argument( '-v', '--verbose', action='store_true' )
     parser.add_argument( '-r', '--resources' )
+    parser.add_argument( '-rf', '--resfmt' )
     parser.add_argument( '-ri', '--resids' )
     parser.add_argument( '-rc', '--resconsts' )
     parser.add_argument( '-re', '--externs' )
 
     args = parser.parse_args()
-
-    print( args )
 
     if args.verbose:
         logging.basicConfig( level=logging.DEBUG )
@@ -253,8 +252,12 @@ def main():
     if args.resources:
         with open( args.resources, 'w' ) as res_file:
             for res in resources:
-                res_file.write( 'BITMAP ID {}_id "{}"\n'.format(
-                    res[1], res[2] ) )
+                if 'palm' == args.resfmt:
+                    res_file.write( 'BITMAP ID {}_id "{}"\n'.format(
+                        res[1], res[2] ) )
+                elif 'win16' == args.resfmt:
+                    res_file.write( '{}_id BITMAP "{}"\n'.format(
+                        res[1], res[2] ) )
 
     if args.resids:
         with open( args.resids, 'w' ) as res_id_file:

@@ -19,6 +19,7 @@ DSEKAI_ASSET_HEADERS := data/sprites.h data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
 
 ASSETDIR_PALM := ../data/palm
+ASSETDIR_WIN16 := ../data/win16
 
 BINDIR := ../bin
 
@@ -52,6 +53,7 @@ $(BIN_PALM): APPID := DSEK
 
 $(BIN_WIN16): CC := wcc
 $(BIN_WIN16): LD := wcl
+$(BIN_WIN16): RC := wrc
 $(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DUSE_WIN16 -DSCALE_2X -DUSE_LOOKUPS
 $(BIN_WIN16): LDFLAGS := -l=windows
 
@@ -83,7 +85,7 @@ $(OBJDIR_LINUX)topdown.o: resext.h
 resext.h: $(DSEKAI_ASSET_HEADERS)
 	python ../scripts/cga2bmp.py -if $^ \
       -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c none \
-      -re resext.h
+      -re $@
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)
@@ -120,16 +122,28 @@ $(ASSETDIR_PALM)/generate.stamp: $(DSEKAI_ASSET_HEADERS)
 	$(MD) $(ASSETDIR_PALM)
 	python ../scripts/cga2bmp.py -if $^ -of $(ASSETDIR_PALM) \
       -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c bitmap \
-      -r $(ASSETDIR_PALM)/palm.rcp \
+      -r $(ASSETDIR_PALM)/palm.rcp -rf palm \
       -ri $(ASSETDIR_PALM)/palm_ids.h \
       -rc $(ASSETDIR_PALM)/palm_rc.h
 	touch $@
 
-$(BIN_WIN16): $(DSEKAI_O_FILES_WIN16)
+$(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)win16.res
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
 $(OBJDIR_WIN16)topdown.o: resext.h
+
+$(OBJDIR_WIN16)win16.res: $(ASSETDIR_WIN16)/win16.rc
+	$(RC) -r -i=$(INCLUDE)/win win16s.rc -fo=$@
+
+$(ASSETDIR_WIN16)/win16.rc: $(DSEKAI_ASSET_HEADERS)
+	$(MD) $(ASSETDIR_WIN16)
+	python ../scripts/cga2bmp.py -if $^ -of $(ASSETDIR_WIN16) \
+      -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c bitmap \
+      -r $(ASSETDIR_WIN16)/win16.rc -rf win16 \
+      -ri $(ASSETDIR_WIN16)/win16_ids.h \
+      -rc $(ASSETDIR_WIN16)/win16_rc.h
+	touch $@
 
 $(OBJDIR_CHECK_LINUX)topdown.o: resext.h
 
