@@ -23,6 +23,51 @@
 #define STATE_OUTENDIAN 6
 #define STATE_INFMT     7
 #define STATE_OUTFMT    8
+#define STATE_INW       9
+#define STATE_INH       10
+
+uint32_t convert_reverse_endian_32( uint32_t int_in ) {
+   int i = 0;
+   uint32_t int_out = 0;
+
+   for( i = 3 ; 0 <= i ; i-- ) {
+      int_out <<= 8;
+      int_out |= (int_in & 0xff);
+      int_in >>= 8;
+   }
+
+   return int_out;
+}
+
+void convert_print_grid( struct CONVERT_GRID* grid ) {
+   size_t x = 0,
+      y = 0;
+   /* Display the bitmap on the console. */
+   convert_printf( "\npreview:\n" );
+   for( y = 0 ; grid->sz_y > y ; y++ ) {
+      printf( "\n" );
+      for( x = 0 ; grid->sz_x > x ; x++ ) {
+         if( 0 == grid->data[(y * grid->sz_x) + x] ) {
+            printf( " ," );
+         } else {
+            printf( "%x,", grid->data[(y * grid->sz_x) + x] );
+         }
+      }
+   }
+   printf( "\n" );
+}
+
+void convert_print_binary( uint8_t byte_in ) {
+   printf( "%d%d%d%d%d%d%d%d\n",
+      byte_in & 0x80 ? 1 : 0,
+      byte_in & 0x40 ? 1 : 0,
+      byte_in & 0x20 ? 1 : 0,
+      byte_in & 0x10 ? 1 : 0,
+      byte_in & 0x08 ? 1 : 0,
+      byte_in & 0x04 ? 1 : 0,
+      byte_in & 0x02 ? 1 : 0,
+      byte_in & 0x01 ? 1 : 0 );
+}
 
 int main( int argc, char* argv[] ) {
    int retval = 0;
@@ -31,7 +76,9 @@ int main( int argc, char* argv[] ) {
       fmt_in = 0,
       fmt_out = 0,
       bpp_in = 0,
-      bpp_out = 0;
+      bpp_out = 0,
+      w_in = 0,
+      h_in = 0;
 #if 0
    char
       endian_in = 'b',
@@ -39,7 +86,7 @@ int main( int argc, char* argv[] ) {
 #endif
    char namebuf_in[NAMEBUF_MAX + 1],
       namebuf_out[NAMEBUF_MAX + 1];
-   unsigned char* grid = NULL;
+   struct CONVERT_GRID* grid = NULL;
 
    memset( namebuf_in, '\0', NAMEBUF_MAX + 1 );
    memset( namebuf_out, '\0', NAMEBUF_MAX + 1 );
@@ -112,6 +159,16 @@ int main( int argc, char* argv[] ) {
          state = 0;
          break;
 
+      case STATE_INW:
+         w_in = atoi( argv[i] );
+         state = 0;
+         break;
+
+      case STATE_INH:
+         h_in = atoi( argv[i] );
+         state = 0;
+         break;
+
       default:
          if( 0 == strncmp( argv[i], "-if", 3 ) ) {
             state = STATE_INFILE;
@@ -129,6 +186,10 @@ int main( int argc, char* argv[] ) {
             state = STATE_INENDIAN;
          } else if( 0 == strncmp( argv[i], "-oe", 3 ) ) {
             state = STATE_OUTENDIAN;
+         } else if( 0 == strncmp( argv[i], "-iw", 3 ) ) {
+            state = STATE_INW;
+         } else if( 0 == strncmp( argv[i], "-ih", 3 ) ) {
+            state = STATE_INH;
          }
       }
    }
@@ -155,6 +216,10 @@ int main( int argc, char* argv[] ) {
    case FMT_BITMAP:
       grid = bmp_read( namebuf_in );
       break;
+
+   case FMT_CGA:
+      grid = cga_read( namebuf_in, w_in, h_in );
+      break;
    }
 
    if( NULL == grid ) {
@@ -162,13 +227,18 @@ int main( int argc, char* argv[] ) {
       return 1;
    }
 
+   //convert_print_grid( grid );
+
    switch( fmt_out ) {
+   case FMT_BITMAP:
+      retval = bmp_write( namebuf_out, grid, bpp_out );
    case FMT_CGA:
-      retval = cga_write( namebuf_out, grid, bpp_out );
+      retval = cga_write( namebuf_out, grid );
       break;
    }
 
-   free( grid );
+   //free( grid->data );
+   //free( grid );
 
    return retval;
 }
