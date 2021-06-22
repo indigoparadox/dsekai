@@ -9,7 +9,7 @@
 #define BMP_FMT_FILE_HEADER_SZ   14
 #define BMP_FMT_BMP_HEADER_SZ    40
 
-#define bmp_int( type, buf, offset ) *(type*)&(buf[offset])
+#define bmp_int( type, buf, offset ) *((type*)&(buf[offset]))
 
 static const uint32_t gc_bmp_header_sz = 40;
 static const uint16_t gc_bmp_planes = 1;
@@ -17,8 +17,51 @@ static const uint32_t gc_bmp_compress_none = 0;
 static const int32_t gc_bmp_res = 72;
 static const uint32_t gc_bmp_colors_imp = 0;
 
-int bmp_write(
+int bmp_write_file(
    const char* path, const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
+) {
+   uint32_t bmp_buffer_sz = 0,
+      bmp_row_sz = 0;
+   uint8_t* bmp_buffer = NULL;
+   FILE* file_out = NULL;
+   int retval = 0;
+
+   /* Add rows padded out to 4 bytes. */
+   bmp_row_sz = (grid->sz_x * o->bpp) / 8;
+   if( 0 != bmp_row_sz % 4 ) {
+      bmp_row_sz += (4 - (bmp_row_sz % 4));
+   }
+   o->bmp_data_sz = (grid->sz_y * bmp_row_sz);
+
+   bmp_buffer_sz = 
+      BMP_FMT_FILE_HEADER_SZ +
+      BMP_FMT_BMP_HEADER_SZ +
+      (4 * (1 == o->bpp ? 2 : 4)) + /* Palette entries. */
+      o->bmp_data_sz;
+
+   bmp_buffer = calloc( 1, bmp_buffer_sz );
+   assert( NULL != bmp_buffer );
+
+   retval = bmp_write( bmp_buffer, bmp_buffer_sz, grid, o );
+   if( retval ) {
+      free( bmp_buffer );
+      return retval;
+   }
+
+   file_out = fopen( path, "wb" );
+   assert( NULL != file_out );
+
+   fwrite( bmp_buffer, 1, bmp_buffer_sz, file_out );
+
+   fclose( file_out );
+   free( bmp_buffer );
+
+   return retval;
+}
+
+int bmp_write(
+   uint8_t* buf_ptr, uint32_t buf_sz,
+   const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
    FILE* bmp_file = NULL;
    int retval = 0;
@@ -28,41 +71,43 @@ int bmp_write(
    size_t bmp_data_offset = 0,
       bmp_file_sz = 0,
       i = 0,
-      row_bytes = 0;
+      row_bytes = 0,
+      bmp_data_byte_idx = 0;
    uint8_t byte_buffer = 0,
       bit_mask_in = 0,
       bit_mask_out = 0;
    uint32_t bmp_colors = 0;
 
-   bmp_file = fopen( path, "wb" );
-   assert( NULL != bmp_file );
-
-   fputc( 'B', bmp_file );
-   fputc( 'M', bmp_file );
-   fwrite( "\0\0\0\0", 4, 1, bmp_file ); /* Placeholder: File Size */
-   fwrite( "\0\0\0\0", 4, 1, bmp_file ); /* Reserved */
-   fwrite( "\0\0\0\0", 4, 1, bmp_file ); /* Placeholder: Bitmap offset. */
+   buf_ptr[0] = 'B';
+   buf_ptr[1] = 'M';
+   bmp_int( uint32_t, buf_ptr, 2 ) = buf_sz;
 
    bmp_colors = 1 == o->bpp ? 2 : 4;
 
-   fwrite( &gc_bmp_header_sz, 4, 1, bmp_file );  /* Header Size */
-   fwrite( &(grid->sz_x), 4, 1, bmp_file );  /* X Size */
-   fwrite( &(grid->sz_y), 4, 1, bmp_file );  /* Y Size */
-   fwrite( &gc_bmp_planes, 2, 1, bmp_file );
-   fwrite( &o->bpp, 2, 1, bmp_file );
-   fwrite( &gc_bmp_compress_none, 4, 1, bmp_file );
-   fwrite( "\0\0\0\0", 4, 1, bmp_file ); /* Placeholder: Bitmap Size */
-   fwrite( &gc_bmp_res, 4, 1, bmp_file );
-   fwrite( &gc_bmp_res, 4, 1, bmp_file );
-   fwrite( &bmp_colors, 4, 1, bmp_file );
-   fwrite( &gc_bmp_colors_imp, 4, 1, bmp_file );
+   bmp_int( uint32_t, buf_ptr, 14 ) = 40;  /* Header Size */
+   bmp_int( uint32_t, buf_ptr, 18 ) = grid->sz_x;
+   bmp_int( uint32_t, buf_ptr, 22 ) = grid->sz_y;
+   bmp_int( uint16_t, buf_ptr, 26 ) = 1; /* Planes */
+   bmp_int( uint16_t, buf_ptr, 28 ) = o->bpp;
+   bmp_int( uint32_t, buf_ptr, 30 ) = 0; /* Compression. */
+   bmp_int( uint32_t, buf_ptr, 34 ) = 0;
+   bmp_int( int32_t, buf_ptr, 38 ) = 72; /* HRes */
+   bmp_int( int32_t, buf_ptr, 42 ) = 72; /* VRes */
+   bmp_int( uint32_t, buf_ptr, 46 ) = bmp_colors;
+   bmp_int( uint32_t, buf_ptr, 50 ) = 0; /* Important Colors */
 
-   fwrite( "\0\0\0\0", 1, 4, bmp_file );
+   bmp_int( uint32_t, buf_ptr, 54 ) = 0x00000000; /* Palette: Black */
    if( 1 < o->bpp ) {
-      fwrite( "\xff\xff\0\0", 1, 4, bmp_file );
-      fwrite( "\xff\0\xff\0", 1, 4, bmp_file );
+      bmp_int( uint32_t, buf_ptr, 58 ) = 0x0000ffff; /* Palette: Cyan */
+      bmp_int( uint32_t, buf_ptr, 62 ) = 0x00ff00ff; /* Palette: Magenta */
+      bmp_int( uint32_t, buf_ptr, 66 ) = 0x00ffffff; /* Palette: White */
+      bmp_data_offset = 70;
+   } else {
+      bmp_int( uint32_t, buf_ptr, 58 ) = 0x00ffffff; /* Palette: White */
+      bmp_data_offset = 62;
    }
-   fwrite( "\xff\xff\xff\0", 1, 4, bmp_file );
+
+   bmp_int( uint32_t, buf_ptr, 10 ) = bmp_data_offset;
 
    /* Calculate bit masks. */
    for( i = 0 ; o->bpp > i ; i++ ) {
@@ -76,7 +121,6 @@ int bmp_write(
 
    convert_printf( "using write mask: 0x%x\n", bit_mask_out );
 
-   bmp_data_offset = ftell( bmp_file );
    for( y = grid->sz_y - 1 ; y >= 0 ; y-- ) {
       row_bytes = 0;
       for( x = 0 ; x < grid->sz_x ; x++ ) {
@@ -86,7 +130,7 @@ int bmp_write(
 
          /* Format grid data into byte. */
          byte_buffer <<= o->bpp;
-         if( o->bpp < grid->bpp && 0 != grid->data[(y * grid->sz_x) + x] ) {
+         if( 1 == o->bpp && 0 != grid->data[(y * grid->sz_x) + x] ) {
             byte_buffer |= 0x01;
          } else {
             byte_buffer |= grid->data[(y * grid->sz_x) + x] & bit_mask_out;
@@ -97,28 +141,21 @@ int bmp_write(
          /* Write finished byte. */
          if( 0 != bit_idx && 0 == bit_idx % 8 ) {
             convert_printf( "writing one byte (row %ld, col %ld)\n", y, x );
-            fwrite( &byte_buffer, 1, 1, bmp_file );
+            buf_ptr[bmp_data_offset + bmp_data_byte_idx] = byte_buffer;
             byte_buffer = 0;
+            assert( bmp_data_byte_idx < buf_sz );
+            bmp_data_byte_idx++;
             row_bytes++;
             bit_idx = 0;
          }
       }
       while( 0 != (row_bytes % 4) ) {
          convert_printf( "adding row padding byte\n" );
-         fputc( '\0', bmp_file );
+         buf_ptr[bmp_data_offset + bmp_data_byte_idx] = '\0';
+         bmp_data_byte_idx++;
          row_bytes++;
       }
    }
-
-   bmp_file_sz = ftell( bmp_file );
-
-   fseek( bmp_file, 2, SEEK_SET );
-   fwrite( &bmp_file_sz, 4, 1, bmp_file );
-
-   fseek( bmp_file, 10, SEEK_SET );
-   fwrite( &bmp_data_offset, 4, 1, bmp_file );
-
-   fclose( bmp_file );
 
    return retval;
 }

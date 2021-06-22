@@ -27,6 +27,7 @@ struct CONVERT_OPTIONS {
    int32_t h;
    uint32_t line_padding;
    uint32_t plane_padding;
+   uint32_t bmp_data_sz;
 };
 
 uint32_t convert_reverse_endian_32( uint32_t );

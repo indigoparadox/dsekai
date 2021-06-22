@@ -291,7 +291,7 @@ int main( int argc, char* argv[] ) {
 
    switch( fmt_out ) {
    case FMT_BITMAP:
-      retval = bmp_write( namebuf_out, grid, &options_out );
+      retval = bmp_write_file( namebuf_out, grid, &options_out );
       break;
    case FMT_CGA:
       retval = cga_write( namebuf_out, grid, &options_out );
