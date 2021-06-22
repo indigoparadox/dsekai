@@ -1,7 +1,7 @@
 
 #include "cga.h"
 
-int cga_write( const char* path, const struct CONVERT_GRID* grid ) {
+int cga_write( const char* path, const struct CONVERT_GRID* grid, int lp ) {
    int retval = 0;
 
    return retval;
@@ -9,7 +9,7 @@ int cga_write( const char* path, const struct CONVERT_GRID* grid ) {
 
 #define CGA_BPP 2
 
-struct CONVERT_GRID* cga_read( const char* path, int sz_x, int sz_y ) {
+struct CONVERT_GRID* cga_read( const char* path, int sz_x, int sz_y, int lp ) {
    FILE* cga_file = NULL;
    size_t read = 0,
       cga_file_sz = 0,
@@ -51,38 +51,33 @@ struct CONVERT_GRID* cga_read( const char* path, int sz_x, int sz_y ) {
    grid->sz_y = sz_y;
    grid->bpp = 2;
 
-   y = 0;
-   printf( "len: %d\n\n", ((sz_x * sz_y) / 8) );
-   while( 8000 > byte_idx ) {
+   printf( "%d\n", lp );
 
-      byte_buffer_odd = raw_cga_data[byte_idx];
-      byte_buffer_even = raw_cga_data[byte_idx + 8192];
+   for( y = 0 ; grid->sz_y > y ; y += 2 /* Every other scanline. */ ) {
+      for( x = 0 ; grid->sz_x > x ; x++ ) {
+         grid_idx_even = (y * grid->sz_x) + x;
+         grid_idx_odd = grid_idx_even + grid->sz_x; /* Next line. */
 
-      grid_idx_even = (y * sz_x) + x;
-      grid_idx_odd = grid_idx_even + sz_x;
-      assert( x + 3 < sz_x );
-         
-      grid->data[grid_idx_odd] |= byte_buffer_odd & 0x03;
-      grid->data[grid_idx_odd + 1] |= byte_buffer_odd & 0x0c;
-      grid->data[grid_idx_odd + 1] >>= 2;
-      grid->data[grid_idx_odd + 2] |= byte_buffer_odd & 0x30;
-      grid->data[grid_idx_odd + 2] >>= 4;
-      grid->data[grid_idx_odd + 3] |= byte_buffer_odd & 0xc0;
-      grid->data[grid_idx_odd + 3] >>= 6;
-      grid->data[grid_idx_even] |= byte_buffer_even & 0x03;
-      grid->data[grid_idx_even + 1] |= byte_buffer_even & 0x0c;
-      grid->data[grid_idx_even + 1] >>= 2;
-      grid->data[grid_idx_even + 2] |= byte_buffer_even & 0x30;
-      grid->data[grid_idx_even + 2] >>= 4;
-      grid->data[grid_idx_even + 3] |= byte_buffer_even & 0xc0;
-      grid->data[grid_idx_even + 3] >>= 6;
-      byte_idx++;
-      x += 4;
+         if( 0 == bit_idx % 8 && 0 != bit_idx ) {
+            bit_idx = 0;
+            byte_idx++;
+         }
 
-      if( x >= sz_x ) {
-         /* Move to the next row. */
-         y += 2;
-         x = 0;
+         assert( grid_idx_even < grid->data_sz );
+         assert( grid_idx_odd < grid->data_sz );
+
+         /* Read the even scanline. */
+         grid->data[grid_idx_even] |= /* Little endian, so reverse bit_idx. */
+            raw_cga_data[byte_idx] & (0x03 << (6 - bit_idx));
+         grid->data[grid_idx_even] >>= (6 - bit_idx);
+
+         /* Read the odd scanline. */
+         grid->data[grid_idx_odd] |= /* Little endian, so reverse bit_idx. */
+            raw_cga_data[byte_idx + lp] & (0x03 << (6 - bit_idx));
+         grid->data[grid_idx_odd] >>= (6 - bit_idx);
+
+         /* Advance the bit index by one pixel. */
+         bit_idx += grid->bpp;
       }
    }
 

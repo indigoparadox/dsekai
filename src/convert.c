@@ -25,6 +25,8 @@
 #define STATE_OUTFMT    8
 #define STATE_INW       9
 #define STATE_INH       10
+#define STATE_INLP      11
+#define STATE_OUTLP     12
 
 uint32_t convert_reverse_endian_32( uint32_t int_in ) {
    int i = 0;
@@ -78,7 +80,9 @@ int main( int argc, char* argv[] ) {
       bpp_in = 0,
       bpp_out = 0,
       w_in = 0,
-      h_in = 0;
+      h_in = 0,
+      lp_in = 0,
+      lp_out = 0;
 #if 0
    char
       endian_in = 'b',
@@ -169,6 +173,16 @@ int main( int argc, char* argv[] ) {
          state = 0;
          break;
 
+      case STATE_INLP:
+         lp_in = atoi( argv[i] );
+         state = 0;
+         break;
+
+      case STATE_OUTLP:
+         lp_out = atoi( argv[i] );
+         state = 0;
+         break;
+
       default:
          if( 0 == strncmp( argv[i], "-if", 3 ) ) {
             state = STATE_INFILE;
@@ -190,6 +204,10 @@ int main( int argc, char* argv[] ) {
             state = STATE_INW;
          } else if( 0 == strncmp( argv[i], "-ih", 3 ) ) {
             state = STATE_INH;
+         } else if( 0 == strncmp( argv[i], "-ip", 3 ) ) {
+            state = STATE_INLP;
+         } else if( 0 == strncmp( argv[i], "-op", 3 ) ) {
+            state = STATE_OUTLP;
          }
       }
    }
@@ -205,10 +223,16 @@ int main( int argc, char* argv[] ) {
       fprintf( stderr, "usage:\n\n" );
       fprintf( stderr, "%s [options] -ic <in_fmt> -oc <out_fmt> -if <in_file> -of <out_file>\n", argv[0] );
       fprintf( stderr, "\noptions:\n\n" );
-      fprintf( stderr, "-ib [bpp]\n" );
-      fprintf( stderr, "-ob [bpp]\n" );
-      fprintf( stderr, "-ic [bpp]\n" );
-      fprintf( stderr, "-oc [bpp]\n" );
+      fprintf( stderr, "-ic [in format]\n" );
+      fprintf( stderr, "-oc [out format]\n" );
+      fprintf( stderr, "\nCGA options:\n" );
+      fprintf( stderr, "\nthese options only apply to raw CGA files:\n\n" );
+      fprintf( stderr, "-ib [in bpp]\n" );
+      fprintf( stderr, "-ob [out bpp]\n" );
+      fprintf( stderr, "-iw [in width]\n" );
+      fprintf( stderr, "-ih [in height]\n" );
+      fprintf( stderr, "-ip [in line padding] (full-screen uses 8192)\n" );
+      fprintf( stderr, "-op [out line padding]\n" );
       return 1;
    }
 
@@ -218,7 +242,7 @@ int main( int argc, char* argv[] ) {
       break;
 
    case FMT_CGA:
-      grid = cga_read( namebuf_in, w_in, h_in );
+      grid = cga_read( namebuf_in, w_in, h_in, lp_in );
       break;
    }
 
@@ -233,7 +257,7 @@ int main( int argc, char* argv[] ) {
    case FMT_BITMAP:
       retval = bmp_write( namebuf_out, grid, bpp_out );
    case FMT_CGA:
-      retval = cga_write( namebuf_out, grid );
+      retval = cga_write( namebuf_out, grid, lp_out );
       break;
    }
 
