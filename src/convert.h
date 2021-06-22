@@ -32,6 +32,7 @@ struct CONVERT_OPTIONS {
 uint32_t convert_reverse_endian_32( uint32_t );
 uint16_t convert_reverse_endian_16( uint16_t );
 void convert_print_binary( uint8_t byte_in );
+uint32_t convert_read_file( const char*, uint8_t** );
 
 #endif /* CONVERT_H */
 

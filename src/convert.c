@@ -28,6 +28,8 @@
 #define STATE_INLP      11
 #define STATE_OUTLP     12
 
+#define CONVERT_READ_FILE_BLOCK_SZ 4096
+
 uint32_t convert_reverse_endian_32( uint32_t int_in ) {
    int i = 0;
    uint32_t int_out = 0;
@@ -57,6 +59,40 @@ void convert_print_grid( struct CONVERT_GRID* grid ) {
       }
    }
    printf( "\n" );
+}
+
+uint32_t convert_read_file( const char* path, uint8_t** buffer_ptr ) {
+   FILE* file_in = NULL;
+   uint32_t read = 0,
+      read_total = 0,
+      file_in_sz = 0;
+   uint8_t buffer_tmp[CONVERT_READ_FILE_BLOCK_SZ + 1];
+
+   memset( buffer_tmp, '\0', CONVERT_READ_FILE_BLOCK_SZ + 1 );
+
+   assert( NULL != buffer_ptr );
+
+   file_in = fopen( path, "rb" );
+   assert( NULL != file_in );
+
+   /* Grab and allocate the file size. */
+   fseek( file_in, 0, SEEK_END );
+   file_in_sz = ftell( file_in );
+   fseek( file_in, 0, SEEK_SET );
+   *buffer_ptr = calloc( file_in_sz, 1 );
+   assert( NULL != *buffer_ptr );
+
+   while(
+      read = (fread( buffer_tmp, 1, CONVERT_READ_FILE_BLOCK_SZ, file_in ))
+   ) {
+      memcpy( *buffer_ptr + read_total, buffer_tmp, read );
+      read_total += read;
+   }
+
+   convert_printf( "read %u bytes (vs %u)\n", read_total, file_in_sz );
+   assert( read_total == file_in_sz );
+
+   return read_total;
 }
 
 void convert_print_binary( uint8_t byte_in ) {
@@ -233,11 +269,11 @@ int main( int argc, char* argv[] ) {
 
    switch( fmt_in ) {
    case FMT_BITMAP:
-      grid = bmp_read( namebuf_in, &options_in );
+      grid = bmp_read_file( namebuf_in, &options_in );
       break;
 
    case FMT_CGA:
-      grid = cga_read( namebuf_in, &options_in );
+      grid = cga_read_file( namebuf_in, &options_in );
       break;
    }
 

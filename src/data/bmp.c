@@ -123,7 +123,25 @@ int bmp_write(
    return retval;
 }
 
-struct CONVERT_GRID* bmp_read( const char* path, struct CONVERT_OPTIONS* o ) {
+struct CONVERT_GRID* bmp_read_file(
+   const char* path, struct CONVERT_OPTIONS* o
+) {
+   uint8_t* bmp_buffer = NULL;
+   uint32_t bmp_buffer_sz = 0;
+   struct CONVERT_GRID* grid_out = NULL;
+
+   bmp_buffer_sz = convert_read_file( path, &bmp_buffer );
+
+   grid_out = bmp_read( bmp_buffer, bmp_buffer_sz, o );
+
+   free( bmp_buffer );
+
+   return grid_out;
+}
+
+struct CONVERT_GRID* bmp_read(
+   const uint8_t* buf, uint32_t buf_sz, struct CONVERT_OPTIONS* o
+) {
    size_t offset = 0,
       read = 0,
       x = 0,
@@ -131,56 +149,36 @@ struct CONVERT_GRID* bmp_read( const char* path, struct CONVERT_OPTIONS* o ) {
       i = 0,
       byte_idx = 0,
       bit_idx = 0;
-   uint32_t bmp_file_sz = 0,
-      bmp_data_offset = 0,
+   uint32_t bmp_data_offset = 0,
       bmp_data_size = 0;
    int32_t sz_x = 0,
       sz_y = 0;
    uint16_t bpp = 0;
    FILE* bmp_file = NULL;
-   uint8_t* raw_bmp_data = NULL;
    struct CONVERT_GRID* grid = NULL;
-   char buffer[CONVERT_BUFFER_SZ + 1];
    char byte_buffer = 0;
 
-   memset( buffer, '\0', CONVERT_BUFFER_SZ );
-
-   bmp_file = fopen( path, "rb" );
-   assert( NULL != bmp_file );
-
    /* Read the bitmap file header. */
-   read = fread( buffer, 1, BMP_FMT_FILE_HEADER_SZ, bmp_file );
-   assert( BMP_FMT_FILE_HEADER_SZ == read );
-   assert( 'B' == buffer[0] );
-   assert( 'M' == buffer[1] );
-   bmp_file_sz = bmp_int( uint32_t, buffer, 2 );
-   convert_printf( "bitmap file is %u bytes\n", bmp_file_sz );
-   bmp_data_offset = bmp_int( uint32_t, buffer, 10 );
+   assert( 'B' == buf[0] );
+   assert( 'M' == buf[1] );
+   assert( buf_sz == bmp_int( uint32_t, buf, 2 ) );
+   bmp_data_offset = bmp_int( uint32_t, buf, 10 );
    convert_printf( "bitmap data starts at %u bytes\n", bmp_data_offset );
 
-   memset( buffer, '\0', CONVERT_BUFFER_SZ );
-   read = fread( buffer, 1, BMP_FMT_BMP_HEADER_SZ, bmp_file );
-   assert( BMP_FMT_BMP_HEADER_SZ == read );
-
    /* Read the bitmap image header. */
-   convert_printf( "bitmap header is %u bytes\n", bmp_int( uint32_t, buffer, 0 ) );
-   assert( 40 == bmp_int( uint32_t, buffer, 0 ) ); /* Windows BMP. */
-   sz_x = bmp_int( int32_t, buffer, 4 );
-   sz_y = bmp_int( int32_t, buffer, 8 );
-   bpp = bmp_int( uint16_t, buffer, 14 );
+   convert_printf( "bitmap header is %u bytes\n",
+      bmp_int( uint32_t, buf, 14 ) );
+   assert( 40 == bmp_int( uint32_t, buf, 14 ) ); /* Windows BMP. */
+   sz_x = bmp_int( int32_t, buf, 18 );
+   sz_y = bmp_int( int32_t, buf, 22 );
+   bpp = bmp_int( uint16_t, buf, 28 );
    convert_printf( "bitmap is %d x %d, %u colors (palette has %u)\n",
-      sz_x, sz_y, bpp, bmp_int( uint32_t, buffer, 28 ) );
-   assert( bmp_int( uint16_t, buffer, 16 ) == 0 ); /* No compression. */
+      sz_x, sz_y, bpp, bmp_int( uint32_t, buf, 46 ) );
+   assert( bmp_int( uint16_t, buf, 30 ) == 0 ); /* No compression. */
 
    /* Read the bitmap data. */
-   bmp_data_size = bmp_file_sz - bmp_data_offset;
+   bmp_data_size = buf_sz - bmp_data_offset;
    convert_printf( "bitmap data is %u bytes\n", bmp_data_size );
-   raw_bmp_data = calloc( 1, bmp_data_size );
-   assert( NULL != raw_bmp_data );
-   fseek( bmp_file, bmp_data_offset, SEEK_SET );
-   read = fread( raw_bmp_data, 1, bmp_data_size, bmp_file );
-   assert( read == bmp_data_size );
-   fclose( bmp_file );
    grid = calloc( 1, sizeof( struct CONVERT_GRID ) );
    assert( NULL != grid );
    grid->data_sz = sz_x * sz_y;
@@ -197,7 +195,7 @@ struct CONVERT_GRID* bmp_read( const char* path, struct CONVERT_OPTIONS* o ) {
       convert_printf( "byte_idx %lu, bit_idx %lu, row %lu, col %lu (%lu)\n",
          byte_idx, bit_idx, y, x, (y * sz_x) + x );
       if( 0 == bit_idx % 8 ) {
-         byte_buffer = raw_bmp_data[byte_idx];
+         byte_buffer = buf[bmp_data_offset + byte_idx];
          byte_idx++;
          bit_idx = 0;
       }

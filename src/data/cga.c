@@ -68,10 +68,26 @@ int cga_write(
    return retval;
 }
 
-struct CONVERT_GRID* cga_read( const char* path, struct CONVERT_OPTIONS* o ) {
-   FILE* cga_file = NULL;
+struct CONVERT_GRID* cga_read_file(
+   const char* path, struct CONVERT_OPTIONS* o
+) {
+   uint8_t* cga_buffer = NULL;
+   uint32_t cga_buffer_sz = 0;
+   struct CONVERT_GRID* grid_out = NULL;
+
+   cga_buffer_sz = convert_read_file( path, &cga_buffer );
+
+   grid_out = cga_read( cga_buffer, cga_buffer_sz, o );
+
+   free( cga_buffer );
+
+   return grid_out;
+}
+
+struct CONVERT_GRID* cga_read(
+   uint8_t* buf, uint32_t buf_sz, struct CONVERT_OPTIONS* o
+) {
    size_t read = 0,
-      cga_file_sz = 0,
       byte_idx = 0,
       bit_idx = 0,
       grid_idx_odd = 0,
@@ -79,26 +95,9 @@ struct CONVERT_GRID* cga_read( const char* path, struct CONVERT_OPTIONS* o ) {
       i = 0,
       y = 0,
       x = 0;
-   uint8_t* raw_cga_data = NULL;
    uint8_t byte_buffer_odd = 0,
       byte_buffer_even = 0;
    struct CONVERT_GRID* grid = NULL;
-
-   cga_file = fopen( path, "rb" );
-   assert( NULL != cga_file );
-
-   fseek( cga_file, 0, SEEK_END );
-   cga_file_sz = ftell( cga_file );
-
-   fseek( cga_file, 0, SEEK_SET );
-
-   raw_cga_data = calloc( 1, cga_file_sz + 1 );
-   assert( NULL != raw_cga_data );
-
-   read = fread( raw_cga_data, 1, cga_file_sz, cga_file );
-   assert( read == cga_file_sz );
-
-   convert_printf( "read CGA file: %lu bytes\n", cga_file_sz );
 
    /* Allocate new grid. */
    grid = calloc( 1, sizeof( struct CONVERT_GRID ) );
@@ -123,16 +122,16 @@ struct CONVERT_GRID* cga_read( const char* path, struct CONVERT_OPTIONS* o ) {
 
          assert( grid_idx_even < grid->data_sz );
          assert( grid_idx_odd < grid->data_sz );
-         assert( byte_idx < cga_file_sz );
+         assert( byte_idx < buf_sz );
 
          /* Read the even scanline. */
          grid->data[grid_idx_even] |= /* Little endian, so reverse bit_idx. */
-            raw_cga_data[byte_idx] & (0x03 << (6 - bit_idx));
+            buf[byte_idx] & (0x03 << (6 - bit_idx));
          grid->data[grid_idx_even] >>= (6 - bit_idx);
 
          /* Read the odd scanline. */
          grid->data[grid_idx_odd] |= /* Little endian, so reverse bit_idx. */
-            raw_cga_data[byte_idx + o->plane_padding + o->line_padding] & 
+            buf[byte_idx + o->plane_padding + o->line_padding] & 
                (0x03 << (6 - bit_idx));
          grid->data[grid_idx_odd] >>= (6 - bit_idx);
 
@@ -140,10 +139,6 @@ struct CONVERT_GRID* cga_read( const char* path, struct CONVERT_OPTIONS* o ) {
          bit_idx += grid->bpp;
       }
    }
-
-   fclose( cga_file );
-
-   free( raw_cga_data );
 
    return grid;
 }
