@@ -60,7 +60,7 @@ void convert_print_grid( struct CONVERT_GRID* grid ) {
 }
 
 void convert_print_binary( uint8_t byte_in ) {
-   printf( "%d%d%d%d%d%d%d%d\n",
+   printf( "bin: %d%d%d%d%d%d%d%d\n",
       byte_in & 0x80 ? 1 : 0,
       byte_in & 0x40 ? 1 : 0,
       byte_in & 0x20 ? 1 : 0,
@@ -255,6 +255,7 @@ int main( int argc, char* argv[] ) {
    switch( fmt_out ) {
    case FMT_BITMAP:
       retval = bmp_write( namebuf_out, grid, bpp_out );
+      break;
    case FMT_CGA:
       retval = cga_write( namebuf_out, grid, bpp_out, pp_out, lp_out );
       break;

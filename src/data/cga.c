@@ -15,7 +15,6 @@ static void cga_write_plane(
 
    /* Write even pixels from grid. */
    for( y = y_offset ; grid->sz_y > y ; y += 2 /* Every other scanline. */ ) {
-      printf( "%d\n", y );
       for( x = 0 ; grid->sz_x > x ; x++ ) {
          grid_idx = (y * grid->sz_x) + x;
 

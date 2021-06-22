@@ -26,8 +26,12 @@ int bmp_write(
       y = 0,
       bit_idx = 0;
    size_t bmp_data_offset = 0,
-      bmp_file_sz = 0;
-   uint8_t byte_buffer = 0;
+      bmp_file_sz = 0,
+      i = 0,
+      row_bytes = 0;
+   uint8_t byte_buffer = 0,
+      bit_mask_in = 0,
+      bit_mask_out = 0;
    uint32_t bmp_colors = 0;
 
    bmp_file = fopen( path, "wb" );
@@ -45,7 +49,7 @@ int bmp_write(
    fwrite( &(grid->sz_x), 4, 1, bmp_file );  /* X Size */
    fwrite( &(grid->sz_y), 4, 1, bmp_file );  /* Y Size */
    fwrite( &gc_bmp_planes, 2, 1, bmp_file );
-   fwrite( &(bpp), 2, 1, bmp_file );
+   fwrite( &bpp, 2, 1, bmp_file );
    fwrite( &gc_bmp_compress_none, 4, 1, bmp_file );
    fwrite( "\0\0\0\0", 4, 1, bmp_file ); /* Placeholder: Bitmap Size */
    fwrite( &gc_bmp_res, 4, 1, bmp_file );
@@ -60,27 +64,49 @@ int bmp_write(
    }
    fwrite( "\xff\xff\xff\0", 1, 4, bmp_file );
 
+   /* Calculate bit masks. */
+   for( i = 0 ; bpp > i ; i++ ) {
+      bit_mask_out <<= 1;
+      bit_mask_out |= 0x01;
+   }
+   for( i = 0 ; grid->bpp > i ; i++ ) {
+      bit_mask_in <<= 1;
+      bit_mask_in |= 0x01;
+   }
+
+   convert_printf( "using write mask: 0x%x\n", bit_mask_out );
+
    bmp_data_offset = ftell( bmp_file );
    for( y = grid->sz_y - 1 ; y >= 0 ; y-- ) {
+      row_bytes = 0;
       for( x = 0 ; x < grid->sz_x ; x++ ) {
          assert( y >= 0 );
          assert( x >= 0 );
          assert( (y * grid->sz_x) + x < grid->data_sz );
-         
+
          /* Format grid data into byte. */
          byte_buffer <<= bpp;
-         byte_buffer |= grid->data[(y * grid->sz_x) + x] & 0x03;
+         if( bpp < grid->bpp && 0 != grid->data[(y * grid->sz_x) + x] ) {
+            byte_buffer |= 0x01;
+         } else {
+            byte_buffer |= grid->data[(y * grid->sz_x) + x] & bit_mask_out;
+         }
+         convert_print_binary( byte_buffer );
          bit_idx += bpp;
 
          /* Write finished byte. */
          if( 0 != bit_idx && 0 == bit_idx % 8 ) {
+            convert_printf( "writing one byte (row %d, col %d)\n", y, x );
             fwrite( &byte_buffer, 1, 1, bmp_file );
+            byte_buffer = 0;
+            row_bytes++;
             bit_idx = 0;
          }
       }
-      while( 0 != (x % 4) ) {
+      while( 0 != (row_bytes % 4) ) {
+         convert_printf( "adding row padding byte\n" );
          fputc( '\0', bmp_file );
-         x++;
+         row_bytes++;
       }
    }
 
@@ -163,6 +189,7 @@ struct CONVERT_GRID* bmp_read( const char* path ) {
 
    grid->sz_x = sz_x;
    grid->sz_y = sz_y;
+   grid->bpp = bpp;
 
    /* Grid starts from top, bitmap starts from bottom. */
    y = sz_y - 1;
