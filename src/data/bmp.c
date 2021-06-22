@@ -18,7 +18,7 @@ static const int32_t gc_bmp_res = 72;
 static const uint32_t gc_bmp_colors_imp = 0;
 
 int bmp_write(
-   const char* path, const struct CONVERT_GRID* grid, uint16_t bpp
+   const char* path, const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
    FILE* bmp_file = NULL;
    int retval = 0;
@@ -43,13 +43,13 @@ int bmp_write(
    fwrite( "\0\0\0\0", 4, 1, bmp_file ); /* Reserved */
    fwrite( "\0\0\0\0", 4, 1, bmp_file ); /* Placeholder: Bitmap offset. */
 
-   bmp_colors = 1 == bpp ? 2 : 4;
+   bmp_colors = 1 == o->bpp ? 2 : 4;
 
    fwrite( &gc_bmp_header_sz, 4, 1, bmp_file );  /* Header Size */
    fwrite( &(grid->sz_x), 4, 1, bmp_file );  /* X Size */
    fwrite( &(grid->sz_y), 4, 1, bmp_file );  /* Y Size */
    fwrite( &gc_bmp_planes, 2, 1, bmp_file );
-   fwrite( &bpp, 2, 1, bmp_file );
+   fwrite( &o->bpp, 2, 1, bmp_file );
    fwrite( &gc_bmp_compress_none, 4, 1, bmp_file );
    fwrite( "\0\0\0\0", 4, 1, bmp_file ); /* Placeholder: Bitmap Size */
    fwrite( &gc_bmp_res, 4, 1, bmp_file );
@@ -58,14 +58,14 @@ int bmp_write(
    fwrite( &gc_bmp_colors_imp, 4, 1, bmp_file );
 
    fwrite( "\0\0\0\0", 1, 4, bmp_file );
-   if( 1 < bpp ) {
+   if( 1 < o->bpp ) {
       fwrite( "\xff\xff\0\0", 1, 4, bmp_file );
       fwrite( "\xff\0\xff\0", 1, 4, bmp_file );
    }
    fwrite( "\xff\xff\xff\0", 1, 4, bmp_file );
 
    /* Calculate bit masks. */
-   for( i = 0 ; bpp > i ; i++ ) {
+   for( i = 0 ; o->bpp > i ; i++ ) {
       bit_mask_out <<= 1;
       bit_mask_out |= 0x01;
    }
@@ -85,18 +85,18 @@ int bmp_write(
          assert( (y * grid->sz_x) + x < grid->data_sz );
 
          /* Format grid data into byte. */
-         byte_buffer <<= bpp;
-         if( bpp < grid->bpp && 0 != grid->data[(y * grid->sz_x) + x] ) {
+         byte_buffer <<= o->bpp;
+         if( o->bpp < grid->bpp && 0 != grid->data[(y * grid->sz_x) + x] ) {
             byte_buffer |= 0x01;
          } else {
             byte_buffer |= grid->data[(y * grid->sz_x) + x] & bit_mask_out;
          }
          convert_print_binary( byte_buffer );
-         bit_idx += bpp;
+         bit_idx += o->bpp;
 
          /* Write finished byte. */
          if( 0 != bit_idx && 0 == bit_idx % 8 ) {
-            convert_printf( "writing one byte (row %d, col %d)\n", y, x );
+            convert_printf( "writing one byte (row %ld, col %ld)\n", y, x );
             fwrite( &byte_buffer, 1, 1, bmp_file );
             byte_buffer = 0;
             row_bytes++;
@@ -123,7 +123,7 @@ int bmp_write(
    return retval;
 }
 
-struct CONVERT_GRID* bmp_read( const char* path ) {
+struct CONVERT_GRID* bmp_read( const char* path, struct CONVERT_OPTIONS* o ) {
    size_t offset = 0,
       read = 0,
       x = 0,

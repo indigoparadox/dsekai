@@ -38,7 +38,7 @@ static void cga_write_plane(
 }
 
 int cga_write(
-   const char* path, const struct CONVERT_GRID* grid, int bpp, int pp, int lp
+   const char* path, const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
    int retval = 0;
    FILE* cga_file = NULL;
@@ -49,14 +49,14 @@ int cga_write(
 
    cga_write_plane( grid, cga_file, 0 );
 
-   while( ftell( cga_file ) < (lp + pp) ) {
+   while( ftell( cga_file ) < (o->line_padding + o->plane_padding) ) {
       fwrite( &gc_null, 1, 1, cga_file );
    }
 
    cga_write_plane( grid, cga_file, 1 );
 
    padding_end = 0;
-   while( padding_end < lp ) {
+   while( padding_end < o->line_padding ) {
       fwrite( &gc_null, 1, 1, cga_file );
       padding_end++;
    }
@@ -68,9 +68,7 @@ int cga_write(
    return retval;
 }
 
-struct CONVERT_GRID* cga_read(
-   const char* path, int sz_x, int sz_y, int bpp, int pp, int lp
-) {
+struct CONVERT_GRID* cga_read( const char* path, struct CONVERT_OPTIONS* o ) {
    FILE* cga_file = NULL;
    size_t read = 0,
       cga_file_sz = 0,
@@ -105,11 +103,11 @@ struct CONVERT_GRID* cga_read(
    /* Allocate new grid. */
    grid = calloc( 1, sizeof( struct CONVERT_GRID ) );
    assert( NULL != grid );
-   grid->data_sz = sz_x * sz_y;
+   grid->data_sz = o->w * o->h;
    grid->data = calloc( 1, grid->data_sz );
    assert( NULL != grid->data );
-   grid->sz_x = sz_x;
-   grid->sz_y = sz_y;
+   grid->sz_x = o->w;
+   grid->sz_y = o->h;
    grid->bpp = 2; /* CGA is 2bpp or we don't understand it. */
 
    /* Read pixels into grid. */
@@ -134,7 +132,8 @@ struct CONVERT_GRID* cga_read(
 
          /* Read the odd scanline. */
          grid->data[grid_idx_odd] |= /* Little endian, so reverse bit_idx. */
-            raw_cga_data[byte_idx + pp + lp] & (0x03 << (6 - bit_idx));
+            raw_cga_data[byte_idx + o->plane_padding + o->line_padding] & 
+               (0x03 << (6 - bit_idx));
          grid->data[grid_idx_odd] >>= (6 - bit_idx);
 
          /* Advance the bit index by one pixel. */

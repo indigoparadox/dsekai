@@ -76,21 +76,19 @@ int main( int argc, char* argv[] ) {
    int i = 0,
       state = 0,
       fmt_in = 0,
-      fmt_out = 0,
-      bpp_in = 2, /* Default to 2-bit CGA. */
-      bpp_out = 0,
-      in_w = 0,
-      in_h = 0,
-      lp_in = 0,
-      lp_out = 0,
-      pp_in = 0,
-      pp_out = 0;
+      fmt_out = 0;
    char namebuf_in[NAMEBUF_MAX + 1],
       namebuf_out[NAMEBUF_MAX + 1];
    struct CONVERT_GRID* grid = NULL;
+   struct CONVERT_OPTIONS options_out,
+      options_in;
 
    memset( namebuf_in, '\0', NAMEBUF_MAX + 1 );
    memset( namebuf_out, '\0', NAMEBUF_MAX + 1 );
+   memset( &options_in, '\0', sizeof( struct CONVERT_OPTIONS ) );
+   memset( &options_out, '\0', sizeof( struct CONVERT_OPTIONS ) );
+
+   options_in.bpp = 2; /* Default to 2-bit CGA. */
 
    for( i = 1 ; argc > i ; i++ ) {
       switch( state ) {
@@ -105,12 +103,12 @@ int main( int argc, char* argv[] ) {
          break;
 
       case STATE_INBITS:
-         bpp_in = atoi( argv[i] );
+         options_in.bpp = atoi( argv[i] );
          state = 0;
          break;
 
       case STATE_OUTBITS:
-         bpp_out = atoi( argv[i] );
+         options_out.bpp = atoi( argv[i] );
          state = 0;
          break;
 
@@ -141,32 +139,32 @@ int main( int argc, char* argv[] ) {
          break;
 
       case STATE_INW:
-         in_w = atoi( argv[i] );
+         options_in.w = atoi( argv[i] );
          state = 0;
          break;
 
       case STATE_INH:
-         in_h = atoi( argv[i] );
+         options_in.h = atoi( argv[i] );
          state = 0;
          break;
 
       case STATE_INLP:
-         lp_in = atoi( argv[i] );
+         options_in.line_padding = atoi( argv[i] );
          state = 0;
          break;
 
       case STATE_OUTLP:
-         lp_out = atoi( argv[i] );
+         options_out.line_padding = atoi( argv[i] );
          state = 0;
          break;
 
       case STATE_INPP:
-         pp_in = atoi( argv[i] );
+         options_in.plane_padding = atoi( argv[i] );
          state = 0;
          break;
 
       case STATE_OUTPP:
-         pp_out = atoi( argv[i] );
+         options_out.plane_padding = atoi( argv[i] );
          state = 0;
          break;
 
@@ -195,6 +193,8 @@ int main( int argc, char* argv[] ) {
             state = STATE_INLP;
          } else if( 0 == strncmp( argv[i], "-ol", 3 ) ) {
             state = STATE_OUTLP;
+         } else if( 0 == strncmp( argv[i], "-r", 3 ) ) {
+            options_out.reverse = 1;
          }
       }
    }
@@ -206,7 +206,8 @@ int main( int argc, char* argv[] ) {
       0 == strlen( namebuf_in ) ||
       0 == strlen( namebuf_out ) ||
       0 == fmt_in || 0 == fmt_out ||
-      (FMT_CGA == fmt_in && (0 == in_w || 0 == in_h || 0 == pp_out))
+      (FMT_CGA == fmt_in && (0 == options_in.w || 0 == options_in.h || 
+         0 == options_out.plane_padding))
    ) {
       fprintf( stderr, "usage:\n\n" );
       fprintf( stderr, "%s [options] -ic <in_fmt> -oc <out_fmt> -if <in_file> -of <out_file>\n", argv[0] );
@@ -226,17 +227,17 @@ int main( int argc, char* argv[] ) {
       return 1;
    }
 
-   if( 0 == bpp_in && FMT_CGA == fmt_in ) {
-      bpp_out = 2;
+   if( 0 == options_in.bpp && FMT_CGA == fmt_in ) {
+      options_out.bpp = 2;
    }
 
    switch( fmt_in ) {
    case FMT_BITMAP:
-      grid = bmp_read( namebuf_in );
+      grid = bmp_read( namebuf_in, &options_in );
       break;
 
    case FMT_CGA:
-      grid = cga_read( namebuf_in, in_w, in_h, bpp_in, pp_in, lp_in );
+      grid = cga_read( namebuf_in, &options_in );
       break;
    }
 
@@ -245,19 +246,19 @@ int main( int argc, char* argv[] ) {
       return 1;
    }
 
-   if( 0 == bpp_out ) {
+   if( 0 == options_out.bpp ) {
       /* Default to grid BPP. */
-      bpp_out = grid->bpp;
+      options_out.bpp = grid->bpp;
    }
 
    //convert_print_grid( grid );
 
    switch( fmt_out ) {
    case FMT_BITMAP:
-      retval = bmp_write( namebuf_out, grid, bpp_out );
+      retval = bmp_write( namebuf_out, grid, &options_out );
       break;
    case FMT_CGA:
-      retval = cga_write( namebuf_out, grid, bpp_out, pp_out, lp_out );
+      retval = cga_write( namebuf_out, grid, &options_out );
       break;
    }
 

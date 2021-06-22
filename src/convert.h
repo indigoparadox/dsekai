@@ -20,6 +20,15 @@ struct CONVERT_GRID {
    uint8_t *data;
 };
 
+struct CONVERT_OPTIONS {
+   uint8_t reverse;
+   uint16_t bpp;
+   int32_t w;
+   int32_t h;
+   uint32_t line_padding;
+   uint32_t plane_padding;
+};
+
 uint32_t convert_reverse_endian_32( uint32_t );
 uint16_t convert_reverse_endian_16( uint16_t );
 void convert_print_binary( uint8_t byte_in );

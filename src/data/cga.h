@@ -9,8 +9,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-int cga_write( const char*, const struct CONVERT_GRID*, int, int, int );
-struct CONVERT_GRID* cga_read( const char*, int, int, int, int, int );
+int cga_write(
+   const char*, const struct CONVERT_GRID*, struct CONVERT_OPTIONS* );
+struct CONVERT_GRID* cga_read( const char*, struct CONVERT_OPTIONS* );
 
 #endif /* CGA_H */
 
