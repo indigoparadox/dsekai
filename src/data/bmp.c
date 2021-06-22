@@ -65,17 +65,14 @@ int bmp_write(
       for( x = 0 ; x < grid->sz_x ; x++ ) {
          assert( y >= 0 );
          assert( x >= 0 );
-         //printf( "%d %d (%d %d)\n", x, y, grid->sz_x, grid->sz_y );
-         //printf( "%d %d\n", (y * grid->sz_x) + x, grid->data_sz );
          assert( (y * grid->sz_x) + x < grid->data_sz );
+         
+         /* Format grid data into byte. */
          byte_buffer <<= bpp;
          byte_buffer |= grid->data[(y * grid->sz_x) + x] & 0x03;
-         /*if( 0 != byte_buffer ) {
-            printf( "%d,", byte_buffer & 0x03 );
-         } else {
-            printf( " ," );
-         }*/
          bit_idx += bpp;
+
+         /* Write finished byte. */
          if( 0 != bit_idx && 0 == bit_idx % 8 ) {
             fwrite( &byte_buffer, 1, 1, bmp_file );
             bit_idx = 0;
@@ -85,7 +82,6 @@ int bmp_write(
          fputc( '\0', bmp_file );
          x++;
       }
-      //printf( "\n" );
    }
 
    bmp_file_sz = ftell( bmp_file );

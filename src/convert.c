@@ -19,8 +19,8 @@
 #define STATE_OUTFILE   2
 #define STATE_INBITS    3
 #define STATE_OUTBITS   4
-#define STATE_INENDIAN  5
-#define STATE_OUTENDIAN 6
+#define STATE_INPP      5
+#define STATE_OUTPP     6
 #define STATE_INFMT     7
 #define STATE_OUTFMT    8
 #define STATE_INW       9
@@ -77,17 +77,14 @@ int main( int argc, char* argv[] ) {
       state = 0,
       fmt_in = 0,
       fmt_out = 0,
-      bpp_in = 0,
+      bpp_in = 2, /* Default to 2-bit CGA. */
       bpp_out = 0,
-      w_in = 0,
-      h_in = 0,
+      in_w = 0,
+      in_h = 0,
       lp_in = 0,
-      lp_out = 0;
-#if 0
-   char
-      endian_in = 'b',
-      endian_out = 'l'
-#endif
+      lp_out = 0,
+      pp_in = 0,
+      pp_out = 0;
    char namebuf_in[NAMEBUF_MAX + 1],
       namebuf_out[NAMEBUF_MAX + 1];
    struct CONVERT_GRID* grid = NULL;
@@ -117,26 +114,6 @@ int main( int argc, char* argv[] ) {
          state = 0;
          break;
 
-#if 0
-      case STATE_INENDIAN:
-         if( 'l' == argv[i][0] ) {
-            endian_in = ENDIAN_LITTLE;
-         } else if( 'b' == argv[i][0] ) {
-            endian_in = ENDIAN_BIG;
-         }
-         state = 0;
-         break;
-
-      case STATE_OUTENDIAN:
-         if( 'l' == argv[i][0] ) {
-            endian_out = ENDIAN_LITTLE;
-         } else if( 'b' == argv[i][0] ) {
-            endian_out = ENDIAN_BIG;
-         }
-         state = 0;
-         break;
-#endif
-
       case STATE_INFMT:
          if( 0 == strncmp( argv[i], "bitmap", 6 ) ) {
             fmt_in = FMT_BITMAP;
@@ -164,12 +141,12 @@ int main( int argc, char* argv[] ) {
          break;
 
       case STATE_INW:
-         w_in = atoi( argv[i] );
+         in_w = atoi( argv[i] );
          state = 0;
          break;
 
       case STATE_INH:
-         h_in = atoi( argv[i] );
+         in_h = atoi( argv[i] );
          state = 0;
          break;
 
@@ -180,6 +157,16 @@ int main( int argc, char* argv[] ) {
 
       case STATE_OUTLP:
          lp_out = atoi( argv[i] );
+         state = 0;
+         break;
+
+      case STATE_INPP:
+         pp_in = atoi( argv[i] );
+         state = 0;
+         break;
+
+      case STATE_OUTPP:
+         pp_out = atoi( argv[i] );
          state = 0;
          break;
 
@@ -196,17 +183,17 @@ int main( int argc, char* argv[] ) {
             state = STATE_INFMT;
          } else if( 0 == strncmp( argv[i], "-oc", 3 ) ) {
             state = STATE_OUTFMT;
-         } else if( 0 == strncmp( argv[i], "-ie", 3 ) ) {
-            state = STATE_INENDIAN;
-         } else if( 0 == strncmp( argv[i], "-oe", 3 ) ) {
-            state = STATE_OUTENDIAN;
          } else if( 0 == strncmp( argv[i], "-iw", 3 ) ) {
             state = STATE_INW;
          } else if( 0 == strncmp( argv[i], "-ih", 3 ) ) {
             state = STATE_INH;
          } else if( 0 == strncmp( argv[i], "-ip", 3 ) ) {
-            state = STATE_INLP;
+            state = STATE_INPP;
          } else if( 0 == strncmp( argv[i], "-op", 3 ) ) {
+            state = STATE_OUTPP;
+         } else if( 0 == strncmp( argv[i], "-il", 3 ) ) {
+            state = STATE_INLP;
+         } else if( 0 == strncmp( argv[i], "-ol", 3 ) ) {
             state = STATE_OUTLP;
          }
       }
@@ -218,7 +205,8 @@ int main( int argc, char* argv[] ) {
    if(
       0 == strlen( namebuf_in ) ||
       0 == strlen( namebuf_out ) ||
-      0 == fmt_in || 0 == fmt_out
+      0 == fmt_in || 0 == fmt_out ||
+      (FMT_CGA == fmt_in && (0 == in_w || 0 == in_h || 0 == pp_out))
    ) {
       fprintf( stderr, "usage:\n\n" );
       fprintf( stderr, "%s [options] -ic <in_fmt> -oc <out_fmt> -if <in_file> -of <out_file>\n", argv[0] );
@@ -227,13 +215,19 @@ int main( int argc, char* argv[] ) {
       fprintf( stderr, "-oc [out format]\n" );
       fprintf( stderr, "\nCGA options:\n" );
       fprintf( stderr, "\nthese options only apply to raw CGA files:\n\n" );
-      fprintf( stderr, "-ib [in bpp]\n" );
-      fprintf( stderr, "-ob [out bpp]\n" );
-      fprintf( stderr, "-iw [in width]\n" );
-      fprintf( stderr, "-ih [in height]\n" );
-      fprintf( stderr, "-ip [in line padding] (full-screen uses 8192)\n" );
-      fprintf( stderr, "-op [out line padding]\n" );
+      fprintf( stderr, "-ib [in bpp] (defaults to 2)\n" );
+      fprintf( stderr, "-ob [out bpp] (defaults to input bpp)\n" );
+      fprintf( stderr, "-iw [in width] (requried for CGA in)\n" );
+      fprintf( stderr, "-ih [in height] (required for CGA in)\n" );
+      fprintf( stderr, "-il [in line padding] (full-screen uses 192)\n" );
+      fprintf( stderr, "-ol [out line padding]\n" );
+      fprintf( stderr, "-ip [in plane padding] (full-screen uses 8000)\n" );
+      fprintf( stderr, "-op [out plane padding]\n" );
       return 1;
+   }
+
+   if( 0 == bpp_in && FMT_CGA == fmt_in ) {
+      bpp_out = 2;
    }
 
    switch( fmt_in ) {
@@ -242,7 +236,7 @@ int main( int argc, char* argv[] ) {
       break;
 
    case FMT_CGA:
-      grid = cga_read( namebuf_in, w_in, h_in, lp_in );
+      grid = cga_read( namebuf_in, in_w, in_h, bpp_in, pp_in, lp_in );
       break;
    }
 
@@ -251,18 +245,23 @@ int main( int argc, char* argv[] ) {
       return 1;
    }
 
+   if( 0 == bpp_out ) {
+      /* Default to grid BPP. */
+      bpp_out = grid->bpp;
+   }
+
    //convert_print_grid( grid );
 
    switch( fmt_out ) {
    case FMT_BITMAP:
       retval = bmp_write( namebuf_out, grid, bpp_out );
    case FMT_CGA:
-      retval = cga_write( namebuf_out, grid, lp_out );
+      retval = cga_write( namebuf_out, grid, bpp_out, pp_out, lp_out );
       break;
    }
 
-   //free( grid->data );
-   //free( grid );
+   free( grid->data );
+   free( grid );
 
    return retval;
 }
