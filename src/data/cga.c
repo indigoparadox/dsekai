@@ -52,29 +52,16 @@ struct CONVERT_GRID* cga_read( const char* path, int sz_x, int sz_y ) {
    grid->bpp = 2;
 
    y = 0;
-   while( cga_file_sz / 2 > byte_idx ) {
-      convert_printf( "byte_idx %lu, bit_idx %lu, row %lu, col %lu (%lu)\n",
-         byte_idx, bit_idx, y, x, (y * sz_x) + x );
-      /*if( 0 == bit_idx % 8 ) {
-         byte_buffer_odd = raw_cga_data[byte_idx];
-         byte_buffer_even = raw_cga_data[byte_idx + 8192];
-         //byte_idx++;
-         bit_idx = 0;
-      }*/
+   printf( "len: %d\n\n", ((sz_x * sz_y) / 8) );
+   while( 8000 > byte_idx ) {
 
       byte_buffer_odd = raw_cga_data[byte_idx];
       byte_buffer_even = raw_cga_data[byte_idx + 8192];
 
-      /* Read this pixel into the grid. */
-      grid_idx_odd = (y * sz_x) + x;
-      grid_idx_even = grid_idx_odd + sz_x;
-      //assert( grid_idx < (cga_file_sz * 4) );
-      printf( "%d\n", x );
+      grid_idx_even = (y * sz_x) + x;
+      grid_idx_odd = grid_idx_even + sz_x;
+      assert( x + 3 < sz_x );
          
-      //for( i = 0 ; 1 > i ; i += 2 ) {
-         //convert_print_binary( byte_buffer );
-         //printf( "becomes " );
-         //if( 0 == y % 2 ) {
       grid->data[grid_idx_odd] |= byte_buffer_odd & 0x03;
       grid->data[grid_idx_odd + 1] |= byte_buffer_odd & 0x0c;
       grid->data[grid_idx_odd + 1] >>= 2;
@@ -89,18 +76,9 @@ struct CONVERT_GRID* cga_read( const char* path, int sz_x, int sz_y ) {
       grid->data[grid_idx_even + 2] >>= 4;
       grid->data[grid_idx_even + 3] |= byte_buffer_even & 0xc0;
       grid->data[grid_idx_even + 3] >>= 6;
-         //}
-         //}
-         //convert_print_binary( grid->data[grid_idx] );
-      //bit_idx += grid->bpp *; /* 2 */
       byte_idx++;
       x += 4;
-      //}
-      //grid->data[grid_idx_odd] >>= (bit_idx - grid->bpp);
-      //grid->data[grid_idx_even] >>= (bit_idx - grid->bpp);
-      //assert( grid->data[grid_idx] < 4 );
 
-      /* Move to the next pixel. */
       if( x >= sz_x ) {
          /* Move to the next row. */
          y += 2;
