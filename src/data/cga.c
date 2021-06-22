@@ -3,14 +3,15 @@
 
 const char gc_null = '\0';
 
-static void cga_write_plane(
+uint32_t cga_write_plane(
    const struct CONVERT_GRID* grid, FILE* cga_file, int y_offset
 ) {
    size_t
       x = 0,
       y = 0,
       bit_idx = 0,
-      grid_idx = 0;
+      grid_idx = 0,
+      bytes_out = 0;
    uint8_t byte_buffer = 0;
 
    /* Write even pixels from grid. */
@@ -23,6 +24,7 @@ static void cga_write_plane(
             /* Write current byte and start a new one. */
             bit_idx = 0;
             fwrite( &byte_buffer, 1, 1, cga_file );
+            bytes_out++;
             byte_buffer = 0;
          }
 
@@ -36,6 +38,8 @@ static void cga_write_plane(
       }
    }
    fwrite( &byte_buffer, 1, 1, cga_file );
+
+   return bytes_out;
 }
 
 int cga_write(

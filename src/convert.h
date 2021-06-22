@@ -17,6 +17,8 @@ struct CONVERT_GRID {
    int32_t sz_y;
    uint16_t bpp;
    uint32_t data_sz;
+   uint32_t line_padding;
+   uint32_t plane_padding;
    uint8_t *data;
 };
 

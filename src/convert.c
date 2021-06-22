@@ -11,6 +11,7 @@
 
 #define FMT_BITMAP      1
 #define FMT_CGA         2
+#define FMT_CGF         3
 
 #define ENDIAN_LITTLE   'l'
 #define ENDIAN_BIG      'b'
@@ -119,6 +120,8 @@ int main( int argc, char* argv[] ) {
             fmt_in = FMT_BITMAP;
          } else if( 0 == strncmp( argv[i], "cga", 3 ) ) {
             fmt_in = FMT_CGA;
+         } else if( 0 == strncmp( argv[i], "cgf", 3 ) ) {
+            fmt_in = FMT_CGF;
 #if 0
          } else if( 0 == strncmp( argv[i], "header", 6 ) ) {
             fmt_in = FMT_HEADER;
@@ -234,7 +237,6 @@ int main( int argc, char* argv[] ) {
    case FMT_BITMAP:
       grid = bmp_read( namebuf_in );
       break;
-
    case FMT_CGA:
       grid = cga_read( namebuf_in, in_w, in_h, bpp_in, pp_in, lp_in );
       break;
@@ -255,8 +257,12 @@ int main( int argc, char* argv[] ) {
    switch( fmt_out ) {
    case FMT_BITMAP:
       retval = bmp_write( namebuf_out, grid, bpp_out );
+      break;
    case FMT_CGA:
       retval = cga_write( namebuf_out, grid, bpp_out, pp_out, lp_out );
+      break;
+   case FMT_CGF:
+      retval = cga_write_cgf( namebuf_out, grid );
       break;
    }
 

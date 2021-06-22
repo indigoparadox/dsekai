@@ -9,7 +9,7 @@ DSEKAI_C_FILES := \
    src/psprintf.c
 
 DSEKAI_C_FILES_LINUX := src/input/sdli.c src/graphics/sdlg.c src/main.c
-DSEKAI_C_FILES_DOS := src/input/dosi.c src/graphics/dosg.c src/main.c
+DSEKAI_C_FILES_DOS := src/input/dosi.c src/graphics/dosg.c src/main.c src/data/iff.c
 DSEKAI_C_FILES_PALM := src/input/palmi.c src/graphics/palmg.c src/mainpalm.c
 DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
 DSEKAI_C_FILES_CHECK := \
@@ -89,7 +89,7 @@ DSEKAI_O_FILES_CHECK_LINUX := $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(
 
 all: $(BIN_DOS) $(BIN_LINUX) bin/lookup
 
-bin/convert: src/convert.c src/data/bmp.c src/data/pak.c src/data/cga.c
+bin/convert: src/convert.c src/data/bmp.c src/data/pak.c src/data/cga.c src/data/iff.c
 	$(MD) $(BINDIR)
 	$(CC) -g -o $@ $^ $(LDFLAGS)
 
