@@ -1,6 +1,8 @@
 
 #include "bmp.h"
 
+#include "dio.h"
+
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -119,7 +121,7 @@ int bmp_write(
       bit_mask_in |= 0x01;
    }
 
-   convert_printf( "using write mask: 0x%x\n", bit_mask_out );
+   dio_printf( "using write mask: 0x%x\n", bit_mask_out );
 
    for( y = grid->sz_y - 1 ; y >= 0 ; y-- ) {
       row_bytes = 0;
@@ -135,12 +137,12 @@ int bmp_write(
          } else {
             byte_buffer |= grid->data[(y * grid->sz_x) + x] & bit_mask_out;
          }
-         convert_print_binary( byte_buffer );
+         dio_print_binary( byte_buffer );
          bit_idx += o->bpp;
 
          /* Write finished byte. */
          if( 0 != bit_idx && 0 == bit_idx % 8 ) {
-            convert_printf( "writing one byte (row %ld, col %ld)\n", y, x );
+            dio_printf( "writing one byte (row %ld, col %ld)\n", y, x );
             buf_ptr[bmp_data_offset + bmp_data_byte_idx] = byte_buffer;
             byte_buffer = 0;
             assert( bmp_data_byte_idx < buf_sz );
@@ -150,7 +152,7 @@ int bmp_write(
          }
       }
       while( 0 != (row_bytes % 4) ) {
-         convert_printf( "adding row padding byte\n" );
+         dio_printf( "adding row padding byte\n" );
          buf_ptr[bmp_data_offset + bmp_data_byte_idx] = '\0';
          bmp_data_byte_idx++;
          row_bytes++;
@@ -167,7 +169,7 @@ struct CONVERT_GRID* bmp_read_file(
    uint32_t bmp_buffer_sz = 0;
    struct CONVERT_GRID* grid_out = NULL;
 
-   bmp_buffer_sz = convert_read_file( path, &bmp_buffer );
+   bmp_buffer_sz = dio_read_file( path, &bmp_buffer );
 
    grid_out = bmp_read( bmp_buffer, bmp_buffer_sz, o );
 
@@ -200,22 +202,22 @@ struct CONVERT_GRID* bmp_read(
    assert( 'M' == buf[1] );
    assert( buf_sz == bmp_int( uint32_t, buf, 2 ) );
    bmp_data_offset = bmp_int( uint32_t, buf, 10 );
-   convert_printf( "bitmap data starts at %u bytes\n", bmp_data_offset );
+   dio_printf( "bitmap data starts at %u bytes\n", bmp_data_offset );
 
    /* Read the bitmap image header. */
-   convert_printf( "bitmap header is %u bytes\n",
+   dio_printf( "bitmap header is %u bytes\n",
       bmp_int( uint32_t, buf, 14 ) );
    assert( 40 == bmp_int( uint32_t, buf, 14 ) ); /* Windows BMP. */
    sz_x = bmp_int( int32_t, buf, 18 );
    sz_y = bmp_int( int32_t, buf, 22 );
    bpp = bmp_int( uint16_t, buf, 28 );
-   convert_printf( "bitmap is %d x %d, %u colors (palette has %u)\n",
+   dio_printf( "bitmap is %d x %d, %u colors (palette has %u)\n",
       sz_x, sz_y, bpp, bmp_int( uint32_t, buf, 46 ) );
    assert( bmp_int( uint16_t, buf, 30 ) == 0 ); /* No compression. */
 
    /* Read the bitmap data. */
    bmp_data_size = buf_sz - bmp_data_offset;
-   convert_printf( "bitmap data is %u bytes\n", bmp_data_size );
+   dio_printf( "bitmap data is %u bytes\n", bmp_data_size );
    grid = calloc( 1, sizeof( struct CONVERT_GRID ) );
    assert( NULL != grid );
    grid->data_sz = sz_x * sz_y;
@@ -229,7 +231,7 @@ struct CONVERT_GRID* bmp_read(
    /* Grid starts from top, bitmap starts from bottom. */
    y = sz_y - 1;
    while( bmp_data_size > byte_idx ) {
-      convert_printf( "byte_idx %lu, bit_idx %lu, row %lu, col %lu (%lu)\n",
+      dio_printf( "byte_idx %lu, bit_idx %lu, row %lu, col %lu (%lu)\n",
          byte_idx, bit_idx, y, x, (y * sz_x) + x );
       if( 0 == bit_idx % 8 ) {
          byte_buffer = buf[bmp_data_offset + byte_idx];

@@ -89,7 +89,11 @@ DSEKAI_O_FILES_CHECK_LINUX := $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(
 
 all: $(BIN_DOS) $(BIN_LINUX) bin/lookup
 
-bin/convert: src/convert.c src/data/bmp.c src/data/pak.c src/data/cga.c
+bin/drcpack: src/drcpack.c src/data/drc.c src/data/dio.c
+	$(MD) $(BINDIR)
+	$(CC) -g -o $@ $^ $(LDFLAGS)
+
+bin/convert: src/convert.c src/data/bmp.c src/data/drc.c src/data/cga.c src/data/dio.c
 	$(MD) $(BINDIR)
 	$(CC) -g -o $@ $^ $(LDFLAGS)
 

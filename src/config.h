@@ -9,11 +9,19 @@
 
 #ifndef SCREEN_W
 #define SCREEN_W 320
-#endif /* SCREEN_W */
+#endif /* !SCREEN_W */
 
 #ifndef SCREEN_H
 #define SCREEN_H 200
-#endif /* SCREEN_H */
+#endif /* !SCREEN_H */
+
+#ifndef NAMEBUF_MAX
+#define NAMEBUF_MAX 255
+#endif /* !NAMEBUF_MAX */
+
+#ifndef DRC_COPY_BLOCK_SZ
+#define DRC_COPY_BLOCK_SZ 1024
+#endif /* !DRC_COPY_BLOCK_SZ */
 
 /* ------ */
 #ifdef USE_DOS
@@ -119,6 +127,10 @@
 #ifndef FPS
 #define FPS 30
 #endif /* FPS */
+
+#ifndef DIO_READ_FILE_BLOCK_SZ
+#define DIO_READ_FILE_BLOCK_SZ 4096
+#endif /* !DIO_READ_FILE_BLOCK_SZ */
 
 #ifndef MAIN_C
 extern char g_assert_failed[];

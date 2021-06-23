@@ -1,6 +1,8 @@
 
 #include "cga.h"
 
+#include "dio.h"
+
 const char gc_null = '\0';
 
 uint32_t cga_write_plane(
@@ -53,7 +55,7 @@ int cga_write_file(
    cga_buffer_sz = 
       (((grid->sz_y / 2) * (grid->sz_x * o->bpp)) / 8) / 2;
    cga_buffer_sz += (2 * o->line_padding);
-   convert_printf( "CGA buffer size: %u\n", cga_buffer_sz );
+   dio_printf( "CGA buffer size: %u\n", cga_buffer_sz );
 
    cga_buffer = calloc( 1, cga_buffer_sz );
    assert( NULL != cga_buffer );
@@ -65,7 +67,7 @@ int cga_write_file(
 
    fwrite( cga_buffer, 1, cga_buffer_sz, cga_file );
 
-   convert_printf( "wrote CGA file: %lu bytes\n", ftell( cga_file ) );
+   dio_printf( "wrote CGA file: %lu bytes\n", ftell( cga_file ) );
 
    free( cga_buffer );
    fclose( cga_file );
@@ -94,7 +96,7 @@ struct CONVERT_GRID* cga_read_file(
    uint32_t cga_buffer_sz = 0;
    struct CONVERT_GRID* grid_out = NULL;
 
-   cga_buffer_sz = convert_read_file( path, &cga_buffer );
+   cga_buffer_sz = dio_read_file( path, &cga_buffer );
 
    grid_out = cga_read( cga_buffer, cga_buffer_sz, o );
 
