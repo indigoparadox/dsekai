@@ -379,7 +379,7 @@ int32_t drc_get_resource(
    fseek( drc_file, toc_start, SEEK_SET );
    assert( 0 != toc_start );
    for( i = 0 ; toc_count > i ; i++ ) {
-      memset( &toce_type, '\0', 5 );
+      memset( &toce_type, '\0', sizeof( uint32_t ) );
       fread( &toce_type, sizeof( uint32_t ), 1, drc_file );
       fread( &toce_id, sizeof( uint32_t ), 1, drc_file );
       fread( &toce_start, sizeof( uint32_t ), 1, drc_file );
@@ -393,7 +393,7 @@ int32_t drc_get_resource(
             toce_id, toce_start, toce_sz );
          resource_sz = toce_sz;
          if( NULL != buffer ) {
-            /* Load file contents into buffer at referencd address. */
+            /* Load file contents into buffer at referenced address. */
             *buffer = calloc( 1, toce_sz );
             if( NULL == *buffer ) {
                resource_sz = -1;

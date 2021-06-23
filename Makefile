@@ -6,7 +6,9 @@ DSEKAI_C_FILES := \
    src/item.c \
    src/window.c \
    src/topdown.c \
-   src/psprintf.c
+   src/psprintf.c \
+   src/data/dio.c \
+   src/data/drc.c
 
 DSEKAI_C_FILES_LINUX := src/input/sdli.c src/graphics/sdlg.c src/main.c
 DSEKAI_C_FILES_DOS := src/input/dosi.c src/graphics/dosg.c src/main.c
@@ -25,11 +27,18 @@ DSEKAI_C_FILES_CHECK := \
 DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
 
-RESEXT_H: src/resext.h
 TOPDOWN_O: src/topdown.o
 
 ASSETDIR_PALM := gen/palm
 ASSETDIR_WIN16 := gen/win16
+
+OBJDIR_LINUX := obj/linux/
+OBJDIR_DOS := obj/dos/
+OBJDIR_PALM := obj/palm/
+OBJDIR_WIN16 := obj/win16/
+OBJDIR_CHECK_LINUX := obj/check_linux/
+
+GENDIR_LINUX := gen/linux/
 
 BINDIR := bin
 
@@ -43,9 +52,11 @@ BIN_CHECK_LINUX := $(BINDIR)/check
 MD := mkdir -p
 PYTHON := python
 CGA2BMP := scripts/cga2bmp.py
+BIN_DRCPACK := bin/drcpack
 
 $(BIN_LINUX): CFLAGS := -DUSE_SDL -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
 $(BIN_LINUX): LDFLAGS := $(shell pkg-config sdl2 --libs) -g
+$(BIN_LINUX): RESEXT_H := $(GENDIR_LINUX)resext.h
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
@@ -73,12 +84,6 @@ $(BIN_WIN16): LDFLAGS := -l=windows
 $(BIN_CHECK_LINUX): CFLAGS := -DUSE_NULL -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
 $(BIN_CHECK_LINUX): LDFLAGS := $(shell pkg-config check --libs) -g
 
-OBJDIR_LINUX := obj/linux/
-OBJDIR_DOS := obj/dos/
-OBJDIR_PALM := obj/palm/
-OBJDIR_WIN16 := obj/win16/
-OBJDIR_CHECK_LINUX := obj/check_linux/
-
 DSEKAI_O_FILES_LINUX := $(addprefix $(OBJDIR_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES_LINUX)))
 DSEKAI_O_FILES_DOS := $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES_DOS)))
 DSEKAI_O_FILES_PALM := $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES_PALM)))
@@ -89,7 +94,7 @@ DSEKAI_O_FILES_CHECK_LINUX := $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(
 
 all: $(BIN_DOS) $(BIN_LINUX) bin/lookup
 
-bin/drcpack: src/drcpack.c src/data/drc.c src/data/dio.c
+$(BIN_DRCPACK): src/drcpack.c src/data/drc.c src/data/dio.c
 	$(MD) $(BINDIR)
 	$(CC) -g -o $@ $^ $(LDFLAGS)
 
@@ -107,10 +112,11 @@ $(BIN_LINUX): $(DSEKAI_O_FILES_LINUX)
 
 $(OBJDIR_LINUX)$(TOPDOWN_O): $(RESEXT_H)
 
-$(RESEXT_H): $(DSEKAI_ASSET_HEADERS)
-	python $(CGA2BMP) -if $^ \
-      -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c none \
-      -re $@
+$(GENDIR_LINUX)resext.h: $(DSEKAI_ASSET_HEADERS)
+	python $(CGA2BMP) -if $^
+#	python $(CGA2BMP) -if $^ \
+#      -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c none \
+#      -re $@
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)

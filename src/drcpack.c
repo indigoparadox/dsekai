@@ -19,31 +19,61 @@
 #define COMMAND_HEADER  4
 
 int main( int argc, char* argv[] ) {
+   char** file_list = NULL,
+      ** file_list_new = NULL;
    int i = 0,
       retval = 0,
       state = 0,
       command = 0,
+      command_create = 0,
+      command_add = 0,
+      command_list = 0,
+      command_header = 0,
       extension_idx = 0;
    uint32_t id = 0,
       file_sz = 0,
       basename_sz = 0;
-   char namebuf_in[NAMEBUF_MAX + 1],
+   char namebuf_header[NAMEBUF_MAX + 1],
       namebuf_arc[NAMEBUF_MAX + 1],
       type_buf[5];
    uint8_t* file_contents = NULL;
    struct DRC_TOC_E* toc_entries = NULL;
    int32_t toc_entries_sz = 0;
    FILE* header_file = NULL;
+   size_t file_list_sz = 0,
+      file_list_len = 0;
 
-   memset( namebuf_in, '\0', NAMEBUF_MAX + 1 );
+   memset( namebuf_header, '\0', NAMEBUF_MAX + 1 );
    memset( namebuf_arc, '\0', NAMEBUF_MAX + 1 );
    memset( type_buf, '\0', 5 );
 
    for( i = 1 ; argc > i ; i++ ) {
       switch( state ) {
       case STATE_INFILE:
-         strncpy( namebuf_in, argv[i], NAMEBUF_MAX );
-         state = 0;
+         if( '-' == argv[i][0] ) {
+            /* Filenames don't start with -. */
+            state = 0;
+            break;
+         }
+         if( NULL == file_list ) {
+            file_list_len = 1;
+            file_list_sz = 1;
+            file_list = calloc( file_list_sz, sizeof( char* ) );
+            assert( NULL != file_list );
+         } else if( file_list_sz <= file_list_len + 1 ) {
+            file_list_sz *= 2;
+            file_list_len++;
+            file_list_new = realloc( file_list, file_list_sz );
+            assert( NULL != file_list_new );
+            file_list = file_list_new;
+         } else {
+            file_list_len++;
+         }
+         printf( "%d: (s:%lu l:%lu) %s\n", i, file_list_sz, file_list_len, file_list[file_list_len - 1] );
+         assert( NULL == file_list[file_list_len - 1] );
+         file_list[file_list_len - 1] = calloc( NAMEBUF_MAX + 1, 1 );
+         assert( NULL != file_list[file_list_len - 1] );
+         strncpy( file_list[file_list_len - 1], argv[i], NAMEBUF_MAX );
          break;
 
       case STATE_ARCFILE:
@@ -57,95 +87,95 @@ int main( int argc, char* argv[] ) {
          break;
 
       case STATE_ID:
-         id = *((uint32_t*)argv[i]);
+         id = atoi( argv[i] );
          state = 0;
          break;
 
       case STATE_HEADER:
-         strncpy( namebuf_in, argv[i], NAMEBUF_MAX );
+         strncpy( namebuf_header, argv[i], NAMEBUF_MAX );
          state = 0;
          break;
+      }
 
-      default:
+      if( 0 == state ) {
          if( 0 == strncmp( argv[i], "-if", 3 ) ) {
-            assert( 0 == state );
             state = STATE_INFILE;
          } else if( 0 == strncmp( argv[i], "-af", 3 ) ) {
-            assert( 0 == state );
             state = STATE_ARCFILE;
          } else if( 0 == strncmp( argv[i], "-t", 2 ) ) {
-            assert( 0 == state );
             state = STATE_TYPE;
          } else if( 0 == strncmp( argv[i], "-i", 2 ) ) {
-            assert( 0 == state );
             state = STATE_ID;
+
          } else if( 0 == strncmp( argv[i], "-c", 2 ) ) {
-            assert( 0 == state );
-            assert( 0 == command );
-            command = COMMAND_CREATE;
+            state = 0;
+            command_create = 1;
+
          } else if( 0 == strncmp( argv[i], "-a", 2 ) ) {
-            assert( 0 == state );
-            assert( 0 == command );
-            command = COMMAND_ADD;
+            state = 0;
+            command_add = 1;
+
          } else if( 0 == strncmp( argv[i], "-lh", 3 ) ) {
-            assert( 0 == state );
-            assert( 0 == command );
             state = STATE_HEADER;
-            command = COMMAND_HEADER;
+            command_header = 1;
+
          } else if( 0 == strncmp( argv[i], "-l", 2 ) ) {
-            assert( 0 == state );
-            assert( 0 == command );
-            command = COMMAND_LIST;
+            state = 0;
+            command_list = 1;
          }
-         break;
       }
    }
 
-   switch( command ) {
-   case COMMAND_CREATE:
-      drc_create( namebuf_arc );
-      break;
+   if( command_create ) {
+      if( 0 > drc_create( namebuf_arc ) ) {
+         return 1;
+      }
+   }
 
-   case COMMAND_ADD:
-      assert( 0 != id );
+   if( command_add ) {
       assert( 0 != *((uint32_t*)type_buf) );
       assert( NULL == file_contents );
 
-      retval = dio_read_file( namebuf_in, &file_contents );
-      if( 0 == retval ) {
-         return 1;
-      }
+      for( i = 0 ; file_list_len > i ; i++ ) {
+         retval = dio_read_file( file_list[i], &file_contents );
+         if( 0 == retval ) {
+            return 1;
+         }
 
-      file_sz = retval;
-      retval = 0;
-
-      assert( NULL != file_contents );
-      assert( 0 < file_sz );
-
-      /* TODO: Preprocess resource (convert tileset names into IDs. */
-      /* TODO: Save a symbol->name map file to aid preprocessor later. */
-
-      basename_sz = dio_basename( namebuf_in, strlen( namebuf_in ) );
-
-      retval = drc_add_resource( namebuf_arc, *((uint32_t*)type_buf), 0,
-         &(namebuf_in[basename_sz]),
-         strlen( namebuf_in ) - basename_sz, file_contents, file_sz );
-      if( 0 <= retval ) {
+         file_sz = retval;
          retval = 0;
-      } else {
-         /* Convert error code to positive. */
-         dio_eprintf( "error adding resource: %d\n", retval );
-         retval *= -1;
-      }
-      break;
 
-   case COMMAND_LIST:
+         assert( NULL != file_contents );
+         assert( 0 < file_sz );
+
+         /* TODO: Preprocess resource (convert tileset names into IDs. */
+         /* TODO: Save a symbol->name map file to aid preprocessor later. */
+
+         basename_sz = dio_basename( file_list[i], strlen( file_list[i] ) );
+
+         retval = drc_add_resource( namebuf_arc, *((uint32_t*)type_buf), id,
+            &(file_list[i][basename_sz]),
+            strlen( file_list[i] ) - basename_sz, file_contents, file_sz );
+         if( 0 <= retval ) {
+            retval = 0;
+         } else {
+            /* Convert error code to positive. */
+            dio_eprintf( "error adding resource: %d\n", retval );
+            retval *= -1;
+         }
+
+         id++;
+      }
+   }
+
+   if( command_list ) {
       drc_list_resources( namebuf_arc, NULL );
-      break;
+   }
    
-   case COMMAND_HEADER:
+   if( command_header ) {
       toc_entries_sz = drc_list_resources( namebuf_arc, &toc_entries );
-      header_file = fopen( namebuf_in, "w" );
+      header_file = fopen( namebuf_header, "w" );
+      assert( NULL != header_file );
       for( i = 0 ; toc_entries_sz > i ; i++ ) {
          extension_idx = dio_char_idx_r(
             toc_entries[i].name, toc_entries[i].name_sz, '.' );
@@ -154,13 +184,12 @@ int main( int argc, char* argv[] ) {
             toc_entries[i].name[extension_idx] = '\0';
          }
 
-         fprintf( header_file, "#define %s 0x%08x\n",
+         fprintf( header_file, "#define %s %u\n",
             toc_entries[i].name, toc_entries[i].id );
          free( toc_entries[i].name );
       }
       free( toc_entries );
       fclose( header_file );
-      break;
    }
 
    return retval;
