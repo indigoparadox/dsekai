@@ -30,8 +30,6 @@
 /* Reserved: 4 bytes. */
 #define DRC_HEADER_OFFSET_FES             26
 
-#define DRC_TOC_ENTRY_SZ                  16
-
 struct DRC_HEADER {
    uint32_t type;
    uint32_t version;
@@ -47,12 +45,15 @@ struct DRC_TOC_E {
    uint32_t id;
    uint32_t data_start;
    uint32_t data_sz;
+   uint16_t name_len;
+   char* name;          /* Used by packer/preprocessor to map image to ID. */
    uint8_t* data;
 };
 
 int32_t drc_list_resources( const char*, struct DRC_TOC_E** );
 int32_t drc_create( const char* );
-int32_t drc_add_resource( const char*, uint32_t, uint32_t, uint8_t*, uint32_t );
+int32_t drc_add_resource( const char*, uint32_t, uint32_t, const char*,
+   uint16_t, const uint8_t*, uint32_t );
 int32_t drc_remove_resource( const char*, uint32_t, uint32_t );
 int32_t drc_get_resource( const char*, uint32_t, uint32_t, struct DRC_TOC_E* );
 int32_t drc_get_end( const char* );

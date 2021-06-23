@@ -7,27 +7,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define drc_copy( src, dest, type, buffer ) \
-   assert( sizeof( buffer ) >= sizeof( type ) ); \
-   if( !fread( &buffer, sizeof( type ), 1, src ) ) { \
+#define drc_copy( src, dest, sz, buffer ) \
+   assert( sizeof( buffer ) >= sz ); \
+   if( !fread( &buffer, sz, 1, src ) ) { \
       return DRC_ERROR_COULD_NOT_READ; \
    } \
-   if( !fwrite( &buffer, sizeof( type ), 1, dest ) ) { \
+   if( !fwrite( &buffer, 1, sz, dest ) ) { \
       return DRC_ERROR_COULD_NOT_WRITE; \
-   } \
-   dio_printf( "copied %lu bytes\n", sizeof( type ) );
+   }
 
 #define drc_change( src, dest, type, new_val ) \
    fseek( src, sizeof( type ), SEEK_CUR ); \
    if( !fwrite( &new_val, sizeof( type ), 1, dest ) ) { \
       return DRC_ERROR_COULD_NOT_WRITE; \
-   } \
-   dio_printf( "changed %lu bytes\n", sizeof( type ) );
+   }
 
 #define drc_skip( src, dest, type ) \
    fseek( src, sizeof( type ), SEEK_CUR ); \
-   fseek( dest, sizeof( type ), SEEK_CUR ); \
-   dio_printf( "skipped %lu bytes\n", sizeof( type ) );
+   fseek( dest, sizeof( type ), SEEK_CUR );
 
 static const uint32_t gc_zero_32 = 0;
 static const uint16_t gc_drc_version = 1;
@@ -41,7 +38,9 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
       toce_id = 0,
       toce_start = 0,
       toce_sz = 0;
-   char toce_type[5];
+   uint16_t toce_name_sz = 0;
+   char toce_type[5],
+      * toce_name = NULL;
 
    dio_printf( "opening %s...\n", path );
 
@@ -60,8 +59,14 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
       fread( &toce_id, sizeof( uint32_t ), 1, drc_file );
       fread( &toce_start, sizeof( uint32_t ), 1, drc_file );
       fread( &toce_sz, sizeof( uint32_t ), 1, drc_file );
-      dio_printf( "%u: %s (starts at %u bytes, %u bytes long)\n",
-         toce_id, toce_type, toce_start, toce_sz );
+      fread( &toce_name_sz, sizeof( uint16_t ), 1, drc_file );
+      toce_name = calloc( toce_name_sz + 1, 1 );
+      assert( NULL != toce_name );
+      fread( toce_name, sizeof( char ), toce_name_sz, drc_file );
+      dio_printf( "%u: %s (%s, starts at %u bytes, %u bytes long)\n",
+         toce_id, toce_name, toce_type, toce_start, toce_sz );
+      free( toce_name );
+      toce_name = NULL;
    }
 
    fseek( drc_file, 0, SEEK_END );
@@ -103,12 +108,13 @@ int32_t drc_create( const char* path ) {
 
 int32_t drc_add_resource(
    const char* path, uint32_t type, uint32_t id,
-   uint8_t* buffer, uint32_t buffer_sz
+   const char* name, uint16_t name_sz, const uint8_t* buffer, uint32_t buffer_sz
 ) {
    FILE* drc_file = NULL,
       * drc_file_tmp = NULL;
    int32_t added_offset = 0;
-   char* temp_dir = NULL;
+   char* temp_dir = NULL,
+      * toc_iter_name = NULL;
    char tmp_path[DRC_MAX_PATH + 1];
    int32_t existing_offset = 0,
       toc_offset = 0,
@@ -121,7 +127,9 @@ int32_t drc_add_resource(
       toc_new_offset = 0,
       toc_entries = 0,
       new_sz = 0,
-      read = 0;
+      read = 0,
+      read_total_data = 0;
+   uint16_t toc_iter_name_sz = 0;
    uint8_t copy_buffer[8];
 
    if( strlen( path ) > DRC_MAX_PATH ) {
@@ -184,14 +192,18 @@ int32_t drc_add_resource(
    fseek( drc_file, 0, SEEK_SET );
 
    /* Copy the header. */
-   drc_copy( drc_file, drc_file_tmp, uint32_t, copy_buffer );     /* Type */
-   drc_copy( drc_file, drc_file_tmp, uint16_t, copy_buffer );     /* Version */
+   drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ),          /* Type */
+      copy_buffer );
+   drc_copy( drc_file, drc_file_tmp, sizeof( uint16_t ),          /* Version */
+      copy_buffer );
    assert( 1 == *copy_buffer );
    drc_change( drc_file, drc_file_tmp, uint32_t, gc_zero_32 );    /* CRC32 */
    drc_change( drc_file, drc_file_tmp, uint32_t, gc_zero_32 );    /* Filesize */
-   drc_copy( drc_file, drc_file_tmp, uint32_t, copy_buffer );     /* TOC Strt */
+   drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ),          /* TOC Strt */
+      copy_buffer );
    drc_change( drc_file, drc_file_tmp, uint32_t, toc_entries );   /* TOC Ct */
-   drc_copy( drc_file, drc_file_tmp, uint32_t, copy_buffer );     /* Reserved */
+   drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ),          /* Reserved */
+      copy_buffer );
    drc_change( drc_file, drc_file_tmp, uint32_t, gc_zero_32 );    /* Dat Strt */
 
    assert( ftell( drc_file ) == DRC_HEADER_SZ );
@@ -199,30 +211,31 @@ int32_t drc_add_resource(
 
    /* Copy the TOC. */
    for( i = 0 ; toc_entries - 1 > i ; i++ ) {
-      drc_copy( drc_file, drc_file_tmp, uint32_t, toc_iter_type );
-      drc_copy( drc_file, drc_file_tmp, uint32_t, toc_iter_id );
-      drc_copy( drc_file, drc_file_tmp, uint32_t, toc_iter_start );
-      drc_copy( drc_file, drc_file_tmp, uint32_t, toc_iter_size );
-      dio_printf( "skipping TOC entry %d (starting at %u, %u bytes)..\n",
-         toc_iter_id, toc_iter_start, toc_iter_size );
+      drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ), toc_iter_type );
+      drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ), toc_iter_id );
+      drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ), toc_iter_start );
+      drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ), toc_iter_size );
+      drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ), toc_iter_name_sz );
+      drc_copy( drc_file, drc_file_tmp, toc_iter_name_sz, toc_iter_name );
+      
+      dio_printf( "skipping TOC entry %d, %s (starting at %u, %u bytes)..\n",
+         toc_iter_id, toc_iter_name, toc_iter_start, toc_iter_size );
    }
 
    /* Write the new TOC entry. */
-   dio_printf( "creating new TOC entry (%u) for file %u (%u bytes)...\n",
-      toc_entries - 1, id, buffer_sz );
+   dio_printf( "creating new TOC entry (%u) for file %u, %s (%u bytes)...\n",
+      toc_entries - 1, id, name, buffer_sz );
    toc_new_offset = ftell( drc_file_tmp );
-   assert( toc_new_offset ==
-      DRC_HEADER_SZ + (DRC_TOC_ENTRY_SZ * (toc_entries - 1)) );
    fwrite( &type, sizeof( uint32_t ), 1, drc_file_tmp );
    fwrite( &id, sizeof( uint32_t ), 1, drc_file_tmp );
    fwrite( &gc_zero_32, sizeof( uint32_t ), 1, drc_file_tmp ); /* Come back. */
    fwrite( &buffer_sz, sizeof( uint32_t ), 1, drc_file_tmp );
+   fwrite( &name_sz, sizeof( uint16_t ), 1, drc_file_tmp );
+   fwrite( name, 1, name_sz, drc_file_tmp );
 
    /* Update the data offset. */
    data_offset = ftell( drc_file_tmp );
    dio_printf( "new data offset is %u...\n", data_offset );
-   assert( data_offset ==
-      DRC_HEADER_SZ + (DRC_TOC_ENTRY_SZ * toc_entries) );
    fseek( drc_file_tmp, DRC_HEADER_OFFSET_FES, SEEK_SET );
    fwrite( &data_offset, sizeof( uint32_t ), 1, drc_file_tmp );
    fseek( drc_file_tmp, data_offset, SEEK_SET );
@@ -233,8 +246,10 @@ int32_t drc_add_resource(
    while(
       0 != (read = fread( &copy_buffer, 1, DRC_COPY_BLOCK_SZ, drc_file ))
    ) {
+      read_total_data += read;
       fwrite( &copy_buffer, 1, read, drc_file_tmp );
    }
+   dio_printf( "copied %u bytes\n", read_total_data );
 
    /* Update the TOC entry offset. */
    data_offset = ftell( drc_file_tmp );
@@ -245,7 +260,7 @@ int32_t drc_add_resource(
 
    /* Append the new data. */
    fseek( drc_file_tmp, data_offset, SEEK_SET );
-   fwrite( &buffer, sizeof( uint8_t ), buffer_sz, drc_file_tmp );
+   fwrite( buffer, sizeof( uint8_t ), buffer_sz, drc_file_tmp );
 
    /* Update the filesize. */
    new_sz = ftell( drc_file_tmp );

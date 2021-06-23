@@ -1,6 +1,7 @@
 
 #include "data/drc.h"
 #include "data/dio.h"
+#include "data/preproc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,6 +92,7 @@ int main( int argc, char* argv[] ) {
    case COMMAND_ADD:
       assert( 0 != id );
       assert( 0 != *((uint32_t*)type_buf) );
+      assert( NULL == file_contents );
 
       retval = dio_read_file( namebuf_in, &file_contents );
       if( 0 == retval ) {
@@ -103,8 +105,11 @@ int main( int argc, char* argv[] ) {
       assert( NULL != file_contents );
       assert( 0 < file_sz );
 
+      /* TODO: Preprocess resource (convert tileset names into IDs. */
+      /* TODO: Save a symbol->name map file to aid preprocessor later. */
+
       retval = drc_add_resource( namebuf_arc, *((uint32_t*)type_buf), 0,
-         file_contents, file_sz );
+         namebuf_in, strlen( namebuf_in ) + 1, file_contents, file_sz );
       if( 0 < retval ) {
          retval = 0;
       } else {
