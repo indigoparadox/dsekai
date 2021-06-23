@@ -4,6 +4,8 @@
 
 #include "config.h"
 
+#include <stddef.h>
+
 /* ------ */
 #ifdef USE_PALM
 /* ------ */
