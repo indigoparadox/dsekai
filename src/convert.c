@@ -294,7 +294,7 @@ int main( int argc, char* argv[] ) {
       retval = bmp_write_file( namebuf_out, grid, &options_out );
       break;
    case FMT_CGA:
-      retval = cga_write( namebuf_out, grid, &options_out );
+      retval = cga_write_file( namebuf_out, grid, &options_out );
       break;
    }
 

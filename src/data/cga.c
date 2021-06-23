@@ -3,8 +3,9 @@
 
 const char gc_null = '\0';
 
-static void cga_write_plane(
-   const struct CONVERT_GRID* grid, FILE* cga_file, int y_offset
+uint32_t cga_write_plane(
+   uint8_t* buffer, uint32_t buffer_sz,
+   const struct CONVERT_GRID* grid, int y_offset
 ) {
    size_t
       x = 0,
@@ -12,6 +13,7 @@ static void cga_write_plane(
       bit_idx = 0,
       grid_idx = 0;
    uint8_t byte_buffer = 0;
+   uint32_t buffer_offset = 0;
 
    /* Write even pixels from grid. */
    for( y = y_offset ; grid->sz_y > y ; y += 2 /* Every other scanline. */ ) {
@@ -21,49 +23,66 @@ static void cga_write_plane(
          if( 0 == bit_idx % 8 && 0 != bit_idx ) {
             /* Write current byte and start a new one. */
             bit_idx = 0;
-            fwrite( &byte_buffer, 1, 1, cga_file );
+            buffer[buffer_offset] = byte_buffer;
+            buffer_offset++;
             byte_buffer = 0;
          }
 
          assert( grid_idx < grid->data_sz );
 
-         /* Write the even scanline. */
+         /* Write the scanline. */
          byte_buffer |= ((grid->data[grid_idx] & (0x03)) << (6 - bit_idx));
 
          /* Advance the bit index by one pixel. */
          bit_idx += grid->bpp;
       }
    }
-   fwrite( &byte_buffer, 1, 1, cga_file );
+   buffer[buffer_offset++] = byte_buffer;
+
+   return buffer_offset;
 }
 
-int cga_write(
+int cga_write_file(
    const char* path, const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
-   int retval = 0;
    FILE* cga_file = NULL;
-   size_t padding_end = 0;
+   int retval = 0;
+   uint8_t* cga_buffer = NULL;
+   uint32_t cga_buffer_sz = 0;
+
+   cga_buffer_sz = 
+      (((grid->sz_y / 2) * (grid->sz_x * o->bpp)) / 8) / 2;
+   cga_buffer_sz += (2 * o->line_padding);
+   convert_printf( "CGA buffer size: %u\n", cga_buffer_sz );
+
+   cga_buffer = calloc( 1, cga_buffer_sz );
+   assert( NULL != cga_buffer );
 
    cga_file = fopen( path, "wb" );
    assert( NULL != cga_file );
 
-   cga_write_plane( grid, cga_file, 0 );
+   retval = cga_write( cga_buffer, cga_buffer_sz, grid, o );
 
-   while( ftell( cga_file ) < (o->line_padding + o->plane_padding) ) {
-      fwrite( &gc_null, 1, 1, cga_file );
-   }
-
-   cga_write_plane( grid, cga_file, 1 );
-
-   padding_end = 0;
-   while( padding_end < o->line_padding ) {
-      fwrite( &gc_null, 1, 1, cga_file );
-      padding_end++;
-   }
+   fwrite( cga_buffer, 1, cga_buffer_sz, cga_file );
 
    convert_printf( "wrote CGA file: %lu bytes\n", ftell( cga_file ) );
 
+   free( cga_buffer );
    fclose( cga_file );
+
+   return retval;
+}
+
+int cga_write(
+   uint8_t* buffer, uint32_t buffer_sz,
+   const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
+) {
+   int retval = 0;
+
+   cga_write_plane( buffer, buffer_sz, grid, 0 );
+
+   cga_write_plane( &(buffer[o->plane_padding + o->line_padding]),
+      buffer_sz - o->plane_padding, grid, 1 ) ;
 
    return retval;
 }
