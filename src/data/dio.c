@@ -20,6 +20,30 @@ uint32_t dio_reverse_endian_32( uint32_t int_in ) {
    return int_out;
 }
 
+int32_t dio_char_idx( const char* str, int32_t str_sz, char c ) {
+   int32_t i = 0;
+
+   for( i = 0 ; str_sz > i ; i++ ) {
+      if( str[i] == c ) {
+         return i;
+      }
+   }
+
+   return -1;
+}
+
+int32_t dio_char_idx_r( const char* str, int32_t str_sz, char c ) {
+   int32_t i = 0;
+
+   for( i = str_sz - 1 ; 0 <= i ; i-- ) {
+      if( str[i] == c ) {
+         return i;
+      }
+   }
+
+   return -1;
+}
+
 /**
  * @return Index of filename in path string, or -1 if a problem occurred.
  */
@@ -105,5 +129,67 @@ void dio_print_binary( uint8_t byte_in ) {
       byte_in & 0x04 ? 1 : 0,
       byte_in & 0x02 ? 1 : 0,
       byte_in & 0x01 ? 1 : 0 );
+}
+
+int32_t dio_copy_file( const char* src, const char* dest ) {
+   FILE* file_in = NULL,
+      * file_out = NULL;
+   uint32_t read = 0,
+      wrote = 0,
+      read_total = 0,
+      wrote_total = 0,
+      retval = 0;
+   uint8_t buffer_tmp[DIO_READ_FILE_BLOCK_SZ + 1];
+
+   memset( buffer_tmp, '\0', DIO_READ_FILE_BLOCK_SZ + 1 );
+
+   file_in = fopen( src, "rb" );
+   if( NULL == file_in ) {
+      retval = DIO_ERROR_COULD_NOT_OPEN_FILE;
+      goto cleanup;
+   }
+
+   file_out = fopen( dest, "wb" );
+   if( NULL == file_out ) {
+      retval = DIO_ERROR_COULD_NOT_OPEN_FILE;
+      goto cleanup;
+   }
+
+   while(
+      read = (fread( buffer_tmp, 1, DIO_READ_FILE_BLOCK_SZ, file_in ))
+   ) {
+      read_total += read;
+      wrote = fwrite( buffer_tmp, 1, read, file_out );
+      wrote_total += wrote;
+      
+      dio_printf( "copy: read %d bytes, wrote %d bytes\n", read_total,
+         wrote_total );
+      if( read_total != wrote_total ) {
+         retval = DIO_ERROR_COPY_MISMATCH;
+         goto cleanup;
+      }
+   }
+
+   dio_printf( "copied %d bytes\n", wrote_total );
+
+cleanup:
+   if( file_in ) {
+      fclose( file_in );
+   }
+   if( file_out ) {
+      fclose( file_out );
+   }
+
+   return retval;
+}
+
+int32_t dio_move_file( const char* src, const char* dest ) {
+
+   if( rename( src, dest ) ) {
+      remove( dest );
+      return dio_copy_file( src, dest );
+   }
+
+   return 0;
 }
 

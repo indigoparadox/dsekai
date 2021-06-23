@@ -8,7 +8,10 @@
 #include <string.h>
 
 #define drc_copy( src, dest, sz, buffer ) \
-   assert( sizeof( buffer ) >= sz ); \
+   if( sizeof( buffer ) < sz ) { \
+      retval = DRC_ERROR_BAD_BUFFER; \
+      goto cleanup; \
+   } \
    if( !fread( &buffer, sz, 1, src ) ) { \
       return DRC_ERROR_COULD_NOT_READ; \
    } \
@@ -31,7 +34,7 @@ static const uint16_t gc_drc_version = 1;
 
 int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
    FILE* drc_file = NULL;
-   int32_t drc_file_sz = 0,
+   int32_t toc_count_out = 0,
       i = 0;
    uint32_t toc_count = 0,
       toc_start = 0,
@@ -41,6 +44,7 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
    uint16_t toce_name_sz = 0;
    char toce_type[5],
       * toce_name = NULL;
+   struct DRC_TOC_E toc_e_iter;
 
    dio_printf( "opening %s...\n", path );
 
@@ -55,26 +59,36 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
    assert( 0 != toc_start );
    for( i = 0 ; toc_count > i ; i++ ) {
       memset( toce_type, '\0', 5 );
-      fread( &toce_type, sizeof( uint32_t ), 1, drc_file );
-      fread( &toce_id, sizeof( uint32_t ), 1, drc_file );
-      fread( &toce_start, sizeof( uint32_t ), 1, drc_file );
-      fread( &toce_sz, sizeof( uint32_t ), 1, drc_file );
-      fread( &toce_name_sz, sizeof( uint16_t ), 1, drc_file );
-      toce_name = calloc( toce_name_sz + 1, 1 );
-      assert( NULL != toce_name );
-      fread( toce_name, sizeof( char ), toce_name_sz, drc_file );
+      fread( &(toc_e_iter.type), sizeof( uint32_t ), 1, drc_file );
+      fread( &(toc_e_iter.id), sizeof( uint32_t ), 1, drc_file );
+      fread( &(toc_e_iter.data_start), sizeof( uint32_t ), 1, drc_file );
+      fread( &(toc_e_iter.data_sz), sizeof( uint32_t ), 1, drc_file );
+      fread( &(toc_e_iter.name_sz), sizeof( uint16_t ), 1, drc_file );
+      toc_e_iter.name = calloc( toce_name_sz + 1, 1 );
+      assert( NULL != toc_e_iter.name );
+      fread( toc_e_iter.name, sizeof( char ), toc_e_iter.name_sz, drc_file );
       dio_printf( "%u: %s (%s, starts at %u bytes, %u bytes long)\n",
-         toce_id, toce_name, toce_type, toce_start, toce_sz );
-      free( toce_name );
-      toce_name = NULL;
-   }
+         toc_e_iter.id, toc_e_iter.name, (char*)&(toc_e_iter.type),
+         toc_e_iter.data_start, toc_e_iter.data_sz );
+      toc_count_out++;
 
-   fseek( drc_file, 0, SEEK_END );
-   drc_file_sz = ftell( drc_file );
+      /* Store the entry in a list if requested. */
+      if( NULL != ptoc ) {
+         if( NULL == *ptoc ) {
+            *ptoc = calloc( 1, sizeof( struct DRC_TOC_E ) );
+            assert( NULL != *ptoc );
+         } else {
+            *ptoc =
+               realloc( *ptoc, sizeof( struct DRC_TOC_E ) * toc_count_out );
+            assert( NULL != *ptoc );
+         }
+         memcpy( &((*ptoc)[i]), &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+      }
+   }
 
    fclose( drc_file );
 
-   return drc_file_sz;
+   return toc_count_out;
 }
 
 int32_t drc_create( const char* path ) {
@@ -106,13 +120,16 @@ int32_t drc_create( const char* path ) {
    return file_sz;
 }
 
+/**
+ * @return Offset of the newly added resource on success. <0 otherwise.
+ */
 int32_t drc_add_resource(
    const char* path, uint32_t type, uint32_t id,
    const char* name, uint16_t name_sz, const uint8_t* buffer, uint32_t buffer_sz
 ) {
    FILE* drc_file = NULL,
       * drc_file_tmp = NULL;
-   int32_t added_offset = 0;
+   int32_t retval = 0;
    char* temp_dir = NULL,
       * toc_iter_name = NULL;
    char tmp_path[DRC_MAX_PATH + 1];
@@ -130,7 +147,7 @@ int32_t drc_add_resource(
       read = 0,
       read_total_data = 0;
    uint16_t toc_iter_name_sz = 0;
-   uint8_t copy_buffer[8];
+   uint8_t copy_buffer[DRC_COPY_BLOCK_SZ + 1];
 
    if( strlen( path ) > DRC_MAX_PATH ) {
       return DRC_ERROR_PATH_TOO_LONG;
@@ -196,7 +213,10 @@ int32_t drc_add_resource(
       copy_buffer );
    drc_copy( drc_file, drc_file_tmp, sizeof( uint16_t ),          /* Version */
       copy_buffer );
-   assert( 1 == *copy_buffer );
+   if( 1 != *((uint16_t*)&copy_buffer) ) {
+      retval = DRC_ERROR_BAD_VERSION;
+      goto cleanup;
+   }
    drc_change( drc_file, drc_file_tmp, uint32_t, gc_zero_32 );    /* CRC32 */
    drc_change( drc_file, drc_file_tmp, uint32_t, gc_zero_32 );    /* Filesize */
    drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ),          /* TOC Strt */
@@ -206,8 +226,14 @@ int32_t drc_add_resource(
       copy_buffer );
    drc_change( drc_file, drc_file_tmp, uint32_t, gc_zero_32 );    /* Dat Strt */
 
-   assert( ftell( drc_file ) == DRC_HEADER_SZ );
-   assert( ftell( drc_file_tmp ) == DRC_HEADER_SZ );
+   if( DRC_HEADER_SZ != ftell( drc_file ) ) {
+      retval = DRC_ERROR_COULD_NOT_READ;
+      goto cleanup;
+   }
+   if( DRC_HEADER_SZ != ftell( drc_file_tmp ) ) {
+      retval = DRC_ERROR_COULD_NOT_WRITE;
+      goto cleanup;
+   }
 
    /* Copy the TOC. */
    for( i = 0 ; toc_entries - 1 > i ; i++ ) {
@@ -215,11 +241,32 @@ int32_t drc_add_resource(
       drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ), toc_iter_id );
       drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ), toc_iter_start );
       drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ), toc_iter_size );
-      drc_copy( drc_file, drc_file_tmp, sizeof( uint32_t ), toc_iter_name_sz );
-      drc_copy( drc_file, drc_file_tmp, toc_iter_name_sz, toc_iter_name );
+      drc_copy( drc_file, drc_file_tmp, sizeof( uint16_t ), toc_iter_name_sz );
+
+      /* Copy the name. */
+      toc_iter_name = calloc( 1, toc_iter_name_sz );
+      if( NULL == toc_iter_name ) {
+         retval = DRC_ERROR_COULD_NOT_ALLOC;
+         goto cleanup;
+      }
+      if( toc_iter_name_sz < fread(
+         toc_iter_name, 1, toc_iter_name_sz, drc_file )
+      ) {
+         retval = DRC_ERROR_COULD_NOT_READ;
+         goto cleanup;
+      }
+      if( toc_iter_name_sz < fwrite(
+         toc_iter_name, 1, toc_iter_name_sz, drc_file_tmp )
+      ) {
+         retval = DRC_ERROR_COULD_NOT_WRITE;
+         goto cleanup;
+      }
       
       dio_printf( "skipping TOC entry %d, %s (starting at %u, %u bytes)..\n",
          toc_iter_id, toc_iter_name, toc_iter_start, toc_iter_size );
+
+      free( toc_iter_name );
+      toc_iter_name = NULL;
    }
 
    /* Write the new TOC entry. */
@@ -241,13 +288,16 @@ int32_t drc_add_resource(
    fseek( drc_file_tmp, data_offset, SEEK_SET );
 
    /* Start copying data. */
-   assert( ftell( drc_file_tmp ) == data_offset );
+   if( data_offset != ftell( drc_file_tmp ) ) {
+      retval = DRC_ERROR_COULD_NOT_WRITE;
+      goto cleanup;
+   }
    dio_printf( "copying existing data...\n" );
    while(
-      0 != (read = fread( &copy_buffer, 1, DRC_COPY_BLOCK_SZ, drc_file ))
+      0 != (read = fread( copy_buffer, 1, DRC_COPY_BLOCK_SZ, drc_file ))
    ) {
       read_total_data += read;
-      fwrite( &copy_buffer, 1, read, drc_file_tmp );
+      fwrite( copy_buffer, 1, read, drc_file_tmp );
    }
    dio_printf( "copied %u bytes\n", read_total_data );
 
@@ -260,7 +310,9 @@ int32_t drc_add_resource(
 
    /* Append the new data. */
    fseek( drc_file_tmp, data_offset, SEEK_SET );
+   assert( data_offset == ftell( drc_file_tmp ) );
    fwrite( buffer, sizeof( uint8_t ), buffer_sz, drc_file_tmp );
+   retval = data_offset;
 
    /* Update the filesize. */
    new_sz = ftell( drc_file_tmp );
@@ -268,10 +320,25 @@ int32_t drc_add_resource(
    fseek( drc_file_tmp, DRC_HEADER_OFFSET_FILESIZE, SEEK_SET );
    fwrite( &new_sz, sizeof( uint32_t ), 1, drc_file_tmp );
 
-   fclose( drc_file );
-   fclose( drc_file_tmp );
+cleanup:
+
+   if( NULL != drc_file ) {
+      fclose( drc_file );
+   }
+
+   if( NULL != drc_file_tmp ) {
+      fclose( drc_file_tmp );
+   }
+
+   if( NULL != toc_iter_name ) {
+      free( toc_iter_name );
+   }
+
+   if( 0 < retval && 0 > dio_move_file( tmp_path, path ) ) {
+      retval = DRC_ERROR_COULD_NOT_MOVE_TEMP;
+   }
    
-   return added_offset;
+   return retval;
 }
 
 int32_t drc_remove_resource(
@@ -282,12 +349,66 @@ int32_t drc_remove_resource(
    return removed_offset;
 }
 
+/**
+ * @return Size (in bytes) of resource if found, or 0 or less otherwise.
+ */
 int32_t drc_get_resource(
-   const char* path, uint32_t type, uint32_t id, struct DRC_TOC_E* resource_ptr
+   const char* path, uint32_t type, uint32_t id, uint8_t** buffer
 ) {
-   uint32_t resource_offset = 0;
+   FILE* drc_file = NULL;
+   int32_t drc_file_sz = 0,
+      i = 0,
+      resource_sz = 0;
+   uint32_t toc_count = 0,
+      toc_start = 0,
+      toce_id = 0,
+      toce_start = 0,
+      toce_sz = 0,
+      toce_type = 0;
+   uint16_t toce_name_sz = 0;
 
-   return resource_offset;
+   dio_printf( "opening %s...\n", path );
+
+   drc_file = fopen( path, "rb" );
+   assert( NULL != drc_file );
+
+   fseek( drc_file, DRC_HEADER_OFFSET_TOC_ENTRIES, SEEK_SET );
+   fread( &toc_count, sizeof( uint32_t ), 1, drc_file );
+   fseek( drc_file, DRC_HEADER_OFFSET_TOC_START, SEEK_SET );
+   fread( &toc_start, sizeof( uint32_t ), 1, drc_file );
+   fseek( drc_file, toc_start, SEEK_SET );
+   assert( 0 != toc_start );
+   for( i = 0 ; toc_count > i ; i++ ) {
+      memset( &toce_type, '\0', 5 );
+      fread( &toce_type, sizeof( uint32_t ), 1, drc_file );
+      fread( &toce_id, sizeof( uint32_t ), 1, drc_file );
+      fread( &toce_start, sizeof( uint32_t ), 1, drc_file );
+      fread( &toce_sz, sizeof( uint32_t ), 1, drc_file );
+      fread( &toce_name_sz, sizeof( uint16_t ), 1, drc_file );
+      fseek( drc_file, toce_name_sz, SEEK_CUR );
+
+      if( toce_type == type && toce_id == id ) {
+         /* Resource found. */
+         dio_printf( "found resource %u (at %u bytes, %u bytes long...\n",
+            toce_id, toce_start, toce_sz );
+         resource_sz = toce_sz;
+         if( NULL != buffer ) {
+            /* Load file contents into buffer at referencd address. */
+            *buffer = calloc( 1, toce_sz );
+            if( NULL == *buffer ) {
+               resource_sz = -1;
+            } else {
+               fseek( drc_file, toce_start, SEEK_SET );
+               fread( *buffer, toce_sz, 1, drc_file );
+            }
+         }
+         break;
+      }
+   }
+
+   fclose( drc_file );
+
+   return resource_sz;
 }
 
 int32_t drc_get_end( const char* path ) {
