@@ -20,6 +20,29 @@ uint32_t dio_reverse_endian_32( uint32_t int_in ) {
    return int_out;
 }
 
+/**
+ * @return Index of filename in path string, or -1 if a problem occurred.
+ */
+int32_t dio_basename( const char* path, uint32_t path_sz ) {
+   int32_t retval = -1;
+   char* path_tmp = NULL,
+      * basename_ptr = NULL;
+
+   path_tmp = calloc( path_sz + 1, 1 );
+   memcpy( path_tmp, path, path_sz );
+
+   basename_ptr = strtok( path_tmp, "\\/" );
+   while( NULL != basename_ptr ) {
+      retval = strlen( path ) - strlen( basename_ptr );
+      assert( retval < path_sz );
+      basename_ptr = strtok( NULL, "\\/" );
+   }
+
+   free( path_tmp );
+
+   return retval;
+}
+
 void dio_print_grid( struct CONVERT_GRID* grid ) {
    size_t x = 0,
       y = 0;

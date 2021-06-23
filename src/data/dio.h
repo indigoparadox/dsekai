@@ -12,7 +12,8 @@
 
 uint32_t dio_reverse_endian_32( uint32_t );
 uint16_t dio_reverse_endian_16( uint16_t );
-void dio_print_binary( uint8_t byte_in );
+int32_t dio_basename( const char*, uint32_t );
+void dio_print_binary( uint8_t );
 uint32_t dio_read_file( const char*, uint8_t** );
 
 #endif /* DIO_H */

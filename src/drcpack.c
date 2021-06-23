@@ -22,7 +22,8 @@ int main( int argc, char* argv[] ) {
       state = 0,
       command = 0;
    uint32_t id = 0,
-      file_sz = 0;
+      file_sz = 0,
+      basename_sz = 0;
    char namebuf_in[NAMEBUF_MAX + 1],
       namebuf_arc[NAMEBUF_MAX + 1],
       type_buf[5];
@@ -108,8 +109,11 @@ int main( int argc, char* argv[] ) {
       /* TODO: Preprocess resource (convert tileset names into IDs. */
       /* TODO: Save a symbol->name map file to aid preprocessor later. */
 
+      basename_sz = dio_basename( namebuf_in, strlen( namebuf_in ) );
+
       retval = drc_add_resource( namebuf_arc, *((uint32_t*)type_buf), 0,
-         namebuf_in, strlen( namebuf_in ) + 1, file_contents, file_sz );
+         &(namebuf_in[basename_sz]),
+         strlen( namebuf_in ) - basename_sz, file_contents, file_sz );
       if( 0 < retval ) {
          retval = 0;
       } else {
