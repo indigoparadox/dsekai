@@ -2,6 +2,8 @@
 #ifndef TILES_H
 #define TILES_H
 
+#include "../../gen/linux/resext.h"
+
 /*
 To add a tile:
 
@@ -13,21 +15,6 @@ To add a tile:
 
 This needs to be reorganized/automated.
 */
-
-const GRAPHICS_TILE* gc_tiles_field[TILEMAP_TILESETS_MAX] = {
-   &gc_tile_field_grass,
-   &gc_tile_field_brick_wall,
-   &gc_tile_field_tree,
-   NULL,
-   NULL,
-   NULL,
-   NULL,
-   NULL,
-   NULL,
-   NULL,
-   NULL,
-   NULL
-};
 
 const uint8_t gc_tiles_field_flags[TILEMAP_TILESETS_MAX] = {
    0x00,

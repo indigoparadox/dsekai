@@ -92,6 +92,10 @@ void graphics_blit_at(
    MemHandleUnlock( bitmap_h );
 }
 
+void graphics_destroy_surface( GRAPHICS_BITMAP_SURFACE* bmp ) {
+   MemHandleUnlock( bmp->handle );
+}
+
 void graphics_draw_block(
    uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
    GRAPHICS_COLOR color

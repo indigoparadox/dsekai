@@ -16,23 +16,19 @@
 #include "graphics/nullg.h"
 #endif /* USE_DOS, USE_SDL, USE_PALM, USE_WIN16, USE_NULL */
 
-#define graphics_sprite_at( spr, x, y ) \
-   graphics_blit_at( \
-      (const GRAPHICS_BITMAP*)spr, x, y, SPRITE_W, SPRITE_H - 1, \
-      sizeof( SPRITE_TYPE ) )
-#define graphics_tile_at( spr, x, y ) \
-   graphics_blit_at( \
-      (const GRAPHICS_BITMAP*)spr, x, y, TILE_W, TILE_H, \
-      sizeof( TILE_TYPE ) )
-#define graphics_pattern_at( spr, x, y ) \
-   graphics_blit_at( \
-      (const GRAPHICS_BITMAP*)spr, x, y, PATTERN_W, PATTERN_H, \
-      sizeof( PATTERN_TYPE ) )
+struct GRAPHICS_BITMAP {
+   uint8_t loaded;
+   uint32_t id;
+   uint16_t ref_count;
+   GRAPHICS_BITMAP_SURFACE* surface;
+};
 
+#if 0
 #define graphics_pattern_masked_at( spr, mask, mo_x, mo_y, x, y ) \
    graphics_blit_masked_at( \
       (const GRAPHICS_PATTERN*)spr, mask, mo_x, mo_y, \
       x, y, PATTERN_W, PATTERN_H, sizeof( PATTERN_TYPE ) )
+#endif
 
 void graphics_init();
 void graphics_shutdown();
@@ -46,10 +42,17 @@ void graphics_char_at(
    const char, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_string_at(
    const char*, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
-void graphics_blit_at( const GRAPHICS_BITMAP*,
-   uint16_t, uint16_t, uint8_t, uint8_t, const int );
+void graphics_blit_at( const struct GRAPHICS_BITMAP*,
+   uint16_t, uint16_t, uint16_t, uint16_t );
+int32_t graphics_load_bitmap( uint32_t, struct GRAPHICS_BITMAP** );
+int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** );
+int32_t graphics_create_surface( uint32_t, GRAPHICS_BITMAP_SURFACE** );
+int32_t graphics_destroy_surface( GRAPHICS_BITMAP_SURFACE** );
+
+#if 0
 void graphics_blit_masked_at( const GRAPHICS_PATTERN*, const GRAPHICS_MASK*,
    uint8_t, uint8_t, uint16_t, uint16_t, uint8_t, uint8_t, const int );
+#endif
 
 #endif /* GRAPHICS_H */
 

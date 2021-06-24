@@ -2,13 +2,8 @@
 #include "window.h"
 
 #include <string.h>
-#ifndef USE_PALM
-#include <assert.h>
-#endif /* USE_PALM */
 
 #include "graphics.h"
-
-#include "data/masks.h"
 
 static struct WINDOW g_windows[WINDOW_COUNT_MAX];
 static uint8_t g_windows_count = 0;
@@ -48,6 +43,7 @@ void window_draw_all() {
       x_min = (SCREEN_W / 2) - (g_windows[i].w / 2);
       y_min = (SCREEN_H / 2) - (g_windows[i].h / 2);
 
+#if 0
       for( y = y_min ; y < y_max ; y += PATTERN_H ) {
          for( x = x_min ; x < x_max ; x += PATTERN_W ) {
             if( x_min == x && y_min == y ) {
@@ -67,6 +63,7 @@ void window_draw_all() {
             }
          }
       }
+#endif
 
       for( j = 0 ; g_windows[i].strings_count > j ; j++ ) {
          graphics_string_at( g_windows[i].strings[j],

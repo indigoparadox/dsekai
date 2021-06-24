@@ -56,18 +56,5 @@ typedef unsigned long uint32_t;
 #endif /* __DOS__ */
 /* ------ */
 
-typedef struct GRAPHICS_MASK {uint8_t bits[16]; } GRAPHICS_MASK;
-#ifdef RESOURCE_SPRITE_HEADERS
-typedef struct GRAPHICS_SPRITE { SPRITE_TYPE bits[SPRITE_H]; } GRAPHICS_SPRITE;
-typedef struct GRAPHICS_TILE { TILE_TYPE bits[TILE_H]; } GRAPHICS_TILE;
-typedef struct GRAPHICS_BITMAP { uint8_t bits[1]; } GRAPHICS_BITMAP;
-#else
-typedef uint16_t GRAPHICS_SPRITE;
-typedef uint16_t GRAPHICS_TILE;
-typedef uint16_t GRAPHICS_BITMAP;
-#endif /* RESOURCE_HEADERS */
-typedef struct GRAPHICS_PATTERN {
-   PATTERN_TYPE bits[PATTERN_H]; } GRAPHICS_PATTERN;
-
 #endif /* DSTYPES_H */
 

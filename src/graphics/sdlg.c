@@ -2,9 +2,9 @@
 #define SDLG_C
 #include "../graphics.h"
 
-#include <assert.h>
 #include <SDL.h>
-#include <assert.h>
+
+#include "../data/drc.h"
 
 SDL_Window* g_window = NULL;
 SDL_Surface* g_screen = NULL;
@@ -79,6 +79,15 @@ void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
    }
 }
 
+void graphics_blit_at(
+   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint16_t w, uint16_t h
+) {
+   assert( NULL != bmp );
+   assert( NULL != *bmp );
+   SDL_BlitSurface( *bmp, NULL, g_s
+}
+
+#if 0
 void graphics_blit_masked_at(
    const GRAPHICS_PATTERN* bmp, const GRAPHICS_MASK* mask,
    uint8_t mask_o_x, uint8_t mask_o_y,
@@ -110,6 +119,7 @@ void graphics_blit_masked_at(
 
    graphics_pattern_at( &pattern_tmp, x, y );
 }
+#endif
 
 void graphics_draw_block(
    uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
@@ -131,5 +141,36 @@ void graphics_draw_block(
 
    SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
    SDL_RenderFillRect( g_renderer, &area );
+}
+
+int32_t graphics_create_surface( uint32_t id, GRAPHICS_BITMAP_SURFACE** ps ){
+   uint8_t* buffer = NULL;
+   int32_t buffer_sz = 0;
+   SDL_RWops* bmp_stream;
+
+   assert( NULL != ps );
+   assert( NULL != *ps );
+
+   buffer_sz = drc_get_resource(
+      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer );
+   if( 0 >= buffer_sz ) {
+      assert( NULL == buffer );
+      return buffer_sz;
+   }
+
+   bmp_stream = SDL_RWFromMem( buffer, buffer_sz );
+   (*ps)->surface = SDL_LoadBMP_RW( bmp_stream, 1 ); /* Free stream on close. */
+   assert( NULL != (*ps)->surface );
+   free( buffer ); /* Free resource memory. */
+   (*ps)->texture = SDL_CreateTextureFromSurface( g_renderer, (*ps)->surface );
+   assert( NULL != (*ps)->texture );
+
+   return buffer_sz;
+}
+
+int32_t graphics_destroy_surface( GRAPHICS_BITMAP_SURFACE** ps ) {
+   SDL_FreeSurface( *ps );
+   *ps = NULL;
+   return 0;
 }
 

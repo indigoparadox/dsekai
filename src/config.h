@@ -23,6 +23,14 @@
 #define DRC_COPY_BLOCK_SZ 1024
 #endif /* !DRC_COPY_BLOCK_SZ */
 
+#ifndef DRC_ARCHIVE
+#define DRC_ARCHIVE "linux16.drc"
+#endif /* !DRC_ARCHIVE */
+
+#ifndef DRC_BMP_TYPE
+#define DRC_BMP_TYPE "BMP1"
+#endif /* DRC_BMP_TYPE */
+
 /* ------ */
 #ifdef USE_DOS
 /* ------ */
@@ -50,7 +58,6 @@
 /* ------ */
 
 #include <assert.h>
-#define USE_FAKE_CGA
 
 /* ------ */
 #elif defined( USE_PALM )

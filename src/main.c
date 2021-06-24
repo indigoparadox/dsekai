@@ -7,14 +7,11 @@
 #include "engines.h"
 #include "item.h"
 
-#define MAIN_C
-#include "data.h"
-
 int main( int argc, char* argv[] ) {
    uint8_t running = 1;
    uint8_t tiles_flags[TILEMAP_TH][TILEMAP_TW];
    struct MOBILE mobiles[MOBILES_MAX];
-   struct ITEM items[ITEMS_MAX];
+   /* struct ITEM items[ITEMS_MAX]; */
    int mobiles_count = 0;
 
    graphics_init();

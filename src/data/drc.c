@@ -37,13 +37,7 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
    int32_t toc_count_out = 0,
       i = 0;
    uint32_t toc_count = 0,
-      toc_start = 0,
-      toce_id = 0,
-      toce_start = 0,
-      toce_sz = 0;
-   uint16_t toce_name_sz = 0;
-   char toce_type[5],
-      * toce_name = NULL;
+      toc_start = 0;
    struct DRC_TOC_E toc_e_iter;
 
    dio_printf( "opening %s...\n", path );
@@ -58,13 +52,15 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
    fseek( drc_file, toc_start, SEEK_SET );
    assert( 0 != toc_start );
    for( i = 0 ; toc_count > i ; i++ ) {
-      memset( toce_type, '\0', 5 );
+      memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
       fread( &(toc_e_iter.type), sizeof( uint32_t ), 1, drc_file );
       fread( &(toc_e_iter.id), sizeof( uint32_t ), 1, drc_file );
       fread( &(toc_e_iter.data_start), sizeof( uint32_t ), 1, drc_file );
       fread( &(toc_e_iter.data_sz), sizeof( uint32_t ), 1, drc_file );
       fread( &(toc_e_iter.name_sz), sizeof( uint16_t ), 1, drc_file );
-      toc_e_iter.name = calloc( toce_name_sz + 1, 1 );
+      assert( 0 < toc_e_iter.name_sz );
+      assert( NULL == toc_e_iter.name );
+      toc_e_iter.name = calloc( toc_e_iter.name_sz + 1, 1 );
       assert( NULL != toc_e_iter.name );
       fread( toc_e_iter.name, sizeof( char ), toc_e_iter.name_sz, drc_file );
       dio_printf( "%u: %s (%s, starts at %u bytes, %u bytes long)\n",
@@ -134,7 +130,6 @@ int32_t drc_add_resource(
       * toc_iter_name = NULL;
    char tmp_path[DRC_MAX_PATH + 1];
    int32_t existing_offset = 0,
-      toc_offset = 0,
       i = 0;
    uint32_t data_offset = 0,
       toc_iter_type = 0,
@@ -356,7 +351,7 @@ int32_t drc_get_resource(
    const char* path, uint32_t type, uint32_t id, uint8_t** buffer
 ) {
    FILE* drc_file = NULL;
-   int32_t drc_file_sz = 0,
+   int32_t
       i = 0,
       resource_sz = 0;
    uint32_t toc_count = 0,

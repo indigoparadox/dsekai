@@ -18,9 +18,10 @@
 #define COMMAND_LIST    3
 #define COMMAND_HEADER  4
 
+#define FILE_LIST_MAX   255
+
 int main( int argc, char* argv[] ) {
-   char** file_list = NULL,
-      ** file_list_new = NULL;
+   char* file_list[FILE_LIST_MAX];
    int i = 0,
       retval = 0,
       state = 0,
@@ -40,12 +41,12 @@ int main( int argc, char* argv[] ) {
    struct DRC_TOC_E* toc_entries = NULL;
    int32_t toc_entries_sz = 0;
    FILE* header_file = NULL;
-   size_t file_list_sz = 0,
-      file_list_len = 0;
+   size_t file_list_len = 0;
 
    memset( namebuf_header, '\0', NAMEBUF_MAX + 1 );
    memset( namebuf_arc, '\0', NAMEBUF_MAX + 1 );
    memset( type_buf, '\0', 5 );
+   memset( file_list, '\0', sizeof( char* ) * FILE_LIST_MAX );
 
    for( i = 1 ; argc > i ; i++ ) {
       switch( state ) {
@@ -55,25 +56,13 @@ int main( int argc, char* argv[] ) {
             state = 0;
             break;
          }
-         if( NULL == file_list ) {
-            file_list_len = 1;
-            file_list_sz = 1;
-            file_list = calloc( file_list_sz, sizeof( char* ) );
-            assert( NULL != file_list );
-         } else if( file_list_sz <= file_list_len + 1 ) {
-            file_list_sz *= 2;
-            file_list_len++;
-            file_list_new = realloc( file_list, file_list_sz );
-            assert( NULL != file_list_new );
-            file_list = file_list_new;
-         } else {
-            file_list_len++;
-         }
-         printf( "%d: (s:%lu l:%lu) %s\n", i, file_list_sz, file_list_len, file_list[file_list_len - 1] );
-         assert( NULL == file_list[file_list_len - 1] );
-         file_list[file_list_len - 1] = calloc( NAMEBUF_MAX + 1, 1 );
-         assert( NULL != file_list[file_list_len - 1] );
-         strncpy( file_list[file_list_len - 1], argv[i], NAMEBUF_MAX );
+         assert( NULL == file_list[file_list_len] );
+         assert( file_list_len < FILE_LIST_MAX );
+         file_list[file_list_len] = calloc( NAMEBUF_MAX + 1, 1 );
+         assert( NULL != file_list[file_list_len] );
+         strncpy( file_list[file_list_len], argv[i], NAMEBUF_MAX );
+         file_list_len++;
+         printf( "%d: (l:%lu) %s\n", i, file_list_len, file_list[file_list_len - 1] );
          break;
 
       case STATE_ARCFILE:
@@ -176,6 +165,9 @@ int main( int argc, char* argv[] ) {
       toc_entries_sz = drc_list_resources( namebuf_arc, &toc_entries );
       header_file = fopen( namebuf_header, "w" );
       assert( NULL != header_file );
+      /* TODO: Dynamically generate include guard name. */
+      fprintf( header_file, "#ifndef RESEXT_H\n" );
+      fprintf( header_file, "#define RESEXT_H\n\n" );
       for( i = 0 ; toc_entries_sz > i ; i++ ) {
          extension_idx = dio_char_idx_r(
             toc_entries[i].name, toc_entries[i].name_sz, '.' );
@@ -189,7 +181,12 @@ int main( int argc, char* argv[] ) {
          free( toc_entries[i].name );
       }
       free( toc_entries );
+      fprintf( header_file, "\n#endif /* RESEXT_H */\n" );
       fclose( header_file );
+   }
+
+   for( i = 0 ; file_list_len > i ; i++ ) {
+      free( file_list[i] );
    }
 
    return retval;

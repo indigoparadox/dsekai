@@ -47,8 +47,7 @@ void graphics_string_at(
 #ifdef USE_FAKE_CGA
 
 void graphics_blit_at(
-   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint8_t w, uint8_t h,
-   const int bytes
+   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
    int y_offset = 0,
       byte_offset = 0,
@@ -108,6 +107,33 @@ void graphics_blit_at(
    }
 }
 
-
 #endif /* USE_FAKE_CGA */
+
+/*
+ * @return 1 if bitmap is loaded and 0 otherwise.
+ */
+int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
+   assert( NULL != b );
+   assert( NULL == *b );
+
+   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
+
+   assert( 0 == (*b)->ref_count );
+
+   (*b)->ref_count++;
+
+   return graphics_create_surface( id, &((*b)->surface) );
+}
+
+/*
+ * @return 1 if bitmap is unloaded and 0 otherwise.
+ */
+int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
+   (*b)->ref_count--;
+   if( 0 >= (*b)->ref_count ) {
+      graphics_destroy_surface( &((*b)->surface) );
+      return 1;
+   }
+   return 0;
+}
 

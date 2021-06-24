@@ -1,12 +1,16 @@
 
 #include <string.h>
 
+#include "data/maps.h"
+#include "data/patterns.h"
+
 #include "graphics.h"
 #include "input.h"
 #include "mobile.h"
 #include "window.h"
 #include "engines.h"
-#include "data.h"
+
+#include "../gen/linux/resext.h"
 
 static int g_semi_cycles = 0;
 static int g_walk_offset = 0;
@@ -18,6 +22,10 @@ static int g_screen_scroll_x_tgt = 0;
 static int g_screen_scroll_y_tgt = 0;
 static uint8_t g_window_shown = 0;
 static uint8_t g_input_blocked_countdown = 0;
+
+#define TOPDOWN_BITMAPS_MAX 50
+
+struct GRAPHICS_BITMAP* bitmaps[TOPDOWN_BITMAPS_MAX];
 
 #define INPUT_BLOCK_DELAY 5
 
@@ -39,9 +47,47 @@ int topdown_loop(
    uint8_t in_char = 0;
    struct WINDOW* w = NULL;
    struct MOBILE* player = &(mobiles[0]);
+   static int initialized = 0;
+   static struct GRAPHICS_BITMAP* tiles_field[TILEMAP_TILESETS_MAX];
 
    assert( MOBILES_MAX > *mobiles_count );
    assert( 0 <= *mobiles_count );
+
+   if( !initialized ) {
+      /* TODO: Generate this dynamically. */
+      memset(
+         tiles_field,
+         '\0',
+         sizeof( struct GRAPHICS_BITMAP* ) * TILEMAP_TILESETS_MAX );
+      graphics_load_bitmap( gc_tile_field_grass, &(tiles_field[0]) );
+      graphics_load_bitmap( gc_tile_field_brick_wall, &(tiles_field[1]) );
+      graphics_load_bitmap( gc_tile_field_tree, &(tiles_field[2]) );
+      g_map_field.tileset = tiles_field;
+
+      graphics_load_bitmap( gc_sprite_robe, &(mobiles[0].sprite) );
+      mobiles[0].hp = 100;
+      mobiles[0].mp = 100;
+      mobiles[0].coords.x = 3;
+      mobiles[0].coords.y = 4;
+      mobiles[0].coords_prev.x = 3;
+      mobiles[0].coords_prev.y = 4;
+      mobiles[0].steps_x = 0;
+      mobiles[0].steps_y = 0;
+      mobiles[0].inventory = NULL;
+      (*mobiles_count)++;
+
+      graphics_load_bitmap( gc_sprite_princess, &(mobiles[1].sprite) );
+      mobiles[1].hp = 100;
+      mobiles[1].mp = 100;
+      mobiles[1].coords.x = 5;
+      mobiles[1].coords.y = 5;
+      mobiles[1].coords_prev.x = 5;
+      mobiles[1].coords_prev.y = 5;
+      mobiles[1].steps_x = 0;
+      mobiles[1].steps_y = 0;
+      mobiles[1].inventory = NULL;
+      (*mobiles_count)++;
+   }
 
    graphics_loop_start();
 
@@ -80,7 +126,7 @@ int topdown_loop(
 
          topdown_refresh_tiles( tiles_flags );
 #ifdef ANIMATE_SCREEN_MOVEMENT
-         tilemap_draw( &gc_map_field, tiles_flags,
+         tilemap_draw( &g_map_field, tiles_flags,
             g_screen_scroll_x, g_screen_scroll_y, 1 );
 
          graphics_flip();
@@ -104,7 +150,7 @@ int topdown_loop(
          return 1;
       }
 
-      tilemap_draw( &gc_map_field, tiles_flags,
+      tilemap_draw( &g_map_field, tiles_flags,
          g_screen_scroll_x, g_screen_scroll_y, 0 );
 
       for( i = 0 ; *mobiles_count > i ; i++ ) {
@@ -142,29 +188,6 @@ int topdown_loop(
 
       g_window_shown = 1;
 
-      mobiles[0].sprite = &gc_sprite_robe;
-      mobiles[0].hp = 100;
-      mobiles[0].mp = 100;
-      mobiles[0].coords.x = 3;
-      mobiles[0].coords.y = 4;
-      mobiles[0].coords_prev.x = 3;
-      mobiles[0].coords_prev.y = 4;
-      mobiles[0].steps_x = 0;
-      mobiles[0].steps_y = 0;
-      mobiles[0].inventory = NULL;
-      (*mobiles_count)++;
-
-      mobiles[1].sprite = &gc_sprite_princess;
-      mobiles[1].hp = 100;
-      mobiles[1].mp = 100;
-      mobiles[1].coords.x = 5;
-      mobiles[1].coords.y = 5;
-      mobiles[1].coords_prev.x = 5;
-      mobiles[1].coords_prev.y = 5;
-      mobiles[1].steps_x = 0;
-      mobiles[1].steps_y = 0;
-      mobiles[1].inventory = NULL;
-      (*mobiles_count)++;
    }
 
    /*
@@ -183,7 +206,7 @@ int topdown_loop(
    case INPUT_KEY_UP:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &gc_map_field, player->coords.x, player->coords.y - 1 )
+         &g_map_field, player->coords.x, player->coords.y - 1 )
       ) {
          mobile_walk_start( player, 0, -1 );
       }
@@ -192,7 +215,7 @@ int topdown_loop(
    case INPUT_KEY_LEFT:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &gc_map_field, player->coords.x - 1, player->coords.y )
+         &g_map_field, player->coords.x - 1, player->coords.y )
       ) {
          mobile_walk_start( player, -1, 0 );
       }
@@ -201,7 +224,7 @@ int topdown_loop(
    case INPUT_KEY_DOWN:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &gc_map_field, player->coords.x, player->coords.y + 1 )
+         &g_map_field, player->coords.x, player->coords.y + 1 )
       ) {
          mobile_walk_start( player, 0, 1 );
       }
@@ -210,7 +233,7 @@ int topdown_loop(
    case INPUT_KEY_RIGHT:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &gc_map_field, player->coords.x + 1, player->coords.y )
+         &g_map_field, player->coords.x + 1, player->coords.y )
       ) {
          mobile_walk_start( player, 1, 0 );
       }

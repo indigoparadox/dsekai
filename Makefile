@@ -56,7 +56,6 @@ BIN_DRCPACK := bin/drcpack
 
 $(BIN_LINUX): CFLAGS := -DUSE_SDL -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
 $(BIN_LINUX): LDFLAGS := $(shell pkg-config sdl2 --libs) -g
-$(BIN_LINUX): RESEXT_H := $(GENDIR_LINUX)resext.h
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
@@ -90,7 +89,7 @@ DSEKAI_O_FILES_PALM := $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES
 DSEKAI_O_FILES_WIN16 := $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
 DSEKAI_O_FILES_CHECK_LINUX := $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
 
-.PHONY: clean
+.PHONY: clean res16_linux_drc
 
 all: $(BIN_DOS) $(BIN_LINUX) bin/lookup
 
@@ -106,23 +105,26 @@ bin/editor: src/editor.c src/data/bmp.c src/data/pak.c
 	$(MD) $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
+# Main: Linux
+
+res16_linux_drc: $(BIN_DRCPACK)
+	$(MD) $(GENDIR_LINUX)
+	$(BIN_DRCPACK) -c -a -af $(BINDIR)/linux16.drc -t BMP1 -i 5001 \
+      -if assets/*.bmp -lh $(GENDIR_LINUX)resext.h
+
 $(BIN_LINUX): $(DSEKAI_O_FILES_LINUX)
 	$(MD) $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR_LINUX)$(TOPDOWN_O): $(RESEXT_H)
-
-$(GENDIR_LINUX)resext.h: $(DSEKAI_ASSET_HEADERS)
-	python $(CGA2BMP) -if $^
-#	python $(CGA2BMP) -if $^ \
-#      -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c none \
-#      -re $@
+# Main: MS-DOS
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
 $(OBJDIR_DOS)$(TOPDOWN_O): $(RESEXT_H)
+
+# Main: Palm
 
 $(BIN_PALM): $(OBJDIR_PALM)grc.stamp $(OBJDIR_PALM)bin.stamp
 	$(MD) $(BINDIR)
@@ -189,7 +191,7 @@ $(OBJDIR_DOS)%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
-$(OBJDIR_LINUX)%.o: %.c
+$(OBJDIR_LINUX)%.o: %.c res16_linux_drc
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
@@ -206,5 +208,5 @@ $(OBJDIR_CHECK_LINUX)%.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 clean:
-	rm -rf $(RESEXT_H) data obj bin *.err
+	rm -rf data obj bin gen *.err
 

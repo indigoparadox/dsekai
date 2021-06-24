@@ -5,9 +5,9 @@
 #include "../tilemap.h"
 #include "tiles.h"
 
-const struct TILEMAP gc_map_field = {
+struct TILEMAP g_map_field = {
    "Field",
-   &gc_tiles_field,
+   NULL,
    &gc_tiles_field_colors,
    &gc_tiles_field_flags,
    {

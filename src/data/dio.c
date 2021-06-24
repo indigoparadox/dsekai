@@ -107,7 +107,7 @@ uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
    assert( NULL != *buffer_ptr );
 
    while(
-      read = (fread( buffer_tmp, 1, DIO_READ_FILE_BLOCK_SZ, file_in ))
+      (read = (fread( buffer_tmp, 1, DIO_READ_FILE_BLOCK_SZ, file_in )))
    ) {
       memcpy( *buffer_ptr + read_total, buffer_tmp, read );
       read_total += read;
@@ -156,7 +156,7 @@ int32_t dio_copy_file( const char* src, const char* dest ) {
    }
 
    while(
-      read = (fread( buffer_tmp, 1, DIO_READ_FILE_BLOCK_SZ, file_in ))
+      (read = (fread( buffer_tmp, 1, DIO_READ_FILE_BLOCK_SZ, file_in )))
    ) {
       read_total += read;
       wrote = fwrite( buffer_tmp, 1, read, file_out );

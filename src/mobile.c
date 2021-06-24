@@ -83,9 +83,10 @@ void mobile_draw(
    assert( SPRITE_W > x_offset );
    assert( SPRITE_H > y_offset );
 
-   graphics_sprite_at(
+   graphics_blit_at(
       m->sprite,
       ((m->coords.x * SPRITE_W) + x_offset) - screen_x,
-      (((m->coords.y * SPRITE_H) + y_offset + walk_offset ) - screen_y) );
+      (((m->coords.y * SPRITE_H) + y_offset + walk_offset ) - screen_y),
+      SPRITE_W, SPRITE_H );
 }
 

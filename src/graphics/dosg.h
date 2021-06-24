@@ -4,6 +4,13 @@
 
 typedef uint8_t GRAPHICS_COLOR;
 
+typedef struct GRAPHICS_BITMAP_SURFACE {
+   uint32_t w;
+   uint32_t h;
+   uint8_t* plane_1;
+   uint8_t* plane_2;
+} GRAPHICS_BITMAP_SURFACE;
+
 #include "../dstypes.h"
 #include "../graphics.h"
 
