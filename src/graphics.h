@@ -4,17 +4,18 @@
 
 #include "dstypes.h"
 
-#ifdef USE_DOS
+#ifdef PLATFORM_DOS
 #include "graphics/dosg.h"
-#elif defined( USE_SDL )
+#elif defined( PLATFORM_SDL )
 #include "graphics/sdlg.h"
-#elif defined( USE_PALM )
+#elif defined( PLATFORM_PALM )
 #include "graphics/palmg.h"
-#elif defined( USE_WIN16 )
+#elif defined( PLATFORM_WIN16 )
 #include "graphics/win16g.h"
-#elif defined( USE_NULL )
+#elif defined( PLATFORM_NULL )
 #include "graphics/nullg.h"
-#endif /* USE_DOS, USE_SDL, USE_PALM, USE_WIN16, USE_NULL */
+#endif /*
+PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16, PLATFORM_NULL */
 
 #if 0
 #define graphics_pattern_masked_at( spr, mask, mo_x, mo_y, x, y ) \

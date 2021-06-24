@@ -85,6 +85,18 @@ void dio_print_grid( struct CONVERT_GRID* grid ) {
    printf( "\n" );
 }
 
+void dio_print_binary( uint8_t byte_in ) {
+   printf( "bin: %d%d%d%d%d%d%d%d\n",
+      byte_in & 0x80 ? 1 : 0,
+      byte_in & 0x40 ? 1 : 0,
+      byte_in & 0x20 ? 1 : 0,
+      byte_in & 0x10 ? 1 : 0,
+      byte_in & 0x08 ? 1 : 0,
+      byte_in & 0x04 ? 1 : 0,
+      byte_in & 0x02 ? 1 : 0,
+      byte_in & 0x01 ? 1 : 0 );
+}
+
 uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
    FILE* file_in = NULL;
    uint32_t read = 0,
@@ -117,18 +129,6 @@ uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
    assert( read_total == file_in_sz );
 
    return read_total;
-}
-
-void dio_print_binary( uint8_t byte_in ) {
-   printf( "bin: %d%d%d%d%d%d%d%d\n",
-      byte_in & 0x80 ? 1 : 0,
-      byte_in & 0x40 ? 1 : 0,
-      byte_in & 0x20 ? 1 : 0,
-      byte_in & 0x10 ? 1 : 0,
-      byte_in & 0x08 ? 1 : 0,
-      byte_in & 0x04 ? 1 : 0,
-      byte_in & 0x02 ? 1 : 0,
-      byte_in & 0x01 ? 1 : 0 );
 }
 
 int32_t dio_copy_file( const char* src, const char* dest ) {

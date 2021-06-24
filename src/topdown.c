@@ -10,8 +10,6 @@
 #include "window.h"
 #include "engines.h"
 
-#include "../gen/linux/resext.h"
-
 static int g_semi_cycles = 0;
 static int g_walk_offset = 0;
 static int g_screen_scroll_x = 0;

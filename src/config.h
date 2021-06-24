@@ -23,19 +23,17 @@
 #define DRC_COPY_BLOCK_SZ 1024
 #endif /* !DRC_COPY_BLOCK_SZ */
 
-#ifndef DRC_ARCHIVE
-#define DRC_ARCHIVE "linux16.drc"
-#endif /* !DRC_ARCHIVE */
-
 #ifndef DRC_BMP_TYPE
 #define DRC_BMP_TYPE "BMP1"
 #endif /* DRC_BMP_TYPE */
 
 /* ------ */
-#ifdef USE_DOS
+#ifdef PLATFORM_DOS
 /* ------ */
 
 #include <assert.h>
+
+#include "../gen/dos/resext.h"
 
 #define GRAPHICS_MODE_320_200_4_CGA    0x05
 #define GRAPHICS_MODE_320_200_256_VGA  0x13
@@ -53,14 +51,24 @@
 #define GRAPHICS_ADDR     GRAPHICS_MODE_320_200_256_VGA_ADDR
 #endif /* GRAPHICS_MODE */
 
+#ifndef DRC_ARCHIVE
+#define DRC_ARCHIVE "doscga.drc"
+#endif /* !DRC_ARCHIVE */
+
 /* ------ */
-#elif defined( USE_SDL )
+#elif defined( PLATFORM_SDL )
 /* ------ */
 
 #include <assert.h>
 
+#include "../gen/sdl/resext.h"
+
+#ifndef DRC_ARCHIVE
+#define DRC_ARCHIVE "sdl16.drc"
+#endif /* !DRC_ARCHIVE */
+
 /* ------ */
-#elif defined( USE_PALM )
+#elif defined( PLATFORM_PALM )
 /* ------ */
 
 #ifdef NDEBUG
@@ -76,8 +84,10 @@
 #endif /* !NDEBUG */
 //#define USE_FAKE_CGA
 
+#include "../gen/palm/resext.h"
+
 /* ------ */
-#elif defined( USE_WIN16 )
+#elif defined( PLATFORM_WIN16 )
 /* ------ */
 
 #include <windows.h>
@@ -85,14 +95,16 @@
 #include <assert.h>
 #define USE_FAKE_CGA
 
+#include "../gen/win16/resext.h"
+
 /* ------ */
-#else /* !USE_DOS, !USE_SDL, !USE_PALM, !USE_WIN16 */
+#else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
 /* ------ */
 
 #include <assert.h>
 
 /* ------ */
-#endif /* USE_DOS, USE_SDL, USE_PALM, USE_WIN16 */
+#endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 /* ------ */
 
 /* Graphics Parameters */

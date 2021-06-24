@@ -2,17 +2,18 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#ifdef USE_DOS
+#ifdef PLATFORM_DOS
 #include "input/dosi.h"
-#elif defined( USE_SDL )
+#elif defined( PLATFORM_SDL )
 #include "input/sdli.h"
-#elif defined( USE_PALM )
+#elif defined( PLATFORM_PALM )
 #include "input/palmi.h"
-#elif defined( USE_WIN16 )
+#elif defined( PLATFORM_WIN16 )
 #include "input/win16i.h"
-#elif defined( USE_NULL )
+#elif defined( PLATFORM_NULL )
 #include "input/nulli.h"
-#endif /* USE_DOS, USE_SDL, USE_PALM, USE_WIN16, USE_NULL */
+#endif /*
+PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16, PLATFORM_NULL */
 
 int input_poll();
 

@@ -10,7 +10,7 @@ DSEKAI_C_FILES := \
    src/data/dio.c \
    src/data/drc.c
 
-DSEKAI_C_FILES_LINUX := src/input/sdli.c src/graphics/sdlg.c src/main.c
+DSEKAI_C_FILES_SDL := src/input/sdli.c src/graphics/sdlg.c src/main.c
 DSEKAI_C_FILES_DOS := src/input/dosi.c src/graphics/dosg.c src/main.c
 DSEKAI_C_FILES_PALM := src/input/palmi.c src/graphics/palmg.c src/mainpalm.c
 DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
@@ -41,23 +41,23 @@ ASSETDIR := assets
 ASSETDIR_PALM := gen/palm
 ASSETDIR_WIN16 := gen/win16
 
-OBJDIR_LINUX := obj/linux/
+OBJDIR_SDL := obj/sdl/
 OBJDIR_DOS := obj/dos/
 OBJDIR_PALM := obj/palm/
 OBJDIR_WIN16 := obj/win16/
-OBJDIR_CHECK_LINUX := obj/check_linux/
+OBJDIR_CHECK_NULL := obj/check_null/
 
-GENDIR_LINUX := gen/linux/
+GENDIR_SDL := gen/sdl/
 GENDIR_DOS := gen/dos/
 
 BINDIR := bin
 
-BIN_LINUX := $(BINDIR)/dsekai
+BIN_SDL := $(BINDIR)/dsekai
 BIN_DOS := $(BINDIR)/dsekai.exe
 BIN_PALM := $(BINDIR)/dsekai.prc
 BIN_WIN16 := $(BINDIR)/dsekai16.exe
 
-BIN_CHECK_LINUX := $(BINDIR)/check
+BIN_CHECK_NULL := $(BINDIR)/check
 
 DSEKAI_ASSETS_BMP := $(wildcard $(ASSETDIR)/*.bmp)
 DSEKAI_ASSETS_DOS_CGA := \
@@ -69,12 +69,12 @@ CGA2BMP := scripts/cga2bmp.py
 DRCPACK := bin/drcpack
 CONVERT := bin/convert
 
-$(BIN_LINUX): CFLAGS := -DUSE_SDL -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
-$(BIN_LINUX): LDFLAGS := $(shell pkg-config sdl2 --libs) -g
+$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM_SDL
+$(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -0 -DUSE_DOS -mm -DSCALE_2X -DUSE_LOOKUPS
+$(BIN_DOS): CFLAGS := -0 -mm -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_DOS
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
@@ -83,7 +83,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
-$(BIN_PALM): CFLAGS := -O0 -DUSE_PALM -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DHIDE_WELCOME_DIALOG -DNO_PALM_DEBUG_LINE -g
+$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DHIDE_WELCOME_DIALOG -DNO_PALM_DEBUG_LINE -DPLATFORM_PALM -g
 $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
@@ -92,21 +92,21 @@ $(BIN_PALM): PALMS_RCP := src/palms.rcp
 $(BIN_WIN16): CC := wcc
 $(BIN_WIN16): LD := wcl
 $(BIN_WIN16): RC := wrc
-$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DUSE_WIN16 -DSCALE_2X -DUSE_LOOKUPS
+$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_WIN16
 $(BIN_WIN16): LDFLAGS := -l=windows
 
-$(BIN_CHECK_LINUX): CFLAGS := -DUSE_NULL -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
-$(BIN_CHECK_LINUX): LDFLAGS := $(shell pkg-config check --libs) -g
+$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM=null
+$(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g
 
-DSEKAI_O_FILES_LINUX := $(addprefix $(OBJDIR_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES_LINUX)))
+DSEKAI_O_FILES_SDL := $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES_SDL)))
 DSEKAI_O_FILES_DOS := $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES_DOS)))
 DSEKAI_O_FILES_PALM := $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES_PALM)))
 DSEKAI_O_FILES_WIN16 := $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
-DSEKAI_O_FILES_CHECK_LINUX := $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
+DSEKAI_O_FILES_CHECK_NULL := $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
 
-.PHONY: clean res_linux16_drc res_doscga_drc
+.PHONY: clean res_sdl16_drc res_doscga_drc
 
-all: $(BIN_DOS) $(BIN_LINUX) bin/lookup
+all: $(BIN_DOS) $(BIN_SDL) bin/lookup
 
 # ====== Utilities ======
 
@@ -124,14 +124,14 @@ bin/editor: src/editor.c src/data/bmp.c src/data/pak.c
 
 # ====== Main: Linux ======
 
-$(BINDIR)/linux16.drc: res_linux16_drc
+$(BINDIR)/sdl16.drc: res_sdl16_drc
 
-res_linux16_drc: $(DRCPACK)
-	$(MD) $(GENDIR_LINUX)
-	$(DRCPACK) -c -a -af $(BINDIR)/linux16.drc -t BMP1 -i 5001 \
-      -if $(ASSETDIR)/*.bmp -lh $(GENDIR_LINUX)resext.h
+res_sdl16_drc: $(DRCPACK)
+	$(MD) $(GENDIR_SDL)
+	$(DRCPACK) -c -a -af $(BINDIR)/sdl16.drc -t BMP1 -i 5001 \
+      -if $(ASSETDIR)/*.bmp -lh $(GENDIR_SDL)resext.h
 
-$(BIN_LINUX): $(DSEKAI_O_FILES_LINUX)
+$(BIN_SDL): $(DSEKAI_O_FILES_SDL)
 	$(MD) $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
@@ -145,7 +145,7 @@ res_doscga_drc: $(DRCPACK) $(DSEKAI_ASSETS_DOS_CGA)
 
 $(GENDIR_DOS)%.cga: $(ASSETDIR)/%.bmp $(BINDIR)/convert
 	$(MD) $(GENDIR_DOS)
-	./bin/convert -ic bitmap -oc cga -ob 2 -if $< -of $@
+	./bin/convert -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)
@@ -209,9 +209,9 @@ $(ASSETDIR_WIN16)/win16.rc: $(DSEKAI_ASSET_HEADERS)
       -rc $(ASSETDIR_WIN16)/win16_rc.h
 	touch $@
 
-$(OBJDIR_CHECK_LINUX)$(TOPDOWN_O): $(RESEXT_H)
+$(OBJDIR_CHECK_NULL)$(TOPDOWN_O): $(RESEXT_H)
 
-$(BIN_CHECK_LINUX): $(DSEKAI_O_FILES_CHECK_LINUX)
+$(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL)
 	$(MD) $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
@@ -222,7 +222,7 @@ $(OBJDIR_DOS)%.o: %.c res_doscga_drc
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
-$(OBJDIR_LINUX)%.o: %.c res_linux16_drc
+$(OBJDIR_SDL)%.o: %.c res_sdl16_drc
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
@@ -234,7 +234,7 @@ $(OBJDIR_WIN16)%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
-$(OBJDIR_CHECK_LINUX)%.o: %.c
+$(OBJDIR_CHECK_NULL)%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 

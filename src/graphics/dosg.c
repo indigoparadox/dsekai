@@ -9,6 +9,7 @@
 #ifdef USE_LOOKUPS
 #include "../data/offsets.h"
 #endif /* USE_LOOKUPS */
+#include "../data/cga.h"
 
 #ifdef USE_DOUBLEBUF
 static uint8_t huge g_buffer[76800]; /* Sized for 0x13. */
@@ -169,15 +170,15 @@ void graphics_blit_at(
    const uint8_t* plane_1 = bmp->plane_1;
    const uint8_t* plane_2 = bmp->plane_2;
 
-   if( NULL == plane_1 || NULL == plane_2 ) {
-      return;
-   }
-
 #if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
 #error "not implemented"
 #elif GRAPHICS_MODE_320_200_4_CGA == GRAPHICS_MODE
    uint8_t y_is_odd = /* Interlacing compensation do % once to save cycles. */
       0 == y % 2 ? 0 : 1;
+
+   if( NULL == plane_1 || NULL == plane_2 ) {
+      return;
+   }
 
 	for( y_offset = 0 ; h > y_offset ; y_offset++ ) {
 #ifdef USE_LOOKUPS
@@ -296,6 +297,8 @@ void graphics_draw_block(
 int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
+   uint16_t plane_sz = 0,
+      plane_offset = 0;
 
    assert( NULL != b );
    assert( NULL == *b );
@@ -312,6 +315,20 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
    }
 
    /* TODO */
+   (*b)->id = id;
+   (*b)->w = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_WIDTH / 2];
+   (*b)->h = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_HEIGHT / 2];
+   (*b)->palette = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PALETTE / 2];
+
+   plane_sz = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_SZ / 2];
+   plane_offset = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_OFFSET / 2];
+   (*b)->plane_1 = calloc( plane_sz, 1 );
+   memcpy( (*b)->plane_1, &(buffer[plane_offset]), plane_sz );
+
+   plane_sz = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_SZ / 2];
+   plane_offset = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_OFFSET / 2];
+   (*b)->plane_2 = calloc( plane_sz, 1 );
+   memcpy( (*b)->plane_2, &(buffer[plane_offset]), plane_sz );
 
    free( buffer ); /* Free resource memory. */
 

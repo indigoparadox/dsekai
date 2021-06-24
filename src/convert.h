@@ -22,6 +22,7 @@ struct CONVERT_OPTIONS {
    uint32_t line_padding;
    uint32_t plane_padding;
    uint32_t bmp_data_sz;
+   uint8_t cga_use_header;
 };
 
 #endif /* CONVERT_H */

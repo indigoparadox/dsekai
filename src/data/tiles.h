@@ -2,8 +2,6 @@
 #ifndef TILES_H
 #define TILES_H
 
-#include "../../gen/linux/resext.h"
-
 /*
 To add a tile:
 

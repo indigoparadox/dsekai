@@ -156,6 +156,10 @@ int main( int argc, char* argv[] ) {
             state = STATE_OUTLP;
          } else if( 0 == strncmp( argv[i], "-r", 3 ) ) {
             options_out.reverse = 1;
+         } else if( 0 == strncmp( argv[i], "-ig", 3 ) ) {
+            options_out.cga_use_header = 1;
+         } else if( 0 == strncmp( argv[i], "-og", 3 ) ) {
+            options_out.cga_use_header = 1;
          }
       }
    }

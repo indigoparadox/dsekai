@@ -54,7 +54,8 @@ int cga_write_file(
    FILE* cga_file = NULL;
    int retval = 0;
    uint8_t* cga_buffer = NULL;
-   uint32_t cga_buffer_sz = 0;
+   uint32_t cga_buffer_sz = 0,
+      cga_buffer_sz_raw = 0;
 
    /* Output BPP is always 2 for now. */
    o->bpp = 2;
@@ -62,9 +63,12 @@ int cga_write_file(
    /* Determine the buffer size. */
    /* x * y size * bpp (which is 2) for total bits / 4 (since 8 / 2 = 4) */
    /* 8 makes castle.4 back from castle.bmp work... probably matches 8 below. */
-   cga_buffer_sz = (((grid->sz_y * grid->sz_x * o->bpp)) / 8);
+   cga_buffer_sz_raw = (((grid->sz_y * grid->sz_x * o->bpp)) / 8);
    o->plane_padding = cga_buffer_sz / 2; /* Plane pads halfway in. */
-   cga_buffer_sz += (2 * o->line_padding);
+   cga_buffer_sz = cga_buffer_sz_raw + (2 * o->line_padding);
+   if( o->cga_use_header ) {
+      cga_buffer_sz += CGA_HEADER_SZ;
+   }
    dio_printf( "CGA buffer size: %u\n", cga_buffer_sz );
 
    cga_buffer = calloc( 1, cga_buffer_sz );
@@ -88,13 +92,39 @@ int cga_write(
    const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
    int retval = 0;
+   uint32_t buffer_data_offset = 0;
 
-   cga_write_plane( buffer, buffer_sz, grid, 0, o->bpp );
+   if( o->cga_use_header ) {
+      buffer_data_offset += CGA_HEADER_SZ;
 
-   assert( buffer_sz > o->plane_padding + o->line_padding );
+      dio_printf( "using CGA header...\n" );
 
-   cga_write_plane( &(buffer[o->plane_padding + o->line_padding]),
-      buffer_sz - o->plane_padding, grid, 1, o->bpp ) ;
+      buffer[0] = 'C';
+      buffer[1] = 'G';
+      ((uint16_t*)buffer)[CGA_HEADER_OFFSET_VERSION / 2] = 1;
+      ((uint16_t*)buffer)[CGA_HEADER_OFFSET_WIDTH / 2] = grid->sz_x;
+      ((uint16_t*)buffer)[CGA_HEADER_OFFSET_HEIGHT / 2] = grid->sz_y;
+      ((uint16_t*)buffer)[CGA_HEADER_OFFSET_BPP / 2] = o->bpp;
+      ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_OFFSET / 2] = CGA_HEADER_SZ;
+      ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_SZ / 2] = 
+         (((grid->sz_y * grid->sz_x * o->bpp)) / 8) / 2;
+      ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_OFFSET / 2] =
+         CGA_HEADER_SZ + (((grid->sz_y * grid->sz_x * o->bpp)) / 8) / 2;
+      ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_SZ / 2] =
+         (((grid->sz_y * grid->sz_x * o->bpp)) / 8) / 2;
+      ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PALETTE / 2] = 1;
+   }
+
+   cga_write_plane(
+      &(buffer[buffer_data_offset]), buffer_sz - buffer_data_offset,
+      grid, 0, o->bpp );
+
+   assert(
+      buffer_sz - buffer_data_offset > o->plane_padding + o->line_padding );
+
+   cga_write_plane(
+      &(buffer[buffer_data_offset + o->plane_padding + o->line_padding]),
+      buffer_sz - o->plane_padding - buffer_data_offset, grid, 1, o->bpp ) ;
 
    return retval;
 }
