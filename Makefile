@@ -107,6 +107,8 @@ bin/editor: src/editor.c src/data/bmp.c src/data/pak.c
 
 # Main: Linux
 
+$(BINDIR)/linux16.drc: res16_linux_drc
+
 res16_linux_drc: $(BIN_DRCPACK)
 	$(MD) $(GENDIR_LINUX)
 	$(BIN_DRCPACK) -c -a -af $(BINDIR)/linux16.drc -t BMP1 -i 5001 \

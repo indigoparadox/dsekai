@@ -16,13 +16,6 @@
 #include "graphics/nullg.h"
 #endif /* USE_DOS, USE_SDL, USE_PALM, USE_WIN16, USE_NULL */
 
-struct GRAPHICS_BITMAP {
-   uint8_t loaded;
-   uint32_t id;
-   uint16_t ref_count;
-   GRAPHICS_BITMAP_SURFACE* surface;
-};
-
 #if 0
 #define graphics_pattern_masked_at( spr, mask, mo_x, mo_y, x, y ) \
    graphics_blit_masked_at( \
@@ -46,8 +39,6 @@ void graphics_blit_at( const struct GRAPHICS_BITMAP*,
    uint16_t, uint16_t, uint16_t, uint16_t );
 int32_t graphics_load_bitmap( uint32_t, struct GRAPHICS_BITMAP** );
 int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** );
-int32_t graphics_create_surface( uint32_t, GRAPHICS_BITMAP_SURFACE** );
-int32_t graphics_destroy_surface( GRAPHICS_BITMAP_SURFACE** );
 
 #if 0
 void graphics_blit_masked_at( const GRAPHICS_PATTERN*, const GRAPHICS_MASK*,

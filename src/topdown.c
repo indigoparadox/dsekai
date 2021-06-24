@@ -87,6 +87,8 @@ int topdown_loop(
       mobiles[1].steps_y = 0;
       mobiles[1].inventory = NULL;
       (*mobiles_count)++;
+
+      initialized = 1;
    }
 
    graphics_loop_start();

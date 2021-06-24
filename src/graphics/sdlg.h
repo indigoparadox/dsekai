@@ -7,10 +7,13 @@
 #include "../graphics.h"
 
 typedef const SDL_Color* GRAPHICS_COLOR;
-typedef struct GRAPHICS_BITMAP_SURFACE {
+struct GRAPHICS_BITMAP {
+   uint8_t loaded;
+   uint32_t id;
+   uint16_t ref_count;
    SDL_Surface* surface;
    SDL_Texture* texture;
-} GRAPHICS_BITMAP_SURFACE;
+};
 
 #ifdef SDLG_C
 const SDL_Color gc_black =    {0,   0,   0};

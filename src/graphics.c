@@ -109,31 +109,3 @@ void graphics_blit_at(
 
 #endif /* USE_FAKE_CGA */
 
-/*
- * @return 1 if bitmap is loaded and 0 otherwise.
- */
-int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
-   assert( NULL != b );
-   assert( NULL == *b );
-
-   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
-
-   assert( 0 == (*b)->ref_count );
-
-   (*b)->ref_count++;
-
-   return graphics_create_surface( id, &((*b)->surface) );
-}
-
-/*
- * @return 1 if bitmap is unloaded and 0 otherwise.
- */
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
-   (*b)->ref_count--;
-   if( 0 >= (*b)->ref_count ) {
-      graphics_destroy_surface( &((*b)->surface) );
-      return 1;
-   }
-   return 0;
-}
-

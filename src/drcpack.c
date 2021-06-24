@@ -22,6 +22,7 @@
 
 int main( int argc, char* argv[] ) {
    char* file_list[FILE_LIST_MAX];
+   FILE* extract_res_file = NULL;
    int i = 0,
       retval = 0,
       state = 0,
@@ -30,18 +31,24 @@ int main( int argc, char* argv[] ) {
       command_add = 0,
       command_list = 0,
       command_header = 0,
+      command_extract = 0,
       extension_idx = 0;
    uint32_t id = 0,
+      extract_res_name_sz = 0,
+      wrote = 0,
       file_sz = 0,
       basename_sz = 0;
    char namebuf_header[NAMEBUF_MAX + 1],
       namebuf_arc[NAMEBUF_MAX + 1],
       type_buf[5];
-   uint8_t* file_contents = NULL;
+   char* extract_res_name = NULL;
+   uint8_t* file_contents = NULL,
+      * extract_res_buffer = NULL;
    struct DRC_TOC_E* toc_entries = NULL;
    int32_t toc_entries_sz = 0;
    FILE* header_file = NULL;
    size_t file_list_len = 0;
+   uint8_t* res_buffer = NULL;
 
    memset( namebuf_header, '\0', NAMEBUF_MAX + 1 );
    memset( namebuf_arc, '\0', NAMEBUF_MAX + 1 );
@@ -111,17 +118,24 @@ int main( int argc, char* argv[] ) {
          } else if( 0 == strncmp( argv[i], "-l", 2 ) ) {
             state = 0;
             command_list = 1;
+
+         } else if( 0 == strncmp( argv[i], "-x", 2 ) ) {
+            state = 0;
+            command_extract = 1;
          }
       }
    }
 
    if( command_create ) {
+      dio_printf( "command: create\n" );
       if( 0 > drc_create( namebuf_arc ) ) {
          return 1;
       }
    }
 
    if( command_add ) {
+      dio_printf( "command: add\n" );
+
       assert( 0 != *((uint32_t*)type_buf) );
       assert( NULL == file_contents );
 
@@ -158,10 +172,35 @@ int main( int argc, char* argv[] ) {
    }
 
    if( command_list ) {
+      dio_printf( "command: list\n" );
       drc_list_resources( namebuf_arc, NULL );
+   }
+
+   if( command_extract ) {
+      dio_printf( "command: extract\n" );
+      
+      extract_res_name_sz = drc_get_resource_name( namebuf_arc,
+         *((uint32_t*)type_buf), id, &extract_res_name );
+      assert( 0 < extract_res_name_sz );
+      assert( NULL != extract_res_name );
+
+      retval = drc_get_resource(
+         namebuf_arc, *((uint32_t*)type_buf), id, &extract_res_buffer );
+      if( 0 > retval ) {
+         dio_eprintf( "unable to extract file\n" );
+         goto cleanup;
+      }
+
+      extract_res_file = fopen( extract_res_name, "wb" );
+      assert( NULL != extract_res_file );
+      dio_printf( "writing resource file...\n" );
+      wrote = fwrite( extract_res_buffer, 1, retval, extract_res_file );
+      dio_printf( "wrote %u (%ld) bytes\n", wrote, ftell( extract_res_file ) );
+      assert( wrote == retval );
    }
    
    if( command_header ) {
+      dio_printf( "command: header\n" );
       toc_entries_sz = drc_list_resources( namebuf_arc, &toc_entries );
       header_file = fopen( namebuf_header, "w" );
       assert( NULL != header_file );
@@ -183,6 +222,20 @@ int main( int argc, char* argv[] ) {
       free( toc_entries );
       fprintf( header_file, "\n#endif /* RESEXT_H */\n" );
       fclose( header_file );
+   }
+
+cleanup:
+
+   if( NULL != extract_res_file ) {
+      fclose( extract_res_file );
+   }
+
+   if( NULL != extract_res_name ) {
+      free( extract_res_name );
+   }
+
+   if( NULL != extract_res_buffer ) {
+      free( extract_res_buffer );
    }
 
    for( i = 0 ; file_list_len > i ; i++ ) {

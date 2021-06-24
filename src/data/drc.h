@@ -34,9 +34,18 @@
 /* Reserved: 4 bytes. */
 #define DRC_HEADER_OFFSET_FES             26
 
+#define DRC_TOC_E_SZ                      22
+#define DRC_TOC_E_OFFSET_TYPE             0
+/* Reserved: 4 byte. */
+#define DRC_TOC_E_OFFSET_ID               8
+#define DRC_TOC_E_OFFSET_DATA_START       12
+#define DRC_TOC_E_OFFSET_DATA_SZ          16
+#define DRC_TOC_E_OFFSET_NAME_SZ          20
+#define DRC_TOC_E_OFFSET_NAME             22
+
 struct DRC_HEADER {
    uint32_t type;
-   uint32_t version;
+   uint16_t version;
    uint32_t crc32; /* TODO */
    uint32_t filesize;
    uint32_t toc_start;
@@ -46,7 +55,7 @@ struct DRC_HEADER {
 
 struct DRC_TOC_E {
    uint32_t type;
-   uint8_t reserved; /* NULL buffer for type to emulate a string. */
+   uint32_t reserved; /* NULL byte for type to emulate a string. */
    uint32_t id;
    uint32_t data_start;
    uint32_t data_sz;
@@ -62,6 +71,8 @@ int32_t drc_add_resource( const char*, uint32_t, uint32_t, const char*,
 int32_t drc_remove_resource( const char*, uint32_t, uint32_t );
 int32_t drc_get_resource( const char*, uint32_t, uint32_t, uint8_t** );
 int32_t drc_get_end( const char* );
+int32_t drc_get_resource_sz( const char*, uint32_t, uint32_t );
+int32_t drc_get_resource_name( const char*, uint32_t, uint32_t, char** );
 
 #endif /* DRC_H */
 

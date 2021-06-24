@@ -80,11 +80,18 @@ void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
 }
 
 void graphics_blit_at(
-   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint16_t w, uint16_t h
+   const struct GRAPHICS_BITMAP* bmp,
+   uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
-   assert( NULL != bmp );
-   assert( NULL != *bmp );
-   SDL_BlitSurface( *bmp, NULL, g_s
+   SDL_Rect dest_rect = {
+      x * SCREEN_SCALE, 
+      y * SCREEN_SCALE,
+      w * SCREEN_SCALE, 
+      h * SCREEN_SCALE};
+   if( NULL == bmp || NULL == bmp->texture ) {
+      return;
+   }
+   SDL_RenderCopy( g_renderer, bmp->texture, NULL, &dest_rect );
 }
 
 #if 0
@@ -143,13 +150,20 @@ void graphics_draw_block(
    SDL_RenderFillRect( g_renderer, &area );
 }
 
-int32_t graphics_create_surface( uint32_t id, GRAPHICS_BITMAP_SURFACE** ps ){
+/*
+ * @return 1 if bitmap is loaded and 0 otherwise.
+ */
+int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
    SDL_RWops* bmp_stream;
 
-   assert( NULL != ps );
-   assert( NULL != *ps );
+   assert( NULL != b );
+   assert( NULL == *b );
+
+   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
+   assert( 0 == (*b)->ref_count );
+   (*b)->ref_count++;
 
    buffer_sz = drc_get_resource(
       DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer );
@@ -159,18 +173,34 @@ int32_t graphics_create_surface( uint32_t id, GRAPHICS_BITMAP_SURFACE** ps ){
    }
 
    bmp_stream = SDL_RWFromMem( buffer, buffer_sz );
-   (*ps)->surface = SDL_LoadBMP_RW( bmp_stream, 1 ); /* Free stream on close. */
-   assert( NULL != (*ps)->surface );
+   (*b)->surface = SDL_LoadBMP_RW( bmp_stream, 1 ); /* Free stream on close. */
+   if( NULL == (*b)->surface ) {
+      fprintf( stderr, "unable to load bitmap %u: %s\n",
+         id, SDL_GetError() );
+      buffer_sz = -1;
+      goto cleanup;
+   }
    free( buffer ); /* Free resource memory. */
-   (*ps)->texture = SDL_CreateTextureFromSurface( g_renderer, (*ps)->surface );
-   assert( NULL != (*ps)->texture );
+   (*b)->texture = SDL_CreateTextureFromSurface( g_renderer, (*b)->surface );
+   assert( NULL != (*b)->texture );
 
+cleanup:
    return buffer_sz;
 }
 
-int32_t graphics_destroy_surface( GRAPHICS_BITMAP_SURFACE** ps ) {
-   SDL_FreeSurface( *ps );
-   *ps = NULL;
+/*
+ * @return 1 if bitmap is unloaded and 0 otherwise.
+ */
+int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
+   assert( NULL != *b );
+   (*b)->ref_count--;
+   if( 0 >= (*b)->ref_count ) {
+      SDL_DestroyTexture( (*b)->texture );
+      SDL_FreeSurface( (*b)->surface );
+      free( *b );
+      *b = NULL;
+      return 1;
+   }
    return 0;
 }
 
