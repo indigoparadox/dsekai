@@ -24,10 +24,19 @@ DSEKAI_C_FILES_CHECK := \
    check/check_graphics.c \
    check/check_engines.c
 
+CONVERT_C_FILES := \
+   src/convert.c \
+   src/data/bmp.c \
+   src/data/drc.c \
+   src/data/cga.c \
+   src/data/dio.c
+
 DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
 
 TOPDOWN_O: src/topdown.o
+
+ASSETDIR := assets
 
 ASSETDIR_PALM := gen/palm
 ASSETDIR_WIN16 := gen/win16
@@ -39,6 +48,7 @@ OBJDIR_WIN16 := obj/win16/
 OBJDIR_CHECK_LINUX := obj/check_linux/
 
 GENDIR_LINUX := gen/linux/
+GENDIR_DOS := gen/dos/
 
 BINDIR := bin
 
@@ -49,10 +59,15 @@ BIN_WIN16 := $(BINDIR)/dsekai16.exe
 
 BIN_CHECK_LINUX := $(BINDIR)/check
 
+DSEKAI_ASSETS_BMP := $(wildcard $(ASSETDIR)/*.bmp)
+DSEKAI_ASSETS_DOS_CGA := \
+   $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS),$(DSEKAI_ASSETS_BMP)))
+
 MD := mkdir -p
 PYTHON := python
 CGA2BMP := scripts/cga2bmp.py
-BIN_DRCPACK := bin/drcpack
+DRCPACK := bin/drcpack
+CONVERT := bin/convert
 
 $(BIN_LINUX): CFLAGS := -DUSE_SDL -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89
 $(BIN_LINUX): LDFLAGS := $(shell pkg-config sdl2 --libs) -g
@@ -89,36 +104,48 @@ DSEKAI_O_FILES_PALM := $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES
 DSEKAI_O_FILES_WIN16 := $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
 DSEKAI_O_FILES_CHECK_LINUX := $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_CHECK_LINUX),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
 
-.PHONY: clean res16_linux_drc
+.PHONY: clean res_linux16_drc res_doscga_drc
 
 all: $(BIN_DOS) $(BIN_LINUX) bin/lookup
 
-$(BIN_DRCPACK): src/drcpack.c src/data/drc.c src/data/dio.c
-	$(MD) $(BINDIR)
-	$(CC) -g -o $@ $^ $(LDFLAGS)
+# ====== Utilities ======
 
-bin/convert: src/convert.c src/data/bmp.c src/data/drc.c src/data/cga.c src/data/dio.c
+$(DRCPACK): src/drcpack.c src/data/drc.c src/data/dio.c
 	$(MD) $(BINDIR)
-	$(CC) -g -o $@ $^ $(LDFLAGS)
+	gcc -g -o $@ $^
+
+bin/convert: $(CONVERT_C_FILES)
+	$(MD) $(BINDIR)
+	gcc -g -o $@ $^
 
 bin/editor: src/editor.c src/data/bmp.c src/data/pak.c
 	$(MD) $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-# Main: Linux
+# ====== Main: Linux ======
 
-$(BINDIR)/linux16.drc: res16_linux_drc
+$(BINDIR)/linux16.drc: res_linux16_drc
 
-res16_linux_drc: $(BIN_DRCPACK)
+res_linux16_drc: $(DRCPACK)
 	$(MD) $(GENDIR_LINUX)
-	$(BIN_DRCPACK) -c -a -af $(BINDIR)/linux16.drc -t BMP1 -i 5001 \
-      -if assets/*.bmp -lh $(GENDIR_LINUX)resext.h
+	$(DRCPACK) -c -a -af $(BINDIR)/linux16.drc -t BMP1 -i 5001 \
+      -if $(ASSETDIR)/*.bmp -lh $(GENDIR_LINUX)resext.h
 
 $(BIN_LINUX): $(DSEKAI_O_FILES_LINUX)
 	$(MD) $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-# Main: MS-DOS
+# ====== Main: MS-DOS ======
+
+$(BINDIR)/doscga.drc: res_doscga_drc
+
+res_doscga_drc: $(DRCPACK) $(DSEKAI_ASSETS_DOS_CGA)
+	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -t BMP1 -i 5001 \
+      -if $(GENDIR_DOS)*.cga -lh $(GENDIR_DOS)resext.h
+
+$(GENDIR_DOS)%.cga: $(ASSETDIR)/%.bmp $(BINDIR)/convert
+	$(MD) $(GENDIR_DOS)
+	./bin/convert -ic bitmap -oc cga -ob 2 -if $< -of $@
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)
@@ -126,7 +153,7 @@ $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 
 $(OBJDIR_DOS)$(TOPDOWN_O): $(RESEXT_H)
 
-# Main: Palm
+# ====== Main: Palm ======
 
 $(BIN_PALM): $(OBJDIR_PALM)grc.stamp $(OBJDIR_PALM)bin.stamp
 	$(MD) $(BINDIR)
@@ -162,6 +189,8 @@ $(ASSETDIR_PALM)/generate.stamp: $(DSEKAI_ASSET_HEADERS)
       -rc $(ASSETDIR_PALM)/palm_rc.h
 	touch $@
 
+# ====== Main: Win16 ======
+
 $(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)win16.res
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
@@ -189,11 +218,11 @@ $(BIN_CHECK_LINUX): $(DSEKAI_O_FILES_CHECK_LINUX)
 $(BINDIR)/lookup: lookup.c
 	gcc -o $@ $^
 
-$(OBJDIR_DOS)%.o: %.c
+$(OBJDIR_DOS)%.o: %.c res_doscga_drc
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
-$(OBJDIR_LINUX)%.o: %.c res16_linux_drc
+$(OBJDIR_LINUX)%.o: %.c res_linux16_drc
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 

@@ -231,7 +231,7 @@ struct CONVERT_GRID* bmp_read(
    /* Grid starts from top, bitmap starts from bottom. */
    y = sz_y - 1;
    while( bmp_data_size > byte_idx ) {
-      dio_printf( "byte_idx %lu, bit_idx %lu, row %lu, col %lu (%lu)\n",
+      dio_printf( "bmp: byte_idx %lu, bit_idx %lu, row %lu, col %lu (%lu)\n",
          byte_idx, bit_idx, y, x, (y * sz_x) + x );
       if( 0 == bit_idx % 8 ) {
          byte_buffer = buf[bmp_data_offset + byte_idx];

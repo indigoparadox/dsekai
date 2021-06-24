@@ -7,20 +7,24 @@ const char gc_null = '\0';
 
 uint32_t cga_write_plane(
    uint8_t* buffer, uint32_t buffer_sz,
-   const struct CONVERT_GRID* grid, int y_offset
+   const struct CONVERT_GRID* grid, int y_offset, int bpp
 ) {
-   size_t
+   uint8_t byte_buffer = 0;
+   uint32_t buffer_offset = 0;
+   int32_t
       x = 0,
       y = 0,
       bit_idx = 0,
       grid_idx = 0;
-   uint8_t byte_buffer = 0;
-   uint32_t buffer_offset = 0;
 
    /* Write even pixels from grid. */
    for( y = y_offset ; grid->sz_y > y ; y += 2 /* Every other scanline. */ ) {
       for( x = 0 ; grid->sz_x > x ; x++ ) {
          grid_idx = (y * grid->sz_x) + x;
+
+         dio_printf( "cga: x: %d, y: %d, byte: %d (%d bpp)\n",
+            x, y, buffer_offset, bpp );
+         assert( buffer_offset < buffer_sz );
 
          if( 0 == bit_idx % 8 && 0 != bit_idx ) {
             /* Write current byte and start a new one. */
@@ -36,7 +40,7 @@ uint32_t cga_write_plane(
          byte_buffer |= ((grid->data[grid_idx] & (0x03)) << (6 - bit_idx));
 
          /* Advance the bit index by one pixel. */
-         bit_idx += grid->bpp;
+         bit_idx += bpp;
       }
    }
    buffer[buffer_offset++] = byte_buffer;
@@ -52,25 +56,29 @@ int cga_write_file(
    uint8_t* cga_buffer = NULL;
    uint32_t cga_buffer_sz = 0;
 
-   cga_buffer_sz = 
-      (((grid->sz_y / 2) * (grid->sz_x * o->bpp)) / 8) / 2;
+   /* Output BPP is always 2 for now. */
+   o->bpp = 2;
+
+   /* Determine the buffer size. */
+   /* x * y size * bpp (which is 2) for total bits / 4 (since 8 / 2 = 4) */
+   /* 8 makes castle.4 back from castle.bmp work... probably matches 8 below. */
+   cga_buffer_sz = (((grid->sz_y * grid->sz_x * o->bpp)) / 8);
+   o->plane_padding = cga_buffer_sz / 2; /* Plane pads halfway in. */
    cga_buffer_sz += (2 * o->line_padding);
    dio_printf( "CGA buffer size: %u\n", cga_buffer_sz );
 
    cga_buffer = calloc( 1, cga_buffer_sz );
    assert( NULL != cga_buffer );
 
+   /* Perform the conversion and write the result to file. */
    cga_file = fopen( path, "wb" );
    assert( NULL != cga_file );
-
    retval = cga_write( cga_buffer, cga_buffer_sz, grid, o );
-
    fwrite( cga_buffer, 1, cga_buffer_sz, cga_file );
-
    dio_printf( "wrote CGA file: %lu bytes\n", ftell( cga_file ) );
 
-   free( cga_buffer );
    fclose( cga_file );
+   free( cga_buffer );
 
    return retval;
 }
@@ -81,10 +89,12 @@ int cga_write(
 ) {
    int retval = 0;
 
-   cga_write_plane( buffer, buffer_sz, grid, 0 );
+   cga_write_plane( buffer, buffer_sz, grid, 0, o->bpp );
+
+   assert( buffer_sz > o->plane_padding + o->line_padding );
 
    cga_write_plane( &(buffer[o->plane_padding + o->line_padding]),
-      buffer_sz - o->plane_padding, grid, 1 ) ;
+      buffer_sz - o->plane_padding, grid, 1, o->bpp ) ;
 
    return retval;
 }
@@ -129,6 +139,10 @@ struct CONVERT_GRID* cga_read(
    grid->sz_x = o->w;
    grid->sz_y = o->h;
    grid->bpp = 2; /* CGA is 2bpp or we don't understand it. */
+
+   /* Image size is w * h * bpp, / 4 px per byte. Planes break / 2. */
+   /* 8 makes castle.4 work... why? */
+   o->plane_padding = ((o->w * o->h * o->bpp) / 8) / 2;
 
    /* Read pixels into grid. */
    for( y = 0 ; grid->sz_y > y ; y += 2 /* Every other scanline. */ ) {

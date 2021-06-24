@@ -161,12 +161,17 @@ void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
 }
 
 void graphics_blit_at(
-   const GRAPHICS_BITMAP* bmp,
-   uint16_t x, uint16_t y, uint8_t w, uint8_t h, const int byte_width
+   const struct GRAPHICS_BITMAP* bmp,
+   uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
 	int y_offset = 0;
    uint16_t byte_offset = 0;
-   const uint8_t* bits = bmp->bits;
+   const uint8_t* plane_1 = bmp->plane_1;
+   const uint8_t* plane_2 = bmp->plane_2;
+
+   if( NULL == plane_1 || NULL == plane_2 ) {
+      return;
+   }
 
 #if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
 #error "not implemented"
@@ -181,35 +186,17 @@ void graphics_blit_at(
 #error "not implemented"
 #endif /* USE_LOOKUPS */
 
-      switch( y_offset + y_is_odd ) {
-      case 0x0:
-      case 0x2:
-      case 0x4:
-      case 0x6:
-      case 0x8:
-      case 0xa:
-      case 0xc:
-      case 0xe:
-         _fmemcpy( &(g_buffer[byte_offset]), bits, byte_width );
-         break;
-
-      case 0x1:
-      case 0x3:
-      case 0x5:
-      case 0x7:
-      case 0x9:
-      case 0xb:
-      case 0xd:
-      case 0xf:
-         _fmemcpy( &(g_buffer[0x2000 + byte_offset]), bits, byte_width );
-         break;
-      }
+      _fmemcpy( &(g_buffer[byte_offset]), plane_1, 2 );
+      _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2, 2 );
 
       /* Advance source address by bytes per copy. */
-      bits += byte_width;
+      plane_1 += 2;
+      plane_2 += 2;
 	}
 #endif /* GRAPHICS_MODE */
 }
+
+#if 0
 
 void graphics_blit_masked_at(
    const GRAPHICS_PATTERN* bmp, const GRAPHICS_MASK* mask,
@@ -277,6 +264,8 @@ void graphics_blit_masked_at(
 #endif /* GRAPHICS_MODE */
 }
 
+#endif
+
 void graphics_draw_block(
    uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
    GRAPHICS_COLOR color
@@ -298,5 +287,50 @@ void graphics_draw_block(
       _fmemset( (char far *)0xB8002000 + byte_offset, color, 2 );
    }
 #endif /* GRAPHICS_MODE */
+
+}
+
+/*
+ * @return 1 if bitmap is loaded and 0 otherwise.
+ */
+int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
+   uint8_t* buffer = NULL;
+   int32_t buffer_sz = 0;
+
+   assert( NULL != b );
+   assert( NULL == *b );
+
+   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
+   assert( 0 == (*b)->ref_count );
+   (*b)->ref_count++;
+
+   buffer_sz = drc_get_resource(
+      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer );
+   if( 0 >= buffer_sz ) {
+      assert( NULL == buffer );
+      return buffer_sz;
+   }
+
+   /* TODO */
+
+   free( buffer ); /* Free resource memory. */
+
+cleanup:
+   return buffer_sz;
+}
+
+/*
+ * @return 1 if bitmap is unloaded and 0 otherwise.
+ */
+int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
+   assert( NULL != *b );
+   (*b)->ref_count--;
+   if( 0 >= (*b)->ref_count ) {
+      /* TODO */
+      free( *b );
+      *b = NULL;
+      return 1;
+   }
+   return 0;
 }
 

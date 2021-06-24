@@ -115,6 +115,7 @@ int main( int argc, char* argv[] ) {
          state = 0;
          break;
 
+#if 0
       case STATE_INPP:
          options_in.plane_padding = atoi( argv[i] );
          state = 0;
@@ -124,6 +125,7 @@ int main( int argc, char* argv[] ) {
          options_out.plane_padding = atoi( argv[i] );
          state = 0;
          break;
+#endif
 
       default:
          if( 0 == strncmp( argv[i], "-if", 3 ) ) {
@@ -142,10 +144,12 @@ int main( int argc, char* argv[] ) {
             state = STATE_INW;
          } else if( 0 == strncmp( argv[i], "-ih", 3 ) ) {
             state = STATE_INH;
+#if 0
          } else if( 0 == strncmp( argv[i], "-ip", 3 ) ) {
             state = STATE_INPP;
          } else if( 0 == strncmp( argv[i], "-op", 3 ) ) {
             state = STATE_OUTPP;
+#endif
          } else if( 0 == strncmp( argv[i], "-il", 3 ) ) {
             state = STATE_INLP;
          } else if( 0 == strncmp( argv[i], "-ol", 3 ) ) {
@@ -159,12 +163,20 @@ int main( int argc, char* argv[] ) {
    printf( "%s (fmt %d) to %s (fmt %d)\n", namebuf_in, fmt_in,
       namebuf_out, fmt_out );
 
+   assert( 0 != strlen( namebuf_in ) );
+   assert( 0 != strlen( namebuf_out ) );
+   assert( 0 != fmt_in );
+   assert( 0 != fmt_out );
+   assert( FMT_CGA != fmt_in || 0 != options_in.w );
+   assert( FMT_CGA != fmt_in || 0 != options_in.h );
+   //assert( FMT_CGA != fmt_in || 0 != options_in.plane_padding );
+
    if(
       0 == strlen( namebuf_in ) ||
       0 == strlen( namebuf_out ) ||
       0 == fmt_in || 0 == fmt_out ||
-      (FMT_CGA == fmt_in && (0 == options_in.w || 0 == options_in.h || 
-         0 == options_out.plane_padding))
+      (FMT_CGA == fmt_in && (0 == options_in.w || 0 == options_in.h))
+         //0 == options_in.plane_padding))
    ) {
       fprintf( stderr, "usage:\n\n" );
       fprintf( stderr, "%s [options] -ic <in_fmt> -oc <out_fmt> -if <in_file> -of <out_file>\n", argv[0] );
@@ -184,7 +196,7 @@ int main( int argc, char* argv[] ) {
       return 1;
    }
 
-   if( 0 == options_in.bpp && FMT_CGA == fmt_in ) {
+   if( 0 == options_in.bpp && (FMT_CGA == fmt_in || FMT_CGA == fmt_out) ) {
       options_out.bpp = 2;
    }
 
@@ -208,7 +220,7 @@ int main( int argc, char* argv[] ) {
       options_out.bpp = grid->bpp;
    }
 
-   //convert_print_grid( grid );
+   dio_print_grid( grid );
 
    switch( fmt_out ) {
    case FMT_BITMAP:
