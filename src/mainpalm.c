@@ -6,7 +6,7 @@
 #include "mobile.h"
 #include "window.h"
 #include "engines.h"
-#include "psprintf.h"
+#include "data/dio.h"
 #include "item.h"
 
 #define MAIN_C
@@ -53,7 +53,7 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
          running = topdown_loop( mobiles, &mobiles_count, &tiles_flags );
 
 #ifndef NO_PALM_DEBUG_LINE
-         palm_debug_line_len = psprintf( palm_debug_line, PSITOA_BUF_LEN,
+         palm_debug_line_len = dio_snprintf( palm_debug_line, PSITOA_BUF_LEN,
             "%d, %d (%d, %d)",
             player.coords.x,
             player.coords.y,

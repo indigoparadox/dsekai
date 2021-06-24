@@ -57,12 +57,16 @@ int topdown_loop(
          tiles_field,
          '\0',
          sizeof( struct GRAPHICS_BITMAP* ) * TILEMAP_TILESETS_MAX );
+#ifndef DISABLE_GRAPHICS
       graphics_load_bitmap( gc_tile_field_grass, &(tiles_field[0]) );
       graphics_load_bitmap( gc_tile_field_brick_wall, &(tiles_field[1]) );
       graphics_load_bitmap( gc_tile_field_tree, &(tiles_field[2]) );
+#endif /* !DISABLE_GRAPHICS */
       g_map_field.tileset = tiles_field;
 
+#ifndef DISABLE_GRAPHICS
       graphics_load_bitmap( gc_sprite_robe, &(mobiles[0].sprite) );
+#endif /* !DISABLE_GRAPHICS */
       mobiles[0].hp = 100;
       mobiles[0].mp = 100;
       mobiles[0].coords.x = 3;
@@ -74,7 +78,9 @@ int topdown_loop(
       mobiles[0].inventory = NULL;
       (*mobiles_count)++;
 
+#ifndef DISABLE_GRAPHICS
       graphics_load_bitmap( gc_sprite_princess, &(mobiles[1].sprite) );
+#endif /* !DISABLE_GRAPHICS */
       mobiles[1].hp = 100;
       mobiles[1].mp = 100;
       mobiles[1].coords.x = 5;
@@ -126,10 +132,12 @@ int topdown_loop(
 
          topdown_refresh_tiles( tiles_flags );
 #ifdef ANIMATE_SCREEN_MOVEMENT
+#ifndef DISABLE_GRAPHICS
          tilemap_draw( &g_map_field, tiles_flags,
             g_screen_scroll_x, g_screen_scroll_y, 1 );
 
          graphics_flip();
+#endif /* !DISABLE_GRAPHICS */
 #endif /* ANIMATE_SCREEN_MOVEMENT */
 
          /* Drain input. */
@@ -150,8 +158,10 @@ int topdown_loop(
          return 1;
       }
 
+#ifndef DISABLE_GRAPHICS
       tilemap_draw( &g_map_field, tiles_flags,
          g_screen_scroll_x, g_screen_scroll_y, 0 );
+#endif /* !DISABLE_GRAPHICS */
 
       for( i = 0 ; *mobiles_count > i ; i++ ) {
          if(
@@ -163,9 +173,11 @@ int topdown_loop(
             /* Mobile is off-screen. */
             continue;
          }
+#ifndef DISABLE_GRAPHICS
          mobile_draw(
             &(mobiles[i]),
             g_walk_offset, g_screen_scroll_x, g_screen_scroll_y );
+#endif /* !DISABLE_GRAPHICS */
       }
    }
 
@@ -245,6 +257,13 @@ int topdown_loop(
       break;
 
    case INPUT_KEY_QUIT:
+#ifndef DISABLE_GRAPHICS
+      graphics_unload_bitmap( &(tiles_field[0]) );
+      graphics_unload_bitmap( &(tiles_field[1]) );
+      graphics_unload_bitmap( &(tiles_field[2]) );
+      graphics_unload_bitmap( &(mobiles[0].sprite) );
+      graphics_unload_bitmap( &(mobiles[1].sprite) );
+#endif /* !DISABLE_GRAPHICS */
       return 0;
    }
 

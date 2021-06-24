@@ -41,6 +41,12 @@ static const uint16_t gc_drc_version = 1;
 static int32_t drc_read_toc_e( FILE* drc_file, struct DRC_TOC_E* toc_e ) {
    uint32_t toc_e_start = 0;
 
+   assert( NULL == toc_e->name );
+   if( NULL != toc_e->name ) {
+      free( toc_e->name );
+      toc_e->name = NULL;
+   }
+
    toc_e_start = ftell( drc_file );
    memset( toc_e, '\0', sizeof( struct DRC_TOC_E ) );
 
@@ -60,7 +66,6 @@ static int32_t drc_read_toc_e( FILE* drc_file, struct DRC_TOC_E* toc_e ) {
    assert( ftell( drc_file ) == toc_e_start + DRC_TOC_E_OFFSET_NAME_SZ );
    fread( &(toc_e->name_sz), sizeof( uint16_t ), 1, drc_file );
    assert( 0 < toc_e->name_sz );
-   assert( NULL == toc_e->name );
    toc_e->name = calloc( toc_e->name_sz + 1, 1 );
    assert( NULL != toc_e->name );
 
@@ -105,6 +110,8 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
    struct DRC_TOC_E toc_e_iter;
    struct DRC_HEADER header;
 
+   memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
+
    dio_printf( "opening %s to list...\n", path );
 
    drc_file = fopen( path, "rb" );
@@ -115,6 +122,7 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
    assert( 0 != header.toc_start );
    for( i = 0 ; header.toc_entries > i ; i++ ) {
 
+      assert( NULL == toc_e_iter.name );
       drc_read_toc_e( drc_file, &toc_e_iter );
 
       toc_count_out++;
@@ -129,7 +137,14 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
                realloc( *ptoc, sizeof( struct DRC_TOC_E ) * toc_count_out );
             assert( NULL != *ptoc );
          }
+
+         /* Move, rather than copy. */
          memcpy( &((*ptoc)[i]), &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+         memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
+      } else {
+         /* Just free the dynamically allocated name. */
+         free( toc_e_iter.name );
+         toc_e_iter.name = NULL;
       }
    }
 
@@ -497,6 +512,8 @@ int32_t drc_get_resource(
    struct DRC_TOC_E toc_e_iter;
    struct DRC_HEADER header;
 
+   memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
+
    dio_printf( "opening %s to get resource...\n", path );
 
    drc_file = fopen( path, "rb" );
@@ -505,6 +522,7 @@ int32_t drc_get_resource(
    drc_read_header( drc_file, &header );
    assert( 0 != header.toc_start );
    for( i = 0 ; header.toc_entries > i ; i++ ) {
+      assert( NULL == toc_e_iter.name );
       drc_read_toc_e( drc_file, &toc_e_iter );
 
       if( toc_e_iter.type == type && toc_e_iter.id == id ) {
@@ -529,7 +547,10 @@ int32_t drc_get_resource(
             dio_printf( "read %d bytes from offset %u\n",
                read, toc_e_iter.data_start );
          }
-         break;
+         goto cleanup;
+      } else {
+         free( toc_e_iter.name );
+         toc_e_iter.name = NULL;
       }
    }
 
@@ -581,6 +602,7 @@ int32_t drc_get_resource_sz( const char* path, uint32_t type, uint32_t id ) {
    assert( 0 != header.toc_start );
    for( i = 0 ; header.toc_entries > i ; i++ ) {
 
+      assert( NULL == toc_e_iter.name );
       drc_read_toc_e( drc_file, &toc_e_iter );
 
       if( toc_e_iter.type == type && toc_e_iter.id == id ) {
@@ -589,6 +611,9 @@ int32_t drc_get_resource_sz( const char* path, uint32_t type, uint32_t id ) {
          res_sz_out = toc_e_iter.data_sz;
          break;
       }
+
+      free( toc_e_iter.name );
+      toc_e_iter.name = NULL;
    }
 
    if( NULL != toc_e_iter.name ) {
@@ -618,6 +643,7 @@ int32_t drc_get_resource_name(
    assert( 0 != header.toc_start );
    for( i = 0 ; header.toc_entries > i ; i++ ) {
 
+      assert( NULL == toc_e_iter.name );
       drc_read_toc_e( drc_file, &toc_e_iter );
       assert( NULL != toc_e_iter.name );
 
@@ -628,6 +654,9 @@ int32_t drc_get_resource_name(
          name_sz_out = toc_e_iter.name_sz;
          break;
       }
+
+      free( toc_e_iter.name );
+      toc_e_iter.name = NULL;
    }
 
    if( 0 >= name_sz_out ) {

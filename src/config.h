@@ -77,7 +77,7 @@
 /* Fake assert. */
 #define assert( comp ) \
    if( !(comp) ) { \
-      g_assert_failed_len = psprintf( \
+      g_assert_failed_len = dio_snprintf( \
          g_assert_failed, 255, \
          "%s, %d: ASSERT FALED", __FUNCTION__, __LINE__ ); \
    }

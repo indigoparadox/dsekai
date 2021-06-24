@@ -28,6 +28,8 @@ void dio_print_grid( struct CONVERT_GRID* );
 int32_t dio_copy_file( const char*, const char* );
 uint32_t dio_read_file( const char*, uint8_t** );
 int32_t dio_move_file( const char*, const char* );
+int16_t dio_itoa( char*, uint16_t, int16_t, uint8_t );
+int16_t dio_snprintf( char*, uint16_t, const char*, ... );
 
 #endif /* DIO_H */
 

@@ -10,6 +10,7 @@
 #include "../data/offsets.h"
 #endif /* USE_LOOKUPS */
 #include "../data/cga.h"
+#include "../data/drc.h"
 
 #ifdef USE_DOUBLEBUF
 static uint8_t huge g_buffer[76800]; /* Sized for 0x13. */
@@ -332,7 +333,6 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
 
    free( buffer ); /* Free resource memory. */
 
-cleanup:
    return buffer_sz;
 }
 
@@ -342,7 +342,7 @@ cleanup:
 int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
    assert( NULL != *b );
    (*b)->ref_count--;
-   if( 0 >= (*b)->ref_count ) {
+   if( 0 == (*b)->ref_count ) {
       /* TODO */
       free( *b );
       *b = NULL;

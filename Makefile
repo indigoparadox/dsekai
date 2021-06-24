@@ -6,7 +6,6 @@ DSEKAI_C_FILES := \
    src/item.c \
    src/window.c \
    src/topdown.c \
-   src/psprintf.c \
    src/data/dio.c \
    src/data/drc.c
 
@@ -20,7 +19,6 @@ DSEKAI_C_FILES_CHECK := \
    check/check_item.c \
    check/check_tilemap.c \
    check/check_window.c \
-   check/check_psprintf.c \
    check/check_graphics.c \
    check/check_engines.c
 
@@ -69,12 +67,12 @@ CGA2BMP := scripts/cga2bmp.py
 DRCPACK := bin/drcpack
 CONVERT := bin/convert
 
-$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM_SDL
-$(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g
+$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM_SDL -fsanitize=address -fsanitize=leak -DDIO_SILENT
+$(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g -fsanitize=address -fsanitize=leak
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -0 -mm -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_DOS
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_DOS -DDIO_SILENT
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
