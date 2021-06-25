@@ -2,6 +2,7 @@
 #include "dio.h"
 
 #include "../convert.h"
+#include "../memory.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,7 +56,7 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
    char* path_tmp = NULL,
       * basename_ptr = NULL;
 
-   path_tmp = calloc( path_sz + 1, 1 );
+   path_tmp = memory_alloc( path_sz + 1, 1 );
    memcpy( path_tmp, path, path_sz );
 
    basename_ptr = strtok( path_tmp, "\\/" );
@@ -65,7 +66,7 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
       basename_ptr = strtok( NULL, "\\/" );
    }
 
-   free( path_tmp );
+   memory_free( &path_tmp );
 
    return retval;
 }
@@ -120,7 +121,7 @@ uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
    fseek( file_in, 0, SEEK_END );
    file_in_sz = ftell( file_in );
    fseek( file_in, 0, SEEK_SET );
-   *buffer_ptr = calloc( file_in_sz, 1 );
+   *buffer_ptr = memory_alloc( file_in_sz, 1 );
    assert( NULL != *buffer_ptr );
 
    while(

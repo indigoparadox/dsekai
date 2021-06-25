@@ -304,7 +304,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
    assert( NULL != b );
    assert( NULL == *b );
 
-   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
+   *b = memory_alloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
    assert( 0 == (*b)->ref_count );
    (*b)->ref_count++;
 
@@ -315,7 +315,6 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
       return buffer_sz;
    }
 
-   /* TODO */
    (*b)->id = id;
    (*b)->w = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_WIDTH / 2];
    (*b)->h = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_HEIGHT / 2];
@@ -323,15 +322,15 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
 
    plane_sz = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_SZ / 2];
    plane_offset = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_OFFSET / 2];
-   (*b)->plane_1 = calloc( plane_sz, 1 );
+   (*b)->plane_1 = memory_alloc( plane_sz, 1 );
    memcpy( (*b)->plane_1, &(buffer[plane_offset]), plane_sz );
 
    plane_sz = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_SZ / 2];
    plane_offset = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_OFFSET / 2];
-   (*b)->plane_2 = calloc( plane_sz, 1 );
+   (*b)->plane_2 = memory_alloc( plane_sz, 1 );
    memcpy( (*b)->plane_2, &(buffer[plane_offset]), plane_sz );
 
-   free( buffer ); /* Free resource memory. */
+   memory_free( &buffer ); /* Free resource memory. */
 
    return buffer_sz;
 }
@@ -343,9 +342,7 @@ int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
    assert( NULL != *b );
    (*b)->ref_count--;
    if( 0 == (*b)->ref_count ) {
-      /* TODO */
-      free( *b );
-      *b = NULL;
+      memory_free( b );
       return 1;
    }
    return 0;

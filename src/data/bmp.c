@@ -2,6 +2,7 @@
 #include "bmp.h"
 
 #include "dio.h"
+#include "../memory.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -41,12 +42,12 @@ int bmp_write_file(
       (4 * (1 == o->bpp ? 2 : 4)) + /* Palette entries. */
       o->bmp_data_sz;
 
-   bmp_buffer = calloc( 1, bmp_buffer_sz );
+   bmp_buffer = memory_alloc( 1, bmp_buffer_sz );
    assert( NULL != bmp_buffer );
 
    retval = bmp_write( bmp_buffer, bmp_buffer_sz, grid, o );
    if( retval ) {
-      free( bmp_buffer );
+      memory_free( &bmp_buffer );
       return retval;
    }
 
@@ -56,7 +57,7 @@ int bmp_write_file(
    fwrite( bmp_buffer, 1, bmp_buffer_sz, file_out );
 
    fclose( file_out );
-   free( bmp_buffer );
+   memory_free( &bmp_buffer );
 
    return retval;
 }
@@ -186,7 +187,7 @@ struct CONVERT_GRID* bmp_read_file(
 
    grid_out = bmp_read( bmp_buffer, bmp_buffer_sz, o );
 
-   free( bmp_buffer );
+   memory_free( &bmp_buffer );
 
    return grid_out;
 }
@@ -231,10 +232,10 @@ struct CONVERT_GRID* bmp_read(
    /* Read the bitmap data. */
    bmp_data_size = buf_sz - bmp_data_offset;
    dio_printf( "bitmap data is %u bytes\n", bmp_data_size );
-   grid = calloc( 1, sizeof( struct CONVERT_GRID ) );
+   grid = memory_alloc( 1, sizeof( struct CONVERT_GRID ) );
    assert( NULL != grid );
    grid->data_sz = sz_x * sz_y;
-   grid->data = calloc( 1, grid->data_sz );
+   grid->data = memory_alloc( 1, grid->data_sz );
    assert( NULL != grid->data );
 
    grid->sz_x = sz_x;

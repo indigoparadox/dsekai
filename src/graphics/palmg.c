@@ -73,10 +73,10 @@ void graphics_draw_block(
 int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
    int retval = 1;
 
-   assert( NULL != b );
-   assert( NULL == *b );
+   /* assert( NULL != b ); */
+   /* assert( NULL == *b ); */
 
-   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
+   *b = memory_alloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
    if( 0 != (*b)->ref_count ) {
       retval = 1;
       goto cleanup;
@@ -107,8 +107,7 @@ int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
    (*b)->ref_count--;
    if( 0 >= (*b)->ref_count ) {
       MemHandleUnlock( (*b)->handle );
-      free( *b );
-      *b = NULL;
+      memory_free( b );
       return 1;
    }
    return 0;

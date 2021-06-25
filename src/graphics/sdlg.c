@@ -5,6 +5,7 @@
 #include <SDL.h>
 
 #include "../data/drc.h"
+#include "../memory.h"
 
 SDL_Window* g_window = NULL;
 SDL_Surface* g_screen = NULL;
@@ -161,7 +162,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
    assert( NULL != b );
    assert( NULL == *b );
 
-   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
+   *b = memory_alloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
    assert( 0 == (*b)->ref_count );
    (*b)->ref_count++;
 
@@ -180,7 +181,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
       buffer_sz = -1;
       goto cleanup;
    }
-   free( buffer ); /* Free resource memory. */
+   memory_free( &buffer ); /* Free resource memory. */
    (*b)->texture = SDL_CreateTextureFromSurface( g_renderer, (*b)->surface );
    assert( NULL != (*b)->texture );
 
@@ -197,8 +198,7 @@ int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
    if( 0 >= (*b)->ref_count ) {
       SDL_DestroyTexture( (*b)->texture );
       SDL_FreeSurface( (*b)->surface );
-      free( *b );
-      *b = NULL;
+      memory_free( b );
       return 1;
    }
    return 0;

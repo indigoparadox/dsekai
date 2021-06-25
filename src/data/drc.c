@@ -1,6 +1,7 @@
 
 #include "drc.h"
 
+#include "../memory.h"
 #include "dio.h"
 
 #include <stdio.h>
@@ -42,7 +43,7 @@ static int32_t drc_read_toc_e( FILE* drc_file, struct DRC_TOC_E* toc_e ) {
 
    assert( NULL == toc_e->name );
    if( NULL != toc_e->name ) {
-      free( toc_e->name );
+      memory_free( &toc_e->name );
       toc_e->name = NULL;
    }
 
@@ -65,7 +66,7 @@ static int32_t drc_read_toc_e( FILE* drc_file, struct DRC_TOC_E* toc_e ) {
    assert( ftell( drc_file ) == toc_e_start + DRC_TOC_E_OFFSET_NAME_SZ );
    fread( &(toc_e->name_sz), sizeof( uint16_t ), 1, drc_file );
    assert( 0 < toc_e->name_sz );
-   toc_e->name = calloc( toc_e->name_sz + 1, 1 );
+   toc_e->name = memory_alloc( toc_e->name_sz + 1, 1 );
    assert( NULL != toc_e->name );
 
    dio_printf( "read TOC entry (%ld bytes)\n",
@@ -129,7 +130,7 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
       /* Store the entry in a list if requested. */
       if( NULL != ptoc ) {
          if( NULL == *ptoc ) {
-            *ptoc = calloc( 1, sizeof( struct DRC_TOC_E ) );
+            *ptoc = memory_alloc( 1, sizeof( struct DRC_TOC_E ) );
             assert( NULL != *ptoc );
          } else {
             *ptoc =
@@ -142,7 +143,7 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
          memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
       } else {
          /* Just free the dynamically allocated name. */
-         free( toc_e_iter.name );
+         memory_free( &toc_e_iter.name );
          toc_e_iter.name = NULL;
       }
    }
@@ -335,7 +336,7 @@ int32_t drc_add_resource(
        */
       if( NULL == toc_offsets ) {
          toc_offsets_sz = 1;
-         toc_offsets_new = calloc( 1, sizeof( uint32_t ) );
+         toc_offsets_new = memory_alloc( 1, sizeof( uint32_t ) );
       } else {
          toc_offsets_sz++;
          toc_offsets_new = realloc( toc_offsets, toc_offsets_sz );
@@ -378,7 +379,7 @@ int32_t drc_add_resource(
          ftell( drc_file_tmp ) - toc_iter_e_start_out );
 
       /* Copy the name. */
-      toc_iter_name = calloc( 1, toc_iter_name_sz );
+      toc_iter_name = memory_alloc( 1, toc_iter_name_sz );
       if( NULL == toc_iter_name ) {
          dio_eprintf( "could not allocate name buffer\n" );
          retval = DRC_ERROR_COULD_NOT_ALLOC;
@@ -402,7 +403,7 @@ int32_t drc_add_resource(
       dio_printf( "skipping TOC entry %d, %s (starting at %u, %u bytes)..\n",
          toc_iter_id, toc_iter_name, toc_iter_start, toc_iter_size );
 
-      free( toc_iter_name );
+      memory_free( &toc_iter_name );
       toc_iter_name = NULL;
    }
 
@@ -464,7 +465,7 @@ int32_t drc_add_resource(
 cleanup:
 
    if( NULL != toc_offsets ) {
-      free( toc_offsets );
+      memory_free( &toc_offsets );
    }
 
    if( NULL != drc_file ) {
@@ -476,7 +477,7 @@ cleanup:
    }
 
    if( NULL != toc_iter_name ) {
-      free( toc_iter_name );
+      memory_free( &toc_iter_name );
    }
 
    if( 0 < retval && 0 > dio_move_file( tmp_path, path ) ) {
@@ -531,7 +532,7 @@ int32_t drc_get_resource(
             goto cleanup;
          }
          /* Load file contents into buffer at referenced address. */
-         *buffer = calloc( 1, toc_e_iter.data_sz );
+         *buffer = memory_alloc( 1, toc_e_iter.data_sz );
          dio_printf( "allocated %u bytes\n", toc_e_iter.data_sz );
          if( NULL == *buffer ) {
             dio_eprintf( "could not allocate contents buffer\n" );
@@ -545,7 +546,7 @@ int32_t drc_get_resource(
          }
          goto cleanup;
       } else {
-         free( toc_e_iter.name );
+         memory_free( &toc_e_iter.name );
          toc_e_iter.name = NULL;
       }
    }
@@ -557,7 +558,7 @@ cleanup:
    }
 
    if( NULL != toc_e_iter.name ) {
-      free( toc_e_iter.name );
+      memory_free( &toc_e_iter.name );
    }
 
    return resource_sz;
@@ -608,12 +609,12 @@ int32_t drc_get_resource_sz( const char* path, uint32_t type, uint32_t id ) {
          break;
       }
 
-      free( toc_e_iter.name );
+      memory_free( &toc_e_iter.name );
       toc_e_iter.name = NULL;
    }
 
    if( NULL != toc_e_iter.name ) {
-      free( toc_e_iter.name );
+      memory_free( &toc_e_iter.name );
    }
    fclose( drc_file );
 
@@ -651,12 +652,11 @@ int32_t drc_get_resource_name(
          break;
       }
 
-      free( toc_e_iter.name );
-      toc_e_iter.name = NULL;
+      memory_free( &toc_e_iter.name );
    }
 
    if( 0 >= name_sz_out ) {
-      free( toc_e_iter.name );
+      memory_free( &toc_e_iter.name );
    }
 
    fclose( drc_file );

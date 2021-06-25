@@ -1,6 +1,7 @@
 
 #include "cga.h"
 
+#include "../memory.h"
 #include "dio.h"
 
 const char gc_null = '\0';
@@ -71,7 +72,7 @@ int cga_write_file(
    }
    dio_printf( "CGA buffer size: %u\n", cga_buffer_sz );
 
-   cga_buffer = calloc( 1, cga_buffer_sz );
+   cga_buffer = memory_alloc( 1, cga_buffer_sz );
    assert( NULL != cga_buffer );
 
    /* Perform the conversion and write the result to file. */
@@ -82,7 +83,7 @@ int cga_write_file(
    dio_printf( "wrote CGA file: %lu bytes\n", ftell( cga_file ) );
 
    fclose( cga_file );
-   free( cga_buffer );
+   memory_free( &cga_buffer );
 
    return retval;
 }
@@ -140,7 +141,7 @@ struct CONVERT_GRID* cga_read_file(
 
    grid_out = cga_read( cga_buffer, cga_buffer_sz, o );
 
-   free( cga_buffer );
+   memory_free( &cga_buffer );
 
    return grid_out;
 }
@@ -161,10 +162,10 @@ struct CONVERT_GRID* cga_read(
    struct CONVERT_GRID* grid = NULL;
 
    /* Allocate new grid. */
-   grid = calloc( 1, sizeof( struct CONVERT_GRID ) );
+   grid = memory_alloc( 1, sizeof( struct CONVERT_GRID ) );
    assert( NULL != grid );
    grid->data_sz = o->w * o->h;
-   grid->data = calloc( 1, grid->data_sz );
+   grid->data = memory_alloc( 1, grid->data_sz );
    assert( NULL != grid->data );
    grid->sz_x = o->w;
    grid->sz_y = o->h;

@@ -12,15 +12,21 @@ DSEKAI_C_FILES_SDL := \
    src/input/sdli.c \
    src/graphics/sdlg.c \
    src/main.c \
-   src/data/drc.c
+   src/data/drc.c \
+   src/memory/calloc.c
 
 DSEKAI_C_FILES_DOS := \
    src/input/dosi.c \
    src/graphics/dosg.c \
    src/main.c \
-   src/data/drc.c
+   src/data/drc.c \
+   src/memory/calloc.c
 
-DSEKAI_C_FILES_PALM := src/input/palmi.c src/graphics/palmg.c src/mainpalm.c
+DSEKAI_C_FILES_PALM := \
+   src/input/palmi.c \
+   src/graphics/palmg.c \
+   src/mainpalm.c \
+   src/memory/palmm.c
 
 DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
 
@@ -35,19 +41,22 @@ DSEKAI_C_FILES_CHECK := \
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
-   src/data/dio.c
+   src/data/dio.c \
+   src/memory/calloc.c
 
 DRCPACK_C_FILES := \
    tools/drcpack.c \
    src/data/drc.c \
-   src/data/dio.c
+   src/data/dio.c \
+   src/memory/calloc.c
 
 CONVERT_C_FILES := \
    tools/convert.c \
    src/data/bmp.c \
    src/data/drc.c \
    src/data/cga.c \
-   src/data/dio.c
+   src/data/dio.c \
+   src/memory/calloc.c
 
 DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16

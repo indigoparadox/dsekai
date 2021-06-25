@@ -1,6 +1,4 @@
 
-#include <string.h>
-
 #include "data/maps.h"
 #include "data/patterns.h"
 
@@ -9,7 +7,7 @@
 #include "mobile.h"
 #include "window.h"
 #include "engines.h"
-
+#include "memory.h"
 
 #define INPUT_BLOCK_DELAY 5
 
@@ -46,17 +44,21 @@ static uint8_t g_input_blocked_countdown = 0;
 
    if( !initialized ) {
       /* TODO: Generate this dynamically. */
-      g_map_field.tileset = calloc(
+      g_map_field.tileset = memory_alloc(
          sizeof( struct GRAPHICS_BITMAP* ), TILEMAP_TILESETS_MAX );
+      assert( NULL != g_map_field.tileset );
+      if( NULL == g_map_field.tileset ) {
+         return 1;
+      }
 #ifndef DISABLE_GRAPHICS
       graphics_load_bitmap( gc_tile_field_grass, &(g_map_field.tileset[0]) );
       graphics_load_bitmap( gc_tile_field_brick_wall, &(g_map_field.tileset[1]) );
       graphics_load_bitmap( gc_tile_field_tree, &(g_map_field.tileset[2]) );
 #endif /* !DISABLE_GRAPHICS */
 
-      tiles_flags = calloc( TILEMAP_TH * TILEMAP_TW, 1 );
+      tiles_flags = memory_alloc( TILEMAP_TH * TILEMAP_TW, 1 );
       assert( NULL != tiles_flags );
-      mobiles = calloc( 2, sizeof( struct MOBILE ) );
+      mobiles = memory_alloc( 2, sizeof( struct MOBILE ) );
       assert( NULL != mobiles );
 
 #ifndef DISABLE_GRAPHICS
@@ -261,8 +263,8 @@ static uint8_t g_input_blocked_countdown = 0;
       graphics_unload_bitmap( &(g_map_field.tileset[2]) );
       graphics_unload_bitmap( &(mobiles[0].sprite) );
       graphics_unload_bitmap( &(mobiles[1].sprite) );
-      free( mobiles );
-      free( tiles_flags );
+      memory_free( &mobiles );
+      memory_free( &tiles_flags );
 #endif /* !DISABLE_GRAPHICS */
       return 0;
    }
