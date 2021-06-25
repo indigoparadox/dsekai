@@ -11,6 +11,7 @@
 #endif /* USE_LOOKUPS */
 #include "../data/cga.h"
 #include "../data/drc.h"
+#include "../memory.h"
 
 #ifdef USE_DOUBLEBUF
 static uint8_t huge g_buffer[76800]; /* Sized for 0x13. */

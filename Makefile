@@ -12,15 +12,13 @@ DSEKAI_C_FILES_SDL := \
    src/input/sdli.c \
    src/graphics/sdlg.c \
    src/main.c \
-   src/data/drc.c \
-   src/memory/calloc.c
+   src/data/drc.c
 
 DSEKAI_C_FILES_DOS := \
    src/input/dosi.c \
    src/graphics/dosg.c \
    src/main.c \
-   src/data/drc.c \
-   src/memory/calloc.c
+   src/data/drc.c
 
 DSEKAI_C_FILES_PALM := \
    src/input/palmi.c \
@@ -41,22 +39,19 @@ DSEKAI_C_FILES_CHECK := \
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
-   src/data/dio.c \
-   src/memory/calloc.c
+   src/data/dio.c
 
 DRCPACK_C_FILES := \
    tools/drcpack.c \
    src/data/drc.c \
-   src/data/dio.c \
-   src/memory/calloc.c
+   src/data/dio.c
 
 CONVERT_C_FILES := \
    tools/convert.c \
    src/data/bmp.c \
    src/data/drc.c \
    src/data/cga.c \
-   src/data/dio.c \
-   src/memory/calloc.c
+   src/data/dio.c
 
 DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
@@ -92,18 +87,20 @@ DSEKAI_ASSETS_PALM := \
    $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BMP))
 
 MD := mkdir -p
-PYTHON := python
-CGA2BMP := scripts/cga2bmp.py
 MKRESH := bin/mkresh
 DRCPACK := bin/drcpack
 CONVERT := bin/convert
 
-$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM_SDL -fsanitize=address -fsanitize=leak -DDIO_SILENT
+CFLAGS_MKRESH := -DMEMORY_CALLOC -g
+CFLAGS_DRCPACK := -DMEMORY_CALLOC -g
+CFLAGS_CONVERT := -DMEMORY_CALLOC -g
+
+$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM_SDL -fsanitize=address -fsanitize=leak -DDIO_SILENT -DMEMORY_CALLOC
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g -fsanitize=address -fsanitize=leak
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_DOS -DDIO_SILENT
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_DOS -DDIO_SILENT -DMEMORY_CALLOC
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
@@ -124,7 +121,7 @@ $(BIN_WIN16): RC := wrc
 $(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_WIN16
 $(BIN_WIN16): LDFLAGS := -l=windows
 
-$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM=null
+$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM=null -DMEMORY_CALLOC
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g
 
 DSEKAI_O_FILES_SDL := $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES_SDL)))
@@ -143,13 +140,13 @@ $(BINDIR):
 # ====== Utilities ======
 
 $(MKRESH): $(MKRESH_C_FILES) | $(BINDIR)
-	gcc -g -o $@ $^
+	gcc $(CFLAGS_MKRESH) -o $@ $^
 
 $(DRCPACK): $(DRCPACK_C_FILES) | $(BINDIR)
-	gcc -g -o $@ $^
+	gcc $(CFLAGS_DRCPACK) -o $@ $^
 
 $(CONVERT): $(CONVERT_C_FILES) | $(BINDIR)
-	gcc -g -o $@ $^
+	gcc $(CFLAGS_CONVERT) -o $@ $^
 
 # ====== Main: Linux ======
 
