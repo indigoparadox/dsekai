@@ -23,10 +23,15 @@ DSEKAI_C_FILES_CHECK := \
    check/check_engines.c
 
 CONVERT_C_FILES := \
-   src/convert.c \
+   tools/convert.c \
    src/data/bmp.c \
    src/data/drc.c \
    src/data/cga.c \
+   src/data/dio.c
+
+DRCPACK_C_FILES := \
+   tools/drcpack.c \
+   src/data/drc.c \
    src/data/dio.c
 
 DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
@@ -36,9 +41,6 @@ TOPDOWN_O: src/topdown.o
 
 ASSETDIR := assets
 
-ASSETDIR_PALM := gen/palm
-ASSETDIR_WIN16 := gen/win16
-
 OBJDIR_SDL := obj/sdl/
 OBJDIR_DOS := obj/dos/
 OBJDIR_PALM := obj/palm/
@@ -47,6 +49,8 @@ OBJDIR_CHECK_NULL := obj/check_null/
 
 GENDIR_SDL := gen/sdl/
 GENDIR_DOS := gen/dos/
+GENDIR_PALM := gen/palm
+GENDIR_WIN16 := gen/win16
 
 BINDIR := bin
 
@@ -60,6 +64,8 @@ BIN_CHECK_NULL := $(BINDIR)/check
 DSEKAI_ASSETS_BMP := $(wildcard $(ASSETDIR)/*.bmp)
 DSEKAI_ASSETS_DOS_CGA := \
    $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS),$(DSEKAI_ASSETS_BMP)))
+DSEKAI_ASSETS_PALM := \
+   $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BMP))
 
 MD := mkdir -p
 PYTHON := python
@@ -102,23 +108,22 @@ DSEKAI_O_FILES_PALM := $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES
 DSEKAI_O_FILES_WIN16 := $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
 DSEKAI_O_FILES_CHECK_NULL := $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
 
-.PHONY: clean res_sdl16_drc res_doscga_drc
+.PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm
 
 all: $(BIN_DOS) $(BIN_SDL) bin/lookup
 
+$(BINDIR):
+	$(MD) $(BINDIR)
+
 # ====== Utilities ======
 
-$(DRCPACK): src/drcpack.c src/data/drc.c src/data/dio.c
+$(DRCPACK): $(DRCPACK_C_FILES)
 	$(MD) $(BINDIR)
 	gcc -g -o $@ $^
 
-bin/convert: $(CONVERT_C_FILES)
+$(CONVERT): $(CONVERT_C_FILES)
 	$(MD) $(BINDIR)
 	gcc -g -o $@ $^
-
-bin/editor: src/editor.c src/data/bmp.c src/data/pak.c
-	$(MD) $(BINDIR)
-	$(CC) -o $@ $^ $(LDFLAGS)
 
 # ====== Main: Linux ======
 
@@ -141,7 +146,7 @@ res_doscga_drc: $(DRCPACK) $(DSEKAI_ASSETS_DOS_CGA)
 	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -t BMP1 -i 5001 \
       -if $(GENDIR_DOS)*.cga -lh $(GENDIR_DOS)resext.h
 
-$(GENDIR_DOS)%.cga: $(ASSETDIR)/%.bmp $(BINDIR)/convert
+$(GENDIR_DOS)%.cga: $(ASSETDIR)/%.bmp $(CONVERT)
 	$(MD) $(GENDIR_DOS)
 	./bin/convert -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
@@ -149,21 +154,25 @@ $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_DOS)$(TOPDOWN_O): $(RESEXT_H)
-
 # ====== Main: Palm ======
 
-$(BIN_PALM): $(OBJDIR_PALM)grc.stamp $(OBJDIR_PALM)bin.stamp
-	$(MD) $(BINDIR)
-	$(BUILDPRC) $(BIN_PALM) $(ICONTEXT) $(APPID) $(OBJDIR_PALM)*.grc $(OBJDIR_PALM)*.bin $(LINKFILES) 
+$(GENDIR_PALM):
+	$(MD) $(GENDIR_PALM)
 
-$(OBJDIR_PALM)$(TOPDOWN_O): $(RESEXT_H) $(ASSETDIR_PALM)/palm_rc.h
+$(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) $(GENDIR_PALM)
+	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc bitmap
 
-$(OBJDIR_PALM)grc.stamp: $(OBJDIR_PALM)dsekai
+res_palm: $(DSEKAI_ASSETS_PALM)
+
+grc_palm: $(OBJDIR_PALM)dsekai
+
+# Use drcpack to generate header even though we're not using DRC.
+$(GENDIR_PALM)/resext.h: res_palm
+	$(DRCPACK) -i 5001 -if $(GENDIR_PALM)/*.bmp -lh $@
+
+grc_palm: $(OBJDIR_PALM)dsekai
 	cd $(OBJDIR_PALM) && $(OBJRES) dsekai
 	touch $@
-
-$(OBJDIR_PALM)mainpalm.o: $(ASSETDIR_PALM)/palm_ids.h $(ASSETDIR_PALM)/palm_rc.h $(ASSETDIR_PALM)/palm.rcp
 
 $(OBJDIR_PALM)dsekai: $(DSEKAI_O_FILES_PALM)
 	$(CC) $(CFLAGS) $^ -o $@
@@ -172,20 +181,8 @@ $(OBJDIR_PALM)bin.stamp: src/palms.rcp
 	$(PILRC) $^ $(OBJDIR_PALM)
 	touch $@
 
-$(ASSETDIR_PALM)/palm_ids.h: $(ASSETDIR_PALM)/generate.stamp
-
-$(ASSETDIR_PALM)/palm_rc.h: $(ASSETDIR_PALM)/generate.stamp
-	
-$(ASSETDIR_PALM)/gc_%.bmp: $(ASSETDIR_PALM)/generate.stamp
-
-$(ASSETDIR_PALM)/generate.stamp: $(DSEKAI_ASSET_HEADERS)
-	$(MD) $(ASSETDIR_PALM)
-	$(PYTHON) $(CGA2BMP) -if $^ -of $(ASSETDIR_PALM) \
-      -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c bitmap \
-      -r $(ASSETDIR_PALM)/palm.rcp -rf palm \
-      -ri $(ASSETDIR_PALM)/palm_ids.h \
-      -rc $(ASSETDIR_PALM)/palm_rc.h
-	touch $@
+$(BIN_PALM): grc_palm $(OBJDIR_PALM)bin.stamp $(BINDIR)
+	$(BUILDPRC) $@ $(ICONTEXT) $(APPID) $(OBJDIR_PALM)*.grc $(OBJDIR_PALM)*.bin $(LINKFILES) 
 
 # ====== Main: Win16 ======
 
@@ -224,7 +221,7 @@ $(OBJDIR_SDL)%.o: %.c res_sdl16_drc
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
-$(OBJDIR_PALM)%.o: %.c
+$(OBJDIR_PALM)%.o: %.c res_palm $(GENDIR_PALM)/resext.h
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 

@@ -1,7 +1,7 @@
 
-#include "data/drc.h"
-#include "data/dio.h"
-#include "data/preproc.h"
+#include "../src/data/drc.h"
+#include "../src/data/dio.h"
+#include "../src/data/preproc.h"
 
 #include <stdio.h>
 #include <stdlib.h>

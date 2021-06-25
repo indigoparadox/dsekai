@@ -1,8 +1,8 @@
 
-#include "data/drc.h"
-#include "data/bmp.h"
-#include "data/cga.h"
-#include "data/dio.h"
+#include "../src/data/drc.h"
+#include "../src/data/bmp.h"
+#include "../src/data/cga.h"
+#include "../src/data/dio.h"
 
 #include <stdio.h>
 #include <stdlib.h>
