@@ -34,7 +34,6 @@
    fseek( dest, sizeof( type ), SEEK_CUR );
 
 static const uint8_t gc_zero_8 = 0;
-static const uint16_t gc_zero_16 = 0;
 static const uint32_t gc_zero_32 = 0;
 static const uint16_t gc_drc_version = 1;
 
@@ -199,7 +198,6 @@ int32_t drc_add_resource(
       i = 0;
    uint32_t data_offset = 0,
       toc_iter_type = 0,
-      toc_offsets_sz = 0,
       toc_new_offset = 0,
       toc_iter_res = 0,
       toc_iter_id = 0,
@@ -213,8 +211,7 @@ int32_t drc_add_resource(
       read = 0,
       wrote = 0,
       read_total_data = 0;
-   uint32_t* toc_offsets = NULL,
-      * toc_offsets_new = NULL;
+   uint32_t* toc_offsets = NULL;
    uint16_t toc_iter_name_sz = 0;
    uint8_t copy_buffer[DRC_COPY_BLOCK_SZ + 1];
 
@@ -508,7 +505,6 @@ int32_t drc_get_resource(
       i = 0,
       resource_sz = 0,
       read = 0;
-   uint16_t toce_name_sz = 0;
    struct DRC_TOC_E toc_e_iter;
    struct DRC_HEADER header;
 

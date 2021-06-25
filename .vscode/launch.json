@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/bin/dsekai",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}/bin",
             "environment": [{
                 "name": "SDL_RENDER_DRIVER",
                 "value": "software"

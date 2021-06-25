@@ -244,7 +244,7 @@ int16_t dio_itoa(
 }
 
 int16_t dio_snprintf(
-   char* buffer, uint16_t buffer_len, const char* fmt, ...
+   char* buffer, int buffer_len, const char* fmt, ...
 ) {
    va_list args;
    unsigned char c = '\0',
@@ -263,13 +263,13 @@ int16_t dio_snprintf(
       if( '%' == last ) {
          switch( c ) {
          case 'd':
-            d = va_arg( args, int16_t );
+            d = va_arg( args, int );
             idx_out +=
                dio_itoa( &(buffer[idx_out]), buffer_len - idx_out, d, 10 );
             break;
 
          case 'x':
-            d = va_arg( args, int16_t );
+            d = va_arg( args, int );
             idx_out +=
                dio_itoa( &(buffer[idx_out]), buffer_len - idx_out, d, 16 );
             break;
