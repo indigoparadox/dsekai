@@ -4,12 +4,20 @@
 
 #include <PalmOS.h>
 
+static UInt32 g_next_input = 0;
+
 int input_poll() {
    EventType event;
    UInt32 key_state;
 
    /* Doze until an event arrives. */
    EvtGetEvent( &event, 100 );
+
+   if( 0 == g_next_input || TimGetTicks() > g_next_input ) {
+      g_next_input = TimGetTicks() + (SysTicksPerSecond());
+   } else {
+      return 0;
+   }
 
    if( event.eType == keyDownEvent ) {
       key_state = KeyCurrentState();

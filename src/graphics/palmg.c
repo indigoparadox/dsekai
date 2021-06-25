@@ -3,6 +3,8 @@
 
 static BitmapType* g_screen = NULL;
 static WinHandle g_win;
+static uint32_t g_ticks_start = 0;
+static int16_t g_ticks_target = 0;
 
 static int16_t graphics_load_bitmap_surface( struct GRAPHICS_BITMAP* b ) {
    int16_t retval = 1;
@@ -55,6 +57,9 @@ void graphics_init() {
       }
    }
 #endif
+
+   /*g_ticks_target = (SysTicksPerSecond() / FPS); */
+   g_ticks_target = SysTicksPerSecond();
 }
 
 void graphics_shutdown() {
@@ -64,9 +69,20 @@ void graphics_flip() {
 }
 
 void graphics_loop_start() {
+   g_ticks_start = TimGetTicks();
 }
 
 void graphics_loop_end() {
+   int16_t delta = 0;
+
+   delta = SysTicksPerSecond() - (TimGetTicks() - g_ticks_start);
+
+   if( 0 > delta || 150 < delta ) {
+      return;
+   }
+
+   /* Sleep until ticks target. */
+   SysTaskDelay( delta );
 }
 
 void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
@@ -97,7 +113,7 @@ void graphics_blit_at(
       return;
    }
 
-   graphics_load_bitmap_surface( bmp );
+   graphics_load_bitmap_surface( (struct GRAPHICS_BITMAP*)bmp );
 
    if( NULL == bmp->bitmap ) {
       WinDrawChars( "Z", 1, x, y );
@@ -106,7 +122,7 @@ void graphics_blit_at(
 
    WinDrawBitmap( bmp->bitmap, x, y );
 
-   graphics_unload_bitmap_surface( bmp );
+   graphics_unload_bitmap_surface( (struct GRAPHICS_BITMAP*)bmp );
 }
 
 void graphics_draw_block(

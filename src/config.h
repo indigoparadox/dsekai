@@ -79,7 +79,7 @@
    if( !(comp) ) { \
       g_assert_failed_len = dio_snprintf( \
          g_assert_failed, 255, \
-         "%s, %d: ASSERT FALED", __FUNCTION__, __LINE__ ); \
+         "%s, %d: ASSERT FAILED", __FILE__, __LINE__ ); \
    }
 #endif /* !NDEBUG */
 //#define USE_FAKE_CGA

@@ -19,6 +19,8 @@ int g_assert_failed_len;
 UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
    uint32_t i = 0, j = 0, x = 0, y = 0;
    uint8_t running = 1;
+   char* tps_show[256];
+   int tps_show_len = 0;
 #ifndef NO_PALM_DEBUG_LINE
    char palm_debug_line[PSPRINTF_BUF_LEN + 1];
    int palm_debug_line_len = 0;
@@ -59,6 +61,15 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
          }
 #endif /* NDEBUG */
  
+         /*
+         memset( tps_show, '\0', 255 );
+         tps_show_len = dio_snprintf( \
+            tps_show, 200, \
+            "Ticks: %d %d",
+            SysTicksPerSecond(), TimGetTicks() );
+         WinDrawChars( tps_show, tps_show_len, 30, 10 );
+         SysTaskDelay( 100 );
+         */
       }
 
       graphics_shutdown();
