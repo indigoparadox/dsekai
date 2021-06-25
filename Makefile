@@ -201,7 +201,6 @@ $(GENDIR_PALM)/palmd.rcp: rcp_h_palm
 
 grc_palm: $(OBJDIR_PALM)dsekai
 	cd $(OBJDIR_PALM) && $(OBJRES) dsekai
-	touch $@
 
 $(OBJDIR_PALM)dsekai: $(DSEKAI_O_FILES_PALM)
 	$(CC) $(CFLAGS) $^ -o $@
