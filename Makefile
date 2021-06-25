@@ -108,7 +108,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
-$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DHIDE_WELCOME_DIALOG -DNO_PALM_DEBUG_LINE -DDISABLE_FILESYSTEM -DPLATFORM_PALM -g -DMEMORY_STATIC
+$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DHIDE_WELCOME_DIALOG -DNO_PALM_DEBUG_LINE -DDISABLE_FILESYSTEM -DPLATFORM_PALM -g -DMEMORY_STATIC -DIGNORE_DIRTY
 $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK

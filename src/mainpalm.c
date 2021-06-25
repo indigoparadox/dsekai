@@ -57,7 +57,12 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
 
 #ifndef NDEBUG
          if( 0 < g_assert_failed_len ) {
-            WinDrawChars( g_assert_failed, g_assert_failed_len, 10, 20 );
+            while( running ) {
+               if( INPUT_KEY_QUIT == input_poll() ) {
+                  running = 0;
+               }
+               WinDrawChars( g_assert_failed, g_assert_failed_len, 10, 20 );
+            }
          }
 #endif /* NDEBUG */
  

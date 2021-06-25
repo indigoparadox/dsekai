@@ -58,7 +58,6 @@ void graphics_init() {
    }
 #endif
 
-   /*g_ticks_target = (SysTicksPerSecond() / FPS); */
    g_ticks_target = SysTicksPerSecond();
 }
 
@@ -143,6 +142,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    }
 
    b->id = id;
+   b->initialized = 1;
 
    /* "Loading" happens in draw routine, since it's coming from RAM anyway. */
 
