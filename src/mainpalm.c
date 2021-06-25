@@ -9,9 +9,6 @@
 #include "data/dio.h"
 #include "item.h"
 
-#define MAIN_C
-#include "data.h"
-
 #ifndef NDEBUG
 char g_assert_failed[256];
 int g_assert_failed_len;
@@ -21,11 +18,7 @@ int g_assert_failed_len;
 
 UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
    uint32_t i = 0, j = 0, x = 0, y = 0;
-   uint8_t running = 1,
-      window_shown = 0;
-   uint8_t tiles_flags[TILEMAP_TH][TILEMAP_TW];
-   struct MOBILE mobiles[MOBILES_MAX];
-   int mobiles_count = 0;
+   uint8_t running = 1;
 #ifndef NO_PALM_DEBUG_LINE
    char palm_debug_line[PSPRINTF_BUF_LEN + 1];
    int palm_debug_line_len = 0;
@@ -39,8 +32,6 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
       graphics_init();
       window_init();
 
-      memset( &tiles_flags, 0x01, TILEMAP_TH * TILEMAP_TW );
-      memset( mobiles, 0x0, sizeof( struct MOBILE ) * MOBILES_MAX );
 #ifndef NDEBUG
       memset( &g_assert_failed, '\0', 256 );
 #endif /* NDEBUG */
@@ -50,7 +41,7 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
          /* assert( NULL != &gc_sprite_princess );
          assert( 0 != gc_sprite_princess ); */
 
-         running = topdown_loop( mobiles, &mobiles_count, &tiles_flags );
+         running = topdown_loop();
 
 #ifndef NO_PALM_DEBUG_LINE
          palm_debug_line_len = dio_snprintf( palm_debug_line, PSITOA_BUF_LEN,

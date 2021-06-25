@@ -1,7 +1,5 @@
 
-#include "palmg.h"
-
-#include <PalmOS.h>
+#include "../graphics.h"
 
 static BitmapType* g_screen = NULL;
 static WinHandle g_win;
@@ -32,73 +30,87 @@ void graphics_loop_start() {
 void graphics_loop_end() {
 }
 
-void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
+void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
 
    if( SCREEN_H <= y || SCREEN_W <= x ) {
       return;
    }
 
-#if 0
-#ifdef PALM_USE_WIN
-   UInt32* display = NULL;
-
-   WinSetForeColor( color );
-   WinDrawPixel( x, y );
-#elif defined( PALM_USE_BMP )
-   display = WinGetDisplayWindow()->displayAddrV20;
-
-   *display = 0xffffffff;
-
-#else
-#endif
-#endif
    WinSetForeColor( color );
    WinPaintPixel( x, y );
 }
 
+#if 0
 void graphics_blit_masked_at(
    const GRAPHICS_PATTERN* bmp, const GRAPHICS_MASK* mask,
    uint8_t mask_o_x, uint8_t mask_o_y,
    uint16_t x, uint16_t y, uint8_t w, uint8_t h, const int byte_width
 ) {
 }
+#endif
 
 void graphics_blit_at(
-   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint8_t w, uint8_t h,
-   const int bytes
+   const struct GRAPHICS_BITMAP* bmp,
+   uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
-   MemHandle bitmap_h;
-   BitmapPtr bitmap;
-
-   if( NULL == bmp ) {
-      WinDrawChars( "Z", 1, x, y );
-      return;
-   }
-
-   if( NULL == *bmp ) {
-      WinDrawChars( "Y", 1, x, y );
-      return;
-   }
-
-   bitmap_h = DmGetResource( 'Tbmp', *bmp );
-
-   if( NULL == bitmap_h ) {
+   if( NULL == bmp | NULL == bmp->bitmap ) {
       WinDrawChars( "X", 1, x, y );
       return;
    }
 
-   bitmap = MemHandleLock( bitmap_h );
-   WinDrawBitmap( bitmap, x, y );
-   MemHandleUnlock( bitmap_h );
-}
-
-void graphics_destroy_surface( GRAPHICS_BITMAP_SURFACE* bmp ) {
-   MemHandleUnlock( bmp->handle );
+   WinDrawBitmap( bmp->bitmap, x, y );
 }
 
 void graphics_draw_block(
    uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
    GRAPHICS_COLOR color
 ) {
+}
+
+/*
+ * @return 1 if bitmap is loaded and 0 otherwise.
+ */
+int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
+   int retval = 1;
+
+   assert( NULL != b );
+   assert( NULL == *b );
+
+   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
+   if( 0 != (*b)->ref_count ) {
+      retval = 1;
+      goto cleanup;
+   }
+   (*b)->ref_count++;
+
+   (*b)->handle = DmGetResource( 'Tbmp', id );
+   if( NULL == (*b)->handle ) {
+      retval = 0;
+      goto cleanup;
+   }
+
+   (*b)->bitmap = MemHandleLock( (*b)->handle );
+   if( NULL == (*b)->bitmap ) {
+      retval = 0;
+      goto cleanup;
+   }
+
+cleanup:
+   return retval;
+}
+
+/*
+ * @return 1 if bitmap is unloaded and 0 otherwise.
+ */
+int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
+   assert( NULL != *b );
+   (*b)->ref_count--;
+   if( 0 >= (*b)->ref_count ) {
+      MemHandleUnlock( (*b)->handle );
+      free( *b );
+      *b = NULL;
+      return 1;
+   }
+   return 0;
 }
 

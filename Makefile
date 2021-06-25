@@ -6,13 +6,24 @@ DSEKAI_C_FILES := \
    src/item.c \
    src/window.c \
    src/topdown.c \
-   src/data/dio.c \
+   src/data/dio.c
+
+DSEKAI_C_FILES_SDL := \
+   src/input/sdli.c \
+   src/graphics/sdlg.c \
+   src/main.c \
    src/data/drc.c
 
-DSEKAI_C_FILES_SDL := src/input/sdli.c src/graphics/sdlg.c src/main.c
-DSEKAI_C_FILES_DOS := src/input/dosi.c src/graphics/dosg.c src/main.c
+DSEKAI_C_FILES_DOS := \
+   src/input/dosi.c \
+   src/graphics/dosg.c \
+   src/main.c \
+   src/data/drc.c
+
 DSEKAI_C_FILES_PALM := src/input/palmi.c src/graphics/palmg.c src/mainpalm.c
+
 DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
+
 DSEKAI_C_FILES_CHECK := \
    check/check.c \
    check/check_mobile.c \
@@ -22,16 +33,20 @@ DSEKAI_C_FILES_CHECK := \
    check/check_graphics.c \
    check/check_engines.c
 
-CONVERT_C_FILES := \
-   tools/convert.c \
-   src/data/bmp.c \
-   src/data/drc.c \
-   src/data/cga.c \
+MKRESH_C_FILES := \
+   tools/mkresh.c \
    src/data/dio.c
 
 DRCPACK_C_FILES := \
    tools/drcpack.c \
    src/data/drc.c \
+   src/data/dio.c
+
+CONVERT_C_FILES := \
+   tools/convert.c \
+   src/data/bmp.c \
+   src/data/drc.c \
+   src/data/cga.c \
    src/data/dio.c
 
 DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
@@ -47,8 +62,8 @@ OBJDIR_PALM := obj/palm/
 OBJDIR_WIN16 := obj/win16/
 OBJDIR_CHECK_NULL := obj/check_null/
 
-GENDIR_SDL := gen/sdl/
-GENDIR_DOS := gen/dos/
+GENDIR_SDL := gen/sdl
+GENDIR_DOS := gen/dos
 GENDIR_PALM := gen/palm
 GENDIR_WIN16 := gen/win16
 
@@ -63,13 +78,14 @@ BIN_CHECK_NULL := $(BINDIR)/check
 
 DSEKAI_ASSETS_BMP := $(wildcard $(ASSETDIR)/*.bmp)
 DSEKAI_ASSETS_DOS_CGA := \
-   $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS),$(DSEKAI_ASSETS_BMP)))
+   $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BMP)))
 DSEKAI_ASSETS_PALM := \
    $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BMP))
 
 MD := mkdir -p
 PYTHON := python
 CGA2BMP := scripts/cga2bmp.py
+MKRESH := bin/mkresh
 DRCPACK := bin/drcpack
 CONVERT := bin/convert
 
@@ -87,7 +103,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
-$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DHIDE_WELCOME_DIALOG -DNO_PALM_DEBUG_LINE -DPLATFORM_PALM -g
+$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DHIDE_WELCOME_DIALOG -DNO_PALM_DEBUG_LINE -DDISABLE_FILESYSTEM -DPLATFORM_PALM -g
 $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
@@ -117,22 +133,25 @@ $(BINDIR):
 
 # ====== Utilities ======
 
-$(DRCPACK): $(DRCPACK_C_FILES)
-	$(MD) $(BINDIR)
+$(MKRESH): $(MKRESH_C_FILES) | $(BINDIR)
 	gcc -g -o $@ $^
 
-$(CONVERT): $(CONVERT_C_FILES)
-	$(MD) $(BINDIR)
+$(DRCPACK): $(DRCPACK_C_FILES) | $(BINDIR)
+	gcc -g -o $@ $^
+
+$(CONVERT): $(CONVERT_C_FILES) | $(BINDIR)
 	gcc -g -o $@ $^
 
 # ====== Main: Linux ======
 
-$(BINDIR)/sdl16.drc: res_sdl16_drc
+$(GENDIR_SDL):
+	$(MD) $@
 
-res_sdl16_drc: $(DRCPACK)
-	$(MD) $(GENDIR_SDL)
+res_sdl16_drc: $(DRCPACK) | $(GENDIR_SDL)
 	$(DRCPACK) -c -a -af $(BINDIR)/sdl16.drc -t BMP1 -i 5001 \
-      -if $(ASSETDIR)/*.bmp -lh $(GENDIR_SDL)resext.h
+      -if $(ASSETDIR)/*.bmp -lh $(GENDIR_SDL)/resext.h
+
+$(BINDIR)/sdl16.drc: res_sdl16_drc
 
 $(BIN_SDL): $(DSEKAI_O_FILES_SDL)
 	$(MD) $(BINDIR)
@@ -144,10 +163,12 @@ $(BINDIR)/doscga.drc: res_doscga_drc
 
 res_doscga_drc: $(DRCPACK) $(DSEKAI_ASSETS_DOS_CGA)
 	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -t BMP1 -i 5001 \
-      -if $(GENDIR_DOS)*.cga -lh $(GENDIR_DOS)resext.h
+      -if $(GENDIR_DOS)/*.cga -lh $(GENDIR_DOS)/resext.h
 
-$(GENDIR_DOS)%.cga: $(ASSETDIR)/%.bmp $(CONVERT)
-	$(MD) $(GENDIR_DOS)
+$(GENDIR_DOS):
+	$(MD) $@
+
+$(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)
 	./bin/convert -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
@@ -157,18 +178,21 @@ $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 # ====== Main: Palm ======
 
 $(GENDIR_PALM):
-	$(MD) $(GENDIR_PALM)
+	$(MD) $@
 
-$(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) $(GENDIR_PALM)
+$(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_PALM)
 	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc bitmap
 
 res_palm: $(DSEKAI_ASSETS_PALM)
 
 grc_palm: $(OBJDIR_PALM)dsekai
 
-# Use drcpack to generate header even though we're not using DRC.
-$(GENDIR_PALM)/resext.h: res_palm
-	$(DRCPACK) -i 5001 -if $(GENDIR_PALM)/*.bmp -lh $@
+rcp_h_palm: res_palm $(MKRESH) | $(GENDIR_PALM)
+	$(MKRESH) -f palm -i 5001 -if $(GENDIR_PALM)/*.bmp -oh $(GENDIR_PALM)/resext.h -or $(GENDIR_PALM)/palmd.rcp
+
+$(GENDIR_PALM)/resext.h: rcp_h_palm
+
+$(GENDIR_PALM)/palmd.rcp: rcp_h_palm
 
 grc_palm: $(OBJDIR_PALM)dsekai
 	cd $(OBJDIR_PALM) && $(OBJRES) dsekai
@@ -177,8 +201,8 @@ grc_palm: $(OBJDIR_PALM)dsekai
 $(OBJDIR_PALM)dsekai: $(DSEKAI_O_FILES_PALM)
 	$(CC) $(CFLAGS) $^ -o $@
 	
-$(OBJDIR_PALM)bin.stamp: src/palms.rcp
-	$(PILRC) $^ $(OBJDIR_PALM)
+$(OBJDIR_PALM)bin.stamp: src/palms.rcp $(GENDIR_PALM)/palmd.rcp
+	$(PILRC) $< $(OBJDIR_PALM)
 	touch $@
 
 $(BIN_PALM): grc_palm $(OBJDIR_PALM)bin.stamp $(BINDIR)

@@ -2,16 +2,20 @@
 #ifndef PALMG_H
 #define PALMG_H
 
-#include "../dstypes.h"
-
-typedef IndexedColorType GRAPHICS_COLOR;
-
-typedef struct GRAPHICS_BITMAP_SURFACE {
-   MemHandle handle;
-   BitmapPtr bitmap;
-} GRAPHICS_BITMAP_SURFACE;
+#include <PalmOS.h>
 
 #include "../graphics.h"
+
+typedef IndexedColorType GRAPHICS_COLOR;
+struct GRAPHICS_BITMAP {
+   uint32_t id;
+   uint16_t ref_count;
+   MemHandle handle;
+   BitmapPtr bitmap;
+};
+
+typedef struct GRAPHICS_PATTERN {
+   PATTERN_TYPE bits[PATTERN_H]; } GRAPHICS_PATTERN;
 
 #define GRAPHICS_COLOR_BLACK        0
 #define GRAPHICS_COLOR_CYAN         1

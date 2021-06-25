@@ -100,6 +100,8 @@ void dio_print_binary( uint8_t byte_in ) {
       byte_in & 0x01 ? 1 : 0 );
 }
 
+#ifndef DISABLE_FILESYSTEM
+
 uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
    FILE* file_in = NULL;
    uint32_t read = 0,
@@ -195,6 +197,8 @@ int32_t dio_move_file( const char* src, const char* dest ) {
 
    return 0;
 }
+
+#endif /* !DISABLE_FILESYSTEM */
 
 int16_t dio_itoa(
    char* buffer, uint16_t buffer_len, int16_t d, uint8_t d_base
