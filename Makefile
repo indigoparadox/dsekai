@@ -190,8 +190,6 @@ $(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_PALM)
 
 res_palm: $(DSEKAI_ASSETS_PALM)
 
-grc_palm: $(OBJDIR_PALM)dsekai
-
 rcp_h_palm: res_palm $(MKRESH) | $(GENDIR_PALM)
 	$(MKRESH) -f palm -i 5001 -if $(GENDIR_PALM)/*.bmp -oh $(GENDIR_PALM)/resext.h -or $(GENDIR_PALM)/palmd.rcp
 
