@@ -296,19 +296,19 @@ void graphics_draw_block(
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
-int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
+int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
    uint16_t plane_sz = 0,
       plane_offset = 0;
 
-   assert( NULL != b );
-   assert( NULL == *b );
+   b->ref_count++;
 
-   *b = memory_alloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
-   assert( 0 == (*b)->ref_count );
-   (*b)->ref_count++;
+   if( 1 > b->ref_count ) {
+      return 0;
+   }
 
+   /* Load the resource. */
    buffer_sz = drc_get_resource(
       DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer );
    if( 0 >= buffer_sz ) {
@@ -316,36 +316,58 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
       return buffer_sz;
    }
 
-   (*b)->id = id;
-   (*b)->w = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_WIDTH / 2];
-   (*b)->h = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_HEIGHT / 2];
-   (*b)->palette = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PALETTE / 2];
+   /* Parse the resource into a usable struct. */
+   b->id = id;
+   b->w = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_WIDTH / 2];
+   b->h = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_HEIGHT / 2];
+   b->palette = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PALETTE / 2];
 
    plane_sz = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_SZ / 2];
    plane_offset = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_OFFSET / 2];
-   (*b)->plane_1 = memory_alloc( plane_sz, 1 );
-   memcpy( (*b)->plane_1, &(buffer[plane_offset]), plane_sz );
+   b->plane_1 = memory_alloc( plane_sz, 1 );
+   memcpy( b->plane_1, &(buffer[plane_offset]), plane_sz );
 
    plane_sz = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_SZ / 2];
    plane_offset = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_OFFSET / 2];
-   (*b)->plane_2 = memory_alloc( plane_sz, 1 );
-   memcpy( (*b)->plane_2, &(buffer[plane_offset]), plane_sz );
+   b->plane_2 = memory_alloc( plane_sz, 1 );
+   memcpy( b->plane_2, &(buffer[plane_offset]), plane_sz );
 
    memory_free( &buffer ); /* Free resource memory. */
 
-   return buffer_sz;
+   b->initialized = 1;
+}
+
+int32_t graphics_load_bitmap_dyn( uint32_t id, struct GRAPHICS_BITMAP** b ) {
+
+   assert( NULL != b );
+   assert( NULL == *b );
+
+   *b = memory_alloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
+   assert( 0 == (*b)->ref_count );
+
+   return graphics_load_bitmap( id, *b );
 }
 
 /*
  * @return 1 if bitmap is unloaded and 0 otherwise.
  */
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
-   assert( NULL != *b );
-   (*b)->ref_count--;
-   if( 0 == (*b)->ref_count ) {
-      memory_free( b );
+int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+   assert( NULL != b );
+   b->ref_count--;
+   if( 0 == b->ref_count ) {
+      memory_free( b->plane_1 );
+      memory_free( b->plane_2 );
+      b->initialized = 0;
       return 1;
    }
    return 0;
+}
+
+int32_t graphics_unload_bitmap_dyn( struct GRAPHICS_BITMAP** b ) {
+   int32_t retval = 0;
+   assert( NULL != b );
+   retval = graphics_unload_bitmap( *b );
+   *b = NULL;
+   return retval;
 }
 

@@ -4,6 +4,45 @@
 static BitmapType* g_screen = NULL;
 static WinHandle g_win;
 
+static int16_t graphics_load_bitmap_surface( struct GRAPHICS_BITMAP* b ) {
+   int16_t retval = 1;
+
+   if( NULL == b ) {
+      retval = 0;
+      goto cleanup;
+   }
+
+   b->handle = DmGetResource( 'Tbmp', b->id );
+   if( NULL == b->handle ) {
+      retval = 0;
+      goto cleanup;
+   }
+
+   b->bitmap = MemHandleLock( b->handle );
+   if( NULL == b->bitmap ) {
+      retval = 0;
+      if( NULL != b->handle ) {
+         MemHandleUnlock( b->handle );
+         b->handle = NULL;
+      }
+      goto cleanup;
+   }
+
+cleanup:
+   return retval;
+}
+
+static void graphics_unload_bitmap_surface( struct GRAPHICS_BITMAP* b ) {
+   if( NULL != b->handle ) {
+      MemHandleUnlock( b->handle );
+      b->handle = NULL;
+   }
+
+   if( NULL != b->bitmap ) {
+      /* TODO: Free bitmap? Don't need to, right? */
+   }
+}
+
 void graphics_init() {
 #if PALM_USE_WIN
    Err error;
@@ -53,12 +92,21 @@ void graphics_blit_at(
    const struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
-   if( NULL == bmp | NULL == bmp->bitmap ) {
+   if( NULL == bmp ) {
       WinDrawChars( "X", 1, x, y );
       return;
    }
 
+   graphics_load_bitmap_surface( bmp );
+
+   if( NULL == bmp->bitmap ) {
+      WinDrawChars( "Z", 1, x, y );
+      return;
+   }
+
    WinDrawBitmap( bmp->bitmap, x, y );
+
+   graphics_unload_bitmap_surface( bmp );
 }
 
 void graphics_draw_block(
@@ -70,30 +118,19 @@ void graphics_draw_block(
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
-int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
+int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    int retval = 1;
 
-   /* assert( NULL != b ); */
-   /* assert( NULL == *b ); */
-
-   *b = memory_alloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
-   if( 0 != (*b)->ref_count ) {
-      retval = 1;
-      goto cleanup;
-   }
-   (*b)->ref_count++;
-
-   (*b)->handle = DmGetResource( 'Tbmp', id );
-   if( NULL == (*b)->handle ) {
+   if( 0 != b->ref_count ) {
       retval = 0;
       goto cleanup;
    }
 
-   (*b)->bitmap = MemHandleLock( (*b)->handle );
-   if( NULL == (*b)->bitmap ) {
-      retval = 0;
-      goto cleanup;
-   }
+   b->id = id;
+
+   /* "Loading" happens in draw routine, since it's coming from RAM anyway. */
+
+   b->ref_count++;
 
 cleanup:
    return retval;
@@ -102,12 +139,14 @@ cleanup:
 /*
  * @return 1 if bitmap is unloaded and 0 otherwise.
  */
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
-   assert( NULL != *b );
-   (*b)->ref_count--;
-   if( 0 >= (*b)->ref_count ) {
-      MemHandleUnlock( (*b)->handle );
-      memory_free( b );
+int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+   if( NULL == b ) {
+      return 0;
+   }
+   b->ref_count--;
+   if( 0 >= b->ref_count ) {
+      b->initialized = 0;
+      b->id = 0;
       return 1;
    }
    return 0;

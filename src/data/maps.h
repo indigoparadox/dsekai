@@ -7,7 +7,7 @@
 
 struct TILEMAP g_map_field = {
    "Field",
-   NULL,
+   { 0 },
    &gc_tiles_field_colors,
    &gc_tiles_field_flags,
    {

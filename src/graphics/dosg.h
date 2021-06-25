@@ -9,6 +9,7 @@ typedef uint8_t GRAPHICS_COLOR;
 
 struct GRAPHICS_BITMAP {
    uint32_t id;
+   uint8_t initialized;
    uint16_t ref_count;
    uint32_t w;
    uint32_t h;

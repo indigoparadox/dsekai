@@ -9,7 +9,7 @@
 struct ITEM;
 
 struct MOBILE {
-   struct GRAPHICS_BITMAP* sprite;
+   struct GRAPHICS_BITMAP sprite;
    uint8_t hp;
    uint8_t mp;
    struct TILEMAP_COORDS coords;

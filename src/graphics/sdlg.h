@@ -9,6 +9,7 @@
 typedef const SDL_Color* GRAPHICS_COLOR;
 struct GRAPHICS_BITMAP {
    uint32_t id;
+   uint8_t initialized;
    uint16_t ref_count;
    SDL_Surface* surface;
    SDL_Texture* texture;

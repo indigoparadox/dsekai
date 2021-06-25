@@ -47,7 +47,7 @@ void tilemap_draw(
 
          /* Blit the tile. */
          graphics_blit_at(
-            t->tileset[tile_id],
+            &(t->tileset[tile_id]),
             (x * TILE_W) - screen_x, (y * TILE_H) - screen_y, TILE_W, TILE_H );
       }
    }

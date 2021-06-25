@@ -69,7 +69,7 @@ void mobile_draw(
 
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
-   assert( NULL != m->sprite );
+   assert( 1 == m->sprite.initialized );
 
    if( m->coords_prev.x > m->coords.x ) {
       x_offset = SPRITE_W - m->steps_x;
@@ -85,7 +85,7 @@ void mobile_draw(
    assert( SPRITE_H > y_offset );
 
    graphics_blit_at(
-      m->sprite,
+      &(m->sprite),
       ((m->coords.x * SPRITE_W) + x_offset) - screen_x,
       (((m->coords.y * SPRITE_H) + y_offset + walk_offset ) - screen_y),
       SPRITE_W, SPRITE_H );

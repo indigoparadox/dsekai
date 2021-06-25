@@ -23,8 +23,7 @@ DSEKAI_C_FILES_DOS := \
 DSEKAI_C_FILES_PALM := \
    src/input/palmi.c \
    src/graphics/palmg.c \
-   src/mainpalm.c \
-   src/memory/palmm.c
+   src/mainpalm.c
 
 DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
 
@@ -109,7 +108,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
-$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DHIDE_WELCOME_DIALOG -DNO_PALM_DEBUG_LINE -DDISABLE_FILESYSTEM -DPLATFORM_PALM -g
+$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DHIDE_WELCOME_DIALOG -DNO_PALM_DEBUG_LINE -DDISABLE_FILESYSTEM -DPLATFORM_PALM -g -DMEMORY_STATIC
 $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK

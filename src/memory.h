@@ -4,6 +4,10 @@
 
 #include "dstypes.h"
 
+#ifdef MEMORY_STATIC
+#error "Using static memory! This header should not be included."
+#endif /* MEMORY_STATIC */
+
 #ifdef MEMORY_CALLOC
 
 #include <stdlib.h>

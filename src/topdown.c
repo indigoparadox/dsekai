@@ -7,9 +7,12 @@
 #include "mobile.h"
 #include "window.h"
 #include "engines.h"
+#ifndef MEMORY_STATIC
 #include "memory.h"
+#endif /* !MEMORY_STATIC */
 
 #define INPUT_BLOCK_DELAY 5
+#define TOPDOWN_MOBILES_MAX 10
 
 static struct MOBILE* mobiles = NULL;
 static uint8_t mobiles_count = 0; 
@@ -42,25 +45,25 @@ int topdown_loop(
    struct WINDOW* w = NULL;
    static struct MOBILE* player = NULL;
    static int initialized = 0;
+#ifdef MEMORY_STATIC
+   static uint8_t tiles_flags[TILEMAP_TH * TILEMAP_TW];
+   static struct MOBILE mobiles[TOPDOWN_MOBILES_MAX];
+#endif /* MEMORY_STATIC */
 
    if( !initialized ) {
       /* TODO: Generate this dynamically. */
-      g_map_field.tileset = memory_alloc(
-         sizeof( struct GRAPHICS_BITMAP* ), TILEMAP_TILESETS_MAX );
-      assert( NULL != g_map_field.tileset );
-      if( NULL == g_map_field.tileset ) {
-         return 1;
-      }
 #ifndef DISABLE_GRAPHICS
       graphics_load_bitmap( gc_tile_field_grass, &(g_map_field.tileset[0]) );
       graphics_load_bitmap( gc_tile_field_brick_wall, &(g_map_field.tileset[1]) );
       graphics_load_bitmap( gc_tile_field_tree, &(g_map_field.tileset[2]) );
 #endif /* !DISABLE_GRAPHICS */
 
+#ifndef MEMORY_STATIC
       tiles_flags = memory_alloc( TILEMAP_TH * TILEMAP_TW, 1 );
       assert( NULL != tiles_flags );
       mobiles = memory_alloc( 2, sizeof( struct MOBILE ) );
       assert( NULL != mobiles );
+#endif /* MEMORY_STATIC */
 
 #ifndef DISABLE_GRAPHICS
       graphics_load_bitmap( gc_sprite_robe, &(mobiles[0].sprite) );
@@ -264,9 +267,11 @@ int topdown_loop(
       graphics_unload_bitmap( &(g_map_field.tileset[2]) );
       graphics_unload_bitmap( &(mobiles[0].sprite) );
       graphics_unload_bitmap( &(mobiles[1].sprite) );
+#endif /* !DISABLE_GRAPHICS */
+#ifndef MEMORY_STATIC
       memory_free( &mobiles );
       memory_free( &tiles_flags );
-#endif /* !DISABLE_GRAPHICS */
+#endif /* !MEMORY_STATIC */
       return 0;
    }
 

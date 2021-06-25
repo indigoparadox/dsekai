@@ -38,8 +38,8 @@ void graphics_string_at(
    const char*, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_blit_at( const struct GRAPHICS_BITMAP*,
    uint16_t, uint16_t, uint16_t, uint16_t );
-int32_t graphics_load_bitmap( uint32_t, struct GRAPHICS_BITMAP** );
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** );
+int32_t graphics_load_bitmap( uint32_t, struct GRAPHICS_BITMAP* );
+int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* );
 
 #if 0
 void graphics_blit_masked_at( const GRAPHICS_PATTERN*, const GRAPHICS_MASK*,
