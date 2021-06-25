@@ -11,6 +11,20 @@
 
 #define INPUT_BLOCK_DELAY 5
 
+static struct MOBILE* mobiles = NULL;
+static uint8_t mobiles_count = 0; 
+static uint8_t* tiles_flags = NULL;
+static int g_semi_cycles = 0;
+static int g_walk_offset = 0;
+static int g_screen_scroll_x = 0;
+static int g_screen_scroll_y = 0;
+static int g_screen_scroll_tx = 0;
+static int g_screen_scroll_ty = 0;
+static int g_screen_scroll_x_tgt = 0;
+static int g_screen_scroll_y_tgt = 0;
+static uint8_t g_window_shown = 0;
+static uint8_t g_input_blocked_countdown = 0;
+
 static
 void topdown_refresh_tiles( uint8_t* tiles_flags ) {
    int x = 0, y = 0;
@@ -28,19 +42,6 @@ int topdown_loop(
    struct WINDOW* w = NULL;
    static struct MOBILE* player = NULL;
    static int initialized = 0;
-static struct MOBILE* mobiles = NULL;
-static uint8_t mobiles_count = 0; 
-static uint8_t* tiles_flags = NULL;
-static int g_semi_cycles = 0;
-static int g_walk_offset = 0;
-static int g_screen_scroll_x = 0;
-static int g_screen_scroll_y = 0;
-static int g_screen_scroll_tx = 0;
-static int g_screen_scroll_ty = 0;
-static int g_screen_scroll_x_tgt = 0;
-static int g_screen_scroll_y_tgt = 0;
-static uint8_t g_window_shown = 0;
-static uint8_t g_input_blocked_countdown = 0;
 
    if( !initialized ) {
       /* TODO: Generate this dynamically. */
