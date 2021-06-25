@@ -18,8 +18,6 @@
 #define STATE_OUTFILE   2
 #define STATE_INBITS    3
 #define STATE_OUTBITS   4
-#define STATE_INPP      5
-#define STATE_OUTPP     6
 #define STATE_INFMT     7
 #define STATE_OUTFMT    8
 #define STATE_INW       9
@@ -115,18 +113,6 @@ int main( int argc, char* argv[] ) {
          state = 0;
          break;
 
-#if 0
-      case STATE_INPP:
-         options_in.plane_padding = atoi( argv[i] );
-         state = 0;
-         break;
-
-      case STATE_OUTPP:
-         options_out.plane_padding = atoi( argv[i] );
-         state = 0;
-         break;
-#endif
-
       default:
          if( 0 == strncmp( argv[i], "-if", 3 ) ) {
             state = STATE_INFILE;
@@ -144,12 +130,6 @@ int main( int argc, char* argv[] ) {
             state = STATE_INW;
          } else if( 0 == strncmp( argv[i], "-ih", 3 ) ) {
             state = STATE_INH;
-#if 0
-         } else if( 0 == strncmp( argv[i], "-ip", 3 ) ) {
-            state = STATE_INPP;
-         } else if( 0 == strncmp( argv[i], "-op", 3 ) ) {
-            state = STATE_OUTPP;
-#endif
          } else if( 0 == strncmp( argv[i], "-il", 3 ) ) {
             state = STATE_INLP;
          } else if( 0 == strncmp( argv[i], "-ol", 3 ) ) {
@@ -173,14 +153,12 @@ int main( int argc, char* argv[] ) {
    assert( 0 != fmt_out );
    assert( FMT_CGA != fmt_in || 0 != options_in.w );
    assert( FMT_CGA != fmt_in || 0 != options_in.h );
-   //assert( FMT_CGA != fmt_in || 0 != options_in.plane_padding );
 
    if(
       0 == strlen( namebuf_in ) ||
       0 == strlen( namebuf_out ) ||
       0 == fmt_in || 0 == fmt_out ||
       (FMT_CGA == fmt_in && (0 == options_in.w || 0 == options_in.h))
-         //0 == options_in.plane_padding))
    ) {
       fprintf( stderr, "usage:\n\n" );
       fprintf( stderr, "%s [options] -ic <in_fmt> -oc <out_fmt> -if <in_file> -of <out_file>\n", argv[0] );

@@ -132,8 +132,21 @@ int bmp_write(
 
          /* Format grid data into byte. */
          byte_buffer <<= o->bpp;
-         if( 1 == o->bpp && 0 != grid->data[(y * grid->sz_x) + x] ) {
-            byte_buffer |= 0x01;
+         if( 1 == o->bpp ) {
+            if( o->reverse ) {
+               /* In reverse, 0s become 1s. */
+               if( 0 == grid->data[(y * grid->sz_x) + x] ) {
+                  byte_buffer |= 0x01;
+               } else {
+                  byte_buffer |= 0x00;
+               }
+            } else {
+               if( 0 != grid->data[(y * grid->sz_x) + x] ) {
+                  byte_buffer |= 0x01;
+               } else {
+                  byte_buffer |= 0x00;
+               }
+            }
          } else {
             byte_buffer |= grid->data[(y * grid->sz_x) + x] & bit_mask_out;
          }
