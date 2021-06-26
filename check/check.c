@@ -15,7 +15,7 @@
 main_add_test_proto( mobile )
 main_add_test_proto( tilemap )
 main_add_test_proto( graphics )
-main_add_test_proto( psprintf )
+main_add_test_proto( data )
 main_add_test_proto( item )
 main_add_test_proto( engines )
 main_add_test_proto( window )
@@ -26,7 +26,7 @@ int main( void ) {
    main_add_test( mobile );
    main_add_test( tilemap );
    main_add_test( graphics );
-   main_add_test( psprintf );
+   main_add_test( data );
    main_add_test( item );
    main_add_test( engines );
    main_add_test( window );
