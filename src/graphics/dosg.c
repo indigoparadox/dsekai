@@ -184,11 +184,24 @@ void graphics_blit_at(
 #ifdef USE_LOOKUPS
       byte_offset = gc_offsets_cga_bytes_p1[y + y_offset][x];
 #else
-#error "not implemented"
+      /* Divide y by 2 since both planes are SCREEN_H / 2 high. */
+      /* Divide result by 4 since it's 2 bits per pixel. */
+      byte_offset = ((((y + y_offset) / 2) * SCREEN_W) + x) / 4;
+      /* Shift the bits over by the remainder. */
+      /*bit_offset = 
+         6 - (((((y / 2) * SCREEN_W) + x) % 4) * 2);*/
 #endif /* USE_LOOKUPS */
 
-      _fmemcpy( &(g_buffer[byte_offset]), plane_1, 1 );
-      _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2, 1 );
+      _fmemcpy( &(g_buffer[byte_offset]), plane_1, 4 );
+      /* _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2, 4 ); */
+
+#if 0
+      /* Big Endian CGA Fix */
+      _fmemcpy( &(g_buffer[byte_offset]), plane_1 - 2, 2 );
+      _fmemcpy( &(g_buffer[byte_offset + 2]), plane_1, 2 );
+      _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2 - 2, 2 );
+      _fmemcpy( &(g_buffer[0x2000 + byte_offset + 2]), plane_2, 2 );
+#endif
 
       /* Advance source address by bytes per copy. */
       plane_1 += 2;
@@ -282,7 +295,7 @@ void graphics_draw_block(
 #ifdef USE_LOOKUPS
       byte_offset = gc_offsets_cga_bytes_p1[y][x_orig];
 #else
-#error "not implemented"
+/* #error "not implemented" */
 #endif /* USE_LOOKUPS */
       _fmemset( (char far *)0xB8000000 + byte_offset, color, 2 );
       _fmemset( (char far *)0xB8002000 + byte_offset, color, 2 );

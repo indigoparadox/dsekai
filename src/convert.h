@@ -23,6 +23,7 @@ struct CONVERT_OPTIONS {
    uint32_t plane_padding;
    uint32_t bmp_data_sz;
    uint8_t cga_use_header;
+   uint8_t little_endian;
 };
 
 #endif /* CONVERT_H */

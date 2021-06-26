@@ -95,16 +95,16 @@ MKRESH := bin/mkresh
 DRCPACK := bin/drcpack
 CONVERT := bin/convert
 
-CFLAGS_MKRESH := -DMEMORY_CALLOC -g
-CFLAGS_DRCPACK := -DMEMORY_CALLOC -g
-CFLAGS_CONVERT := -DMEMORY_CALLOC -g
+CFLAGS_MKRESH := -DMEMORY_CALLOC -DNO_RESEXT -g
+CFLAGS_DRCPACK := -DMEMORY_CALLOC -DNO_RESEXT -g
+CFLAGS_CONVERT := -DMEMORY_CALLOC -DNO_RESEXT -g
 
 $(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM_SDL -fsanitize=address -fsanitize=leak -DDIO_SILENT -DMEMORY_CALLOC
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g -fsanitize=address -fsanitize=leak
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_DOS -DDIO_SILENT -DMEMORY_CALLOC
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DDIO_SILENT -DMEMORY_CALLOC
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
@@ -185,7 +185,7 @@ $(GENDIR_DOS):
 	$(MD) $@
 
 $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)
-	./bin/convert -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
+	$(CONVERT) -ic bitmap -oc cga -oe l -ob 2 -if $< -of $@ -og
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)

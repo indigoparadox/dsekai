@@ -280,7 +280,8 @@ int topdown_loop(
       g_semi_cycles = 0;
 
       if( 0 == g_walk_offset ) {
-         g_walk_offset = 1;
+         /* Walk offset must be divisible by 2 for CGA blitting to work. */
+         g_walk_offset = 2;
       } else {
          g_walk_offset = 0;
       }

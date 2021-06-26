@@ -14,16 +14,18 @@
 #define ENDIAN_LITTLE   'l'
 #define ENDIAN_BIG      'b'
 
-#define STATE_INFILE    1
-#define STATE_OUTFILE   2
-#define STATE_INBITS    3
-#define STATE_OUTBITS   4
-#define STATE_INFMT     7
-#define STATE_OUTFMT    8
-#define STATE_INW       9
-#define STATE_INH       10
-#define STATE_INLP      11
-#define STATE_OUTLP     12
+#define STATE_INFILE       1
+#define STATE_OUTFILE      2
+#define STATE_INBITS       3
+#define STATE_OUTBITS      4
+#define STATE_INFMT        7
+#define STATE_OUTFMT       8
+#define STATE_INW          9
+#define STATE_INH          10
+#define STATE_INLP         11
+#define STATE_OUTLP        12
+#define STATE_ENDIAN_IN    13
+#define STATE_ENDIAN_OUT   14
 
 int main( int argc, char* argv[] ) {
    int retval = 0;
@@ -64,6 +66,20 @@ int main( int argc, char* argv[] ) {
 
       case STATE_OUTBITS:
          options_out.bpp = atoi( argv[i] );
+         state = 0;
+         break;
+
+      case STATE_ENDIAN_IN:
+         if( 'l' == argv[i][0] ) {
+            options_in.little_endian = 1;
+         }
+         state = 0;
+         break;
+
+      case STATE_ENDIAN_OUT:
+         if( 'l' == argv[i][0] ) {
+            options_out.little_endian = 1;
+         }
          state = 0;
          break;
 
@@ -140,6 +156,10 @@ int main( int argc, char* argv[] ) {
             options_in.cga_use_header = 1;
          } else if( 0 == strncmp( argv[i], "-og", 3 ) ) {
             options_out.cga_use_header = 1;
+         } else if( 0 == strncmp( argv[i], "-ie", 3 ) ) {
+            state = STATE_ENDIAN_IN;
+         } else if( 0 == strncmp( argv[i], "-oe", 3 ) ) {
+            state = STATE_ENDIAN_OUT;
          }
       }
    }
@@ -177,6 +197,8 @@ int main( int argc, char* argv[] ) {
       fprintf( stderr, "-ol [out line padding]\n" );
       fprintf( stderr, "-ip [in plane padding] (full-screen uses 8000)\n" );
       fprintf( stderr, "-op [out plane padding]\n" );
+      fprintf( stderr, "-ie [in endian (b/l)]\n" );
+      fprintf( stderr, "-oe [out endian (b/l)]\n" );
       return 1;
    }
 

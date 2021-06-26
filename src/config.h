@@ -102,7 +102,9 @@
 
 #include <assert.h>
 
+#ifndef NO_RESEXT
 #include "../gen/sdl/resext.h"
+#endif /* NO_RESEXT */
 
 /* ------ */
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
