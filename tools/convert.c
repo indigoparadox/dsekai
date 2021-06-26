@@ -69,6 +69,7 @@ int main( int argc, char* argv[] ) {
          state = 0;
          break;
 
+#if 0
       case STATE_ENDIAN_IN:
          if( 'l' == argv[i][0] ) {
             options_in.little_endian = 1;
@@ -82,6 +83,7 @@ int main( int argc, char* argv[] ) {
          }
          state = 0;
          break;
+#endif
 
       case STATE_INFMT:
          if( 0 == strncmp( argv[i], "bitmap", 6 ) ) {
@@ -156,10 +158,12 @@ int main( int argc, char* argv[] ) {
             options_in.cga_use_header = 1;
          } else if( 0 == strncmp( argv[i], "-og", 3 ) ) {
             options_out.cga_use_header = 1;
+#if 0
          } else if( 0 == strncmp( argv[i], "-ie", 3 ) ) {
             state = STATE_ENDIAN_IN;
          } else if( 0 == strncmp( argv[i], "-oe", 3 ) ) {
             state = STATE_ENDIAN_OUT;
+#endif
          }
       }
    }

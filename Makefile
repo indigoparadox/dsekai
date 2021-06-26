@@ -185,7 +185,7 @@ $(GENDIR_DOS):
 	$(MD) $@
 
 $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)
-	$(CONVERT) -ic bitmap -oc cga -oe l -ob 2 -if $< -of $@ -og
+	$(CONVERT) -ic bitmap -oc cga -oe b -ob 2 -if $< -of $@ -og
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)

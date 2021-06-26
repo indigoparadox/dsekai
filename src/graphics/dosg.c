@@ -169,8 +169,8 @@ void graphics_blit_at(
 ) {
 	int y_offset = 0;
    uint16_t byte_offset = 0;
-   const uint8_t* plane_1 = bmp->plane_1;
-   const uint8_t* plane_2 = bmp->plane_2;
+   const uint8_t* plane_1 = bmp->plane_1 - 2;
+   const uint8_t* plane_2 = bmp->plane_2 - 2;
 
 #if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
 #error "not implemented"
@@ -192,10 +192,11 @@ void graphics_blit_at(
          6 - (((((y / 2) * SCREEN_W) + x) % 4) * 2);*/
 #endif /* USE_LOOKUPS */
 
+#if 1
       _fmemcpy( &(g_buffer[byte_offset]), plane_1, 4 );
-      /* _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2, 4 ); */
+      _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2, 4 );
 
-#if 0
+#else
       /* Big Endian CGA Fix */
       _fmemcpy( &(g_buffer[byte_offset]), plane_1 - 2, 2 );
       _fmemcpy( &(g_buffer[byte_offset + 2]), plane_1, 2 );

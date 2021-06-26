@@ -254,7 +254,7 @@ START_TEST( check_data_cga_write_le ) {
       cga_header->plane1_offset + cga_header->plane1_sz,
       cga_header->width / 4 );
    printf( "should be:\n\n" );
-   buffer_printf( &gc_test_cga_16_16_4, test_header->plane1_offset,
+   buffer_printf( &gc_test_cga_16_16_4_le, test_header->plane1_offset,
       test_header->plane1_offset + test_header->plane1_sz,
       test_header->width / 4 );
    printf( "p2:\n\n" );
@@ -262,7 +262,7 @@ START_TEST( check_data_cga_write_le ) {
       cga_header->plane2_offset + cga_header->plane2_sz,
       cga_header->width / 4 );
    printf( "should be:\n\n" );
-   buffer_printf( &gc_test_cga_16_16_4, test_header->plane2_offset,
+   buffer_printf( &gc_test_cga_16_16_4_le, test_header->plane2_offset,
       test_header->plane2_offset + test_header->plane2_sz,
       test_header->width / 4 );
    fflush( stdout );

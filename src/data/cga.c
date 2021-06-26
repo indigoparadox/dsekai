@@ -59,6 +59,8 @@ int cga_write(
       byte_buffer_odd;
    uint32_t plane1_start = 0,
       plane2_start = 0;
+   uint16_t* plane_row = 0,
+      swap_buffer = 0;
    int32_t
       x = 0,
       y = 0,
@@ -98,22 +100,8 @@ int cga_write(
    /* Write pixels from grid. */
    for( y = 0 ; grid->sz_y - 1 > y ; y += 2 ) {
       for( x = 0 ; grid->sz_x > x ; x++ ) {
-         if( o->little_endian ) {
-            if( x >= (grid->sz_x / 2) ) {
-               grid_idx_even = (y * grid->sz_x) + 
-                  (x - (grid->sz_x / 2));
-               grid_idx_odd = grid_idx_even + grid->sz_x +
-                  (x - (grid->sz_x / 2));
-            } else {
-               grid_idx_even = (y * grid->sz_x) + 
-                  (x + (grid->sz_x / 2));
-               grid_idx_odd = grid_idx_even + grid->sz_x +
-                  (x + (grid->sz_x / 2));
-            }
-         } else {
-            grid_idx_even = (y * grid->sz_x) + x;
-            grid_idx_odd = grid_idx_even + grid->sz_x;
-         }
+         grid_idx_even = (y * grid->sz_x) + x;
+         grid_idx_odd = grid_idx_even + grid->sz_x;
 
          /* Write the even scanline. */
          byte_idx_even = (((y / 2) * grid->sz_x) + x) / 4;
@@ -126,7 +114,7 @@ int cga_write(
          assert( byte_idx_even < buffer_sz );
          buffer[plane1_start + byte_idx_even] |= 
             (grid->data[grid_idx_even] << bit_idx);
-         dio_printf(
+         printf(
             "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
             x, y, byte_idx_even, bit_idx,
             plane1_start + byte_idx_even,
@@ -140,6 +128,33 @@ int cga_write(
             (grid->data[grid_idx_odd] << bit_idx);
       }
    }
+
+#if 0
+   if( o->little_endian ) {
+      for(
+         byte_idx_even = 0;
+         header->plane1_sz > byte_idx_even; 
+         byte_idx_even += 2
+      ) {
+         plane_row = &(buffer[plane1_start + byte_idx_even]);
+         swap_buffer = 
+            ((*plane_row >> 24) & 0x000000ff ) |
+            ((*plane_row <<  8) & 0x00ff0000 ) |
+            ((*plane_row >>  8) & 0x0000ff00 ) |
+            ((*plane_row << 24) & 0xff000000 );
+         *plane_row = swap_buffer;
+
+         plane_row = &(buffer[plane2_start + byte_idx_even]);
+         swap_buffer = 
+            ((*plane_row >> 24) & 0x000000ff ) |
+            ((*plane_row <<  8) & 0x00ff0000 ) |
+            ((*plane_row >>  8) & 0x0000ff00 ) |
+            ((*plane_row << 24) & 0xff000000 );
+         *plane_row = swap_buffer;
+
+      }
+   }
+#endif
 
    return retval;
 }
