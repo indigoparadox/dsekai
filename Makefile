@@ -55,7 +55,8 @@ CONVERT_C_FILES := \
    src/data/bmp.c \
    src/data/drc.c \
    src/data/cga.c \
-   src/data/dio.c
+   src/data/dio.c \
+   src/data/header.c
 
 DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
@@ -84,11 +85,20 @@ BIN_WIN16 := $(BINDIR)/dsekai16.exe
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
-DSEKAI_ASSETS_BMP := $(wildcard $(ASSETDIR)/*.bmp)
+DSEKAI_ASSETS_SPRITES := $(wildcard $(ASSETDIR)/sprite_*.bmp)
+DSEKAI_ASSETS_TILES := $(wildcard $(ASSETDIR)/tile_*.bmp)
+DSEKAI_ASSETS_PATTERNS := $(wildcard $(ASSETDIR)/pattern_*.bmp)
+DSEKAI_ASSETS_BITMAPS := \
+   $(DSEKAI_ASSETS_SPRITES) \
+   $(DSEKAI_ASSETS_TILES) \
+   $(DSEKAI_ASSETS_PATTERNS)
+DSEKAI_ASSETS_MASKS := $(wildcard $(ASSETDIR)/mask_*.bmp)
+DSEKAI_ASSETS_MASKS_H := \
+   $(subst assets/,gen/,$(subst .bmp,.h,$(DSEKAI_ASSETS_MASKS)))
 DSEKAI_ASSETS_DOS_CGA := \
-   $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BMP)))
+   $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_PALM := \
-   $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BMP))
+   $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BITMAPS))
 
 MD := mkdir -p
 MKRESH := bin/mkresh
@@ -134,12 +144,17 @@ DSEKAI_O_FILES_PALM := $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES
 DSEKAI_O_FILES_WIN16 := $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
 DSEKAI_O_FILES_CHECK_NULL := $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
 
-.PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm
+.PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm res_masks
 
 all: $(BIN_DOS) $(BIN_SDL) bin/lookup
 
 $(BINDIR):
 	$(MD) $(BINDIR)
+
+gen/mask_%.h: assets/mask_%.bmp $(CONVERT)
+	$(CONVERT) -ic bitmap -oc header -if $< -of $@ -ob 1
+
+res_masks: $(DSEKAI_ASSETS_MASKS_H)
 
 # ====== Utilities ======
 
@@ -162,14 +177,14 @@ $(GENDIR_SDL):
 
 res_sdl16_drc: $(DRCPACK) | $(GENDIR_SDL)
 	$(DRCPACK) -c -a -af $(BINDIR)/sdl16.drc -t BMP1 -i 5001 \
-      -if $(ASSETDIR)/*.bmp -lh $(GENDIR_SDL)/resext.h
+      -if $(DSEKAI_ASSETS_BITMAPS) -lh $(GENDIR_SDL)/resext.h
 
 $(BINDIR)/sdl16.drc: res_sdl16_drc
 
 $(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR_SDL)%.o: %.c res_sdl16_drc
+$(OBJDIR_SDL)%.o: %.c res_sdl16_drc res_masks
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
@@ -185,7 +200,7 @@ $(GENDIR_DOS):
 	$(MD) $@
 
 $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)
-	$(CONVERT) -ic bitmap -oc cga -oe b -ob 2 -if $< -of $@ -og
+	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)

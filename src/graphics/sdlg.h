@@ -27,9 +27,6 @@ extern const SDL_Color gc_magenta;
 extern const SDL_Color gc_white;
 #endif /* SDLG_C */
 
-typedef struct GRAPHICS_PATTERN {
-   PATTERN_TYPE bits[PATTERN_H]; } GRAPHICS_PATTERN;
-
 #define GRAPHICS_COLOR_BLACK     &gc_black
 #define GRAPHICS_COLOR_CYAN      &gc_cyan
 #define GRAPHICS_COLOR_MAGENTA   &gc_magenta

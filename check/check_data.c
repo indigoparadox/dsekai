@@ -226,6 +226,7 @@ START_TEST( check_data_cga_write ) {
 }
 END_TEST
 
+#if 0
 START_TEST( check_data_cga_write_le ) {
    struct CONVERT_GRID* grid = NULL;
    struct CONVERT_OPTIONS options;
@@ -268,6 +269,7 @@ START_TEST( check_data_cga_write_le ) {
    fflush( stdout );
 }
 END_TEST
+#endif
 
 Suite* data_suite( void ) {
    Suite* s;
@@ -280,8 +282,10 @@ Suite* data_suite( void ) {
 
    tcase_add_loop_test( tc_core, check_data_cga_read, 0, 256 );
    tcase_add_loop_test( tc_core, check_data_cga_write, 0, TEST_CGA_16_16_4_SZ );
+#if 0
    tcase_add_loop_test( tc_core, check_data_cga_write_le, 0,
       TEST_CGA_16_16_4_SZ );
+#endif
 
    suite_add_tcase( s, tc_core );
 

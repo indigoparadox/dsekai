@@ -117,13 +117,10 @@
 #define FONT_SPACE 0
 #define SPRITE_H 16
 #define SPRITE_W 16
-#define SPRITE_TYPE uint32_t
 #define TILE_W 16
 #define TILE_H 16
-#define TILE_TYPE uint32_t
-#define PATTERN_W 8
-#define PATTERN_H 8
-#define PATTERN_TYPE uint16_t
+#define PATTERN_W 16
+#define PATTERN_H 16
 
 #define WINDOW_TEXT_X 8
 #define WINDOW_TEXT_Y 8

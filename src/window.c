@@ -5,6 +5,12 @@
 
 #include "graphics.h"
 
+#define MASKS_C
+#include "../gen/mask_rounded_tl.h"
+#include "../gen/mask_rounded_tr.h"
+#include "../gen/mask_rounded_bl.h"
+#include "../gen/mask_rounded_br.h"
+
 static struct WINDOW g_windows[WINDOW_COUNT_MAX];
 static uint8_t g_windows_count = 0;
 
@@ -43,27 +49,39 @@ void window_draw_all() {
       x_min = (SCREEN_W / 2) - (g_windows[i].w / 2);
       y_min = (SCREEN_H / 2) - (g_windows[i].h / 2);
 
-#if 0
       for( y = y_min ; y < y_max ; y += PATTERN_H ) {
          for( x = x_min ; x < x_max ; x += PATTERN_W ) {
+            
             if( x_min == x && y_min == y ) {
-               graphics_pattern_masked_at(
-                  g_windows[i].pattern, &(gc_masks[0]), 0, 0, x, y );
+               /* Top Left */
+               graphics_blit_masked_at(
+                  &(g_windows[i].pattern), mask_rounded_tl, mask_rounded_tl_sz,
+                  0, 0, x, y );
+
             } else if( x_max - PATTERN_W == x && y_min == y ) {
-               graphics_pattern_masked_at(
-                  g_windows[i].pattern, &(gc_masks[1]), 0, 0, x, y );
+               /* Top Right */
+               graphics_blit_masked_at(
+                  &(g_windows[i].pattern), mask_rounded_tr, mask_rounded_tr_sz,
+                  0, 0, x, y );
+
             } else if( x_min == x && y_max - PATTERN_H == y ) {
-               graphics_pattern_masked_at(
-                  g_windows[i].pattern, &(gc_masks[2]), 0, 0, x, y );
+               /* Bottom Left */
+               graphics_blit_masked_at(
+                  &(g_windows[i].pattern), mask_rounded_bl, mask_rounded_bl_sz,
+                  0, 0, x, y );
+            
             } else if( x_max - PATTERN_W == x && y_max - PATTERN_H == y ) {
-               graphics_pattern_masked_at(
-                  g_windows[i].pattern, &(gc_masks[3]), 0, 0, x, y );
+               /* Bottom Right */
+               graphics_blit_masked_at(
+                  &(g_windows[i].pattern), mask_rounded_br, mask_rounded_br_sz,
+                  0, 0, x, y );
+            
             } else {
-               graphics_pattern_at( g_windows[i].pattern, x, y );
+               graphics_blit_at( &(g_windows[i].pattern), x, y,
+                  PATTERN_W, PATTERN_H );
             }
          }
       }
-#endif
 
       for( j = 0 ; g_windows[i].strings_count > j ; j++ ) {
          graphics_string_at( g_windows[i].strings[j],

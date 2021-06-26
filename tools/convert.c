@@ -3,6 +3,7 @@
 #include "../src/data/bmp.h"
 #include "../src/data/cga.h"
 #include "../src/data/dio.h"
+#include "../src/data/header.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +11,7 @@
 
 #define FMT_BITMAP      1
 #define FMT_CGA         2
+#define FMT_HEADER      3
 
 #define ENDIAN_LITTLE   'l'
 #define ENDIAN_BIG      'b'
@@ -103,10 +105,8 @@ int main( int argc, char* argv[] ) {
             fmt_out = FMT_BITMAP;
          } else if( 0 == strncmp( argv[i], "cga", 3 ) ) {
             fmt_out = FMT_CGA;
-#if 0
          } else if( 0 == strncmp( argv[i], "header", 6 ) ) {
             fmt_out = FMT_HEADER;
-#endif
          }
          state = 0;
          break;
@@ -164,6 +164,9 @@ int main( int argc, char* argv[] ) {
          } else if( 0 == strncmp( argv[i], "-oe", 3 ) ) {
             state = STATE_ENDIAN_OUT;
 #endif
+         } else if( '-' == argv[i][0] ) {
+            fprintf( stderr, "invalid command specified\n" );
+            return 1;
          }
       }
    }
@@ -199,10 +202,12 @@ int main( int argc, char* argv[] ) {
       fprintf( stderr, "-ih [in height] (required for CGA in)\n" );
       fprintf( stderr, "-il [in line padding] (full-screen uses 192)\n" );
       fprintf( stderr, "-ol [out line padding]\n" );
+#if 0
       fprintf( stderr, "-ip [in plane padding] (full-screen uses 8000)\n" );
       fprintf( stderr, "-op [out plane padding]\n" );
       fprintf( stderr, "-ie [in endian (b/l)]\n" );
       fprintf( stderr, "-oe [out endian (b/l)]\n" );
+#endif
       return 1;
    }
 
@@ -236,9 +241,15 @@ int main( int argc, char* argv[] ) {
    case FMT_BITMAP:
       retval = bmp_write_file( namebuf_out, grid, &options_out );
       break;
+
    case FMT_CGA:
       retval = cga_write_file( namebuf_out, grid, &options_out );
       break;
+
+   case FMT_HEADER:
+      retval = header_write_file( namebuf_out, grid, &options_out );
+      break;
+
    }
 
    free( grid->data );

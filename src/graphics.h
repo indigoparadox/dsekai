@@ -16,12 +16,19 @@
 #include "graphics/nullg.h"
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 
-#if 0
+/*
+typedef struct GRAPHICS_MASK {uint8_t bits[16]; } GRAPHICS_MASK;
+typedef struct GRAPHICS_PATTERN {
+   PATTERN_TYPE bits[PATTERN_H]; } GRAPHICS_PATTERN;
+
 #define graphics_pattern_masked_at( spr, mask, mo_x, mo_y, x, y ) \
    graphics_blit_masked_at( \
       (const GRAPHICS_PATTERN*)spr, mask, mo_x, mo_y, \
-      x, y, PATTERN_W, PATTERN_H, sizeof( PATTERN_TYPE ) )
-#endif
+      x, y, PATTERN_W, PATTERN_H )
+
+#define graphics_pattern_at( spr, x, y ) \
+   graphics_blit_at( spr, x, y, PATTERN_W, PATTERN_H )
+*/
 
 void graphics_init();
 void graphics_shutdown();
@@ -39,11 +46,9 @@ void graphics_blit_at( const struct GRAPHICS_BITMAP*,
    uint16_t, uint16_t, uint16_t, uint16_t );
 int32_t graphics_load_bitmap( uint32_t, struct GRAPHICS_BITMAP* );
 int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* );
-
-#if 0
-void graphics_blit_masked_at( const GRAPHICS_PATTERN*, const GRAPHICS_MASK*,
-   uint8_t, uint8_t, uint16_t, uint16_t, uint8_t, uint8_t, const int );
-#endif
+void graphics_blit_masked_at(
+   const struct GRAPHICS_BITMAP*, const uint8_t*, uint16_t,
+   uint16_t, uint16_t, uint16_t, uint16_t );
 
 #endif /* GRAPHICS_H */
 

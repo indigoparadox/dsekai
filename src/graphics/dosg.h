@@ -18,9 +18,6 @@ struct GRAPHICS_BITMAP {
    uint8_t* plane_2;
 };
 
-typedef struct GRAPHICS_PATTERN {
-   PATTERN_TYPE bits[PATTERN_H]; } GRAPHICS_PATTERN;
-
 #define GRAPHICS_COLOR_BLACK        0
 #define GRAPHICS_COLOR_CYAN         1
 #define GRAPHICS_COLOR_MAGENTA      2

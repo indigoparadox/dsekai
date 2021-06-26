@@ -212,7 +212,6 @@ void graphics_blit_at(
 }
 
 #if 0
-
 void graphics_blit_masked_at(
    const GRAPHICS_PATTERN* bmp, const GRAPHICS_MASK* mask,
    uint8_t mask_o_x, uint8_t mask_o_y,

@@ -1,6 +1,5 @@
 
 #include "data/maps.h"
-#include "data/patterns.h"
 
 #include "graphics.h"
 #include "input.h"
@@ -53,9 +52,9 @@ int topdown_loop(
    if( !initialized ) {
       /* TODO: Generate this dynamically. */
 #ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( gc_tile_field_grass, &(g_map_field.tileset[0]) );
-      graphics_load_bitmap( gc_tile_field_brick_wall, &(g_map_field.tileset[1]) );
-      graphics_load_bitmap( gc_tile_field_tree, &(g_map_field.tileset[2]) );
+      graphics_load_bitmap( tile_field_grass, &(g_map_field.tileset[0]) );
+      graphics_load_bitmap( tile_field_brick_wall, &(g_map_field.tileset[1]) );
+      graphics_load_bitmap( tile_field_tree, &(g_map_field.tileset[2]) );
 #endif /* !DISABLE_GRAPHICS */
 
 #ifndef MEMORY_STATIC
@@ -66,7 +65,7 @@ int topdown_loop(
 #endif /* MEMORY_STATIC */
 
 #ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( gc_sprite_robe, &(mobiles[0].sprite) );
+      graphics_load_bitmap( sprite_robe, &(mobiles[0].sprite) );
 #endif /* !DISABLE_GRAPHICS */
       mobiles[0].hp = 100;
       mobiles[0].mp = 100;
@@ -83,7 +82,7 @@ int topdown_loop(
       assert( NULL != player );
 
 #ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( gc_sprite_princess, &(mobiles[1].sprite) );
+      graphics_load_bitmap( sprite_princess, &(mobiles[1].sprite) );
 #endif /* !DISABLE_GRAPHICS */
       mobiles[1].hp = 100;
       mobiles[1].mp = 100;
@@ -195,7 +194,7 @@ int topdown_loop(
    if( !g_window_shown ) {
 #ifndef HIDE_WELCOME_DIALOG
       w = window_push();
-      w->pattern = &(gc_patterns[0]);
+      graphics_load_bitmap( pattern_cm_checker, &(w->pattern) );
       w->w = 80;
       w->h = 64;
       w->dirty = 1;
