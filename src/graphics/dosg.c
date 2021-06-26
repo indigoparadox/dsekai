@@ -187,8 +187,8 @@ void graphics_blit_at(
 #error "not implemented"
 #endif /* USE_LOOKUPS */
 
-      _fmemcpy( &(g_buffer[byte_offset]), plane_1, 2 );
-      _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2, 2 );
+      _fmemcpy( &(g_buffer[byte_offset]), plane_1, 1 );
+      _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2, 1 );
 
       /* Advance source address by bytes per copy. */
       plane_1 += 2;

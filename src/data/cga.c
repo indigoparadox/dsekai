@@ -59,24 +59,24 @@ int cga_write(
    struct CGA_HEADER* header = (struct CGA_HEADER*)buffer;
    uint8_t byte_buffer_even = 0,
       byte_buffer_odd;
-   uint32_t buffer_offset_even = 0,
-      buffer_offset_odd = 0;
+   uint32_t plane1_start = 0,
+      plane2_start = 0;
    int32_t
       x = 0,
       y = 0,
       bit_idx = 0,
       grid_idx_even = 0,
       grid_idx_odd = 0,
-      plane1_start = 0,
-      plane2_start = 0,
+      byte_idx_even = 0,
+      byte_idx_odd = 0,
       plane_sz = 0;
 
-   plane_sz = (grid->sz_y * grid->sz_x) / PX_PER_BYTE;
-   buffer_offset_odd = buffer_offset_even + plane_sz;
+   plane_sz = ((grid->sz_y / 2) * grid->sz_x) / PX_PER_BYTE;
+   plane2_start = plane1_start + plane_sz;
 
    if( o->cga_use_header ) {
-      buffer_offset_even += CGA_HEADER_SZ;
-      buffer_offset_odd = buffer_offset_even + plane_sz;
+      plane1_start += CGA_HEADER_SZ;
+      plane2_start = plane1_start + plane_sz;
 
       dio_printf( "using CGA header...\n" );
 
@@ -86,43 +86,51 @@ int cga_write(
       header->width = grid->sz_x;
       header->height = grid->sz_y;
       header->bpp = o->bpp;
-      header->plane1_offset = buffer_offset_odd;
+      assert( 2 == header->bpp );
+      header->plane1_offset = plane1_start;
       header->plane1_sz = plane_sz;
-      header->plane2_offset = buffer_offset_even;
+      header->plane2_offset = plane2_start;
       header->plane2_sz = plane_sz;
       header->palette = 1;
    }
 
-   /* Write even pixels from grid. */
-   for( y = 0 ; grid->sz_y - 1 > y ; y++ ) {
+   /* Write pixels from grid. */
+   for( y = 0 ; grid->sz_y - 1 > y ; y += 2 ) {
       for( x = 0 ; grid->sz_x > x ; x++ ) {
          grid_idx_even = (y * grid->sz_x) + x;
          grid_idx_odd = grid_idx_even + grid->sz_x;
 
-         /* dio_printf( "cga: x: %d, y: %d, byte %d: %d%d%d%d%d%d%d (%d bpp)\n",
-            x, y, buffer_offset,
-            (byte_buffer >> 7) & 0x01,
-            (byte_buffer >> 6) & 0x01,
-            (byte_buffer >> 5) & 0x01,
-            (byte_buffer >> 4) & 0x01,
-            (byte_buffer >> 3) & 0x01,
-            (byte_buffer >> 2) & 0x01,
-            (byte_buffer >> 1) & 0x01,
-            byte_buffer & 0x01,
-            bpp ); */
-         /* printf( 
-            "XXX: %x, %x: ev %d od %d\n", x, y,
-            buffer_offset_even, buffer_offset_odd ); */
-         assert( buffer_offset_even <= buffer_sz );
-         assert( buffer_offset_odd <= buffer_sz );
+         /* Write the even scanline. */
+         byte_idx_even = (((y / 2) * grid->sz_x) + x) / 4;
+         /* assert( byte_idx_even < buf_sz ); */
+         bit_idx = (6 - (((((y / 2) * grid->sz_x) + x) % 4) * header->bpp));
+         assert( bit_idx < 8 );
+         assert( bit_idx >= 0 );
+         assert( 0 == (bit_idx % 2) );
+         assert( byte_idx_even < (plane1_start + plane_sz ) );
+         assert( byte_idx_even < buffer_sz );
+         buffer[plane1_start + byte_idx_even] |= 
+            (grid->data[grid_idx_even] << bit_idx);
+         printf(
+            "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
+            x, y, byte_idx_even, bit_idx,
+            plane1_start + byte_idx_even,
+            buffer[plane1_start + byte_idx_even] );
 
+         byte_idx_odd = (((((grid->sz_y + y) / 2) * grid->sz_x) + x) / 4) +
+            o->line_padding;
+         assert( byte_idx_odd < buffer_sz );
+         buffer[plane1_start + byte_idx_odd] |=
+            (grid->data[grid_idx_odd] << bit_idx);
+
+#if 0
          if( 0 == bit_idx % 8 && 0 != bit_idx ) {
             /* Write current byte and start a new one. */
             bit_idx = 0;
-            buffer[buffer_offset_even] = byte_buffer_even;
-            buffer[buffer_offset_odd] = byte_buffer_odd;
-            buffer_offset_even++;
-            buffer_offset_odd++;
+            buffer[plane1_start] = byte_buffer_even;
+            buffer[plane2_start] = byte_buffer_odd;
+            plane1_start++;
+            plane2_start++;
             byte_buffer_even = 0;
             byte_buffer_odd = 0;
          }
@@ -137,10 +145,9 @@ int cga_write(
 
          /* Advance the bit index by one pixel. */
          bit_idx += o->bpp;
+   #endif
       }
    }
-   buffer[buffer_offset_even++] = byte_buffer_even;
-   buffer[buffer_offset_odd++] = byte_buffer_odd;
 
    return retval;
 }
@@ -217,9 +224,12 @@ struct CONVERT_GRID* cga_read(
          assert( grid_idx_odd < grid->data_sz );
 
          /* Read the even scanline. */
-         byte_idx_even = (((y / 2) * grid->sz_x) + x) / 4;
+         /* Divide y by 2 since both planes are SCREEN_H / 2 high. */
+         /* Divide result by 4 since it's 2 bits per pixel. */
+         byte_idx_even = (((y / 2) * grid->sz_x) + x) / PX_PER_BYTE;
          assert( byte_idx_even < buf_sz );
-         bit_idx = (6 - (((((y / 2) * grid->sz_x) + x) % 4) * grid->bpp));
+         bit_idx =
+            (6 - (((((y / 2) * grid->sz_x) + x) % PX_PER_BYTE) * grid->bpp));
          assert( bit_idx < 8 );
          assert( bit_idx >= 0 );
          assert( 0 == (bit_idx % 2) );

@@ -5,7 +5,9 @@
 #include "../src/data/cga.h"
 #include "../src/data/bmp.h"
 
-static const uint8_t gc_test_cga_16_16_4[84] = {
+#define TEST_CGA_16_16_4_SZ 84
+
+static const uint8_t gc_test_cga_16_16_4[TEST_CGA_16_16_4_SZ] = {
    'C', 'G',
    0x01, 0x00, /* Version      1 */
    0x10, 0x00, /* Width:      16 */
@@ -38,7 +40,6 @@ static const uint8_t gc_test_cga_16_16_4[84] = {
    0xf0, 0x00, 0x00, 0x0f, /* 5 */
    0xf0, 0x00, 0x00, 0x0f, /* 6 */
    0xff, 0xff, 0xff, 0xff, /* 7 */
-
 };
 
 static const uint8_t gc_test_grid_16_16_4_data[256] = {
@@ -99,14 +100,18 @@ static const struct CONVERT_GRID gc_test_grid_16_16_4 = {
    &gc_test_grid_16_16_4_data
 };
 
-void buffer_printf( uint8_t* buffer, int start, int end ) {
+void buffer_printf( uint8_t* buffer, int start, int end, int col_break ) {
    int column_idx = 1,
       i = 0;
 
    for( i = start ; end > i ; i++ ) {
-      printf( "0x%02x ", buffer[i] );
+      if( 0 != buffer[i] ) {
+         printf( "0x%02x, ", buffer[i] );
+      } else {
+         printf( "    , " );
+      }
 
-      if( 0 == column_idx % 10 ) {
+      if( 0 == column_idx % col_break ) {
          printf( "\n" );
       }
       column_idx++;
@@ -122,37 +127,57 @@ START_TEST( check_data_cga_read ) {
    memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
    options.cga_use_header = 1;
 
-   grid = cga_read( (const uint8_t*)&gc_test_cga_16_16_4, 84, &options );
+   grid = cga_read(
+      (const uint8_t*)&gc_test_cga_16_16_4, TEST_CGA_16_16_4_SZ, &options );
 
    ck_assert_int_eq( gc_test_grid_16_16_4.sz_x, grid->sz_x );
    ck_assert_int_eq( gc_test_grid_16_16_4.sz_y, grid->sz_y );
    ck_assert_int_eq( gc_test_grid_16_16_4.bpp, grid->bpp );
    ck_assert_int_eq( gc_test_grid_16_16_4.data_sz, grid->data_sz );
-   
    ck_assert_int_eq( gc_test_grid_16_16_4_data[_i], grid->data[_i] );
 
-   dio_print_grid( grid );
+   /* dio_print_grid( grid ); */
 }
 END_TEST
 
 START_TEST( check_data_cga_write ) {
    struct CONVERT_GRID* grid = NULL;
    struct CONVERT_OPTIONS options;
-   uint8_t buffer[1024];
-   struct CGA_HEADER* cga_header = (struct CGA_HEADER*)buffer;
+   uint8_t buffer[TEST_CGA_16_16_4_SZ];
+   struct CGA_HEADER* cga_header = (struct CGA_HEADER*)buffer,
+      * test_header = (struct CGA_HEADER*)gc_test_cga_16_16_4;
 
-   memset( &buffer, '\0', 1024 );
+   memset( &buffer, '\0', TEST_CGA_16_16_4_SZ );
    memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
    options.cga_use_header = 1;
    options.bpp = 2;
 
-   cga_write( &buffer, 1024, &gc_test_grid_16_16_4, &options );
+   cga_write( &buffer, TEST_CGA_16_16_4_SZ, &gc_test_grid_16_16_4, &options );
 
-   ck_assert_int_eq( 1, cga_header->version );
-   ck_assert_int_eq( 16, cga_header->width );
-   ck_assert_int_eq( 16, cga_header->height );
-   ck_assert_int_eq( 2, cga_header->bpp );
+   ck_assert_int_eq( test_header->version, cga_header->version );
+   ck_assert_int_eq( test_header->width, cga_header->width );
+   ck_assert_int_eq( test_header->height, cga_header->height );
+   ck_assert_int_eq( test_header->bpp, cga_header->bpp );
+   ck_assert_int_eq( test_header->plane1_offset, cga_header->plane1_offset );
+   ck_assert_int_eq( CGA_HEADER_SZ, cga_header->plane1_offset );
    ck_assert_int_eq( gc_test_cga_16_16_4[_i], buffer[_i] );
+
+#if 0
+   printf( "cga p1:\n\n" );
+   buffer_printf( &buffer, cga_header->plane1_offset,
+      cga_header->plane1_offset + cga_header->plane1_sz,
+      cga_header->width / 4 );
+   printf( "should be:\n\n" );
+   buffer_printf( &gc_test_cga_16_16_4, test_header->plane1_offset,
+      test_header->plane1_offset + test_header->plane1_sz,
+      test_header->width / 4 );
+   printf( "p2:\n\n" );
+   buffer_printf( &buffer, cga_header->plane2_offset,
+      cga_header->plane2_offset + cga_header->plane2_sz,
+      cga_header->width / 4 );
+   printf( "\n" );
+   fflush( stdout );
+#endif
 }
 END_TEST
 
@@ -166,7 +191,7 @@ Suite* data_suite( void ) {
    tc_core = tcase_create( "Core" );
 
    tcase_add_loop_test( tc_core, check_data_cga_read, 0, 256 );
-   /* tcase_add_loop_test( tc_core, check_data_cga_write, 0, 256 ); */
+   tcase_add_loop_test( tc_core, check_data_cga_write, 0, TEST_CGA_16_16_4_SZ );
 
    suite_add_tcase( s, tc_core );
 
