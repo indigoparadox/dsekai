@@ -225,34 +225,29 @@ struct CONVERT_GRID* cga_read(
          assert( 0 == (bit_idx % 2) );
          grid->data[grid_idx_even] |=
             ((buf[plane1_offset + byte_idx_even] >> bit_idx) & 0x03);
-         /* printf( "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
+         dio_printf(
+            "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
             x, y, byte_idx_even, bit_idx,
             plane1_offset + byte_idx_even,
-            buf[plane1_offset + byte_idx_even] ); */
+            buf[plane1_offset + byte_idx_even] );
 
-         /* Read the even scanline. */
+         /* Read the odd scanline. */
          byte_idx_odd = (((((grid->sz_y + y) / 2) * grid->sz_x) + x) / 4) +
             o->line_padding;
          assert( byte_idx_odd < buf_sz );
-         /*bit_idx_odd = (6 - ((((((grid->sz_y + y) / 2) * grid->sz_x) + x) % 4) * grid->bpp));
-         assert( bit_idx < 8 );
-         assert( bit_idx >= 0 );
-         assert( 0 == (bit_idx % 2) );*/
          grid->data[grid_idx_odd] |=
             ((buf[plane1_offset + byte_idx_odd] >> bit_idx) & 0x03);
-         /*printf( "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
+         dio_printf(
+            "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
             x, y, byte_idx_even, bit_idx,
             plane1_offset + byte_idx_even,
-            buf[plane1_offset + byte_idx_even] );*/
+            buf[plane1_offset + byte_idx_even] );
 
          assert(
             (grid->data[grid_idx_even] & 0xff) ==
             (grid->data[grid_idx_even] & 0x03) );
-
-         /* Read the odd scanline. */
-
       }
-      printf( "---\n" );
+      dio_printf( "---\n" );
    }
 
    if( o->cga_use_header ) {
