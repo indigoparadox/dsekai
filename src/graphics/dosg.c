@@ -175,8 +175,6 @@ void graphics_blit_at(
 #if GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
 #error "not implemented"
 #elif GRAPHICS_MODE_320_200_4_CGA == GRAPHICS_MODE
-   uint8_t y_is_odd = /* Interlacing compensation do % once to save cycles. */
-      0 == y % 2 ? 0 : 1;
 
    if( NULL == plane_1 || NULL == plane_2 ) {
       return;
@@ -319,7 +317,9 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    /* Parse the resource into a usable struct. */
    b->id = id;
    b->w = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_WIDTH / 2];
+   assert( 16 == b->w );
    b->h = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_HEIGHT / 2];
+   assert( 16 == b->h );
    b->palette = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PALETTE / 2];
 
    plane_sz = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_SZ / 2];

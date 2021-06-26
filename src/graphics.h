@@ -12,10 +12,9 @@
 #include "graphics/palmg.h"
 #elif defined( PLATFORM_WIN16 )
 #include "graphics/win16g.h"
-#elif defined( PLATFORM_NULL )
+#else
 #include "graphics/nullg.h"
-#endif /*
-PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16, PLATFORM_NULL */
+#endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 
 #if 0
 #define graphics_pattern_masked_at( spr, mask, mo_x, mo_y, x, y ) \

@@ -34,7 +34,12 @@ DSEKAI_C_FILES_CHECK := \
    check/check_tilemap.c \
    check/check_window.c \
    check/check_graphics.c \
-   check/check_engines.c
+   check/check_engines.c \
+   check/check_data.c \
+   src/graphics/nullg.c \
+   src/input/nulli.c \
+   src/data/cga.c \
+   src/data/bmp.c
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
@@ -120,7 +125,7 @@ $(BIN_WIN16): RC := wrc
 $(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_WIN16
 $(BIN_WIN16): LDFLAGS := -l=windows
 
-$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM=null -DMEMORY_CALLOC
+$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM_NULL -DMEMORY_CALLOC -DDIO_SILENT
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g
 
 DSEKAI_O_FILES_SDL := $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES_SDL)))
@@ -147,7 +152,10 @@ $(DRCPACK): $(DRCPACK_C_FILES) | $(BINDIR)
 $(CONVERT): $(CONVERT_C_FILES) | $(BINDIR)
 	gcc $(CFLAGS_CONVERT) -o $@ $^
 
-# ====== Main: Linux ======
+$(BINDIR)/lookup: lookup.c
+	gcc -o $@ $^
+
+# ====== Main: SDL ======
 
 $(GENDIR_SDL):
 	$(MD) $@
@@ -158,9 +166,12 @@ res_sdl16_drc: $(DRCPACK) | $(GENDIR_SDL)
 
 $(BINDIR)/sdl16.drc: res_sdl16_drc
 
-$(BIN_SDL): $(DSEKAI_O_FILES_SDL)
-	$(MD) $(BINDIR)
+$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
+
+$(OBJDIR_SDL)%.o: %.c res_sdl16_drc
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 # ====== Main: MS-DOS ======
 
@@ -179,6 +190,10 @@ $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
+
+$(OBJDIR_DOS)%.o: %.c res_doscga_drc
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
 # ====== Main: Palm ======
 
@@ -210,6 +225,10 @@ $(OBJDIR_PALM)bin.stamp: src/palms.rcp $(GENDIR_PALM)/palmd.rcp
 $(BIN_PALM): grc_palm $(OBJDIR_PALM)bin.stamp $(BINDIR)
 	$(BUILDPRC) $@ $(ICONTEXT) $(APPID) $(OBJDIR_PALM)*.grc $(OBJDIR_PALM)*.bin $(LINKFILES) 
 
+$(OBJDIR_PALM)%.o: %.c res_palm $(GENDIR_PALM)/resext.h
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
+
 # ====== Main: Win16 ======
 
 $(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)win16.res
@@ -230,34 +249,20 @@ $(ASSETDIR_WIN16)/win16.rc: $(DSEKAI_ASSET_HEADERS)
       -rc $(ASSETDIR_WIN16)/win16_rc.h
 	touch $@
 
-$(OBJDIR_CHECK_NULL)$(TOPDOWN_O): $(RESEXT_H)
-
-$(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL)
-	$(MD) $(BINDIR)
-	$(CC) -o $@ $^ $(LDFLAGS)
-
-$(BINDIR)/lookup: lookup.c
-	gcc -o $@ $^
-
-$(OBJDIR_DOS)%.o: %.c res_doscga_drc
-	$(MD) $(dir $@)
-	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
-
-$(OBJDIR_SDL)%.o: %.c res_sdl16_drc
-	$(MD) $(dir $@)
-	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
-
-$(OBJDIR_PALM)%.o: %.c res_palm $(GENDIR_PALM)/resext.h
-	$(MD) $(dir $@)
-	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
-
 $(OBJDIR_WIN16)%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
-$(OBJDIR_CHECK_NULL)%.o: %.c
+# ====== Check: Null ======
+
+$(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+$(OBJDIR_CHECK_NULL)%.o: %.c res_sdl16_drc
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
+
+# ====== Clean ======
 
 clean:
 	rm -rf data obj bin gen *.err

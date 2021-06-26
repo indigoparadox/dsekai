@@ -82,7 +82,6 @@
          __FILE__ ": %d: ASSERT FAILED", __LINE__ ); \
    }
 #endif /* !NDEBUG */
-//#define USE_FAKE_CGA
 
 #include "../gen/palm/resext.h"
 
@@ -102,6 +101,8 @@
 /* ------ */
 
 #include <assert.h>
+
+#include "../gen/sdl/resext.h"
 
 /* ------ */
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */

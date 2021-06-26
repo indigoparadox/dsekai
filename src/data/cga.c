@@ -166,12 +166,12 @@ struct CONVERT_GRID* cga_read(
 ) {
    int32_t
       bit_idx = 0,
-      row_bytes = 0,
       grid_idx_odd = 0,
       grid_idx_even = 0,
       byte_idx_odd = 0,
       byte_idx_even = 0,
       plane1_offset = 0,
+      plane2_offset = 0,
       y = 0,
       x = 0;
    struct CONVERT_GRID* grid = NULL;
@@ -188,10 +188,13 @@ struct CONVERT_GRID* cga_read(
       grid->sz_x = header.width;
       grid->sz_y = header.height;
       grid->data_sz = header.width * header.height;
+      plane1_offset = header.plane1_offset;
+      plane2_offset = header.plane2_offset;
    } else {
       grid->sz_x = o->w;
       grid->sz_y = o->h;
       grid->data_sz = o->w * o->h;
+      plane2_offset = o->plane_padding;
    }
    assert( 0 < grid->sz_x );
    assert( 0 < grid->sz_y );
@@ -205,22 +208,15 @@ struct CONVERT_GRID* cga_read(
 
    /* Read pixels into grid. */
    for( y = 0 ; grid->sz_y > y ; y += 2 /* Every other scanline. */ ) {
-      row_bytes = 0;
       for( x = 0 ; grid->sz_x > x ; x++ ) {
          /* Calculate linear grid indexes. */
-         grid_idx_even = (y * grid->sz_x) + x;
+         grid_idx_even = ((y * grid->sz_x) + x);
          grid_idx_odd = grid_idx_even + grid->sz_x; /* Next line. */
 
          assert( grid_idx_even < grid->data_sz );
          assert( grid_idx_odd < grid->data_sz );
 
          /* Read the even scanline. */
-         #if 0
-         grid->data[grid_idx_even] |= /* Little endian, so reverse bit_idx. */
-            (buf[header.plane1_offset + byte_idx] & (0x03 << (6 - bit_idx)));
-         grid->data[grid_idx_even] >>= (6 - bit_idx);
-         #endif
-
          byte_idx_even = (((y / 2) * grid->sz_x) + x) / 4;
          assert( byte_idx_even < buf_sz );
          bit_idx = (6 - (((((y / 2) * grid->sz_x) + x) % 4) * grid->bpp));
@@ -229,43 +225,39 @@ struct CONVERT_GRID* cga_read(
          assert( 0 == (bit_idx % 2) );
          grid->data[grid_idx_even] |=
             ((buf[plane1_offset + byte_idx_even] >> bit_idx) & 0x03);
-         printf( "cga x%d y%d new byte %d, bit %d\n",
-            x, y, byte_idx_even, bit_idx );
-         /*grid->data[grid_idx_even] >>= bit_idx;*/
+         /* printf( "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
+            x, y, byte_idx_even, bit_idx,
+            plane1_offset + byte_idx_even,
+            buf[plane1_offset + byte_idx_even] ); */
 
-         /*assert(
+         /* Read the even scanline. */
+         byte_idx_odd = (((((grid->sz_y + y) / 2) * grid->sz_x) + x) / 4) +
+            o->line_padding;
+         assert( byte_idx_odd < buf_sz );
+         /*bit_idx_odd = (6 - ((((((grid->sz_y + y) / 2) * grid->sz_x) + x) % 4) * grid->bpp));
+         assert( bit_idx < 8 );
+         assert( bit_idx >= 0 );
+         assert( 0 == (bit_idx % 2) );*/
+         grid->data[grid_idx_odd] |=
+            ((buf[plane1_offset + byte_idx_odd] >> bit_idx) & 0x03);
+         /*printf( "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
+            x, y, byte_idx_even, bit_idx,
+            plane1_offset + byte_idx_even,
+            buf[plane1_offset + byte_idx_even] );*/
+
+         assert(
             (grid->data[grid_idx_even] & 0xff) ==
-            (grid->data[grid_idx_even] & 0x03) );*/
+            (grid->data[grid_idx_even] & 0x03) );
 
-         #if 0
          /* Read the odd scanline. */
-         grid->data[grid_idx_odd] |= /* Little endian, so reverse bit_idx. */
-            ((buf[header.plane2_offset + byte_idx + 
-            o->plane_padding + o->line_padding]) & 
-               (0x03 << (6 - bit_idx)));
-         grid->data[grid_idx_odd] >>= (6 - bit_idx);
-         #endif
-
-         /* Advance the bit index by one pixel. */
-         /*
-         assert( 2 == grid->bpp );
-         bit_idx += grid->bpp;
-         if( 8 == bit_idx ) {
-            bit_idx = 0;
-            byte_idx++;
-            row_bytes++;
-         }
-         */
 
       }
-      /* printf( "row %d bytes: %d (should be %d)\n", y, row_bytes,
-         grid->sz_x / PX_PER_BYTE );
-      assert( row_bytes == grid->sz_x / PX_PER_BYTE ); */
+      printf( "---\n" );
    }
 
-   /* if( o->cga_use_header ) {
-      assert( byte_idx == header.plane1_sz );
-   } */
+   if( o->cga_use_header ) {
+      assert( header.plane1_sz == byte_idx_even + 1 );
+   }
 
    return grid;
 }

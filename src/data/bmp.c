@@ -14,12 +14,6 @@
 
 #define bmp_int( type, buf, offset ) *((type*)&(buf[offset]))
 
-static const uint32_t gc_bmp_header_sz = 40;
-static const uint16_t gc_bmp_planes = 1;
-static const uint32_t gc_bmp_compress_none = 0;
-static const int32_t gc_bmp_res = 72;
-static const uint32_t gc_bmp_colors_imp = 0;
-
 int bmp_write_file(
    const char* path, const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
@@ -66,13 +60,11 @@ int bmp_write(
    uint8_t* buf_ptr, uint32_t buf_sz,
    const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
-   FILE* bmp_file = NULL;
    int retval = 0;
-   ssize_t x = 0,
+   int32_t x = 0,
       y = 0,
       bit_idx = 0;
-   size_t bmp_data_offset = 0,
-      bmp_file_sz = 0,
+   uint32_t bmp_data_offset = 0,
       i = 0,
       row_bytes = 0,
       bmp_data_byte_idx = 0;
@@ -151,12 +143,12 @@ int bmp_write(
          } else {
             byte_buffer |= grid->data[(y * grid->sz_x) + x] & bit_mask_out;
          }
-         dio_print_binary( byte_buffer );
+         /* dio_print_binary( byte_buffer ); */
          bit_idx += o->bpp;
 
          /* Write finished byte. */
          if( 0 != bit_idx && 0 == bit_idx % 8 ) {
-            dio_printf( "writing one byte (row %ld, col %ld)\n", y, x );
+            dio_printf( "bmp: writing one byte (row %ld, col %ld)\n", y, x );
             buf_ptr[bmp_data_offset + bmp_data_byte_idx] = byte_buffer;
             byte_buffer = 0;
             assert( bmp_data_byte_idx < buf_sz );
@@ -166,7 +158,7 @@ int bmp_write(
          }
       }
       while( 0 != (row_bytes % 4) ) {
-         dio_printf( "adding row padding byte\n" );
+         dio_printf( "bmp: adding row padding byte\n" );
          buf_ptr[bmp_data_offset + bmp_data_byte_idx] = '\0';
          bmp_data_byte_idx++;
          row_bytes++;
@@ -195,19 +187,16 @@ struct CONVERT_GRID* bmp_read_file(
 struct CONVERT_GRID* bmp_read(
    const uint8_t* buf, uint32_t buf_sz, struct CONVERT_OPTIONS* o
 ) {
-   size_t offset = 0,
-      read = 0,
-      x = 0,
+   uint32_t x = 0,
       y = 0,
       i = 0,
       byte_idx = 0,
-      bit_idx = 0;
-   uint32_t bmp_data_offset = 0,
+      bit_idx = 0,
+      bmp_data_offset = 0,
       bmp_data_size = 0;
    int32_t sz_x = 0,
       sz_y = 0;
    uint16_t bpp = 0;
-   FILE* bmp_file = NULL;
    struct CONVERT_GRID* grid = NULL;
    char byte_buffer = 0;
 

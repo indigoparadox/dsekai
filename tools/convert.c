@@ -137,7 +137,7 @@ int main( int argc, char* argv[] ) {
          } else if( 0 == strncmp( argv[i], "-r", 3 ) ) {
             options_out.reverse = 1;
          } else if( 0 == strncmp( argv[i], "-ig", 3 ) ) {
-            options_out.cga_use_header = 1;
+            options_in.cga_use_header = 1;
          } else if( 0 == strncmp( argv[i], "-og", 3 ) ) {
             options_out.cga_use_header = 1;
          }
@@ -151,14 +151,16 @@ int main( int argc, char* argv[] ) {
    assert( 0 != strlen( namebuf_out ) );
    assert( 0 != fmt_in );
    assert( 0 != fmt_out );
-   assert( FMT_CGA != fmt_in || 0 != options_in.w );
-   assert( FMT_CGA != fmt_in || 0 != options_in.h );
+   //assert( FMT_CGA != fmt_in || 0 != options_in.w );
+   //assert( FMT_CGA != fmt_in || 0 != options_in.h );
 
    if(
       0 == strlen( namebuf_in ) ||
       0 == strlen( namebuf_out ) ||
       0 == fmt_in || 0 == fmt_out ||
-      (FMT_CGA == fmt_in && (0 == options_in.w || 0 == options_in.h))
+      (FMT_CGA == fmt_in &&
+         (0 == options_in.w || 0 == options_in.h) &&
+            !options_in.cga_use_header )
    ) {
       fprintf( stderr, "usage:\n\n" );
       fprintf( stderr, "%s [options] -ic <in_fmt> -oc <out_fmt> -if <in_file> -of <out_file>\n", argv[0] );
