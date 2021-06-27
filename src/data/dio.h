@@ -12,8 +12,13 @@
 #define dio_printf( ... ) printf( __VA_ARGS__ )
 #define dio_eprintf( ... ) fprintf( stderr, __VA_ARGS__ )
 #else
+#ifdef NO_VARGS
+#define dio_printf( x )
+#define dio_eprintf( x )
+#else
 #define dio_printf( ... )
 #define dio_eprintf( ... )
+#endif /* NO_VARGS */
 #endif
 
 struct CONVERT_GRID;

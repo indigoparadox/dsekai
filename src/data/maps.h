@@ -2,6 +2,9 @@
 #ifndef MAPS_H
 #define MAPS_H
 
+#include "../dstypes.h"
+#include "../config.h"
+
 #include "../tilemap.h"
 #include "tiles.h"
 

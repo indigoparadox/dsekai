@@ -239,7 +239,7 @@ $(BIN_DOS): $(DSEKAI_O_FILES_DOS)
 	$(MD) $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_DOS)%.o: %.c res_doscga_drc
+$(OBJDIR_DOS)%.o: %.c res_doscga_drc res_masks
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
