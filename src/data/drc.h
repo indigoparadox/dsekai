@@ -4,6 +4,8 @@
 
 #include "../dstypes.h"
 
+#include "dio.h"
+
 #define DRC_MAX_PATH 255
 #ifdef USE_DOS
 #define DRC_DEFAULT_TEMP "c:\\temp"
@@ -65,10 +67,6 @@ struct DRC_TOC_E {
 };
 
 int32_t drc_list_resources( const char*, struct DRC_TOC_E** );
-int32_t drc_create( const char* );
-int32_t drc_add_resource( const char*, uint32_t, uint32_t, const char*,
-   uint16_t, const uint8_t*, uint32_t );
-int32_t drc_remove_resource( const char*, uint32_t, uint32_t );
 int32_t drc_get_resource( const char*, uint32_t, uint32_t, uint8_t** );
 int32_t drc_get_end( const char* );
 int32_t drc_get_resource_sz( const char*, uint32_t, uint32_t );

@@ -2,7 +2,7 @@
 #ifndef JSON_H
 #define JSON_H
 
-#include "../dstypes.h"
+#include "../../src/dstypes.h"
 
 struct JSON_BASE {
    uint8_t json_type;

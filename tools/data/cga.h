@@ -2,12 +2,12 @@
 #ifndef CGA_H
 #define CGA_H
 
-#include "../convert.h"
-
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "../../src/dstypes.h"
 
 #define CGA_HEADER_SZ                     30
 
@@ -43,6 +43,9 @@ struct CGA_HEADER {
    uint16_t reserved3;
    uint16_t reserved4;
 };
+
+struct CONVERT_GRID;
+struct CONVERT_OPTIONS;
 
 uint32_t cga_write_plane(
    uint8_t*, uint32_t, const struct CONVERT_GRID* grid, int, int );

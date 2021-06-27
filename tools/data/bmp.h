@@ -2,7 +2,10 @@
 #ifndef BMP_H
 #define BMP_H
 
-#include "../convert.h"
+#include "../../src/dstypes.h"
+
+struct CONVERT_GRID;
+struct CONVERT_OPTIONS;
 
 int bmp_write_file(
    const char*, const struct CONVERT_GRID*, struct CONVERT_OPTIONS* );

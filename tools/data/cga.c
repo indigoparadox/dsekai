@@ -1,8 +1,10 @@
 
 #include "cga.h"
 
-#include "../memory.h"
-#include "dio.h"
+#include "../../src/memory.h"
+#include "../../src/data/dio.h"
+
+#include "../convert.h"
 
 const char gc_null = '\0';
 

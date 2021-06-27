@@ -5,8 +5,7 @@ DSEKAI_C_FILES := \
    src/mobile.c \
    src/item.c \
    src/window.c \
-   src/topdown.c \
-   src/data/dio.c
+   src/topdown.c
 
 DSEKAI_C_FILES_SDL := \
    src/input/sdli.c \
@@ -23,7 +22,8 @@ DSEKAI_C_FILES_DOS := \
 DSEKAI_C_FILES_PALM := \
    src/input/palmi.c \
    src/graphics/palmg.c \
-   src/mainpalm.c
+   src/mainpalm.c \
+   src/dio.c
 
 DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
 
@@ -43,9 +43,10 @@ DSEKAI_C_FILES_CHECK := \
    check/check_data.c \
    src/graphics/nullg.c \
    src/input/nulli.c \
-   src/data/cga.c \
-   src/data/bmp.c \
-   src/data/json.c
+   tools/data/cga.c \
+   tools/data/bmp.c \
+   tools/data/json.c \
+   src/data/dio.c
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
@@ -53,17 +54,18 @@ MKRESH_C_FILES := \
 
 DRCPACK_C_FILES := \
    tools/drcpack.c \
+   tools/data/drcwrite.c \
    src/data/drc.c \
    src/data/dio.c
 
 CONVERT_C_FILES := \
    tools/convert.c \
-   src/data/bmp.c \
+   tools/data/bmp.c \
    src/data/drc.c \
-   src/data/cga.c \
+   tools/data/cga.c \
    src/data/dio.c \
-   src/data/header.c \
-   src/data/json.c
+   tools/data/header.c \
+   tools/data/json.c
 
 DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
@@ -116,7 +118,7 @@ DRCPACK := bin/drcpack
 CONVERT := bin/convert
 
 CFLAGS_MKRESH := -DMEMORY_CALLOC -DNO_RESEXT -g
-CFLAGS_DRCPACK := -DMEMORY_CALLOC -DNO_RESEXT -g
+CFLAGS_DRCPACK := -DMEMORY_CALLOC -DNO_RESEXT -g -DDRC_READ_WRITE
 CFLAGS_CONVERT := -DMEMORY_CALLOC -DNO_RESEXT -g
 
 CFLAGS_DEBUG_GCC := -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak

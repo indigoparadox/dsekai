@@ -1,7 +1,6 @@
 
 #include "dio.h"
 
-#include "../convert.h"
 #ifndef DISABLE_FILESYSTEM
 #ifdef MEMORY_STATIC
 #error "Filesystem routines require dynamic memory heap!"
@@ -13,6 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+
+#include "../../tools/convert.h"
 
 #define PSITOA_BUF_LEN 6 /* 65535 = 5 digits + NULL. */
 
@@ -53,6 +54,8 @@ int32_t dio_char_idx_r( const char* str, int32_t str_sz, char c ) {
    return -1;
 }
 
+#ifdef USE_DIO_PRINT_GRID
+
 void dio_print_grid( struct CONVERT_GRID* grid ) {
    size_t x = 0,
       y = 0;
@@ -70,6 +73,8 @@ void dio_print_grid( struct CONVERT_GRID* grid ) {
    }
    printf( "\n" );
 }
+
+#endif /* USE_DIO_PRINT_GRID */
 
 void dio_print_binary( uint8_t byte_in ) {
    printf( "bin: %d%d%d%d%d%d%d%d\n",

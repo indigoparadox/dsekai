@@ -1,10 +1,10 @@
 
 #include <check.h>
 
-#include "../src/convert.h"
-#include "../src/data/cga.h"
-#include "../src/data/bmp.h"
-#include "../src/data/json.h"
+#include "../tools/convert.h"
+#include "../tools/data/cga.h"
+#include "../tools/data/bmp.h"
+#include "../tools/data/json.h"
 
 #define TEST_CGA_16_16_4_SZ (CGA_HEADER_SZ + (2 * 32))
 
@@ -187,6 +187,9 @@ START_TEST( check_data_cga_read ) {
    ck_assert_int_eq( gc_test_grid_16_16_4_data[_i], grid->data[_i] );
 
    /* dio_print_grid( grid ); */
+
+   free( grid->data );
+   free( grid );
 }
 END_TEST
 

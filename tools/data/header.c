@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "dio.h"
+#include "../../src/data/dio.h"
+#include "../convert.h"
 
 int header_img_write_file(
    const char* path, const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o

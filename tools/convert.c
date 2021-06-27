@@ -1,9 +1,10 @@
 
-#include "../src/data/drc.h"
-#include "../src/data/bmp.h"
-#include "../src/data/cga.h"
+#include "convert.h"
+#include "data/drcwrite.h"
+#include "data/bmp.h"
+#include "data/cga.h"
 #include "../src/data/dio.h"
-#include "../src/data/header.h"
+#include "data/header.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -260,7 +261,7 @@ int main( int argc, char* argv[] ) {
       options_out.bpp = grid->bpp;
    }
 
-   dio_print_grid( grid );
+   /* dio_print_grid( grid ); */
 
    switch( fmt_out ) {
    case FMT_BITMAP:

@@ -9,7 +9,7 @@
 #ifdef USE_LOOKUPS
 #include "../data/offsets.h"
 #endif /* USE_LOOKUPS */
-#include "../data/cga.h"
+#include "../../tools/data/cga.h"
 #include "../data/drc.h"
 #include "../memory.h"
 

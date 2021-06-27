@@ -2,8 +2,10 @@
 #ifndef HEADER_H
 #define HEADER_H
 
-#include "../dstypes.h"
-#include "../convert.h"
+#include "../../src/dstypes.h"
+
+struct CONVERT_GRID;
+struct CONVERT_OPTIONS;
 
 int header_img_write_file(
    const char*, const struct CONVERT_GRID*, struct CONVERT_OPTIONS* );

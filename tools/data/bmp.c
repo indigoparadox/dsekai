@@ -1,13 +1,15 @@
 
 #include "bmp.h"
 
-#include "dio.h"
-#include "../memory.h"
+#include "../../src/data/dio.h"
+#include "../../src/memory.h"
 
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "../convert.h"
 
 #define BMP_FMT_FILE_HEADER_SZ   14
 #define BMP_FMT_BMP_HEADER_SZ    40

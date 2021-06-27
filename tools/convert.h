@@ -2,7 +2,7 @@
 #ifndef CONVERT_H
 #define CONVERT_H
 
-#include "dstypes.h"
+#include "../src/dstypes.h"
 
 #define CONVERT_BUFFER_SZ 1024
 
