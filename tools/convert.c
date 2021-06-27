@@ -12,6 +12,11 @@
 #define FMT_BITMAP      1
 #define FMT_CGA         2
 #define FMT_HEADER      3
+#define FMT_HEADER_IMG  4
+#define FMT_HEADER_MAP  5
+#define FMT_HEADER_WIN  6
+#define FMT_JSON_MAP    7
+#define FMT_JSON_WIN    8
 
 #define ENDIAN_LITTLE   'l'
 #define ENDIAN_BIG      'b'
@@ -92,6 +97,10 @@ int main( int argc, char* argv[] ) {
             fmt_in = FMT_BITMAP;
          } else if( 0 == strncmp( argv[i], "cga", 3 ) ) {
             fmt_in = FMT_CGA;
+         } else if( 0 == strncmp( argv[i], "jmap", 4 ) ) {
+            fmt_in = FMT_JSON_MAP;
+         } else if( 0 == strncmp( argv[i], "jwin", 4 ) ) {
+            fmt_in = FMT_JSON_WIN;
 #if 0
          } else if( 0 == strncmp( argv[i], "header", 6 ) ) {
             fmt_in = FMT_HEADER;
@@ -181,6 +190,22 @@ int main( int argc, char* argv[] ) {
    //assert( FMT_CGA != fmt_in || 0 != options_in.w );
    //assert( FMT_CGA != fmt_in || 0 != options_in.h );
 
+   if( FMT_HEADER == fmt_out ) {
+      switch( fmt_in ) {
+      case FMT_JSON_MAP:
+         fmt_out = FMT_HEADER_MAP;
+         break;
+
+      case FMT_JSON_WIN:
+         fmt_out = FMT_HEADER_WIN;
+         break;
+
+      default:
+         fmt_out = FMT_HEADER_IMG;
+         break;
+      }
+   }
+
    if(
       0 == strlen( namebuf_in ) ||
       0 == strlen( namebuf_out ) ||
@@ -246,8 +271,8 @@ int main( int argc, char* argv[] ) {
       retval = cga_write_file( namebuf_out, grid, &options_out );
       break;
 
-   case FMT_HEADER:
-      retval = header_write_file( namebuf_out, grid, &options_out );
+   case FMT_HEADER_IMG:
+      retval = header_img_write_file( namebuf_out, grid, &options_out );
       break;
 
    }

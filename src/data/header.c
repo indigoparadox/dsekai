@@ -7,7 +7,7 @@
 
 #include "dio.h"
 
-int header_write_file(
+int header_img_write_file(
    const char* path, const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
    FILE* header_file = NULL;
@@ -93,7 +93,7 @@ int header_write_file(
    return retval;
 }
 
-int header_write(
+int header_img_write(
    uint8_t* buffer, uint32_t buffer_sz,
    const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
