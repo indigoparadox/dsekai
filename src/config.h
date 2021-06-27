@@ -83,12 +83,7 @@
 #define assert( comp )
 #else
 /* Fake assert. */
-#define assert( comp ) \
-   if( !(comp) ) { \
-      g_assert_failed_len = dio_snprintf( \
-         g_assert_failed, 255, \
-         __FILE__ ": %d: ASSERT FAILED", __LINE__ ); \
-   }
+#define assert( comp ) if( !(comp) ) { g_assert_failed_len = dio_snprintf( g_assert_failed, 255, __FILE__ ": %d: ASSERT FAILED", __LINE__ ); }
 #endif /* !NDEBUG */
 
 #include "../gen/palm/resext.h"
