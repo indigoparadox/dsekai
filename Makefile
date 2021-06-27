@@ -23,7 +23,7 @@ DSEKAI_C_FILES_PALM := \
    src/input/palmi.c \
    src/graphics/palmg.c \
    src/mainpalm.c \
-   src/dio.c
+   src/data/dio.c
 
 DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
 

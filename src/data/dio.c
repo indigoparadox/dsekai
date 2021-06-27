@@ -13,9 +13,9 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "../../tools/convert.h"
-
 #define PSITOA_BUF_LEN 6 /* 65535 = 5 digits + NULL. */
+
+struct CONVERT_GRID;
 
 uint32_t dio_reverse_endian_32( uint32_t int_in ) {
    int i = 0;
