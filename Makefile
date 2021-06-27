@@ -45,6 +45,7 @@ DSEKAI_C_FILES_CHECK := \
    src/input/nulli.c \
    tools/data/cga.c \
    tools/data/bmp.c \
+   tools/data/icns.c \
    tools/data/json.c \
    src/data/dio.c
 
@@ -65,7 +66,8 @@ CONVERT_C_FILES := \
    tools/data/cga.c \
    src/data/dio.c \
    tools/data/header.c \
-   tools/data/json.c
+   tools/data/json.c \
+   tools/data/icns.c
 
 LOOKUPS_C_FILES: tools/lookups.c
 

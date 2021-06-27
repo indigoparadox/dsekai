@@ -3,6 +3,7 @@
 #include "data/drcwrite.h"
 #include "data/bmp.h"
 #include "data/cga.h"
+#include "data/icns.h"
 #include "../src/data/dio.h"
 #include "data/header.h"
 
@@ -18,6 +19,7 @@
 #define FMT_HEADER_WIN  6
 #define FMT_JSON_MAP    7
 #define FMT_JSON_WIN    8
+#define FMT_ICNS        9
 
 #define ENDIAN_LITTLE   'l'
 #define ENDIAN_BIG      'b'
@@ -98,6 +100,8 @@ int main( int argc, char* argv[] ) {
             fmt_in = FMT_BITMAP;
          } else if( 0 == strncmp( argv[i], "cga", 3 ) ) {
             fmt_in = FMT_CGA;
+         } else if( 0 == strncmp( argv[i], "icns", 4 ) ) {
+            fmt_in = FMT_ICNS;
          } else if( 0 == strncmp( argv[i], "jmap", 4 ) ) {
             fmt_in = FMT_JSON_MAP;
          } else if( 0 == strncmp( argv[i], "jwin", 4 ) ) {
@@ -117,6 +121,8 @@ int main( int argc, char* argv[] ) {
             fmt_out = FMT_CGA;
          } else if( 0 == strncmp( argv[i], "header", 6 ) ) {
             fmt_out = FMT_HEADER;
+         } else if( 0 == strncmp( argv[i], "icns", 4 ) ) {
+            fmt_out = FMT_ICNS;
          }
          state = 0;
          break;
@@ -248,6 +254,10 @@ int main( int argc, char* argv[] ) {
 
    case FMT_CGA:
       grid = cga_read_file( namebuf_in, &options_in );
+      break;
+
+   case FMT_ICNS:
+      grid = icns_read_file( namebuf_in, &options_in );
       break;
    }
 

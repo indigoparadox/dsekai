@@ -4,6 +4,7 @@
 #include "../tools/convert.h"
 #include "../tools/data/cga.h"
 #include "../tools/data/bmp.h"
+#include "../tools/data/icns.h"
 #include "../tools/data/json.h"
 
 #define TEST_CGA_16_16_4_SZ (CGA_HEADER_SZ + (2 * 32))
@@ -86,6 +87,39 @@ static const uint8_t gc_test_cga_16_16_4_le[TEST_CGA_16_16_4_SZ] = {
    0x00, 0x0f, 0xf0, 0x00, /* 5 */
    0x00, 0x0f, 0xf0, 0x00, /* 6 */
    0xff, 0xff, 0xff, 0xff, /* 7 */
+};
+
+#define TEST_ICNS_16_16_2_SZ (ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ + 64)
+
+static const uint8_t gc_test_icns_16_16_2[TEST_ICNS_16_16_2_SZ] = {
+
+   0x69, 0x63, 0x6e, 0x73,
+   0x00, 0x00, 0x00, ICNS_FILE_HEADER_SZ + 
+                     ICNS_DATA_HEADER_SZ + 64,
+
+   /* Data Header */
+
+   'i', 'c', 's', '#',
+   0x00, 0x00, 0x00, 0x48,
+
+   /* Data */
+
+   0xff, 0xff,
+   0xff, 0xff,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc3, 0xc3,
+   0xc3, 0xc3,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xff, 0xff,
+   0xff, 0xff,
 };
 
 static const uint8_t gc_test_grid_16_16_4_data[256] = {
@@ -217,6 +251,28 @@ START_TEST( check_data_cga_write ) {
 }
 END_TEST
 
+START_TEST( check_data_icns_read ) {
+   struct CONVERT_GRID* grid = NULL;
+   struct CONVERT_OPTIONS options;
+
+   memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
+
+   grid = icns_read(
+      (const uint8_t*)&gc_test_icns_16_16_2, TEST_CGA_16_16_4_SZ, &options );
+
+   ck_assert_int_eq( gc_test_grid_16_16_4.sz_x, grid->sz_x );
+   ck_assert_int_eq( gc_test_grid_16_16_4.sz_y, grid->sz_y );
+   ck_assert_int_eq( gc_test_grid_16_16_4.bpp, 2 );
+   ck_assert_int_eq( gc_test_grid_16_16_4.data_sz, grid->data_sz );
+   ck_assert_int_eq( (gc_test_grid_16_16_4_data[_i] & 0x01), grid->data[_i] );
+
+   /* dio_print_grid( grid ); */
+
+   free( grid->data );
+   free( grid );
+}
+END_TEST
+
 START_TEST( check_data_json_parse ) {
    json_parse_buffer( &gc_test_json, 0 );
 }
@@ -233,6 +289,7 @@ Suite* data_suite( void ) {
 
    tcase_add_loop_test( tc_core, check_data_cga_read, 0, 256 );
    tcase_add_loop_test( tc_core, check_data_cga_write, 0, TEST_CGA_16_16_4_SZ );
+   tcase_add_loop_test( tc_core, check_data_icns_read, 0, 256 );
    tcase_add_test( tc_core, check_data_json_parse );
 
    suite_add_tcase( s, tc_core );
