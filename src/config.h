@@ -95,7 +95,6 @@
 #include <windows.h>
 
 #include <assert.h>
-#define USE_FAKE_CGA
 
 #include "../gen/win16/resext.h"
 

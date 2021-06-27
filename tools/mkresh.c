@@ -13,6 +13,7 @@
 #define STATE_ID        5
 
 #define FMT_PALM        1
+#define FMT_WIN16       2
 
 #define FILE_LIST_MAX   255
 
@@ -104,6 +105,8 @@ int main( int argc, char* argv[] ) {
       case STATE_FMT:
          if( 0 == strncmp( argv[i], "palm", 4 ) ) {
             fmt = FMT_PALM;
+         } else if( 0 == strncmp( argv[i], "win16", 5 ) ) {
+            fmt = FMT_WIN16;
          }
          state = 0;
          break;
@@ -169,6 +172,13 @@ int main( int argc, char* argv[] ) {
             "\n",
             "",
             file_list, FOI_FILENAME);
+      } else if( FMT_WIN16 == fmt ) {
+         mkresh_iterate(
+            namebuf_res, file_basename_list, file_list_len, id_start,
+            "%s BITMAP \"%s\"\n",
+            "\n",
+            "",
+            file_list, FOI_FILENAME );
       }
    }
 

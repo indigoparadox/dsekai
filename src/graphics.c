@@ -54,7 +54,8 @@ void graphics_blit_masked_at(
 #ifdef USE_FAKE_CGA
 
 void graphics_blit_at(
-   const GRAPHICS_BITMAP* bmp, uint16_t x, uint16_t y, uint16_t w, uint16_t h
+   const struct GRAPHICS_BITMAP* bmp,
+   uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
    int y_offset = 0,
       byte_offset = 0,

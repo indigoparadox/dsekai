@@ -69,9 +69,6 @@ CONVERT_C_FILES := \
 
 LOOKUPS_C_FILES: tools/lookups.c
 
-DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
-DSEKAI_ASSET_DIMENSION := 16 16
-
 TOPDOWN_O: src/topdown.o
 
 ASSETDIR := assets
@@ -150,7 +147,7 @@ $(BIN_PALM): PALMS_RCP := src/palms.rcp
 $(BIN_WIN16): CC := wcc
 $(BIN_WIN16): LD := wcl
 $(BIN_WIN16): RC := wrc
-$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_WIN16
+$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_WIN16 -DMEMORY_CALLOC
 $(BIN_WIN16): LDFLAGS := -l=windows
 
 $(BIN_MAC7): CC := m68k-apple-macos-gcc
@@ -274,7 +271,7 @@ $(OBJDIR_PALM)bin.stamp: src/palms.rcp $(GENDIR_PALM)/palmd.rcp
 	$(PILRC) $< $(OBJDIR_PALM)
 	touch $@
 
-$(BIN_PALM): grc_palm $(OBJDIR_PALM)bin.stamp $(BINDIR)
+$(BIN_PALM): grc_palm $(OBJDIR_PALM)bin.stamp | $(BINDIR)
 	$(BUILDPRC) $@ $(ICONTEXT) $(APPID) $(OBJDIR_PALM)*.grc $(OBJDIR_PALM)*.bin $(LINKFILES) 
 
 $(OBJDIR_PALM)%.o: %.c res_palm $(GENDIR_PALM)/resext.h
@@ -283,25 +280,21 @@ $(OBJDIR_PALM)%.o: %.c res_palm $(GENDIR_PALM)/resext.h
 
 # ====== Main: Win16 ======
 
-$(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)win16.res
-	$(MD) $(BINDIR)
+$(GENDIR_WIN16):
+	$(MD) $@
+
+$(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)win16.res | $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
 $(OBJDIR_WIN16)$(TOPDOWN_O): $(RESEXT_H)
 
-$(OBJDIR_WIN16)win16.res: $(ASSETDIR_WIN16)/win16.rc
+$(OBJDIR_WIN16)win16.res: $(GENDIR_WIN16)/win16.rc
 	$(RC) -r -i=$(INCLUDE)/win src/win16s.rc -fo=$@
 
-$(ASSETDIR_WIN16)/win16.rc: $(DSEKAI_ASSET_HEADERS)
-	$(MD) $(ASSETDIR_WIN16)
-	$(PYTHON) $(CGA2BMP) -if $^ -of $(ASSETDIR_WIN16) \
-      -s $(DSEKAI_ASSET_DIMENSION) -ei l -bi 2 -c bitmap \
-      -r $(ASSETDIR_WIN16)/win16.rc -rf win16 \
-      -ri $(ASSETDIR_WIN16)/win16_ids.h \
-      -rc $(ASSETDIR_WIN16)/win16_rc.h
-	touch $@
+$(GENDIR_WIN16)/win16.rc: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)
+	$(MKRESH) -f win16 -i 5001 -if $(DSEKAI_ASSETS_BITMAPS) -oh $(GENDIR_WIN16)/resext.h -or $@
 
-$(OBJDIR_WIN16)%.o: %.c
+$(OBJDIR_WIN16)%.o: %.c $(OBJDIR_WIN16)win16.res
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
