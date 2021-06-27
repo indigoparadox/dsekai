@@ -67,6 +67,8 @@ CONVERT_C_FILES := \
    tools/data/header.c \
    tools/data/json.c
 
+LOOKUPS_C_FILES: tools/lookups.c
+
 DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
 
@@ -116,10 +118,12 @@ MD := mkdir -p
 MKRESH := bin/mkresh
 DRCPACK := bin/drcpack
 CONVERT := bin/convert
+LOOKUPS := bin/lookups
 
 CFLAGS_MKRESH := -DMEMORY_CALLOC -DNO_RESEXT -g
 CFLAGS_DRCPACK := -DMEMORY_CALLOC -DNO_RESEXT -g -DDRC_READ_WRITE
 CFLAGS_CONVERT := -DMEMORY_CALLOC -DNO_RESEXT -g
+CFLAGS_LOOKUPS := -g
 
 CFLAGS_DEBUG_GCC := -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak
 
@@ -179,7 +183,7 @@ DSEKAI_O_FILES_CHECK_NULL := \
 
 .PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm res_masks
 
-all: $(BIN_DOS) $(BIN_SDL) bin/lookup
+all: $(BIN_DOS) $(BIN_SDL) $(BIN_PALM)
 
 $(BINDIR):
 	$(MD) $(BINDIR)
@@ -200,8 +204,8 @@ $(DRCPACK): $(DRCPACK_C_FILES) | $(BINDIR)
 $(CONVERT): $(CONVERT_C_FILES) | $(BINDIR)
 	gcc $(CFLAGS_CONVERT) -o $@ $^
 
-$(BINDIR)/lookup: lookup.c
-	gcc -o $@ $^
+$(LOOKUPS): $(LOOKUPS_C_FILES) | $(BINDIR)
+	gcc $(CFLAGS_LOOKUPS) -o $@ tools/lookups.c
 
 # ====== Main: SDL ======
 
