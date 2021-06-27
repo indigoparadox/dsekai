@@ -33,6 +33,14 @@
 
 #include <assert.h>
 
+#ifdef ANCIENT_C
+#include <stdio.h>
+#define DIO_SILENT
+#define NO_VARGS
+#define USE_LOOKUPS
+#define NO_I86
+#endif /* ANCIENT_C */
+
 #include "../gen/dos/resext.h"
 
 #define GRAPHICS_M_320_200_4_CGA  0x05
@@ -154,10 +162,6 @@
 #ifndef FPS
 #define FPS 30
 #endif /* FPS */
-
-#ifndef NULL
-#define NULL ((void*)0)
-#endif /* NULL */
 
 #ifndef DIO_READ_FILE_BLOCK_SZ
 #define DIO_READ_FILE_BLOCK_SZ 4096

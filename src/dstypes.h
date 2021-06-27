@@ -7,7 +7,7 @@
 #include <stddef.h>
 
 /* ------ */
-#ifdef USE_PALM
+#ifdef PLATFORM_PALM
 /* ------ */
 
 #include <PalmOS.h>
@@ -19,7 +19,7 @@ typedef UInt32 uint32_t;
 typedef Int32 int32_t;
 
 /* ------ */
-#elif defined( USE_DOS )
+#elif defined( PLATFORM_DOS )
 /* ------ */
 
 typedef signed char int8_t;
@@ -32,7 +32,7 @@ typedef unsigned long uint32_t;
 #define RESOURCE_SPRITE_HEADERS
 
 /* ------ */
-#elif defined( USE_WIN16 )
+#elif defined( PLATFORM_WIN16 )
 /* ------ */
 
 typedef signed char int8_t;

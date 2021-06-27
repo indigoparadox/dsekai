@@ -6,10 +6,17 @@
 #include "graphics.h"
 
 #define MASKS_C
+#ifdef ANCIENT_C
+#include "../gen/mrtl.h"
+#include "../gen/mrtr.h"
+#include "../gen/mrbl.h"
+#include "../gen/mrbr.h"
+#else
 #include "../gen/mask_rounded_tl.h"
 #include "../gen/mask_rounded_tr.h"
 #include "../gen/mask_rounded_bl.h"
 #include "../gen/mask_rounded_br.h"
+#endif /* ANCIENT_C */
 
 static struct WINDOW g_windows[WINDOW_COUNT_MAX];
 static uint8_t g_windows_count = 0;

@@ -24,10 +24,12 @@ struct TILEMAP {
    const uint8_t tiles[TILEMAP_TH][TILEMAP_TW / 2];
 };
 
+#ifndef ANCIENT_C
 void tilemap_draw(
    const struct TILEMAP* t, uint8_t* tiles_flags, uint16_t, uint16_t,
    uint16_t, uint16_t, uint8_t
 );
+#endif /* ANCIENT_C */
 uint8_t tilemap_collide( const struct TILEMAP*, uint8_t, uint8_t );
 
 #endif /* TILEMAP_H */

@@ -182,7 +182,7 @@ int topdown_loop(
          mobile_draw(
             &(mobiles[i]),
             g_walk_offset, g_screen_scroll_x, g_screen_scroll_y );
-            assert( NULL != player );
+         assert( NULL != player );
 #endif /* !DISABLE_GRAPHICS */
       }
    }

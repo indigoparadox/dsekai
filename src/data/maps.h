@@ -8,11 +8,21 @@
 #include "../tilemap.h"
 #include "tiles.h"
 
+#ifdef ANCIENT_C
+void *tiles_field_flags_ptr = &gc_tiles_field_flags[0];
+void *tiles_field_colors_ptr = &gc_tiles_field_colors[0];
+#endif /* ANCIENT_C */
+
 struct TILEMAP g_map_field = {
    "Field",
    { 0 },
+#ifdef ANCIENT_C
+   NULL,
+   NULL,
+#else
    &gc_tiles_field_colors,
    &gc_tiles_field_flags,
+#endif /* ANCIENT_C */
    {
       {0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11},
       {0x10, 0x00, 0x00, 0x00, 0x01, 0x10, 0x00, 0x00, 0x00, 0x01},
