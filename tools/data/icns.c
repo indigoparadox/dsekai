@@ -36,12 +36,12 @@ struct CONVERT_GRID* icns_read(
    file_header = (struct ICNS_DATA_HEADER*)buf;
    data_header = (struct ICNS_DATA_HEADER*)&(buf[ICNS_FILE_HEADER_SZ]);
 
-   printf( "icns %c%c%c%c data %d long\n",
+   /* printf( "icns %c%c%c%c data %d long\n",
       data_header->icon_type[0],
       data_header->icon_type[1],
       data_header->icon_type[2],
       data_header->icon_type[3],
-      dio_reverse_endian_32( data_header->data_sz ) );
+      dio_reverse_endian_32( data_header->data_sz ) ); */
 
    grid_out = calloc( 1, sizeof( struct CONVERT_GRID ) );
    assert( NULL != grid_out );
@@ -67,5 +67,175 @@ struct CONVERT_GRID* icns_read(
    assert( byte_idx == data_header->data_sz ); */
 
    return grid_out;
+}
+
+int icns_write_file(
+   const char* path, const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
+) {
+   uint32_t icns_buffer_sz = 0,
+      icns_canvas_sz = 0;
+   uint8_t* icns_buffer = NULL;
+   FILE* file_out = NULL;
+   int retval = 0;
+
+   icns_canvas_sz = ((grid->sz_x * grid->sz_y * o->bpp) / 8);
+   if( 1 == o->bpp ) {
+      /* Add a mask. */
+      icns_canvas_sz *= 2;
+   }
+
+   icns_buffer_sz = 
+      ICNS_FILE_HEADER_SZ +
+      ICNS_DATA_HEADER_SZ +
+      icns_canvas_sz;
+
+   icns_buffer = memory_alloc( 1, icns_buffer_sz );
+   assert( NULL != icns_buffer );
+
+   retval = icns_write( icns_buffer, icns_buffer_sz, grid, o );
+   assert( !retval );
+   if( retval ) {
+      memory_free( &icns_buffer );
+      return retval;
+   }
+
+   file_out = fopen( path, "wb" );
+   assert( NULL != file_out );
+
+   dio_printf( "icns: writing to %s...\n", path );
+
+   fwrite( icns_buffer, 1, icns_buffer_sz, file_out );
+
+   fclose( file_out );
+   memory_free( &icns_buffer );
+
+   return retval;
+}
+
+int icns_write(
+   uint8_t* buf_ptr, uint32_t buf_sz,
+   const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
+) {
+   int retval = 0;
+   int32_t grid_x = 0,
+      grid_y = 0,
+      file_byte_idx = 0,
+      data_byte_idx = 0,
+      bit_idx = 0,
+      grid_idx = 0;
+   uint8_t byte_buffer = 0;
+   struct ICNS_FILE_HEADER* file_header =
+      (struct ICNS_FILE_HEADER*)&(buf_ptr[0]);
+   struct ICNS_DATA_HEADER* data_header =
+      (struct ICNS_DATA_HEADER*)&(buf_ptr[ICNS_FILE_HEADER_SZ]);
+
+   file_header->id[0] = 'i';
+   file_header->id[1] = 'c';
+   file_header->id[2] = 'n';
+   file_header->id[3] = 's';
+
+   if( 1 == o->bpp && 16 == grid->sz_x && 16 == grid->sz_y ) {
+      data_header->icon_type[0] = 'i';
+      data_header->icon_type[1] = 'c';
+      data_header->icon_type[2] = 's';
+      data_header->icon_type[3] = '#';
+
+   } else if( 4 == o->bpp && 16 == grid->sz_x && 16 == grid->sz_y ) {
+      data_header->icon_type[0] = 'i';
+      data_header->icon_type[1] = 'c';
+      data_header->icon_type[2] = 's';
+      data_header->icon_type[3] = '4';
+
+   } else if( 8 == o->bpp && 16 == grid->sz_x && 16 == grid->sz_y ) {
+      data_header->icon_type[0] = 'i';
+      data_header->icon_type[1] = 'c';
+      data_header->icon_type[2] = 's';
+      data_header->icon_type[3] = '8';
+
+   } else if( 1 == o->bpp && 32 == grid->sz_x && 32 == grid->sz_y ) {
+      data_header->icon_type[0] = 'I';
+      data_header->icon_type[1] = 'C';
+      data_header->icon_type[2] = 'N';
+      data_header->icon_type[3] = '#';
+
+   } else if( 8 == grid->bpp && 32 == grid->sz_x && 32 == grid->sz_y ) {
+      data_header->icon_type[0] = 'i';
+      data_header->icon_type[1] = 'c';
+      data_header->icon_type[2] = 'l';
+      data_header->icon_type[3] = '8';
+   }
+
+   dio_printf( "icns: writing type %c%c%c%c (%dx%d %d bpp)\n",
+      data_header->icon_type[0],
+      data_header->icon_type[1],
+      data_header->icon_type[2],
+      data_header->icon_type[3],
+      grid->sz_x,
+      grid->sz_y,
+      o->bpp );
+
+   file_byte_idx += ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ;
+   data_byte_idx = 0;
+   for( grid_y = 0 ; grid->sz_y > grid_y ; grid_y++ ) {
+      for( grid_x = 0 ; grid->sz_x > grid_x ; grid_x++ ) {
+         grid_idx = ((grid_y * grid->sz_x) + grid_x);
+
+         assert( grid_idx < grid->data_sz );
+         assert( file_byte_idx < buf_sz );
+
+         byte_buffer <<= o->bpp;
+         /* Only allow reversal if 1bpp. */
+         if( o->reverse && 1 == o->bpp ) {
+            byte_buffer |= 0x01;
+            byte_buffer &= ~((grid->data[grid_idx] & 0x01));
+         } else {
+            byte_buffer |= (grid->data[grid_idx] & 0x01);
+         }
+         bit_idx += o->bpp;
+
+         if( 8 <= bit_idx ) {
+            buf_ptr[file_byte_idx] = byte_buffer;
+            file_byte_idx++;
+            data_byte_idx++;
+            bit_idx = 0;
+            byte_buffer = 0;
+         }
+      }
+   }
+
+   /* Write the mask. */
+   /* TODO: Make the insides opaque. */
+   for( grid_y = 0 ; grid->sz_y > grid_y ; grid_y++ ) {
+      for( grid_x = 0 ; grid->sz_x > grid_x ; grid_x++ ) {
+         grid_idx = ((grid_y * grid->sz_x) + grid_x);
+
+         assert( grid_idx < grid->data_sz );
+         assert( file_byte_idx < buf_sz );
+
+         byte_buffer <<= o->bpp;
+         /* Only allow reversal if 1bpp. */
+         if( o->reverse && 1 == o->bpp ) {
+            byte_buffer |= 0x01;
+            byte_buffer &= ~((grid->data[grid_idx] & 0x01));
+         } else {
+            byte_buffer |= (grid->data[grid_idx] & 0x01);
+         }
+         bit_idx += o->bpp;
+
+         if( 8 <= bit_idx ) {
+            buf_ptr[file_byte_idx] = byte_buffer;
+            file_byte_idx++;
+            data_byte_idx++;
+            bit_idx = 0;
+            byte_buffer = 0;
+         }
+      }
+   }
+
+   file_header->file_sz = dio_reverse_endian_32( file_byte_idx );
+   data_header->data_sz = dio_reverse_endian_32( data_byte_idx +
+      ICNS_DATA_HEADER_SZ );
+
+   return retval;
 }
 

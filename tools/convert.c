@@ -282,10 +282,13 @@ int main( int argc, char* argv[] ) {
       retval = cga_write_file( namebuf_out, grid, &options_out );
       break;
 
+   case FMT_ICNS:
+      retval = icns_write_file( namebuf_out, grid, &options_out );
+      break;
+
    case FMT_HEADER_IMG:
       retval = header_img_write_file( namebuf_out, grid, &options_out );
       break;
-
    }
 
    free( grid->data );

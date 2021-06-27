@@ -112,6 +112,8 @@ DSEKAI_ASSETS_DOS_CGA := \
    $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_PALM := \
    $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BITMAPS))
+DSEKAI_ASSETS_MAC7 := \
+   $(subst .bmp,.icn,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
 
 MD := mkdir -p
 MKRESH := bin/mkresh
@@ -180,7 +182,7 @@ DSEKAI_O_FILES_CHECK_NULL := \
    $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES))) \
    $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
 
-.PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm res_masks
+.PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm res_masks res_mac7
 
 all: $(BIN_DOS) $(BIN_SDL) $(BIN_PALM)
 
@@ -302,6 +304,14 @@ $(OBJDIR_WIN16)%.o: %.c $(OBJDIR_WIN16)win16.res
 
 # ====== Main: MacOS 7 ======
 
+$(GENDIR_MAC7):
+	$(MD) $@
+
+$(GENDIR_MAC7)/%.icn: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC7)
+	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
+
+res_mac7: $(DSEKAI_ASSETS_MAC7)
+
 $(OBJDIR_MAC7)dsekai.code.bin: $(DSEKAI_O_FILES_MAC7)
 	$(MD) $(dir $@)
 	$(CC) $(LDFLAGS) -o $@ $^
@@ -315,7 +325,7 @@ $(BIN_MAC7): $(OBJDIR_MAC7)dsekai.code.bin
       --cc $(BINDIR)/dsekai.APPL \
       --cc $(BIN_MAC7)
 
-$(OBJDIR_MAC7)%.o: %.c
+$(OBJDIR_MAC7)%.o: %.c res_mac7
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 

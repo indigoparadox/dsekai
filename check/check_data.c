@@ -89,13 +89,14 @@ static const uint8_t gc_test_cga_16_16_4_le[TEST_CGA_16_16_4_SZ] = {
    0xff, 0xff, 0xff, 0xff, /* 7 */
 };
 
-#define TEST_ICNS_16_16_2_SZ (ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ + 64)
+#define TEST_ICNS_16_16_2_DATA_SZ (((16 * 16) / 8) * 2)
+#define TEST_ICNS_16_16_2_SZ \
+   (ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ + TEST_ICNS_16_16_2_DATA_SZ)
 
 static const uint8_t gc_test_icns_16_16_2[TEST_ICNS_16_16_2_SZ] = {
 
    0x69, 0x63, 0x6e, 0x73,
-   0x00, 0x00, 0x00, ICNS_FILE_HEADER_SZ + 
-                     ICNS_DATA_HEADER_SZ + 64,
+   0x00, 0x00, 0x00, TEST_ICNS_16_16_2_SZ,
 
    /* Data Header */
 
@@ -103,6 +104,25 @@ static const uint8_t gc_test_icns_16_16_2[TEST_ICNS_16_16_2_SZ] = {
    0x00, 0x00, 0x00, 0x48,
 
    /* Data */
+
+   0xff, 0xff,
+   0xff, 0xff,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc3, 0xc3,
+   0xc3, 0xc3,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xc0, 0x03,
+   0xff, 0xff,
+   0xff, 0xff,
+
+   /* Mask */
 
    0xff, 0xff,
    0xff, 0xff,
@@ -273,6 +293,29 @@ START_TEST( check_data_icns_read ) {
 }
 END_TEST
 
+START_TEST( check_data_icns_write ) {
+   struct CONVERT_OPTIONS options;
+   uint8_t buffer[TEST_ICNS_16_16_2_SZ];
+   struct ICNS_FILE_HEADER* file_header = (struct ICNS_FILE_HEADER*)buffer,
+      * test_header = (struct ICNS_FILE_HEADER*)gc_test_icns_16_16_2;
+
+   memset( &buffer, '\0', TEST_ICNS_16_16_2_SZ );
+   memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
+   options.bpp = 1;
+
+   icns_write( 
+      (uint8_t*)&buffer, TEST_ICNS_16_16_2_SZ,
+      &gc_test_grid_16_16_4, &options );
+
+   ck_assert_int_eq(
+      dio_reverse_endian_32( test_header->file_sz ),
+      dio_reverse_endian_32( file_header->file_sz ) );
+   ck_assert_int_eq(
+      gc_test_icns_16_16_2[ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ + _i],
+      buffer[ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ +_i] );
+}
+END_TEST
+
 START_TEST( check_data_json_parse ) {
    json_parse_buffer( &gc_test_json, 0 );
 }
@@ -290,6 +333,8 @@ Suite* data_suite( void ) {
    tcase_add_loop_test( tc_core, check_data_cga_read, 0, 256 );
    tcase_add_loop_test( tc_core, check_data_cga_write, 0, TEST_CGA_16_16_4_SZ );
    tcase_add_loop_test( tc_core, check_data_icns_read, 0, 256 );
+   tcase_add_loop_test(
+      tc_core, check_data_icns_write, 0, TEST_ICNS_16_16_2_DATA_SZ );
    tcase_add_test( tc_core, check_data_json_parse );
 
    suite_add_tcase( s, tc_core );

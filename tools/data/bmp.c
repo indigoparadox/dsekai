@@ -150,7 +150,9 @@ int bmp_write(
 
          /* Write finished byte. */
          if( 0 != bit_idx && 0 == bit_idx % 8 ) {
+            /*
             dio_printf( "bmp: writing one byte (row %ld, col %ld)\n", y, x );
+            */
             buf_ptr[bmp_data_offset + bmp_data_byte_idx] = byte_buffer;
             byte_buffer = 0;
             assert( bmp_data_byte_idx < buf_sz );
@@ -160,7 +162,9 @@ int bmp_write(
          }
       }
       while( 0 != (row_bytes % 4) ) {
+         /*
          dio_printf( "bmp: adding row padding byte\n" );
+         */
          buf_ptr[bmp_data_offset + bmp_data_byte_idx] = '\0';
          bmp_data_byte_idx++;
          row_bytes++;
