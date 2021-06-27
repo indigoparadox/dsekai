@@ -4,6 +4,7 @@
 #include "../src/convert.h"
 #include "../src/data/cga.h"
 #include "../src/data/bmp.h"
+#include "../src/data/json.h"
 
 #define TEST_CGA_16_16_4_SZ (CGA_HEADER_SZ + (2 * 32))
 
@@ -142,7 +143,11 @@ static const struct CONVERT_GRID gc_test_grid_16_16_4 = {
    16,
    2,
    256,
-   &gc_test_grid_16_16_4_data
+   (uint8_t*)&gc_test_grid_16_16_4_data
+};
+
+static const char gc_test_json[] = {
+   "{\"objects_sz\": 3, \"objects\": [{\"name\":\"foo\"},{\"name\":\"bar\"},{\"name\":\"baz\",\"extra\":12}]}"
 };
 
 void buffer_printf( uint8_t* buffer, int start, int end, int col_break ) {
@@ -186,7 +191,6 @@ START_TEST( check_data_cga_read ) {
 END_TEST
 
 START_TEST( check_data_cga_write ) {
-   struct CONVERT_GRID* grid = NULL;
    struct CONVERT_OPTIONS options;
    uint8_t buffer[TEST_CGA_16_16_4_SZ];
    struct CGA_HEADER* cga_header = (struct CGA_HEADER*)buffer,
@@ -197,7 +201,8 @@ START_TEST( check_data_cga_write ) {
    options.cga_use_header = 1;
    options.bpp = 2;
 
-   cga_write( &buffer, TEST_CGA_16_16_4_SZ, &gc_test_grid_16_16_4, &options );
+   cga_write( 
+      (uint8_t*)&buffer, TEST_CGA_16_16_4_SZ, &gc_test_grid_16_16_4, &options );
 
    ck_assert_int_eq( test_header->version, cga_header->version );
    ck_assert_int_eq( test_header->width, cga_header->width );
@@ -206,70 +211,13 @@ START_TEST( check_data_cga_write ) {
    ck_assert_int_eq( test_header->plane1_offset, cga_header->plane1_offset );
    ck_assert_int_eq( CGA_HEADER_SZ, cga_header->plane1_offset );
    ck_assert_int_eq( gc_test_cga_16_16_4[_i], buffer[_i] );
-
-#if 0
-   printf( "cga p1:\n\n" );
-   buffer_printf( &buffer, cga_header->plane1_offset,
-      cga_header->plane1_offset + cga_header->plane1_sz,
-      cga_header->width / 4 );
-   printf( "should be:\n\n" );
-   buffer_printf( &gc_test_cga_16_16_4, test_header->plane1_offset,
-      test_header->plane1_offset + test_header->plane1_sz,
-      test_header->width / 4 );
-   printf( "p2:\n\n" );
-   buffer_printf( &buffer, cga_header->plane2_offset,
-      cga_header->plane2_offset + cga_header->plane2_sz,
-      cga_header->width / 4 );
-   printf( "\n" );
-   fflush( stdout );
-#endif
 }
 END_TEST
 
-#if 0
-START_TEST( check_data_cga_write_le ) {
-   struct CONVERT_GRID* grid = NULL;
-   struct CONVERT_OPTIONS options;
-   uint8_t buffer[TEST_CGA_16_16_4_SZ];
-   struct CGA_HEADER* cga_header = (struct CGA_HEADER*)buffer,
-      * test_header = (struct CGA_HEADER*)gc_test_cga_16_16_4_le;
-
-   memset( &buffer, '\0', TEST_CGA_16_16_4_SZ );
-   memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
-   options.cga_use_header = 1;
-   options.bpp = 2;
-   options.little_endian = 1;
-
-   cga_write( &buffer, TEST_CGA_16_16_4_SZ, &gc_test_grid_16_16_4, &options );
-
-   ck_assert_int_eq( test_header->version, cga_header->version );
-   ck_assert_int_eq( test_header->width, cga_header->width );
-   ck_assert_int_eq( test_header->height, cga_header->height );
-   ck_assert_int_eq( test_header->bpp, cga_header->bpp );
-   ck_assert_int_eq( test_header->plane1_offset, cga_header->plane1_offset );
-   ck_assert_int_eq( CGA_HEADER_SZ, cga_header->plane1_offset );
-   ck_assert_int_eq( gc_test_cga_16_16_4_le[_i], buffer[_i] );
-
-   printf( "cga p1:\n\n" );
-   buffer_printf( &buffer, cga_header->plane1_offset,
-      cga_header->plane1_offset + cga_header->plane1_sz,
-      cga_header->width / 4 );
-   printf( "should be:\n\n" );
-   buffer_printf( &gc_test_cga_16_16_4_le, test_header->plane1_offset,
-      test_header->plane1_offset + test_header->plane1_sz,
-      test_header->width / 4 );
-   printf( "p2:\n\n" );
-   buffer_printf( &buffer, cga_header->plane2_offset,
-      cga_header->plane2_offset + cga_header->plane2_sz,
-      cga_header->width / 4 );
-   printf( "should be:\n\n" );
-   buffer_printf( &gc_test_cga_16_16_4_le, test_header->plane2_offset,
-      test_header->plane2_offset + test_header->plane2_sz,
-      test_header->width / 4 );
-   fflush( stdout );
+START_TEST( check_data_json_parse ) {
+   json_parse_buffer( &gc_test_json, 0 );
 }
 END_TEST
-#endif
 
 Suite* data_suite( void ) {
    Suite* s;
@@ -282,10 +230,7 @@ Suite* data_suite( void ) {
 
    tcase_add_loop_test( tc_core, check_data_cga_read, 0, 256 );
    tcase_add_loop_test( tc_core, check_data_cga_write, 0, TEST_CGA_16_16_4_SZ );
-#if 0
-   tcase_add_loop_test( tc_core, check_data_cga_write_le, 0,
-      TEST_CGA_16_16_4_SZ );
-#endif
+   tcase_add_test( tc_core, check_data_json_parse );
 
    suite_add_tcase( s, tc_core );
 

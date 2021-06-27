@@ -55,22 +55,16 @@ int cga_write(
 ) {
    int retval = 0;
    struct CGA_HEADER* header = (struct CGA_HEADER*)buffer;
-   uint8_t byte_buffer_even = 0,
-      byte_buffer_odd;
    uint32_t plane1_start = 0,
       plane2_start = 0;
-   uint16_t* plane_row = 0,
-      swap_buffer = 0;
    int32_t
       x = 0,
       y = 0,
-      i = 0,
       bit_idx = 0,
       grid_idx_even = 0,
       grid_idx_odd = 0,
       byte_idx_even = 0,
       byte_idx_odd = 0,
-      last_byte_idx = 0,
       plane_sz = 0;
 
    plane_sz = ((grid->sz_y / 2) * grid->sz_x) / PX_PER_BYTE;

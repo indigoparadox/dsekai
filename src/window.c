@@ -51,6 +51,10 @@ void window_draw_all() {
 
       for( y = y_min ; y < y_max ; y += PATTERN_H ) {
          for( x = x_min ; x < x_max ; x += PATTERN_W ) {
+
+            /* TODO: Define window definitions in JSON, then compile them to
+            headers that can be attached to window definitions and called from
+            here. */
             
             if( x_min == x && y_min == y ) {
                /* Top Left */

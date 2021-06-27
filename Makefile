@@ -44,7 +44,8 @@ DSEKAI_C_FILES_CHECK := \
    src/graphics/nullg.c \
    src/input/nulli.c \
    src/data/cga.c \
-   src/data/bmp.c
+   src/data/bmp.c \
+   src/data/json.c
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
@@ -61,7 +62,8 @@ CONVERT_C_FILES := \
    src/data/drc.c \
    src/data/cga.c \
    src/data/dio.c \
-   src/data/header.c
+   src/data/header.c \
+   src/data/json.c
 
 DSEKAI_ASSET_HEADERS := src/data/sprites.h src/data/tilebmps.h
 DSEKAI_ASSET_DIMENSION := 16 16
@@ -117,8 +119,10 @@ CFLAGS_MKRESH := -DMEMORY_CALLOC -DNO_RESEXT -g
 CFLAGS_DRCPACK := -DMEMORY_CALLOC -DNO_RESEXT -g
 CFLAGS_CONVERT := -DMEMORY_CALLOC -DNO_RESEXT -g
 
-$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM_SDL -fsanitize=address -fsanitize=leak -DDIO_SILENT -DMEMORY_CALLOC
-$(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g -fsanitize=address -fsanitize=leak
+CFLAGS_DEBUG_GCC := -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak
+
+$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT -DMEMORY_CALLOC $(CFLAGS_DEBUG_GCC)
+$(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
@@ -149,8 +153,8 @@ $(BIN_MAC7): REZ := Rez
 $(BIN_MAC7): REZFLAGS :=
 $(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
 
-$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM_NULL -DMEMORY_CALLOC -DDIO_SILENT
-$(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g
+$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL -DMEMORY_CALLOC -DDIO_SILENTL $(CFLAGS_DEBUG_GCC)
+$(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(CFLAGS_DEBUG_GCC)
 
 DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES))) \
