@@ -27,6 +27,11 @@ DSEKAI_C_FILES_PALM := \
 
 DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
 
+DSEKAI_C_FILES_MAC7 := \
+   src/input/mac7i.c \
+   src/graphics/mac7g.c \
+   src/main.c
+
 DSEKAI_C_FILES_CHECK := \
    check/check.c \
    check/check_mobile.c \
@@ -69,12 +74,14 @@ OBJDIR_SDL := obj/sdl/
 OBJDIR_DOS := obj/dos/
 OBJDIR_PALM := obj/palm/
 OBJDIR_WIN16 := obj/win16/
+OBJDIR_MAC7 := obj/mac7/
 OBJDIR_CHECK_NULL := obj/check_null/
 
 GENDIR_SDL := gen/sdl
 GENDIR_DOS := gen/dos
 GENDIR_PALM := gen/palm
 GENDIR_WIN16 := gen/win16
+GENDIR_MAC7 := gen/mac7
 
 BINDIR := bin
 
@@ -82,6 +89,7 @@ BIN_SDL := $(BINDIR)/dsekai
 BIN_DOS := $(BINDIR)/dsekai.exe
 BIN_PALM := $(BINDIR)/dsekai.prc
 BIN_WIN16 := $(BINDIR)/dsekai16.exe
+BIN_MAC7 := $(BINDIR)/dsekai.bin $(BINDIR)/dsekai.APPL $(BINDIR)/dsekai.dsk
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
@@ -135,14 +143,33 @@ $(BIN_WIN16): RC := wrc
 $(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_WIN16
 $(BIN_WIN16): LDFLAGS := -l=windows
 
+$(BIN_MAC7): CC := m68k-apple-macos-gcc
+$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -DMEMORY_CALLOC -DDIO_SILENT
+$(BIN_MAC7): REZ := Rez
+$(BIN_MAC7): REZFLAGS :=
+$(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
+
 $(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -Wall -Wno-missing-braces -Wno-char-subscripts -std=c89 -DPLATFORM_NULL -DMEMORY_CALLOC -DDIO_SILENT
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g
 
-DSEKAI_O_FILES_SDL := $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES_SDL)))
-DSEKAI_O_FILES_DOS := $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES_DOS)))
-DSEKAI_O_FILES_PALM := $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES_PALM)))
-DSEKAI_O_FILES_WIN16 := $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
-DSEKAI_O_FILES_CHECK_NULL := $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES))) $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
+DSEKAI_O_FILES_SDL := \
+   $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES_SDL)))
+DSEKAI_O_FILES_DOS := \
+   $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES_DOS)))
+DSEKAI_O_FILES_PALM := \
+   $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES_PALM)))
+DSEKAI_O_FILES_WIN16 := \
+   $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
+DSEKAI_O_FILES_MAC7 := \
+   $(addprefix $(OBJDIR_MAC7),$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_MAC7),$(subst .c,.o,$(DSEKAI_C_FILES_MAC7)))
+DSEKAI_O_FILES_CHECK_NULL := \
+   $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
 
 .PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm res_masks
 
@@ -267,6 +294,25 @@ $(ASSETDIR_WIN16)/win16.rc: $(DSEKAI_ASSET_HEADERS)
 $(OBJDIR_WIN16)%.o: %.c
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
+
+# ====== Main: MacOS 7 ======
+
+$(OBJDIR_MAC7)dsekai.code.bin: $(DSEKAI_O_FILES_MAC7)
+	$(MD) $(dir $@)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+$(BIN_MAC7): $(OBJDIR_MAC7)dsekai.code.bin
+	$(REZ) $(REZFLAGS) \
+      --copy "$^" \
+      "$(RETRO68_PREFIX)/RIncludes/Retro68APPL.r" \
+      -t "APPL" -c "DSEK" \
+      -o $(BINDIR)/dsekai.bin \
+      --cc $(BINDIR)/dsekai.APPL \
+      --cc $(BIN_MAC7)
+
+$(OBJDIR_MAC7)%.o: %.c
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 # ====== Check: Null ======
 

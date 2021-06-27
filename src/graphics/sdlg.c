@@ -21,7 +21,7 @@ void graphics_init() {
    SDL_Rect area;
 #endif /* DEBUG_CGA_EMU */
 
-if( SDL_Init( SDL_INIT_EVERYTHING ) ) {
+   if( SDL_Init( SDL_INIT_EVERYTHING ) ) {
       printf( "error initializing SDL: %s\n", SDL_GetError() );
    }
 

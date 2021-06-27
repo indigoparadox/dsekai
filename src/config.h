@@ -97,6 +97,14 @@
 #include "../gen/win16/resext.h"
 
 /* ------ */
+#elif defined( PLATFORM_MAC7 )
+/* ------ */
+
+#include <assert.h>
+
+#include "../gen/mac7/resext.h"
+
+/* ------ */
 #else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
 /* ------ */
 
