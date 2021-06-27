@@ -2,7 +2,8 @@
 #include "tilemap.h"
 
 void tilemap_draw(
-   const struct TILEMAP* t, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW],
+   const struct TILEMAP* t, uint8_t* tiles_flags,
+   uint16_t tiles_flags_w, uint16_t tiles_flags_h,
    uint16_t screen_x, uint16_t screen_y, uint8_t force
 ) {
    int x = 0,
@@ -28,7 +29,7 @@ void tilemap_draw(
 #ifndef IGNORE_DIRTY
          if(
             !force &&
-            !((*tiles_flags)[y][x] & TILEMAP_TILE_FLAG_DIRTY)
+            !(tiles_flags[(y * tiles_flags_w) + x] & TILEMAP_TILE_FLAG_DIRTY)
          ) {
             continue;
          }
@@ -39,14 +40,14 @@ void tilemap_draw(
          assert( y >= 0 );
          assert( x >= 0 );
 
-         (*tiles_flags)[y][x] &= ~TILEMAP_TILE_FLAG_DIRTY;
+         tiles_flags[(y * tiles_flags_w) + x] &= ~TILEMAP_TILE_FLAG_DIRTY;
 
          /* Grab the left byte if even or the right if odd. */
          tile_id = tilemap_get_tile_id( t, x, y );
 
          /* Blit the tile. */
          graphics_blit_at(
-            (*t->tileset)[tile_id],
+            &(t->tileset[tile_id]),
             (x * TILE_W) - screen_x, (y * TILE_H) - screen_y, TILE_W, TILE_H );
       }
    }

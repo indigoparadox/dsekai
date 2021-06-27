@@ -44,6 +44,13 @@ void graphics_string_at(
    }
 }
 
+void graphics_blit_masked_at(
+   const struct GRAPHICS_BITMAP* bmp, const uint8_t* mask, uint16_t mask_sz,
+   uint16_t x, uint16_t y, uint16_t w, uint16_t h
+) {
+
+}
+
 #ifdef USE_FAKE_CGA
 
 void graphics_blit_at(

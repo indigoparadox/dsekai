@@ -35,20 +35,20 @@
 
 #include "../gen/dos/resext.h"
 
-#define GRAPHICS_MODE_320_200_4_CGA    0x05
-#define GRAPHICS_MODE_320_200_256_VGA  0x13
+#define GRAPHICS_M_320_200_4_CGA  0x05
+#define GRAPHICS_M_320_200_256_V  0x13
 
-#define GRAPHICS_MODE_320_200_256_VGA_ADDR   0xA0000000L
-#define GRAPHICS_MODE_320_200_4_CGA_ADDR     0xB8000000L
+#define GRAPHICS_M_320_200_256_VGA_A   0xA0000000L
+#define GRAPHICS_M_320_200_4_CGA_A     0xB8000000L
 
 #ifndef GRAPHICS_MODE
 #define GRAPHICS_MODE      0x05
 #endif /* !GRAPHICS_MODE */
 
-#if GRAPHICS_MODE_320_200_4_CGA == GRAPHICS_MODE
-#define GRAPHICS_ADDR     GRAPHICS_MODE_320_200_4_CGA_ADDR
-#elif GRAPHICS_MODE_320_200_256_VGA == GRAPHICS_MODE
-#define GRAPHICS_ADDR     GRAPHICS_MODE_320_200_256_VGA_ADDR
+#if GRAPHICS_M_320_200_4_CGA == GRAPHICS_MODE
+#define GRAPHICS_ADDR     GRAPHICS_M_320_200_4_CGA_A
+#elif GRAPHICS_M_320_200_256_VGA == GRAPHICS_MODE
+#define GRAPHICS_ADDR     GRAPHICS_M_320_200_256_VGA_A
 #endif /* GRAPHICS_MODE */
 
 #ifndef DRC_ARCHIVE
@@ -79,10 +79,9 @@
    if( !(comp) ) { \
       g_assert_failed_len = dio_snprintf( \
          g_assert_failed, 255, \
-         "%s, %d: ASSERT FALED", __FUNCTION__, __LINE__ ); \
+         __FILE__ ": %d: ASSERT FAILED", __LINE__ ); \
    }
 #endif /* !NDEBUG */
-//#define USE_FAKE_CGA
 
 #include "../gen/palm/resext.h"
 
@@ -98,10 +97,22 @@
 #include "../gen/win16/resext.h"
 
 /* ------ */
+#elif defined( PLATFORM_MAC7 )
+/* ------ */
+
+#include <assert.h>
+
+#include "../gen/mac7/resext.h"
+
+/* ------ */
 #else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
 /* ------ */
 
 #include <assert.h>
+
+#ifndef NO_RESEXT
+#include "../gen/sdl/resext.h"
+#endif /* NO_RESEXT */
 
 /* ------ */
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
@@ -114,13 +125,10 @@
 #define FONT_SPACE 0
 #define SPRITE_H 16
 #define SPRITE_W 16
-#define SPRITE_TYPE uint32_t
 #define TILE_W 16
 #define TILE_H 16
-#define TILE_TYPE uint32_t
-#define PATTERN_W 8
-#define PATTERN_H 8
-#define PATTERN_TYPE uint16_t
+#define PATTERN_W 16
+#define PATTERN_H 16
 
 #define WINDOW_TEXT_X 8
 #define WINDOW_TEXT_Y 8
@@ -146,6 +154,10 @@
 #ifndef FPS
 #define FPS 30
 #endif /* FPS */
+
+#ifndef NULL
+#define NULL ((void*)0)
+#endif /* NULL */
 
 #ifndef DIO_READ_FILE_BLOCK_SZ
 #define DIO_READ_FILE_BLOCK_SZ 4096

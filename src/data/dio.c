@@ -1,7 +1,12 @@
 
 #include "dio.h"
 
-#include "../convert.h"
+#ifndef DISABLE_FILESYSTEM
+#ifdef MEMORY_STATIC
+#error "Filesystem routines require dynamic memory heap!"
+#endif /* MEMORY_STATIC */
+#include "../memory.h"
+#endif /* !DISABLE_FILESYSTEM */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +14,8 @@
 #include <stdarg.h>
 
 #define PSITOA_BUF_LEN 6 /* 65535 = 5 digits + NULL. */
+
+struct CONVERT_GRID;
 
 uint32_t dio_reverse_endian_32( uint32_t int_in ) {
    int i = 0;
@@ -47,28 +54,7 @@ int32_t dio_char_idx_r( const char* str, int32_t str_sz, char c ) {
    return -1;
 }
 
-/**
- * @return Index of filename in path string, or -1 if a problem occurred.
- */
-int32_t dio_basename( const char* path, uint32_t path_sz ) {
-   int32_t retval = -1;
-   char* path_tmp = NULL,
-      * basename_ptr = NULL;
-
-   path_tmp = calloc( path_sz + 1, 1 );
-   memcpy( path_tmp, path, path_sz );
-
-   basename_ptr = strtok( path_tmp, "\\/" );
-   while( NULL != basename_ptr ) {
-      retval = strlen( path ) - strlen( basename_ptr );
-      assert( retval < path_sz );
-      basename_ptr = strtok( NULL, "\\/" );
-   }
-
-   free( path_tmp );
-
-   return retval;
-}
+#ifdef USE_DIO_PRINT_GRID
 
 void dio_print_grid( struct CONVERT_GRID* grid ) {
    size_t x = 0,
@@ -88,6 +74,8 @@ void dio_print_grid( struct CONVERT_GRID* grid ) {
    printf( "\n" );
 }
 
+#endif /* USE_DIO_PRINT_GRID */
+
 void dio_print_binary( uint8_t byte_in ) {
    printf( "bin: %d%d%d%d%d%d%d%d\n",
       byte_in & 0x80 ? 1 : 0,
@@ -98,6 +86,31 @@ void dio_print_binary( uint8_t byte_in ) {
       byte_in & 0x04 ? 1 : 0,
       byte_in & 0x02 ? 1 : 0,
       byte_in & 0x01 ? 1 : 0 );
+}
+
+#ifndef DISABLE_FILESYSTEM
+
+/**
+ * @return Index of filename in path string, or -1 if a problem occurred.
+ */
+int32_t dio_basename( const char* path, uint32_t path_sz ) {
+   int32_t retval = -1;
+   char* path_tmp = NULL,
+      * basename_ptr = NULL;
+
+   path_tmp = memory_alloc( path_sz + 1, 1 );
+   memcpy( path_tmp, path, path_sz );
+
+   basename_ptr = strtok( path_tmp, "\\/" );
+   while( NULL != basename_ptr ) {
+      retval = strlen( path ) - strlen( basename_ptr );
+      assert( retval < path_sz );
+      basename_ptr = strtok( NULL, "\\/" );
+   }
+
+   memory_free( &path_tmp );
+
+   return retval;
 }
 
 uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
@@ -118,7 +131,7 @@ uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
    fseek( file_in, 0, SEEK_END );
    file_in_sz = ftell( file_in );
    fseek( file_in, 0, SEEK_SET );
-   *buffer_ptr = calloc( file_in_sz, 1 );
+   *buffer_ptr = memory_alloc( file_in_sz, 1 );
    assert( NULL != *buffer_ptr );
 
    while(
@@ -196,6 +209,8 @@ int32_t dio_move_file( const char* src, const char* dest ) {
    return 0;
 }
 
+#endif /* !DISABLE_FILESYSTEM */
+
 int16_t dio_itoa(
    char* buffer, uint16_t buffer_len, int16_t d, uint8_t d_base
 ) {
@@ -244,7 +259,7 @@ int16_t dio_itoa(
 }
 
 int16_t dio_snprintf(
-   char* buffer, uint16_t buffer_len, const char* fmt, ...
+   char* buffer, int buffer_len, const char* fmt, ...
 ) {
    va_list args;
    unsigned char c = '\0',
@@ -263,13 +278,13 @@ int16_t dio_snprintf(
       if( '%' == last ) {
          switch( c ) {
          case 'd':
-            d = va_arg( args, int16_t );
+            d = va_arg( args, int );
             idx_out +=
                dio_itoa( &(buffer[idx_out]), buffer_len - idx_out, d, 10 );
             break;
 
          case 'x':
-            d = va_arg( args, int16_t );
+            d = va_arg( args, int );
             idx_out +=
                dio_itoa( &(buffer[idx_out]), buffer_len - idx_out, d, 16 );
             break;

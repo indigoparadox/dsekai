@@ -9,6 +9,7 @@
 typedef const SDL_Color* GRAPHICS_COLOR;
 struct GRAPHICS_BITMAP {
    uint32_t id;
+   uint8_t initialized;
    uint16_t ref_count;
    SDL_Surface* surface;
    SDL_Texture* texture;
@@ -25,9 +26,6 @@ extern const SDL_Color gc_cyan;
 extern const SDL_Color gc_magenta;
 extern const SDL_Color gc_white;
 #endif /* SDLG_C */
-
-typedef struct GRAPHICS_PATTERN {
-   PATTERN_TYPE bits[PATTERN_H]; } GRAPHICS_PATTERN;
 
 #define GRAPHICS_COLOR_BLACK     &gc_black
 #define GRAPHICS_COLOR_CYAN      &gc_cyan

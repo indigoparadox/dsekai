@@ -1,7 +1,6 @@
 
-#include "data/drc.h"
-#include "data/dio.h"
-#include "data/preproc.h"
+#include "data/drcwrite.h"
+#include "../src/data/dio.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +31,7 @@ int main( int argc, char* argv[] ) {
       command_list = 0,
       command_header = 0,
       command_extract = 0,
+      filename_len = 0,
       extension_idx = 0;
    uint32_t id = 0,
       extract_res_name_sz = 0,
@@ -65,11 +65,11 @@ int main( int argc, char* argv[] ) {
          }
          assert( NULL == file_list[file_list_len] );
          assert( file_list_len < FILE_LIST_MAX );
-         file_list[file_list_len] = calloc( NAMEBUF_MAX + 1, 1 );
+         filename_len = strlen( argv[i] );
+         file_list[file_list_len] = calloc( filename_len + 1, 1 );
          assert( NULL != file_list[file_list_len] );
-         strncpy( file_list[file_list_len], argv[i], NAMEBUF_MAX );
+         strncpy( file_list[file_list_len], argv[i], filename_len );
          file_list_len++;
-         printf( "%d: (l:%lu) %s\n", i, file_list_len, file_list[file_list_len - 1] );
          break;
 
       case STATE_ARCFILE:

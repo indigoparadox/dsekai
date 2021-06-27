@@ -2,12 +2,15 @@
 #ifndef MAPS_H
 #define MAPS_H
 
+#include "../dstypes.h"
+#include "../config.h"
+
 #include "../tilemap.h"
 #include "tiles.h"
 
 struct TILEMAP g_map_field = {
    "Field",
-   NULL,
+   { 0 },
    &gc_tiles_field_colors,
    &gc_tiles_field_flags,
    {

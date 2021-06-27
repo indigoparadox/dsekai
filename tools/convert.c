@@ -1,8 +1,10 @@
 
-#include "data/drc.h"
+#include "convert.h"
+#include "data/drcwrite.h"
 #include "data/bmp.h"
 #include "data/cga.h"
-#include "data/dio.h"
+#include "../src/data/dio.h"
+#include "data/header.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,22 +12,28 @@
 
 #define FMT_BITMAP      1
 #define FMT_CGA         2
+#define FMT_HEADER      3
+#define FMT_HEADER_IMG  4
+#define FMT_HEADER_MAP  5
+#define FMT_HEADER_WIN  6
+#define FMT_JSON_MAP    7
+#define FMT_JSON_WIN    8
 
 #define ENDIAN_LITTLE   'l'
 #define ENDIAN_BIG      'b'
 
-#define STATE_INFILE    1
-#define STATE_OUTFILE   2
-#define STATE_INBITS    3
-#define STATE_OUTBITS   4
-#define STATE_INPP      5
-#define STATE_OUTPP     6
-#define STATE_INFMT     7
-#define STATE_OUTFMT    8
-#define STATE_INW       9
-#define STATE_INH       10
-#define STATE_INLP      11
-#define STATE_OUTLP     12
+#define STATE_INFILE       1
+#define STATE_OUTFILE      2
+#define STATE_INBITS       3
+#define STATE_OUTBITS      4
+#define STATE_INFMT        7
+#define STATE_OUTFMT       8
+#define STATE_INW          9
+#define STATE_INH          10
+#define STATE_INLP         11
+#define STATE_OUTLP        12
+#define STATE_ENDIAN_IN    13
+#define STATE_ENDIAN_OUT   14
 
 int main( int argc, char* argv[] ) {
    int retval = 0;
@@ -69,11 +77,31 @@ int main( int argc, char* argv[] ) {
          state = 0;
          break;
 
+#if 0
+      case STATE_ENDIAN_IN:
+         if( 'l' == argv[i][0] ) {
+            options_in.little_endian = 1;
+         }
+         state = 0;
+         break;
+
+      case STATE_ENDIAN_OUT:
+         if( 'l' == argv[i][0] ) {
+            options_out.little_endian = 1;
+         }
+         state = 0;
+         break;
+#endif
+
       case STATE_INFMT:
          if( 0 == strncmp( argv[i], "bitmap", 6 ) ) {
             fmt_in = FMT_BITMAP;
          } else if( 0 == strncmp( argv[i], "cga", 3 ) ) {
             fmt_in = FMT_CGA;
+         } else if( 0 == strncmp( argv[i], "jmap", 4 ) ) {
+            fmt_in = FMT_JSON_MAP;
+         } else if( 0 == strncmp( argv[i], "jwin", 4 ) ) {
+            fmt_in = FMT_JSON_WIN;
 #if 0
          } else if( 0 == strncmp( argv[i], "header", 6 ) ) {
             fmt_in = FMT_HEADER;
@@ -87,10 +115,8 @@ int main( int argc, char* argv[] ) {
             fmt_out = FMT_BITMAP;
          } else if( 0 == strncmp( argv[i], "cga", 3 ) ) {
             fmt_out = FMT_CGA;
-#if 0
          } else if( 0 == strncmp( argv[i], "header", 6 ) ) {
             fmt_out = FMT_HEADER;
-#endif
          }
          state = 0;
          break;
@@ -115,18 +141,6 @@ int main( int argc, char* argv[] ) {
          state = 0;
          break;
 
-#if 0
-      case STATE_INPP:
-         options_in.plane_padding = atoi( argv[i] );
-         state = 0;
-         break;
-
-      case STATE_OUTPP:
-         options_out.plane_padding = atoi( argv[i] );
-         state = 0;
-         break;
-#endif
-
       default:
          if( 0 == strncmp( argv[i], "-if", 3 ) ) {
             state = STATE_INFILE;
@@ -144,12 +158,6 @@ int main( int argc, char* argv[] ) {
             state = STATE_INW;
          } else if( 0 == strncmp( argv[i], "-ih", 3 ) ) {
             state = STATE_INH;
-#if 0
-         } else if( 0 == strncmp( argv[i], "-ip", 3 ) ) {
-            state = STATE_INPP;
-         } else if( 0 == strncmp( argv[i], "-op", 3 ) ) {
-            state = STATE_OUTPP;
-#endif
          } else if( 0 == strncmp( argv[i], "-il", 3 ) ) {
             state = STATE_INLP;
          } else if( 0 == strncmp( argv[i], "-ol", 3 ) ) {
@@ -157,9 +165,18 @@ int main( int argc, char* argv[] ) {
          } else if( 0 == strncmp( argv[i], "-r", 3 ) ) {
             options_out.reverse = 1;
          } else if( 0 == strncmp( argv[i], "-ig", 3 ) ) {
-            options_out.cga_use_header = 1;
+            options_in.cga_use_header = 1;
          } else if( 0 == strncmp( argv[i], "-og", 3 ) ) {
             options_out.cga_use_header = 1;
+#if 0
+         } else if( 0 == strncmp( argv[i], "-ie", 3 ) ) {
+            state = STATE_ENDIAN_IN;
+         } else if( 0 == strncmp( argv[i], "-oe", 3 ) ) {
+            state = STATE_ENDIAN_OUT;
+#endif
+         } else if( '-' == argv[i][0] ) {
+            fprintf( stderr, "invalid command specified\n" );
+            return 1;
          }
       }
    }
@@ -171,16 +188,32 @@ int main( int argc, char* argv[] ) {
    assert( 0 != strlen( namebuf_out ) );
    assert( 0 != fmt_in );
    assert( 0 != fmt_out );
-   assert( FMT_CGA != fmt_in || 0 != options_in.w );
-   assert( FMT_CGA != fmt_in || 0 != options_in.h );
-   //assert( FMT_CGA != fmt_in || 0 != options_in.plane_padding );
+   //assert( FMT_CGA != fmt_in || 0 != options_in.w );
+   //assert( FMT_CGA != fmt_in || 0 != options_in.h );
+
+   if( FMT_HEADER == fmt_out ) {
+      switch( fmt_in ) {
+      case FMT_JSON_MAP:
+         fmt_out = FMT_HEADER_MAP;
+         break;
+
+      case FMT_JSON_WIN:
+         fmt_out = FMT_HEADER_WIN;
+         break;
+
+      default:
+         fmt_out = FMT_HEADER_IMG;
+         break;
+      }
+   }
 
    if(
       0 == strlen( namebuf_in ) ||
       0 == strlen( namebuf_out ) ||
       0 == fmt_in || 0 == fmt_out ||
-      (FMT_CGA == fmt_in && (0 == options_in.w || 0 == options_in.h))
-         //0 == options_in.plane_padding))
+      (FMT_CGA == fmt_in &&
+         (0 == options_in.w || 0 == options_in.h) &&
+            !options_in.cga_use_header )
    ) {
       fprintf( stderr, "usage:\n\n" );
       fprintf( stderr, "%s [options] -ic <in_fmt> -oc <out_fmt> -if <in_file> -of <out_file>\n", argv[0] );
@@ -195,8 +228,12 @@ int main( int argc, char* argv[] ) {
       fprintf( stderr, "-ih [in height] (required for CGA in)\n" );
       fprintf( stderr, "-il [in line padding] (full-screen uses 192)\n" );
       fprintf( stderr, "-ol [out line padding]\n" );
+#if 0
       fprintf( stderr, "-ip [in plane padding] (full-screen uses 8000)\n" );
       fprintf( stderr, "-op [out plane padding]\n" );
+      fprintf( stderr, "-ie [in endian (b/l)]\n" );
+      fprintf( stderr, "-oe [out endian (b/l)]\n" );
+#endif
       return 1;
    }
 
@@ -224,15 +261,21 @@ int main( int argc, char* argv[] ) {
       options_out.bpp = grid->bpp;
    }
 
-   dio_print_grid( grid );
+   /* dio_print_grid( grid ); */
 
    switch( fmt_out ) {
    case FMT_BITMAP:
       retval = bmp_write_file( namebuf_out, grid, &options_out );
       break;
+
    case FMT_CGA:
       retval = cga_write_file( namebuf_out, grid, &options_out );
       break;
+
+   case FMT_HEADER_IMG:
+      retval = header_img_write_file( namebuf_out, grid, &options_out );
+      break;
+
    }
 
    free( grid->data );

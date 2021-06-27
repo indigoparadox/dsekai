@@ -1,6 +1,6 @@
 
 #include "src/palmrsc.h"
-#include "gen/palm/palm_ids.h"
+#include "gen/palm/resext.h"
 
 VERSION 1 "1.0"
 
@@ -12,7 +12,6 @@ BEGIN
    BUTTONS "OK"
 END
 
-
 ALERT ID TheError
 INFORMATION
 BEGIN
@@ -21,5 +20,5 @@ BEGIN
    BUTTONS "OK"
 END
 
-#include "gen/palm/palm.rcp"
+#include "gen/palm/palmd.rcp"
 

@@ -12,8 +12,13 @@
 #define dio_printf( ... ) printf( __VA_ARGS__ )
 #define dio_eprintf( ... ) fprintf( stderr, __VA_ARGS__ )
 #else
+#ifdef NO_VARGS
+#define dio_printf( x )
+#define dio_eprintf( x )
+#else
 #define dio_printf( ... )
 #define dio_eprintf( ... )
+#endif /* NO_VARGS */
 #endif
 
 struct CONVERT_GRID;
@@ -29,7 +34,7 @@ int32_t dio_copy_file( const char*, const char* );
 uint32_t dio_read_file( const char*, uint8_t** );
 int32_t dio_move_file( const char*, const char* );
 int16_t dio_itoa( char*, uint16_t, int16_t, uint8_t );
-int16_t dio_snprintf( char*, uint16_t, const char*, ... );
+int16_t dio_snprintf( char*, int, const char*, ... );
 
 #endif /* DIO_H */
 

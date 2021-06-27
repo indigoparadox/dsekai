@@ -4,31 +4,48 @@
 
 #include <PalmOS.h>
 
+static UInt32 g_next_input = 0;
+
 int input_poll() {
    EventType event;
    UInt32 key_state;
+   UInt16 allow_input = 0;
 
    /* Doze until an event arrives. */
    EvtGetEvent( &event, 100 );
 
-   if( event.eType == keyDownEvent ) {
-      key_state = KeyCurrentState();
-      if( key_state & keyBitHard2 ) {
-         return INPUT_KEY_LEFT;
-      } else if( key_state & keyBitPageDown ) {
-         return INPUT_KEY_DOWN;
-      } else if( key_state & keyBitPageUp ) {
-         return INPUT_KEY_UP;
-      } else if( key_state & keyBitHard3 ) {
-         return INPUT_KEY_RIGHT;
-      }
+   if( 0 == g_next_input || TimGetTicks() > g_next_input ) {
+      g_next_input = TimGetTicks() + (SysTicksPerSecond());
+      allow_input = 0xffff;
    }
 
-   /* System gets a chance to handle the event. */
-   SysHandleEvent( &event );
+   switch( event.eType ) {
+   case keyDownEvent:
+      if( event.data.keyDown.chr == hard2Chr ) {
+         return allow_input & INPUT_KEY_LEFT;
 
-   if( event.eType == appStopEvent ) {
+      } else if( event.data.keyDown.chr == pageDownChr ) {
+         return allow_input & INPUT_KEY_DOWN;
+
+      } else if( event.data.keyDown.chr == pageUpChr ) {
+         return allow_input & INPUT_KEY_UP;
+
+      } else if( event.data.keyDown.chr == hard3Chr ) {
+         return allow_input & INPUT_KEY_RIGHT;
+
+      } else {
+         /* System gets a chance to handle the event. */
+         SysHandleEvent( &event );
+      }
+      break;
+
+   case appStopEvent:
       return INPUT_KEY_QUIT;
+
+   default:
+      /* System gets a chance to handle the event. */
+      SysHandleEvent( &event );
+      break;
    }
 
    return 0;

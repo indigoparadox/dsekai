@@ -9,7 +9,7 @@
 struct ITEM;
 
 struct MOBILE {
-   struct GRAPHICS_BITMAP* sprite;
+   struct GRAPHICS_BITMAP sprite;
    uint8_t hp;
    uint8_t mp;
    struct TILEMAP_COORDS coords;
@@ -20,8 +20,7 @@ struct MOBILE {
 };
 
 uint8_t mobile_walk_start( struct MOBILE*, int8_t, int8_t );
-void mobile_animate(
-   struct MOBILE* m, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW] );
+void mobile_animate( struct MOBILE* m, uint8_t*, uint16_t, uint16_t );
 void mobile_draw( const struct MOBILE*, int8_t, int16_t, int16_t );
 
 #endif /* MOBILE_H */

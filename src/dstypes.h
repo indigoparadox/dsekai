@@ -53,7 +53,7 @@ typedef unsigned long uint32_t;
 #define RESOURCE_SPRITE_HEADERS
 
 /* ------ */
-#endif /* __DOS__ */
+#endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 /* ------ */
 
 #endif /* DSTYPES_H */

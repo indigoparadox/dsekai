@@ -30,7 +30,8 @@ uint8_t mobile_walk_start( struct MOBILE* m, int8_t x_mod, int8_t y_mod ) {
 }
 
 void mobile_animate(
-   struct MOBILE* m, uint8_t (*tiles_flags)[TILEMAP_TH][TILEMAP_TW]
+   struct MOBILE* m, uint8_t* tiles_flags, uint16_t tiles_flags_w,
+   uint16_t tiles_flags_h
 ) {
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
@@ -43,8 +44,8 @@ void mobile_animate(
    assert( SPRITE_H > m->steps_y );
 
    /* Leave a trail of dirty tiles. */
-   (*tiles_flags)[m->coords.y][m->coords.x] |= TILEMAP_TILE_FLAG_DIRTY;
-   (*tiles_flags)[m->coords_prev.y][m->coords_prev.x] |= TILEMAP_TILE_FLAG_DIRTY;
+   tiles_flags[(m->coords.y * tiles_flags_w) + m->coords.x] |= TILEMAP_TILE_FLAG_DIRTY;
+   tiles_flags[(m->coords_prev.y * tiles_flags_w) + m->coords_prev.x] |= TILEMAP_TILE_FLAG_DIRTY;
 
    if(
       m->coords.x != m->coords_prev.x ||
@@ -68,7 +69,7 @@ void mobile_draw(
 
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
-   assert( NULL != m->sprite );
+   assert( 1 == m->sprite.initialized );
 
    if( m->coords_prev.x > m->coords.x ) {
       x_offset = SPRITE_W - m->steps_x;
@@ -84,9 +85,11 @@ void mobile_draw(
    assert( SPRITE_H > y_offset );
 
    graphics_blit_at(
-      m->sprite,
+      &(m->sprite),
       ((m->coords.x * SPRITE_W) + x_offset) - screen_x,
       (((m->coords.y * SPRITE_H) + y_offset + walk_offset ) - screen_y),
-      SPRITE_W, SPRITE_H );
+      /* Chop off bottom 2px of sprite to fit it within bounds accounting
+         for walking offset. */
+      SPRITE_W, SPRITE_H - 2 );
 }
 

@@ -5,6 +5,7 @@
 #include <SDL.h>
 
 #include "../data/drc.h"
+#include "../memory.h"
 
 SDL_Window* g_window = NULL;
 SDL_Surface* g_screen = NULL;
@@ -20,7 +21,7 @@ void graphics_init() {
    SDL_Rect area;
 #endif /* DEBUG_CGA_EMU */
 
-if( SDL_Init( SDL_INIT_EVERYTHING ) ) {
+   if( SDL_Init( SDL_INIT_EVERYTHING ) ) {
       printf( "error initializing SDL: %s\n", SDL_GetError() );
    }
 
@@ -153,18 +154,15 @@ void graphics_draw_block(
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
-int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
+int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
    SDL_RWops* bmp_stream;
 
    assert( NULL != b );
-   assert( NULL == *b );
+   assert( 0 == b->ref_count );
 
-   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
-   assert( 0 == (*b)->ref_count );
-   (*b)->ref_count++;
-
+   /* Load resource into buffer. */
    buffer_sz = drc_get_resource(
       DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer );
    if( 0 >= buffer_sz ) {
@@ -172,33 +170,49 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP** b ) {
       return buffer_sz;
    }
 
+   /* Parse buffered resource into SDL. */
    bmp_stream = SDL_RWFromMem( buffer, buffer_sz );
-   (*b)->surface = SDL_LoadBMP_RW( bmp_stream, 1 ); /* Free stream on close. */
-   if( NULL == (*b)->surface ) {
-      fprintf( stderr, "unable to load bitmap %u: %s\n",
-         id, SDL_GetError() );
+   b->surface = SDL_LoadBMP_RW( bmp_stream, 1 ); /* Free stream on close. */
+   if( NULL == b->surface ) {
+      fprintf( stderr, "unable to load bitmap %u: %s\n", id, SDL_GetError() );
       buffer_sz = -1;
       goto cleanup;
    }
-   free( buffer ); /* Free resource memory. */
-   (*b)->texture = SDL_CreateTextureFromSurface( g_renderer, (*b)->surface );
-   assert( NULL != (*b)->texture );
+   b->texture = SDL_CreateTextureFromSurface( g_renderer, b->surface );
+   if( NULL == b->texture ) {
+      fprintf( stderr, "unable to load texture %u: %s\n", id, SDL_GetError() );
+      buffer_sz = -1;
+      if( NULL != b->surface ) {
+         SDL_FreeSurface( b->surface );
+         b->surface = NULL;
+      }
+      goto cleanup;
+   }
+
+   b->ref_count++;
+   b->initialized = 1;
 
 cleanup:
+
+   if( NULL != buffer ) {
+      memory_free( &buffer ); /* Free resource memory. */
+   }
+
    return buffer_sz;
 }
 
 /*
  * @return 1 if bitmap is unloaded and 0 otherwise.
  */
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP** b ) {
-   assert( NULL != *b );
-   (*b)->ref_count--;
-   if( 0 >= (*b)->ref_count ) {
-      SDL_DestroyTexture( (*b)->texture );
-      SDL_FreeSurface( (*b)->surface );
-      free( *b );
-      *b = NULL;
+int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+   if( NULL == b ) {
+      return 0;
+   }
+   b->ref_count--;
+   if( 0 >= b->ref_count ) {
+      SDL_DestroyTexture( b->texture );
+      SDL_FreeSurface( b->surface );
+      b->initialized = 0;
       return 1;
    }
    return 0;

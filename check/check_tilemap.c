@@ -1,9 +1,6 @@
 
 #include <check.h>
 
-#define MAIN_C
-#include "../data.h"
-
 Suite* tilemap_suite( void ) {
    Suite* s;
    TCase* tc_core;
