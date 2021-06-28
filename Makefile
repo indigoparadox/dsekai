@@ -30,6 +30,7 @@ DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
 DSEKAI_C_FILES_MAC7 := \
    src/input/mac7i.c \
    src/graphics/mac7g.c \
+   src/data/drc.c \
    src/main.c
 
 DSEKAI_C_FILES_CHECK := \
@@ -115,8 +116,12 @@ DSEKAI_ASSETS_ICNS := \
    $(subst .bmp,.icns,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_RSRC := \
    $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
+DSEKAI_ASSETS_PICTS := \
+   $(subst .bmp,.pict,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
 
 MD := mkdir -p
+IMAGEMAGICK := convert
+
 MKRESH := bin/mkresh
 DRCPACK := bin/drcpack
 CONVERT := bin/convert
@@ -156,7 +161,9 @@ $(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DUSE_LOOKUPS -
 $(BIN_WIN16): LDFLAGS := -l=windows
 
 $(BIN_MAC7): CC := m68k-apple-macos-gcc
+$(BIN_MAC7): CXX := m68k-apple-macos-g++
 $(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -DMEMORY_CALLOC -DDIO_SILENT
+$(BIN_MAC7): LDFLAGS := -lRetroConsole
 $(BIN_MAC7): REZ := Rez
 $(BIN_MAC7): REZFLAGS :=
 $(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
@@ -312,24 +319,30 @@ $(OBJDIR_WIN16)%.o: %.c $(OBJDIR_WIN16)win16.res
 $(GENDIR_MAC7):
 	$(MD) $@
 
-# TODO
-$(GENDIR_MAC7)/resext.h: $(GENDIR_MAC7) $(MKRESH)
-	$(MKRESH) -f palm -i 5001 \
-      -if $(DSEKAI_ASSETS_ICNS) \
-      -oh $(GENDIR_MAC7)/resext.h \
+#$(GENDIR_MAC7)/resext.h: $(GENDIR_MAC7) $(MKRESH)
+#	$(MKRESH) -f palm -i 5001 \
+#      -if $(DSEKAI_ASSETS_ICNS) \
+#      -oh $(GENDIR_MAC7)/resext.h \
 
-$(GENDIR_MAC7)/%.rsrc: $(GENDIR_MAC7)/%.icns
-	echo "read 'icns' (-16455) \"$<\";" > $@
+$(BINDIR)/mac7.drc \
+$(GENDIR_MAC7)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | $(GENDIR_SDL)
+	$(DRCPACK) -c -a -af $(BINDIR)/mac7.drc -t PICT -i 5001 \
+      -if $(DSEKAI_ASSETS_PICTS) -lh $(GENDIR_MAC7)/resext.h
+
+$(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)
+	$(IMAGEMAGICK) $< $@
+
+#$(GENDIR_MAC7)/%.rsrc: $(GENDIR_MAC7)/%.icns
+#	echo "read 'icns' (-16455) \"$<\";" > $@
 
 $(GENDIR_MAC7)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC7)
 	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
 
-$(OBJDIR_MAC7)dsekai.code.bin: $(DSEKAI_O_FILES_MAC7)
-	$(MD) $(dir $@)
-	$(CC) $(LDFLAGS) -o $@ $^
+$(OBJDIR_MAC7)dsekai.code.bin: $(DSEKAI_O_FILES_MAC7) | $(OBJDIR_MAC7)
+	$(CXX) $(LDFLAGS) -o $@ $^
 
-$(BIN_MAC7): $(OBJDIR_MAC7)dsekai.code.bin $(DSEKAI_ASSETS_RSRC)
-	$(REZ) $(REZFLAGS) \
+$(BIN_MAC7): $(OBJDIR_MAC7)dsekai.code.bin
+	$(REZ) -I$(RETRO68_PREFIX)/RIncludes \
       --copy $^ \
       "$(RETRO68_PREFIX)/RIncludes/Retro68APPL.r" \
       -t "APPL" -c "DSEK" \
@@ -337,8 +350,8 @@ $(BIN_MAC7): $(OBJDIR_MAC7)dsekai.code.bin $(DSEKAI_ASSETS_RSRC)
       --cc $(BINDIR)/dsekai.APPL \
       --cc $(BINDIR)/dsekai.dsk
 
-$(OBJDIR_MAC7)%.o: %.c $(GENDIR_MAC7)/resext.h
-	$(MD) $(dir $@)
+$(OBJDIR_MAC7)%.o: \
+%.c $(BINDIR)/mac7.drc $(GENDIR_MAC7)/resext.h | $(OBJDIR_MAC7)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 # ====== Check: Null ======

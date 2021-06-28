@@ -11,11 +11,11 @@ struct GRAPHICS_BITMAP {
    uint32_t id;
    uint8_t initialized;
    uint16_t ref_count;
+   PicHandle pict;
+   void* ptr2; /* Unused */
+   uint32_t pict_sz;
 
    /* Unused Overrides */
-   void* ptr1;
-   void* ptr2;
-   uint32_t res1;
    uint32_t res2;
    uint8_t res3;
    uint8_t res4;

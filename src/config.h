@@ -178,6 +178,10 @@ include <stdio.h>
 
 #include "../gen/mac7/resext.h"
 
+#ifndef DRC_ARCHIVE
+#define DRC_ARCHIVE "mac7.drc"
+#endif /* !DRC_ARCHIVE */
+
 /* ------ */
 #else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
 /* ------ */
