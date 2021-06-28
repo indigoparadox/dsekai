@@ -9,19 +9,53 @@
 #define JSON_TOKEN_MAX 512
 #endif /* JSON_TOKEN_MAX */
 
+#define 
+
+#define JSON_STATE_ERROR_TOO_LONG   -1
+
+#define JSON_STATE_NONE             0
+
+#define JSON_STATE_INSIDE_OBJECT    1
+
 struct JSON_PARSER {
    char last_c;
    char next_token[JSON_TOKEN_MAX + 1];
    uint32_t next_token_idx;
    struct JSON_OBJECT* root;
    struct JSON_BASE* iter;
+   int state;
+   int error;
 };
+
+static struct JSON_PARSER*
+json_parse_cbrace_open( char c, struct JSON_PARSER* p ) {
+   switch( p->state ) {
+   default:
+      if( JSON_TOKEN_MAX <= p->next_token_idx + 1 ) {
+         p->state = JSON_STATE_ERROR_TOO_LONG;
+         return NULL;
+      }
+      p->next_token[p->next_token_idx++] = c;
+      break;
+   }
+}
+
+static struct JSON_PARSER* json_parse_dquote( char c, struct JSON_PARSER* p ) {
+
+   switch( p->state ) {
+   case STATE_INSIDE_STRING:
+   }
+
+}
+
+static struct JSON_PARSER* json_parse_char( char c, struct JSON_PARSER* p ) {
+}
 
 static struct JSON_PARSER* json_parse( char c, struct JSON_PARSER* p ) {
 
    switch( c ) {
    case '{':
-      break;
+      return json_parse_cbrace_open( c, p );
 
    case '}':
       break;
@@ -33,7 +67,7 @@ static struct JSON_PARSER* json_parse( char c, struct JSON_PARSER* p ) {
       break;
 
    case '"':
-      break;
+      break json_parse_dquote( c, p );
 
    case ',':
       break;
