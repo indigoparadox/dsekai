@@ -6,6 +6,10 @@
 #include "data/icns.h"
 #include "../src/data/dio.h"
 #include "data/header.h"
+#include "data/maptoh.h"
+
+#define JSMN_PARENT_LINKS
+#include "data/jsmn.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -288,6 +292,10 @@ int main( int argc, char* argv[] ) {
 
    case FMT_HEADER_IMG:
       retval = header_img_write_file( namebuf_out, grid, &options_out );
+      break;
+
+   case FMT_HEADER_MAP:
+      retval = header_map_write_file( namebuf_out, namebuf_in, &options_out );
       break;
    }
 

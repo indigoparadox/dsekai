@@ -11,11 +11,15 @@ struct GRAPHICS_BITMAP {
    uint32_t id;
    uint8_t initialized;
    uint16_t ref_count;
+
+   uint8_t* plane_1;
+   uint8_t* plane_2;
    uint32_t w;
    uint32_t h;
    uint8_t palette;
-   uint8_t* plane_1;
-   uint8_t* plane_2;
+
+   /* Unused Overrides */
+   uint8_t res4;
 };
 
 #define GRAPHICS_COLOR_BLACK        0

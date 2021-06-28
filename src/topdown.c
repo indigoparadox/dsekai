@@ -10,6 +10,8 @@
 #include "memory.h"
 #endif /* !MEMORY_STATIC */
 
+#include "data/windows.h"
+
 #define INPUT_BLOCK_DELAY 5
 #define TOPDOWN_MOBILES_MAX 10
 
@@ -194,10 +196,10 @@ int topdown_loop(
    if( !g_window_shown ) {
 #ifndef HIDE_WELCOME_DIALOG
       w = window_push();
-      graphics_load_bitmap( pattern_cm_checker, &(w->pattern) );
+      w->frame = &g_pattern_cm_checker;
       w->w = 80;
       w->h = 64;
-      w->dirty = 1;
+      w->dirty = DIRTY_THRESHOLD;
       w->state = WINDOW_STATE_VISIBLE;
       w->strings[0] = "Welcome!";
       w->strings_count = 1;

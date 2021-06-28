@@ -5,19 +5,6 @@
 
 #include "graphics.h"
 
-#define MASKS_C
-#ifdef ANCIENT_C
-#include "../gen/mrtl.h"
-#include "../gen/mrtr.h"
-#include "../gen/mrbl.h"
-#include "../gen/mrbr.h"
-#else
-#include "../gen/mask_rounded_tl.h"
-#include "../gen/mask_rounded_tr.h"
-#include "../gen/mask_rounded_bl.h"
-#include "../gen/mask_rounded_br.h"
-#endif /* ANCIENT_C */
-
 static struct WINDOW g_windows[WINDOW_COUNT_MAX];
 static uint8_t g_windows_count = 0;
 
@@ -39,6 +26,10 @@ void window_draw_all() {
       x_min = 0,
       y_min = 0;
 
+   debug_printf( 1, "starting window drawing..." );
+
+   return;
+
    for( i = 0 ; g_windows_count > i ; i++ ) {
       if(
          WINDOW_STATE_VISIBLE != g_windows[i].state
@@ -46,6 +37,8 @@ void window_draw_all() {
          || 0 == g_windows[i].dirty
 #endif /* !IGNORE_DIRTY */
       ) {
+         debug_printf( 1, "ignoring window %d (dirty: %d, state: %d)",
+            i, g_windows[i].dirty, g_windows[i].state );
          continue;
       }
 
@@ -56,39 +49,57 @@ void window_draw_all() {
       x_min = (SCREEN_W / 2) - (g_windows[i].w / 2);
       y_min = (SCREEN_H / 2) - (g_windows[i].h / 2);
 
+      debug_printf( 1, "max: %d, %d; min: %d, %d", x_max, y_max, x_min, y_min );
+
       for( y = y_min ; y < y_max ; y += PATTERN_H ) {
          for( x = x_min ; x < x_max ; x += PATTERN_W ) {
 
             /* TODO: Define window definitions in JSON, then compile them to
             headers that can be attached to window definitions and called from
             here. */
-            
+
             if( x_min == x && y_min == y ) {
                /* Top Left */
-               graphics_blit_masked_at(
-                  &(g_windows[i].pattern), mask_rounded_tl, mask_rounded_tl_sz,
-                  0, 0, x, y );
+               graphics_blit_at( &(g_windows[i].frame->tl), x, y,
+                  PATTERN_W, PATTERN_H );
 
             } else if( x_max - PATTERN_W == x && y_min == y ) {
                /* Top Right */
-               graphics_blit_masked_at(
-                  &(g_windows[i].pattern), mask_rounded_tr, mask_rounded_tr_sz,
-                  0, 0, x, y );
+               graphics_blit_at( &(g_windows[i].frame->tr), x, y,
+                  PATTERN_W, PATTERN_H );
 
             } else if( x_min == x && y_max - PATTERN_H == y ) {
                /* Bottom Left */
-               graphics_blit_masked_at(
-                  &(g_windows[i].pattern), mask_rounded_bl, mask_rounded_bl_sz,
-                  0, 0, x, y );
+               graphics_blit_at( &(g_windows[i].frame->bl), x, y,
+                  PATTERN_W, PATTERN_H );
             
             } else if( x_max - PATTERN_W == x && y_max - PATTERN_H == y ) {
                /* Bottom Right */
-               graphics_blit_masked_at(
-                  &(g_windows[i].pattern), mask_rounded_br, mask_rounded_br_sz,
-                  0, 0, x, y );
+               graphics_blit_at( &(g_windows[i].frame->br), x, y,
+                  PATTERN_W, PATTERN_H );
+            
+            } else if( x_max - PATTERN_W == x ) {
+               /* Right */
+               graphics_blit_at( &(g_windows[i].frame->r), x, y,
+                  PATTERN_W, PATTERN_H );
+            
+            } else if( x_min == x ) {
+               /* Left */
+               graphics_blit_at( &(g_windows[i].frame->l), x, y,
+                  PATTERN_W, PATTERN_H );
+            
+            } else if( y_min == y ) {
+               /* Top */
+               graphics_blit_at( &(g_windows[i].frame->t), x, y,
+                  PATTERN_W, PATTERN_H );
+            
+            } else if( y_max - PATTERN_H == y ) {
+               /* Bottom */
+               graphics_blit_at( &(g_windows[i].frame->b), x, y,
+                  PATTERN_W, PATTERN_H );
             
             } else {
-               graphics_blit_at( &(g_windows[i].pattern), x, y,
+               graphics_blit_at( &(g_windows[i].frame->c), x, y,
                   PATTERN_W, PATTERN_H );
             }
          }
@@ -100,7 +111,7 @@ void window_draw_all() {
             g_windows[i].strings_color, 1 );
       }
 
-      g_windows[i].dirty = 0;
+      g_windows[i].dirty -= 1;
    }
 }
 

@@ -27,6 +27,37 @@
 #define DRC_BMP_TYPE "BMP1"
 #endif /* DRC_BMP_TYPE */
 
+#ifndef MOBILES_MAX
+#define MOBILES_MAX 10
+#endif /* !MOBILES_MAX */
+
+#ifndef DEBUG_THRESHOLD
+#define DEBUG_THRESHOLD 2
+#endif /* !DEBUG_THRESHOLD */
+
+#ifndef DIRTY_THRESHOLD
+#define DIRTY_THRESHOLD 3
+#endif /* DIRTY_THRESHOLD */
+
+#ifdef DEBUG_LOG
+
+#define internal_debug_printf( lvl, ... ) \
+   if( lvl >= DEBUG_THRESHOLD ) { \
+      printf( "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); \
+      printf( __VA_ARGS__ ); \
+      printf( "\n" ); \
+   }
+
+#define debug_printf( lvl, ... ) \
+   internal_debug_printf( lvl, __VA_ARGS__ )
+
+#else
+
+#define debug_printf( ... )
+
+#endif /* DEBUG_LOG */
+
+
 /* ------ */
 #ifdef PLATFORM_DOS
 /* ------ */
@@ -34,7 +65,28 @@
 #include <assert.h>
 
 #ifdef ANCIENT_C
-#include <stdio.h>
+#
+/* XXX */
+#define DEBUG_THRESHOLD 2
+#define DIRTY_THRESHOLD 3
+
+#ifdef DEBUG_LOG
+
+#define internal_debug_printf( lvl, ... ) \
+   if( lvl >= DEBUG_THRESHOLD ) { \
+      printf( "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); \
+      printf( __VA_ARGS__ ); \
+      printf( "\n" ); \
+   }
+
+#define debug_printf( lvl, ... ) \
+   internal_debug_printf( lvl, __VA_ARGS__ )
+
+#else
+
+#endif /* DEBUG_LOG */
+
+include <stdio.h>
 #define DIO_SILENT
 #define NO_VARGS
 #define USE_LOOKUPS
@@ -136,10 +188,6 @@
 #define WINDOW_TEXT_Y 8
 #define WINDOW_STRINGS_MAX 5
 #define WINDOW_STRING_LEN_MAX 64
-
-/* Engine Parameters */
-
-#define MOBILES_MAX 10
 
 /* Derived Parameters */
 

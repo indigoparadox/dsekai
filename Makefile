@@ -46,7 +46,6 @@ DSEKAI_C_FILES_CHECK := \
    tools/data/cga.c \
    tools/data/bmp.c \
    tools/data/icns.c \
-   tools/data/json.c \
    src/data/dio.c
 
 MKRESH_C_FILES := \
@@ -66,8 +65,8 @@ CONVERT_C_FILES := \
    tools/data/cga.c \
    src/data/dio.c \
    tools/data/header.c \
-   tools/data/json.c \
-   tools/data/icns.c
+   tools/data/icns.c \
+   tools/data/maptoh.c
 
 LOOKUPS_C_FILES: tools/lookups.c
 
@@ -142,7 +141,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
-$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DHIDE_WELCOME_DIALOG -DNO_PALM_DEBUG_LINE -DDISABLE_FILESYSTEM -DPLATFORM_PALM -g -DMEMORY_STATIC -DIGNORE_DIRTY
+$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DNO_PALM_DEBUG_LINE -DDISABLE_FILESYSTEM -DPLATFORM_PALM -g -DMEMORY_STATIC -DIGNORE_DIRTY
 $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
@@ -259,7 +258,10 @@ $(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_PALM)
 res_palm: $(DSEKAI_ASSETS_PALM)
 
 rcp_h_palm: res_palm $(MKRESH) | $(GENDIR_PALM)
-	$(MKRESH) -f palm -i 5001 -if $(GENDIR_PALM)/*.bmp -oh $(GENDIR_PALM)/resext.h -or $(GENDIR_PALM)/palmd.rcp
+	$(MKRESH) -f palm -i 5001 \
+      -if $(DSEKAI_ASSETS_PALM) \
+      -oh $(GENDIR_PALM)/resext.h \
+      -or $(GENDIR_PALM)/palmd.rcp
 
 $(GENDIR_PALM)/resext.h: rcp_h_palm
 
@@ -276,7 +278,8 @@ $(OBJDIR_PALM)bin.stamp: src/palms.rcp $(GENDIR_PALM)/palmd.rcp
 	touch $@
 
 $(BIN_PALM): grc_palm $(OBJDIR_PALM)bin.stamp | $(BINDIR)
-	$(BUILDPRC) $@ $(ICONTEXT) $(APPID) $(OBJDIR_PALM)*.grc $(OBJDIR_PALM)*.bin $(LINKFILES) 
+	$(BUILDPRC) $@ $(ICONTEXT) $(APPID) \
+      $(OBJDIR_PALM)*.grc $(OBJDIR_PALM)*.bin $(LINKFILES) 
 
 $(OBJDIR_PALM)%.o: %.c res_palm $(GENDIR_PALM)/resext.h
 	$(MD) $(dir $@)

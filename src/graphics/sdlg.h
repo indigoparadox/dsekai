@@ -11,8 +11,15 @@ struct GRAPHICS_BITMAP {
    uint32_t id;
    uint8_t initialized;
    uint16_t ref_count;
+
    SDL_Surface* surface;
    SDL_Texture* texture;
+
+   /* Unused Overrides */
+   uint32_t res1;
+   uint32_t res2;
+   uint8_t res3;
+   uint8_t res4;
 };
 
 #ifdef SDLG_C

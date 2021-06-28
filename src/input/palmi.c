@@ -33,6 +33,9 @@ int input_poll() {
       } else if( event.data.keyDown.chr == hard3Chr ) {
          return allow_input & INPUT_KEY_RIGHT;
 
+      } else if( event.data.keyDown.chr == hard4Chr ) {
+         return allow_input & INPUT_KEY_OK;
+
       } else {
          /* System gets a chance to handle the event. */
          SysHandleEvent( &event );

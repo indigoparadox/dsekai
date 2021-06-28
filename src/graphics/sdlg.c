@@ -80,7 +80,7 @@ void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
    }
 }
 
-void graphics_blit_at(
+void graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
@@ -92,42 +92,11 @@ void graphics_blit_at(
    if( NULL == bmp || NULL == bmp->texture ) {
       return;
    }
+
+   debug_printf( 1, "blitting resource #%d to %d, %d x %d, %d...",
+      bmp->id, x, y, w, h );
    SDL_RenderCopy( g_renderer, bmp->texture, NULL, &dest_rect );
 }
-
-#if 0
-void graphics_blit_masked_at(
-   const GRAPHICS_PATTERN* bmp, const GRAPHICS_MASK* mask,
-   uint8_t mask_o_x, uint8_t mask_o_y,
-   uint16_t x, uint16_t y, uint8_t w, uint8_t h, const int byte_width
-) {
-   GRAPHICS_PATTERN pattern_tmp;
-   int x_offset = 0, y_offset = 0;
-
-   memcpy( &pattern_tmp, bmp, sizeof( GRAPHICS_PATTERN ) );
-
-   /* Apply the transparency mask to the pattern. */
-   for( y_offset = 0 ; PATTERN_H > y_offset ; y_offset++ ) {
-      pattern_tmp.bits[y_offset] = bmp->bits[y_offset];
-      for( x_offset = 0 ; 8 > x_offset ; x_offset++ ) {
-         /* Perform endian "conversion" (though masks are one byte). */
-         if( x_offset >= 4 ) {
-            /* Compare each row, bit by (double) bit. */
-            if( !(mask->bits[y_offset] & (0x01 << x_offset)) ) {
-               pattern_tmp.bits[y_offset] &= ~(0x3 << (x_offset));
-            }
-         } else {
-            /* Compare each row, bit by (double) bit. */
-            if( !(mask->bits[y_offset] & (0x01 << x_offset)) ) {
-               pattern_tmp.bits[y_offset] &= ~(0x3 << (x_offset + 8));
-            }
-         }
-      }
-   }
-
-   graphics_pattern_at( &pattern_tmp, x, y );
-}
-#endif
 
 void graphics_draw_block(
    uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
@@ -154,13 +123,20 @@ void graphics_draw_block(
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
-int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
+int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
+   uint32_t id = 0;
    SDL_RWops* bmp_stream;
 
    assert( NULL != b );
    assert( 0 == b->ref_count );
+
+   if( 0 < id_in ) {
+      id = id_in;
+   } else {
+      id = b->id;
+   }
 
    /* Load resource into buffer. */
    buffer_sz = drc_get_resource(
@@ -178,6 +154,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
       buffer_sz = -1;
       goto cleanup;
    }
+   debug_printf( 2, "loaded surface for bitmap resource #%d", id );
    b->texture = SDL_CreateTextureFromSurface( g_renderer, b->surface );
    if( NULL == b->texture ) {
       fprintf( stderr, "unable to load texture %u: %s\n", id, SDL_GetError() );
@@ -188,6 +165,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
       }
       goto cleanup;
    }
+   debug_printf( 2, "loaded texture for bitmap resource #%d", id );
 
    b->ref_count++;
    b->initialized = 1;

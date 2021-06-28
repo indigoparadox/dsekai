@@ -103,7 +103,7 @@ void graphics_blit_masked_at(
 }
 #endif
 
-void graphics_blit_at(
+void graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {

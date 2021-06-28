@@ -11,8 +11,15 @@ struct GRAPHICS_BITMAP {
    uint32_t id;
    uint8_t initialized;
    uint16_t ref_count;
+
    MemHandle handle;
    BitmapPtr bitmap;
+
+   /* Unused Overrides */
+   uint32_t res1;
+   uint32_t res2;
+   uint8_t res3;
+   uint8_t res4;
 };
 
 #define GRAPHICS_COLOR_BLACK        0

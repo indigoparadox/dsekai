@@ -3,7 +3,8 @@
 
 #include "data/font8x8.h"
 
-typedef void (*graphics_draw_px_cb)( uint16_t, uint16_t, GRAPHICS_COLOR );
+void graphics_platform_blit_at(
+   const struct GRAPHICS_BITMAP*, uint16_t, uint16_t, uint16_t, uint16_t );
 
 void graphics_char_at(
    const char c, uint16_t x_orig, uint16_t y_orig, GRAPHICS_COLOR color,
@@ -44,76 +45,22 @@ void graphics_string_at(
    }
 }
 
-void graphics_blit_masked_at(
-   const struct GRAPHICS_BITMAP* bmp, const uint8_t* mask, uint16_t mask_sz,
-   uint16_t x, uint16_t y, uint16_t w, uint16_t h
-) {
-
-}
-
-#ifdef USE_FAKE_CGA
-
 void graphics_blit_at(
-   const struct GRAPHICS_BITMAP* bmp,
+   struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
-   int y_offset = 0,
-      byte_offset = 0,
-      bit_offset = 0,
-      x_scr_offset = 0,
-      raw_byte = 0,
-      masked_byte = 0;
-   const uint8_t* bits = bmp->bits;
+   if( NULL == bmp ) {
+      /* Can't do anything. */
+      return;
+   }
 
-   for( y_offset = 0 ; h > y_offset ; y_offset++ ) {
-      x_scr_offset = w - 1;
+   if( !bmp->initialized && 0 < bmp->id ) {
+      /* Try to load uninitialized, pre-populated bitmap resource. */
+      graphics_load_bitmap( 0, bmp );
+   }
 
-      /* Start at the last byte and move backwards. */
-      for(
-         byte_offset = ((bytes - 1) * 8) ;
-         0 <= byte_offset ;
-         byte_offset -= 8
-      ) {
-         /* Get full line and shift it to the current byte. */
-         switch( w ) {
-         case SPRITE_W:
-            raw_byte = (((SPRITE_TYPE*)bits)[y_offset] >> byte_offset) & 0xff;
-            break;
-#if SPRITE_W != TILE_W
-         case TILE_W:
-            raw_byte = (((TILE_TYPE*)bits)[y_offset] >> byte_offset) & 0xff;
-            break;
-#endif
-         case PATTERN_W:
-            raw_byte = (((PATTERN_TYPE*)bits)[y_offset] >> byte_offset) & 0xff;
-            break;
-         }
-
-         /* Iterate through the line 2 bits at a time. */
-         for( bit_offset = 0 ; 8 > bit_offset ; bit_offset += 2 ) {
-            masked_byte = raw_byte & 0x03;
-            if( 0x01 == masked_byte ) {
-               graphics_draw_px(
-                  x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_CYAN );
-            } else if( 0x02 == masked_byte ) {
-               graphics_draw_px(
-                  x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_MAGENTA );
-            } else if( 0x03 == masked_byte ) {
-               graphics_draw_px(
-                  x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_WHITE );
-            } else if( 0x00 == masked_byte ) {
-               graphics_draw_px(
-                  x + x_scr_offset, y + y_offset, GRAPHICS_COLOR_BLACK );
-            }
-
-            raw_byte >>= 2;
-            x_scr_offset--;
-         }
-
-      }
-      assert( -1 == x_scr_offset );
+   if( bmp->initialized ) {
+      graphics_platform_blit_at( bmp, x, y, w, h );
    }
 }
-
-#endif /* USE_FAKE_CGA */
 

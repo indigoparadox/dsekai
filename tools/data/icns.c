@@ -33,7 +33,7 @@ struct CONVERT_GRID* icns_read(
    struct ICNS_FILE_HEADER* file_header = NULL;
    struct ICNS_DATA_HEADER* data_header = NULL;
 
-   file_header = (struct ICNS_DATA_HEADER*)buf;
+   file_header = (struct ICNS_DATA_HEADER*)&(buf[0]);
    data_header = (struct ICNS_DATA_HEADER*)&(buf[ICNS_FILE_HEADER_SZ]);
 
    /* printf( "icns %c%c%c%c data %d long\n",
