@@ -93,13 +93,18 @@ static void graphics_remove_timer() {
    _enable();
 }
 
-void graphics_init() {
+/*
+ * @return 1 if init was successful and 0 otherwise.
+ */
+int graphics_init() {
    union REGS r;
 
 	r.h.ah = 0;
 	r.h.al = GRAPHICS_MODE;
 	int86( 0x10, &r, &r );
    graphics_install_timer();
+
+   return 1;
 }
 
 void graphics_shutdown() {
@@ -165,7 +170,10 @@ void graphics_draw_px( uint16_t x, uint16_t y, GRAPHICS_COLOR color ) {
 #endif /* GRAPHICS_MODE */
 }
 
-void graphics_platform_blit_at(
+/*
+ * @return 1 if blit was successful and 0 otherwise.
+ */
+int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
@@ -179,7 +187,7 @@ void graphics_platform_blit_at(
 #elif GRAPHICS_M_320_200_4_CGA == GRAPHICS_MODE
 
    if( NULL == plane_1 || NULL == plane_2 ) {
-      return;
+      return 0;
    }
 
 	for( y_offset = 0 ; h > y_offset ; y_offset++ ) {
@@ -211,6 +219,8 @@ void graphics_platform_blit_at(
       plane_2 += 2;
 	}
 #endif /* GRAPHICS_MODE */
+
+   return 1;
 }
 
 void graphics_draw_block(

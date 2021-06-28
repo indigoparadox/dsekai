@@ -36,7 +36,7 @@ struct WINDOW {
 };
 
 void window_init();
-void window_draw_all();
+int window_draw_all();
 uint8_t windows_visible();
 struct WINDOW* window_push();
 void window_pop();

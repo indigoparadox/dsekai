@@ -3,7 +3,7 @@
 
 #include "data/font8x8.h"
 
-void graphics_platform_blit_at(
+int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP*, uint16_t, uint16_t, uint16_t, uint16_t );
 
 void graphics_char_at(
@@ -45,22 +45,39 @@ void graphics_string_at(
    }
 }
 
-void graphics_blit_at(
+/*
+ * @return 1 if blit was successful and 0 otherwise.
+ */
+int graphics_blit_at(
    struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
+   int retval = 0;
+
    if( NULL == bmp ) {
       /* Can't do anything. */
-      return;
+      error_printf( "tried to blit empty bitmap" );
+      goto cleanup;
    }
 
    if( !bmp->initialized && 0 < bmp->id ) {
       /* Try to load uninitialized, pre-populated bitmap resource. */
-      graphics_load_bitmap( 0, bmp );
+      retval = graphics_load_bitmap( 0, bmp );
+      if( !retval ) {
+         error_printf( "failed to lazy load bitmap" );
+         goto cleanup;
+      }
    }
 
    if( bmp->initialized ) {
-      graphics_platform_blit_at( bmp, x, y, w, h );
+      retval = graphics_platform_blit_at( bmp, x, y, w, h );
+      if( !retval ) {
+         error_printf( "failed to blit bitmap" );
+         goto cleanup;
+      }
    }
+
+cleanup:
+   return retval;
 }
 

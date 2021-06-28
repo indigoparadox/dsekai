@@ -41,6 +41,8 @@
 
 #ifdef DEBUG_LOG
 
+#include <stdio.h>
+
 #define internal_debug_printf( lvl, ... ) \
    if( lvl >= DEBUG_THRESHOLD ) { \
       printf( "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); \
@@ -48,12 +50,30 @@
       printf( "\n" ); \
    }
 
+#define internal_error_printf( ... ) \
+   fprintf( stderr, __FILE__ ": %d: ", __LINE__ ); \
+   fprintf( stderr, __VA_ARGS__ ); \
+   fprintf( stderr, "\n" ); \
+
 #define debug_printf( lvl, ... ) \
    internal_debug_printf( lvl, __VA_ARGS__ )
+
+#define error_printf( ... ) \
+   internal_error_printf( __VA_ARGS__ )
+
+#else
+
+#ifdef ANCIENT_C
+
+#define debug_printf( x )
+#define error_printf( x )
 
 #else
 
 #define debug_printf( ... )
+#define error_printf( ... )
+
+#endif /* ANCIENT_C */
 
 #endif /* DEBUG_LOG */
 

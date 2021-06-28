@@ -16,7 +16,10 @@ volatile uint32_t g_ms;
 const uint32_t gc_ms_target = 1000 / FPS;
 static uint32_t g_ms_start = 0; 
 
-void graphics_init() {
+/*
+ * @return 1 if init was successful and 0 otherwise.
+ */
+int graphics_init() {
 #ifdef DEBUG_CGA_EMU
    SDL_Rect area;
 #endif /* DEBUG_CGA_EMU */
@@ -30,11 +33,17 @@ void graphics_init() {
    g_window = SDL_CreateWindow( "dsekai",
       SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
       SCREEN_REAL_W, SCREEN_REAL_H, 0 );
-   assert( NULL != g_window );
+   if( NULL ) {
+      return 0;
+   }
    g_screen = SDL_GetWindowSurface( g_window );
-   assert( NULL != g_screen );
+   if( NULL == g_screen ) {
+      return 0;
+   }
    g_renderer = SDL_CreateSoftwareRenderer( g_screen );
-   assert( NULL != g_renderer );
+   if( NULL == g_renderer ) {
+      return 0;
+   }
 
 #ifdef DEBUG_CGA_EMU
    area.x = 0;
@@ -44,6 +53,8 @@ void graphics_init() {
    SDL_SetRenderDrawColor( g_renderer,  0, 0, 0, 255 );
    SDL_RenderFillRect( g_renderer, &area );
 #endif /* DEBUG_CGA_EMU */
+
+   return 1;
 }
 
 void graphics_shutdown() {
@@ -80,7 +91,10 @@ void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
    }
 }
 
-void graphics_platform_blit_at(
+/*
+ * @return 1 if blit was successful and 0 otherwise.
+ */
+int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
@@ -90,12 +104,14 @@ void graphics_platform_blit_at(
       w * SCREEN_SCALE, 
       h * SCREEN_SCALE};
    if( NULL == bmp || NULL == bmp->texture ) {
-      return;
+      return 0;
    }
 
    debug_printf( 1, "blitting resource #%d to %d, %d x %d, %d...",
       bmp->id, x, y, w, h );
    SDL_RenderCopy( g_renderer, bmp->texture, NULL, &dest_rect );
+
+   return 1;
 }
 
 void graphics_draw_block(

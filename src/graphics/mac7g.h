@@ -3,11 +3,6 @@
 #define MAC7G_H
 
 #include <Quickdraw.h>
-#include <MacMemory.h>
-#include <Sound.h>
-#include <Events.h>
-#include <Fonts.h>
-#include <NumberFormatting.h>
 
 #include "../graphics.h"
 

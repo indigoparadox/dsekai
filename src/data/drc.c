@@ -142,7 +142,9 @@ int32_t drc_get_resource(
    dio_printf( "opening %s to get resource...\n", path );
 
    drc_file = fopen( path, "rb" );
-   assert( NULL != drc_file );
+   if( NULL == drc_file ) {
+      return 0;
+   }
 
    drc_read_header( drc_file, &header );
    assert( 0 != header.toc_start );

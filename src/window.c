@@ -16,7 +16,7 @@ uint8_t windows_visible() {
    return g_windows_count;
 }
 
-void window_draw_all() {
+int window_draw_all() {
    int i = 0,
       j = 0,
       x = 0,
@@ -24,11 +24,10 @@ void window_draw_all() {
       x_max = 0,
       y_max = 0,
       x_min = 0,
-      y_min = 0;
+      y_min = 0,
+      blit_retval = 0;
 
    debug_printf( 1, "starting window drawing..." );
-
-   return;
 
    for( i = 0 ; g_windows_count > i ; i++ ) {
       if(
@@ -60,47 +59,52 @@ void window_draw_all() {
 
             if( x_min == x && y_min == y ) {
                /* Top Left */
-               graphics_blit_at( &(g_windows[i].frame->tl), x, y,
+               blit_retval = graphics_blit_at( &(g_windows[i].frame->tl), x, y,
                   PATTERN_W, PATTERN_H );
 
             } else if( x_max - PATTERN_W == x && y_min == y ) {
                /* Top Right */
-               graphics_blit_at( &(g_windows[i].frame->tr), x, y,
+               blit_retval = graphics_blit_at( &(g_windows[i].frame->tr), x, y,
                   PATTERN_W, PATTERN_H );
 
             } else if( x_min == x && y_max - PATTERN_H == y ) {
                /* Bottom Left */
-               graphics_blit_at( &(g_windows[i].frame->bl), x, y,
+               blit_retval = graphics_blit_at( &(g_windows[i].frame->bl), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_max - PATTERN_W == x && y_max - PATTERN_H == y ) {
                /* Bottom Right */
-               graphics_blit_at( &(g_windows[i].frame->br), x, y,
+               blit_retval = graphics_blit_at( &(g_windows[i].frame->br), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_max - PATTERN_W == x ) {
                /* Right */
-               graphics_blit_at( &(g_windows[i].frame->r), x, y,
+               blit_retval = graphics_blit_at( &(g_windows[i].frame->r), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_min == x ) {
                /* Left */
-               graphics_blit_at( &(g_windows[i].frame->l), x, y,
+               blit_retval = graphics_blit_at( &(g_windows[i].frame->l), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( y_min == y ) {
                /* Top */
-               graphics_blit_at( &(g_windows[i].frame->t), x, y,
+               blit_retval = graphics_blit_at( &(g_windows[i].frame->t), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( y_max - PATTERN_H == y ) {
                /* Bottom */
-               graphics_blit_at( &(g_windows[i].frame->b), x, y,
+               blit_retval = graphics_blit_at( &(g_windows[i].frame->b), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else {
-               graphics_blit_at( &(g_windows[i].frame->c), x, y,
+               blit_retval = graphics_blit_at( &(g_windows[i].frame->c), x, y,
                   PATTERN_W, PATTERN_H );
+            }
+
+            if( !blit_retval ) {
+               error_printf( "window blit failed" );
+               goto cleanup;
             }
          }
       }
@@ -113,6 +117,10 @@ void window_draw_all() {
 
       g_windows[i].dirty -= 1;
    }
+
+cleanup:
+
+   return blit_retval;
 }
 
 struct WINDOW* window_push() {

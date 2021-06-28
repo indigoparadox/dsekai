@@ -111,8 +111,10 @@ DSEKAI_ASSETS_DOS_CGA := \
    $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_PALM := \
    $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BITMAPS))
-DSEKAI_ASSETS_MAC7 := \
-   $(subst .bmp,.icn,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
+DSEKAI_ASSETS_ICNS := \
+   $(subst .bmp,.icns,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
+DSEKAI_ASSETS_RSRC := \
+   $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
 
 MD := mkdir -p
 MKRESH := bin/mkresh
@@ -127,7 +129,7 @@ CFLAGS_LOOKUPS := -g
 
 CFLAGS_DEBUG_GCC := -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak
 
-$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT -DMEMORY_CALLOC $(CFLAGS_DEBUG_GCC)
+$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT -DMEMORY_CALLOC $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
@@ -310,25 +312,32 @@ $(OBJDIR_WIN16)%.o: %.c $(OBJDIR_WIN16)win16.res
 $(GENDIR_MAC7):
 	$(MD) $@
 
-$(GENDIR_MAC7)/%.icn: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC7)
-	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
+# TODO
+$(GENDIR_MAC7)/resext.h: $(GENDIR_MAC7) $(MKRESH)
+	$(MKRESH) -f palm -i 5001 \
+      -if $(DSEKAI_ASSETS_ICNS) \
+      -oh $(GENDIR_MAC7)/resext.h \
 
-res_mac7: $(DSEKAI_ASSETS_MAC7)
+$(GENDIR_MAC7)/%.rsrc: $(GENDIR_MAC7)/%.icns
+	echo "read 'icns' (-16455) \"$<\";" > $@
+
+$(GENDIR_MAC7)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC7)
+	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
 
 $(OBJDIR_MAC7)dsekai.code.bin: $(DSEKAI_O_FILES_MAC7)
 	$(MD) $(dir $@)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-$(BIN_MAC7): $(OBJDIR_MAC7)dsekai.code.bin
+$(BIN_MAC7): $(OBJDIR_MAC7)dsekai.code.bin $(DSEKAI_ASSETS_RSRC)
 	$(REZ) $(REZFLAGS) \
-      --copy "$^" \
+      --copy $^ \
       "$(RETRO68_PREFIX)/RIncludes/Retro68APPL.r" \
       -t "APPL" -c "DSEK" \
       -o $(BINDIR)/dsekai.bin \
       --cc $(BINDIR)/dsekai.APPL \
-      --cc $(BIN_MAC7)
+      --cc $(BINDIR)/dsekai.dsk
 
-$(OBJDIR_MAC7)%.o: %.c res_mac7
+$(OBJDIR_MAC7)%.o: %.c $(GENDIR_MAC7)/resext.h
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 

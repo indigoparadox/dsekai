@@ -69,7 +69,6 @@ void mobile_draw(
 
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
-   assert( 1 == m->sprite.initialized );
 
    if( m->coords_prev.x > m->coords.x ) {
       x_offset = SPRITE_W - m->steps_x;

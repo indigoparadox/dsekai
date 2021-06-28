@@ -45,20 +45,12 @@ static void graphics_unload_bitmap_surface( struct GRAPHICS_BITMAP* b ) {
    }
 }
 
-void graphics_init() {
-#if PALM_USE_WIN
-   Err error;
-
-   g_screen = BmpCreate( SCREEN_W, SCREEN_H, 2, NULL, &error );
-   if( g_screen ) {
-      g_win = WinCreateBitmapWindow( g_screen, &error );
-      if( g_win ) {
-         WinSetDrawWindow( g_win );
-      }
-   }
-#endif
-
+/*
+ * @return 1 if init was successful and 0 otherwise.
+ */
+int graphics_init() {
    g_ticks_target = SysTicksPerSecond();
+   return 1;
 }
 
 void graphics_shutdown() {
@@ -94,34 +86,27 @@ void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
    WinPaintPixel( x, y );
 }
 
-#if 0
-void graphics_blit_masked_at(
-   const GRAPHICS_PATTERN* bmp, const GRAPHICS_MASK* mask,
-   uint8_t mask_o_x, uint8_t mask_o_y,
-   uint16_t x, uint16_t y, uint8_t w, uint8_t h, const int byte_width
-) {
-}
-#endif
-
-void graphics_platform_blit_at(
+int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
    if( NULL == bmp ) {
       WinDrawChars( "X", 1, x, y );
-      return;
+      return 0;
    }
 
    graphics_load_bitmap_surface( (struct GRAPHICS_BITMAP*)bmp );
 
    if( NULL == bmp->bitmap ) {
       WinDrawChars( "Z", 1, x, y );
-      return;
+      return 0;
    }
 
    WinDrawBitmap( bmp->bitmap, x, y );
 
    graphics_unload_bitmap_surface( (struct GRAPHICS_BITMAP*)bmp );
+
+   return 1;
 }
 
 void graphics_draw_block(
