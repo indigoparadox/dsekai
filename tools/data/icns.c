@@ -25,15 +25,14 @@ struct CONVERT_GRID* icns_read_file(
 struct CONVERT_GRID* icns_read(
    const uint8_t* buf, uint32_t buf_sz, struct CONVERT_OPTIONS* o
 ) {
-   uint32_t x = 0;
    int32_t bit_idx = 0,
       byte_idx = 0,
       i = 0;
    struct CONVERT_GRID* grid_out = NULL;
-   struct ICNS_FILE_HEADER* file_header = NULL;
+   /* struct ICNS_FILE_HEADER* file_header = NULL; */
    struct ICNS_DATA_HEADER* data_header = NULL;
 
-   file_header = (struct ICNS_DATA_HEADER*)&(buf[0]);
+   /* file_header = (struct ICNS_FILE_HEADER*)&(buf[0]); */
    data_header = (struct ICNS_DATA_HEADER*)&(buf[ICNS_FILE_HEADER_SZ]);
 
    /* printf( "icns %c%c%c%c data %d long\n",
@@ -54,7 +53,8 @@ struct CONVERT_GRID* icns_read(
 
    for( i = 0 ; 256 > i ; i++ ) {
       assert( byte_idx < data_header->data_sz );
-      grid_out->data[i] |= buf[ICNS_DATA_HEADER_SZ + ICNS_FILE_HEADER_SZ + byte_idx] & (0x1 << (7 - bit_idx));
+      grid_out->data[i] |= buf[ICNS_DATA_HEADER_SZ + 
+         ICNS_FILE_HEADER_SZ + byte_idx] & (0x1 << (7 - bit_idx));
       grid_out->data[i] >>= (7 - bit_idx);
       bit_idx++;
       if( 8 <= bit_idx ) {
@@ -102,7 +102,7 @@ int icns_write_file(
    file_out = fopen( path, "wb" );
    assert( NULL != file_out );
 
-   dio_printf( "icns: writing to %s...\n", path );
+   debug_printf( 2, "icns: writing to %s...\n", path );
 
    fwrite( icns_buffer, 1, icns_buffer_sz, file_out );
 
@@ -165,7 +165,7 @@ int icns_write(
       data_header->icon_type[3] = '8';
    }
 
-   dio_printf( "icns: writing type %c%c%c%c (%dx%d %d bpp)\n",
+   debug_printf( 2, "icns: writing type %c%c%c%c (%dx%d %d bpp)\n",
       data_header->icon_type[0],
       data_header->icon_type[1],
       data_header->icon_type[2],
@@ -174,7 +174,8 @@ int icns_write(
       grid->sz_y,
       o->bpp );
 
-   file_byte_idx += ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ;
+   file_byte_idx += sizeof( struct ICNS_FILE_HEADER ) \
+      + sizeof( struct ICNS_DATA_HEADER );
    data_byte_idx = 0;
    for( grid_y = 0 ; grid->sz_y > grid_y ; grid_y++ ) {
       for( grid_x = 0 ; grid->sz_x > grid_x ; grid_x++ ) {
@@ -189,7 +190,12 @@ int icns_write(
             byte_buffer |= 0x01;
             byte_buffer &= ~((grid->data[grid_idx] & 0x01));
          } else {
-            byte_buffer |= (grid->data[grid_idx] & 0x01);
+            assert( 1 == o->bpp );
+            if( grid->data[grid_idx] ) {
+               byte_buffer |= 0x01;
+            } else {
+               byte_buffer |= 0x00;
+            }
          }
          bit_idx += o->bpp;
 
@@ -218,7 +224,12 @@ int icns_write(
             byte_buffer |= 0x01;
             byte_buffer &= ~((grid->data[grid_idx] & 0x01));
          } else {
-            byte_buffer |= (grid->data[grid_idx] & 0x01);
+            assert( 1 == o->bpp );
+            if( grid->data[grid_idx] ) {
+               byte_buffer |= 0x01;
+            } else {
+               byte_buffer |= 0x00;
+            }
          }
          bit_idx += o->bpp;
 

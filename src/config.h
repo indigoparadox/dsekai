@@ -163,6 +163,7 @@
          printf( "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); \
          printf( __VA_ARGS__ ); \
          printf( "\n" ); \
+         fflush( stdout ); \
       }
 
 #  define internal_error_printf( ... ) \

@@ -48,6 +48,8 @@ static const uint8_t gc_test_cga_16_16_4[TEST_CGA_16_16_4_SZ] = {
    0xff, 0xff, 0xff, 0xff, /* 7 */
 };
 
+#if 0
+
 static const uint8_t gc_test_cga_16_16_4_le[TEST_CGA_16_16_4_SZ] = {
    'C', 'G',
    0x02, 0x00,                /* Version      1 */
@@ -88,9 +90,12 @@ static const uint8_t gc_test_cga_16_16_4_le[TEST_CGA_16_16_4_SZ] = {
    0xff, 0xff, 0xff, 0xff, /* 7 */
 };
 
-#define TEST_ICNS_16_16_2_DATA_SZ (((16 * 16) / 8) * 2)
+#endif
+
+#define TEST_ICNS_16_16_2_DATA_SZ ((16 * 16) / 8)
 #define TEST_ICNS_16_16_2_SZ \
-   (ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ + TEST_ICNS_16_16_2_DATA_SZ)
+   (ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ + \
+      (2 * TEST_ICNS_16_16_2_DATA_SZ)) /* 2x, since there's a mask. */
 
 static const uint8_t gc_test_icns_16_16_2[TEST_ICNS_16_16_2_SZ] = {
 
@@ -102,7 +107,7 @@ static const uint8_t gc_test_icns_16_16_2[TEST_ICNS_16_16_2_SZ] = {
    'i', 'c', 's', '#',
    0x00, 0x00, 0x00, 0x48,
 
-   /* Data */
+   /* Data (32 bytes) */
 
    0xff, 0xff,
    0xff, 0xff,
@@ -121,7 +126,7 @@ static const uint8_t gc_test_icns_16_16_2[TEST_ICNS_16_16_2_SZ] = {
    0xff, 0xff,
    0xff, 0xff,
 
-   /* Mask */
+   /* Mask (32 bytes) */
 
    0xff, 0xff,
    0xff, 0xff,
@@ -139,6 +144,72 @@ static const uint8_t gc_test_icns_16_16_2[TEST_ICNS_16_16_2_SZ] = {
    0xc0, 0x03,
    0xff, 0xff,
    0xff, 0xff,
+};
+
+#define TEST_BMP_16_16_16_SZ (sizeof( struct BITMAP_FILE_HEADER ) + \
+   sizeof( struct BITMAP_DATA_HEADER ) + \
+   ((16 * 16) / 2) + /* Bitmap Data */ \
+   (4 * 16)) /* Palette Entries */
+
+static const uint8_t gc_test_bmp_16_16_16[TEST_BMP_16_16_16_SZ] = {
+   
+   /* File Header */
+   
+    'B',  'M',
+   0xce, 0x00, 0x00, 0x00,    /* File Size */ /* TODO */
+   0x00, 0x00,                /* Reserved 1 */
+   0x00, 0x00,                /* Reserved 2 */
+   0x76, 0x00, 0x00, 0x00,    /* Bitmap Offset */ /* TODO */
+
+   /* Bitmap Header */
+
+   0x28, 0x00, 0x00, 0x00,    /* Header Size */
+   0x10, 0x00, 0x00, 0x00,    /* Bitmap Width */
+   0x10, 0x00, 0x00, 0x00,    /* Bitmap Height */
+   0x01, 0x00,                /* Color Planes */
+   0x04, 0x00,                /* BPP */
+   0x00, 0x00, 0x00, 0x00,    /* Compression */
+   0x00, 0x01, 0x00, 0x00,    /* Bitmap Size */
+   0x48, 0x00, 0x00, 0x00,    /* HRes */
+   0x48, 0x00, 0x00, 0x00,    /* VRes */
+   0x10, 0x00, 0x00, 0x00,    /* Colors */
+   0x10, 0x00, 0x00, 0x00,    /* Important Colors */
+
+   /* Palette */
+
+   0x00, 0x00, 0x00, 0x00, /* 0 */
+   0xaa, 0x00, 0x00, 0x00, /* 1 */
+   0x00, 0xaa, 0x00, 0x00, /* 2 */
+   0xaa, 0xaa, 0x00, 0x00, /* 3 */
+   0x00, 0x00, 0xaa, 0x00, /* 4 */
+   0xaa, 0x00, 0xaa, 0x00, /* 5 */
+   0x00, 0x55, 0xaa, 0x00, /* 6 */
+   0xaa, 0xaa, 0xaa, 0x00, /* 7 */
+   0x55, 0x55, 0x55, 0x00, /* 8 */
+   0xff, 0x55, 0x55, 0x00, /* 9 */
+   0x55, 0xff, 0x55, 0x00, /* a */
+   0xff, 0xff, 0x55, 0x00, /* b */
+   0x55, 0x55, 0xff, 0x00, /* c */
+   0xff, 0x55, 0xff, 0x00, /* d */
+   0x55, 0xff, 0xff, 0x00, /* e */
+   0xff, 0xff, 0xff, 0x00, /* f */
+
+   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
+   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
+   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
 
 static const uint8_t gc_test_grid_16_16_4_data[256] = {
@@ -303,6 +374,7 @@ START_TEST( check_data_icns_write ) {
    memset( &buffer, '\0', TEST_ICNS_16_16_2_SZ );
    memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
    options.bpp = 1;
+   options.reverse = 0;
 
    icns_write( 
       (uint8_t*)&buffer, TEST_ICNS_16_16_2_SZ,
@@ -316,6 +388,59 @@ START_TEST( check_data_icns_write ) {
       buffer[ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ +_i] );
 }
 END_TEST
+
+START_TEST( check_data_bmp_write ) {
+   struct CONVERT_OPTIONS options;
+   uint8_t buffer[TEST_BMP_16_16_16_SZ];
+   struct BITMAP_FILE_HEADER* file_header = (struct BITMAP_FILE_HEADER*)buffer,
+      * test_f_header = (struct BITMAP_FILE_HEADER*)gc_test_bmp_16_16_16;
+   struct BITMAP_DATA_HEADER* data_header = (struct BITMAP_DATA_HEADER*)buffer,
+      * test_d_header = (struct BITMAP_DATA_HEADER*)&(gc_test_bmp_16_16_16[
+         sizeof( struct BITMAP_FILE_HEADER )]);
+
+   memset( &buffer, '\0', TEST_BMP_16_16_16_SZ );
+   memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
+   options.bpp = 4;
+
+   bmp_write( 
+      (uint8_t*)&buffer, TEST_BMP_16_16_16_SZ,
+      &gc_test_grid_16_16_4, &options );
+
+   /* ck_assert_int_eq( test_f_header->file_sz, file_header->file_sz ); */
+   ck_assert_int_eq(
+      gc_test_bmp_16_16_16[
+         sizeof( struct BITMAP_FILE_HEADER ) +
+         sizeof( struct BITMAP_DATA_HEADER ) + _i],
+      buffer[
+         sizeof( struct BITMAP_FILE_HEADER ) +
+         sizeof( struct BITMAP_DATA_HEADER ) + _i] );
+}
+END_TEST
+
+#if 0
+START_TEST( check_data_ico_write ) {
+   struct CONVERT_OPTIONS options;
+   uint8_t buffer[TEST_ICO_16_16_16_SZ];
+   struct ICNS_FILE_HEADER* file_header = (struct ICNS_FILE_HEADER*)buffer,
+      * test_header = (struct ICNS_FILE_HEADER*)gc_test_icns_16_16_2;
+
+   memset( &buffer, '\0', TEST_ICNS_16_16_2_SZ );
+   memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
+   options.bpp = 1;
+
+   icns_write( 
+      (uint8_t*)&buffer, TEST_ICNS_16_16_2_SZ,
+      &gc_test_grid_16_16_4, &options );
+
+   ck_assert_int_eq(
+      dio_reverse_endian_32( test_header->file_sz ),
+      dio_reverse_endian_32( file_header->file_sz ) );
+   ck_assert_int_eq(
+      gc_test_icns_16_16_2[ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ + _i],
+      buffer[ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ +_i] );
+}
+END_TEST
+#endif
 
 #if 0
 START_TEST( check_data_json_parse ) {
@@ -338,6 +463,12 @@ Suite* data_suite( void ) {
    tcase_add_loop_test( tc_core, check_data_icns_read, 0, 256 );
    tcase_add_loop_test(
       tc_core, check_data_icns_write, 0, TEST_ICNS_16_16_2_DATA_SZ );
+   tcase_add_loop_test(
+      tc_core, check_data_bmp_write, 
+      sizeof( struct BITMAP_FILE_HEADER ) +
+         sizeof( struct BITMAP_DATA_HEADER ),
+      sizeof( struct BITMAP_FILE_HEADER ) +
+         sizeof( struct BITMAP_DATA_HEADER ) + ((16 * 16) / 2) );
 #if 0
    tcase_add_test( tc_core, check_data_json_parse );
 #endif
