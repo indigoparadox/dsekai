@@ -166,7 +166,14 @@ int bmp_write(
    bmp_palette = (uint32_t*)&(buf_ptr[bmp_data_offset]);
    bmp_palette[0] = 0x00000000; /* Palette: Black */
    bmp_data_offset += 4;
-   if( 2 == o->bpp ) {
+   
+   switch( o->bpp ) {
+   case 1:
+      bmp_palette[1] = 0x00ffffff; /* Palette: White */
+      bmp_data_offset += 4;
+      break;
+
+   case 2:
       bmp_palette[1] = 0x0000ffff; /* Palette: Cyan */
       bmp_palette[2] = 0x00ff00ff; /* Palette: Magenta */
       bmp_palette[3] = 0x00ffffff; /* Palette: White */
@@ -176,7 +183,10 @@ int bmp_write(
          sizeof( struct BITMAP_FILE_HEADER ) +
          sizeof( struct BITMAP_DATA_HEADER ) +
          (4 * 4) );
-   } else if( 4 == o->bpp ) {
+      break;
+
+   case 4:
+   default:
       bmp_palette[1] = dio_reverse_endian_32( 0xaa000000 );
       bmp_palette[2] = dio_reverse_endian_32( 0x00aa0000 );
       bmp_palette[3] = dio_reverse_endian_32( 0xaaaa0000 );
@@ -198,10 +208,8 @@ int bmp_write(
          sizeof( struct BITMAP_FILE_HEADER ) +
          sizeof( struct BITMAP_DATA_HEADER ) +
          (16 * 4) );
-   
-   } else {
-      bmp_palette[1] = 0x00ffffff; /* Palette: White */
-      bmp_data_offset += 4;
+
+      break;
    }
 
    bmp_int( uint32_t, buf_ptr, 10 ) = bmp_data_offset;
@@ -239,6 +247,7 @@ int bmp_write(
             byte_buffer |= 
                bmp_palette_cga_4_to_16( grid->data[(y * grid->sz_x) + x] )
                & bit_mask_out;
+            break;
          }
          /* dio_print_binary( byte_buffer ); */
          bit_idx += o->bpp;
