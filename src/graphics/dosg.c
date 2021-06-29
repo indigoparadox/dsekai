@@ -265,7 +265,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
 
    /* Load the resource. */
    buffer_sz = drc_get_resource(
-      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer );
+      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer, 0 );
    if( 0 >= buffer_sz ) {
       assert( NULL == buffer );
       retval = buffer_sz;
@@ -305,11 +305,11 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
 cleanup:
 
    if( 0 >= retval && b->plane_1 ) {
-      memory_free( b->plane_1 );
+      memory_free( &(b->plane_1) );
    }
 
    if( 0 >= retval && b->plane_2 ) {
-      memory_free( b->plane_1 );
+      memory_free( &(b->plane_1) );
    }
 
    return 1;
@@ -333,8 +333,8 @@ int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
    assert( NULL != b );
    b->ref_count--;
    if( 0 == b->ref_count ) {
-      memory_free( b->plane_1 );
-      memory_free( b->plane_2 );
+      memory_free( &(b->plane_1) );
+      memory_free( &(b->plane_2) );
       b->initialized = 0;
       return 1;
    }

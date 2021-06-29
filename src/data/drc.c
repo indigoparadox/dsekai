@@ -1,4 +1,8 @@
 
+/**
+ * \file
+ */
+
 #include "drc.h"
 
 #include "../memory.h"
@@ -8,6 +12,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * \brief Read a struct DRC_TOC_E from the provided DRC archive at its current
+ *        offset.
+ *
+ * @param drc_file Pointer to the archive file being read.
+ * @param toc_e Pointer to a struct DRC_TOC_E to read into.
+ * @return
+ */
 static int32_t drc_read_toc_e( FILE* drc_file, struct DRC_TOC_E* toc_e ) {
    uint32_t toc_e_start = 0;
 
@@ -35,17 +47,25 @@ static int32_t drc_read_toc_e( FILE* drc_file, struct DRC_TOC_E* toc_e ) {
    
    assert( ftell( drc_file ) == toc_e_start + DRC_TOC_E_OFFSET_NAME_SZ );
    fread( &(toc_e->name_sz), sizeof( uint16_t ), 1, drc_file );
+
+#ifdef MEMORY_STATIC
+   /* Skip the name, since we can't allocate for it. */
+   toc_e->name = NULL;
+   fseek( drc_file, toc_e->name_sz, SEEK_CUR );
+   toc_e->name_sz = 0;
+#else
    assert( 0 < toc_e->name_sz );
    toc_e->name = memory_alloc( toc_e->name_sz + 1, 1 );
    assert( NULL != toc_e->name );
+#endif /* MEMORY_STATIC */
 
-   dio_printf( "read TOC entry (%ld bytes)\n",
+   debug_printf( 1, "read TOC entry (%ld bytes)\n",
       ftell( drc_file ) - toc_e_start );
    assert( DRC_TOC_E_SZ == ftell( drc_file ) - toc_e_start );
 
    fread( toc_e->name, sizeof( char ), toc_e->name_sz, drc_file );
    
-   dio_printf( "%u: %s (%s, starts at %u bytes, %u bytes long)\n",
+   debug_printf( 1, "%u: %s (%s, starts at %u bytes, %u bytes long)\n",
       toc_e->id, toc_e->name, (char*)&(toc_e->type),
       toc_e->data_start, toc_e->data_sz );
 
@@ -73,16 +93,28 @@ static int32_t drc_read_header( FILE* drc_file, struct DRC_HEADER* h ) {
    return 0;
 }
 
-int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
+/**
+ * \brief List the resources available in the DRC archive at the given path.
+ * \param path
+ * \param ptoc Pointer to a list of struct DRC_TOC_E objects to fill with
+ *             the resulting entries. If the targeted pointer is NULL, and
+ *             dynamic memory is enabled, then it will be allocated.
+ * \param ptoc_sz
+ * \return
+ */
+int32_t drc_list_resources(
+   const char* path, struct DRC_TOC_E** ptoc, uint16_t ptoc_sz
+) {
    FILE* drc_file = NULL;
    int32_t toc_count_out = 0,
       i = 0;
    struct DRC_TOC_E toc_e_iter;
    struct DRC_HEADER header;
+   struct DRC_TOC_E* toc_e_new_ptr = NULL;
 
    memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
 
-   dio_printf( "opening %s to list...\n", path );
+   debug_printf( 2, "opening %s to list...\n", path );
 
    drc_file = fopen( path, "rb" );
    assert( NULL != drc_file );
@@ -96,27 +128,40 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
       drc_read_toc_e( drc_file, &toc_e_iter );
 
       toc_count_out++;
-      
+
       /* Store the entry in a list if requested. */
       if( NULL != ptoc ) {
+#ifndef MEMORY_STATIC
          if( NULL == *ptoc ) {
-            *ptoc = memory_alloc( 1, sizeof( struct DRC_TOC_E ) );
+            *ptoc = memory_alloc(
+               DRC_TOC_INITIAL_ALLOC, sizeof( struct DRC_TOC_E ) );
             assert( NULL != *ptoc );
-         } else {
-            *ptoc =
-               realloc( *ptoc, sizeof( struct DRC_TOC_E ) * toc_count_out );
-            assert( NULL != *ptoc );
+         } else if( 0 == ptoc_sz || i >= ptoc_sz ) {
+            toc_e_new_ptr = memory_realloc(
+               *ptoc, sizeof( struct DRC_TOC_E ) * toc_count_out );
+            if( NULL != toc_e_new_ptr ) {
+               *ptoc = toc_e_new_ptr;
+            } else {
+               goto cleanup;
+            }
          }
+#endif /* !MEMORY_STATIC */
 
-         /* Move, rather than copy. */
-         memcpy( &((*ptoc)[i]), &toc_e_iter, sizeof( struct DRC_TOC_E ) );
-         memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
+         if( NULL != *ptoc && (0 == ptoc_sz || i < ptoc_sz - 1) ) {
+            /* Move, rather than copy. */
+            memcpy( &((*ptoc)[i]), &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+            memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
+         }
+#ifndef MEMORY_STATIC
       } else {
          /* Just free the dynamically allocated name. */
          memory_free( &toc_e_iter.name );
          toc_e_iter.name = NULL;
+#endif /* !MEMORY_STATIC */
       }
    }
+
+cleanup:
 
    fclose( drc_file );
 
@@ -124,10 +169,15 @@ int32_t drc_list_resources( const char* path, struct DRC_TOC_E** ptoc ) {
 }
 
 /**
- * @return Size (in bytes) of resource if found, or 0 or less otherwise.
+ * \param buffer Pointer to a pointer to a buffer to fill with the resource
+ *               requested, or pointer to a NULL pointer to allocate this
+ *               buffer dynamically.
+ * \param buffer_sz Allocated size of the buffer provided, or 0 if none.
+ * \return Size (in bytes) of resource if found, or 0 or less otherwise.
  */
 int32_t drc_get_resource(
-   const char* path, uint32_t type, uint32_t id, uint8_t** buffer
+   const char* path, uint32_t type, uint32_t id, uint8_t** buffer,
+   uint16_t buffer_sz
 ) {
    FILE* drc_file = NULL;
    int32_t
@@ -139,7 +189,7 @@ int32_t drc_get_resource(
 
    memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
 
-   dio_printf( "opening %s to get resource...\n", path );
+   debug_printf( 2, "opening %s to get resource...\n", path );
 
    drc_file = fopen( path, "rb" );
    if( NULL == drc_file ) {
@@ -154,25 +204,38 @@ int32_t drc_get_resource(
 
       if( toc_e_iter.type == type && toc_e_iter.id == id ) {
          /* Resource found. */
-         dio_printf( "found resource %u (at %u bytes, %u bytes long...\n",
+         debug_printf( 2, "found resource %u (at %u bytes, %u bytes long...\n",
             toc_e_iter.id, toc_e_iter.data_start, toc_e_iter.data_sz );
          resource_sz = toc_e_iter.data_sz;
          if( NULL == buffer ) {
-            dio_eprintf( "no buffer ptr supplied\n" );
+            error_printf( "no buffer ptr supplied\n" );
+            /* Don't assign an error value, since no pointer is valid.
+             * Just return the requested size. 
+             */
             goto cleanup;
          }
          /* Load file contents into buffer at referenced address. */
-         *buffer = memory_alloc( 1, toc_e_iter.data_sz );
-         dio_printf( "allocated %u bytes\n", toc_e_iter.data_sz );
+#ifndef MEMORY_STATIC
          if( NULL == *buffer ) {
-            dio_eprintf( "could not allocate contents buffer\n" );
-            resource_sz = -1;
-         } else {
+            *buffer = memory_alloc( 1, toc_e_iter.data_sz );
+            debug_printf( 2, "allocated %u bytes\n", toc_e_iter.data_sz );
+         }
+#endif /* !MEMORY_STATIC */
+
+         /* Check to make sure buffer really was allocated. */
+         if(
+            NULL != *buffer &&
+            (0 == buffer_sz || toc_e_iter.data_sz < buffer_sz)
+         ) {
             fseek( drc_file, toc_e_iter.data_start, SEEK_SET );
             read = fread( *buffer, 1, toc_e_iter.data_sz, drc_file );
             assert( read == toc_e_iter.data_sz );
-            dio_printf( "read %d bytes from offset %u\n",
+            debug_printf( 2, "read %d bytes from offset %u\n",
                read, toc_e_iter.data_start );
+
+         } else if( NULL == *buffer ) {
+            error_printf( "could not allocate contents buffer" );
+            resource_sz = -1;
          }
          goto cleanup;
       } else {
@@ -219,7 +282,7 @@ int32_t drc_get_resource_sz( const char* path, uint32_t type, uint32_t id ) {
    struct DRC_TOC_E toc_e_iter;
    struct DRC_HEADER header;
 
-   dio_printf( "opening %s to get resource size...\n", path );
+   debug_printf( 2, "opening %s to get resource size...\n", path );
 
    drc_file = fopen( path, "rb" );
    assert( NULL != drc_file );
@@ -233,7 +296,7 @@ int32_t drc_get_resource_sz( const char* path, uint32_t type, uint32_t id ) {
       drc_read_toc_e( drc_file, &toc_e_iter );
 
       if( toc_e_iter.type == type && toc_e_iter.id == id ) {
-         dio_printf( "found size for resource %u of type %s: %u bytes\n",
+         debug_printf( 2, "found size for resource %u of type %s: %u bytes\n",
             toc_e_iter.id, (char*)&(toc_e_iter.type), toc_e_iter.data_sz );
          res_sz_out = toc_e_iter.data_sz;
          break;
@@ -260,7 +323,7 @@ int32_t drc_get_resource_name(
    struct DRC_TOC_E toc_e_iter;
    struct DRC_HEADER header;
 
-   dio_printf( "opening %s to get resource name...\n", path );
+   debug_printf( 2, "opening %s to get resource name...\n", path );
 
    drc_file = fopen( path, "rb" );
    assert( NULL != drc_file );
@@ -275,7 +338,7 @@ int32_t drc_get_resource_name(
       assert( NULL != toc_e_iter.name );
 
       if( toc_e_iter.type == type && toc_e_iter.id == id ) {
-         dio_printf( "found name for resource %u of type %s: %s\n",
+         debug_printf( 2, "found name for resource %u of type %s: %s\n",
             toc_e_iter.id, (char*)&(toc_e_iter.type), toc_e_iter.name );
          *name_out = toc_e_iter.name;
          name_sz_out = toc_e_iter.name_sz;

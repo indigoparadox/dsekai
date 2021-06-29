@@ -6,6 +6,8 @@
 int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP*, uint16_t, uint16_t, uint16_t, uint16_t );
 
+#ifdef USE_SOFTWARE_TEXT
+
 void graphics_char_at(
    const char c, uint16_t x_orig, uint16_t y_orig, GRAPHICS_COLOR color,
    uint8_t scale
@@ -28,7 +30,7 @@ void graphics_char_at(
 }
 
 void graphics_string_at(
-   const char* s, uint16_t x_orig, uint16_t y_orig,
+   const char* s, uint16_t s_len, uint16_t x_orig, uint16_t y_orig,
    GRAPHICS_COLOR color, uint8_t scale
 ) {
    uint16_t i = 0,
@@ -44,6 +46,8 @@ void graphics_string_at(
       i++;
    }
 }
+
+#endif /* USE_SOFTWARE_TEXT */
 
 /*
  * @return 1 if blit was successful and 0 otherwise.

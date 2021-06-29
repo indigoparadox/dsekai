@@ -1,4 +1,6 @@
 
+/* \file drc.h */
+
 #ifndef DRC_H
 #define DRC_H
 
@@ -66,8 +68,9 @@ struct DRC_TOC_E {
    uint8_t* data;
 };
 
-int32_t drc_list_resources( const char*, struct DRC_TOC_E** );
-int32_t drc_get_resource( const char*, uint32_t, uint32_t, uint8_t** );
+int32_t drc_list_resources( const char*, struct DRC_TOC_E**, uint16_t );
+int32_t drc_get_resource(
+   const char*, uint32_t, uint32_t, uint8_t**, uint16_t );
 int32_t drc_get_end( const char* );
 int32_t drc_get_resource_sz( const char*, uint32_t, uint32_t );
 int32_t drc_get_resource_name( const char*, uint32_t, uint32_t, char** );

@@ -5,7 +5,6 @@
 #include "../tools/data/cga.h"
 #include "../tools/data/bmp.h"
 #include "../tools/data/icns.h"
-#include "../tools/data/json.h"
 
 #define TEST_CGA_16_16_4_SZ (CGA_HEADER_SZ + (2 * 32))
 
@@ -200,9 +199,11 @@ static const struct CONVERT_GRID gc_test_grid_16_16_4 = {
    (uint8_t*)&gc_test_grid_16_16_4_data
 };
 
+#if 0
 static const char gc_test_json[] = {
    "{\"objects_sz\": 3, \"objects\": [{\"name\":\"foo\"},{\"name\":\"bar\"},{\"name\":\"baz\",\"extra\":12}]}"
 };
+#endif
 
 void buffer_printf( uint8_t* buffer, int start, int end, int col_break ) {
    int column_idx = 1,
@@ -316,10 +317,12 @@ START_TEST( check_data_icns_write ) {
 }
 END_TEST
 
+#if 0
 START_TEST( check_data_json_parse ) {
    json_parse_buffer( &gc_test_json, 0 );
 }
 END_TEST
+#endif
 
 Suite* data_suite( void ) {
    Suite* s;
@@ -335,7 +338,9 @@ Suite* data_suite( void ) {
    tcase_add_loop_test( tc_core, check_data_icns_read, 0, 256 );
    tcase_add_loop_test(
       tc_core, check_data_icns_write, 0, TEST_ICNS_16_16_2_DATA_SZ );
+#if 0
    tcase_add_test( tc_core, check_data_json_parse );
+#endif
 
    suite_add_tcase( s, tc_core );
 

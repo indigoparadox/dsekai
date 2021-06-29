@@ -1,7 +1,12 @@
 
 #include "../graphics.h"
 
-void graphics_init() {
+int graphics_init() {
+   return 1;
+}
+
+void graphics_shutdown() {
+
 }
 
 void graphics_flip() {

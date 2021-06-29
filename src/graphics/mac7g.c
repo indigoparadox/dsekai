@@ -99,8 +99,8 @@ void graphics_draw_block(
 }
 
 int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
-   uint8_t* buffer = NULL;
-   int32_t buffer_sz = 0;
+   uint8_t buffer[MAC7_RSRC_BUFFER_SZ] = NULL;
+   int32_t buffer_sz = MAC7_RSRC_BUFFER_SZ;
    uint32_t id = 0;
    int32_t retval = 0;
 
@@ -115,7 +115,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
 
    /* Load resource into buffer. */
    buffer_sz = drc_get_resource(
-      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer );
+      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer, MAC7_RSRC_BUFFER_SZ );
    if( 0 >= buffer_sz ) {
       goto cleanup;
    }

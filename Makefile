@@ -8,30 +8,34 @@ DSEKAI_C_FILES := \
    src/topdown.c
 
 DSEKAI_C_FILES_SDL := \
+   src/main.c \
    src/input/sdli.c \
    src/graphics/sdlg.c \
-   src/main.c \
    src/data/drc.c
 
 DSEKAI_C_FILES_DOS := \
+   src/main.c \
    src/input/dosi.c \
    src/graphics/dosg.c \
-   src/main.c \
    src/data/drc.c
 
 DSEKAI_C_FILES_PALM := \
+   src/main.c \
    src/input/palmi.c \
    src/graphics/palmg.c \
-   src/mainpalm.c \
    src/data/dio.c
 
-DSEKAI_C_FILES_WIN16 := src/input/win16i.c src/graphics/win16g.c src/mainw16.c
+DSEKAI_C_FILES_WIN16 := \
+   src/main.c \
+   src/input/win16i.c \
+   src/graphics/win16g.c
 
 DSEKAI_C_FILES_MAC7 := \
+   src/main.c \
    src/input/mac7i.c \
    src/graphics/mac7g.c \
-   src/data/drc.c \
-   src/main.c
+   src/memory/fakem.c \
+   src/data/drc.c
 
 DSEKAI_C_FILES_CHECK := \
    check/check.c \
@@ -131,12 +135,12 @@ CFLAGS_LOOKUPS := -g
 
 CFLAGS_DEBUG_GCC := -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak
 
-$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT -DMEMORY_CALLOC $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT
+$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DDIO_SILENT -DMEMORY_CALLOC -DUSE_LOOKUPS
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DDIO_SILENT -DUSE_LOOKUPS
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
@@ -145,7 +149,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
-$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DNO_PALM_DEBUG_LINE -DDISABLE_FILESYSTEM -DPLATFORM_PALM -g -DMEMORY_STATIC -DIGNORE_DIRTY
+$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g
 $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
@@ -154,13 +158,13 @@ $(BIN_PALM): PALMS_RCP := src/palms.rcp
 $(BIN_WIN16): CC := wcc
 $(BIN_WIN16): LD := wcl
 $(BIN_WIN16): RC := wrc
-$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_WIN16 -DMEMORY_CALLOC
+$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DPLATFORM_WIN16
 $(BIN_WIN16): LDFLAGS := -l=windows
 
 $(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
 $(BIN_MAC7): CC := m68k-apple-macos-gcc
 $(BIN_MAC7): CXX := m68k-apple-macos-g++
-$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -DMEMORY_CALLOC -DDIO_SILENT -I$(RETRO68_PREFIX)/multiversal/CIncludes -DDISABLE_MAIN_PARMS
+$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -DDIO_SILENT -I$(RETRO68_PREFIX)/multiversal/CIncludes
 $(BIN_MAC7): LDFLAGS := -lRetroConsole
 $(BIN_MAC7): REZ := Rez
 $(BIN_MAC7): REZFLAGS :=
@@ -290,12 +294,15 @@ $(OBJDIR_PALM)/%.o: %.c res_palm $(GENDIR_PALM)/resext.h
 $(GENDIR_WIN16):
 	$(MD) $@
 
+$(OBJDIR_WIN16):
+	$(MD) $@
+
 $(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
 $(OBJDIR_WIN16)/$(TOPDOWN_O): $(RESEXT_H)
 
-$(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc
+$(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc | $(OBJDIR_WIN16)
 	$(RC) -r -i=$(INCLUDE)/win src/win16s.rc -fo=$@
 
 $(GENDIR_WIN16)/win16.rc: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)

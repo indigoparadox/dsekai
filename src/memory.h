@@ -18,11 +18,14 @@
       free( *(ptr_ptr) ); \
       *(ptr_ptr) = NULL; \
    }
+#define memory_realloc( ptr, sz ) \
+   realloc( ptr, (sz) );
 
 #else
 
 void* memory_alloc( uint16_t, uint16_t );
 void memory_free( void** );
+void* memory_realloc( void*, uint16_t );
 
 #endif /* MEMORY_CALLOC */
 

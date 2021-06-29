@@ -20,3 +20,8 @@ void memory_free( void** ptr_ptr ) {
    *ptr_ptr = NULL;
 }
 
+void* memory_realloc( void* ptr, uint16_t sz ) {
+   /* TODO */
+   return NULL;
+}
+

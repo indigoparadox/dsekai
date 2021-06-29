@@ -153,3 +153,14 @@ int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
    return 0;
 }
 
+#ifndef USE_SOFTWARE_TEXT
+
+void graphics_string_at(
+   const char* s, uint16_t s_len, uint16_t x_orig, uint16_t y_orig,
+   GRAPHICS_COLOR color, uint8_t scale
+) {
+   WinDrawChars( s, s_len, x_orig, y_orig );
+}
+
+#endif /* !USE_SOFTWARE_TEXT */
+

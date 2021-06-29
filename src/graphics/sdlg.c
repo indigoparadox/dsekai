@@ -156,7 +156,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
 
    /* Load resource into buffer. */
    buffer_sz = drc_get_resource(
-      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer );
+      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer, 0 );
    if( 0 >= buffer_sz ) {
       assert( NULL == buffer );
       return buffer_sz;

@@ -173,7 +173,7 @@ int main( int argc, char* argv[] ) {
 
    if( command_list ) {
       dio_printf( "command: list\n" );
-      drc_list_resources( namebuf_arc, NULL );
+      drc_list_resources( namebuf_arc, NULL, 0 );
    }
 
    if( command_extract ) {
@@ -185,7 +185,7 @@ int main( int argc, char* argv[] ) {
       assert( NULL != extract_res_name );
 
       retval = drc_get_resource(
-         namebuf_arc, *((uint32_t*)type_buf), id, &extract_res_buffer );
+         namebuf_arc, *((uint32_t*)type_buf), id, &extract_res_buffer, 0 );
       if( 0 > retval ) {
          dio_eprintf( "unable to extract file\n" );
          goto cleanup;
@@ -201,7 +201,7 @@ int main( int argc, char* argv[] ) {
    
    if( command_header ) {
       dio_printf( "command: header\n" );
-      toc_entries_sz = drc_list_resources( namebuf_arc, &toc_entries );
+      toc_entries_sz = drc_list_resources( namebuf_arc, &toc_entries, 0 );
       header_file = fopen( namebuf_header, "w" );
       assert( NULL != header_file );
       /* TODO: Dynamically generate include guard name. */

@@ -61,7 +61,7 @@ void graphics_draw_block(
 void graphics_char_at(
    const char, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_string_at(
-   const char*, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
+   const char*, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 int graphics_blit_at( struct GRAPHICS_BITMAP*,
    uint16_t, uint16_t, uint16_t, uint16_t );
 int32_t graphics_load_bitmap( uint32_t, struct GRAPHICS_BITMAP* );

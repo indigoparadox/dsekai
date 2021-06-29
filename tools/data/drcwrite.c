@@ -105,7 +105,7 @@ int32_t drc_add_resource(
    }
 
    /* Make sure resource does not exist, get offset if it does. */
-   existing_offset = drc_get_resource( path, type, id, NULL );
+   existing_offset = drc_get_resource( path, type, id, NULL, 0 );
    if( 0 > existing_offset ) {
       /* Error occurred. */
       return existing_offset;

@@ -43,7 +43,7 @@ int cga_write_file(
    assert( NULL != cga_file );
    retval = cga_write( cga_buffer, cga_buffer_sz, grid, o );
    fwrite( cga_buffer, 1, cga_buffer_sz, cga_file );
-   dio_printf( "wrote CGA file: %lu bytes\n", ftell( cga_file ) );
+   debug_printf( 2, "wrote CGA file: %lu bytes\n", ftell( cga_file ) );
 
    fclose( cga_file );
    memory_free( &cga_buffer );
@@ -76,7 +76,7 @@ int cga_write(
       plane1_start += CGA_HEADER_SZ;
       plane2_start = plane1_start + plane_sz;
 
-      dio_printf( "using CGA header...\n" );
+      debug_printf( 1, "using CGA header...\n" );
 
       buffer[0] = 'C';
       buffer[1] = 'G';
@@ -240,13 +240,11 @@ struct CONVERT_GRID* cga_read(
          assert( 0 == (bit_idx % 2) );
          grid->data[grid_idx_even] |=
             ((buf[plane1_offset + byte_idx_even] >> bit_idx) & 0x03);
-         /*
-         dio_printf(
-            "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
+         debug_printf(
+            1, "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
             x, y, byte_idx_even, bit_idx,
             plane1_offset + byte_idx_even,
             buf[plane1_offset + byte_idx_even] );
-         */
 
          /* Read the odd scanline. */
          byte_idx_odd = (((((grid->sz_y + y) / 2) * grid->sz_x) + x) / 4) +
@@ -254,11 +252,11 @@ struct CONVERT_GRID* cga_read(
          assert( byte_idx_odd < buf_sz );
          grid->data[grid_idx_odd] |=
             ((buf[plane1_offset + byte_idx_odd] >> bit_idx) & 0x03);
-         dio_printf(
-            "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
-            x, y, byte_idx_even, bit_idx,
-            plane1_offset + byte_idx_even,
-            buf[plane1_offset + byte_idx_even] );
+         debug_printf(
+            1, "cga x%02d y%02d new byte %02d, bit %02d (byte %d has %02x)\n",
+            x, y, byte_idx_odd, bit_idx,
+            plane1_offset + byte_idx_odd,
+            buf[plane1_offset + byte_idx_odd] );
 
          /*
          assert(
@@ -266,7 +264,7 @@ struct CONVERT_GRID* cga_read(
             (grid->data[grid_idx_even] & 0x03) );
          */
       }
-      dio_printf( "---\n" );
+      debug_printf( 1, "---\n" );
    }
 
    if( o->cga_use_header ) {
