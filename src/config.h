@@ -15,6 +15,18 @@
 #define SCREEN_H 200
 #endif /* !SCREEN_H */
 
+#ifndef SCREEN_SCALE
+#define SCREEN_SCALE 1
+#endif /* SCREEN_SCALE */
+
+#ifndef FPS
+#define FPS 30
+#endif /* FPS */
+
+#ifndef DIO_READ_FILE_BLOCK_SZ
+#define DIO_READ_FILE_BLOCK_SZ 4096
+#endif /* !DIO_READ_FILE_BLOCK_SZ */
+
 #ifndef NAMEBUF_MAX
 #define NAMEBUF_MAX 255
 #endif /* !NAMEBUF_MAX */
@@ -39,79 +51,57 @@
 #define DIRTY_THRESHOLD 3
 #endif /* DIRTY_THRESHOLD */
 
+/* ! */
 #ifdef DEBUG_LOG
+/* ! */
 
-#include <stdio.h>
+#  include <stdio.h>
 
-#define internal_debug_printf( lvl, ... ) \
-   if( lvl >= DEBUG_THRESHOLD ) { \
-      printf( "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); \
-      printf( __VA_ARGS__ ); \
-      printf( "\n" ); \
-   }
+#  define internal_debug_printf( lvl, ... ) \
+      if( lvl >= DEBUG_THRESHOLD ) { \
+         printf( "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); \
+         printf( __VA_ARGS__ ); \
+         printf( "\n" ); \
+      }
 
-#define internal_error_printf( ... ) \
-   fprintf( stderr, __FILE__ ": %d: ", __LINE__ ); \
-   fprintf( stderr, __VA_ARGS__ ); \
-   fprintf( stderr, "\n" ); \
+#  define internal_error_printf( ... ) \
+      fprintf( stderr, __FILE__ ": %d: ", __LINE__ ); \
+      fprintf( stderr, __VA_ARGS__ ); \
+      fprintf( stderr, "\n" ); \
 
-#define debug_printf( lvl, ... ) \
-   internal_debug_printf( lvl, __VA_ARGS__ )
+#  define debug_printf( lvl, ... ) \
+      internal_debug_printf( lvl, __VA_ARGS__ )
 
-#define error_printf( ... ) \
-   internal_error_printf( __VA_ARGS__ )
+#  define error_printf( ... ) \
+      internal_error_printf( __VA_ARGS__ )
+
+/* ! */
+#elif defined( ANCIENT_C )
+/* ! */
+
+#  define debug_printf( x )
+#  define error_printf( x )
 
 #else
+
+#  define debug_printf( ... )
+#  define error_printf( ... )
+
+#endif /* DEBUG_LOG, ANCIENT_C */
 
 #ifdef ANCIENT_C
-
-#define debug_printf( x )
-#define error_printf( x )
-
-#else
-
-#define debug_printf( ... )
-#define error_printf( ... )
-
+#  include <stdio.h>
+#  define DIO_SILENT
+#  define NO_VARGS
+#  define USE_LOOKUPS
+#  define NO_I86
 #endif /* ANCIENT_C */
-
-#endif /* DEBUG_LOG */
-
 
 /* ------ */
 #ifdef PLATFORM_DOS
 /* ------ */
 
 #include <assert.h>
-
-#ifdef ANCIENT_C
-#
-/* XXX */
-#define DEBUG_THRESHOLD 2
-#define DIRTY_THRESHOLD 3
-
-#ifdef DEBUG_LOG
-
-#define internal_debug_printf( lvl, ... ) \
-   if( lvl >= DEBUG_THRESHOLD ) { \
-      printf( "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); \
-      printf( __VA_ARGS__ ); \
-      printf( "\n" ); \
-   }
-
-#define debug_printf( lvl, ... ) \
-   internal_debug_printf( lvl, __VA_ARGS__ )
-
-#else
-
-#endif /* DEBUG_LOG */
-
-include <stdio.h>
-#define DIO_SILENT
-#define NO_VARGS
-#define USE_LOOKUPS
-#define NO_I86
-#endif /* ANCIENT_C */
 
 #include "../gen/dos/resext.h"
 
@@ -152,10 +142,10 @@ include <stdio.h>
 /* ------ */
 
 #ifdef NDEBUG
-#define assert( comp )
+#  define assert( comp )
 #else
 /* Fake assert. */
-#define assert( comp ) if( !(comp) ) { g_assert_failed_len = dio_snprintf( g_assert_failed, 255, __FILE__ ": %d: ASSERT FAILED", __LINE__ ); }
+#  define assert( comp ) if( !(comp) ) { g_assert_failed_len = dio_snprintf( g_assert_failed, 255, __FILE__ ": %d: ASSERT FAILED", __LINE__ ); }
 #endif /* !NDEBUG */
 
 #include "../gen/palm/resext.h"
@@ -218,20 +208,8 @@ include <stdio.h>
 #define SCREEN_TW (SCREEN_W / TILE_W)
 #define SCREEN_TH (SCREEN_H / TILE_H)
 
-#ifndef SCREEN_SCALE
-#define SCREEN_SCALE 1
-#endif /* SCREEN_SCALE */
-
 #define SCREEN_REAL_W SCREEN_W * SCREEN_SCALE
 #define SCREEN_REAL_H SCREEN_H * SCREEN_SCALE
-
-#ifndef FPS
-#define FPS 30
-#endif /* FPS */
-
-#ifndef DIO_READ_FILE_BLOCK_SZ
-#define DIO_READ_FILE_BLOCK_SZ 4096
-#endif /* !DIO_READ_FILE_BLOCK_SZ */
 
 #ifndef MAIN_C
 extern char g_assert_failed[];
