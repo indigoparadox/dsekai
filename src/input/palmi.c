@@ -6,6 +6,10 @@
 
 static UInt32 g_next_input = 0;
 
+int input_init() {
+   return 1;
+}
+
 int input_poll() {
    EventType event;
    UInt32 key_state;

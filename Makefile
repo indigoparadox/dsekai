@@ -75,12 +75,12 @@ TOPDOWN_O: src/topdown.o
 
 ASSETDIR := assets
 
-OBJDIR_SDL := obj/sdl/
-OBJDIR_DOS := obj/dos/
-OBJDIR_PALM := obj/palm/
-OBJDIR_WIN16 := obj/win16/
-OBJDIR_MAC7 := obj/mac7/
-OBJDIR_CHECK_NULL := obj/check_null/
+OBJDIR_SDL := obj/sdl
+OBJDIR_DOS := obj/dos
+OBJDIR_PALM := obj/palm
+OBJDIR_WIN16 := obj/win16
+OBJDIR_MAC7 := obj/mac7
+OBJDIR_CHECK_NULL := obj/check_null
 
 GENDIR_SDL := gen/sdl
 GENDIR_DOS := gen/dos
@@ -105,9 +105,6 @@ DSEKAI_ASSETS_BITMAPS := \
    $(DSEKAI_ASSETS_SPRITES) \
    $(DSEKAI_ASSETS_TILES) \
    $(DSEKAI_ASSETS_PATTERNS)
-DSEKAI_ASSETS_MASKS := $(wildcard $(ASSETDIR)/mask_*.bmp)
-DSEKAI_ASSETS_MASKS_H := \
-   $(subst assets/,gen/,$(subst .bmp,.h,$(DSEKAI_ASSETS_MASKS)))
 DSEKAI_ASSETS_DOS_CGA := \
    $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_PALM := \
@@ -160,47 +157,42 @@ $(BIN_WIN16): RC := wrc
 $(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DUSE_LOOKUPS -DPLATFORM_WIN16 -DMEMORY_CALLOC
 $(BIN_WIN16): LDFLAGS := -l=windows
 
+$(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
 $(BIN_MAC7): CC := m68k-apple-macos-gcc
 $(BIN_MAC7): CXX := m68k-apple-macos-g++
-$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -DMEMORY_CALLOC -DDIO_SILENT
+$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -DMEMORY_CALLOC -DDIO_SILENT -I$(RETRO68_PREFIX)/multiversal/CIncludes -DDISABLE_MAIN_PARMS
 $(BIN_MAC7): LDFLAGS := -lRetroConsole
 $(BIN_MAC7): REZ := Rez
 $(BIN_MAC7): REZFLAGS :=
-$(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
 
 $(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL -DMEMORY_CALLOC -DDIO_SILENTL $(CFLAGS_DEBUG_GCC)
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(CFLAGS_DEBUG_GCC)
 
 DSEKAI_O_FILES_SDL := \
-   $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_SDL),$(subst .c,.o,$(DSEKAI_C_FILES_SDL)))
+   $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL)))
 DSEKAI_O_FILES_DOS := \
-   $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_DOS),$(subst .c,.o,$(DSEKAI_C_FILES_DOS)))
+   $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS)))
 DSEKAI_O_FILES_PALM := \
-   $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_PALM),$(subst .c,.o,$(DSEKAI_C_FILES_PALM)))
+   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_PALM)))
 DSEKAI_O_FILES_WIN16 := \
-   $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_WIN16),$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
+   $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
 DSEKAI_O_FILES_MAC7 := \
-   $(addprefix $(OBJDIR_MAC7),$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_MAC7),$(subst .c,.o,$(DSEKAI_C_FILES_MAC7)))
+   $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC7)))
 DSEKAI_O_FILES_CHECK_NULL := \
-   $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_CHECK_NULL),$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
+   $(addprefix $(OBJDIR_CHECK_NULL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_CHECK_NULL)/,$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
 
-.PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm res_masks res_mac7
+.PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm res_mac7
 
 all: $(BIN_DOS) $(BIN_SDL) $(BIN_PALM)
 
 $(BINDIR):
 	$(MD) $(BINDIR)
-
-gen/mask_%.h: assets/mask_%.bmp $(CONVERT)
-	$(CONVERT) -ic bitmap -oc header -if $< -of $@ -ob 1
-
-res_masks: $(DSEKAI_ASSETS_MASKS_H)
 
 # ====== Utilities ======
 
@@ -230,7 +222,7 @@ $(BINDIR)/sdl16.drc: res_sdl16_drc
 $(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR_SDL)%.o: %.c res_sdl16_drc res_masks
+$(OBJDIR_SDL)/%.o: %.c res_sdl16_drc
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
@@ -248,11 +240,10 @@ $(GENDIR_DOS):
 $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
-$(BIN_DOS): $(DSEKAI_O_FILES_DOS)
-	$(MD) $(BINDIR)
+$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_DOS)%.o: %.c res_doscga_drc res_masks
+$(OBJDIR_DOS)/%.o: %.c res_doscga_drc
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
@@ -276,21 +267,21 @@ $(GENDIR_PALM)/resext.h: rcp_h_palm
 
 $(GENDIR_PALM)/palmd.rcp: rcp_h_palm
 
-grc_palm: $(OBJDIR_PALM)dsekai
+grc_palm: $(OBJDIR_PALM)/dsekai
 	cd $(OBJDIR_PALM) && $(OBJRES) dsekai
 
-$(OBJDIR_PALM)dsekai: $(DSEKAI_O_FILES_PALM)
+$(OBJDIR_PALM)/dsekai: $(DSEKAI_O_FILES_PALM)
 	$(CC) $(CFLAGS) $^ -o $@
 	
-$(OBJDIR_PALM)bin.stamp: src/palms.rcp $(GENDIR_PALM)/palmd.rcp
+$(OBJDIR_PALM)/bin.stamp: src/palms.rcp $(GENDIR_PALM)/palmd.rcp
 	$(PILRC) $< $(OBJDIR_PALM)
 	touch $@
 
-$(BIN_PALM): grc_palm $(OBJDIR_PALM)bin.stamp | $(BINDIR)
+$(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin.stamp | $(BINDIR)
 	$(BUILDPRC) $@ $(ICONTEXT) $(APPID) \
-      $(OBJDIR_PALM)*.grc $(OBJDIR_PALM)*.bin $(LINKFILES) 
+      $(OBJDIR_PALM)/*.grc $(OBJDIR_PALM)/*.bin $(LINKFILES) 
 
-$(OBJDIR_PALM)%.o: %.c res_palm $(GENDIR_PALM)/resext.h
+$(OBJDIR_PALM)/%.o: %.c res_palm $(GENDIR_PALM)/resext.h
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
@@ -299,22 +290,25 @@ $(OBJDIR_PALM)%.o: %.c res_palm $(GENDIR_PALM)/resext.h
 $(GENDIR_WIN16):
 	$(MD) $@
 
-$(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)win16.res | $(BINDIR)
+$(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_WIN16)$(TOPDOWN_O): $(RESEXT_H)
+$(OBJDIR_WIN16)/$(TOPDOWN_O): $(RESEXT_H)
 
-$(OBJDIR_WIN16)win16.res: $(GENDIR_WIN16)/win16.rc
+$(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc
 	$(RC) -r -i=$(INCLUDE)/win src/win16s.rc -fo=$@
 
 $(GENDIR_WIN16)/win16.rc: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)
 	$(MKRESH) -f win16 -i 5001 -if $(DSEKAI_ASSETS_BITMAPS) -oh $(GENDIR_WIN16)/resext.h -or $@
 
-$(OBJDIR_WIN16)%.o: %.c $(OBJDIR_WIN16)win16.res
+$(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win16.res
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 
 # ====== Main: MacOS 7 ======
+
+$(OBJDIR_MAC7):
+	$(MD) $@
 
 $(GENDIR_MAC7):
 	$(MD) $@
@@ -338,10 +332,10 @@ $(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)
 $(GENDIR_MAC7)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC7)
 	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
 
-$(OBJDIR_MAC7)dsekai.code.bin: $(DSEKAI_O_FILES_MAC7) | $(OBJDIR_MAC7)
-	$(CXX) $(LDFLAGS) -o $@ $^
+$(OBJDIR_MAC7)/dsekai.code.bin: $(DSEKAI_O_FILES_MAC7) | $(OBJDIR_MAC7)
+	$(CXX) $(LDFLAGS) -o $@ $^ # Use CXX to link for RetroConsole.
 
-$(BIN_MAC7): $(OBJDIR_MAC7)dsekai.code.bin
+$(BIN_MAC7): $(OBJDIR_MAC7)/dsekai.code.bin
 	$(REZ) -I$(RETRO68_PREFIX)/RIncludes \
       --copy $^ \
       "$(RETRO68_PREFIX)/RIncludes/Retro68APPL.r" \
@@ -350,8 +344,9 @@ $(BIN_MAC7): $(OBJDIR_MAC7)dsekai.code.bin
       --cc $(BINDIR)/dsekai.APPL \
       --cc $(BINDIR)/dsekai.dsk
 
-$(OBJDIR_MAC7)%.o: \
+$(OBJDIR_MAC7)/%.o: \
 %.c $(BINDIR)/mac7.drc $(GENDIR_MAC7)/resext.h | $(OBJDIR_MAC7)
+	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 
 # ====== Check: Null ======
@@ -359,7 +354,7 @@ $(OBJDIR_MAC7)%.o: \
 $(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR_CHECK_NULL)%.o: %.c res_sdl16_drc
+$(OBJDIR_CHECK_NULL)/%.o: %.c res_sdl16_drc
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 

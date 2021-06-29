@@ -1,24 +1,32 @@
 
 #include "../input.h"
 
-#include <Quickdraw.h>
-#include <Windows.h>
-#include <Events.h>
+#include <Multiverse.h>
 
-EventRecord g_event;
-
-extern Rect g_window_rect;
+int input_init() {
+   FlushEvents( everyEvent, 0 );
+   return 1;
+}
 
 int input_poll() {
-   SystemTask();
+   EventRecord event;
+   uint8_t key = 0;
 
-   TextSize( 48 );
-   MoveTo( g_window_rect.left, g_window_rect.top );
-   DrawString( "\pXXX" );
+   /* SystemTask(); */
 
-   if( WaitNextEvent( everyEvent, &g_event, 5L, NULL ) ) {
-      if( mouseDown == g_event.what ) {
-         return INPUT_KEY_QUIT;
+   if( GetNextEvent( everyEvent, &event ) ) {
+      if( keyDown == event.what ) {
+         key = (uint8_t)((event.message & keyCodeMask) >> 8);
+         switch( key ) {
+         case 0x0c: /* Q */
+            return INPUT_KEY_QUIT;
+
+         case 0x06: /* Z */
+            return INPUT_KEY_OK;
+
+         default:
+            break;
+         }
       }
    }
 

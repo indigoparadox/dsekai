@@ -1,5 +1,9 @@
 
+int input_init() {
+   return 1;
+}
+
 int input_poll() {
-   return 0;
+   return 1;
 }
 

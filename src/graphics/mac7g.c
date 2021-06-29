@@ -4,41 +4,57 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <Quickdraw.h>
-#include <Windows.h>
-#include <MacMemory.h>
-#include <Sound.h>
-#include <Fonts.h>
-#include <NumberFormatting.h>
+#include <Multiverse.h>
 
 #include "../data/drc.h"
 
 QDGlobals g_qd;
 WindowPtr g_window;
+WindowRecord g_window_record;
 Rect g_window_rect;
 
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
 int graphics_init() {
+   ControlHandle beepbutton;
+   Rect r;
 
    InitGraf( &g_qd.thePort );
-   InitFonts();
+   /* InitFonts(); */
    InitWindows();
-   InitMenus();
-   TEInit();
-   InitDialogs( NULL );
+   /* InitMenus(); */
    InitCursor();
+   /* TEInit();
+   InitDialogs( NULL ); */
 
    g_window_rect = qd.screenBits.bounds;
-   InsetRect( &g_window_rect, 50, 50 );
-   g_window = NewWindow( NULL, &g_window_rect, "\pdsekai", true, documentProc,
-      (WindowPtr)(-1), false, 0 );
+   /* InsetRect( &g_window_rect, 50, 50 ); */
+   g_window = NewWindow(
+      &g_window_record, &g_window_rect, "\p", true, 2, (WindowPtr)-1, true, 0 );
+   /* g_window = NewWindow(
+      &g_window_record,
+      &g_window_rect,
+      "\p",
+      true,
+      plainDBox,
+      (WindowPtr)(-1),
+      true,
+      0 ); */
    if( !g_window ) {
-      return -1;
+      return 0;
    }
    SetPort( g_window );
-   return 0;
+
+   SetRect( &r, 100, 100, 230, 120 );
+   beepbutton = \
+   NewControl( 
+      g_window,&r,"\pBeep Hit",true,0,0,0,pushButProc,0);
+
+   MoveTo( 100, 175 );
+   DrawString( "\pPress any key to exit." );
+
+   return 1;
 }
 
 void graphics_shutdown() {
@@ -63,7 +79,6 @@ int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP* b,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
-   BitMapHandle bmh = NULL;
    Rect r;
 
    if( NULL == b || NULL == b->pict ) {

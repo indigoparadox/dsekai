@@ -17,6 +17,7 @@
 #endif /*
 PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16, PLATFORM_NULL */
 
+int input_init();
 int input_poll();
 
 #endif /* INPUT_H */

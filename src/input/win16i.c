@@ -1,6 +1,11 @@
 
 #include "win16i.h"
 
-void input_poll() {
+int input_init() {
+   return 1;
+}
+
+int input_poll() {
+   return 0;
 }
 
