@@ -59,13 +59,13 @@ static int32_t drc_read_toc_e( FILE* drc_file, struct DRC_TOC_E* toc_e ) {
    assert( NULL != toc_e->name );
 #endif /* MEMORY_STATIC */
 
-   debug_printf( 1, "read TOC entry (%ld bytes)\n",
+   debug_printf( 1, "read TOC entry (%ld bytes)",
       ftell( drc_file ) - toc_e_start );
    assert( DRC_TOC_E_SZ == ftell( drc_file ) - toc_e_start );
 
    fread( toc_e->name, sizeof( char ), toc_e->name_sz, drc_file );
    
-   debug_printf( 1, "%u: %s (%s, starts at %u bytes, %u bytes long)\n",
+   debug_printf( 1, "%u: %s (%s, starts at %u bytes, %u bytes long)",
       toc_e->id, toc_e->name, (char*)&(toc_e->type),
       toc_e->data_start, toc_e->data_sz );
 
@@ -114,7 +114,7 @@ int32_t drc_list_resources(
 
    memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
 
-   debug_printf( 2, "opening %s to list...\n", path );
+   debug_printf( 2, "opening %s to list...", path );
 
    drc_file = fopen( path, "rb" );
    assert( NULL != drc_file );
@@ -189,7 +189,7 @@ int32_t drc_get_resource(
 
    memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
 
-   debug_printf( 2, "opening %s to get resource...\n", path );
+   debug_printf( 2, "opening %s to get resource...", path );
 
    drc_file = fopen( path, "rb" );
    if( NULL == drc_file ) {
@@ -204,11 +204,11 @@ int32_t drc_get_resource(
 
       if( toc_e_iter.type == type && toc_e_iter.id == id ) {
          /* Resource found. */
-         debug_printf( 2, "found resource %u (at %u bytes, %u bytes long...\n",
+         debug_printf( 2, "found resource %u (at %u bytes, %u bytes long...",
             toc_e_iter.id, toc_e_iter.data_start, toc_e_iter.data_sz );
          resource_sz = toc_e_iter.data_sz;
          if( NULL == buffer ) {
-            error_printf( "no buffer ptr supplied\n" );
+            error_printf( "no buffer ptr supplied" );
             /* Don't assign an error value, since no pointer is valid.
              * Just return the requested size. 
              */
@@ -218,7 +218,7 @@ int32_t drc_get_resource(
 #ifndef MEMORY_STATIC
          if( NULL == *buffer ) {
             *buffer = memory_alloc( 1, toc_e_iter.data_sz );
-            debug_printf( 2, "allocated %u bytes\n", toc_e_iter.data_sz );
+            debug_printf( 2, "allocated %u bytes", toc_e_iter.data_sz );
          }
 #endif /* !MEMORY_STATIC */
 
@@ -230,7 +230,7 @@ int32_t drc_get_resource(
             fseek( drc_file, toc_e_iter.data_start, SEEK_SET );
             read = fread( *buffer, 1, toc_e_iter.data_sz, drc_file );
             assert( read == toc_e_iter.data_sz );
-            debug_printf( 2, "read %d bytes from offset %u\n",
+            debug_printf( 2, "read %d bytes from offset %u",
                read, toc_e_iter.data_start );
 
          } else if( NULL == *buffer ) {
@@ -282,7 +282,7 @@ int32_t drc_get_resource_sz( const char* path, uint32_t type, uint32_t id ) {
    struct DRC_TOC_E toc_e_iter;
    struct DRC_HEADER header;
 
-   debug_printf( 2, "opening %s to get resource size...\n", path );
+   debug_printf( 2, "opening %s to get resource size...", path );
 
    drc_file = fopen( path, "rb" );
    assert( NULL != drc_file );
@@ -296,7 +296,7 @@ int32_t drc_get_resource_sz( const char* path, uint32_t type, uint32_t id ) {
       drc_read_toc_e( drc_file, &toc_e_iter );
 
       if( toc_e_iter.type == type && toc_e_iter.id == id ) {
-         debug_printf( 2, "found size for resource %u of type %s: %u bytes\n",
+         debug_printf( 2, "found size for resource %u of type %s: %u bytes",
             toc_e_iter.id, (char*)&(toc_e_iter.type), toc_e_iter.data_sz );
          res_sz_out = toc_e_iter.data_sz;
          break;
@@ -323,7 +323,7 @@ int32_t drc_get_resource_name(
    struct DRC_TOC_E toc_e_iter;
    struct DRC_HEADER header;
 
-   debug_printf( 2, "opening %s to get resource name...\n", path );
+   debug_printf( 2, "opening %s to get resource name...", path );
 
    drc_file = fopen( path, "rb" );
    assert( NULL != drc_file );
@@ -338,7 +338,7 @@ int32_t drc_get_resource_name(
       assert( NULL != toc_e_iter.name );
 
       if( toc_e_iter.type == type && toc_e_iter.id == id ) {
-         debug_printf( 2, "found name for resource %u of type %s: %s\n",
+         debug_printf( 2, "found name for resource %u of type %s: %s",
             toc_e_iter.id, (char*)&(toc_e_iter.type), toc_e_iter.name );
          *name_out = toc_e_iter.name;
          name_sz_out = toc_e_iter.name_sz;
