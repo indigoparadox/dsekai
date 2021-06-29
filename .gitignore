@@ -6,3 +6,5 @@ obj
 gen
 resext.h
 QC.INI
+.finf
+.rsrc

@@ -361,5 +361,5 @@ $(OBJDIR_CHECK_NULL)/%.o: %.c res_sdl16_drc
 # ====== Clean ======
 
 clean:
-	rm -rf data obj bin gen *.err
+	rm -rf data obj bin gen *.err .rsrc .finf
 
