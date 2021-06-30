@@ -39,12 +39,12 @@ BITMAP_DATA_HEADER {
 
 #define BMP_COMPRESSION_NONE (0)
 
-int bmp_write_file(
+uint8_t bmp_colors_count( uint8_t );
+int32_t bmp_write_file(
    const char*, const struct CONVERT_GRID*, struct CONVERT_OPTIONS* );
-int bmp_write(
+int32_t bmp_write(
    uint8_t*, uint32_t, const struct CONVERT_GRID*, struct CONVERT_OPTIONS* );
-struct CONVERT_GRID* bmp_read_file(
-   const char* path, struct CONVERT_OPTIONS* o );
+struct CONVERT_GRID* bmp_read_file( const char*, struct CONVERT_OPTIONS* );
 struct CONVERT_GRID* bmp_read(
    const uint8_t*, uint32_t, struct CONVERT_OPTIONS* );
 

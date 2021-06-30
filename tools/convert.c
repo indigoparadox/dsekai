@@ -24,6 +24,7 @@
 #define FMT_JSON_MAP    7
 #define FMT_JSON_WIN    8
 #define FMT_ICNS        9
+#define FMT_ICO         10
 
 #define ENDIAN_LITTLE   'l'
 #define ENDIAN_BIG      'b'
@@ -127,6 +128,8 @@ int main( int argc, char* argv[] ) {
             fmt_out = FMT_HEADER;
          } else if( 0 == strncmp( argv[i], "icns", 4 ) ) {
             fmt_out = FMT_ICNS;
+         } else if( 0 == strncmp( argv[i], "ico", 3 ) ) {
+            fmt_out = FMT_ICO;
          }
          state = 0;
          break;
@@ -288,6 +291,10 @@ int main( int argc, char* argv[] ) {
 
    case FMT_ICNS:
       retval = icns_write_file( namebuf_out, grid, &options_out );
+      break;
+
+   case FMT_ICO:
+      retval = ico_write_file( namebuf_out, grid, &options_out );
       break;
 
    case FMT_HEADER_IMG:

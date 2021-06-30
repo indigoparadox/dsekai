@@ -51,6 +51,7 @@ DSEKAI_C_FILES_CHECK := \
    tools/data/cga.c \
    tools/data/bmp.c \
    tools/data/icns.c \
+   tools/data/ico.c \
    src/data/dio.c
 
 MKRESH_C_FILES := \
@@ -66,6 +67,7 @@ DRCPACK_C_FILES := \
 CONVERT_C_FILES := \
    tools/convert.c \
    tools/data/bmp.c \
+   tools/data/ico.c \
    src/data/drc.c \
    tools/data/cga.c \
    src/data/dio.c \
