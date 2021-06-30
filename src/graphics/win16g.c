@@ -2,6 +2,7 @@
 #define GRAPHICS_C
 #include "../graphics.h"
 #include "../input.h"
+#include "../win16s.h"
 
 #include <string.h>
 
@@ -107,7 +108,7 @@ int graphics_init() {
 
    wc.lpfnWndProc   = (WNDPROC)&WndProc;
    wc.hInstance     = g_instance;
-   /* wc.hIcon         = LoadIcon( g_hInstance, MAKEINTRESOURCE( IDI_APPICON ) ); */
+   wc.hIcon         = LoadIcon( g_instance, MAKEINTRESOURCE( icon_dsekai ) );
    wc.hCursor       = LoadCursor( NULL, IDC_ARROW );
    wc.hbrBackground = (HBRUSH)( COLOR_BTNFACE + 1 );
    /* wc.lpszMenuName  = MAKEINTRESOURCE( IDR_MAINMENU ); */

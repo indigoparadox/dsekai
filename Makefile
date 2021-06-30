@@ -298,10 +298,13 @@ $(GENDIR_WIN16):
 $(OBJDIR_WIN16):
 	$(MD) $@
 
+$(GENDIR_WIN16)/%.ico: $(ASSETDIR)/%.bmp | $(GENDIR_WIN16)
+	$(IMAGEMAGICK) $< $@
+
 $(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc | $(OBJDIR_WIN16)
+$(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc $(GENDIR_WIN16)/dsekai.ico | $(OBJDIR_WIN16)
 	$(RC) -r -i $(INCLUDE)win src/win16s.rc -o $@
 
 $(GENDIR_WIN16)/win16.rc \
