@@ -205,8 +205,8 @@
 #  include <stdio.h>
 #  define DIO_SILENT
 #  define NO_VARGS
-#  define USE_LOOKUPS
 #  define NO_I86
+#  define NO_CGA_FUNCTIONS
 #endif /* ANCIENT_C */
 
 /* ! */

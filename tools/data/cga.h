@@ -44,6 +44,8 @@ struct CGA_HEADER {
    uint16_t reserved4;
 };
 
+#ifndef NO_CGA_FUNCTIONS
+
 struct CONVERT_GRID;
 struct CONVERT_OPTIONS;
 
@@ -57,6 +59,8 @@ struct CONVERT_GRID* cga_read_file(
    const char* path, struct CONVERT_OPTIONS* o );
 struct CONVERT_GRID* cga_read(
    const uint8_t*, uint32_t, struct CONVERT_OPTIONS* );
+
+#endif /* NO_CGA_FUNCTIONS */
 
 #endif /* CGA_H */
 

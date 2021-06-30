@@ -5,27 +5,31 @@
 .c.obj:
 	qcl -c -Ic:\msc5\include -DPLATFORM_DOS -DANCIENT_C -W1 -Ze -Zid -AM $*.c
 
-graphics.obj : src\graphics.c
+graphics.obj : graphics.c
 
-item.obj : src\item.c
+item.obj : item.c
 
-main.obj : src\main.c
+main.obj : main.c
 
-mobile.obj : src\mobile.c
+mobile.obj : mobile.c
 
-tilemap.obj : src\tilemap.c
+tilemap.obj : tilemap.c
 
-topdown.obj : src\topdown.c
+topdown.obj : topdown.c
 
-window.obj : src\window.c
+window.obj : window.c
 
-dio.obj : src\data\dio.c
+dio.obj : 
+	qcl -c -Ic:\msc5\include -DPLATFORM_DOS -DANCIENT_C -W1 -Ze -Zid -AM data\dio.c
 
-drc.obj : src\data\drc.c
+drc.obj :
+	qcl -c -Ic:\msc5\include -DPLATFORM_DOS -DANCIENT_C -W1 -Ze -Zid -AM data\drc.c
 
-dosg.obj : src\graphics\dosg.c
+dosg.obj :
+	qcl -c -Ic:\msc5\include -DPLATFORM_DOS -DANCIENT_C -W1 -Ze -Zid -AM graphics\dosg.c
 
-dosi.obj : src\input\dosi.c
+dosi.obj : input\dosi.c
+	qcl -c -Ic:\msc5\include -DPLATFORM_DOS -DANCIENT_C -W1 -Ze -Zid -AM input\dosi.c
 
 Dsekai.exe : graphics.obj item.obj main.obj mobile.obj tilemap.obj  \
 		topdown.obj window.obj dio.obj drc.obj dosg.obj dosi.obj 
