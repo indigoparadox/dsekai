@@ -16,15 +16,19 @@
 
 #define bmp_int( type, buf, offset ) *((type*)&(buf[offset]))
 
-int bmp_write_file(
+/**
+ * \return The number of bytes successfully written.
+ */
+int32_t bmp_write_file(
    const char* path, const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
-   uint32_t bmp_buffer_sz = 0,
+   int32_t bmp_buffer_sz = 0,
       bmp_row_sz = 0,
-      palette_entries = 0;
+      palette_entries = 0,
+      bmp_file_sz = 0,
+      written = 0;
    uint8_t* bmp_buffer = NULL;
    FILE* file_out = NULL;
-   int retval = 0;
 
    /* Add rows padded out to 4 bytes. */
    bmp_row_sz = (grid->sz_x * o->bpp) / 8;
@@ -33,20 +37,7 @@ int bmp_write_file(
    }
    o->bmp_data_sz = (grid->sz_y * bmp_row_sz);
 
-   switch( o->bpp ) {
-   case 1:
-      palette_entries = 2;
-      break;
-
-   case 2:
-      palette_entries = 4;
-      break;
-
-   case 4:
-   default:
-      palette_entries = 16;
-      break;
-   }
+   palette_entries = bmp_colors_count( o->bpp );
 
    bmp_buffer_sz = 
       BMP_FMT_FILE_HEADER_SZ +
@@ -57,21 +48,27 @@ int bmp_write_file(
    bmp_buffer = memory_alloc( 1, bmp_buffer_sz );
    assert( NULL != bmp_buffer );
 
-   retval = bmp_write( bmp_buffer, bmp_buffer_sz, grid, o );
-   if( retval ) {
+   bmp_file_sz = bmp_write( bmp_buffer, bmp_buffer_sz, grid, o );
+   assert( bmp_file_sz == bmp_buffer_sz );
+   if( 0 >= bmp_file_sz ) {
       memory_free( &bmp_buffer );
-      return retval;
+      return bmp_file_sz;
    }
 
    file_out = fopen( path, "wb" );
    assert( NULL != file_out );
 
-   fwrite( bmp_buffer, 1, bmp_buffer_sz, file_out );
+   written = fwrite( bmp_buffer, 1, bmp_buffer_sz, file_out );
 
    fclose( file_out );
    memory_free( &bmp_buffer );
 
-   return retval;
+   assert( written == bmp_buffer_sz );
+   if( written != bmp_buffer_sz ) {
+      return CONVERT_ERROR_FILE_WRITE;
+   }
+
+   return bmp_buffer_sz;
 }
 
 static uint8_t bmp_palette_cga_4_to_16( int color_in ) {
@@ -105,46 +102,62 @@ static uint8_t bmp_palette_any_to_mono( uint8_t color_in, uint8_t reverse ) {
    return 0;
 }
 
-int bmp_write(
+uint8_t bmp_colors_count( uint8_t bpp ) {
+   switch( bpp ) {
+   case 1:
+      return 2;
+
+   case 2:
+      return 4;
+
+   case 4:
+   default:
+      return 16;
+   }
+}
+
+/**
+ * \return The number of bytes successfully written.
+ */
+int32_t bmp_write(
    uint8_t* buf_ptr, uint32_t buf_sz,
    const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
 ) {
-   int retval = 0;
    int32_t x = 0,
       y = 0,
       bit_idx = 0;
-   uint32_t bmp_data_offset = 0,
-      i = 0,
+   uint32_t i = 0,
       row_bytes = 0,
-      bmp_data_byte_idx = 0;
+      bmp_file_byte_idx = 0;
    uint8_t byte_buffer = 0,
       bit_mask_in = 0,
       bit_mask_out = 0;
    uint32_t bmp_colors = 0,
       * bmp_palette = 0;
-   struct BITMAP_FILE_HEADER* file_header = (struct BITMAP_FILE_HEADER*)buf_ptr;
-   struct BITMAP_DATA_HEADER* data_header =
-      (struct BITMAP_DATA_HEADER*)&(buf_ptr[
+   struct BITMAP_FILE_HEADER* file_header = NULL;
+   struct BITMAP_DATA_HEADER* data_header = NULL;
+
+   if( o->bmp_no_file_header ) {
+      file_header = NULL;
+      data_header = (struct BITMAP_DATA_HEADER*)buf_ptr;
+
+      bmp_file_byte_idx +=
+         sizeof( struct BITMAP_DATA_HEADER );
+
+   } else {
+      file_header = (struct BITMAP_FILE_HEADER*)buf_ptr;
+      data_header = (struct BITMAP_DATA_HEADER*)&(buf_ptr[
          sizeof( struct BITMAP_FILE_HEADER )]);
 
-   buf_ptr[0] = 'B';
-   buf_ptr[1] = 'M';
-   bmp_int( uint32_t, buf_ptr, 2 ) = buf_sz;
-
-   switch( o->bpp ) {
-   case 1:
-      bmp_colors = 2;
-      break;
-
-   case 2:
-      bmp_colors = 4;
-      break;
-
-   case 4:
-   default:
-      bmp_colors = 16;
-      break;
+      file_header->id[0] = 'B';
+      file_header->id[1] = 'M';
+         
+      bmp_file_byte_idx +=
+         sizeof( struct BITMAP_FILE_HEADER ) +
+         sizeof( struct BITMAP_DATA_HEADER );
    }
+
+   bmp_colors = bmp_colors_count( o->bpp );
 
    assert( sizeof( struct BITMAP_DATA_HEADER ) == 40 );
    
@@ -154,65 +167,92 @@ int bmp_write(
    data_header->planes = 1; /* Planes */
    data_header->bpp = o->bpp;
    data_header->compression = 0; /* Compression. */
-   data_header->image_sz = 0;
+   data_header->image_sz = 
+      (data_header->bitmap_w * data_header->bitmap_h) / (8 / o->bpp);
    data_header->hres = 72; /* HRes */
    data_header->vres = 72; /* VRes */
    data_header->colors = bmp_colors;
    data_header->colors_important = 0; /* Important Colors */
 
-   bmp_data_offset = sizeof( struct BITMAP_FILE_HEADER ) +
-      sizeof( struct BITMAP_DATA_HEADER );
-
-   bmp_palette = (uint32_t*)&(buf_ptr[bmp_data_offset]);
-   bmp_palette[0] = 0x00000000; /* Palette: Black */
-   bmp_data_offset += 4;
+   bmp_palette = (uint32_t*)&(buf_ptr[bmp_file_byte_idx]);
+   *bmp_palette = 0x00000000; /* Palette: Black */
+   bmp_palette++;
+   bmp_file_byte_idx += 4;
    
    switch( o->bpp ) {
    case 1:
-      bmp_palette[1] = 0x00ffffff; /* Palette: White */
-      bmp_data_offset += 4;
+      *bmp_palette = 0x00ffffff; /* Palette: White */
+      bmp_palette++;
+      bmp_file_byte_idx += 4;
+
+      assert( bmp_file_byte_idx ==
+         (o->bmp_no_file_header ? 0 : sizeof( struct BITMAP_FILE_HEADER )) +
+         sizeof( struct BITMAP_DATA_HEADER ) +
+         (2 * 4) );
       break;
 
    case 2:
-      bmp_palette[1] = 0x0000ffff; /* Palette: Cyan */
-      bmp_palette[2] = 0x00ff00ff; /* Palette: Magenta */
-      bmp_palette[3] = 0x00ffffff; /* Palette: White */
-      bmp_data_offset += (3 * 4);
+      *bmp_palette = 0x0000ffff; /* Palette: Cyan */
+      bmp_palette++;
+      *bmp_palette = 0x00ff00ff; /* Palette: Magenta */
+      bmp_palette++;
+      *bmp_palette = 0x00ffffff; /* Palette: White */
+      bmp_palette++;
+      bmp_file_byte_idx += (4 * 3);
 
-      assert( bmp_data_offset ==
-         sizeof( struct BITMAP_FILE_HEADER ) +
+      assert( bmp_file_byte_idx ==
+         (o->bmp_no_file_header ? 0 : sizeof( struct BITMAP_FILE_HEADER )) +
          sizeof( struct BITMAP_DATA_HEADER ) +
          (4 * 4) );
       break;
 
    case 4:
    default:
-      bmp_palette[1] = dio_reverse_endian_32( 0xaa000000 );
-      bmp_palette[2] = dio_reverse_endian_32( 0x00aa0000 );
-      bmp_palette[3] = dio_reverse_endian_32( 0xaaaa0000 );
-      bmp_palette[4] = dio_reverse_endian_32( 0x0000aa00 );
-      bmp_palette[5] = dio_reverse_endian_32( 0xaa00aa00 );
-      bmp_palette[6] = dio_reverse_endian_32( 0x0055aa00 );
-      bmp_palette[7] = dio_reverse_endian_32( 0xaaaaaa00 );
-      bmp_palette[8] = dio_reverse_endian_32( 0x55555500 );
-      bmp_palette[9] = dio_reverse_endian_32( 0xff555500 );
-      bmp_palette[10] = dio_reverse_endian_32( 0x55ff5500 );
-      bmp_palette[11] = dio_reverse_endian_32( 0xffff5500 );
-      bmp_palette[12] = dio_reverse_endian_32( 0x5555ff00 );
-      bmp_palette[13] = dio_reverse_endian_32( 0xff55ff00 );
-      bmp_palette[14] = dio_reverse_endian_32( 0x55ffff00 );
-      bmp_palette[15] = dio_reverse_endian_32( 0xffffff00 );
-      bmp_data_offset += (15 * 4);
+      *bmp_palette = dio_reverse_endian_32( 0xaa000000 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0x00aa0000 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0xaaaa0000 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0x0000aa00 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0xaa00aa00 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0x0055aa00 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0xaaaaaa00 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0x55555500 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0xff555500 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0x55ff5500 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0xffff5500 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0x5555ff00 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0xff55ff00 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0x55ffff00 );
+      bmp_palette++;
+      *bmp_palette = dio_reverse_endian_32( 0xffffff00 );
+      bmp_palette++;
+      bmp_file_byte_idx += (4 * 15);
 
-      assert( bmp_data_offset ==
-         sizeof( struct BITMAP_FILE_HEADER ) +
+      assert( bmp_file_byte_idx ==
+         (o->bmp_no_file_header ? 0 : sizeof( struct BITMAP_FILE_HEADER )) +
          sizeof( struct BITMAP_DATA_HEADER ) +
          (16 * 4) );
 
       break;
    }
 
-   bmp_int( uint32_t, buf_ptr, 10 ) = bmp_data_offset;
+   /* Store the offset of the start of the bitmap data. */
+   if( !o->bmp_no_file_header ) {
+      file_header->bmp_offset = bmp_file_byte_idx;
+   }
+   o->bmp_data_offset_out = bmp_file_byte_idx;
 
    /* Calculate bit masks. */
    for( i = 0 ; o->bpp > i ; i++ ) {
@@ -255,26 +295,29 @@ int bmp_write(
          /* Write finished byte. */
          if( 0 != bit_idx && 0 == bit_idx % 8 ) {
             debug_printf( 
-               1, "bmp: writing byte %d+%d out of %d (row %d, col %d)\n",
-                  bmp_data_offset, bmp_data_byte_idx, buf_sz, y, x );
-            assert( bmp_data_offset + bmp_data_byte_idx < buf_sz );
-            buf_ptr[bmp_data_offset + bmp_data_byte_idx] = byte_buffer;
+               1, "bmp: writing byte %d out of %d (row %d, col %d)\n",
+                  bmp_file_byte_idx, buf_sz, y, x );
+            assert( bmp_file_byte_idx < buf_sz );
+            buf_ptr[bmp_file_byte_idx] = byte_buffer;
             byte_buffer = 0;
-            assert( bmp_data_byte_idx < buf_sz );
-            bmp_data_byte_idx++;
+            bmp_file_byte_idx++;
             row_bytes++;
             bit_idx = 0;
          }
       }
       while( 0 != (row_bytes % 4) ) {
          debug_printf( 1, "bmp: adding row padding byte\n" );
-         buf_ptr[bmp_data_offset + bmp_data_byte_idx] = '\0';
-         bmp_data_byte_idx++;
+         buf_ptr[bmp_file_byte_idx] = '\0';
+         bmp_file_byte_idx++;
          row_bytes++;
       }
    }
 
-   return retval;
+   if( !o->bmp_no_file_header ) {
+      file_header->file_sz = bmp_file_byte_idx;
+   }
+
+   return bmp_file_byte_idx;
 }
 
 struct CONVERT_GRID* bmp_read_file(
