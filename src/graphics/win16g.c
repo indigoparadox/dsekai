@@ -1,6 +1,21 @@
 
 #define GRAPHICS_C
 #include "../graphics.h"
+#include "../input.h"
+#include "../win16s.h"
+
+#include <string.h>
+
+extern uint8_t g_running;
+extern uint8_t g_last_key;
+extern HINSTANCE g_instance;
+extern HWND g_window;
+
+struct GRAPHICS_BITMAP g_screen;
+volatile uint32_t g_ms;
+
+const uint32_t gc_ms_target = 1000 / FPS;
+static uint32_t g_ms_start = 0; 
 
 static LRESULT CALLBACK WndProc(
    HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
@@ -9,16 +24,34 @@ static LRESULT CALLBACK WndProc(
    HDC hdcScreen;
    HDC hdcBuffer;
    BITMAP srcBitmap;
-   HBITMAP srcHbm;
+   HBITMAP oldHbm;
 
-   switch( message )
-   {
+   switch( message ) {
+      case WM_CREATE:
+         break;
+
       case WM_PAINT:
-         hdcScreen = BeginPaint( hWnd, &ps );
-         hdcBuffer = CreateCompatibleDC( hdcScreen );
-         srcHbm = SelectObject( hdcBuffer, g_screen->surface );
 
-         GetObject( g_screen->surface, sizeof( BITMAP ), &srcBitmap );
+         /* Create HDC for screen. */
+         hdcScreen = BeginPaint( hWnd, &ps );
+
+         if( 0 == g_screen.initialized ) {
+            debug_printf( 2, "creating screen buffer..." );
+            g_screen.bitmap = CreateCompatibleBitmap( hdcScreen,
+               SCREEN_REAL_W, SCREEN_REAL_H );
+            g_screen.initialized = 1;
+         }
+         assert( NULL != g_screen.bitmap );
+
+         /* Create a new HDC for buffer and select buffer into it. */
+         hdcBuffer = CreateCompatibleDC( hdcScreen );
+         oldHbm = SelectObject( hdcBuffer, g_screen.bitmap );
+
+         /* Load parameters of the buffer into info object (srcBitmap). */
+         GetObject( g_screen.bitmap, sizeof( BITMAP ), &srcBitmap );
+
+         debug_printf( 1, "blitting buffer bitmap (%d x %d)",
+            srcBitmap.bmWidth, srcBitmap.bmHeight );
 
          BitBlt(
             hdcScreen,
@@ -30,15 +63,32 @@ static LRESULT CALLBACK WndProc(
             SRCCOPY
          );
 
-         SelectObject( hdcScreen, srcHbm );
+         /* Return the default object into the HDC. */
+         SelectObject( hdcScreen, oldHbm );
 
          DeleteDC( hdcBuffer );
+         DeleteDC( hdcScreen );
 
          EndPaint( hWnd, &ps );
          break;
 
+      case WM_ERASEBKGND:
+         return 1;
+
+      case WM_KEYDOWN:
+         g_last_key = wParam;
+         break;
+
       case WM_DESTROY:
+         if( 0 != g_screen.initialized ) {
+            debug_printf( 2, "destroying screen buffer..." );
+            DeleteObject( g_screen.bitmap );
+         }
          PostQuitMessage( 0 );
+         break;
+
+      case WM_TIMER:
+         g_running = topdown_loop();
          break;
 
       default:
@@ -50,187 +100,162 @@ static LRESULT CALLBACK WndProc(
 }
 
 int graphics_init() {
-   HWND hWnd;
    MSG msg;
    WNDCLASS wc = { 0 };
 
-   g_instance = hInstance;
+   memset( &g_screen, '\0', sizeof( struct GRAPHICS_BITMAP ) );
+   memset( &wc, '\0', sizeof( WNDCLASS ) );
 
-   if( hPrevInstance ) {
-      error_printf( "previous instance detected" );
-      return 1;
-   }
-
-   wc.lpfnWndProc   = &MainWndProc;
-   wc.hInstance     = g_hInstance;
-   wc.hIcon         = LoadIcon( g_hInstance, MAKEINTRESOURCE( IDI_APPICON ) );
+   wc.lpfnWndProc   = (WNDPROC)&WndProc;
+   wc.hInstance     = g_instance;
+   wc.hIcon         = LoadIcon( g_instance, MAKEINTRESOURCE( icon_dsekai ) );
    wc.hCursor       = LoadCursor( NULL, IDC_ARROW );
    wc.hbrBackground = (HBRUSH)( COLOR_BTNFACE + 1 );
-   wc.lpszMenuName  = MAKEINTRESOURCE( IDR_MAINMENU );
-   wc.lpszClassName = MainWndClass;
+   /* wc.lpszMenuName  = MAKEINTRESOURCE( IDR_MAINMENU ); */
+   wc.lpszClassName = "DSekaiWindowClass";
 
    if( !RegisterClass( &wc ) ) {
       error_printf( "unable to register main window class" );
-      return 1;
-   }
-}
-
-#if 0
-void graphics_screen_new(
-   GRAPHICS** g, SCAFFOLD_SIZE w, SCAFFOLD_SIZE h,
-   SCAFFOLD_SIZE vw, SCAFFOLD_SIZE vh,  int32_t arg1, void* arg2
-) {
-   int result;
-   HWND hWnd;
-   INT nRetVal = 0;
-   WNDCLASSEX winclass;
-   HBRUSH hBrush;
-   ZeroMemory( &winclass, sizeof( WNDCLASSEX ) );
-
-   hBrush = CreateSolidBrush( RGB( 0, 0, 0 ) );
-
-   winclass.cbSize = sizeof( WNDCLASSEX );
-   winclass.hbrBackground = hBrush;
-   winclass.hCursor = LoadCursor( NULL, IDC_ARROW );
-   winclass.hInstance = arg2;
-   winclass.lpfnWndProc = (WNDPROC)WndProc;
-   winclass.lpszClassName = "IPWindowClass";
-   winclass.style = CS_HREDRAW | CS_VREDRAW;
-
-   result = RegisterClassEx( &winclass );
-   if( !result ) {
-      /* TODO: Display error. */
-      GetLastError();
-      MessageBox( NULL, "Error registering window class.", "Error", MB_ICONERROR | MB_OK );
-      nRetVal = 1;
-      goto cleanup;
+      return 0;
    }
 
-   hWnd = CreateWindowEx(
-      0, "IPWindowClass", "ProIRCd",
-      WS_OVERLAPPED | WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU,
-      0, 0, w, h, NULL, NULL, arg2, NULL
+   g_window = CreateWindowEx(
+      0, "DSekaiWindowClass", "dsekai",
+      WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
+      CW_USEDEFAULT, CW_USEDEFAULT,
+      SCREEN_REAL_W, SCREEN_REAL_H, NULL, NULL, g_instance, NULL
    );
 
-   /* SetWindowDisplayAflfinity( hWnd, WDA_MONITOR ); */
-
-   ShowWindow( hWnd, arg1 );
-
-cleanup:
-   return;
-}
-
-void graphics_surface_init( GRAPHICS* g, SCAFFOLD_SIZE w, SCAFFOLD_SIZE h ) {
-   if( 0 < w && 0 < h) {
-      g->surface =
-   } else {
-      g->surface = NULL;
-   }
-   graphics_surface_set_h( g, h );
-   graphics_surface_set_w( g, w );
-   g->palette = NULL;
-   return;
-}
-
-void graphics_surface_cleanup( GRAPHICS* g ) {
-
-}
-
-void graphics_flip_screen( GRAPHICS* g ) {
-
-}
-
-void graphics_shutdown( GRAPHICS* g ) {
-
-}
-
-void graphics_set_image_path( GRAPHICS* g, const bstring path ) {
-
-}
-
-void graphics_set_image_data(
-   GRAPHICS* g, const BYTE* data, SCAFFOLD_SIZE length
-) {
-   BITMAPFILEHEADER bfh = *(BITMAPFILEHEADER*)data;
-   BITMAPINFOHEADER bih = *(BITMAPINFOHEADER*)(data +
-                                 sizeof( BITMAPFILEHEADER ));
-   RGBQUAD             rgb = *(RGBQUAD*)(data +
-                                 sizeof( BITMAPFILEHEADER ) +
-                                 sizeof( BITMAPINFOHEADER ));
-   BITMAPINFO bi;
-   const BYTE* pPixels = NULL;
-   BYTE* ppvBits = NULL;
-
-   bi.bmiColors[0] = rgb;
-   bi.bmiHeader = bih;
-   pPixels = (data + bfh.bfOffBits);
-
-   if( NULL != g->surface ) {
-      DeleteObject( g->surface );
-      g->surface = NULL;
+   if( !g_window ) {
+      error_printf( "unable to create main window" );
+      return 0;
    }
 
-   g->surface =
-      CreateDIBSection( NULL, &bi, DIB_RGB_COLORS, (void**) &ppvBits, NULL, 0 );
-   SetDIBits( NULL, g->surface, 0, bih.biHeight, pPixels, &bi, DIB_RGB_COLORS );
+   SetTimer( g_window, WIN_GFX_TIMER_ID, 1000 / FPS, NULL );
 
-   /* GetObject( g->surface, sizeof( BITMAP ), NULL ); */
+   return 1;
 }
 
-BYTE* graphics_export_image_data( GRAPHICS* g, SCAFFOLD_SIZE* out_len ) {
-
+void graphics_shutdown() {
 }
 
-void graphics_draw_rect(
-   GRAPHICS* g, SCAFFOLD_SIZE x, SCAFFOLD_SIZE y,
-   SCAFFOLD_SIZE w, SCAFFOLD_SIZE h, GRAPHICS_COLOR color
+void graphics_flip() {
+   /*UpdateWindow( g_screen.window );*/
+   InvalidateRect( g_window, 0, TRUE );
+}
+
+void graphics_loop_start() {
+}
+
+void graphics_loop_end() {
+}
+
+/*
+ * @return 1 if blit was successful and 0 otherwise.
+ */
+int graphics_platform_blit_at(
+   const struct GRAPHICS_BITMAP* bmp,
+   uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
-
-}
-
-void graphics_transition( GRAPHICS* g, GRAPHICS_TRANSIT_FX fx ) {
-}
-
-void graphics_blit_partial(
-   GRAPHICS* g, SCAFFOLD_SIZE x, SCAFFOLD_SIZE y,
-   SCAFFOLD_SIZE s_x, SCAFFOLD_SIZE s_y,
-   SCAFFOLD_SIZE s_w, SCAFFOLD_SIZE s_h, const GRAPHICS* src
-) {
-   HDC hdcDest = NULL;
+   HDC hdcBuffer = NULL;
    HDC hdcSrc = NULL;
    BITMAP srcBitmap;
-   HBITMAP srcHbm = NULL;
+   HBITMAP oldHbmSrc = NULL;
+   HBITMAP oldHbmBuffer = NULL;
 
-   hdcSrc = CreateCompatibleDC( hdcDest );
-   srcHbm = SelectObject( hdcSrc, src->surface );
+   if( NULL == bmp || NULL == bmp->bitmap ) {
+      return 0;
+   }
 
-   GetObject( src->surface, sizeof( BITMAP ), &srcBitmap );
+   debug_printf( 1, "blitting resource #%d to %d, %d x %d, %d...",
+      bmp->id, x, y, w, h );
 
-   BitBlt(
-      hdcDest, 0, 0, srcBitmap.bmWidth, srcBitmap.bmHeight, hdcSrc, 0, 0,
+   /* Create HDC for the off-screen buffer to blit to. */
+   hdcBuffer = CreateCompatibleDC( NULL );
+   oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
+
+   /* Create HDC for source bitmap compatible with the buffer. */
+   hdcSrc = CreateCompatibleDC( NULL );
+   oldHbmSrc = SelectObject( hdcSrc, bmp->bitmap );
+
+   GetObject( bmp->bitmap, sizeof( BITMAP ), &srcBitmap );
+
+   StretchBlt(
+      hdcBuffer,
+      x * SCREEN_SCALE, y * SCREEN_SCALE,
+      srcBitmap.bmWidth * SCREEN_SCALE,
+      srcBitmap.bmHeight * SCREEN_SCALE,
+      hdcSrc,
+      0, 0,
+      srcBitmap.bmWidth,
+      srcBitmap.bmHeight,
       SRCCOPY
    );
 
-   SelectObject( hdcDest, srcHbm );
+   /* Reselect the initial objects into the provided DCs. */
+   SelectObject( hdcSrc, oldHbmSrc );
+   SelectObject( hdcBuffer, oldHbmBuffer );
 
    DeleteDC( hdcSrc );
-   DeleteDC( hdcDest );
+   DeleteDC( hdcBuffer );
+
+   return 1;
 }
 
-void graphics_sleep( uint16_t milliseconds ) {
-
+void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
 }
 
-void graphics_draw_char(
-   GRAPHICS* g, SCAFFOLD_SIZE_SIGNED x, SCAFFOLD_SIZE_SIGNED y,
-   GRAPHICS_COLOR color, GRAPHICS_FONT_SIZE size, char c
+void graphics_draw_block(
+   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
+   const GRAPHICS_COLOR color
 ) {
 }
 
-void graphics_set_window_title( GRAPHICS* g, bstring title, void* icon ) {
+/*
+ * @return 1 if bitmap is loaded and 0 otherwise.
+ */
+int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
+   uint8_t* buffer = NULL;
+   int32_t buffer_sz = 0;
+   uint32_t id = 0;
+
+   assert( NULL != b );
+   assert( 0 == b->ref_count );
+
+   if( 0 < id_in ) {
+      id = id_in;
+   } else {
+      id = b->id;
+   }
+
+   /* Load resource into bitmap. */
+   b->bitmap = LoadBitmap( g_instance, MAKEINTRESOURCE( id ) );
+   if( !b->bitmap ) {
+      error_printf( "unable to load resource %u", id );
+      return 0;
+   }
+
+   b->id = id_in;
+   b->ref_count++;
+   b->initialized = 1;
+
+   return 1;
 }
 
-uint32_t graphics_get_ticks() {
+/*
+ * @return 1 if bitmap is unloaded and 0 otherwise.
+ */
+int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+   if( NULL == b ) {
+      return 0;
+   }
+   b->ref_count--;
+   if( 0 >= b->ref_count ) {
+      debug_printf( 2, "unloading bitmap resource %d", b->id );
+      b->initialized = 0;
+      DeleteObject( b->bitmap );
+      return 1;
+   }
+   return 0;
 }
 
-#endif

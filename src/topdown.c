@@ -283,17 +283,7 @@ int topdown_loop() {
       break;
 
    case INPUT_KEY_QUIT:
-#ifndef DISABLE_GRAPHICS
-      graphics_unload_bitmap( &(g_map_field.tileset[0]) );
-      graphics_unload_bitmap( &(g_map_field.tileset[1]) );
-      graphics_unload_bitmap( &(g_map_field.tileset[2]) );
-      graphics_unload_bitmap( &(g_mobiles[0].sprite) );
-      graphics_unload_bitmap( &(g_mobiles[1].sprite) );
-#endif /* !DISABLE_GRAPHICS */
-#ifndef MEMORY_STATIC
-      memory_free( &g_mobiles );
-      memory_free( &g_tiles_flags );
-#endif /* !MEMORY_STATIC */
+      topdown_deinit();
       return 0;
    }
 
@@ -331,5 +321,20 @@ int topdown_loop() {
    graphics_loop_end();
 
    return 1;
+}
+
+void topdown_deinit() {
+   int i = 0;
+
+   for( i = 0 ; g_mobiles_count > i ; i++ ) {
+      mobile_deinit( &(g_mobiles[i]) );
+   }
+
+   tilemap_deinit( &g_map_field );
+
+#ifndef MEMORY_STATIC
+   memory_free( &g_mobiles );
+   memory_free( &g_tiles_flags );
+#endif /* !MEMORY_STATIC */
 }
 

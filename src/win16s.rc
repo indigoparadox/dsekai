@@ -4,3 +4,7 @@
 #include "../gen/win16/resext.h"
 #include "../gen/win16/win16.rc"
 
+#include "win16s.h"
+
+icon_dsekai ICON "gen/win16/dsekai.ico"
+

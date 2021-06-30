@@ -20,6 +20,10 @@
 #define GRAPHICS_MODE      0x05
 #endif /* !GRAPHICS_MODE */
 
+#ifndef CGA_COLD
+#define CGA_COLD           0x01
+#endif /* CGA_COLD */
+
 #if GRAPHICS_M_320_200_4_CGA == GRAPHICS_MODE
 #define GRAPHICS_ADDR     GRAPHICS_M_320_200_4_CGA_A
 #elif GRAPHICS_M_320_200_256_VGA == GRAPHICS_MODE
@@ -66,6 +70,8 @@
 
 #define USE_SOFTWARE_TEXT
 #define MEMORY_CALLOC
+
+#define SCREEN_BPP 4
 
 /* ------ */
 #elif defined( PLATFORM_MAC7 )
@@ -199,8 +205,8 @@
 #  include <stdio.h>
 #  define DIO_SILENT
 #  define NO_VARGS
-#  define USE_LOOKUPS
 #  define NO_I86
+#  define NO_CGA_FUNCTIONS
 #endif /* ANCIENT_C */
 
 /* ! */

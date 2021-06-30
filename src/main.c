@@ -7,6 +7,8 @@
 #include "engines.h"
 #include "item.h"
 
+uint8_t g_running = 1;
+
 #ifdef USE_SOFT_ASSERT
 char g_assert_failed[256];
 int g_assert_failed_len;
@@ -30,6 +32,7 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
 /* ------ */
 
 HINSTANCE g_instance = NULL;
+HWND g_window = NULL;
 
 int PASCAL WinMain(
    HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow
@@ -45,7 +48,17 @@ int main( int argc, char* argv[] ) {
 #endif /* PLATFORM_PALM, PLATFORM_MAC7, PLATFORM_WIN16 */
 /* ------ */
 
-   uint8_t running = 1;
+#ifdef PLATFORM_WIN16
+   MSG msg;
+   int msg_retval = 0;
+
+   g_instance = hInstance;
+
+   if( hPrevInstance ) {
+      error_printf( "previous instance detected" );
+      return 1;
+   }
+#endif /* PLATFORM_WIN16 */
 
    if( !graphics_init() ) {
       error_printf( "unable to initialize graphics" );
@@ -55,26 +68,42 @@ int main( int argc, char* argv[] ) {
       return 1;
 #endif /* DISABLE_MAIN_PARMS */
    }
+
    if( !input_init() ) {
       error_printf( "unable to initialize input" );
    }
+
+#ifdef PLATFORM_WIN16
+   ShowWindow( g_window, nCmdShow );
+#endif /* PLATFORM_WIN16 */
+
    window_init();
 
-   while( running ) {
-#ifdef SKELETON_LOOP
+   while( g_running ) {
+#ifdef PLATFORM_WIN16
+      /* In Windows, this stuff is handled by the message processor. */
+      msg_retval = GetMessage( &msg, NULL, 0, 0 );
+      if( 0 >= msg_retval ) {
+         g_running = 0;
+         break;
+      }
+
+      TranslateMessage( &msg );
+      DispatchMessage( &msg );
+#elif defined( SKELETON_LOOP )
       if( INPUT_KEY_QUIT == input_poll() ) {
-         running = 0;
+         g_running = 0;
       }
 #else
-      running = topdown_loop();
+      g_running = topdown_loop();
 
 #endif /* SKELETON_LOOP */
 
 #ifdef USE_SOFT_ASSERT
       if( 0 < g_assert_failed_len ) {
-         while( running ) {
+         while( g_running ) {
             if( INPUT_KEY_QUIT == input_poll() ) {
-               running = 0;
+               g_running = 0;
             }
             WinDrawChars( g_assert_failed, g_assert_failed_len, 10, 20 );
          }

@@ -135,7 +135,8 @@ CFLAGS_DRCPACK := -DMEMORY_CALLOC -DNO_RESEXT -g -DDRC_READ_WRITE
 CFLAGS_CONVERT := -DMEMORY_CALLOC -DNO_RESEXT -g
 CFLAGS_LOOKUPS := -g
 
-CFLAGS_DEBUG_GCC := -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak
+CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG
+CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak
 
 $(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
@@ -160,7 +161,7 @@ $(BIN_PALM): PALMS_RCP := src/palms.rcp
 $(BIN_WIN16): CC := wcc
 $(BIN_WIN16): LD := wcl
 $(BIN_WIN16): RC := wrc
-$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCALE_2X -DPLATFORM_WIN16
+$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC)
 $(BIN_WIN16): LDFLAGS := -l=windows
 
 $(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
@@ -299,18 +300,21 @@ $(GENDIR_WIN16):
 $(OBJDIR_WIN16):
 	$(MD) $@
 
+$(GENDIR_WIN16)/%.ico: $(ASSETDIR)/%.bmp | $(GENDIR_WIN16)
+	$(IMAGEMAGICK) $< $@
+
 $(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_WIN16)/$(TOPDOWN_O): $(RESEXT_H)
+$(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc $(GENDIR_WIN16)/dsekai.ico | $(OBJDIR_WIN16)
+	$(RC) -r -i $(INCLUDE)win src/win16s.rc -o $@
 
-$(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc | $(OBJDIR_WIN16)
-	$(RC) -r -i=$(INCLUDE)/win src/win16s.rc -fo=$@
+$(GENDIR_WIN16)/win16.rc \
+$(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)
+	$(MKRESH) -f win16 -i 5001 -if $(DSEKAI_ASSETS_BITMAPS) \
+      -oh $(GENDIR_WIN16)/resext.h -or $(GENDIR_WIN16)/win16.rc
 
-$(GENDIR_WIN16)/win16.rc: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)
-	$(MKRESH) -f win16 -i 5001 -if $(DSEKAI_ASSETS_BITMAPS) -oh $(GENDIR_WIN16)/resext.h -or $@
-
-$(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win16.res
+$(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win16.res $(RESEXT_H)
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 

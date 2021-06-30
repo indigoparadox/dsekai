@@ -30,6 +30,7 @@ void tilemap_draw(
 );
 #endif /* ANCIENT_C */
 uint8_t tilemap_collide( const struct TILEMAP*, uint8_t, uint8_t );
+void tilemap_deinit( struct TILEMAP* );
 
 #endif /* TILEMAP_H */
 
