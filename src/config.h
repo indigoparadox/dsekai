@@ -67,6 +67,8 @@
 #define USE_SOFTWARE_TEXT
 #define MEMORY_CALLOC
 
+#define SCREEN_BPP 4
+
 /* ------ */
 #elif defined( PLATFORM_MAC7 )
 /* ------ */

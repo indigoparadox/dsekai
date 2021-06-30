@@ -9,9 +9,9 @@ struct GRAPHICS_BITMAP {
    uint32_t id;
    uint8_t initialized;
    uint16_t ref_count;
+   HBITMAP bitmap;
 
    /* Unused Overrides */
-   void* s1;
    void* s2;
    uint32_t res1;
    uint32_t res2;

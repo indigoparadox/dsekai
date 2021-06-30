@@ -47,6 +47,15 @@ int main( int argc, char* argv[] ) {
 
    uint8_t running = 1;
 
+#ifdef PLATFORM_WIN16
+   g_instance = hInstance;
+
+   if( hPrevInstance ) {
+      error_printf( "previous instance detected" );
+      return 1;
+   }
+#endif /* PLATFORM_WIN16 */
+
    if( !graphics_init() ) {
       error_printf( "unable to initialize graphics" );
 #ifdef DISABLE_MAIN_PARMS
