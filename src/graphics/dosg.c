@@ -99,9 +99,19 @@ static void graphics_remove_timer() {
 int graphics_init() {
    union REGS r;
 
+   memset( &r, '\0', sizeof( union REGS ) );
+
 	r.h.ah = 0;
 	r.h.al = GRAPHICS_MODE;
 	int86( 0x10, &r, &r );
+
+   memset( &r, '\0', sizeof( union REGS ) );
+
+   r.h.ah = 0x0b;
+   r.h.bh = 0x01;
+   r.h.bl = CGA_COLD;
+	int86( 0x10, &r, &r );
+
    graphics_install_timer();
 
    return 1;
