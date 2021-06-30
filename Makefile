@@ -159,7 +159,7 @@ $(BIN_PALM): PALMS_RCP := src/palms.rcp
 $(BIN_WIN16): CC := wcc
 $(BIN_WIN16): LD := wcl
 $(BIN_WIN16): RC := wrc
-$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCREEN_SCALE=3 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC)
+$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC)
 $(BIN_WIN16): LDFLAGS := -l=windows
 
 $(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain

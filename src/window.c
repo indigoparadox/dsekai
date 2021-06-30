@@ -143,6 +143,10 @@ struct WINDOW* window_push() {
 void window_pop() {
    int i = 0;
 
+   if( 0 == g_windows_count ) {
+      return;
+   }
+
    for( i = 0 ; g_windows_count > i ; i++ ) {
       memcpy( &(g_windows[i]), &(g_windows[i + 1]), sizeof( struct WINDOW ) );
    }

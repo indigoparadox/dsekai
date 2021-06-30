@@ -1,9 +1,12 @@
 
 #define GRAPHICS_C
 #include "../graphics.h"
+#include "../input.h"
 
 #include <string.h>
 
+extern uint8_t g_running;
+extern uint8_t g_last_key;
 extern HINSTANCE g_instance;
 extern HWND g_window;
 
@@ -31,8 +34,8 @@ static LRESULT CALLBACK WndProc(
          /* Create HDC for screen. */
          hdcScreen = BeginPaint( hWnd, &ps );
 
-         if( NULL == g_screen.bitmap ) {
-            debug_printf( "2", "creating screen buffer..." );
+         if( 0 == g_screen.initialized ) {
+            debug_printf( 2, "creating screen buffer..." );
             g_screen.bitmap = CreateCompatibleBitmap( hdcScreen,
                SCREEN_REAL_W, SCREEN_REAL_H );
             g_screen.initialized = 1;
@@ -71,12 +74,20 @@ static LRESULT CALLBACK WndProc(
       case WM_ERASEBKGND:
          return 1;
 
+      case WM_KEYDOWN:
+         g_last_key = wParam;
+         break;
+
       case WM_DESTROY:
-         if( NULL != g_screen.bitmap ) {
+         if( 0 != g_screen.initialized ) {
             debug_printf( 2, "destroying screen buffer..." );
             DeleteObject( g_screen.bitmap );
          }
          PostQuitMessage( 0 );
+         break;
+
+      case WM_TIMER:
+         g_running = topdown_loop();
          break;
 
       default:
@@ -109,7 +120,8 @@ int graphics_init() {
 
    g_window = CreateWindowEx(
       0, "DSekaiWindowClass", "dsekai",
-      WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+      WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
+      CW_USEDEFAULT, CW_USEDEFAULT,
       SCREEN_REAL_W, SCREEN_REAL_H, NULL, NULL, g_instance, NULL
    );
 
@@ -117,6 +129,8 @@ int graphics_init() {
       error_printf( "unable to create main window" );
       return 0;
    }
+
+   SetTimer( g_window, WIN_GFX_TIMER_ID, 1000 / FPS, NULL );
 
    return 1;
 }
@@ -130,15 +144,9 @@ void graphics_flip() {
 }
 
 void graphics_loop_start() {
-   g_ms_start = GetTickCount();
 }
 
 void graphics_loop_end() {
-   int16_t delta = 0;
-   
-   do {
-      delta = gc_ms_target - (GetTickCount() - g_ms_start);
-   } while( 0 < delta );  
 }
 
 /*

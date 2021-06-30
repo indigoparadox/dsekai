@@ -7,6 +7,8 @@
 #include "engines.h"
 #include "item.h"
 
+uint8_t g_running = 1;
+
 #ifdef USE_SOFT_ASSERT
 char g_assert_failed[256];
 int g_assert_failed_len;
@@ -46,8 +48,6 @@ int main( int argc, char* argv[] ) {
 #endif /* PLATFORM_PALM, PLATFORM_MAC7, PLATFORM_WIN16 */
 /* ------ */
 
-   uint8_t running = 1;
-
 #ifdef PLATFORM_WIN16
    MSG msg;
    int msg_retval = 0;
@@ -79,33 +79,31 @@ int main( int argc, char* argv[] ) {
 
    window_init();
 
-   while( running ) {
+   while( g_running ) {
 #ifdef PLATFORM_WIN16
+      /* In Windows, this stuff is handled by the message processor. */
       msg_retval = GetMessage( &msg, NULL, 0, 0 );
       if( 0 >= msg_retval ) {
-         running = 0;
+         g_running = 0;
          break;
       }
 
       TranslateMessage( &msg );
       DispatchMessage( &msg );
-#endif /* PLATFORM_WIN16 */
-
-
-#ifdef SKELETON_LOOP
+#elif defined( SKELETON_LOOP )
       if( INPUT_KEY_QUIT == input_poll() ) {
-         running = 0;
+         g_running = 0;
       }
 #else
-      running = topdown_loop();
+      g_running = topdown_loop();
 
 #endif /* SKELETON_LOOP */
 
 #ifdef USE_SOFT_ASSERT
       if( 0 < g_assert_failed_len ) {
-         while( running ) {
+         while( g_running ) {
             if( INPUT_KEY_QUIT == input_poll() ) {
-               running = 0;
+               g_running = 0;
             }
             WinDrawChars( g_assert_failed, g_assert_failed_len, 10, 20 );
          }

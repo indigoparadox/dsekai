@@ -19,6 +19,8 @@ struct GRAPHICS_BITMAP {
    uint8_t res4;
 };
 
+#define WIN_GFX_TIMER_ID 6001
+
 #define GRAPHICS_COLOR_BLACK        0
 #define GRAPHICS_COLOR_CYAN         1
 #define GRAPHICS_COLOR_MAGENTA      2
