@@ -204,6 +204,8 @@ int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
    }
    b->ref_count--;
    if( 0 >= b->ref_count ) {
+      debug_printf( 2, "unloading texture and surface for bitmap resource %d",
+         b->id );
       SDL_DestroyTexture( b->texture );
       SDL_FreeSurface( b->surface );
       b->initialized = 0;

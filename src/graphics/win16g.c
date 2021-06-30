@@ -246,6 +246,16 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
  * @return 1 if bitmap is unloaded and 0 otherwise.
  */
 int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+   if( NULL == b ) {
+      return 0;
+   }
+   b->ref_count--;
+   if( 0 >= b->ref_count ) {
+      debug_printf( 2, "unloading bitmap resource %d", b->id );
+      b->initialized = 0;
+      DeleteObject( b->bitmap );
+      return 1;
+   }
    return 0;
 }
 

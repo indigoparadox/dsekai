@@ -63,3 +63,15 @@ uint8_t tilemap_collide( const struct TILEMAP* t, uint8_t x, uint8_t y ) {
    return 0;
 }
 
+void tilemap_deinit( struct TILEMAP* t ) {
+   int i = 0;
+
+   if( NULL == t ) {
+      return;
+   }
+
+   for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
+      graphics_unload_bitmap( &(t->tileset[i]) );
+   }
+}
+

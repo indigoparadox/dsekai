@@ -16,14 +16,21 @@ struct MOBILE {
    struct TILEMAP_COORDS coords_prev;
    uint8_t steps_x;
    uint8_t steps_y;
+   uint8_t facing;
    struct ITEM* inventory;
 };
+
+#define MOBILE_FACING_SOUTH   0
+#define MOBILE_FACING_NORTH   1
+#define MOBILE_FACING_RIGHT   2
+#define MOBILE_FACING_LEFT    3
 
 uint8_t mobile_walk_start( struct MOBILE*, int8_t, int8_t );
 #ifndef ANCIENT_C
 void mobile_animate( struct MOBILE* m, uint8_t*, uint16_t, uint16_t );
 #endif /* ANCIENT_C */
 void mobile_draw( const struct MOBILE*, int8_t, int16_t, int16_t );
+void mobile_deinit( struct MOBILE* );
 
 #endif /* MOBILE_H */
 
