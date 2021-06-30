@@ -5,8 +5,13 @@
 #include <string.h>
 
 extern HINSTANCE g_instance;
+extern HWND g_window;
 
 struct GRAPHICS_BITMAP g_screen;
+volatile uint32_t g_ms;
+
+const uint32_t gc_ms_target = 1000 / FPS;
+static uint32_t g_ms_start = 0; 
 
 static LRESULT CALLBACK WndProc(
    HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
@@ -15,27 +20,34 @@ static LRESULT CALLBACK WndProc(
    HDC hdcScreen;
    HDC hdcBuffer;
    BITMAP srcBitmap;
-   HBITMAP srcHbm;
+   HBITMAP oldHbm;
 
    switch( message ) {
       case WM_CREATE:
-         if( NULL == g_screen.bitmap ) {
-            g_screen.bitmap = CreateBitmap(
-               SCREEN_REAL_W, SCREEN_REAL_H, 1, SCREEN_BPP, NULL );
-            assert( NULL != g_screen.bitmap );
-            g_screen.initialized = 1;
-         }
          break;
 
       case WM_PAINT:
 
          /* Create HDC for screen. */
          hdcScreen = BeginPaint( hWnd, &ps );
-         hdcBuffer = CreateCompatibleDC( hdcScreen );
 
-         /* Load into on offscreen bitmap. */
-         srcHbm = SelectObject( hdcBuffer, g_screen.bitmap );
+         if( NULL == g_screen.bitmap ) {
+            debug_printf( "2", "creating screen buffer..." );
+            g_screen.bitmap = CreateCompatibleBitmap( hdcScreen,
+               SCREEN_REAL_W, SCREEN_REAL_H );
+            g_screen.initialized = 1;
+         }
+         assert( NULL != g_screen.bitmap );
+
+         /* Create a new HDC for buffer and select buffer into it. */
+         hdcBuffer = CreateCompatibleDC( hdcScreen );
+         oldHbm = SelectObject( hdcBuffer, g_screen.bitmap );
+
+         /* Load parameters of the buffer into info object (srcBitmap). */
          GetObject( g_screen.bitmap, sizeof( BITMAP ), &srcBitmap );
+
+         debug_printf( 1, "blitting buffer bitmap (%d x %d)",
+            srcBitmap.bmWidth, srcBitmap.bmHeight );
 
          BitBlt(
             hdcScreen,
@@ -47,14 +59,23 @@ static LRESULT CALLBACK WndProc(
             SRCCOPY
          );
 
-         SelectObject( hdcScreen, srcHbm );
+         /* Return the default object into the HDC. */
+         SelectObject( hdcScreen, oldHbm );
 
          DeleteDC( hdcBuffer );
+         DeleteDC( hdcScreen );
 
          EndPaint( hWnd, &ps );
          break;
 
+      case WM_ERASEBKGND:
+         return 1;
+
       case WM_DESTROY:
+         if( NULL != g_screen.bitmap ) {
+            debug_printf( 2, "destroying screen buffer..." );
+            DeleteObject( g_screen.bitmap );
+         }
          PostQuitMessage( 0 );
          break;
 
@@ -67,7 +88,6 @@ static LRESULT CALLBACK WndProc(
 }
 
 int graphics_init() {
-   HWND hWnd;
    MSG msg;
    WNDCLASS wc = { 0 };
 
@@ -87,6 +107,17 @@ int graphics_init() {
       return 0;
    }
 
+   g_window = CreateWindowEx(
+      0, "DSekaiWindowClass", "dsekai",
+      WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+      SCREEN_REAL_W, SCREEN_REAL_H, NULL, NULL, g_instance, NULL
+   );
+
+   if( !g_window ) {
+      error_printf( "unable to create main window" );
+      return 0;
+   }
+
    return 1;
 }
 
@@ -94,12 +125,20 @@ void graphics_shutdown() {
 }
 
 void graphics_flip() {
+   /*UpdateWindow( g_screen.window );*/
+   InvalidateRect( g_window, 0, TRUE );
 }
 
 void graphics_loop_start() {
+   g_ms_start = GetTickCount();
 }
 
 void graphics_loop_end() {
+   int16_t delta = 0;
+   
+   do {
+      delta = gc_ms_target - (GetTickCount() - g_ms_start);
+   } while( 0 < delta );  
 }
 
 /*
@@ -109,10 +148,11 @@ int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
-   HDC hdcScreen = NULL;
+   HDC hdcBuffer = NULL;
    HDC hdcSrc = NULL;
    BITMAP srcBitmap;
-   HBITMAP srcHbm = NULL;
+   HBITMAP oldHbmSrc = NULL;
+   HBITMAP oldHbmBuffer = NULL;
 
    if( NULL == bmp || NULL == bmp->bitmap ) {
       return 0;
@@ -121,21 +161,34 @@ int graphics_platform_blit_at(
    debug_printf( 1, "blitting resource #%d to %d, %d x %d, %d...",
       bmp->id, x, y, w, h );
 
-   /* Create HDC for source bitmap compatible with the screen. */
+   /* Create HDC for the off-screen buffer to blit to. */
+   hdcBuffer = CreateCompatibleDC( NULL );
+   oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
+
+   /* Create HDC for source bitmap compatible with the buffer. */
    hdcSrc = CreateCompatibleDC( NULL );
-   srcHbm = SelectObject( hdcSrc, bmp->bitmap );
+   oldHbmSrc = SelectObject( hdcSrc, bmp->bitmap );
 
    GetObject( bmp->bitmap, sizeof( BITMAP ), &srcBitmap );
 
-   BitBlt(
-      hdcScreen, 0, 0, srcBitmap.bmWidth, srcBitmap.bmHeight, hdcSrc, 0, 0,
+   StretchBlt(
+      hdcBuffer,
+      x * SCREEN_SCALE, y * SCREEN_SCALE,
+      srcBitmap.bmWidth * SCREEN_SCALE,
+      srcBitmap.bmHeight * SCREEN_SCALE,
+      hdcSrc,
+      0, 0,
+      srcBitmap.bmWidth,
+      srcBitmap.bmHeight,
       SRCCOPY
    );
 
-   SelectObject( hdcScreen, srcHbm );
+   /* Reselect the initial objects into the provided DCs. */
+   SelectObject( hdcSrc, oldHbmSrc );
+   SelectObject( hdcBuffer, oldHbmBuffer );
 
    DeleteDC( hdcSrc );
-   DeleteDC( hdcScreen );
+   DeleteDC( hdcBuffer );
 
    return 1;
 }
@@ -153,11 +206,37 @@ void graphics_draw_block(
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
 int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
+   uint8_t* buffer = NULL;
+   int32_t buffer_sz = 0;
+   uint32_t id = 0;
+
+   assert( NULL != b );
+   assert( 0 == b->ref_count );
+
+   if( 0 < id_in ) {
+      id = id_in;
+   } else {
+      id = b->id;
+   }
+
+   /* Load resource into bitmap. */
+   b->bitmap = LoadBitmap( g_instance, MAKEINTRESOURCE( id ) );
+   if( !b->bitmap ) {
+      error_printf( "unable to load resource %u", id );
+      return 0;
+   }
+
+   b->id = id_in;
+   b->ref_count++;
+   b->initialized = 1;
+
+   return 1;
 }
 
 /*
  * @return 1 if bitmap is unloaded and 0 otherwise.
  */
 int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+   return 0;
 }
 

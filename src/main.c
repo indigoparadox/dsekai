@@ -30,6 +30,7 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
 /* ------ */
 
 HINSTANCE g_instance = NULL;
+HWND g_window = NULL;
 
 int PASCAL WinMain(
    HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow
@@ -48,6 +49,9 @@ int main( int argc, char* argv[] ) {
    uint8_t running = 1;
 
 #ifdef PLATFORM_WIN16
+   MSG msg;
+   int msg_retval = 0;
+
    g_instance = hInstance;
 
    if( hPrevInstance ) {
@@ -64,12 +68,30 @@ int main( int argc, char* argv[] ) {
       return 1;
 #endif /* DISABLE_MAIN_PARMS */
    }
+
    if( !input_init() ) {
       error_printf( "unable to initialize input" );
    }
+
+#ifdef PLATFORM_WIN16
+   ShowWindow( g_window, nCmdShow );
+#endif /* PLATFORM_WIN16 */
+
    window_init();
 
    while( running ) {
+#ifdef PLATFORM_WIN16
+      msg_retval = GetMessage( &msg, NULL, 0, 0 );
+      if( 0 >= msg_retval ) {
+         running = 0;
+         break;
+      }
+
+      TranslateMessage( &msg );
+      DispatchMessage( &msg );
+#endif /* PLATFORM_WIN16 */
+
+
 #ifdef SKELETON_LOOP
       if( INPUT_KEY_QUIT == input_poll() ) {
          running = 0;
