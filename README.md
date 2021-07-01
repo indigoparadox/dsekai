@@ -21,11 +21,11 @@ Items in the tools/ and check/ subdirectories may depend on the src/ directory f
 
 The following platforms are currently supported:
 
-* **MS-DOS**
+* **MS-DOS w/ CGA Graphics**
 * **PalmOS >= 3.5**
 * **GNU/Linux with SDL** (May work with other POSIX platforms.)
-* **Windows (16-bit)** (Coming soon.)
-* **Mac-OS 7** (Coming soon.)
+* **Windows (16-bit)** (And maybe 32-bit.)
+* **Mac-OS 6/7** (Coming soon...ish...)
 
 ## Compiling
 
