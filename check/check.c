@@ -19,6 +19,7 @@ main_add_test_proto( data )
 main_add_test_proto( item )
 main_add_test_proto( engines )
 main_add_test_proto( window )
+main_add_test_proto( dio )
 
 int main( void ) {
    int number_failed = 0;
@@ -30,6 +31,7 @@ int main( void ) {
    main_add_test( item );
    main_add_test( engines );
    main_add_test( window );
+   main_add_test( dio );
 
    return( number_failed == 0 ) ? 0 : 1;
 }

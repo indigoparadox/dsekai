@@ -5,6 +5,7 @@
 #include "../tools/data/cga.h"
 #include "../tools/data/bmp.h"
 #include "../tools/data/icns.h"
+#include "../tools/data/json.h"
 
 #include "testdata.h"
 
@@ -169,12 +170,30 @@ START_TEST( check_data_bmp_write_data ) {
 }
 END_TEST
 
-#if 0
-START_TEST( check_data_json_parse ) {
-   json_parse_buffer( &gc_test_json, 0 );
+#define JSON_TEST_TOKENS_MAX 50
+
+START_TEST( check_data_json_parse_1 ) {
+   int retval = 0,
+      tokens_parsed = 0,
+      id = 0;
+   jsmn_parser parser;
+   jsmntok_t tokens[JSON_TEST_TOKENS_MAX];
+
+   jsmn_init( &parser );
+   tokens_parsed = jsmn_parse(
+      &parser, gc_test_json, strlen( gc_test_json ),
+      tokens, JSON_TEST_TOKENS_MAX );
+
+   printf( "json: %s\n", gc_test_json );
+
+   ck_assert_int_gt( tokens_parsed, 0 );
+
+   id = json_token_id_from_path(
+      "/objects/0/name", &(tokens[0]), tokens_parsed, gc_test_json );
+
+   ck_assert_int_eq( id, 7 );
 }
 END_TEST
-#endif
 
 Suite* data_suite( void ) {
    Suite* s;
@@ -199,9 +218,7 @@ Suite* data_suite( void ) {
       sizeof( struct BITMAP_FILE_HEADER ) +
          sizeof( struct BITMAP_DATA_HEADER ) + ((16 * 16) / 2) );
 
-#if 0
-   tcase_add_test( tc_core, check_data_json_parse );
-#endif
+   tcase_add_test( tc_core, check_data_json_parse_1 );
 
    suite_add_tcase( s, tc_core );
 

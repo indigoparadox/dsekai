@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAPTOH_TOKENS_MAX 512
+#define MAPTOH_TOKENS_MAX 10240
 
 int header_map_write_file(
    const char* path_out, const char* path_in, struct CONVERT_OPTIONS* o

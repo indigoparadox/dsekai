@@ -46,11 +46,14 @@ DSEKAI_C_FILES_CHECK := \
    check/check_graphics.c \
    check/check_engines.c \
    check/check_data.c \
+   check/check_dio.c \
    src/graphics/nullg.c \
    src/input/nulli.c \
    tools/data/cga.c \
    tools/data/bmp.c \
    tools/data/icns.c \
+   tools/data/jmap.c \
+   tools/data/json.c \
    src/data/dio.c
 
 MKRESH_C_FILES := \
@@ -71,6 +74,8 @@ CONVERT_C_FILES := \
    src/data/dio.c \
    tools/data/header.c \
    tools/data/icns.c \
+   tools/data/jmap.c \
+   tools/data/json.c \
    tools/data/maptoh.c
 
 LOOKUPS_C_FILES: tools/lookups.c
@@ -170,7 +175,7 @@ $(BIN_MAC7): LDFLAGS := -lRetroConsole
 $(BIN_MAC7): REZ := Rez
 $(BIN_MAC7): REZFLAGS :=
 
-$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL -DMEMORY_CALLOC -DDIO_SILENTL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=1
+$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL -DMEMORY_CALLOC -DDIO_SILENTL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=2
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(CFLAGS_DEBUG_GCC)
 
 DSEKAI_O_FILES_SDL := \

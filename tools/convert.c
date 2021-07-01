@@ -4,12 +4,10 @@
 #include "data/bmp.h"
 #include "data/cga.h"
 #include "data/icns.h"
+#include "data/jmap.h"
 #include "../src/data/dio.h"
 #include "data/header.h"
 #include "data/maptoh.h"
-
-#define JSMN_PARENT_LINKS
-#include "data/jsmn.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -201,6 +199,7 @@ int main( int argc, char* argv[] ) {
    //assert( FMT_CGA != fmt_in || 0 != options_in.w );
    //assert( FMT_CGA != fmt_in || 0 != options_in.h );
 
+#if 0
    if( FMT_HEADER == fmt_out ) {
       switch( fmt_in ) {
       case FMT_JSON_MAP:
@@ -216,6 +215,7 @@ int main( int argc, char* argv[] ) {
          break;
       }
    }
+#endif
 
    if(
       0 == strlen( namebuf_in ) ||
@@ -262,6 +262,10 @@ int main( int argc, char* argv[] ) {
 
    case FMT_ICNS:
       grid = icns_read_file( namebuf_in, &options_in );
+      break;
+   
+   case FMT_JSON_MAP:
+      grid = jmap_read_file( namebuf_in, &options_in );
       break;
    }
 

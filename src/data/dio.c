@@ -258,6 +258,35 @@ int16_t dio_itoa(
    return idx;
 }
 
+int16_t dio_atoi( const char* a, int base ) {
+   uint16_t idx = 0,
+      place = 1;
+   int16_t out = 0;
+
+   /* TODO: Handle negatives. */
+   while( a[idx] >= 48 && a[idx] <= 57 ) {
+      out *= base;
+      out += (a[idx] - 48);
+      idx++;
+   }
+
+   return out;
+}
+
+int16_t dio_strncmp( const char* a, const char* b, uint16_t len, char sep ) {
+   int i = 0;
+
+   while( len > i && sep != a[i] && sep != b[i] ) {
+      if( a[i] != b[i] ) {
+         return a[i] - b[i];
+      }
+
+      i++;
+   }
+
+   return 0;
+}
+
 int16_t dio_snprintf(
    char* buffer, int buffer_len, const char* fmt, ...
 ) {

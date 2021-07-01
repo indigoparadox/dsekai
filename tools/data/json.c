@@ -1,120 +1,141 @@
 
+#define JSON_C
 #include "json.h"
+
+#include "../../src/data/dio.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef JSON_TOKEN_MAX
-#define JSON_TOKEN_MAX 512
-#endif /* JSON_TOKEN_MAX */
-
-#define 
-
-#define JSON_STATE_ERROR_TOO_LONG   -1
-
-#define JSON_STATE_NONE             0
-
-#define JSON_STATE_INSIDE_OBJECT    1
-
-struct JSON_PARSER {
-   char last_c;
-   char next_token[JSON_TOKEN_MAX + 1];
-   uint32_t next_token_idx;
-   struct JSON_OBJECT* root;
-   struct JSON_BASE* iter;
-   int state;
-   int error;
-};
-
-static struct JSON_PARSER*
-json_parse_cbrace_open( char c, struct JSON_PARSER* p ) {
-   switch( p->state ) {
-   default:
-      if( JSON_TOKEN_MAX <= p->next_token_idx + 1 ) {
-         p->state = JSON_STATE_ERROR_TOO_LONG;
-         return NULL;
-      }
-      p->next_token[p->next_token_idx++] = c;
-      break;
-   }
-}
-
-static struct JSON_PARSER* json_parse_dquote( char c, struct JSON_PARSER* p ) {
-
-   switch( p->state ) {
-   case STATE_INSIDE_STRING:
-   }
-
-}
-
-static struct JSON_PARSER* json_parse_char( char c, struct JSON_PARSER* p ) {
-}
-
-static struct JSON_PARSER* json_parse( char c, struct JSON_PARSER* p ) {
-
-   switch( c ) {
-   case '{':
-      return json_parse_cbrace_open( c, p );
-
-   case '}':
-      break;
-
-   case '[':
-      break;
-
-   case ']':
-      break;
-
-   case '"':
-      break json_parse_dquote( c, p );
-
-   case ',':
-      break;
-
-   case '\t':
-   case '\n':
-   case '\r':
-   case ' ':
-      
-      break;
-
-   default:
-      /* Add the token to the next token and move on. */
-      p->next_token[c++] = c;
-      break;
-   }
-
-   return p;
-}
-
-struct JSON_OBJECT* json_parse_buffer( const uint8_t* buf, uint32_t buf_sz ) {
-   struct JSON_OBJECT* root_out = NULL;
-   struct JSON_BASE* iter = NULL;
-   struct JSON_PARSER parser;
+int16_t json_get_token_idx(
+   const char* contents, uint16_t contents_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz,
+   const uint8_t* buf, uint16_t tree_depth_id
+) {
    int i = 0;
+   int16_t tentative_child_idx = -1,
+      cmp_str_as_i = 0,
+      child_idx = 0;
+   jsmntok_t* parent = &(tokens[tree_depth_id]);
 
-   memset( &parser, '\0', sizeof( struct JSON_PARSER ) );
+   debug_printf( 1, "parent type is: %d\n", parent->type );
 
-   root_out = calloc( 1, sizeof( struct JSON_OBJECT ) );
-   assert( NULL != root_out );
-
-   parser.root = root_out;
-   parser.iter = root_out;
-
-   for( i = 0 ; buf_sz > i ; i++ ) {
-      iter = json_parse( buf[i], &parser );
+   if( JSMN_ARRAY == parent->type ) {
+      cmp_str_as_i = dio_atoi( contents, 10 );
+      debug_printf( 1, "idx as int is: %d\n", cmp_str_as_i );
    }
 
-   return root_out;
+   for( i = 0 ; tokens_sz > i ; i++ ) {
+      debug_printf( 1, "%s sz %d vs  %d, %d\n", contents, contents_sz,
+         tokens[i].end - tokens[i].start, tokens[i].size );
+      if(
+         (
+            /* If parent is array, then string key isn't relevant. */
+            JSMN_ARRAY == parent->type ||
+            /* If contents is NULL, just go by parent. */
+            (NULL == contents ?
+            /* Finally, go by string key comparison. */
+            1 : (
+               0 == strncmp(
+                  contents,
+                  &(buf[tokens[i].start]),
+                  contents_sz
+               /* Also, make sure we're comparing the WHOLE token. */
+               ) && (contents_sz == (tokens[i].end - tokens[i].start))
+            ) )
+         ) &&
+         /* Always limit to children of current tree_depth_id. */
+         tree_depth_id == tokens[i].parent
+      ) {
+         if(
+            JSMN_OBJECT == parent->type &&
+            JSMN_STRING == tokens[i].type
+         ) {
+            /* Found a string in an object, check if it's a key. */
+            tentative_child_idx = json_get_token_idx(
+               NULL, 0, tokens, tokens_sz, buf, i );
+            if( -1 == tentative_child_idx ) {
+               return i;
+            } else {
+               /* It's a key, return child. */
+               debug_printf( 1, "redirecting to %d", tentative_child_idx );
+               return tentative_child_idx;
+            }
+         } else if( JSMN_ARRAY == parent->type ) {
+            if( cmp_str_as_i == child_idx ) {
+               return i;
+            } else {
+               child_idx++;
+            }
+         }
+         /* printf( "token #%d (type %d), parent %d, start %d, end %d\n",
+            i, tokens[i].type, tokens[i].parent, tokens[i].start,
+            tokens[i].end );
+         printf( "%c%c%c%c\n",
+            buf[tokens[i].start],
+            buf[tokens[i].start + 1],
+            buf[tokens[i].start + 2],
+            buf[tokens[i].start + 3] ); */
+         return i;
+      }
+   }
+
+   return -1;
 }
 
-struct JSON_OBJECT* json_parse_file( const char* path ) {
-   FILE* json_file = NULL;
-   struct JSON_OBJECT* root_out = NULL;
+void json_print_element( const uint8_t* buffer, int16_t start, int16_t end ) {
+   int j = 0;
 
-   /* TODO */
+   /* Print contents. */
+   for( j = start; end > j ; j++ ) {
+      printf( "%c", buffer[j] );
+   }
+   printf( "\n" );
 
-   return root_out;
+}
+
+int16_t json_token_id_from_path(
+   const char* path, jsmntok_t* tokens, uint16_t tokens_sz, const uint8_t* buf
+) {
+   int i = 0,
+      path_cur_tok_start = 0,
+      path_cur_tok_sz = 0;
+
+   debug_printf( 2, "path: %s\n", path );
+
+   while( path_cur_tok_start + path_cur_tok_sz < strlen( path ) ) {
+
+      /* Find the next path token in the path. */
+      path_cur_tok_start += path_cur_tok_sz + 1;
+      path_cur_tok_sz = 0;
+      while(
+         path[path_cur_tok_start + path_cur_tok_sz] != '/' &&
+         path[path_cur_tok_start + path_cur_tok_sz] != '\0'
+      ) {
+         path_cur_tok_sz++;
+      }
+
+      debug_printf( 1, "curtok is %d (starts at %d, %d long) (%d vs %d) ",
+         i, path_cur_tok_start, path_cur_tok_sz,
+         path_cur_tok_start + path_cur_tok_sz,
+         strlen( path ) );
+      /*json_print_element(
+         path,
+         path_cur_tok_start,
+         path_cur_tok_start + path_cur_tok_sz ); */
+
+      /* Find the element that corresponds to that path token at that position.
+       */
+      i = json_get_token_idx(
+         &(path[path_cur_tok_start]), path_cur_tok_sz,
+         tokens, tokens_sz, buf, i );
+
+      if( 0 > i ) {
+         return i;
+      }
+   }
+
+   return i;
 }
 

@@ -266,11 +266,15 @@ static const struct CONVERT_GRID gc_test_grid_16_16_4 = {
    (uint8_t*)&gc_test_grid_16_16_4_data
 };
 
-#if 0
 static const char gc_test_json[] = {
-   "{\"objects_sz\": 3, \"objects\": [{\"name\":\"foo\"},{\"name\":\"bar\"},{\"name\":\"baz\",\"extra\":12}]}"
+   "{\"objects_sz\": 3, "
+   "\"objects\": [ {"
+      "\"name\":\"foo\","
+      "\"noom\":\"bar\","
+      "\"nom\":\"baz\","
+      "\"extra\":["
+         "\"hoo\", 12, \"zzz\", 99, 2]}]}"
 };
-#endif
 
 #endif /* TESTDATA_H */
 
