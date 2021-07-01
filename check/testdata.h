@@ -2,6 +2,8 @@
 #ifndef TESTDATA_H
 #define TESTDATA_H
 
+#ifdef CKDATA_IM_C
+
 #define TEST_CGA_16_16_4_SZ (CGA_HEADER_SZ + (2 * 32))
 
 static const uint8_t gc_test_cga_16_16_4[TEST_CGA_16_16_4_SZ] = {
@@ -266,15 +268,31 @@ static const struct CONVERT_GRID gc_test_grid_16_16_4 = {
    (uint8_t*)&gc_test_grid_16_16_4_data
 };
 
+#endif /* CKDATA_IM_C */
+
+#ifdef CKDATA_JS_C
+
 static const char gc_test_json[] = {
-   "{\"objects_sz\": 3, "
-   "\"objects\": [ {"
-      "\"name\":\"foo\","
-      "\"noom\":\"bar\","
-      "\"nom\":\"baz\","
-      "\"extra\":["
-         "\"hoo\", 12, \"zzz\", 99, 2]}]}"
+   "{"
+      "\"objects_sz\": 3, "
+      "\"objects\": "
+         "["
+            "{"
+               "\"name\":\"foo\","
+               "\"noom\":\"bar\","
+               "\"nom\":\"baz\","
+               "\"extra\":["
+                  "\"hoo\", 12, \"zzz\", 99, 2"
+               "],"
+            "}"
+         "],"
+      "\"items\": ["
+         "\"item_a\", \"item_b\", item_c\", 44, 55 ,66"
+      "]"
+   "}"
 };
+
+#endif /* CKDATA_JS_C */
 
 #endif /* TESTDATA_H */
 

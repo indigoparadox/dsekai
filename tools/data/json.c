@@ -27,7 +27,7 @@ int16_t json_get_token_idx(
    }
 
    for( i = 0 ; tokens_sz > i ; i++ ) {
-      debug_printf( 1, "%s sz %d vs  %d, %d\n", contents, contents_sz,
+      debug_printf( 1, "str %s sz %d vs  %d, %d\n", contents, contents_sz,
          tokens[i].end - tokens[i].start, tokens[i].size );
       if(
          (
@@ -63,10 +63,15 @@ int16_t json_get_token_idx(
                return tentative_child_idx;
             }
          } else if( JSMN_ARRAY == parent->type ) {
+            debug_printf( 1,
+               "idx %d cmp to child_idx %d\n", cmp_str_as_i, child_idx );
             if( cmp_str_as_i == child_idx ) {
+               /* List index matches numerically. */
                return i;
             } else {
+               /* Try next list item. */
                child_idx++;
+               continue;
             }
          }
          /* printf( "token #%d (type %d), parent %d, start %d, end %d\n",

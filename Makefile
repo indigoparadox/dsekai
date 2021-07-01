@@ -46,6 +46,7 @@ DSEKAI_C_FILES_CHECK := \
    check/ckgfx.c \
    check/cktopdwn.c \
    check/ckdataim.c \
+   check/ckdatajs.c \
    check/ckdio.c \
    src/graphics/nullg.c \
    src/input/nulli.c \

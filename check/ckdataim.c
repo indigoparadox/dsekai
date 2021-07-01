@@ -5,8 +5,8 @@
 #include "../tools/data/cga.h"
 #include "../tools/data/bmp.h"
 #include "../tools/data/icns.h"
-#include "../tools/data/json.h"
 
+#define CKDATA_IM_C
 #include "testdata.h"
 
 void buffer_printf( uint8_t* buffer, int start, int end, int col_break ) {
@@ -170,57 +170,43 @@ START_TEST( check_data_bmp_write_data ) {
 }
 END_TEST
 
-#define JSON_TEST_TOKENS_MAX 50
-
-START_TEST( check_data_json_parse_1 ) {
-   int retval = 0,
-      tokens_parsed = 0,
-      id = 0;
-   jsmn_parser parser;
-   jsmntok_t tokens[JSON_TEST_TOKENS_MAX];
-
-   jsmn_init( &parser );
-   tokens_parsed = jsmn_parse(
-      &parser, gc_test_json, strlen( gc_test_json ),
-      tokens, JSON_TEST_TOKENS_MAX );
-
-   printf( "json: %s\n", gc_test_json );
-
-   ck_assert_int_gt( tokens_parsed, 0 );
-
-   id = json_token_id_from_path(
-      "/objects/0/name", &(tokens[0]), tokens_parsed, gc_test_json );
-
-   ck_assert_int_eq( id, 7 );
-}
-END_TEST
-
-Suite* data_suite( void ) {
+Suite* data_img_suite( void ) {
    Suite* s;
-   TCase* tc_core;
+   TCase* tc_bmp,
+      *tc_cga,
+      *tc_icns;
 
-   s = suite_create( "data" );
+   s = suite_create( "data_img" );
 
-   /* Core test case */
-   tc_core = tcase_create( "Core" );
+   /* CGA test case */
+   tc_cga = tcase_create( "CGA" );
 
-   tcase_add_loop_test( tc_core, check_data_cga_read, 0, 256 );
-   tcase_add_loop_test( tc_core, check_data_cga_write, 0, TEST_CGA_16_16_4_SZ );
-   tcase_add_loop_test( tc_core, check_data_icns_read, 0, 256 );
+   tcase_add_loop_test( tc_cga, check_data_cga_read, 0, 256 );
+   tcase_add_loop_test( tc_cga, check_data_cga_write, 0, TEST_CGA_16_16_4_SZ );
+
+   suite_add_tcase( s, tc_cga );
+
+   /* ICNS test case */
+   tc_icns = tcase_create( "ICNS" );
+
+   tcase_add_loop_test( tc_icns, check_data_icns_read, 0, 256 );
    tcase_add_loop_test(
-      tc_core, check_data_icns_write_data, 0, TEST_ICNS_16_16_2_DATA_SZ );
+      tc_icns, check_data_icns_write_data, 0, TEST_ICNS_16_16_2_DATA_SZ );
 
-   tcase_add_test( tc_core, check_data_bmp_write_header );
+   suite_add_tcase( s, tc_icns );
+
+   /* BMP test case */
+   tc_bmp = tcase_create( "BMP" );
+
+   tcase_add_test( tc_bmp, check_data_bmp_write_header );
    tcase_add_loop_test(
-      tc_core, check_data_bmp_write_data, 
+      tc_bmp, check_data_bmp_write_data, 
       sizeof( struct BITMAP_FILE_HEADER ) +
          sizeof( struct BITMAP_DATA_HEADER ),
       sizeof( struct BITMAP_FILE_HEADER ) +
          sizeof( struct BITMAP_DATA_HEADER ) + ((16 * 16) / 2) );
 
-   tcase_add_test( tc_core, check_data_json_parse_1 );
-
-   suite_add_tcase( s, tc_core );
+   suite_add_tcase( s, tc_bmp );
 
    return s;
 }
