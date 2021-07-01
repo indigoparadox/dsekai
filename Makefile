@@ -39,14 +39,14 @@ DSEKAI_C_FILES_MAC7 := \
 
 DSEKAI_C_FILES_CHECK := \
    check/check.c \
-   check/check_mobile.c \
-   check/check_item.c \
-   check/check_tilemap.c \
-   check/check_window.c \
-   check/check_graphics.c \
-   check/check_engines.c \
-   check/check_data.c \
-   check/check_dio.c \
+   check/ckmobile.c \
+   check/ckitem.c \
+   check/cktmap.c \
+   check/ckwindow.c \
+   check/ckgfx.c \
+   check/cktopdwn.c \
+   check/ckdataim.c \
+   check/ckdio.c \
    src/graphics/nullg.c \
    src/input/nulli.c \
    tools/data/cga.c \
