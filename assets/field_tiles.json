@@ -1,0 +1,44 @@
+{ "columns":0,
+ "grid":
+    {
+     "height":1,
+     "orientation":"orthogonal",
+     "width":1
+    },
+ "margin":0,
+ "name":"field_tiles",
+ "spacing":0,
+ "terrains":[
+        {
+         "name":"grass",
+         "tile":-1
+        }],
+ "tilecount":3,
+ "tileheight":16,
+ "tiles":
+    {
+     "0":
+        {
+         "image":"tile_field_grass.bmp",
+         "imageheight":16,
+         "imagewidth":16,
+         "terrain":[0, 0, 0, 0]
+        },
+     "1":
+        {
+         "image":"tile_field_brick_wall.bmp",
+         "imageheight":16,
+         "imagewidth":16,
+         "terrain":[0, 0, 0, 0]
+        },
+     "2":
+        {
+         "image":"tile_field_tree.bmp",
+         "imageheight":16,
+         "imagewidth":16,
+         "terrain":[0, 0, 0, 0]
+        }
+    },
+ "tilewidth":16,
+ "type":"tileset"
+}

@@ -32,49 +32,42 @@ struct CONVERT_GRID* jmap_read(
    const uint8_t* buffer, uint32_t buffer_sz, struct CONVERT_OPTIONS* o
 ) {
    int retval = 0,
-      tokens_parsed = 0,
+      tok_parsed = 0,
+      tiles_count = 0,
+      i = 0,
       id = 0;
    jsmn_parser parser;
    jsmntok_t tokens[JMAP_TOKENS_MAX];
    struct CONVERT_GRID* grid_out = NULL;
+   char iter_path[255];
 
-   grid_out = calloc( 1, sizeof( struct CONVERT_GRID ) );
+   grid_out = memory_alloc( 1, sizeof( struct CONVERT_GRID ) );
    assert( NULL != grid_out );
 
    jsmn_init( &parser );
-   tokens_parsed = jsmn_parse(
+   tok_parsed = jsmn_parse(
       &parser, buffer, buffer_sz, tokens, JMAP_TOKENS_MAX );
 
-   debug_printf( 2, "%d tokens parsed", tokens_parsed );
+   debug_printf( 2, "%d tokens parsed", tok_parsed );
 
-   /*json_children( 7, buffer, &tokens, tokens_parsed );*/
+   /* Load map properties. */
+   grid_out->sz_x =
+      json_int_from_path( "/width", tokens, tok_parsed, buffer );
+   grid_out->sz_y =
+      json_int_from_path( "/height", tokens, tok_parsed, buffer );
+   printf( "new grid: %d x %d\n", grid_out->sz_x, grid_out->sz_y );
 
-   id = json_token_id_from_path(
-      "/layers/0/data/0", &(tokens[0]), tokens_parsed, buffer );
-   assert( id >= 0 );
-   debug_printf( 1, "found id: %d", id );
-
-#if 0
-   for( i = 0 ; tokens_parsed > i ; i++ ) {
-      if( 0 != tokens[i].parent || JSMN_STRING != tokens[i].type ) {
-         continue;
-      }
-
-      if(
-         (0 == dio_strncmp( "version", &(buffer[tokens[i].start]), 7, '"' ) &&
-         0 == tokens[i].parent &&
-         JSMN_STRING == tokens[i].type) ||
-         tokens[i].parent == 12707
-      ) {
-         printf( "token %d, parent %d, start %d, end %d\n",
-            tokens[i].type, tokens[i].parent, tokens[i].start, tokens[i].end );
-         printf( "%c%c%c%c\n",
-            buffer[tokens[i].start],
-            buffer[tokens[i].start + 1],
-            buffer[tokens[i].start + 2],
-            buffer[tokens[i].start + 3] );
-      }
+   tiles_count = grid_out->sz_x * grid_out->sz_y;
+   grid_out->data = memory_alloc( tiles_count, 1 );
+   for( i = 0 ; tiles_count > i ; i++ ) {
+      /* Load tile data into the grid. */
+      dio_snprintf( iter_path, 255, "/layers/0/data/%d", i );
+      grid_out->data[i] = 
+         json_int_from_path( iter_path, &(tokens[0]), tok_parsed, buffer );
+      assert( id >= 0 );
    }
-#endif
+   printf( "\n" );
+
+   return grid_out;
 }
 

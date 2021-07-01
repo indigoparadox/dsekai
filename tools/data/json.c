@@ -144,3 +144,11 @@ int16_t json_token_id_from_path(
    return i;
 }
 
+int16_t json_int_from_path(
+   const char* path, jsmntok_t* tokens, uint16_t tokens_sz, const uint8_t* buf
+) {
+   int id = 0;
+   id = json_token_id_from_path( path, tokens, tokens_sz, buf );
+   return dio_atoi( &(buf[tokens[id].start]), 10 );
+}
+
