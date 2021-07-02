@@ -32,6 +32,7 @@ main_add_test_proto( item )
 main_add_test_proto( engines )
 main_add_test_proto( window )
 main_add_test_proto( dio )
+main_add_test_proto( drc )
 
 int main( int argc, char* argv[] ) {
    int number_failed = 0,
@@ -48,6 +49,7 @@ int main( int argc, char* argv[] ) {
    main_add_test( engines );
    main_add_test( window );
    main_add_test( dio );
+   main_add_test( drc );
 
    return( number_failed == 0 ) ? 0 : 1;
 }

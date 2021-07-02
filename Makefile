@@ -5,39 +5,41 @@ DSEKAI_C_FILES := \
    src/mobile.c \
    src/item.c \
    src/window.c \
+   tools/data/json.c \
+   src/data/dio.c \
    src/topdown.c
 
-DSEKAI_C_FILES_SDL := \
+DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
    src/input/sdli.c \
    src/graphics/sdlg.c \
    src/data/drc.c
 
-DSEKAI_C_FILES_DOS := \
+DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
    src/input/dosi.c \
    src/graphics/dosg.c \
    src/data/drc.c
 
-DSEKAI_C_FILES_PALM := \
+DSEKAI_C_FILES_PALM_ONLY := \
    src/main.c \
    src/input/palmi.c \
    src/graphics/palmg.c \
    src/data/dio.c
 
-DSEKAI_C_FILES_WIN16 := \
+DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
    src/input/win16i.c \
    src/graphics/win16g.c
 
-DSEKAI_C_FILES_MAC7 := \
+DSEKAI_C_FILES_MAC7_ONLY := \
    src/main.c \
    src/input/mac7i.c \
    src/graphics/mac7g.c \
    src/memory/fakem.c \
    src/data/drc.c
 
-DSEKAI_C_FILES_CHECK := \
+DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    check/check.c \
    check/ckmobile.c \
    check/ckitem.c \
@@ -48,6 +50,7 @@ DSEKAI_C_FILES_CHECK := \
    check/ckdataim.c \
    check/ckdatajs.c \
    check/ckdio.c \
+   check/ckdrc.c \
    src/graphics/nullg.c \
    src/input/nulli.c \
    tools/data/cga.c \
@@ -55,6 +58,8 @@ DSEKAI_C_FILES_CHECK := \
    tools/data/icns.c \
    tools/data/jmap.c \
    tools/data/json.c \
+   tools/data/drcwrite.c \
+   src/data/drc.c \
    src/data/dio.c
 
 MKRESH_C_FILES := \
@@ -97,6 +102,7 @@ GENDIR_DOS := gen/dos
 GENDIR_PALM := gen/palm
 GENDIR_WIN16 := gen/win16
 GENDIR_MAC7 := gen/mac7
+GENDIR_CHECK_NULL := gen/check_null
 
 BINDIR := bin
 
@@ -115,6 +121,8 @@ DSEKAI_ASSETS_BITMAPS := \
    $(DSEKAI_ASSETS_SPRITES) \
    $(DSEKAI_ASSETS_TILES) \
    $(DSEKAI_ASSETS_PATTERNS)
+DSEKAI_ASSETS_MAPS := \
+   assets/field.json
 DSEKAI_ASSETS_DOS_CGA := \
    $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_PALM := \
@@ -135,7 +143,7 @@ CONVERT := bin/convert
 LOOKUPS := bin/lookups
 
 CFLAGS_MKRESH := -DMEMORY_CALLOC -DNO_RESEXT -g
-CFLAGS_DRCPACK := -DMEMORY_CALLOC -DNO_RESEXT -g -DDRC_READ_WRITE
+CFLAGS_DRCPACK := -DMEMORY_CALLOC -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=1
 CFLAGS_CONVERT := -DMEMORY_CALLOC -DNO_RESEXT -g
 CFLAGS_LOOKUPS := -g
 
@@ -147,7 +155,7 @@ $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DDIO_SILENT -DUSE_LOOKUPS
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DDIO_SILENT -DUSE_LOOKUPS -zp=1
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
@@ -165,8 +173,8 @@ $(BIN_PALM): PALMS_RCP := src/palms.rcp
 $(BIN_WIN16): CC := wcc
 $(BIN_WIN16): LD := wcl
 $(BIN_WIN16): RC := wrc
-$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC)
-$(BIN_WIN16): LDFLAGS := -l=windows
+$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1
+$(BIN_WIN16): LDFLAGS := -l=windows -zp=1
 
 $(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
 $(BIN_MAC7): CC := m68k-apple-macos-gcc
@@ -176,27 +184,28 @@ $(BIN_MAC7): LDFLAGS := -lRetroConsole
 $(BIN_MAC7): REZ := Rez
 $(BIN_MAC7): REZFLAGS :=
 
-$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL -DMEMORY_CALLOC -DDIO_SILENTL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=2
+$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL -DMEMORY_CALLOC -DDIO_SILENTL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=2 -DCHECK
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(CFLAGS_DEBUG_GCC)
+
+DSEKAI_C_FILES_CHECK_NULL := $(DSEKAI_C_FILES) $(DSEKAI_C_FILES_CHECK_NULL_ONLY)
 
 DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL)))
+   $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY)))
 DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS)))
+   $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY)))
 DSEKAI_O_FILES_PALM := \
    $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_PALM)))
+   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_PALM_ONLY)))
 DSEKAI_O_FILES_WIN16 := \
    $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN16)))
+   $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN16_ONLY)))
 DSEKAI_O_FILES_MAC7 := \
    $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC7)))
+   $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC7_ONLY)))
 DSEKAI_O_FILES_CHECK_NULL := \
-   $(addprefix $(OBJDIR_CHECK_NULL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_CHECK_NULL)/,$(subst .c,.o,$(DSEKAI_C_FILES_CHECK)))
+   $(addprefix $(OBJDIR_CHECK_NULL)/,$(subst .c,.o,$(DSEKAI_C_FILES_CHECK_NULL)))
 
 .PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm res_mac7
 
@@ -225,8 +234,9 @@ $(GENDIR_SDL):
 	$(MD) $@
 
 res_sdl16_drc: $(DRCPACK) | $(GENDIR_SDL)
-	$(DRCPACK) -c -a -af $(BINDIR)/sdl16.drc -t BMP1 -i 5001 \
-      -if $(DSEKAI_ASSETS_BITMAPS) -lh $(GENDIR_SDL)/resext.h
+	$(DRCPACK) -c -a -af $(BINDIR)/sdl16.drc -i 5001 \
+      -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) \
+      -lh $(GENDIR_SDL)/resext.h
 
 $(BINDIR)/sdl16.drc: res_sdl16_drc
 
@@ -242,7 +252,7 @@ $(OBJDIR_SDL)/%.o: %.c res_sdl16_drc
 $(BINDIR)/doscga.drc: res_doscga_drc
 
 res_doscga_drc: $(DRCPACK) $(DSEKAI_ASSETS_DOS_CGA)
-	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -t BMP1 -i 5001 \
+	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -i 5001 \
       -if $(GENDIR_DOS)/*.cga -lh $(GENDIR_DOS)/resext.h
 
 $(GENDIR_DOS):
@@ -368,10 +378,25 @@ $(OBJDIR_MAC7)/%.o: \
 
 # ====== Check: Null ======
 
+$(GENDIR_CHECK_NULL):
+	$(MD) $@
+
+$(GENDIR_CHECK_NULL)/resext.h: $(GENDIR_CHECK_NULL) $(MKRESH)
+	$(MKRESH) -f palm -i 5001 \
+      -if $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) \
+      -oh $(GENDIR_CHECK_NULL)/resext.h
+
 $(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR_CHECK_NULL)/%.o: %.c res_sdl16_drc
+$(OBJDIR_CHECK_NULL)/%.d: %.c $(GENDIR_CHECK_NULL)/resext.h
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(OBJDIR_CHECK_NULL)/,$<)) -MF $@
+
+include $(DSEKAI_O_FILES_CHECK_NULL:.o=.d)
+	
+$(OBJDIR_CHECK_NULL)/%.o: %.c $(GENDIR_CHECK_NULL)/resext.h
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $(<:%.o=%)
 

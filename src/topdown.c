@@ -1,6 +1,4 @@
 
-#include "data/maps.h"
-
 #include "graphics.h"
 #include "input.h"
 #include "mobile.h"
@@ -34,6 +32,7 @@ static int g_screen_scroll_y_tgt = 0;
 static uint8_t g_window_shown = 0;
 static uint8_t g_input_blocked_countdown = 0;
 static struct MOBILE* g_player = NULL;
+static struct TILEMAP g_map;
 
 static
 void topdown_refresh_tiles( uint8_t* tiles_flags ) {
@@ -82,7 +81,7 @@ int topdown_draw() {
       topdown_refresh_tiles( g_tiles_flags );
 #ifdef ANIMATE_SCREEN_MOVEMENT
 #ifndef DISABLE_GRAPHICS
-      tilemap_draw( &g_map_field, g_tiles_flags,
+      tilemap_draw( &g_map, g_tiles_flags,
          TILEMAP_TW, TILEMAP_TH,
          g_screen_scroll_x, g_screen_scroll_y, 1 );
 
@@ -113,7 +112,7 @@ int topdown_draw() {
    }
 
 #ifndef DISABLE_GRAPHICS
-   tilemap_draw( &g_map_field, g_tiles_flags,
+   tilemap_draw( &g_map, g_tiles_flags,
       TILEMAP_TW, TILEMAP_TH,
       g_screen_scroll_x, g_screen_scroll_y, 0 );
 #endif /* !DISABLE_GRAPHICS */
@@ -149,9 +148,9 @@ int topdown_loop() {
    if( !initialized ) {
       /* TODO: Generate this dynamically. */
 #ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( tile_field_grass, &(g_map_field.tileset[0]) );
-      graphics_load_bitmap( tile_field_brick_wall, &(g_map_field.tileset[1]) );
-      graphics_load_bitmap( tile_field_tree, &(g_map_field.tileset[2]) );
+      graphics_load_bitmap( tile_field_grass, &(g_map.tileset[0]) );
+      graphics_load_bitmap( tile_field_brick_wall, &(g_map.tileset[1]) );
+      graphics_load_bitmap( tile_field_tree, &(g_map.tileset[2]) );
 #endif /* !DISABLE_GRAPHICS */
 
 #ifndef MEMORY_STATIC
@@ -192,10 +191,12 @@ int topdown_loop() {
       g_mobiles[1].inventory = NULL;
       g_mobiles_count++;
 
+      tilemap_load( field, &g_map );
+
       /* Make sure the tilemap is drawn at least once behind any initial
        * windows.
        */
-      tilemap_draw( &g_map_field, g_tiles_flags,
+      tilemap_draw( &g_map, g_tiles_flags,
          TILEMAP_TW, TILEMAP_TH,
          g_screen_scroll_x, g_screen_scroll_y, 1 );
 
@@ -244,7 +245,7 @@ int topdown_loop() {
    case INPUT_KEY_UP:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &g_map_field, g_player->coords.x, g_player->coords.y - 1 )
+         &g_map, g_player->coords.x, g_player->coords.y - 1 )
       ) {
          mobile_walk_start( g_player, 0, -1 );
       }
@@ -253,7 +254,7 @@ int topdown_loop() {
    case INPUT_KEY_LEFT:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &g_map_field, g_player->coords.x - 1, g_player->coords.y )
+         &g_map, g_player->coords.x - 1, g_player->coords.y )
       ) {
          mobile_walk_start( g_player, -1, 0 );
       }
@@ -262,7 +263,7 @@ int topdown_loop() {
    case INPUT_KEY_DOWN:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &g_map_field, g_player->coords.x, g_player->coords.y + 1 )
+         &g_map, g_player->coords.x, g_player->coords.y + 1 )
       ) {
          mobile_walk_start( g_player, 0, 1 );
       }
@@ -271,7 +272,7 @@ int topdown_loop() {
    case INPUT_KEY_RIGHT:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &g_map_field, g_player->coords.x + 1, g_player->coords.y )
+         &g_map, g_player->coords.x + 1, g_player->coords.y )
       ) {
          mobile_walk_start( g_player, 1, 0 );
       }
@@ -330,7 +331,7 @@ void topdown_deinit() {
       mobile_deinit( &(g_mobiles[i]) );
    }
 
-   tilemap_deinit( &g_map_field );
+   tilemap_deinit( &g_map );
 
 #ifndef MEMORY_STATIC
    memory_free( &g_mobiles );

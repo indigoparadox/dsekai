@@ -10,6 +10,14 @@
 
 #include "../gen/dos/resext.h"
 
+#ifndef DIO_PATH_TEMP
+#define DIO_PATH_TEMP "c:\\temp"
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP '\\'
+#endif /* !DIO_PATH_SEP */
+
 #define GRAPHICS_M_320_200_4_CGA  0x05
 #define GRAPHICS_M_320_200_256_V  0x13
 
@@ -43,6 +51,14 @@
 
 #include "../gen/sdl/resext.h"
 
+#ifndef DIO_PATH_TEMP
+#define DIO_PATH_TEMP "/tmp"
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP '/'
+#endif /* !DIO_PATH_SEP */
+
 #ifndef DRC_ARCHIVE
 #define DRC_ARCHIVE "sdl16.drc"
 #endif /* !DRC_ARCHIVE */
@@ -68,6 +84,14 @@
 
 #include "../gen/win16/resext.h"
 
+#ifndef DIO_PATH_TEMP
+#define DIO_PATH_TEMP "c:\\temp"
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP '\\'
+#endif /* !DIO_PATH_SEP */
+
 #define USE_SOFTWARE_TEXT
 #define MEMORY_CALLOC
 
@@ -78,6 +102,10 @@
 /* ------ */
 
 #include "../gen/mac7/resext.h"
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP ':'
+#endif /* !DIO_PATH_SEP */
 
 #ifndef DRC_ARCHIVE
 #define DRC_ARCHIVE "mac7.drc"
@@ -91,8 +119,20 @@
 #else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
 /* ------ */
 
+#ifndef DIO_PATH_TEMP
+#define DIO_PATH_TEMP "/tmp"
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP '/'
+#endif /* !DIO_PATH_SEP */
+
+#ifndef DRC_ARCHIVE
+#define DRC_ARCHIVE "null.drc"
+#endif /* !DRC_ARCHIVE */
+
 #ifndef NO_RESEXT
-#include "../gen/sdl/resext.h"
+#include "../gen/check_null/resext.h"
 #endif /* NO_RESEXT */
 
 #define USE_SOFTWARE_TEXT
@@ -101,8 +141,8 @@
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 /* ------ */
 
-#define TILEMAP_TW (80)
-#define TILEMAP_TH (44)
+#define TILEMAP_TW (60)
+#define TILEMAP_TH (60)
 
 #define TILEMAP_TILESETS_MAX  (12)
 
@@ -138,6 +178,10 @@
 #define DRC_BMP_TYPE "BMP1"
 #endif /* DRC_BMP_TYPE */
 
+#ifndef DRC_MAP_TYPE
+#define DRC_MAP_TYPE "TMAP"
+#endif /* DRC_BMP_TYPE */
+
 #ifndef MOBILES_MAX
 #define MOBILES_MAX (10)
 #endif /* !MOBILES_MAX */
@@ -157,6 +201,10 @@
 #ifndef DRC_TOC_INITIAL_ALLOC
 #define DRC_TOC_INITIAL_ALLOC 1
 #endif /* !DRC_TOC_INITIAL_ALLOC */
+
+#ifndef DIO_PATH_MAX
+#define DIO_PATH_MAX 254
+#endif /* DIO_PATH_MAX */
 
 /* ! */
 #ifdef DEBUG_LOG

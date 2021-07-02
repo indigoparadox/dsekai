@@ -15,7 +15,212 @@
 
 #define PSITOA_BUF_LEN 6 /* 65535 = 5 digits + NULL. */
 
+int32_t g_next_stream_id = 0;
+
 struct CONVERT_GRID;
+
+int32_t dio_open_stream_file(
+   const char* path, const char* mode, struct DIO_STREAM* stream
+) {
+   debug_printf( 2, "opening file %s mode %s as stream %d...",
+      path, mode, g_next_stream_id );
+   
+   stream->buffer.file = fopen( path, mode );
+   if( NULL == stream->buffer.file ) {
+      return DIO_ERROR_COULD_NOT_OPEN_FILE;
+   }
+
+   /* Grab the file size for later */
+   fseek( stream->buffer.file, 0, SEEK_END );
+   stream->buffer_sz = ftell( stream->buffer.file );
+   fseek( stream->buffer.file, 0, SEEK_SET );
+
+   debug_printf( 2, "file is %d bytes", stream->buffer_sz );
+
+   assert( stream->buffer_sz >= 0 );
+
+   stream->id = g_next_stream_id;
+   stream->type = DIO_STREAM_FILE;
+   stream->position = 0;
+
+   g_next_stream_id++;
+
+   return stream->buffer_sz;
+}
+
+int32_t dio_open_stream_buffer(
+   uint8_t* buf, uint32_t buf_sz, struct DIO_STREAM* stream
+) {
+   debug_printf( 2, "opening buffer as stream %d...", g_next_stream_id );
+
+   stream->buffer.bytes = buf;
+   stream->buffer_sz = buf_sz;
+   stream->type = DIO_STREAM_BUFFER;
+   stream->id = g_next_stream_id;
+   stream->position = 0;
+
+   g_next_stream_id++;
+
+   return buf_sz;
+}
+
+void dio_close_stream( struct DIO_STREAM* stream ) {
+   if( NULL == stream || 0 == stream->type ) {
+      return;
+   }
+
+   debug_printf( 2, "closing stream %d...", stream->id );
+
+   switch( stream->type ) {
+   case DIO_STREAM_FILE:
+      fclose( stream->buffer.file );
+      break;
+
+   default:
+      break;
+   }
+
+   /* TODO: Free buffer? */
+
+   stream->type = 0;
+   stream->id = -1;
+   stream->buffer_sz = 0;
+}
+
+int32_t dio_seek_stream( struct DIO_STREAM* stream, int32_t seek, uint8_t m ) {
+
+   dio_assert_stream( stream );
+
+   switch( m ) {
+   case SEEK_SET:
+      debug_printf( 2, "seeking stream %d to %d...", stream->id, seek );
+      assert( 0 <= seek );
+      assert( stream->buffer_sz > seek );
+      if( seek >= stream->buffer_sz ) {
+         error_printf( "attempted to seek beyond stream %d end",
+            stream->id);
+         return -1;
+      }
+      stream->position = seek;
+      break;
+
+   case SEEK_CUR:
+      debug_printf( 2, "seeking stream %d by +%d...", stream->id, seek );
+      assert( stream->buffer_sz > stream->position + seek );
+      if( seek >= stream->buffer_sz || stream->position + seek < 0 ) {
+         error_printf( "attempted to seek beyond stream %d end",
+            stream->id);
+         return -1;
+      }
+      stream->position += seek;
+      break;
+
+   case SEEK_END:
+      debug_printf( 2, "seeking stream %d to %d from end...",
+         stream->id, seek );
+      assert( 0 <= stream->buffer_sz - 1 - seek );
+      if( 
+         stream->buffer_sz - 1 - seek < 0 ||
+         stream->buffer_sz - 1 - seek >= stream->buffer_sz
+      ) {
+         error_printf( "attempted to seek beyond stream %d end",
+            stream->id);
+         return -1;
+      }
+      stream->position = stream->buffer_sz - 1 - seek;
+      break;
+   }
+
+   switch( stream->type ) {
+   case DIO_STREAM_FILE:
+      fseek( stream->buffer.file, seek, m );
+      return ftell( stream->buffer.file );
+
+   case DIO_STREAM_BUFFER:
+      /* This was handled by setting the position above. */
+      return stream->position;
+   }
+
+   return -1;
+}
+
+int32_t dio_tell_stream( struct DIO_STREAM* stream ) {
+   dio_assert_stream( stream );
+   return stream->position;
+}
+
+int32_t dio_sz_stream( struct DIO_STREAM* stream ) {
+   dio_assert_stream( stream );
+   return stream->buffer_sz;
+}
+
+int32_t dio_position_stream( struct DIO_STREAM* stream ) {
+   dio_assert_stream( stream );
+   return stream->position;
+}
+
+uint8_t dio_type_stream( struct DIO_STREAM* stream ) {
+   dio_assert_stream( stream );
+   return stream->type;
+}
+
+int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
+   int32_t sz_out = 0;
+
+   dio_assert_stream( src );
+
+   debug_printf( 2, "reading %d bytes at %d (out of %d)...",
+      sz, src->position, src->buffer_sz );
+
+   assert( src->position + sz < src->buffer_sz );
+   assert( src->position + sz >= 0 );
+
+   switch( src->type ) {
+   case DIO_STREAM_FILE:
+      sz_out = fread( dest, 1, sz, src->buffer.file );
+      src->position += sz_out;
+      assert( ftell( src->buffer.file ) == src->position );
+      return sz_out;
+
+   case DIO_STREAM_BUFFER:
+      memcpy( dest, src->buffer.bytes, sz );
+      src->position += sz;
+      return sz;
+
+   default:
+      return DIO_ERROR_INVALID_STREAM;
+   }
+}
+
+int32_t dio_write_stream(
+   const void* src, uint32_t sz, struct DIO_STREAM* dest
+) {
+   int32_t sz_out = 0;
+
+   dio_assert_stream( dest );
+
+   assert( dest->position + sz >= 0 );
+
+   debug_printf( 1, "writing %d bytes to stream %d...", sz, dest->id );
+   
+   switch( dest->type ) {
+   case DIO_STREAM_FILE:
+      sz_out = fwrite( src, 1, sz, dest->buffer.file );
+      if( dest->position + sz_out >= dest->buffer_sz ) {
+         dest->buffer_sz = dest->position + sz_out;
+      }
+      dest->position += sz_out;
+      assert( ftell( dest->buffer.file ) == dest->position );
+      return sz_out;
+
+   case DIO_STREAM_BUFFER:
+      assert( dest->position + sz < dest->buffer_sz );
+      memcpy( dest->buffer.bytes, src, sz );
+      dest->position += sz;
+      return sz;
+   }
+   return -1;
+}
 
 uint32_t dio_reverse_endian_32( uint32_t int_in ) {
    int i = 0;
@@ -62,16 +267,16 @@ void dio_print_grid( struct CONVERT_GRID* grid ) {
    /* Display the bitmap on the console. */
    dio_printf( "\npreview:\n" );
    for( y = 0 ; grid->sz_y > y ; y++ ) {
-      printf( "\n" );
+      dio_printf( "\n" );
       for( x = 0 ; grid->sz_x > x ; x++ ) {
          if( 0 == grid->data[(y * grid->sz_x) + x] ) {
-            printf( " ," );
+            dio_printf( " ," );
          } else {
-            printf( "%x,", grid->data[(y * grid->sz_x) + x] );
+            dio_printf( "%x,", grid->data[(y * grid->sz_x) + x] );
          }
       }
    }
-   printf( "\n" );
+   dio_printf( "\n" );
 }
 
 #endif /* USE_DIO_PRINT_GRID */
@@ -89,6 +294,29 @@ void dio_print_binary( uint8_t byte_in ) {
 }
 
 #ifndef DISABLE_FILESYSTEM
+
+int16_t dio_mktemp_path( char* buf, uint16_t buf_sz, const char* tmpfilename ) {
+   const char* temp_dir;
+
+   temp_dir = getenv( "TEMP" );
+   if( NULL == temp_dir ) {
+      temp_dir = DIO_PATH_TEMP;
+   }
+
+   if( strlen( temp_dir ) + 1 + strlen( tmpfilename ) >= buf_sz ) {
+      error_printf( "temporary path too long" );
+      return -1;
+   }
+
+   memset( buf, '\0', buf_sz );
+   strncpy( buf, temp_dir, buf_sz );
+
+   buf[strlen( temp_dir )] = DIO_PATH_SEP;
+   strncpy( &(buf[strlen( temp_dir ) + 1]), tmpfilename,
+      buf_sz - strlen( temp_dir + 1 ) );
+
+   return strlen( buf );
+}
 
 /**
  * @return Index of filename in path string, or -1 if a problem occurred.
@@ -141,7 +369,7 @@ uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
       read_total += read;
    }
 
-   dio_printf( "read %u bytes (vs %u)\n", read_total, file_in_sz );
+   debug_printf( 2, "read %u bytes (vs %u)", read_total, file_in_sz );
    assert( read_total == file_in_sz );
 
    return read_total;
@@ -178,7 +406,7 @@ int32_t dio_copy_file( const char* src, const char* dest ) {
       wrote = fwrite( buffer_tmp, 1, read, file_out );
       wrote_total += wrote;
       
-      dio_printf( "copy: read %d bytes, wrote %d bytes\n", read_total,
+      debug_printf( 1, "copy: read %d bytes, wrote %d bytes\n", read_total,
          wrote_total );
       if( read_total != wrote_total ) {
          retval = DIO_ERROR_COPY_MISMATCH;
@@ -186,7 +414,7 @@ int32_t dio_copy_file( const char* src, const char* dest ) {
       }
    }
 
-   dio_printf( "copied %d bytes\n", wrote_total );
+   debug_printf( 2, "copied %d bytes\n", wrote_total );
 
 cleanup:
    if( file_in ) {
@@ -206,6 +434,11 @@ int32_t dio_move_file( const char* src, const char* dest ) {
       return dio_copy_file( src, dest );
    }
 
+   return 0;
+}
+
+int32_t dio_remove_file( const char* path ) {
+   remove( path );
    return 0;
 }
 
@@ -259,8 +492,7 @@ int16_t dio_itoa(
 }
 
 int16_t dio_atoi( const char* a, int base ) {
-   uint16_t idx = 0,
-      place = 1;
+   uint16_t idx = 0;
    int16_t out = 0;
 
    /* TODO: Handle negatives. */
@@ -331,5 +563,6 @@ int16_t dio_snprintf(
 
    return idx_out;
 }
+
 
 

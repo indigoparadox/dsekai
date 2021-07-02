@@ -8,7 +8,8 @@
 
 #define TILEMAP_TILE_FLAG_DIRTY     0x01
 
-#define tilemap_get_tile_id( t, x, y ) ((t->tiles[y][x / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
+#define tilemap_get_tile_id( t, x, y ) \
+   ((t->tiles[((y * TILEMAP_TW) + x) / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
 
 struct TILEMAP_COORDS {
    uint8_t x;
@@ -16,13 +17,13 @@ struct TILEMAP_COORDS {
 };
 
 struct TILEMAP {
-   const char* name;
+   char* name;
    struct GRAPHICS_BITMAP tileset[TILEMAP_TILESETS_MAX];
-   const GRAPHICS_COLOR (*tileset_colors)[TILEMAP_TILESETS_MAX];
-   const uint8_t (*tileset_flags)[TILEMAP_TILESETS_MAX];
-   const uint8_t tiles[TILEMAP_TH][TILEMAP_TW / 2];
+   uint8_t tileset_flags[TILEMAP_TILESETS_MAX];
+   uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];
 };
 
+int16_t tilemap_load( uint32_t, struct TILEMAP* );
 #ifndef ANCIENT_C
 void tilemap_draw(
    const struct TILEMAP* t, uint8_t* tiles_flags, uint16_t, uint16_t,

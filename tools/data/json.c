@@ -11,7 +11,7 @@
 int16_t json_get_token_idx(
    const char* contents, uint16_t contents_sz,
    jsmntok_t* tokens, uint16_t tokens_sz,
-   const uint8_t* buf, uint16_t tree_depth_id
+   const char* buf, uint16_t tree_depth_id
 ) {
    int i = 0;
    int16_t tentative_child_idx = -1,
@@ -89,7 +89,7 @@ int16_t json_get_token_idx(
    return -1;
 }
 
-void json_print_element( const uint8_t* buffer, int16_t start, int16_t end ) {
+void json_print_element( const char* buffer, int16_t start, int16_t end ) {
    int j = 0;
 
    /* Print contents. */
@@ -101,7 +101,7 @@ void json_print_element( const uint8_t* buffer, int16_t start, int16_t end ) {
 }
 
 int16_t json_token_id_from_path(
-   const char* path, jsmntok_t* tokens, uint16_t tokens_sz, const uint8_t* buf
+   const char* path, jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
 ) {
    int i = 0,
       path_cur_tok_start = 0,
@@ -121,7 +121,7 @@ int16_t json_token_id_from_path(
          path_cur_tok_sz++;
       }
 
-      debug_printf( 1, "curtok is %d (starts at %d, %d long) (%d vs %d) ",
+      debug_printf( 1, "curtok is %d (starts at %d, %d long) (%d vs %lu) ",
          i, path_cur_tok_start, path_cur_tok_sz,
          path_cur_tok_start + path_cur_tok_sz,
          strlen( path ) );
@@ -145,7 +145,7 @@ int16_t json_token_id_from_path(
 }
 
 int16_t json_int_from_path(
-   const char* path, jsmntok_t* tokens, uint16_t tokens_sz, const uint8_t* buf
+   const char* path, jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
 ) {
    int id = 0;
    id = json_token_id_from_path( path, tokens, tokens_sz, buf );

@@ -1,6 +1,7 @@
 
 #include "data/drcwrite.h"
 #include "../src/data/dio.h"
+#include "../src/memory.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,10 +39,12 @@ int main( int argc, char* argv[] ) {
       wrote = 0,
       file_sz = 0,
       basename_sz = 0;
+   int32_t extract_res_buffer_sz = 0;
    char namebuf_header[NAMEBUF_MAX + 1],
       namebuf_arc[NAMEBUF_MAX + 1],
-      type_buf[5];
-   char* extract_res_name = NULL;
+      tmp_path[DIO_PATH_MAX + 1];
+   char* extract_res_name = NULL,
+      * temp_dir = NULL;
    uint8_t* file_contents = NULL,
       * extract_res_buffer = NULL;
    struct DRC_TOC_E* toc_entries = NULL;
@@ -49,11 +52,16 @@ int main( int argc, char* argv[] ) {
    FILE* header_file = NULL;
    size_t file_list_len = 0;
    uint8_t* res_buffer = NULL;
+   union DRC_TYPE typebuf;
+   union DRC_TYPE typebuf_extract;
+   struct DIO_STREAM drc_file_in,
+      drc_file_out;
 
    memset( namebuf_header, '\0', NAMEBUF_MAX + 1 );
    memset( namebuf_arc, '\0', NAMEBUF_MAX + 1 );
-   memset( type_buf, '\0', 5 );
    memset( file_list, '\0', sizeof( char* ) * FILE_LIST_MAX );
+   memset( &typebuf, '\0', 4 );
+   memset( &typebuf_extract, '\0', 4 );
 
    for( i = 1 ; argc > i ; i++ ) {
       switch( state ) {
@@ -66,7 +74,7 @@ int main( int argc, char* argv[] ) {
          assert( NULL == file_list[file_list_len] );
          assert( file_list_len < FILE_LIST_MAX );
          filename_len = strlen( argv[i] );
-         file_list[file_list_len] = calloc( filename_len + 1, 1 );
+         file_list[file_list_len] = memory_alloc( filename_len + 1, 1 );
          assert( NULL != file_list[file_list_len] );
          strncpy( file_list[file_list_len], argv[i], filename_len );
          file_list_len++;
@@ -78,7 +86,7 @@ int main( int argc, char* argv[] ) {
          break;
 
       case STATE_TYPE:
-         strncpy( type_buf, argv[i], 4 );
+         strncpy( typebuf_extract.str, argv[i], 4 );
          state = 0;
          break;
 
@@ -98,8 +106,10 @@ int main( int argc, char* argv[] ) {
             state = STATE_INFILE;
          } else if( 0 == strncmp( argv[i], "-af", 3 ) ) {
             state = STATE_ARCFILE;
+
          } else if( 0 == strncmp( argv[i], "-t", 2 ) ) {
             state = STATE_TYPE;
+
          } else if( 0 == strncmp( argv[i], "-i", 2 ) ) {
             state = STATE_ID;
 
@@ -127,16 +137,21 @@ int main( int argc, char* argv[] ) {
    }
 
    if( command_create ) {
-      dio_printf( "command: create\n" );
-      if( 0 > drc_create( namebuf_arc ) ) {
-         return 1;
+      debug_printf( 2, "command: create" );
+      dio_open_stream_file( namebuf_arc, "wb", &drc_file_out );
+      if(
+         0 == dio_type_stream( &drc_file_out ) ||
+         0 > drc_create( &drc_file_out )
+      ) {
+         retval = DRC_ERROR_COULD_NOT_CREATE;
+         goto cleanup;
       }
+      dio_close_stream( &drc_file_out );
    }
 
    if( command_add ) {
-      dio_printf( "command: add\n" );
+      debug_printf( 2, "command: add" );
 
-      assert( 0 != *((uint32_t*)type_buf) );
       assert( NULL == file_contents );
 
       for( i = 0 ; file_list_len > i ; i++ ) {
@@ -156,15 +171,65 @@ int main( int argc, char* argv[] ) {
 
          basename_sz = dio_basename( file_list[i], strlen( file_list[i] ) );
 
-         retval = drc_add_resource( namebuf_arc, *((uint32_t*)type_buf), id,
+         extension_idx = dio_char_idx_r(
+            file_list[i], strlen( file_list[i] ), '.' );
+         if(
+            0 == strncmp( "bmp", &(file_list[i][extension_idx + 1]), 3 ) ||
+            0 == strncmp( "cga", &(file_list[i][extension_idx + 1]), 3 )
+         ) {
+            typebuf.str[0] = 'B';
+            typebuf.str[1] = 'M';
+            typebuf.str[2] = 'P';
+            typebuf.str[3] = '1';
+         } else if(
+            0 == strncmp( "jso", &(file_list[i][extension_idx + 1]), 3 )
+         ) {
+            typebuf.str[0] = 'T';
+            typebuf.str[1] = 'M';
+            typebuf.str[2] = 'A';
+            typebuf.str[3] = 'P';
+         }
+
+         /* Open archive to copy. */
+         dio_open_stream_file( namebuf_arc, "rb", &drc_file_in );
+         if( 0 == dio_type_stream( &drc_file_in ) ) {
+            retval = DRC_ERROR_COULD_NOT_CREATE_TEMP;
+            goto cleanup;
+         }
+         
+         /* Create a temp copy to modify. */
+         if( 0 >= dio_mktemp_path( tmp_path, DIO_PATH_MAX, "drctmp.drc" ) ) {
+            retval = -1;
+            goto cleanup;
+         }
+
+         debug_printf( 2, "creating temporary copy: %s", tmp_path );
+         dio_open_stream_file( tmp_path, "wb", &drc_file_out );
+         if( 0 == dio_type_stream( &drc_file_out ) ) {
+            retval = DRC_ERROR_COULD_NOT_CREATE_TEMP;
+            goto cleanup;
+         }
+
+         retval = drc_add_resource( &drc_file_in, &drc_file_out, typebuf, id,
             &(file_list[i][basename_sz]),
             strlen( file_list[i] ) - basename_sz, file_contents, file_sz );
          if( 0 <= retval ) {
             retval = 0;
          } else {
             /* Convert error code to positive. */
-            dio_eprintf( "error adding resource: %d\n", retval );
+            error_printf( "error adding resource: %d", retval );
             retval *= -1;
+            goto cleanup;
+         }
+
+         /* Close the archive and replace the original with the temp out. */
+         dio_close_stream( &drc_file_in );
+         dio_close_stream( &drc_file_out );
+         debug_printf( 2, "moving temporary copy %s to %s...",
+            tmp_path, namebuf_arc );
+         if( 0 > dio_move_file( tmp_path, namebuf_arc ) ) {
+            retval = DRC_ERROR_COULD_NOT_MOVE_TEMP;
+            goto cleanup;
          }
 
          id++;
@@ -172,37 +237,68 @@ int main( int argc, char* argv[] ) {
    }
 
    if( command_list ) {
-      dio_printf( "command: list\n" );
-      drc_list_resources( namebuf_arc, NULL, 0 );
+      debug_printf( 2, "command: list" );
+      dio_open_stream_file( namebuf_arc, "rb", &drc_file_in );
+      if( 0 == dio_type_stream( &drc_file_in ) ) {
+         retval = DRC_ERROR_COULD_NOT_OPEN;
+         goto cleanup;
+      }
+      drc_list_resources( &drc_file_in, NULL, 0 );
+      dio_close_stream( &drc_file_in );
    }
 
    if( command_extract ) {
-      dio_printf( "command: extract\n" );
+      debug_printf( 2, "command: extract" );
       
-      extract_res_name_sz = drc_get_resource_name( namebuf_arc,
-         *((uint32_t*)type_buf), id, &extract_res_name );
+      dio_open_stream_file( namebuf_arc, "rb", &drc_file_in );
+      if( 0 == dio_type_stream( &drc_file_in ) ) {
+         retval = DRC_ERROR_COULD_NOT_OPEN;
+         goto cleanup;
+      }
+      extract_res_name_sz = drc_get_resource_name(
+         &drc_file_in, typebuf_extract, id, &extract_res_name );
       assert( 0 < extract_res_name_sz );
       assert( NULL != extract_res_name );
 
+      extract_res_buffer_sz = drc_get_resource_sz(
+         &drc_file_in, typebuf_extract, id );
+      if( 0 >= extract_res_buffer_sz ) {
+         error_printf( "unable to find requested resource" );
+      }
+      extract_res_buffer = memory_alloc( 1, extract_res_buffer_sz );
+
       retval = drc_get_resource(
-         namebuf_arc, *((uint32_t*)type_buf), id, &extract_res_buffer, 0 );
+         &drc_file_in, typebuf_extract, id,
+         extract_res_buffer, extract_res_name_sz );
       if( 0 > retval ) {
-         dio_eprintf( "unable to extract file\n" );
+         error_printf( "unable to extract file" );
          goto cleanup;
       }
+      dio_close_stream( &drc_file_in );
 
       extract_res_file = fopen( extract_res_name, "wb" );
       assert( NULL != extract_res_file );
-      dio_printf( "writing resource file...\n" );
+      debug_printf( 2, "writing resource file..." );
       wrote = fwrite( extract_res_buffer, 1, retval, extract_res_file );
-      dio_printf( "wrote %u (%ld) bytes\n", wrote, ftell( extract_res_file ) );
+      debug_printf( 2, 
+         "wrote %u (%ld) bytes", wrote, ftell( extract_res_file ) );
       assert( wrote == retval );
    }
    
    if( command_header ) {
-      dio_printf( "command: header\n" );
-      toc_entries_sz = drc_list_resources( namebuf_arc, &toc_entries, 0 );
+      
+      debug_printf( 2, "command: header" );
+
+      dio_open_stream_file( namebuf_arc, "rb", &drc_file_in );
+      if( 0 == dio_type_stream( &drc_file_in ) ) {
+         retval = DRC_ERROR_COULD_NOT_OPEN;
+         goto cleanup;
+      }
+      toc_entries_sz = drc_list_resources( &drc_file_in, &toc_entries, 0 );
+      dio_close_stream( &drc_file_in );
+      
       header_file = fopen( namebuf_header, "w" );
+      
       assert( NULL != header_file );
       /* TODO: Dynamically generate include guard name. */
       fprintf( header_file, "#ifndef RESEXT_H\n" );
@@ -225,6 +321,14 @@ int main( int argc, char* argv[] ) {
    }
 
 cleanup:
+
+   if( 0 != dio_type_stream( &drc_file_in ) ) {
+      dio_close_stream( &drc_file_in );
+   }
+
+   if( 0 != dio_type_stream( &drc_file_out ) ) {
+      dio_close_stream( &drc_file_out );
+   }
 
    if( NULL != extract_res_file ) {
       fclose( extract_res_file );
