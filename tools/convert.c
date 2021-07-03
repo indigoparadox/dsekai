@@ -7,7 +7,6 @@
 #include "data/jmap.h"
 #include "../src/data/dio.h"
 #include "data/header.h"
-#include "data/maptoh.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -283,23 +282,19 @@ int main( int argc, char* argv[] ) {
 
    switch( fmt_out ) {
    case FMT_BITMAP:
-      retval = bmp_write_file( namebuf_out, grid, &options_out );
+      retval = 0 > bmp_write_file( namebuf_out, grid, &options_out ) ? 1 : 0;
       break;
 
    case FMT_CGA:
-      retval = cga_write_file( namebuf_out, grid, &options_out );
+      retval = 0 > cga_write_file( namebuf_out, grid, &options_out ) ? 1 : 0;
       break;
 
    case FMT_ICNS:
-      retval = icns_write_file( namebuf_out, grid, &options_out );
+      retval = 0 > icns_write_file( namebuf_out, grid, &options_out ) ? 1 : 0;
       break;
 
    case FMT_HEADER_IMG:
-      retval = header_img_write_file( namebuf_out, grid, &options_out );
-      break;
-
-   case FMT_HEADER_MAP:
-      retval = header_map_write_file( namebuf_out, namebuf_in, &options_out );
+      retval = 0 > header_img_write_file( namebuf_out, grid, &options_out ) ? 1 : 0;
       break;
    }
 

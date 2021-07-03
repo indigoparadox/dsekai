@@ -12,6 +12,16 @@
 #define DIO_STREAM_BUFFER  1
 #define DIO_STREAM_FILE    2
 
+#ifdef PLATFORM_PALM
+#include <PalmOS.h>
+
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+
+#define dio_assert_stream( stream )
+
+#else
 #include <stdio.h>
 
 #define dio_assert_stream( stream ) \
@@ -19,9 +29,12 @@
       0 <= stream->id && \
       ((DIO_STREAM_BUFFER == stream->type && NULL != stream->buffer.bytes ) || \
       (DIO_STREAM_FILE == stream->type && NULL != stream->buffer.file )) )
+#endif /* PLATFORM_PALM */
 
 union DIO_BUFFER {
+#ifndef DISABLE_FILESYSTEM
    FILE* file;
+#endif /* !DISABLE_FILESYSTEM */
    uint8_t* bytes;
 };
 
@@ -33,9 +46,19 @@ struct DIO_STREAM {
    int32_t position;
 };
 
+struct DIO_RESOURCE {
+   void* ptr;
+   uint32_t ptr_sz;
+#ifdef PLATFORM_PALM
+   MemHandle handle;
+#endif /* PLATFORM_PALM */
+};
+
 struct CONVERT_GRID;
 struct DIO_STREAM;
 
+int32_t dio_get_resource_handle( uint32_t, uint32_t, struct DIO_RESOURCE* );
+void dio_free_resource_handle( struct DIO_RESOURCE* );
 int32_t dio_open_stream_file( const char*, const char*, struct DIO_STREAM* );
 int32_t dio_open_stream_buffer( uint8_t*, uint32_t, struct DIO_STREAM* );
 void dio_close_stream( struct DIO_STREAM* );

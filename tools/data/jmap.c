@@ -3,7 +3,7 @@
 
 #include "../../src/memory.h"
 #include "../../src/data/dio.h"
-#include "json.h"
+#include "../../src/data/json.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,7 +1,7 @@
 
 #include <check.h>
 
-#include "../tools/data/json.h"
+#include "../src/data/json.h"
 
 #define CKDATA_JS_C
 #include "testdata.h"

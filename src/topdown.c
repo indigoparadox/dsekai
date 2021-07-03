@@ -10,6 +10,9 @@
 
 #include "data/windows.h"
 
+/* XXX */
+#define MEMORY_STATIC
+
 #define INPUT_BLOCK_DELAY 5
 #define TOPDOWN_MOBILES_MAX 10
 
@@ -196,7 +199,7 @@ int topdown_loop() {
       g_mobiles_count++;
 
 #ifdef TILEMAP_JSON
-      tilemap_load( field, &g_map );
+      tilemap_load( map_field, &g_map );
 #else
       memcpy( &g_map, &gc_map_field, sizeof( struct TILEMAP ) );
       g_map.tiles = &gc_map_field_tiles;

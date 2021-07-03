@@ -1,5 +1,6 @@
 
 #include "../graphics.h"
+#include "../data/dio.h"
 
 static BitmapType* g_screen = NULL;
 static WinHandle g_win;
@@ -8,33 +9,28 @@ static int16_t g_ticks_target = 0;
 
 static int16_t graphics_load_bitmap_surface( struct GRAPHICS_BITMAP* b ) {
    int16_t retval = 1;
+   struct DIO_RESOURCE rsc;
 
    if( NULL == b ) {
       retval = 0;
       goto cleanup;
    }
 
-   b->handle = DmGetResource( 'Tbmp', b->id );
-   if( NULL == b->handle ) {
-      retval = 0;
+   retval = dio_get_resource_handle( b->id, 'Tbmp', &rsc );
+   if( !retval ) {
       goto cleanup;
    }
 
-   b->bitmap = MemHandleLock( b->handle );
-   if( NULL == b->bitmap ) {
-      retval = 0;
-      if( NULL != b->handle ) {
-         MemHandleUnlock( b->handle );
-         b->handle = NULL;
-      }
-      goto cleanup;
-   }
+   b->handle = rsc.handle;
+   b->bitmap = rsc.ptr;
 
 cleanup:
    return retval;
 }
 
 static void graphics_unload_bitmap_surface( struct GRAPHICS_BITMAP* b ) {
+   struct DIO_RESOURCE rsc;
+
    if( NULL != b->handle ) {
       MemHandleUnlock( b->handle );
       b->handle = NULL;
@@ -90,23 +86,36 @@ int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
+   int retval = 1;
+   struct DIO_RESOURCE rsrc;
+
+   memset( &rsrc, '\0', sizeof( struct DIO_RESOURCE ) );
+
    if( NULL == bmp ) {
       WinDrawChars( "X", 1, x, y );
-      return 0;
+      retval = 0;
+      goto cleanup;
    }
 
-   graphics_load_bitmap_surface( (struct GRAPHICS_BITMAP*)bmp );
+   memset( &rsrc, '\0', sizeof( struct DIO_RESOURCE ) );
+   retval = dio_get_resource_handle( bmp->id, 'Tbmp', &rsrc );
+   if( !retval ) {
+      goto cleanup;
+   }
 
    if( NULL == bmp->bitmap ) {
       WinDrawChars( "Z", 1, x, y );
-      return 0;
+      retval = 0;
+      goto cleanup;
    }
 
-   WinDrawBitmap( bmp->bitmap, x, y );
+   WinDrawBitmap( (BitmapPtr)rsrc.ptr, x, y );
 
-   graphics_unload_bitmap_surface( (struct GRAPHICS_BITMAP*)bmp );
+cleanup:
 
-   return 1;
+   dio_free_resource_handle( &rsrc );
+
+   return retval;
 }
 
 void graphics_draw_block(

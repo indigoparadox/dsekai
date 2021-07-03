@@ -81,7 +81,9 @@
 #include "../gen/palm/resext.h"
 
 #define USE_SOFT_ASSERT
+#if 0
 #define MEMORY_STATIC
+#endif
 #define DISABLE_FILESYSTEM
 
 /* ------ */

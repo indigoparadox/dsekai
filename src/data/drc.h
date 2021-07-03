@@ -33,7 +33,7 @@
 
 #define DRC_ARCHIVE_TYPE {'D', 'R', 'C', 'T'}
 #define DRC_BITMAP_TYPE {'B', 'M', 'P', '1'}
-#define DRC_MAP_TYPE {'T', 'M', 'A', 'P'}
+#define DRC_MAP_TYPE {'j', 's', 'o', 'n'}
 
 union DRC_TYPE {
    char str[4];

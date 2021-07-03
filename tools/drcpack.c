@@ -184,10 +184,10 @@ int main( int argc, char* argv[] ) {
          } else if(
             0 == strncmp( "jso", &(file_list[i][extension_idx + 1]), 3 )
          ) {
-            typebuf.str[0] = 'T';
-            typebuf.str[1] = 'M';
-            typebuf.str[2] = 'A';
-            typebuf.str[3] = 'P';
+            typebuf.str[0] = 'j';
+            typebuf.str[1] = 's';
+            typebuf.str[2] = 'o';
+            typebuf.str[3] = 'n';
          }
 
          /* Open archive to copy. */

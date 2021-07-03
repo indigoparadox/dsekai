@@ -5,7 +5,7 @@ DSEKAI_C_FILES := \
    src/mobile.c \
    src/item.c \
    src/window.c \
-   tools/data/json.c \
+   src/data/json.c \
    src/data/dio.c \
    src/topdown.c
 
@@ -57,13 +57,14 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    tools/data/bmp.c \
    tools/data/icns.c \
    tools/data/jmap.c \
-   tools/data/json.c \
+   src/data/json.c \
    tools/data/drcwrite.c \
    src/data/drc.c \
    src/data/dio.c
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
+   src/data/drc.c \
    src/data/dio.c
 
 DRCPACK_C_FILES := \
@@ -81,8 +82,7 @@ CONVERT_C_FILES := \
    tools/data/header.c \
    tools/data/icns.c \
    tools/data/jmap.c \
-   tools/data/json.c \
-   tools/data/maptoh.c
+   src/data/json.c
 
 LOOKUPS_C_FILES: tools/lookups.c
 
@@ -122,7 +122,7 @@ DSEKAI_ASSETS_BITMAPS := \
    $(DSEKAI_ASSETS_TILES) \
    $(DSEKAI_ASSETS_PATTERNS)
 DSEKAI_ASSETS_MAPS := \
-   assets/field.json
+   assets/map_field.json
 DSEKAI_ASSETS_DOS_CGA := \
    $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_PALM := \
@@ -282,7 +282,7 @@ res_palm: $(DSEKAI_ASSETS_PALM)
 
 rcp_h_palm: res_palm $(MKRESH) | $(GENDIR_PALM)
 	$(MKRESH) -f palm -i 5001 \
-      -if $(DSEKAI_ASSETS_PALM) \
+      -if $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) \
       -oh $(GENDIR_PALM)/resext.h \
       -or $(GENDIR_PALM)/palmd.rcp
 

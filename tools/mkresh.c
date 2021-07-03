@@ -20,40 +20,9 @@
 #define FOI_ID          0
 #define FOI_FILENAME    1
 
-int mkresh_iterate(
-   const char* path,
-   const char* res_basenames[FILE_LIST_MAX], uint16_t res_names_len,
-   uint16_t id_start,
-   const char* line_fmt, const char* prelude, const char* postlude,
-   const char* res_filenames[FILE_LIST_MAX],
-   uint8_t filename_or_id
-) {
-   FILE* header_file = NULL;
-   int written_res_lines = 0,
-      i = 0;
-
-   header_file = fopen( path, "w" );
-   assert( NULL!= header_file );
-
-   fprintf( header_file, prelude );
-
-   for( i = 0 ; res_names_len > i ; i++ ) {
-      if( FOI_ID == filename_or_id ) {
-         fprintf(
-            header_file, line_fmt, res_basenames[i], id_start++ );
-      } else {
-         fprintf(
-            header_file, line_fmt, res_basenames[i],
-               res_filenames[i] );
-      }
-   }
-
-   fprintf( header_file, postlude );
-
-   fclose( header_file );
-
-   return written_res_lines;
-}
+const char gc_res_bitmap[] = "BITMAP";
+const char gc_res_data_json[] = "DATA \"json\"";
+const char gc_res_data_misc[] = "DATA \"misc\"";
 
 int main( int argc, char* argv[] ) {
    int retval = 0;
@@ -66,10 +35,13 @@ int main( int argc, char* argv[] ) {
       extension_idx = 0;
    char* header_name = NULL,
       * file_list[FILE_LIST_MAX],
-      * file_basename_list[FILE_LIST_MAX];
+      * file_basename_list[FILE_LIST_MAX],
+      * res_type = NULL;
    char namebuf_header[NAMEBUF_MAX + 1],
       namebuf_res[NAMEBUF_MAX + 1];
    size_t file_list_len = 0;
+   FILE * header_file = NULL,
+      * res_file = NULL;
 
    memset( namebuf_header, '\0', NAMEBUF_MAX + 1 );
    memset( namebuf_res, '\0', NAMEBUF_MAX + 1 );
@@ -156,31 +128,70 @@ int main( int argc, char* argv[] ) {
    }
 
    if( 0 < strlen( namebuf_header ) ) {
-      mkresh_iterate(
-         namebuf_header, file_basename_list, file_list_len, id_start,
-         "#define %s %d\n",
-         "\n#ifndef RESEXT_H\n#define RESEXT_H\n\n",
-         "\n#endif /* RESEXT_H */\n",
-         file_list, FOI_ID );
+      header_file = fopen( namebuf_header, "w" );
+      assert( NULL!= header_file );
+
+      fprintf( header_file, "\n#ifndef RESEXT_H\n#define RESEXT_H\n\n" );
+
+      for( i = 0 ; file_list_len > i ; i++ ) {
+         fprintf( header_file, "#define %s %d\n",
+            file_basename_list[i], id_start + i );
+      }
+
+      fprintf( header_file, "\n#endif /* RESEXT_H */\n" );
+
+      fclose( header_file );
+      header_file = NULL;
    }
 
    if( 0 < strlen( namebuf_res ) ) {
-      if( FMT_PALM == fmt ) {
-         mkresh_iterate(
-            namebuf_res, file_basename_list, file_list_len, id_start,
-            "BITMAP ID %s \"%s\"\n",
-            "\n",
-            "",
-            file_list, FOI_FILENAME);
-      } else if( FMT_WIN16 == fmt ) {
-         mkresh_iterate(
-            namebuf_res, file_basename_list, file_list_len, id_start,
-            "%s BITMAP \"%s\"\n",
-            "\n",
-            "",
-            file_list, FOI_FILENAME );
+      res_file = fopen( namebuf_res, "w" );
+      assert( NULL!= res_file );
+
+      for( i = 0 ; file_list_len > i ; i++ ) {
+         /* TODO: Safety checks. */
+         filename_len = strlen( file_list[i] );
+         extension_idx = dio_char_idx_r( file_list[i], filename_len, '.' ) + 1;
+
+         if( 0 == strncmp( &(file_list[i][extension_idx]), "bmp", 3 ) ) {
+            res_type = gc_res_bitmap;
+         } else if( 0 == strncmp( &(file_list[i][extension_idx]), "jso", 3 ) ) {
+            res_type = gc_res_data_json;
+         } else {
+            res_type = gc_res_data_misc;
+         }
+
+         printf( "%s\n", &(file_list[i][extension_idx]) );
+
+         switch( fmt ) {
+         case FMT_PALM:
+            fprintf( res_file, "%s ID %s \"%s\"\n",
+               res_type, file_basename_list[i], file_list[i] );
+            break;
+
+         case FMT_WIN16:
+            fprintf( res_file, "%s %s \"%s\"\n",
+               file_basename_list[i], res_type, file_list[i] );
+            break;
+         }
+
       }
+
+      fclose( res_file );
+      res_file = NULL;
    }
+
+cleanup:
+
+   if( NULL != header_file ) {
+      fclose( header_file );
+   }
+   header_file = NULL;
+
+   if( NULL != res_file ) {
+      fclose( res_file );
+   }
+   header_file = NULL;
 
    return retval;
 }

@@ -1,7 +1,7 @@
 
 #include "tilemap.h"
 
-#include "../tools/data/json.h"
+#include "data/json.h"
 #include "data/dio.h"
 #include "data/drc.h"
 #include "memory.h"
@@ -17,42 +17,31 @@
 int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    int16_t tok_parsed = 0,
       tiles_count = 0,
-      buffer_used = 0,
       i = 0,
       retval = 0;
    uint8_t tile_id_in = 0;
    jsmn_parser parser;
-   /* jsmntok_t tokens[JSON_TOKENS_MAX]; */
    jsmntok_t* tokens = NULL;
    char iter_path[JSON_PATH_SZ];
-   /* unsigned char json_buffer[JSON_BUFFER_SZ]; */
-   unsigned char* json_buffer = NULL;
-   struct DIO_STREAM drc_file;
-   union DRC_TYPE map_type = DRC_MAP_TYPE;
+   struct DIO_RESOURCE rsrc;
 
-   tokens = memory_alloc( JSON_TOKENS_MAX, sizeof( jsmntok_t ) );
-   json_buffer = memory_alloc( JSON_BUFFER_SZ, 1 );
-
-   /* TODO: OS-specific resources. */
-   dio_open_stream_file( DRC_ARCHIVE, "r", &drc_file );
-   if( 0 == dio_type_stream( &drc_file ) ) {
-      error_printf( "unable to open archive for tilemap" );
-      retval = -1;
+   memset( &rsrc, '\0', sizeof( struct DIO_RESOURCE ) );
+   retval = dio_get_resource_handle( id, 'json', &rsrc );
+   if( !retval ) {
       goto cleanup;
    }
 
-   memset( json_buffer, '\0', JSON_BUFFER_SZ );
-
-   buffer_used = drc_get_resource(
-      &drc_file, map_type, id, &(json_buffer[0]),
-      JSON_BUFFER_SZ );
+   tokens = memory_alloc( JSON_TOKENS_MAX, sizeof( jsmntok_t ) );
 
    jsmn_init( &parser );
    tok_parsed = jsmn_parse(
-      &parser, &(json_buffer[0]), buffer_used, tokens, JSON_TOKENS_MAX );
+      &parser, rsrc.ptr, rsrc.ptr_sz, tokens, JSON_TOKENS_MAX );
 
    debug_printf( 2, "%d tokens parsed", tok_parsed );
-   assert( 0 < tok_parsed );
+   if( 0 == tok_parsed ) {
+      retval = 0;
+      goto cleanup;
+   }
 
    /* Load map properties. */
    tiles_count = (TILEMAP_TW * TILEMAP_TH);
@@ -60,7 +49,7 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       /* Load tile data into the grid. */
       dio_snprintf( iter_path, 255, "/layers/0/data/%d", i );
       tile_id_in = 
-         json_int_from_path( iter_path, &(tokens[0]), tok_parsed, json_buffer );
+         json_int_from_path( iter_path, &(tokens[0]), tok_parsed, rsrc.ptr );
       tile_id_in--;
       if( 0 == i % 2 ) {
          tile_id_in <<= 4;
@@ -73,11 +62,8 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
 
 cleanup:
 
-   if( 0 < dio_type_stream( &drc_file ) ) {
-      dio_close_stream( &drc_file );
-   }
+   dio_free_resource_handle( &rsrc );
 
-   memory_free( &json_buffer );
    memory_free( &tokens );
 
    return retval;

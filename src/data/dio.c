@@ -1,6 +1,8 @@
 
 #include "dio.h"
 
+#include "drc.h"
+
 #ifndef DISABLE_FILESYSTEM
 #ifdef MEMORY_STATIC
 /* #error "Filesystem routines require dynamic memory heap!" */
@@ -9,7 +11,6 @@
 #endif /* MEMORY_STATIC */
 #endif /* !DISABLE_FILESYSTEM */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -19,6 +20,89 @@
 int32_t g_next_stream_id = 0;
 
 struct CONVERT_GRID;
+
+/**
+ * \brief Allocate a handle to a resource in DRC archive or OS resource fork.
+ */
+int32_t dio_get_resource_handle(
+   uint32_t id, uint32_t type, struct DIO_RESOURCE* rsrc
+) {
+   int32_t retval = 1;
+
+#ifdef PLATFORM_PALM
+
+   rsrc->handle = DmGetResource( type, id );
+   if( NULL == rsrc->handle ) {
+      retval = 0;
+      goto cleanup;
+   }
+
+   rsrc->ptr = MemHandleLock( rsrc->handle );
+   if( NULL == rsrc->ptr ) {
+      retval = 0;
+      if( NULL != rsrc->handle ) {
+         MemHandleUnlock( rsrc->handle );
+         rsrc->handle = NULL;
+      }
+      goto cleanup;
+   }
+
+cleanup:
+
+#else
+   struct DIO_STREAM drc_file;
+   union DRC_TYPE drc_type;
+
+   drc_type.u32 = dio_reverse_endian_32( type );
+
+   memset( &drc_file, '\0', sizeof( struct DIO_STREAM ) );
+
+   /* TODO: OS-specific resources. */
+   dio_open_stream_file( DRC_ARCHIVE, "r", &drc_file );
+   if( 0 == dio_type_stream( &drc_file ) ) {
+      error_printf( "unable to open archive for tilemap" );
+      retval = 0;
+      goto cleanup;
+   }
+
+   rsrc->ptr_sz = drc_get_resource_sz( &drc_file, drc_type, id );
+   rsrc->ptr = memory_alloc( rsrc->ptr_sz, 1 );
+   drc_get_resource( &drc_file, drc_type, id, rsrc->ptr, rsrc->ptr_sz );
+
+cleanup:
+
+   if( 0 < dio_type_stream( &drc_file ) ) {
+      dio_close_stream( &drc_file );
+   }
+
+#endif /* PLATFORM_PALM */
+
+   return retval;
+}
+
+/**
+ * \brief Free resource handle allocated by dio_get_resource_handle().
+ */
+void dio_free_resource_handle( struct DIO_RESOURCE* rsrc ) {
+#ifdef PLATFORM_PALM
+
+   if( NULL != rsrc->handle ) {
+      MemHandleUnlock( rsrc->handle );
+      rsrc->handle = NULL;
+   }
+
+#else
+
+   if( NULL != rsrc->ptr ) {
+      free( rsrc->ptr );
+   }
+   rsrc->ptr = NULL;
+   rsrc->ptr_sz = 0;
+
+#endif /* PLATFORM_PALM */
+}
+
+#ifndef DISABLE_FILESYSTEM
 
 int32_t dio_open_stream_file(
    const char* path, const char* mode, struct DIO_STREAM* stream
@@ -49,6 +133,8 @@ int32_t dio_open_stream_file(
    return stream->buffer_sz;
 }
 
+#endif /* DIO_STREAM_FILE */
+
 int32_t dio_open_stream_buffer(
    uint8_t* buf, uint32_t buf_sz, struct DIO_STREAM* stream
 ) {
@@ -75,9 +161,11 @@ void dio_close_stream( struct DIO_STREAM* stream ) {
    debug_printf( 2, "closing stream %d...", stream->id );
 
    switch( stream->type ) {
+#ifndef DISABLE_FILESYSTEM
    case DIO_STREAM_FILE:
       fclose( stream->buffer.file );
       break;
+#endif /* !DISABLE_FILESYSTEM */
 
    default:
       break;
@@ -135,9 +223,11 @@ int32_t dio_seek_stream( struct DIO_STREAM* stream, int32_t seek, uint8_t m ) {
    }
 
    switch( stream->type ) {
+#ifndef DISABLE_FILESYSTEM
    case DIO_STREAM_FILE:
       fseek( stream->buffer.file, seek, m );
       return ftell( stream->buffer.file );
+#endif /* !DIO_STREAM_FILE */
 
    case DIO_STREAM_BUFFER:
       /* This was handled by setting the position above. */
@@ -178,11 +268,13 @@ int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
    assert( src->position + sz >= 0 ); */
 
    switch( src->type ) {
+#ifndef DISABLE_FILESYSTEM
    case DIO_STREAM_FILE:
       sz_out = fread( dest, 1, sz, src->buffer.file );
       src->position += sz_out;
       /* assert( ftell( src->buffer.file ) == src->position ); */
       return sz_out;
+#endif /* !DISABLE_FILESYSTEM */
 
    case DIO_STREAM_BUFFER:
       memcpy( dest, &(src->buffer.bytes[src->position]), sz );
@@ -207,6 +299,7 @@ int32_t dio_write_stream(
    assert( dest->position + sz >= dest->position );
    
    switch( dest->type ) {
+#ifndef DISABLE_FILESYSTEM
    case DIO_STREAM_FILE:
       sz_out = fwrite( src, 1, sz, dest->buffer.file );
       if( dest->position + sz_out >= dest->buffer_sz ) {
@@ -215,6 +308,7 @@ int32_t dio_write_stream(
       dest->position += sz_out;
       assert( ftell( dest->buffer.file ) == dest->position );
       return sz_out;
+#endif /* !DISABLE_FILESYSTEM */
 
    case DIO_STREAM_BUFFER:
       assert( dest->position + sz < dest->buffer_sz );

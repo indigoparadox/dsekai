@@ -8,8 +8,7 @@
 
 #define TILEMAP_TILE_FLAG_DIRTY     0x01
 
-#define tilemap_get_tile_id( t, x, y ) \
-   ((t->tiles[((y * TILEMAP_TW) + x) / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
+#define tilemap_get_tile_id( t, x, y ) ((t->tiles[((y * TILEMAP_TW) + x) / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
 
 struct TILEMAP_COORDS {
    uint8_t x;
