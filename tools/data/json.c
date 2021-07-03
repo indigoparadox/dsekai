@@ -149,6 +149,8 @@ int16_t json_int_from_path(
 ) {
    int id = 0;
    id = json_token_id_from_path( path, tokens, tokens_sz, buf );
+   assert( id < tokens_sz );
+   assert( 0 <= id );
    return dio_atoi( &(buf[tokens[id].start]), 10 );
 }
 

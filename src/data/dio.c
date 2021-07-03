@@ -24,6 +24,8 @@ int32_t dio_open_stream_file(
 ) {
    debug_printf( 2, "opening file %s mode %s as stream %d...",
       path, mode, g_next_stream_id );
+
+   assert( 0 == stream->type );
    
    stream->buffer.file = fopen( path, mode );
    if( NULL == stream->buffer.file ) {
@@ -52,6 +54,8 @@ int32_t dio_open_stream_buffer(
    uint8_t* buf, uint32_t buf_sz, struct DIO_STREAM* stream
 ) {
    debug_printf( 2, "opening buffer as stream %d...", g_next_stream_id );
+
+   assert( 0 == stream->type );
 
    stream->buffer.bytes = buf;
    stream->buffer_sz = buf_sz;
@@ -95,7 +99,7 @@ int32_t dio_seek_stream( struct DIO_STREAM* stream, int32_t seek, uint8_t m ) {
    case SEEK_SET:
       debug_printf( 2, "seeking stream %d to %d...", stream->id, seek );
       assert( 0 <= seek );
-      assert( stream->buffer_sz > seek );
+      assert( stream->buffer_sz >= seek );
       if( seek >= stream->buffer_sz ) {
          error_printf( "attempted to seek beyond stream %d end",
             stream->id);
@@ -160,7 +164,6 @@ int32_t dio_position_stream( struct DIO_STREAM* stream ) {
 }
 
 uint8_t dio_type_stream( struct DIO_STREAM* stream ) {
-   dio_assert_stream( stream );
    return stream->type;
 }
 
@@ -169,11 +172,11 @@ int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
 
    dio_assert_stream( src );
 
-   debug_printf( 2, "reading %d bytes at %d (out of %d)...",
+   debug_printf( 1, "reading %d bytes at %d (out of %d)...",
       sz, src->position, src->buffer_sz );
 
-   assert( src->position + sz < src->buffer_sz );
-   assert( src->position + sz >= 0 );
+   /* assert( src->position + sz < src->buffer_sz );
+   assert( src->position + sz >= 0 ); */
 
    switch( src->type ) {
    case DIO_STREAM_FILE:
@@ -183,7 +186,7 @@ int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
       return sz_out;
 
    case DIO_STREAM_BUFFER:
-      memcpy( dest, src->buffer.bytes, sz );
+      memcpy( dest, &(src->buffer.bytes[src->position]), sz );
       src->position += sz;
       return sz;
 
@@ -199,9 +202,10 @@ int32_t dio_write_stream(
 
    dio_assert_stream( dest );
 
-   assert( dest->position + sz >= 0 );
+   debug_printf( 1, "writing %d bytes at %d (out of %d)...",
+      sz, dest->position, dest->buffer_sz );
 
-   debug_printf( 1, "writing %d bytes to stream %d...", sz, dest->id );
+   assert( dest->position + sz >= 0 );
    
    switch( dest->type ) {
    case DIO_STREAM_FILE:
@@ -215,7 +219,7 @@ int32_t dio_write_stream(
 
    case DIO_STREAM_BUFFER:
       assert( dest->position + sz < dest->buffer_sz );
-      memcpy( dest->buffer.bytes, src, sz );
+      memcpy( &(dest->buffer.bytes[dest->position]), src, sz );
       dest->position += sz;
       return sz;
    }
@@ -406,7 +410,7 @@ int32_t dio_copy_file( const char* src, const char* dest ) {
       wrote = fwrite( buffer_tmp, 1, read, file_out );
       wrote_total += wrote;
       
-      debug_printf( 1, "copy: read %d bytes, wrote %d bytes\n", read_total,
+      debug_printf( 1, "copy: read %d bytes, wrote %d bytes", read_total,
          wrote_total );
       if( read_total != wrote_total ) {
          retval = DIO_ERROR_COPY_MISMATCH;
@@ -414,7 +418,7 @@ int32_t dio_copy_file( const char* src, const char* dest ) {
       }
    }
 
-   debug_printf( 2, "copied %d bytes\n", wrote_total );
+   debug_printf( 2, "copied %d bytes", wrote_total );
 
 cleanup:
    if( file_in ) {

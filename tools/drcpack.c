@@ -193,12 +193,14 @@ int main( int argc, char* argv[] ) {
          /* Open archive to copy. */
          dio_open_stream_file( namebuf_arc, "rb", &drc_file_in );
          if( 0 == dio_type_stream( &drc_file_in ) ) {
-            retval = DRC_ERROR_COULD_NOT_CREATE_TEMP;
+            error_printf( "could not open archive" );
+            retval = DRC_ERROR_COULD_NOT_OPEN;
             goto cleanup;
          }
          
          /* Create a temp copy to modify. */
          if( 0 >= dio_mktemp_path( tmp_path, DIO_PATH_MAX, "drctmp.drc" ) ) {
+            error_printf( "could not create temporary path" );
             retval = -1;
             goto cleanup;
          }
@@ -206,6 +208,7 @@ int main( int argc, char* argv[] ) {
          debug_printf( 2, "creating temporary copy: %s", tmp_path );
          dio_open_stream_file( tmp_path, "wb", &drc_file_out );
          if( 0 == dio_type_stream( &drc_file_out ) ) {
+            error_printf( "could not create temporary file" );
             retval = DRC_ERROR_COULD_NOT_CREATE_TEMP;
             goto cleanup;
          }
@@ -243,8 +246,20 @@ int main( int argc, char* argv[] ) {
          retval = DRC_ERROR_COULD_NOT_OPEN;
          goto cleanup;
       }
-      drc_list_resources( &drc_file_in, NULL, 0 );
+      toc_entries_sz = drc_list_resources( &drc_file_in, &toc_entries, 0 );
       dio_close_stream( &drc_file_in );
+
+      for( i = 0 ; toc_entries_sz > i ; i++ ) {
+         printf( "TOC entry %d | type %c%c%c%c | size %d bytes @ offset %d\n",
+            toc_entries[i].id,
+            toc_entries[i].type.str[0], toc_entries[i].type.str[1],
+            toc_entries[i].type.str[2], toc_entries[i].type.str[3],
+            toc_entries[i].data_sz, toc_entries[i].data_start );
+      }
+
+      free( toc_entries );
+      toc_entries = NULL;
+      toc_entries_sz = 0;
    }
 
    if( command_extract ) {
@@ -283,6 +298,8 @@ int main( int argc, char* argv[] ) {
       debug_printf( 2, 
          "wrote %u (%ld) bytes", wrote, ftell( extract_res_file ) );
       assert( wrote == retval );
+
+      retval = 0;
    }
    
    if( command_header ) {
@@ -291,12 +308,14 @@ int main( int argc, char* argv[] ) {
 
       dio_open_stream_file( namebuf_arc, "rb", &drc_file_in );
       if( 0 == dio_type_stream( &drc_file_in ) ) {
+         error_printf( "error opening header file" );
          retval = DRC_ERROR_COULD_NOT_OPEN;
          goto cleanup;
       }
       toc_entries_sz = drc_list_resources( &drc_file_in, &toc_entries, 0 );
       dio_close_stream( &drc_file_in );
       
+      debug_printf( 2, "opening header file..." );
       header_file = fopen( namebuf_header, "w" );
       
       assert( NULL != header_file );
@@ -304,6 +323,8 @@ int main( int argc, char* argv[] ) {
       fprintf( header_file, "#ifndef RESEXT_H\n" );
       fprintf( header_file, "#define RESEXT_H\n\n" );
       for( i = 0 ; toc_entries_sz > i ; i++ ) {
+         debug_printf( 1, "writing TOC entry %d (ID %d) to header...",
+            i, toc_entries[i].id );
          extension_idx = dio_char_idx_r(
             toc_entries[i].name, toc_entries[i].name_sz, '.' );
          if( 0 < extension_idx ) {
@@ -313,14 +334,17 @@ int main( int argc, char* argv[] ) {
 
          fprintf( header_file, "#define %s %u\n",
             toc_entries[i].name, toc_entries[i].id );
-         free( toc_entries[i].name );
       }
       free( toc_entries );
       fprintf( header_file, "\n#endif /* RESEXT_H */\n" );
       fclose( header_file );
    }
 
+   assert( 0 == retval );
+
 cleanup:
+
+   debug_printf( 2, "cleaning up resources..." );
 
    if( 0 != dio_type_stream( &drc_file_in ) ) {
       dio_close_stream( &drc_file_in );

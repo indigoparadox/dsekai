@@ -79,9 +79,12 @@ END_TEST
 START_TEST( check_dio_stream_bytes_rw ) {
    struct DIO_STREAM test_stream;
    const char* test_string = "Test String";
-   uint8_t test_buffer[1024];
+   uint8_t test_buffer[1024],
+      test_reader[24];
 
    memset( test_buffer, '\0', 1024 );
+   memset( &test_stream, '\0', sizeof( struct DIO_STREAM ) );
+   memset( test_reader, '\0', 24 );
 
    dio_open_stream_buffer( test_buffer, 1024, &test_stream );
    dio_write_stream( test_string, 11 /* strlen( test_str ) */, &test_stream );
@@ -90,6 +93,51 @@ START_TEST( check_dio_stream_bytes_rw ) {
    ck_assert_int_eq( 11, strlen( test_buffer ) );
    ck_assert_int_eq( 11, dio_position_stream( &test_stream ) );
    ck_assert_int_eq( 1024, dio_sz_stream( &test_stream ) );
+
+   dio_seek_stream( &test_stream, 5, SEEK_SET );
+   dio_read_stream( test_reader, 6, &test_stream );
+
+   ck_assert_str_eq( test_reader, "String" );
+}
+END_TEST
+
+START_TEST( check_dio_stream_bytes_seek ) {
+   struct DIO_STREAM test_stream;
+   uint8_t test_buffer[1024];
+   char test_string[] = "This is a test string.",
+      test_string_2[] = "XYZ";
+   
+   dio_open_stream_buffer( test_buffer, 1024, &test_stream );
+   dio_write_stream( &test_string, 22, &test_stream );
+
+   dio_seek_stream( &test_stream, 0, SEEK_SET );
+
+   dio_write_stream( test_string_2, 3, &test_stream );
+
+   ck_assert_int_eq( 'X', test_buffer[0] );
+   ck_assert_int_eq( 'Y', test_buffer[1] );
+   ck_assert_int_eq( 'Z', test_buffer[2] );
+
+   dio_seek_stream( &test_stream, 10, SEEK_SET );
+   
+   ck_assert_int_eq( 1024, dio_sz_stream( &test_stream ) );
+   ck_assert_int_eq( 10, dio_position_stream( &test_stream ) );
+
+   dio_seek_stream( &test_stream, 5, SEEK_CUR );
+
+   dio_write_stream( test_string_2, 3, &test_stream );
+
+   ck_assert_int_eq( 18, dio_position_stream( &test_stream ) );
+
+   ck_assert_int_eq( 'X', test_buffer[15] );
+   ck_assert_int_eq( 'Y', test_buffer[16] );
+   ck_assert_int_eq( 'Z', test_buffer[17] );
+
+   dio_seek_stream( &test_stream, 0, SEEK_END );
+
+   ck_assert_int_eq( 1023, dio_position_stream( &test_stream ) );
+
+   dio_close_stream( &test_stream );
 }
 END_TEST
 
@@ -179,6 +227,7 @@ Suite* dio_suite( void ) {
 
    tcase_add_test( tc_stream_bytes, check_dio_stream_bytes_openclose ); 
    tcase_add_test( tc_stream_bytes, check_dio_stream_bytes_rw ); 
+   tcase_add_test( tc_stream_bytes, check_dio_stream_bytes_seek ); 
 
    suite_add_tcase( s, tc_stream_bytes );
 

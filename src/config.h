@@ -221,7 +221,7 @@
       }
 
 #  define internal_error_printf( ... ) \
-      fprintf( stderr, __FILE__ ": %d: ", __LINE__ ); \
+      fprintf( stderr, "(E) " __FILE__ ": %d: ", __LINE__ ); \
       fprintf( stderr, __VA_ARGS__ ); \
       fprintf( stderr, "\n" ); \
 

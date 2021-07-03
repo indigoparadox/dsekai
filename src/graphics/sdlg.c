@@ -144,6 +144,8 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    int32_t buffer_sz = 0;
    uint32_t id = 0;
    SDL_RWops* bmp_stream;
+   struct DIO_STREAM rstream;
+   union DRC_TYPE bitmap_type = DRC_BITMAP_TYPE;
 
    assert( NULL != b );
    assert( 0 == b->ref_count );
@@ -155,8 +157,9 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into buffer. */
-   buffer_sz = drc_get_resource(
-      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer, 0 );
+   memset( &rstream, '\0', sizeof( struct DIO_STREAM ) );
+   dio_open_stream_file( DRC_ARCHIVE, "rb", &rstream );
+   buffer_sz = drc_get_resource( &rstream, bitmap_type, id, &buffer, 0 );
    if( 0 >= buffer_sz ) {
       assert( NULL == buffer );
       return buffer_sz;
@@ -190,6 +193,10 @@ cleanup:
 
    if( NULL != buffer ) {
       memory_free( &buffer ); /* Free resource memory. */
+   }
+
+   if( 0 != dio_type_stream( &rstream ) ) {
+      dio_close_stream( &rstream );
    }
 
    return buffer_sz;

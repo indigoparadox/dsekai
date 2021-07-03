@@ -23,7 +23,7 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    char iter_path[JSON_PATH_SZ];
    char json_buffer[JSON_BUFFER_SZ];
    struct DIO_STREAM drc_file;
-   union DRC_TYPE map_type;
+   union DRC_TYPE map_type = DRC_MAP_TYPE;
 
    dio_open_stream_file( DRC_ARCHIVE, "r", &drc_file );
    if( 0 == dio_type_stream( &drc_file ) ) {
@@ -33,7 +33,6 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    }
 
    memset( json_buffer, '\0', JSON_BUFFER_SZ );
-   memcpy( &map_type, DRC_MAP_TYPE, 4 );
 
    buffer_used = drc_get_resource(
       &drc_file, map_type, id, &(json_buffer[0]),
@@ -46,6 +45,7 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       &parser, &(json_buffer[0]), buffer_used, tokens, JSON_TOKENS_MAX );
 
    debug_printf( 2, "%d tokens parsed", tok_parsed );
+   assert( 0 < tok_parsed );
 
    /* Load map properties. */
    tiles_count = (TILEMAP_TW * TILEMAP_TH);

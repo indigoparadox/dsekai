@@ -23,101 +23,25 @@
 static int32_t drc_read_toc_e(
    struct DIO_STREAM* drc_file, struct DRC_TOC_E* toc_e
 ) {
-   uint32_t toc_e_start = 0;
+   uint32_t toc_e_start = 0,
+      read = 0;
 
-   dio_read_stream( toc_e, sizeof( struct DRC_TOC_E ), drc_file );
-
-#if 0
-   assert( NULL == toc_e->name );
-   if( NULL != toc_e->name ) {
-      memory_free( &toc_e->name );
-      toc_e->name = NULL;
-   }
-
-   toc_e_start = dio_tell_stream( drc_file );
-   memset( toc_e, '\0', sizeof( struct DRC_TOC_E ) );
-
-   dio_read_stream( &(toc_e->type), sizeof( uint32_t ), drc_file );
-   dio_read_stream( &(toc_e->reserved), sizeof( uint32_t ), drc_file );
-   
-   assert( dio_tell_stream( drc_file ) == toc_e_start + DRC_TOC_E_OFFSET_ID );
-   dio_read_stream( &(toc_e->id), sizeof( uint32_t ), drc_file );
-   assert( 10000 > toc_e->id );
-
-   assert( dio_tell_stream( drc_file ) ==
-      toc_e_start + DRC_TOC_E_OFFSET_DATA_START );
-   dio_read_stream( &(toc_e->data_start), sizeof( uint32_t ), drc_file );
-   
-   assert( dio_tell_stream( drc_file ) == 
-      toc_e_start + DRC_TOC_E_OFFSET_DATA_SZ );
-   dio_read_stream( &(toc_e->data_sz), sizeof( uint32_t ), drc_file );
-   
-   assert( dio_tell_stream( drc_file ) ==
-      toc_e_start + DRC_TOC_E_OFFSET_NAME_SZ );
-   dio_read_stream( &(toc_e->name_sz), sizeof( uint16_t ), drc_file );
-
-#ifdef MEMORY_STATIC
-   /* Skip the name, since we can't allocate for it. */
-   toc_e->name = NULL;
-   if( 0 > dio_seek_stream( drc_file, toc_e->name_sz, SEEK_CUR ) ) {
+   if(
+      sizeof( struct DRC_TOC_E ) !=
+      dio_read_stream( toc_e, sizeof( struct DRC_TOC_E ), drc_file )
+   ) {
       return -1;
    }
-   toc_e->name_sz = 0;
-#else
-   assert( 0 < toc_e->name_sz );
-   toc_e->name = memory_alloc( toc_e->name_sz + 1, 1 );
-   assert( NULL != toc_e->name );
 
-   debug_printf( 1, "read TOC entry (%u bytes)",
-      dio_tell_stream( drc_file ) - toc_e_start );
-   assert( DRC_TOC_E_SZ == dio_tell_stream( drc_file ) - toc_e_start );
-
-   dio_read_stream( toc_e->name, toc_e->name_sz, drc_file );
-#endif /* MEMORY_STATIC */
-   
-   debug_printf( 1, "%u: %s (%s, starts at %u bytes, %u bytes long)",
-      toc_e->id, toc_e->name, (char*)&(toc_e->type),
-      toc_e->data_start, toc_e->data_sz );
-
-   assert( dio_tell_stream( drc_file ) ==
-      toc_e_start + DRC_TOC_E_SZ + toc_e->name_sz );
-
-#endif
 
    /* TODO: Error handling .*/
-   return 0;
+   return sizeof( struct DRC_TOC_E );
 }
 
 static int32_t drc_read_header(
    struct DIO_STREAM* drc_file, struct DRC_HEADER* h
 ) {
-
-#if 0
-   dio_read_stream( &h->type, sizeof( uint32_t ), drc_file );
-   dio_read_stream( &h->version, sizeof( uint16_t ), drc_file );
-#ifndef CHECK
-   assert( 1 == h->version );
-#endif /* !CHECK */
-   debug_printf( 2, "filesize is %d into drc header",
-      offsetof( struct DRC_HEADER, filesize ) );
-   if( 0 > dio_seek_stream(
-      drc_file, offsetof( struct DRC_HEADER, filesize ), SEEK_SET )
-   ) {
-      return -1;
-   }
-   dio_read_stream( &h->filesize, sizeof( uint32_t ), drc_file );
-   dio_read_stream( &h->toc_start, sizeof( uint32_t ), drc_file );
-   dio_read_stream( &h->toc_entries, sizeof( uint32_t ), drc_file );
-
-#ifndef CHECK
-   assert( dio_sz_stream( drc_file ) == h->filesize );
-#endif /* !CHECK */
-
-   if( 0 > dio_seek_stream( drc_file, h->toc_start, SEEK_SET ) ) {
-      return -1;
-   }
-#endif
-
+   dio_seek_stream( drc_file, 0, SEEK_SET );
    dio_read_stream( h, sizeof( struct DRC_HEADER ), drc_file );
    if( 0 > dio_seek_stream(
       drc_file, offsetof( struct DRC_HEADER, filesize ), SEEK_SET )
@@ -153,17 +77,17 @@ int32_t drc_list_resources(
 
    drc_read_header( drc_file, &header );
 
+   dio_seek_stream( drc_file, header.toc_start, SEEK_SET );
+
    assert( 0 != header.toc_start );
    for( i = 0 ; header.toc_entries > i ; i++ ) {
 
-      assert( NULL == toc_e_iter.name );
       drc_read_toc_e( drc_file, &toc_e_iter );
 
       toc_count_out++;
 
       /* Store the entry in a list if requested. */
       if( NULL != ptoc ) {
-#if 0
 #ifndef MEMORY_STATIC
          if( NULL == *ptoc ) {
             *ptoc = memory_alloc(
@@ -177,22 +101,16 @@ int32_t drc_list_resources(
             } else {
                goto cleanup;
             }
-         }
+        }
 #endif /* !MEMORY_STATIC */
-#endif
+
          if( NULL != *ptoc && (0 == ptoc_sz || i < ptoc_sz - 1) ) {
+            debug_printf( 1, "copying listing result for TOC entry %d",
+               toc_e_iter.id );
             /* Move, rather than copy. */
             memcpy( &((*ptoc)[i]), &toc_e_iter, sizeof( struct DRC_TOC_E ) );
             memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
          }
-#ifndef MEMORY_STATIC
-      } else {
-#if 0
-         /* Just free the dynamically allocated name. */
-         memory_free( &toc_e_iter.name );
-         toc_e_iter.name = NULL;
-#endif
-#endif /* !MEMORY_STATIC */
       }
    }
 
@@ -220,15 +138,9 @@ int32_t drc_get_resource_info(
    debug_printf( 2, "drc is %d bytes long; found %d TOC entries",
       header.filesize, header.toc_entries );
    for( i = 0 ; header.toc_entries > i ; i++ ) {
-      assert( NULL == toc_e_iter.name );
       drc_read_toc_e( drc_file, &toc_e_iter );
 
-      if( toc_e_iter.type.u32 != type.u32 && toc_e_iter.id == id ) {
-#if 0
-#ifndef MEMORY_STATIC
-         memory_free( &toc_e_iter.name );
-#endif /* !MEMORY_STATIC */
-#endif
+      if( toc_e_iter.type.u32 != type.u32 && toc_e_iter.id != id ) {
          continue;
       }
 

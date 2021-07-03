@@ -29,18 +29,13 @@
 #define DRC_ERROR_COULD_NOT_ALLOC         -10
 #define DRC_ERROR_COULD_NOT_FIND          -11
 
-#define DRC_TOC_E_SZ                      22
-#define DRC_TOC_E_OFFSET_TYPE             0
-/* Reserved: 4 byte. */
-#define DRC_TOC_E_OFFSET_ID               8
-#define DRC_TOC_E_OFFSET_DATA_START       12
-#define DRC_TOC_E_OFFSET_DATA_SZ          16
-#define DRC_TOC_E_OFFSET_NAME_SZ          20
-#define DRC_TOC_E_OFFSET_NAME             22
+#define DRC_ARCHIVE_TYPE {'D', 'R', 'C', 'T'}
+#define DRC_BITMAP_TYPE {'B', 'M', 'P', '1'}
+#define DRC_MAP_TYPE {'T', 'M', 'A', 'B'}
 
 union DRC_TYPE {
-   uint32_t u32;
    char str[4];
+   uint32_t u32;
 };
 
 #ifdef __GNUC__
