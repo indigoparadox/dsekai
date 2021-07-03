@@ -4,8 +4,11 @@
 #include "../tools/data/json.h"
 #include "data/dio.h"
 #include "data/drc.h"
+#include "memory.h"
 
 #include <string.h>
+
+#ifdef TILEMAP_JSON
 
 #define JSON_TOKENS_MAX 1024
 #define JSON_PATH_SZ 255
@@ -19,11 +22,16 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       retval = 0;
    uint8_t tile_id_in = 0;
    jsmn_parser parser;
-   jsmntok_t tokens[JSON_TOKENS_MAX];
+   /* jsmntok_t tokens[JSON_TOKENS_MAX]; */
+   jsmntok_t* tokens = NULL;
    char iter_path[JSON_PATH_SZ];
-   unsigned char json_buffer[JSON_BUFFER_SZ];
+   /* unsigned char json_buffer[JSON_BUFFER_SZ]; */
+   unsigned char* json_buffer = NULL;
    struct DIO_STREAM drc_file;
    union DRC_TYPE map_type = DRC_MAP_TYPE;
+
+   tokens = memory_alloc( JSON_TOKENS_MAX, sizeof( jsmntok_t ) );
+   json_buffer = memory_alloc( JSON_BUFFER_SZ, 1 );
 
    /* TODO: OS-specific resources. */
    dio_open_stream_file( DRC_ARCHIVE, "r", &drc_file );
@@ -69,8 +77,13 @@ cleanup:
       dio_close_stream( &drc_file );
    }
 
+   memory_free( &json_buffer );
+   memory_free( &tokens );
+
    return retval;
 }
+
+#endif /* TILEMAP_JSON */
 
 void tilemap_draw(
    const struct TILEMAP* t, uint8_t* tiles_flags,

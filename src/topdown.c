@@ -13,6 +13,10 @@
 #define INPUT_BLOCK_DELAY 5
 #define TOPDOWN_MOBILES_MAX 10
 
+#ifndef TILEMAP_JSON
+#include "data/maps.h"
+#endif /* !TILEMAP_JSON */
+
 #ifdef MEMORY_STATIC
 static uint8_t g_tiles_flags[TILEMAP_TH * TILEMAP_TW];
 static struct MOBILE g_mobiles[TOPDOWN_MOBILES_MAX];
@@ -191,7 +195,12 @@ int topdown_loop() {
       g_mobiles[1].inventory = NULL;
       g_mobiles_count++;
 
+#ifdef TILEMAP_JSON
       tilemap_load( field, &g_map );
+#else
+      memcpy( &g_map, &gc_map_field, sizeof( struct TILEMAP ) );
+      g_map.tiles = &gc_map_field_tiles;
+#endif /* TILEMAP_JSON */
 
       /* Make sure the tilemap is drawn at least once behind any initial
        * windows.

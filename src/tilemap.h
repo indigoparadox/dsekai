@@ -19,8 +19,13 @@ struct TILEMAP_COORDS {
 struct TILEMAP {
    char* name;
    struct GRAPHICS_BITMAP tileset[TILEMAP_TILESETS_MAX];
+#ifdef TILEMAP_JSON
    uint8_t tileset_flags[TILEMAP_TILESETS_MAX];
    uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];
+#else
+   const uint8_t* tileset_flags;
+   const uint8_t* tiles;
+#endif /* !TILEMAP_JSON */
 };
 
 int16_t tilemap_load( uint32_t, struct TILEMAP* );
