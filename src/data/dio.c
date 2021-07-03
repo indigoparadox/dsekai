@@ -3,9 +3,10 @@
 
 #ifndef DISABLE_FILESYSTEM
 #ifdef MEMORY_STATIC
-#error "Filesystem routines require dynamic memory heap!"
-#endif /* MEMORY_STATIC */
+/* #error "Filesystem routines require dynamic memory heap!" */
+#else
 #include "../memory.h"
+#endif /* MEMORY_STATIC */
 #endif /* !DISABLE_FILESYSTEM */
 
 #include <stdio.h>
@@ -203,7 +204,7 @@ int32_t dio_write_stream(
    debug_printf( 1, "writing %d bytes at %d (out of %d)...",
       sz, dest->position, dest->buffer_sz );
 
-   assert( dest->position + sz >= 0 );
+   assert( dest->position + sz >= dest->position );
    
    switch( dest->type ) {
    case DIO_STREAM_FILE:
@@ -320,6 +321,8 @@ int16_t dio_mktemp_path( char* buf, uint16_t buf_sz, const char* tmpfilename ) {
    return strlen( buf );
 }
 
+#ifndef MEMORY_STATIC
+
 /**
  * @return Index of filename in path string, or -1 if a problem occurred.
  */
@@ -338,10 +341,12 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
       basename_ptr = strtok( NULL, "\\/" );
    }
 
-   memory_free( &path_tmp );
+   memory_free( (void**)&path_tmp );
 
    return retval;
 }
+
+#endif /* !MEMORY_STATIC */
 
 uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
    FILE* file_in = NULL;

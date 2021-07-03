@@ -106,7 +106,7 @@ int32_t drc_add_resource(
    header_buffer.first_entry_start += sizeof( struct DRC_TOC_E );
 
    if( sizeof( struct DRC_HEADER ) != dio_tell_stream( drc_file_in ) ) {
-      error_printf( "read %d bytes; should have read %d bytes",
+      error_printf( "read %d bytes; should have read %lu bytes",
          dio_tell_stream( drc_file_in ), sizeof( struct DRC_HEADER ) );
       retval = DRC_ERROR_COULD_NOT_READ;
       goto cleanup;
@@ -117,7 +117,7 @@ int32_t drc_add_resource(
       &header_buffer, sizeof( struct DRC_HEADER ), drc_file_out );
 
    if( sizeof( struct DRC_HEADER ) != dio_tell_stream( drc_file_out ) ) {
-      error_printf( "wrote %d bytes; should have written %d bytes",
+      error_printf( "wrote %d bytes; should have written %lu bytes",
          dio_tell_stream( drc_file_out ), sizeof( struct DRC_HEADER ) );
       retval = DRC_ERROR_COULD_NOT_WRITE;
       goto cleanup;

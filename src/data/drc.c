@@ -122,6 +122,7 @@ int32_t drc_get_resource_info(
    int32_t i = 0;
    union DRC_TYPE header_type = DRC_ARCHIVE_TYPE;
    struct DRC_HEADER header;
+   uint8_t* header_bytes = (uint8_t*)&header;
    struct DRC_TOC_E toc_e_iter;
 
    debug_printf( 2, "opening drc to get resource info..." );
@@ -129,14 +130,35 @@ int32_t drc_get_resource_info(
    assert( NULL != e );
 
    drc_read_header( drc_file, &header );
-   assert( header_type.u32 == header.type.u32 );
-   assert( header.toc_start > 0 );
-   assert( header.toc_start <= dio_sz_stream( drc_file ) );
-   assert( header.first_entry_start > 0 );
-   assert( header.first_entry_start <= dio_sz_stream( drc_file ) );
-   assert( header.first_entry_start >= header.toc_start );
-   assert( header.toc_entries >= 0 );
-   assert( header.toc_entries < DRC_MAX_ENTRIES );
+   if( 
+      header_type.u32 != header.type.u32 ||
+      header.toc_start == 0 ||
+      header.toc_start > dio_sz_stream( drc_file ) ||
+      header.first_entry_start == 0 ||
+      header.first_entry_start > dio_sz_stream( drc_file ) ||
+      header.first_entry_start < header.toc_start ||
+      header.toc_entries < 0 ||
+      header.toc_entries >= DRC_MAX_ENTRIES
+   ) {
+      error_printf( "invalid archive header" );
+      error_printf( "header is %lu bytes, looks like: ",
+         sizeof( struct DRC_HEADER ) );
+      for( i = 0 ; sizeof( struct DRC_HEADER ) > i ; i++ ) {
+         error_printf( "%02x", header_bytes[i] );
+      }
+      error_printf( "header fields:" );
+      error_printf( "   type: %c%c%c%c",
+         header.type.str[0], header.type.str[1], header.type.str[2],
+         header.type.str[3] );
+      error_printf( "   version: %u", header.version );
+      error_printf( "   crc32: %u", header.crc32 );
+      error_printf( "   filesize: %u", header.filesize );
+      error_printf( "   toc_start: %u", header.toc_start );
+      error_printf( "   toc_entries: %u", header.toc_entries );
+      error_printf( "   reserved: %u", header.reserved );
+      error_printf( "   first_entry_start: %u", header.first_entry_start );
+      return -1;
+   }
    debug_printf( 2, "drc is %d bytes long; found %d TOC entries",
       header.filesize, header.toc_entries );
    dio_seek_stream( drc_file, header.toc_start, SEEK_SET );

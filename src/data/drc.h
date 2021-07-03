@@ -8,7 +8,6 @@
 
 #include "dio.h"
 
-#define DRC_MAX_PATH 255
 #ifdef USE_DOS
 #define DRC_DEFAULT_TEMP "c:\\temp"
 #define DRC_PATH_SEP '\\'
@@ -34,7 +33,7 @@
 
 #define DRC_ARCHIVE_TYPE {'D', 'R', 'C', 'T'}
 #define DRC_BITMAP_TYPE {'B', 'M', 'P', '1'}
-#define DRC_MAP_TYPE {'T', 'M', 'A', 'B'}
+#define DRC_MAP_TYPE {'T', 'M', 'A', 'P'}
 
 union DRC_TYPE {
    char str[4];
@@ -46,7 +45,7 @@ __attribute__( (__packed__) )
 #endif /* __GNUC__ */
 struct DRC_HEADER {
    union DRC_TYPE type;
-   uint16_t version;
+   uint32_t version;
    uint32_t crc32; /* TODO */
    uint32_t filesize;
    uint32_t toc_start;
@@ -64,7 +63,7 @@ struct DRC_TOC_E {
    uint32_t id;
    uint32_t data_start;
    uint32_t data_sz;
-   uint16_t name_sz;
+   uint32_t name_sz;
    char name[64];          /* Used by packer/preprocessor to map image to ID. */
 };
 

@@ -155,9 +155,9 @@ int topdown_loop() {
 
 #ifndef MEMORY_STATIC
       g_tiles_flags = memory_alloc( TILEMAP_TH * TILEMAP_TW, 1 );
-      assert( NULL != g_tiles_flags );
+      /* assert( NULL != g_tiles_flags ); */
       g_mobiles = memory_alloc( 2, sizeof( struct MOBILE ) );
-      assert( NULL != g_mobiles );
+      /* assert( NULL != g_mobiles ); */
 #endif /* MEMORY_STATIC */
 
 #ifndef DISABLE_GRAPHICS
@@ -175,7 +175,7 @@ int topdown_loop() {
       g_mobiles_count++;
 
       g_player = &(g_mobiles[0]);
-      assert( NULL != g_player );
+      /* assert( NULL != g_player ); */
 
 #ifndef DISABLE_GRAPHICS
       graphics_load_bitmap( sprite_princess, &(g_mobiles[1].sprite) );
@@ -191,7 +191,7 @@ int topdown_loop() {
       g_mobiles[1].inventory = NULL;
       g_mobiles_count++;
 
-      tilemap_load( field, &g_map );
+      /*tilemap_load( field, &g_map );*/
 
       /* Make sure the tilemap is drawn at least once behind any initial
        * windows.
@@ -334,8 +334,8 @@ void topdown_deinit() {
    tilemap_deinit( &g_map );
 
 #ifndef MEMORY_STATIC
-   memory_free( &g_mobiles );
-   memory_free( &g_tiles_flags );
+   memory_free( (void**)&g_mobiles );
+   memory_free( (void**)&g_tiles_flags );
 #endif /* !MEMORY_STATIC */
 }
 

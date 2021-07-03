@@ -278,12 +278,29 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    /* Load the resource. */
    memset( &rstream, '\0', sizeof( struct DIO_STREAM ) );
    dio_open_stream_file( DRC_ARCHIVE, "rb", &rstream );
+   if( 0 == dio_type_stream( &rstream ) ) {
+      error_printf( "unable to open DRC archive" );
+      retval = 0;
+      goto cleanup;
+   }
+
    buffer_sz = drc_get_resource_sz( &rstream, bitmap_type, id );
+   if( 0 >= buffer_sz ) {
+      error_printf( "unable to get resource %d info", id );
+      retval = 0;
+      goto cleanup;
+   }
+
    buffer = memory_alloc( 1, buffer_sz );
+   if( NULL == buffer ) {
+      error_printf( "unable to allocate memory" );
+      retval = 0;
+      goto cleanup;
+   }
+
    buffer_sz = drc_get_resource( &rstream, bitmap_type, id, buffer, 0 );
    if( 0 >= buffer_sz ) {
-      assert( NULL == buffer );
-      retval = buffer_sz;
+      retval = 0;
       goto cleanup;
    }
 

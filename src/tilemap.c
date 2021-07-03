@@ -21,7 +21,7 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    jsmn_parser parser;
    jsmntok_t tokens[JSON_TOKENS_MAX];
    char iter_path[JSON_PATH_SZ];
-   char json_buffer[JSON_BUFFER_SZ];
+   unsigned char json_buffer[JSON_BUFFER_SZ];
    struct DIO_STREAM drc_file;
    union DRC_TYPE map_type = DRC_MAP_TYPE;
 

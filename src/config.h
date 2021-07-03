@@ -28,6 +28,10 @@
 #define GRAPHICS_MODE      0x05
 #endif /* !GRAPHICS_MODE */
 
+#ifndef LOG_FILE_NAME
+#define LOG_FILE_NAME "logdos.txt"
+#endif /* !LOG_FILE_NAME */
+
 #ifndef CGA_COLD
 #define CGA_COLD           0x01
 #endif /* CGA_COLD */
@@ -42,7 +46,9 @@
 #define DRC_ARCHIVE "doscga.drc"
 #endif /* !DRC_ARCHIVE */
 
+#define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
+/* #define MEMORY_STATIC */
 #define MEMORY_CALLOC
 
 /* ------ */
@@ -141,8 +147,8 @@
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 /* ------ */
 
-#define TILEMAP_TW (60)
-#define TILEMAP_TH (60)
+#define TILEMAP_TW (30)
+#define TILEMAP_TH (30)
 
 #define TILEMAP_TILESETS_MAX  (12)
 
@@ -198,6 +204,17 @@
 #define DIO_PATH_MAX 254
 #endif /* DIO_PATH_MAX */
 
+#ifdef LOG_TO_FILE
+#ifndef DEBUG_LOG
+#define DEBUG_LOG
+#endif /* !DEBUG_LOG */
+#define LOG_ERR_TARGET g_log_file
+#define LOG_STD_TARGET g_log_file
+#else
+#define LOG_ERR_TARGET stderr
+#define LOG_STD_TARGET stdout
+#endif /* LOG_TO_FILE */
+
 /* ! */
 #ifdef DEBUG_LOG
 /* ! */
@@ -206,16 +223,17 @@
 
 #  define internal_debug_printf( lvl, ... ) \
       if( lvl >= DEBUG_THRESHOLD ) { \
-         printf( "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); \
-         printf( __VA_ARGS__ ); \
-         printf( "\n" ); \
-         fflush( stdout ); \
+         fprintf( LOG_STD_TARGET, "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); \
+         fprintf( LOG_STD_TARGET, __VA_ARGS__ ); \
+         fprintf( LOG_STD_TARGET, "\n" ); \
+         fflush( LOG_STD_TARGET ); \
       }
 
 #  define internal_error_printf( ... ) \
-      fprintf( stderr, "(E) " __FILE__ ": %d: ", __LINE__ ); \
-      fprintf( stderr, __VA_ARGS__ ); \
-      fprintf( stderr, "\n" ); \
+      fprintf( LOG_ERR_TARGET, "(E) " __FILE__ ": %d: ", __LINE__ ); \
+      fprintf( LOG_ERR_TARGET, __VA_ARGS__ ); \
+      fprintf( LOG_ERR_TARGET, "\n" ); \
+      fflush( LOG_ERR_TARGET );
 
 #  define debug_printf( lvl, ... ) \
       internal_debug_printf( lvl, __VA_ARGS__ )
@@ -287,6 +305,14 @@
 
 #define SCREEN_REAL_W (SCREEN_W * SCREEN_SCALE)
 #define SCREEN_REAL_H (SCREEN_H * SCREEN_SCALE)
+
+#ifdef LOG_TO_FILE
+#ifdef MAIN_C
+FILE* g_log_file = NULL;
+#else /* !MAIN_C */
+extern FILE* g_log_file;
+#endif /* MAIN_C */
+#endif /* LOG_TO_FILE */
 
 #ifndef MAIN_C
 extern char g_assert_failed[];
