@@ -25,7 +25,7 @@ int graphics_init() {
 #endif /* DEBUG_CGA_EMU */
 
    if( SDL_Init( SDL_INIT_EVERYTHING ) ) {
-      printf( "error initializing SDL: %s\n", SDL_GetError() );
+      error_printf( "error initializing SDL: %s", SDL_GetError() );
    }
 
    /*SDL_CreateWindowAndRenderer(
@@ -173,14 +173,14 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    bmp_stream = SDL_RWFromMem( buffer, buffer_sz );
    b->surface = SDL_LoadBMP_RW( bmp_stream, 1 ); /* Free stream on close. */
    if( NULL == b->surface ) {
-      fprintf( stderr, "unable to load bitmap %u: %s\n", id, SDL_GetError() );
+      error_printf( "unable to load bitmap %u: %s", id, SDL_GetError() );
       buffer_sz = -1;
       goto cleanup;
    }
    debug_printf( 2, "loaded surface for bitmap resource #%d", id );
    b->texture = SDL_CreateTextureFromSurface( g_renderer, b->surface );
    if( NULL == b->texture ) {
-      fprintf( stderr, "unable to load texture %u: %s\n", id, SDL_GetError() );
+      error_printf( "unable to load texture %u: %s", id, SDL_GetError() );
       buffer_sz = -1;
       if( NULL != b->surface ) {
          SDL_FreeSurface( b->surface );

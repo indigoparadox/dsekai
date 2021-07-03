@@ -69,7 +69,7 @@ int32_t drc_add_resource(
       return existing_offset;
    } else if( 0 < existing_offset ) {
       /* Resource exists. */
-      dio_printf( "resource %u/%u exists at %d; replacing...\n",
+      debug_printf( 2, "resource %u/%u exists at %d; replacing...",
          type.u32, id, existing_offset );
       /* TODO: Rather than removing the resource, exclude it from the copy
                loop below. */

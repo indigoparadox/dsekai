@@ -9,19 +9,6 @@
 #define DIO_ERROR_COULD_NOT_OPEN_FILE  -3
 #define DIO_ERROR_INVALID_STREAM       -4
 
-#ifndef DIO_SILENT
-#define dio_printf( ... ) printf( __VA_ARGS__ )
-#define dio_eprintf( ... ) fprintf( stderr, __VA_ARGS__ )
-#else
-#ifdef NO_VARGS
-#define dio_printf( x )
-#define dio_eprintf( x )
-#else
-#define dio_printf( ... )
-#define dio_eprintf( ... )
-#endif /* NO_VARGS */
-#endif
-
 #define DIO_STREAM_BUFFER  1
 #define DIO_STREAM_FILE    2
 

@@ -11,8 +11,16 @@
  "terrains":[
         {
          "name":"grass",
-         "tile":-1
-        }],
+         "tile":0
+        }, 
+        {
+         "name":"brick_wall",
+         "tile":1
+        },
+        {
+         "name":"tree",
+         "tile":2
+        }], 
  "tilecount":3,
  "tileheight":16,
  "tiles":
@@ -29,14 +37,14 @@
          "image":"tile_field_brick_wall.bmp",
          "imageheight":16,
          "imagewidth":16,
-         "terrain":[0, 0, 0, 0]
+         "terrain":[1, 1, 1, 1]
         },
      "2":
         {
          "image":"tile_field_tree.bmp",
          "imageheight":16,
          "imagewidth":16,
-         "terrain":[0, 0, 0, 0]
+         "terrain":[2, 2, 2, 2]
         }
     },
  "tilewidth":16,

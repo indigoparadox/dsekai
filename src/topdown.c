@@ -191,7 +191,7 @@ int topdown_loop() {
       g_mobiles[1].inventory = NULL;
       g_mobiles_count++;
 
-      /*tilemap_load( field, &g_map );*/
+      tilemap_load( field, &g_map );
 
       /* Make sure the tilemap is drawn at least once behind any initial
        * windows.

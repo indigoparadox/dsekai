@@ -7,9 +7,9 @@
 
 #include <string.h>
 
-#define JSON_TOKENS_MAX 4096
+#define JSON_TOKENS_MAX 1024
 #define JSON_PATH_SZ 255
-#define JSON_BUFFER_SZ 40960
+#define JSON_BUFFER_SZ 4096
 
 int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    int16_t tok_parsed = 0,
@@ -25,6 +25,7 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    struct DIO_STREAM drc_file;
    union DRC_TYPE map_type = DRC_MAP_TYPE;
 
+   /* TODO: OS-specific resources. */
    dio_open_stream_file( DRC_ARCHIVE, "r", &drc_file );
    if( 0 == dio_type_stream( &drc_file ) ) {
       error_printf( "unable to open archive for tilemap" );
@@ -37,8 +38,6 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    buffer_used = drc_get_resource(
       &drc_file, map_type, id, &(json_buffer[0]),
       JSON_BUFFER_SZ );
-
-   printf( "%s (%d)\n", json_buffer, buffer_used );
 
    jsmn_init( &parser );
    tok_parsed = jsmn_parse(
@@ -54,8 +53,14 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       dio_snprintf( iter_path, 255, "/layers/0/data/%d", i );
       tile_id_in = 
          json_int_from_path( iter_path, &(tokens[0]), tok_parsed, json_buffer );
-      t->tiles[i / 2] =
-         ((0 == i % 2) ? (tile_id_in << 4) : tile_id_in) & 0x0f;
+      tile_id_in--;
+      if( 0 == i % 2 ) {
+         tile_id_in <<= 4;
+         tile_id_in &= 0xf0;
+      } else {
+         tile_id_in &= 0x0f;
+      }
+      t->tiles[i / 2] |= tile_id_in;
    }
 
 cleanup:

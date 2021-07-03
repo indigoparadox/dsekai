@@ -155,7 +155,7 @@ $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DDIO_SILENT -DUSE_LOOKUPS -zp=1
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DDIO_SILENT -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=1
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
@@ -253,7 +253,7 @@ $(OBJDIR_SDL)/%.o: %.c res_sdl16_drc
 $(BINDIR)/doscga.drc: res_doscga_drc
 
 res_doscga_drc: $(DRCPACK) $(DSEKAI_ASSETS_DOS_CGA)
-	rm $(BINDIR)/sdl16.drc || true
+	rm $(BINDIR)/doscga.drc || true
 	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -i 5001 \
       -if $(GENDIR_DOS)/*.cga $(DSEKAI_ASSETS_MAPS) -lh $(GENDIR_DOS)/resext.h
 

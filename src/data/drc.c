@@ -165,7 +165,7 @@ int32_t drc_get_resource_info(
    for( i = 0 ; header.toc_entries > i ; i++ ) {
       drc_read_toc_e( drc_file, &toc_e_iter );
 
-      debug_printf( 1, "comparing: %c%c%c%c vs %c%c%c%c, %d vs %d\n",
+      debug_printf( 1, "comparing: %c%c%c%c vs %c%c%c%c, %d vs %d",
          toc_e_iter.type.str[0], toc_e_iter.type.str[1],
          toc_e_iter.type.str[2], toc_e_iter.type.str[3],
          type.str[0], type.str[1], type.str[2], type.str[3],
