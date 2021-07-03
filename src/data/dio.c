@@ -39,8 +39,6 @@ int32_t dio_open_stream_file(
 
    debug_printf( 2, "file is %d bytes", stream->buffer_sz );
 
-   assert( stream->buffer_sz >= 0 );
-
    stream->id = g_next_stream_id;
    stream->type = DIO_STREAM_FILE;
    stream->position = 0;
@@ -182,7 +180,7 @@ int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
    case DIO_STREAM_FILE:
       sz_out = fread( dest, 1, sz, src->buffer.file );
       src->position += sz_out;
-      assert( ftell( src->buffer.file ) == src->position );
+      /* assert( ftell( src->buffer.file ) == src->position ); */
       return sz_out;
 
    case DIO_STREAM_BUFFER:

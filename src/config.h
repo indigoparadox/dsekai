@@ -174,14 +174,6 @@
 #define DRC_COPY_BLOCK_SZ (1024)
 #endif /* !DRC_COPY_BLOCK_SZ */
 
-#ifndef DRC_BMP_TYPE
-#define DRC_BMP_TYPE "BMP1"
-#endif /* DRC_BMP_TYPE */
-
-#ifndef DRC_MAP_TYPE
-#define DRC_MAP_TYPE "TMAP"
-#endif /* DRC_BMP_TYPE */
-
 #ifndef MOBILES_MAX
 #define MOBILES_MAX (10)
 #endif /* !MOBILES_MAX */

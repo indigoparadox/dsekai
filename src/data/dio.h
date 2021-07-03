@@ -29,7 +29,6 @@
 
 #define dio_assert_stream( stream ) \
    assert( \
-      0 <= stream->buffer_sz && \
       0 <= stream->id && \
       ((DIO_STREAM_BUFFER == stream->type && NULL != stream->buffer.bytes ) || \
       (DIO_STREAM_FILE == stream->type && NULL != stream->buffer.file )) )
@@ -43,8 +42,8 @@ struct DIO_STREAM {
    int32_t id;
    uint8_t type;
    union DIO_BUFFER buffer;
-   uint32_t buffer_sz;
-   uint32_t position;
+   int32_t buffer_sz;
+   int32_t position;
 };
 
 struct CONVERT_GRID;

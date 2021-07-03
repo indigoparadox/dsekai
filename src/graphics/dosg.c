@@ -266,6 +266,8 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    uint16_t plane_sz = 0,
       plane_offset = 0;
    int32_t retval = 1;
+   struct DIO_STREAM rstream;
+   union DRC_TYPE bitmap_type = DRC_BITMAP_TYPE;
 
    b->ref_count++;
 
@@ -274,8 +276,11 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load the resource. */
-   buffer_sz = drc_get_resource(
-      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer, 0 );
+   memset( &rstream, '\0', sizeof( struct DIO_STREAM ) );
+   dio_open_stream_file( DRC_ARCHIVE, "rb", &rstream );
+   buffer_sz = drc_get_resource_sz( &rstream, bitmap_type, id );
+   buffer = memory_alloc( 1, buffer_sz );
+   buffer_sz = drc_get_resource( &rstream, bitmap_type, id, buffer, 0 );
    if( 0 >= buffer_sz ) {
       assert( NULL == buffer );
       retval = buffer_sz;

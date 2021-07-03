@@ -158,7 +158,7 @@ START_TEST( check_drc_add ) {
       sizeof( struct DRC_HEADER ) + sizeof( struct DRC_TOC_E ) + 22,
       dio_tell_stream( &g_drc_stream_w ) ); */
 
-   print_buffers();
+   /* print_buffers(); */
 
 }
 END_TEST
@@ -193,10 +193,54 @@ START_TEST( check_drc_list ) {
 
    ck_assert_int_eq( toc_sz, 2 );
    ck_assert_int_eq( toc_l[0].id, toc_e->id );
+   ck_assert_int_eq( toc_l[0].type.u32, toc_e->type.u32 );
    ck_assert_int_eq( toc_l[1].id, 5002 );
+   ck_assert_int_eq( toc_l[1].type.u32, toc_e->type.u32 );
 
    free( toc_l );
       
+}
+END_TEST
+
+START_TEST( check_drc_get ) {
+   int i = 0,
+      toc_sz = 0;
+   int32_t read = 0;
+   union DRC_TYPE toc_type = DRC_BITMAP_TYPE,
+      header_type = DRC_ARCHIVE_TYPE;
+   char test_string_1[] = "This is a test string.",
+      test_string_2[] = "Another tstrng.",
+      reader[24];
+   struct DRC_HEADER* header = (struct DRC_HEADER*)&g_buffer_r;
+   struct DRC_TOC_E* toc_e =
+         (struct DRC_TOC_E*)&(g_buffer_r[sizeof( struct DRC_HEADER )]),
+      * toc_l = NULL;
+
+   drc_create( &g_drc_stream_r );
+
+   drc_add_resource(
+      &g_drc_stream_r, &g_drc_stream_w, toc_type, 5001, "test1.bmp", 9,
+      test_string_1, 22 );
+
+   memcpy( g_buffer_r, g_buffer_w, DRC_CKBUFFER_SZ );
+
+   drc_add_resource(
+      &g_drc_stream_r, &g_drc_stream_w, toc_type, 5002, "test2.bmp", 9,
+      test_string_2, 15 );
+
+   memcpy( g_buffer_r, g_buffer_w, DRC_CKBUFFER_SZ );
+
+   dio_close_stream( &g_drc_stream_r );
+   dio_open_stream_buffer( g_buffer_r, DRC_CKBUFFER_SZ, &g_drc_stream_r );
+
+   read = drc_get_resource_sz( &g_drc_stream_r, toc_type, 5001 );
+
+   ck_assert_int_eq( read, 22 );
+      
+   read = drc_get_resource( &g_drc_stream_r, toc_type, 5001, reader, 24 );
+
+   ck_assert_int_eq( read, 22 );
+   ck_assert_str_eq( reader, test_string_1 );
 }
 END_TEST
 
@@ -213,6 +257,7 @@ Suite* drc_suite( void ) {
    tcase_add_test( tc_core, check_drc_create ); 
    tcase_add_test( tc_core, check_drc_add ); 
    tcase_add_test( tc_core, check_drc_list ); 
+   tcase_add_test( tc_core, check_drc_get ); 
 
    suite_add_tcase( s, tc_core );
 

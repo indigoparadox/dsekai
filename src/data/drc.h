@@ -17,6 +17,9 @@
 #define DRC_PATH_SEP '/'
 #endif /* USE_DOS */
 
+/* This is kind of arbitrary. Test if increasing. */
+#define DRC_MAX_ENTRIES 1024
+
 #define DRC_ERROR_PATH_TOO_LONG           -1
 #define DRC_ERROR_COULD_NOT_CREATE        -2
 #define DRC_ERROR_COULD_NOT_CREATE_TEMP   -3

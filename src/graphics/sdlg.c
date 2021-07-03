@@ -159,11 +159,15 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    /* Load resource into buffer. */
    memset( &rstream, '\0', sizeof( struct DIO_STREAM ) );
    dio_open_stream_file( DRC_ARCHIVE, "rb", &rstream );
-   buffer_sz = drc_get_resource( &rstream, bitmap_type, id, &buffer, 0 );
+   buffer_sz = drc_get_resource_sz( &rstream, bitmap_type, id );
+   buffer = memory_alloc( 1, buffer_sz );
+   buffer_sz = drc_get_resource( &rstream, bitmap_type, id, buffer, 0 );
    if( 0 >= buffer_sz ) {
       assert( NULL == buffer );
       return buffer_sz;
    }
+
+   debug_printf( 2, "loaded %d bytes", buffer_sz );
 
    /* Parse buffered resource into SDL. */
    bmp_stream = SDL_RWFromMem( buffer, buffer_sz );

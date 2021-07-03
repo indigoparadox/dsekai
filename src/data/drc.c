@@ -23,16 +23,12 @@
 static int32_t drc_read_toc_e(
    struct DIO_STREAM* drc_file, struct DRC_TOC_E* toc_e
 ) {
-   uint32_t toc_e_start = 0,
-      read = 0;
-
    if(
       sizeof( struct DRC_TOC_E ) !=
       dio_read_stream( toc_e, sizeof( struct DRC_TOC_E ), drc_file )
    ) {
       return -1;
    }
-
 
    /* TODO: Error handling .*/
    return sizeof( struct DRC_TOC_E );
@@ -124,6 +120,7 @@ int32_t drc_get_resource_info(
    union DRC_TYPE type, uint32_t id, struct DRC_TOC_E* e
 ) {
    int32_t i = 0;
+   union DRC_TYPE header_type = DRC_ARCHIVE_TYPE;
    struct DRC_HEADER header;
    struct DRC_TOC_E toc_e_iter;
 
@@ -132,15 +129,27 @@ int32_t drc_get_resource_info(
    assert( NULL != e );
 
    drc_read_header( drc_file, &header );
-#ifndef CHECK
-   assert( 0 != header.toc_start );
-#endif /* !CHECK */
+   assert( header_type.u32 == header.type.u32 );
+   assert( header.toc_start > 0 );
+   assert( header.toc_start <= dio_sz_stream( drc_file ) );
+   assert( header.first_entry_start > 0 );
+   assert( header.first_entry_start <= dio_sz_stream( drc_file ) );
+   assert( header.first_entry_start >= header.toc_start );
+   assert( header.toc_entries >= 0 );
+   assert( header.toc_entries < DRC_MAX_ENTRIES );
    debug_printf( 2, "drc is %d bytes long; found %d TOC entries",
       header.filesize, header.toc_entries );
+   dio_seek_stream( drc_file, header.toc_start, SEEK_SET );
    for( i = 0 ; header.toc_entries > i ; i++ ) {
       drc_read_toc_e( drc_file, &toc_e_iter );
 
-      if( toc_e_iter.type.u32 != type.u32 && toc_e_iter.id != id ) {
+      debug_printf( 1, "comparing: %c%c%c%c vs %c%c%c%c, %d vs %d\n",
+         toc_e_iter.type.str[0], toc_e_iter.type.str[1],
+         toc_e_iter.type.str[2], toc_e_iter.type.str[3],
+         type.str[0], type.str[1], type.str[2], type.str[3],
+         toc_e_iter.id, id );
+
+      if( toc_e_iter.type.u32 != type.u32 || toc_e_iter.id != id ) {
          continue;
       }
 
@@ -153,6 +162,8 @@ int32_t drc_get_resource_info(
          toc_e_iter.data_start, toc_e_iter.data_sz );
 
       memcpy( e, &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+
+      i = sizeof( struct DRC_TOC_E );
 
       goto cleanup;
    }
@@ -216,57 +227,21 @@ int32_t drc_get_resource(
 
 cleanup:
 
-#ifndef MEMORY_STATIC
-#if 0
-   if( NULL != toc_e_iter.name ) {
-      memory_free( &toc_e_iter.name );
-   }
-#endif
-#endif /* !MEMORY_STATIC */
-
    return resource_sz;
 }
 
 int32_t drc_get_resource_sz(
    struct DIO_STREAM* drc_file, union DRC_TYPE type, uint32_t id
 ) {
-   int32_t res_sz_out = 0,
-      i = 0;
+   int32_t res_sz_out = 0;
    struct DRC_TOC_E toc_e_iter;
-   struct DRC_HEADER header;
 
-   debug_printf( 2, "opening drc to get resource size..." );
-
-   drc_read_header( drc_file, &header );
-
-   assert( 0 != header.toc_start );
-   for( i = 0 ; header.toc_entries > i ; i++ ) {
-
-      assert( NULL == toc_e_iter.name );
-      drc_read_toc_e( drc_file, &toc_e_iter );
-
-      if( toc_e_iter.type.u32 == type.u32 && toc_e_iter.id == id ) {
-         debug_printf( 2, "found size for resource %u of type %s: %u bytes",
-            toc_e_iter.id, (char*)&(toc_e_iter.type), toc_e_iter.data_sz );
-         res_sz_out = toc_e_iter.data_sz;
-         break;
-      }
-
-      /*
-      memory_free( &toc_e_iter.name );
-      toc_e_iter.name = NULL;
-      */
+   res_sz_out = drc_get_resource_info( drc_file, type, id, &toc_e_iter );
+   if( 0 >= res_sz_out ) {
+      return res_sz_out;
    }
 
-#if 0
-#ifndef MEMORY_STATIC
-   if( NULL != toc_e_iter.name ) {
-      memory_free( &toc_e_iter.name );
-   }
-#endif /* MEMORY_STATIC */
-#endif
-
-   return res_sz_out;
+   return toc_e_iter.data_sz;
 }
 
 int32_t drc_get_resource_name(
