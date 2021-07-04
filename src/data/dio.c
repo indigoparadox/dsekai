@@ -3,14 +3,6 @@
 
 #include "drc.h"
 
-#ifndef DISABLE_FILESYSTEM
-#ifdef MEMORY_STATIC
-/* #error "Filesystem routines require dynamic memory heap!" */
-#else
-#include "../memory.h"
-#endif /* MEMORY_STATIC */
-#endif /* !DISABLE_FILESYSTEM */
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -24,34 +16,15 @@ struct CONVERT_GRID;
 /**
  * \brief Allocate a handle to a resource in DRC archive or OS resource fork.
  */
-int32_t dio_get_resource_handle(
-   uint32_t id, uint32_t type, struct DIO_RESOURCE* rsrc
-) {
-   int32_t retval = 1;
-
+MEMORY_HANDLE dio_get_resource_handle( uint32_t id, uint32_t type ) {
 #ifdef PLATFORM_PALM
-
-   rsrc->handle = DmGetResource( type, id );
-   if( NULL == rsrc->handle ) {
-      retval = 0;
-      goto cleanup;
-   }
-
-   rsrc->ptr = MemHandleLock( rsrc->handle );
-   if( NULL == rsrc->ptr ) {
-      retval = 0;
-      if( NULL != rsrc->handle ) {
-         MemHandleUnlock( rsrc->handle );
-         rsrc->handle = NULL;
-      }
-      goto cleanup;
-   }
-
-cleanup:
-
+   return DmGetResource( type, id );
 #else
    struct DIO_STREAM drc_file;
    union DRC_TYPE drc_type;
+   uint8_t* ptr = NULL;
+   int32_t ptr_sz = 0;
+   MEMORY_HANDLE handle = NULL;
 
    drc_type.u32 = dio_reverse_endian_32( type );
 
@@ -61,13 +34,22 @@ cleanup:
    dio_open_stream_file( DRC_ARCHIVE, "r", &drc_file );
    if( 0 == dio_type_stream( &drc_file ) ) {
       error_printf( "unable to open archive for tilemap" );
-      retval = 0;
       goto cleanup;
    }
 
-   rsrc->ptr_sz = drc_get_resource_sz( &drc_file, drc_type, id );
-   rsrc->ptr = memory_alloc( rsrc->ptr_sz, 1 );
-   drc_get_resource( &drc_file, drc_type, id, rsrc->ptr, rsrc->ptr_sz );
+   /* Allocate a handle, lock it, copy in the file, release it. */
+   ptr_sz = drc_get_resource_sz( &drc_file, drc_type, id );
+   debug_printf( 2, "allocating %d bytes for resource", ptr_sz );
+   assert( 0 < ptr_sz );
+   handle = memory_alloc( ptr_sz, 1 );
+   if( NULL == handle ) {
+      error_printf( "could not allocate space for resource" );
+      goto cleanup;
+   }
+   ptr = memory_lock( handle );
+   assert( NULL != ptr );
+   drc_get_resource( &drc_file, drc_type, id, ptr, ptr_sz );
+   memory_unlock( handle );
 
 cleanup:
 
@@ -75,30 +57,7 @@ cleanup:
       dio_close_stream( &drc_file );
    }
 
-#endif /* PLATFORM_PALM */
-
-   return retval;
-}
-
-/**
- * \brief Free resource handle allocated by dio_get_resource_handle().
- */
-void dio_free_resource_handle( struct DIO_RESOURCE* rsrc ) {
-#ifdef PLATFORM_PALM
-
-   if( NULL != rsrc->handle ) {
-      MemHandleUnlock( rsrc->handle );
-      rsrc->handle = NULL;
-   }
-
-#else
-
-   if( NULL != rsrc->ptr ) {
-      free( rsrc->ptr );
-   }
-   rsrc->ptr = NULL;
-   rsrc->ptr_sz = 0;
-
+   return handle;
 #endif /* PLATFORM_PALM */
 }
 
@@ -261,6 +220,8 @@ int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
 
    dio_assert_stream( src );
 
+   assert( NULL != dest );
+
    debug_printf( 1, "reading %d bytes at %d (out of %d)...",
       sz, src->position, src->buffer_sz );
 
@@ -273,6 +234,7 @@ int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
       sz_out = fread( dest, 1, sz, src->buffer.file );
       src->position += sz_out;
       /* assert( ftell( src->buffer.file ) == src->position ); */
+      debug_printf( 1, "read complete" );
       return sz_out;
 #endif /* !DISABLE_FILESYSTEM */
 
@@ -415,8 +377,6 @@ int16_t dio_mktemp_path( char* buf, uint16_t buf_sz, const char* tmpfilename ) {
    return strlen( buf );
 }
 
-#ifndef MEMORY_STATIC
-
 /**
  * @return Index of filename in path string, or -1 if a problem occurred.
  */
@@ -424,8 +384,11 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
    int32_t retval = -1;
    char* path_tmp = NULL,
       * basename_ptr = NULL;
+   MEMORY_HANDLE handle = NULL;
 
-   path_tmp = memory_alloc( path_sz + 1, 1 );
+   handle = memory_alloc( path_sz + 1, 1 );
+   assert( 0 == handle->locks );
+   path_tmp = memory_lock( handle );
    memcpy( path_tmp, path, path_sz );
 
    basename_ptr = strtok( path_tmp, "\\/" );
@@ -435,23 +398,23 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
       basename_ptr = strtok( NULL, "\\/" );
    }
 
-   memory_free( (void**)&path_tmp );
+   memory_unlock( handle );
+   memory_free( handle );
 
    return retval;
 }
 
-#endif /* !MEMORY_STATIC */
-
-uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
+uint32_t dio_read_file( const char* path, MEMORY_HANDLE* buffer_handle ) {
    FILE* file_in = NULL;
    uint32_t read = 0,
       read_total = 0,
       file_in_sz = 0;
    uint8_t buffer_tmp[DIO_READ_FILE_BLOCK_SZ + 1];
+   uint8_t* buffer_ptr = NULL;
 
    memset( buffer_tmp, '\0', DIO_READ_FILE_BLOCK_SZ + 1 );
 
-   assert( NULL != buffer_ptr );
+   assert( NULL != buffer_handle );
 
    file_in = fopen( path, "rb" );
    assert( NULL != file_in );
@@ -460,18 +423,21 @@ uint32_t dio_read_file( const char* path, uint8_t** buffer_ptr ) {
    fseek( file_in, 0, SEEK_END );
    file_in_sz = ftell( file_in );
    fseek( file_in, 0, SEEK_SET );
-   *buffer_ptr = memory_alloc( file_in_sz, 1 );
-   assert( NULL != *buffer_ptr );
+   *buffer_handle = memory_alloc( file_in_sz, 1 );
+   assert( NULL != *buffer_handle );
+   buffer_ptr = memory_lock( *buffer_handle );
 
    while(
       (read = (fread( buffer_tmp, 1, DIO_READ_FILE_BLOCK_SZ, file_in )))
    ) {
-      memcpy( *buffer_ptr + read_total, buffer_tmp, read );
+      memcpy( buffer_ptr + read_total, buffer_tmp, read );
       read_total += read;
    }
 
    debug_printf( 2, "read %u bytes (vs %u)", read_total, file_in_sz );
    assert( read_total == file_in_sz );
+
+   buffer_ptr = memory_unlock( *buffer_handle );
 
    return read_total;
 }

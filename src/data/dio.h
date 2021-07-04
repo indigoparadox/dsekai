@@ -3,6 +3,7 @@
 #define DIO_H
 
 #include "../dstypes.h"
+#include "../memory.h"
 
 #define DIO_ERROR_NULL_PTR             -1
 #define DIO_ERROR_COPY_MISMATCH        -2
@@ -46,19 +47,10 @@ struct DIO_STREAM {
    int32_t position;
 };
 
-struct DIO_RESOURCE {
-   void* ptr;
-   uint32_t ptr_sz;
-#ifdef PLATFORM_PALM
-   MemHandle handle;
-#endif /* PLATFORM_PALM */
-};
-
 struct CONVERT_GRID;
 struct DIO_STREAM;
 
-int32_t dio_get_resource_handle( uint32_t, uint32_t, struct DIO_RESOURCE* );
-void dio_free_resource_handle( struct DIO_RESOURCE* );
+MEMORY_HANDLE dio_get_resource_handle( uint32_t, uint32_t );
 int32_t dio_open_stream_file( const char*, const char*, struct DIO_STREAM* );
 int32_t dio_open_stream_buffer( uint8_t*, uint32_t, struct DIO_STREAM* );
 void dio_close_stream( struct DIO_STREAM* );
@@ -78,7 +70,7 @@ int32_t dio_basename( const char*, uint32_t );
 void dio_print_binary( uint8_t );
 void dio_print_grid( struct CONVERT_GRID* );
 int32_t dio_copy_file( const char*, const char* );
-uint32_t dio_read_file( const char*, uint8_t** );
+uint32_t dio_read_file( const char*, MEMORY_HANDLE* );
 int32_t dio_move_file( const char*, const char* );
 int16_t dio_itoa( char*, uint16_t, int16_t, uint8_t );
 int16_t dio_atoi( const char*, int );

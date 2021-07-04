@@ -123,6 +123,9 @@ int32_t drc_add_resource(
       goto cleanup;
    }
 
+   assert( dio_tell_stream( drc_file_out ) == sizeof( struct DRC_HEADER ) );
+   assert( dio_tell_stream( drc_file_in ) == sizeof( struct DRC_HEADER ) );
+
    /* Copy the TOC. */
    assert( sizeof( struct DRC_HEADER ) == dio_tell_stream( drc_file_in ) );
    assert( sizeof( struct DRC_HEADER ) == dio_tell_stream( drc_file_out ) );
@@ -146,6 +149,12 @@ int32_t drc_add_resource(
          &toc_buffer, sizeof( struct DRC_TOC_E ), drc_file_out );
    }
 
+   assert( dio_tell_stream( drc_file_out ) ==
+      sizeof( struct DRC_HEADER ) +
+      ((header_buffer.toc_entries - 1) * sizeof( struct DRC_TOC_E )) );
+   assert( dio_tell_stream( drc_file_in ) == 
+      header_buffer.first_entry_start - sizeof( struct DRC_TOC_E ) );
+
    /* Write the new TOC entry. */
    memset( &toc_buffer, '\0', sizeof( struct DRC_TOC_E ) );
    debug_printf( 2, "creating new TOC entry (%u) for file %u, %s (%u bytes)...",
@@ -160,6 +169,9 @@ int32_t drc_add_resource(
    strncpy( toc_buffer.name, name, 64 );
 
    dio_write_stream( &toc_buffer, sizeof( struct DRC_TOC_E ), drc_file_out );
+   assert( dio_tell_stream( drc_file_out ) == header_buffer.first_entry_start );
+   assert( dio_tell_stream( drc_file_in ) == 
+      header_buffer.first_entry_start - sizeof( struct DRC_TOC_E ) );
 
    /* Copy the existing data. */
    copy_remaining = orig_filesize - orig_first_entry_start;
@@ -177,8 +189,13 @@ int32_t drc_add_resource(
       dio_write_stream( copy_buffer, copy_remaining, drc_file_out );
    }
 
+   assert( dio_tell_stream( drc_file_in ) == orig_filesize );
+   assert( dio_tell_stream( drc_file_out ) == toc_buffer.data_start );
+
    debug_printf( 1, "writing new data..." );
    dio_write_stream( buffer, buffer_sz, drc_file_out );
+
+   assert( dio_tell_stream( drc_file_out ) == header_buffer.filesize );
 
 cleanup:
 

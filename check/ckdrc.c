@@ -169,35 +169,136 @@ START_TEST( check_drc_list ) {
    union DRC_TYPE toc_type = DRC_BITMAP_TYPE,
       header_type = DRC_ARCHIVE_TYPE;
    char test_string_1[] = "This is a test string.",
-      test_string_2[] = "Another tstrng.";
+      test_string_2[] = "Another tstrng.",
+      test_string_3[] = "ZYXQRS";
    struct DRC_HEADER* header = (struct DRC_HEADER*)&g_buffer_r;
    struct DRC_TOC_E* toc_e =
          (struct DRC_TOC_E*)&(g_buffer_r[sizeof( struct DRC_HEADER )]),
       * toc_l = NULL;
+   MEMORY_HANDLE handle = NULL;
+   int32_t filesize_test = 0,
+      test_1_start = 0,
+      test_2_start = 0;
 
    drc_create( &g_drc_stream_r );
+
+   /* Add first test. */
 
    drc_add_resource(
       &g_drc_stream_r, &g_drc_stream_w, toc_type, 5001, "test1.bmp", 9,
       test_string_1, 22 );
 
+   dio_close_stream( &g_drc_stream_w );
+   dio_close_stream( &g_drc_stream_r );
+   dio_open_stream_buffer( g_buffer_w, DRC_CKBUFFER_SZ, &g_drc_stream_w );
+   dio_open_stream_buffer( g_buffer_r, DRC_CKBUFFER_SZ, &g_drc_stream_r );
+
    memcpy( g_buffer_r, g_buffer_w, DRC_CKBUFFER_SZ );
+
+   toc_sz = drc_list_resources( &g_drc_stream_r, &handle, 0 );
+
+   filesize_test = sizeof( struct DRC_HEADER ) +
+      (1 * sizeof( struct DRC_TOC_E )) +
+      22;
+
+   test_1_start = sizeof( struct DRC_HEADER ) +
+      (1 * sizeof( struct DRC_TOC_E ));
+
+   toc_l = memory_lock( handle );
+
+   ck_assert_int_eq( toc_sz, 1 );
+   ck_assert_int_eq( filesize_test, header->filesize );
+   ck_assert_int_eq( test_1_start, toc_l[0].data_start );
+
+   toc_l = memory_unlock( handle );
+
+   memory_free( handle );
+   handle = NULL;
+
+   /* Add second test. */
 
    drc_add_resource(
       &g_drc_stream_r, &g_drc_stream_w, toc_type, 5002, "test2.bmp", 9,
       test_string_2, 15 );
 
+   dio_close_stream( &g_drc_stream_w );
+   dio_close_stream( &g_drc_stream_r );
+   dio_open_stream_buffer( g_buffer_w, DRC_CKBUFFER_SZ, &g_drc_stream_w );
+   dio_open_stream_buffer( g_buffer_r, DRC_CKBUFFER_SZ, &g_drc_stream_r );
+
    memcpy( g_buffer_r, g_buffer_w, DRC_CKBUFFER_SZ );
 
-   toc_sz = drc_list_resources( &g_drc_stream_r, &toc_l, 0 );
+   toc_sz = drc_list_resources( &g_drc_stream_r, &handle, 0 );
+
+   filesize_test = sizeof( struct DRC_HEADER ) +
+      (2 * sizeof( struct DRC_TOC_E )) +
+      22 + 15;
+
+   test_1_start = sizeof( struct DRC_HEADER ) +
+      (2 * sizeof( struct DRC_TOC_E ));
+
+   test_2_start = sizeof( struct DRC_HEADER ) +
+      (2 * sizeof( struct DRC_TOC_E )) +
+      22;
+
+   toc_l = memory_lock( handle );
 
    ck_assert_int_eq( toc_sz, 2 );
+   ck_assert_int_eq( filesize_test, header->filesize );
+   ck_assert_int_eq( 22, toc_l[0].data_sz );
+   ck_assert_int_eq( test_1_start, toc_l[0].data_start );
+   ck_assert_int_eq( 15, toc_l[1].data_sz );
+   ck_assert_int_eq( test_2_start, toc_l[1].data_start );
+
+   toc_l = memory_unlock( handle );
+   
+   memory_free( handle );
+   handle = NULL;
+
+   /* Add third test. */
+
+   drc_add_resource(
+      &g_drc_stream_r, &g_drc_stream_w, toc_type, 5003, "test3.bmp", 9,
+      test_string_3, 6 );
+
+   dio_close_stream( &g_drc_stream_w );
+   dio_close_stream( &g_drc_stream_r );
+   dio_open_stream_buffer( g_buffer_w, DRC_CKBUFFER_SZ, &g_drc_stream_w );
+   dio_open_stream_buffer( g_buffer_r, DRC_CKBUFFER_SZ, &g_drc_stream_r );
+
+   memcpy( g_buffer_r, g_buffer_w, DRC_CKBUFFER_SZ );
+
+   toc_sz = drc_list_resources( &g_drc_stream_r, &handle, 0 );
+
+   toc_l = memory_lock( handle );
+
+   ck_assert_int_eq( toc_sz, 3 );
    ck_assert_int_eq( toc_l[0].id, toc_e->id );
    ck_assert_int_eq( toc_l[0].type.u32, toc_e->type.u32 );
    ck_assert_int_eq( toc_l[1].id, 5002 );
    ck_assert_int_eq( toc_l[1].type.u32, toc_e->type.u32 );
+   ck_assert_int_eq( toc_l[2].id, 5003 );
+   ck_assert_int_eq( toc_l[2].type.u32, toc_e->type.u32 );
 
-   free( toc_l );
+   filesize_test = sizeof( struct DRC_HEADER ) +
+      (3 * sizeof( struct DRC_TOC_E )) +
+      22 + 15 + 6;
+
+   test_1_start = sizeof( struct DRC_HEADER ) +
+      (3 * sizeof( struct DRC_TOC_E ));
+
+   test_2_start = sizeof( struct DRC_HEADER ) +
+      (3 * sizeof( struct DRC_TOC_E )) +
+      22;
+
+   ck_assert_int_eq( test_1_start, toc_l[0].data_start );
+   ck_assert_int_eq( test_2_start, toc_l[1].data_start );
+   ck_assert_int_eq( filesize_test, header->filesize );
+
+   toc_l = memory_unlock( handle );
+
+   memory_free( handle );
+   handle = NULL;
       
 }
 END_TEST

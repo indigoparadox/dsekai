@@ -4,30 +4,31 @@
 
 #include "dstypes.h"
 
-#ifdef MEMORY_STATIC
-#error "Using static memory! This header should not be included."
-#endif /* MEMORY_STATIC */
-
-#ifdef MEMORY_CALLOC
-
-#include <stdlib.h>
-
-#define memory_alloc( sz, ct ) calloc( sz, ct )
-#define memory_free( ptr_ptr ) \
-   if( NULL != (ptr_ptr) && NULL != *(ptr_ptr) ) { \
-      free( *(ptr_ptr) ); \
-      *(ptr_ptr) = NULL; \
-   }
-#define memory_realloc( ptr, sz ) \
-   realloc( ptr, (sz) );
-
+#ifdef PLATFORM_PALM
+#include "memory/palmm.h"
+#elif defined( PLATFORM_MAC7 )
+#include "memory/mac7m.h"
 #else
+#include "memory/fakem.h"
+#endif /* PLATFORM_* */
 
-void* memory_alloc( uint16_t, uint16_t );
-void memory_free( void** );
-void* memory_realloc( void*, uint16_t );
+struct FAKE_MEMORY_HANDLE {
+#if 0
+   uint32_t sz;
+   uint32_t offset;
+#endif
+   void* ptr;
+   uint32_t ptr_sz;
+   uint32_t locks;
+   struct FAKE_MEMORY_HANDLE* next;
+};
 
-#endif /* MEMORY_CALLOC */
+MEMORY_HANDLE memory_alloc( uint32_t, uint32_t );
+void memory_free( MEMORY_HANDLE );
+uint32_t memory_sz( MEMORY_HANDLE );
+uint32_t memory_resize( MEMORY_HANDLE, uint32_t );
+void* memory_lock( MEMORY_HANDLE );
+void* memory_unlock( MEMORY_HANDLE );
 
-#endif /* MEMORY_H */
+#endif /* !MEMORY_H */
 

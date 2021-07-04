@@ -5,6 +5,7 @@
 #define DRC_H
 
 #include "../dstypes.h"
+#include "../memory.h"
 
 #include "dio.h"
 
@@ -67,7 +68,7 @@ struct DRC_TOC_E {
    char name[64];          /* Used by packer/preprocessor to map image to ID. */
 };
 
-int32_t drc_list_resources( struct DIO_STREAM*, struct DRC_TOC_E**, uint16_t );
+int32_t drc_list_resources( struct DIO_STREAM*, MEMORY_HANDLE*, uint16_t );
 int32_t drc_get_resource(
    struct DIO_STREAM*, union DRC_TYPE, uint32_t, uint8_t*, uint16_t );
 int32_t drc_get_resource_sz( struct DIO_STREAM*, union DRC_TYPE, uint32_t );

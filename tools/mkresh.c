@@ -35,8 +35,8 @@ int main( int argc, char* argv[] ) {
       extension_idx = 0;
    char* header_name = NULL,
       * file_list[FILE_LIST_MAX],
-      * file_basename_list[FILE_LIST_MAX],
-      * res_type = NULL;
+      * file_basename_list[FILE_LIST_MAX];
+   const char* res_type = NULL;
    char namebuf_header[NAMEBUF_MAX + 1],
       namebuf_res[NAMEBUF_MAX + 1];
    size_t file_list_len = 0;
@@ -90,7 +90,6 @@ int main( int argc, char* argv[] ) {
       }
 
       if( 0 == state ) {
-         printf( "%s\n", argv[i] );
          if( 0 == strncmp( argv[i], "-if", 3 ) ) {
             state = STATE_INFILES;
          } else if( 0 == strncmp( argv[i], "-or", 3 ) ) {
@@ -160,8 +159,6 @@ int main( int argc, char* argv[] ) {
          } else {
             res_type = gc_res_data_misc;
          }
-
-         printf( "%s\n", &(file_list[i][extension_idx]) );
 
          switch( fmt ) {
          case FMT_PALM:

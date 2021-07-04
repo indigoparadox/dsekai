@@ -49,6 +49,8 @@ int main( int argc, char* argv[] ) {
       * extract_res_buffer = NULL;
    struct DRC_TOC_E* toc_entries = NULL;
    int32_t toc_entries_sz = 0;
+   MEMORY_HANDLE toc_entries_handle = NULL;
+   MEMORY_HANDLE file_contents_handle = NULL;
    FILE* header_file = NULL;
    size_t file_list_len = 0;
    uint8_t* res_buffer = NULL;
@@ -74,7 +76,9 @@ int main( int argc, char* argv[] ) {
          assert( NULL == file_list[file_list_len] );
          assert( file_list_len < FILE_LIST_MAX );
          filename_len = strlen( argv[i] );
-         file_list[file_list_len] = memory_alloc( filename_len + 1, 1 );
+         /* file_list[file_list_len] = memory_alloc( filename_len + 1, 1 ); */
+         /* TODO: Use memory manager. */
+         file_list[file_list_len] = calloc( filename_len + 1, 1 );
          assert( NULL != file_list[file_list_len] );
          strncpy( file_list[file_list_len], argv[i], filename_len );
          file_list_len++;
@@ -155,14 +159,15 @@ int main( int argc, char* argv[] ) {
       assert( NULL == file_contents );
 
       for( i = 0 ; file_list_len > i ; i++ ) {
-         retval = dio_read_file( file_list[i], &file_contents );
+         retval = dio_read_file( file_list[i], &file_contents_handle );
          if( 0 == retval ) {
             return 1;
          }
 
-         file_sz = retval;
+         file_sz = memory_sz( file_contents_handle );
          retval = 0;
 
+         file_contents = memory_lock( file_contents_handle );
          assert( NULL != file_contents );
          assert( 0 < file_sz );
 
@@ -235,6 +240,10 @@ int main( int argc, char* argv[] ) {
             goto cleanup;
          }
 
+         file_contents = memory_unlock( file_contents_handle );
+         memory_free( file_contents_handle );
+         file_contents_handle = NULL;
+
          id++;
       }
    }
@@ -246,9 +255,11 @@ int main( int argc, char* argv[] ) {
          retval = DRC_ERROR_COULD_NOT_OPEN;
          goto cleanup;
       }
-      toc_entries_sz = drc_list_resources( &drc_file_in, &toc_entries, 0 );
+      toc_entries_sz = 
+         drc_list_resources( &drc_file_in, &toc_entries_handle, 0 );
       dio_close_stream( &drc_file_in );
 
+      toc_entries = memory_lock( toc_entries_handle );
       for( i = 0 ; toc_entries_sz > i ; i++ ) {
          printf( "TOC entry %d | type %c%c%c%c | size %d bytes @ offset %d\n",
             toc_entries[i].id,
@@ -256,9 +267,9 @@ int main( int argc, char* argv[] ) {
             toc_entries[i].type.str[2], toc_entries[i].type.str[3],
             toc_entries[i].data_sz, toc_entries[i].data_start );
       }
+      toc_entries = memory_unlock( toc_entries_handle );
 
-      free( toc_entries );
-      toc_entries = NULL;
+      memory_free( toc_entries_handle );
       toc_entries_sz = 0;
    }
 
@@ -312,7 +323,9 @@ int main( int argc, char* argv[] ) {
          retval = DRC_ERROR_COULD_NOT_OPEN;
          goto cleanup;
       }
-      toc_entries_sz = drc_list_resources( &drc_file_in, &toc_entries, 0 );
+      toc_entries_handle = NULL;
+      toc_entries_sz =
+         drc_list_resources( &drc_file_in, &toc_entries_handle, 0 );
       dio_close_stream( &drc_file_in );
       
       debug_printf( 2, "opening header file..." );
@@ -322,6 +335,7 @@ int main( int argc, char* argv[] ) {
       /* TODO: Dynamically generate include guard name. */
       fprintf( header_file, "#ifndef RESEXT_H\n" );
       fprintf( header_file, "#define RESEXT_H\n\n" );
+      toc_entries = memory_lock( toc_entries_handle );
       for( i = 0 ; toc_entries_sz > i ; i++ ) {
          debug_printf( 1, "writing TOC entry %d (ID %d) to header...",
             i, toc_entries[i].id );
@@ -335,7 +349,8 @@ int main( int argc, char* argv[] ) {
          fprintf( header_file, "#define %s %u\n",
             toc_entries[i].name, toc_entries[i].id );
       }
-      free( toc_entries );
+      toc_entries = memory_unlock( toc_entries_handle );
+      memory_free( toc_entries_handle );
       fprintf( header_file, "\n#endif /* RESEXT_H */\n" );
       fclose( header_file );
    }
@@ -345,6 +360,14 @@ int main( int argc, char* argv[] ) {
 cleanup:
 
    debug_printf( 2, "cleaning up resources..." );
+
+   if( NULL != file_contents ) {
+     file_contents = memory_unlock( file_contents_handle );
+   }
+
+   if( NULL != file_contents_handle ) {
+      memory_free( file_contents_handle );
+   }
 
    if( 0 != dio_type_stream( &drc_file_in ) ) {
       dio_close_stream( &drc_file_in );

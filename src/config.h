@@ -177,6 +177,10 @@
 #define FPS (30)
 #endif /* FPS */
 
+#ifndef MEMORY_FAKE_HEAP_SZ
+#define MEMORY_FAKE_HEAP_SZ (112500)
+#endif /* !MEMORY_FAKE_HEAP_S */
+
 #ifndef DIO_READ_FILE_BLOCK_SZ
 #define DIO_READ_FILE_BLOCK_SZ (4096)
 #endif /* !DIO_READ_FILE_BLOCK_SZ */

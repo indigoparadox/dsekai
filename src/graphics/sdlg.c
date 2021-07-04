@@ -160,7 +160,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    memset( &rstream, '\0', sizeof( struct DIO_STREAM ) );
    dio_open_stream_file( DRC_ARCHIVE, "rb", &rstream );
    buffer_sz = drc_get_resource_sz( &rstream, bitmap_type, id );
-   buffer = memory_alloc( 1, buffer_sz );
+   buffer = calloc( 1, buffer_sz );
    buffer_sz = drc_get_resource( &rstream, bitmap_type, id, buffer, 0 );
    if( 0 >= buffer_sz ) {
       assert( NULL == buffer );
@@ -196,7 +196,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
 cleanup:
 
    if( NULL != buffer ) {
-      memory_free( &buffer ); /* Free resource memory. */
+      free( buffer ); /* Free resource memory. */
    }
 
    if( 0 != dio_type_stream( &rstream ) ) {

@@ -18,24 +18,39 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    int16_t tok_parsed = 0,
       tiles_count = 0,
       i = 0,
-      retval = 0;
-   uint8_t tile_id_in = 0;
+      retval = 1;
+   uint8_t tile_id_in = 0,
+      * json_buffer = NULL;
    jsmn_parser parser;
    jsmntok_t* tokens = NULL;
    char iter_path[JSON_PATH_SZ];
-   struct DIO_RESOURCE rsrc;
+   MEMORY_HANDLE json_handle = NULL,
+      tokens_handle = NULL;
+   uint32_t json_buffer_sz = 0;
 
-   memset( &rsrc, '\0', sizeof( struct DIO_RESOURCE ) );
-   retval = dio_get_resource_handle( id, 'json', &rsrc );
-   if( !retval ) {
+   json_handle = dio_get_resource_handle( id, 'json' );
+   if( NULL == json_handle ) {
+      error_printf( "could not get tilemap resource handle" );
+      retval = 0;
       goto cleanup;
    }
 
-   tokens = memory_alloc( JSON_TOKENS_MAX, sizeof( jsmntok_t ) );
+   tokens_handle = memory_alloc( JSON_TOKENS_MAX, sizeof( jsmntok_t ) );
+   if( NULL == tokens_handle ) {
+      error_printf( "could not allocate space for JSON tokens" );
+      retval = 0;
+      goto cleanup;
+   }
+
+   json_buffer_sz = memory_sz( json_handle );
+   json_buffer = memory_lock( json_handle );
+   tokens = memory_lock( tokens_handle );
+
+   printf( "XXY: %c\n", json_buffer[0] );
 
    jsmn_init( &parser );
    tok_parsed = jsmn_parse(
-      &parser, rsrc.ptr, rsrc.ptr_sz, tokens, JSON_TOKENS_MAX );
+      &parser, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
 
    debug_printf( 2, "%d tokens parsed", tok_parsed );
    if( 0 == tok_parsed ) {
@@ -49,7 +64,7 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       /* Load tile data into the grid. */
       dio_snprintf( iter_path, 255, "/layers/0/data/%d", i );
       tile_id_in = 
-         json_int_from_path( iter_path, &(tokens[0]), tok_parsed, rsrc.ptr );
+         json_int_from_path( iter_path, &(tokens[0]), tok_parsed, json_buffer );
       tile_id_in--;
       if( 0 == i % 2 ) {
          tile_id_in <<= 4;
@@ -62,9 +77,21 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
 
 cleanup:
 
-   dio_free_resource_handle( &rsrc );
+   if( NULL != tokens ) {
+      tokens = memory_unlock( tokens_handle );
+   }
 
-   memory_free( &tokens );
+   if( NULL != tokens_handle ) {
+      memory_free( tokens_handle );
+   }
+
+   if( NULL != json_buffer ) {
+      json_buffer = memory_unlock( json_handle );
+   }
+
+   if( NULL != json_handle ) {
+      memory_free( json_handle );
+   }
 
    return retval;
 }

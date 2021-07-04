@@ -87,9 +87,8 @@ int graphics_platform_blit_at(
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
    int retval = 1;
-   struct DIO_RESOURCE rsrc;
-
-   memset( &rsrc, '\0', sizeof( struct DIO_RESOURCE ) );
+   MEMORY_HANDLE rsrc = NULL;
+   BitmapPtr ptr = NULL;
 
    if( NULL == bmp ) {
       WinDrawChars( "X", 1, x, y );
@@ -97,19 +96,17 @@ int graphics_platform_blit_at(
       goto cleanup;
    }
 
-   memset( &rsrc, '\0', sizeof( struct DIO_RESOURCE ) );
-   retval = dio_get_resource_handle( bmp->id, 'Tbmp', &rsrc );
-   if( !retval ) {
-      goto cleanup;
-   }
+   rsrc = DmGetResource( bmp->id, 'Tbmp' );
 
-   if( NULL == bmp->bitmap ) {
+   if( NULL == rsrc ) {
       WinDrawChars( "Z", 1, x, y );
       retval = 0;
       goto cleanup;
    }
 
-   WinDrawBitmap( (BitmapPtr)rsrc.ptr, x, y );
+   ptr = MemHandleLock( rsrc );
+   WinDrawBitmap( ptr, x, y );
+   MemHandleUnlock( rsrc );
 
 cleanup:
 

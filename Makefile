@@ -13,12 +13,14 @@ DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
    src/input/sdli.c \
    src/graphics/sdlg.c \
+   src/memory/fakem.c \
    src/data/drc.c
 
 DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
    src/input/dosi.c \
    src/graphics/dosg.c \
+   src/memory/fakem.c \
    src/data/drc.c
 
 DSEKAI_C_FILES_PALM_ONLY := \
@@ -51,6 +53,7 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    check/ckdatajs.c \
    check/ckdio.c \
    check/ckdrc.c \
+   check/ckmemory.c \
    src/graphics/nullg.c \
    src/input/nulli.c \
    tools/data/cga.c \
@@ -59,23 +62,27 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    tools/data/jmap.c \
    src/data/json.c \
    tools/data/drcwrite.c \
+   src/memory/fakem.c \
    src/data/drc.c \
    src/data/dio.c
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
+   src/memory/fakem.c \
    src/data/drc.c \
    src/data/dio.c
 
 DRCPACK_C_FILES := \
    tools/drcpack.c \
    tools/data/drcwrite.c \
+   src/memory/fakem.c \
    src/data/drc.c \
    src/data/dio.c
 
 CONVERT_C_FILES := \
    tools/convert.c \
    tools/data/bmp.c \
+   src/memory/fakem.c \
    src/data/drc.c \
    tools/data/cga.c \
    src/data/dio.c \
@@ -142,7 +149,7 @@ DRCPACK := bin/drcpack
 CONVERT := bin/convert
 LOOKUPS := bin/lookups
 
-CFLAGS_MKRESH := -DMEMORY_CALLOC -DNO_RESEXT -g
+CFLAGS_MKRESH := -DMEMORY_CALLOC -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=2
 CFLAGS_DRCPACK := -DMEMORY_CALLOC -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3
 CFLAGS_CONVERT := -DMEMORY_CALLOC -DNO_RESEXT -g
 CFLAGS_LOOKUPS := -g
@@ -150,7 +157,7 @@ CFLAGS_LOOKUPS := -g
 CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak
 
-$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT
+$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT -DDEBUG_THRESHOLD=3
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc

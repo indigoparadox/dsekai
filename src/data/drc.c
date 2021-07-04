@@ -52,61 +52,62 @@ static int32_t drc_read_header(
 /**
  * \brief List the resources available in the DRC archive at the given path.
  * \param path
- * \param ptoc Pointer to a list of struct DRC_TOC_E objects to fill with
+ * \param htoc Pointer to a list of struct DRC_TOC_E objects to fill with
  *             the resulting entries. If the targeted pointer is NULL, and
  *             dynamic memory is enabled, then it will be allocated.
- * \param ptoc_sz
+ * \param htoc_sz
  * \return
  */
 int32_t drc_list_resources(
-   struct DIO_STREAM* drc_file, struct DRC_TOC_E** ptoc, uint16_t ptoc_sz
+   struct DIO_STREAM* drc_file, MEMORY_HANDLE* htoc, uint16_t htoc_sz
 ) {
    int32_t toc_count_out = 0,
-      i = 0;
+      i = 0,
+      new_toc_list_sz = 0;
    struct DRC_TOC_E toc_e_iter;
    struct DRC_HEADER header;
-   struct DRC_TOC_E* toc_e_new_ptr = NULL;
+   struct DRC_TOC_E* toc_ptr = NULL;
 
    memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
 
    debug_printf( 2, "opening drc to list..." );
 
    drc_read_header( drc_file, &header );
-
    dio_seek_stream( drc_file, header.toc_start, SEEK_SET );
 
-   assert( 0 != header.toc_start );
+   assert( header.toc_start == sizeof( struct DRC_HEADER ) );
    for( i = 0 ; header.toc_entries > i ; i++ ) {
 
       drc_read_toc_e( drc_file, &toc_e_iter );
+ 
+      assert( header.toc_start + ((i + 1) * sizeof( struct DRC_TOC_E )) ==
+         dio_tell_stream( drc_file ) );
 
       toc_count_out++;
 
       /* Store the entry in a list if requested. */
-      if( NULL != ptoc ) {
-#ifndef MEMORY_STATIC
-         if( NULL == *ptoc ) {
-            *ptoc = memory_alloc(
+      if( NULL != htoc ) {
+         if( NULL == *htoc ) {
+            *htoc = memory_alloc(
                DRC_TOC_INITIAL_ALLOC, sizeof( struct DRC_TOC_E ) );
-            assert( NULL != *ptoc );
-         } else if( 0 == ptoc_sz || i >= ptoc_sz ) {
-            toc_e_new_ptr = memory_realloc(
-               *ptoc, sizeof( struct DRC_TOC_E ) * toc_count_out );
-            if( NULL != toc_e_new_ptr ) {
-               *ptoc = toc_e_new_ptr;
-            } else {
+         } else if( 0 == htoc_sz || i >= htoc_sz ) {
+            new_toc_list_sz = sizeof( struct DRC_TOC_E ) * toc_count_out;
+            if( memory_resize( *htoc, new_toc_list_sz ) < new_toc_list_sz ) {
+               error_printf( "unable to allocate new TOC list" );
+               toc_count_out--;
                goto cleanup;
             }
-        }
-#endif /* !MEMORY_STATIC */
-
-         if( NULL != *ptoc && (0 == ptoc_sz || i < ptoc_sz - 1) ) {
-            debug_printf( 1, "copying listing result for TOC entry %d",
-               toc_e_iter.id );
-            /* Move, rather than copy. */
-            memcpy( &((*ptoc)[i]), &toc_e_iter, sizeof( struct DRC_TOC_E ) );
-            memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
          }
+         assert( NULL != *htoc );
+
+         toc_ptr = memory_lock( *htoc );
+         debug_printf( 1, "copying listing result for TOC entry %d",
+            toc_e_iter.id );
+         /* Move, rather than copy. */
+         memcpy( &(toc_ptr[i]), &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+         assert( toc_ptr[i].type.u32 == toc_e_iter.type.u32 );
+         memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
+         toc_ptr = memory_unlock( *htoc );
       }
    }
 
@@ -236,6 +237,7 @@ int32_t drc_get_resource(
    /* Load file contents into buffer at referenced address. */
    if( 0 > dio_seek_stream( drc_file, toc_e_iter.data_start, SEEK_SET ) ) {
       resource_sz = DRC_ERROR_COULD_NOT_READ;
+      error_printf( "unable to seek to resource location in archive" );
       goto cleanup;
    }
    read = dio_read_stream( buffer, toc_e_iter.data_sz, drc_file );
