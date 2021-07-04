@@ -13,58 +13,6 @@ int32_t g_next_stream_id = 0;
 
 struct CONVERT_GRID;
 
-/**
- * \brief Allocate a handle to a resource in DRC archive or OS resource fork.
- */
-MEMORY_HANDLE dio_get_resource_handle( uint32_t id, uint32_t type ) {
-#ifdef PLATFORM_PALM
-   return DmGetResource( type, id );
-#else
-   struct DIO_STREAM drc_file;
-   union DRC_TYPE drc_type;
-   uint8_t* ptr = NULL;
-   int32_t ptr_sz = 0;
-   MEMORY_HANDLE handle = NULL;
-
-   drc_type.u32 = dio_reverse_endian_32( type );
-
-   memset( &drc_file, '\0', sizeof( struct DIO_STREAM ) );
-
-   /* TODO: OS-specific resources. */
-   dio_open_stream_file( DRC_ARCHIVE, "r", &drc_file );
-   if( 0 == dio_type_stream( &drc_file ) ) {
-      error_printf( "unable to open archive for tilemap" );
-      goto cleanup;
-   }
-
-   /* Allocate a handle, lock it, copy in the file, release it. */
-   ptr_sz = drc_get_resource_sz( &drc_file, drc_type, id );
-   debug_printf( 2, "allocating %d bytes for resource", ptr_sz );
-   assert( 0 < ptr_sz );
-   handle = memory_alloc( ptr_sz, 1 );
-   if( NULL == handle ) {
-      error_printf( "could not allocate space for resource" );
-      goto cleanup;
-   }
-   ptr = memory_lock( handle );
-   assert( NULL != ptr );
-   drc_get_resource( &drc_file, drc_type, id, ptr, ptr_sz );
-   memory_unlock( handle );
-
-cleanup:
-
-   if( 0 < dio_type_stream( &drc_file ) ) {
-      dio_close_stream( &drc_file );
-   }
-
-   return handle;
-#endif /* PLATFORM_PALM */
-}
-
-void dio_free_resource_handle( MEMORY_HANDLE handle ) {
-   /* TODO */
-}
-
 #ifndef DISABLE_FILESYSTEM
 
 int32_t dio_open_stream_file(
@@ -407,6 +355,8 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
 
    return retval;
 }
+
+/* TODO: Remove dio_read_file() and integrate into tools formats. */
 
 uint32_t dio_read_file( const char* path, MEMORY_HANDLE* buffer_handle ) {
    FILE* file_in = NULL;

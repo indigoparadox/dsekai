@@ -6,7 +6,7 @@
 
 #include <Multiverse.h>
 
-#include "../data/drc.h"
+#include "../drc.h"
 
 QDGlobals g_qd;
 WindowPtr g_window;

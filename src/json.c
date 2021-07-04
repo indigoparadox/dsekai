@@ -2,7 +2,7 @@
 #define JSON_C
 #include "json.h"
 
-#include "../../src/data/dio.h"
+#include "dio.h"
 
 #include <stdio.h>
 #include <stdlib.h>

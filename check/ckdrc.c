@@ -1,7 +1,7 @@
 
 #include <check.h>
 
-#include "../src/data/drc.h"
+#include "../src/drc.h"
 #include "../tools/data/drcwrite.h"
 
 #define DRC_CKBUFFER_SZ 10240

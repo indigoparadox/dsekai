@@ -4,9 +4,6 @@
 #include <string.h>
 
 #include "drcwrite.h"
-#include "../../src/data/drc.h"
-
-#include "../../src/memory.h"
 
 static const uint16_t gc_drc_version = 1;
 

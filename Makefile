@@ -5,8 +5,8 @@ DSEKAI_C_FILES := \
    src/mobile.c \
    src/item.c \
    src/window.c \
-   src/data/json.c \
-   src/data/dio.c \
+   src/json.c \
+   src/dio.c \
    src/topdown.c
 
 DSEKAI_C_FILES_SDL_ONLY := \
@@ -14,20 +14,22 @@ DSEKAI_C_FILES_SDL_ONLY := \
    src/input/sdli.c \
    src/graphics/sdlg.c \
    src/memory/fakem.c \
-   src/data/drc.c
+   src/resource/drcr.c \
+   src/drc.c
 
 DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
    src/input/dosi.c \
    src/graphics/dosg.c \
    src/memory/fakem.c \
-   src/data/drc.c
+   src/resource/drcr.c \
+   src/drc.c
 
 DSEKAI_C_FILES_PALM_ONLY := \
    src/main.c \
    src/input/palmi.c \
    src/graphics/palmg.c \
-   src/data/dio.c
+   src/dio.c
 
 DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
@@ -39,7 +41,7 @@ DSEKAI_C_FILES_MAC7_ONLY := \
    src/input/mac7i.c \
    src/graphics/mac7g.c \
    src/memory/fakem.c \
-   src/data/drc.c
+   src/drc.c
 
 DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    check/check.c \
@@ -51,6 +53,7 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    check/cktopdwn.c \
    check/ckdataim.c \
    check/ckdatajs.c \
+   src/resource/drcr.c \
    check/ckdio.c \
    check/ckdrc.c \
    check/ckmemory.c \
@@ -59,35 +62,35 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    tools/data/cga.c \
    tools/data/bmp.c \
    tools/data/icns.c \
-   src/data/json.c \
+   src/json.c \
    tools/data/drcwrite.c \
    src/memory/fakem.c \
-   src/data/drc.c \
-   src/data/dio.c
+   src/drc.c \
+   src/dio.c
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
    src/memory/fakem.c \
-   src/data/drc.c \
-   src/data/dio.c
+   src/drc.c \
+   src/dio.c
 
 DRCPACK_C_FILES := \
    tools/drcpack.c \
    tools/data/drcwrite.c \
    src/memory/fakem.c \
-   src/data/drc.c \
-   src/data/dio.c
+   src/drc.c \
+   src/dio.c
 
 CONVERT_C_FILES := \
    tools/convert.c \
    tools/data/bmp.c \
    src/memory/fakem.c \
-   src/data/drc.c \
+   src/drc.c \
    tools/data/cga.c \
-   src/data/dio.c \
+   src/dio.c \
    tools/data/header.c \
    tools/data/icns.c \
-   src/data/json.c
+   src/json.c
 
 LOOKUPS_C_FILES: tools/lookups.c
 
@@ -147,9 +150,9 @@ DRCPACK := bin/drcpack
 CONVERT := bin/convert
 LOOKUPS := bin/lookups
 
-CFLAGS_MKRESH := -DMEMORY_CALLOC -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=2
-CFLAGS_DRCPACK := -DMEMORY_CALLOC -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3
-CFLAGS_CONVERT := -DMEMORY_CALLOC -DNO_RESEXT -g
+CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=2
+CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3
+CFLAGS_CONVERT := -DNO_RESEXT -g
 CFLAGS_LOOKUPS := -g
 
 CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG
@@ -160,7 +163,7 @@ $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DDIO_SILENT -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=3
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=3 -DHIDE_WELCOME_DIALOG
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
@@ -184,12 +187,12 @@ $(BIN_WIN16): LDFLAGS := -l=windows -zp=1
 $(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
 $(BIN_MAC7): CC := m68k-apple-macos-gcc
 $(BIN_MAC7): CXX := m68k-apple-macos-g++
-$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -DDIO_SILENT -I$(RETRO68_PREFIX)/multiversal/CIncludes
+$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes
 $(BIN_MAC7): LDFLAGS := -lRetroConsole
 $(BIN_MAC7): REZ := Rez
 $(BIN_MAC7): REZFLAGS :=
 
-$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL -DMEMORY_CALLOC -DDIO_SILENTL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=3 -DCHECK
+$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=3 -DCHECK
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(CFLAGS_DEBUG_GCC)
 
 DSEKAI_C_FILES_CHECK_NULL := $(DSEKAI_C_FILES) $(DSEKAI_C_FILES_CHECK_NULL_ONLY)

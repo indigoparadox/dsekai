@@ -1,10 +1,11 @@
 
 #include "tilemap.h"
 
-#include "data/json.h"
-#include "data/dio.h"
-#include "data/drc.h"
+#include "json.h"
+#include "dio.h"
+#include "drc.h"
 #include "memory.h"
+#include "resource.h"
 
 #include <string.h>
 
@@ -27,8 +28,9 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    MEMORY_HANDLE json_handle = NULL,
       tokens_handle = NULL;
    uint32_t json_buffer_sz = 0;
+   union DRC_TYPE type = DRC_MAP_TYPE;
 
-   json_handle = dio_get_resource_handle( id, 'json' );
+   json_handle = resource_get_handle( id, type );
    if( NULL == json_handle ) {
       error_printf( "could not get tilemap resource handle" );
       retval = 0;
@@ -45,8 +47,6 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    json_buffer_sz = memory_sz( json_handle );
    json_buffer = memory_lock( json_handle );
    tokens = memory_lock( tokens_handle );
-
-   printf( "XXY: %c\n", json_buffer[0] );
 
    jsmn_init( &parser );
    tok_parsed = jsmn_parse(
@@ -90,7 +90,7 @@ cleanup:
    }
 
    if( NULL != json_handle ) {
-      memory_free( json_handle );
+      resource_free_handle( json_handle );
    }
 
    return retval;

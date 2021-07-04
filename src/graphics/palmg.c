@@ -1,6 +1,6 @@
 
 #include "../graphics.h"
-#include "../data/dio.h"
+#include "../dio.h"
 
 static BitmapType* g_screen = NULL;
 static WinHandle g_win;

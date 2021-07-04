@@ -4,7 +4,7 @@
 #include "data/bmp.h"
 #include "data/cga.h"
 #include "data/icns.h"
-#include "../src/data/dio.h"
+#include "../src/dio.h"
 #include "data/header.h"
 
 #include <stdio.h>

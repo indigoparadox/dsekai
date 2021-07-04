@@ -1,7 +1,7 @@
 
 #include <check.h>
 
-#include "../src/data/dio.h"
+#include "../src/dio.h"
 
 START_TEST( check_dio_atoi_one ) {
    char test_a[] = "1";

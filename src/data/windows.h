@@ -5,15 +5,15 @@
 #include "../window.h"
 
 struct WINDOW_FRAME g_pattern_cm_checker = {
-   { pattern_cm_checker_tr },
-   { pattern_cm_checker_tl },
-   { pattern_cm_checker_br },
-   { pattern_cm_checker_bl },
-   { pattern_cm_checker_t },
-   { pattern_cm_checker_b },
-   { pattern_cm_checker_r },
-   { pattern_cm_checker_l },
-   { pattern_cm_checker_c },
+   { pattern_cm_checker_tr, 0, 0, NULL, NULL, 0, 0, 0, 0 },
+   { pattern_cm_checker_tl, 0, 0, NULL, NULL, 0, 0, 0, 0 },
+   { pattern_cm_checker_br, 0, 0, NULL, NULL, 0, 0, 0, 0 },
+   { pattern_cm_checker_bl, 0, 0, NULL, NULL, 0, 0, 0, 0 },
+   { pattern_cm_checker_t, 0, 0, NULL, NULL, 0, 0, 0, 0 },
+   { pattern_cm_checker_b, 0, 0, NULL, NULL, 0, 0, 0, 0 },
+   { pattern_cm_checker_r, 0, 0, NULL, NULL, 0, 0, 0, 0 },
+   { pattern_cm_checker_l, 0, 0, NULL, NULL, 0, 0, 0, 0 },
+   { pattern_cm_checker_c, 0, 0, NULL, NULL, 0, 0, 0, 0 },
 };
 
 #endif /* WINDOWS_H */

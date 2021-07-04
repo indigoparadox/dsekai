@@ -2,8 +2,8 @@
 #ifndef DIO_H
 #define DIO_H
 
-#include "../dstypes.h"
-#include "../memory.h"
+#include "dstypes.h"
+#include "memory.h"
 
 #define DIO_ERROR_NULL_PTR             -1
 #define DIO_ERROR_COPY_MISMATCH        -2

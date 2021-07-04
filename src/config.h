@@ -48,8 +48,6 @@
 
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
-/* #define MEMORY_STATIC */
-#define MEMORY_CALLOC
 #define TILEMAP_JSON
 
 /* ------ */
@@ -71,7 +69,6 @@
 #endif /* !DRC_ARCHIVE */
 
 #define USE_SOFTWARE_TEXT
-#define MEMORY_CALLOC
 #define TILEMAP_JSON
 
 /* ------ */
@@ -84,7 +81,6 @@
 
 #if 0
 #define USE_SOFT_ASSERT
-#define MEMORY_STATIC
 #endif
 #define DISABLE_FILESYSTEM
 
@@ -109,7 +105,6 @@
 #endif /* !DIO_PATH_SEP */
 
 #define USE_SOFTWARE_TEXT
-#define MEMORY_CALLOC
 
 #define SCREEN_BPP 4
 
@@ -128,7 +123,6 @@
 #endif /* !DRC_ARCHIVE */
 
 #define USE_SOFTWARE_TEXT
-/* #define MEMORY_STATIC */
 #define DRC_TOC_INITIAL_ALLOC 20 /* Fake it until we have realloc. */
 
 /* ------ */

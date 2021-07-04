@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../src/data/dio.h"
+#include "../../src/dio.h"
 #include "../convert.h"
 
 int header_img_write_file(

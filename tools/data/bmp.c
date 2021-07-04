@@ -1,7 +1,7 @@
 
 #include "bmp.h"
 
-#include "../../src/data/dio.h"
+#include "../../src/dio.h"
 #include "../../src/memory.h"
 
 #include <stdio.h>

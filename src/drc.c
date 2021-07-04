@@ -5,9 +5,6 @@
 
 #include "drc.h"
 
-#include "../memory.h"
-#include "dio.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

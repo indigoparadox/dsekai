@@ -4,8 +4,9 @@
 
 #include <SDL.h>
 
-#include "../data/drc.h"
+#include "../drc.h"
 #include "../memory.h"
+#include "../resource.h"
 
 SDL_Window* g_window = NULL;
 SDL_Surface* g_screen = NULL;
@@ -141,10 +142,12 @@ void graphics_draw_block(
  */
 int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
-   int32_t buffer_sz = 0;
-   uint32_t id = 0;
+   MEMORY_HANDLE buffer_handle = NULL;
+   union DRC_TYPE type = DRC_BITMAP_TYPE;
+   uint32_t id = 0,
+      retval = 1,
+      buffer_sz = 0;
    SDL_RWops* bmp_stream;
-   union DRC_TYPE bitmap_type = DRC_BITMAP_TYPE;
 
    assert( NULL != b );
    assert( 0 == b->ref_count );
@@ -156,27 +159,29 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into buffer. */
-   buffer_sz = dio_get_resource( &rstream, bitmap_type, id, buffer, 0 );
-   if( 0 >= buffer_sz ) {
-      assert( NULL == buffer );
-      return buffer_sz;
+   buffer_handle = resource_get_handle( id, type );
+   if( NULL == buffer_handle ) {
+      retval = 0;
+      error_printf( "unable to get resource handle" );
+      goto cleanup;
    }
 
-   debug_printf( 2, "loaded %d bytes", buffer_sz );
+   buffer_sz = memory_sz( buffer_handle );
+   buffer = memory_lock( buffer_handle );
 
    /* Parse buffered resource into SDL. */
    bmp_stream = SDL_RWFromMem( buffer, buffer_sz );
    b->surface = SDL_LoadBMP_RW( bmp_stream, 1 ); /* Free stream on close. */
    if( NULL == b->surface ) {
       error_printf( "unable to load bitmap %u: %s", id, SDL_GetError() );
-      buffer_sz = -1;
+      retval = 0;
       goto cleanup;
    }
    debug_printf( 2, "loaded surface for bitmap resource #%d", id );
    b->texture = SDL_CreateTextureFromSurface( g_renderer, b->surface );
    if( NULL == b->texture ) {
       error_printf( "unable to load texture %u: %s", id, SDL_GetError() );
-      buffer_sz = -1;
+      retval = 0;
       if( NULL != b->surface ) {
          SDL_FreeSurface( b->surface );
          b->surface = NULL;
@@ -191,14 +196,14 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
 cleanup:
 
    if( NULL != buffer ) {
-      free( buffer ); /* Free resource memory. */
+      buffer = memory_unlock( buffer_handle );
    }
 
-   if( 0 != dio_type_stream( &rstream ) ) {
-      dio_close_stream( &rstream );
+   if( NULL != buffer_handle ) {
+      resource_free_handle( buffer_handle );
    }
 
-   return buffer_sz;
+   return retval;
 }
 
 /*

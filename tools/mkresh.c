@@ -1,5 +1,5 @@
 
-#include "../src/data/dio.h"
+#include "../src/dio.h"
 
 #include <stdio.h>
 #include <stdlib.h>

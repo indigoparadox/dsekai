@@ -2,7 +2,7 @@
 #ifndef DRCWRITE_H
 #define DRCWRITE_H
 
-#include "../../src/data/drc.h"
+#include "../../src/drc.h"
 
 int32_t drc_create( struct DIO_STREAM* );
 int32_t drc_add_resource( struct DIO_STREAM*, struct DIO_STREAM*,

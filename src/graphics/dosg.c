@@ -12,8 +12,9 @@
 #include "../data/offsets.h"
 #endif /* USE_LOOKUPS */
 #include "../../tools/data/cga.h"
-#include "../data/drc.h"
+#include "../drc.h"
 #include "../memory.h"
+#include "../resource.h"
 
 #ifdef USE_DOUBLEBUF
 static uint8_t huge g_buffer[76800]; /* Sized for 0x13. */
@@ -263,11 +264,11 @@ void graphics_draw_block(
 int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
+   union DRC_TYPE type = DRC_BITMAP_TYPE;
    uint16_t plane_sz = 0,
       plane_offset = 0;
    int32_t retval = 1;
-   struct DIO_STREAM rstream;
-   union DRC_TYPE bitmap_type = DRC_BITMAP_TYPE;
+   MEMORY_HANDLE buffer_handle = NULL;
 
    b->ref_count++;
 
@@ -276,33 +277,15 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load the resource. */
-   memset( &rstream, '\0', sizeof( struct DIO_STREAM ) );
-   dio_open_stream_file( DRC_ARCHIVE, "rb", &rstream );
-   if( 0 == dio_type_stream( &rstream ) ) {
-      error_printf( "unable to open DRC archive" );
-      retval = 0;
-      goto cleanup;
-   }
-
-   buffer_sz = drc_get_resource_sz( &rstream, bitmap_type, id );
-   if( 0 >= buffer_sz ) {
+   buffer_handle = resource_get_handle( id, type );
+   if( NULL == buffer_handle ) {
       error_printf( "unable to get resource %d info", id );
       retval = 0;
       goto cleanup;
    }
 
-   buffer = memory_alloc( 1, buffer_sz );
-   if( NULL == buffer ) {
-      error_printf( "unable to allocate memory" );
-      retval = 0;
-      goto cleanup;
-   }
-
-   buffer_sz = drc_get_resource( &rstream, bitmap_type, id, buffer, 0 );
-   if( 0 >= buffer_sz ) {
-      retval = 0;
-      goto cleanup;
-   }
+   buffer_sz = memory_sz( buffer_handle );
+   buffer = memory_lock( buffer_handle );
 
    /* Parse the resource into a usable struct. */
    b->id = id;
@@ -314,7 +297,8 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
 
    plane_sz = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_SZ / 2];
    plane_offset = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE1_OFFSET / 2];
-   b->plane_1 = memory_alloc( plane_sz, 1 );
+   /* TODO: Memory architecture? */
+   b->plane_1 = calloc( plane_sz, 1 );
    if( NULL == b->plane_1 ) {
       retval = 0;
       goto cleanup;
@@ -323,25 +307,31 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
 
    plane_sz = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_SZ / 2];
    plane_offset = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_OFFSET / 2];
-   b->plane_2 = memory_alloc( plane_sz, 1 );
+   b->plane_2 = calloc( plane_sz, 1 );
    if( NULL == b->plane_2 ) {
       retval = 0;
       goto cleanup;
    }
    memcpy( b->plane_2, &(buffer[plane_offset]), plane_sz );
 
-   memory_free( &buffer ); /* Free resource memory. */
-
    b->initialized = 1;
 
 cleanup:
 
    if( 0 >= retval && b->plane_1 ) {
-      memory_free( &(b->plane_1) );
+      free( b->plane_1 );
    }
 
    if( 0 >= retval && b->plane_2 ) {
-      memory_free( &(b->plane_1) );
+      free( b->plane_1 );
+   }
+
+   if( NULL != buffer ) {
+      buffer = memory_unlock( buffer_handle );
+   }
+
+   if( NULL != buffer_handle ) {
+      resource_free_handle( buffer_handle );
    }
 
    return 1;
@@ -352,7 +342,7 @@ int32_t graphics_load_bitmap_dyn( uint32_t id, struct GRAPHICS_BITMAP** b ) {
    assert( NULL != b );
    assert( NULL == *b );
 
-   *b = memory_alloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
+   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
    assert( 0 == (*b)->ref_count );
 
    return graphics_load_bitmap( id, *b );
@@ -365,8 +355,8 @@ int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
    assert( NULL != b );
    b->ref_count--;
    if( 0 == b->ref_count ) {
-      memory_free( &(b->plane_1) );
-      memory_free( &(b->plane_2) );
+      free( b->plane_1 );
+      free( b->plane_2 );
       b->initialized = 0;
       return 1;
    }

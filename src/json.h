@@ -2,7 +2,7 @@
 #ifndef JSON_H
 #define JSON_H
 
-#include "../../src/dstypes.h"
+#include "dstypes.h"
 
 #define JSON_TYPE_LIST_
 #define JSON_TYPE_OBJECT         
