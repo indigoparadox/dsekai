@@ -4,7 +4,6 @@
 #include "data/bmp.h"
 #include "data/cga.h"
 #include "data/icns.h"
-#include "data/jmap.h"
 #include "../src/data/dio.h"
 #include "data/header.h"
 
@@ -103,8 +102,6 @@ int main( int argc, char* argv[] ) {
             fmt_in = FMT_CGA;
          } else if( 0 == strncmp( argv[i], "icns", 4 ) ) {
             fmt_in = FMT_ICNS;
-         } else if( 0 == strncmp( argv[i], "jmap", 4 ) ) {
-            fmt_in = FMT_JSON_MAP;
          } else if( 0 == strncmp( argv[i], "jwin", 4 ) ) {
             fmt_in = FMT_JSON_WIN;
 #if 0
@@ -261,10 +258,6 @@ int main( int argc, char* argv[] ) {
 
    case FMT_ICNS:
       grid = icns_read_file( namebuf_in, &options_in );
-      break;
-   
-   case FMT_JSON_MAP:
-      grid = jmap_read_file( namebuf_in, &options_in );
       break;
    }
 

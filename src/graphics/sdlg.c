@@ -144,7 +144,6 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    int32_t buffer_sz = 0;
    uint32_t id = 0;
    SDL_RWops* bmp_stream;
-   struct DIO_STREAM rstream;
    union DRC_TYPE bitmap_type = DRC_BITMAP_TYPE;
 
    assert( NULL != b );
@@ -157,11 +156,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into buffer. */
-   memset( &rstream, '\0', sizeof( struct DIO_STREAM ) );
-   dio_open_stream_file( DRC_ARCHIVE, "rb", &rstream );
-   buffer_sz = drc_get_resource_sz( &rstream, bitmap_type, id );
-   buffer = calloc( 1, buffer_sz );
-   buffer_sz = drc_get_resource( &rstream, bitmap_type, id, buffer, 0 );
+   buffer_sz = dio_get_resource( &rstream, bitmap_type, id, buffer, 0 );
    if( 0 >= buffer_sz ) {
       assert( NULL == buffer );
       return buffer_sz;

@@ -59,7 +59,6 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    tools/data/cga.c \
    tools/data/bmp.c \
    tools/data/icns.c \
-   tools/data/jmap.c \
    src/data/json.c \
    tools/data/drcwrite.c \
    src/memory/fakem.c \
@@ -88,7 +87,6 @@ CONVERT_C_FILES := \
    src/data/dio.c \
    tools/data/header.c \
    tools/data/icns.c \
-   tools/data/jmap.c \
    src/data/json.c
 
 LOOKUPS_C_FILES: tools/lookups.c

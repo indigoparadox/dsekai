@@ -45,13 +45,14 @@ int32_t bmp_write_file(
       (4 * palette_entries) + /* Palette entries are 32-bit (4 bytes). */
       o->bmp_data_sz;
 
-   bmp_buffer = memory_alloc( 1, bmp_buffer_sz );
+   /* TODO: Use memory architecture. */
+   bmp_buffer = calloc( 1, bmp_buffer_sz );
    assert( NULL != bmp_buffer );
 
    bmp_file_sz = bmp_write( bmp_buffer, bmp_buffer_sz, grid, o );
    assert( bmp_file_sz == bmp_buffer_sz );
    if( 0 >= bmp_file_sz ) {
-      memory_free( &bmp_buffer );
+      free( bmp_buffer );
       return bmp_file_sz;
    }
 
@@ -61,7 +62,7 @@ int32_t bmp_write_file(
    written = fwrite( bmp_buffer, 1, bmp_buffer_sz, file_out );
 
    fclose( file_out );
-   memory_free( &bmp_buffer );
+   free( bmp_buffer );
 
    assert( written == bmp_buffer_sz );
    if( written != bmp_buffer_sz ) {
@@ -324,14 +325,19 @@ struct CONVERT_GRID* bmp_read_file(
    const char* path, struct CONVERT_OPTIONS* o
 ) {
    uint8_t* bmp_buffer = NULL;
+   MEMORY_HANDLE buffer_handle = NULL;
    uint32_t bmp_buffer_sz = 0;
    struct CONVERT_GRID* grid_out = NULL;
 
-   bmp_buffer_sz = dio_read_file( path, &bmp_buffer );
+   bmp_buffer_sz = dio_read_file( path, &buffer_handle );
+
+   bmp_buffer = memory_lock( buffer_handle );
 
    grid_out = bmp_read( bmp_buffer, bmp_buffer_sz, o );
 
-   memory_free( &bmp_buffer );
+   bmp_buffer = memory_unlock( buffer_handle );
+
+   memory_free( buffer_handle );
 
    return grid_out;
 }
@@ -373,10 +379,11 @@ struct CONVERT_GRID* bmp_read(
    /* Read the bitmap data. */
    bmp_data_size = buf_sz - bmp_data_offset;
    debug_printf( 2, "bitmap data is %u bytes\n", bmp_data_size );
-   grid = memory_alloc( 1, sizeof( struct CONVERT_GRID ) );
+   /* TODO: Use memory architecture. */
+   grid = calloc( 1, sizeof( struct CONVERT_GRID ) );
    assert( NULL != grid );
    grid->data_sz = sz_x * sz_y;
-   grid->data = memory_alloc( 1, grid->data_sz );
+   grid->data = calloc( 1, grid->data_sz );
    assert( NULL != grid->data );
 
    grid->sz_x = sz_x;

@@ -35,7 +35,8 @@ int cga_write_file(
    }
    printf( "CGA buffer size: %u\n", cga_buffer_sz );
 
-   cga_buffer = memory_alloc( 1, cga_buffer_sz );
+   /* TODO: Use memory architecture. */
+   cga_buffer = calloc( 1, cga_buffer_sz );
    assert( NULL != cga_buffer );
 
    /* Perform the conversion and write the result to file. */
@@ -46,7 +47,7 @@ int cga_write_file(
    debug_printf( 2, "wrote CGA file: %lu bytes\n", ftell( cga_file ) );
 
    fclose( cga_file );
-   memory_free( &cga_buffer );
+   free( cga_buffer );
 
    return retval;
 }
@@ -162,13 +163,18 @@ struct CONVERT_GRID* cga_read_file(
 ) {
    uint8_t* cga_buffer = NULL;
    uint32_t cga_buffer_sz = 0;
+   MEMORY_HANDLE cga_buffer_handle = NULL;
    struct CONVERT_GRID* grid_out = NULL;
 
-   cga_buffer_sz = dio_read_file( path, &cga_buffer );
+   cga_buffer_sz = dio_read_file( path, &cga_buffer_handle );
+
+   cga_buffer = memory_lock( cga_buffer_handle );
 
    grid_out = cga_read( cga_buffer, cga_buffer_sz, o );
 
-   memory_free( &cga_buffer );
+   cga_buffer = memory_unlock( cga_buffer_handle );
+
+   memory_free( cga_buffer_handle );
 
    return grid_out;
 }
@@ -194,7 +200,8 @@ struct CONVERT_GRID* cga_read(
    }
 
    /* Allocate new grid. */
-   grid = memory_alloc( 1, sizeof( struct CONVERT_GRID ) );
+   /* TODO: Use memory architecture. */
+   grid = calloc( 1, sizeof( struct CONVERT_GRID ) );
    assert( NULL != grid );
    if( o->cga_use_header ) {
       grid->sz_x = header.width;
@@ -210,7 +217,7 @@ struct CONVERT_GRID* cga_read(
    }
    assert( 0 < grid->sz_x );
    assert( 0 < grid->sz_y );
-   grid->data = memory_alloc( 1, grid->data_sz );
+   grid->data = calloc( 1, grid->data_sz );
    assert( NULL != grid->data );
    grid->bpp = 2; /* CGA is 2bpp or we don't understand it. */
 

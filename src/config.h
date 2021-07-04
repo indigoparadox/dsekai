@@ -78,13 +78,19 @@
 #elif defined( PLATFORM_PALM )
 /* ------ */
 
+#include <PalmOS.h>
+
 #include "../gen/palm/resext.h"
 
-#define USE_SOFT_ASSERT
 #if 0
+#define USE_SOFT_ASSERT
 #define MEMORY_STATIC
 #endif
 #define DISABLE_FILESYSTEM
+
+#define stringify_line( line ) #line
+
+#define assert( test ) ErrFatalDisplayIf( !(test), __FILE__ ": " stringify_line( __LINE__ ) ": assert failure" )
 
 /* ------ */
 #elif defined( PLATFORM_WIN16 )
@@ -286,7 +292,7 @@
 
 #  define assert( comp ) if( !(comp) ) { g_assert_failed_len = dio_snprintf( g_assert_failed, 255, __FILE__ ": %d: ASSERT FAILED", __LINE__ ); }
 
-#else
+#elif !defined( assert )
 
 #include <assert.h>
 

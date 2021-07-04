@@ -5,19 +5,25 @@
 #include "../../src/memory.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 struct CONVERT_GRID* icns_read_file(
    const char* path, struct CONVERT_OPTIONS* o
 ) {
    uint8_t* icns_buffer = NULL;
    uint32_t icns_buffer_sz = 0;
+   MEMORY_HANDLE icns_buffer_handle = NULL;
    struct CONVERT_GRID* grid_out = NULL;
 
-   icns_buffer_sz = dio_read_file( path, &icns_buffer );
+   icns_buffer_sz = dio_read_file( path, &icns_buffer_handle );
+
+   icns_buffer = memory_lock( icns_buffer_handle );
 
    grid_out = icns_read( icns_buffer, icns_buffer_sz, o );
 
-   memory_free( &icns_buffer );
+   icns_buffer = memory_unlock( icns_buffer_handle );
+
+   memory_free( icns_buffer_handle );
 
    return grid_out;
 }
@@ -89,13 +95,14 @@ int icns_write_file(
       ICNS_DATA_HEADER_SZ +
       icns_canvas_sz;
 
-   icns_buffer = memory_alloc( 1, icns_buffer_sz );
+   /* TODO: Use memory architecture. */
+   icns_buffer = calloc( 1, icns_buffer_sz );
    assert( NULL != icns_buffer );
 
    retval = icns_write( icns_buffer, icns_buffer_sz, grid, o );
    assert( !retval );
    if( retval ) {
-      memory_free( &icns_buffer );
+      free( icns_buffer );
       return retval;
    }
 
@@ -107,7 +114,7 @@ int icns_write_file(
    fwrite( icns_buffer, 1, icns_buffer_sz, file_out );
 
    fclose( file_out );
-   memory_free( &icns_buffer );
+   free( icns_buffer );
 
    return retval;
 }

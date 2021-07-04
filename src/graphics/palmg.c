@@ -7,40 +7,6 @@ static WinHandle g_win;
 static uint32_t g_ticks_start = 0;
 static int16_t g_ticks_target = 0;
 
-static int16_t graphics_load_bitmap_surface( struct GRAPHICS_BITMAP* b ) {
-   int16_t retval = 1;
-   struct DIO_RESOURCE rsc;
-
-   if( NULL == b ) {
-      retval = 0;
-      goto cleanup;
-   }
-
-   retval = dio_get_resource_handle( b->id, 'Tbmp', &rsc );
-   if( !retval ) {
-      goto cleanup;
-   }
-
-   b->handle = rsc.handle;
-   b->bitmap = rsc.ptr;
-
-cleanup:
-   return retval;
-}
-
-static void graphics_unload_bitmap_surface( struct GRAPHICS_BITMAP* b ) {
-   struct DIO_RESOURCE rsc;
-
-   if( NULL != b->handle ) {
-      MemHandleUnlock( b->handle );
-      b->handle = NULL;
-   }
-
-   if( NULL != b->bitmap ) {
-      /* TODO: Free bitmap? Don't need to, right? */
-   }
-}
-
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
@@ -109,8 +75,6 @@ int graphics_platform_blit_at(
    MemHandleUnlock( rsrc );
 
 cleanup:
-
-   dio_free_resource_handle( &rsrc );
 
    return retval;
 }

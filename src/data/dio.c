@@ -61,6 +61,10 @@ cleanup:
 #endif /* PLATFORM_PALM */
 }
 
+void dio_free_resource_handle( MEMORY_HANDLE handle ) {
+   /* TODO */
+}
+
 #ifndef DISABLE_FILESYSTEM
 
 int32_t dio_open_stream_file(
