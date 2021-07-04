@@ -29,6 +29,8 @@ void main() {
 
 UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
 
+   if( cmd == sysAppLaunchCmdNormalLaunch ) {
+
 /* ------ */
 #elif defined( PLATFORM_WIN16 )
 /* ------ */
@@ -126,5 +128,9 @@ int main( int argc, char* argv[] ) {
 #ifndef DISABLE_MAIN_PARMS
    return 0;
 #endif /* !DISABLE_MAIN_PARMS */
+
+#ifdef PLATFORM_PALM
+   }
+#endif /* PLATFORM_PALM */
 }
 

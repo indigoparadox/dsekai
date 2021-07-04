@@ -9,8 +9,6 @@
 
 #include <string.h>
 
-#ifdef TILEMAP_JSON
-
 #define JSON_TOKENS_MAX 1024
 #define JSON_PATH_SZ 255
 #define JSON_BUFFER_SZ 4096
@@ -96,12 +94,18 @@ cleanup:
    return retval;
 }
 
-#endif /* TILEMAP_JSON */
+void tilemap_refresh_tiles( struct TILEMAP* t ) {
+   int x = 0, y = 0;
+
+   for( y = 0 ; TILEMAP_TH > y ; y++ ) {
+      for( x = 0 ; TILEMAP_TW > x ; x++ ) {
+         t->tiles_flags[(y * TILEMAP_TW) + x] |= TILEMAP_TILE_FLAG_DIRTY;
+      }
+   }
+}
 
 void tilemap_draw(
-   const struct TILEMAP* t, uint8_t* tiles_flags,
-   uint16_t tiles_flags_w, uint16_t tiles_flags_h,
-   uint16_t screen_x, uint16_t screen_y, uint8_t force
+   struct TILEMAP* t, uint16_t screen_x, uint16_t screen_y, uint8_t force
 ) {
    int x = 0,
       y = 0;
@@ -126,7 +130,7 @@ void tilemap_draw(
 #ifndef IGNORE_DIRTY
          if(
             !force &&
-            !(tiles_flags[(y * tiles_flags_w) + x] & TILEMAP_TILE_FLAG_DIRTY)
+            !(t->tiles_flags[(y * TILEMAP_TW) + x] & TILEMAP_TILE_FLAG_DIRTY)
          ) {
             continue;
          }
@@ -137,7 +141,7 @@ void tilemap_draw(
          assert( y >= 0 );
          assert( x >= 0 );
 
-         tiles_flags[(y * tiles_flags_w) + x] &= ~TILEMAP_TILE_FLAG_DIRTY;
+         t->tiles_flags[(y * TILEMAP_TW) + x] &= ~TILEMAP_TILE_FLAG_DIRTY;
 
          /* Grab the left byte if even or the right if odd. */
          tile_id = tilemap_get_tile_id( t, x, y );

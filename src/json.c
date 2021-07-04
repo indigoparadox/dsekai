@@ -89,17 +89,6 @@ int16_t json_get_token_idx(
    return -1;
 }
 
-void json_print_element( const char* buffer, int16_t start, int16_t end ) {
-   int j = 0;
-
-   /* Print contents. */
-   for( j = start; end > j ; j++ ) {
-      printf( "%c", buffer[j] );
-   }
-   printf( "\n" );
-
-}
-
 int16_t json_token_id_from_path(
    const char* path, jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
 ) {
@@ -125,10 +114,6 @@ int16_t json_token_id_from_path(
          i, path_cur_tok_start, path_cur_tok_sz,
          path_cur_tok_start + path_cur_tok_sz,
          strlen( path ) );
-      /*json_print_element(
-         path,
-         path_cur_tok_start,
-         path_cur_tok_start + path_cur_tok_sz ); */
 
       /* Find the element that corresponds to that path token at that position.
        */

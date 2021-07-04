@@ -26,9 +26,7 @@ struct MOBILE {
 #define MOBILE_FACING_LEFT    3
 
 uint8_t mobile_walk_start( struct MOBILE*, int8_t, int8_t );
-#ifndef ANCIENT_C
-void mobile_animate( struct MOBILE* m, uint8_t*, uint16_t, uint16_t );
-#endif /* ANCIENT_C */
+void mobile_animate( struct MOBILE*, struct TILEMAP* );
 void mobile_draw( const struct MOBILE*, int8_t, int16_t, int16_t );
 void mobile_deinit( struct MOBILE* );
 

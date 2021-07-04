@@ -12,7 +12,7 @@
 #define TOPDOWN_MOBILES_MAX 10
 
 static MEMORY_HANDLE g_mobiles_handle = NULL;
-static MEMORY_HANDLE g_tiles_flags_handle = NULL;
+static MEMORY_HANDLE g_map_handle = NULL;
 static uint8_t g_mobiles_count = 0; 
 static int g_semi_cycles = 0;
 static int g_walk_offset = 0;
@@ -24,25 +24,13 @@ static int g_screen_scroll_x_tgt = 0;
 static int g_screen_scroll_y_tgt = 0;
 static uint8_t g_window_shown = 0;
 static uint8_t g_input_blocked_countdown = 0;
-static struct MOBILE* g_player = NULL;
-static struct TILEMAP g_map;
 static int g_player_idx = 0;
-
-static
-void topdown_refresh_tiles( uint8_t* tiles_flags ) {
-   int x = 0, y = 0;
-   for( y = 0 ; TILEMAP_TH > y ; y++ ) {
-      for( x = 0 ; TILEMAP_TW > x ; x++ ) {
-         tiles_flags[(y * TILEMAP_TW) + x] |= TILEMAP_TILE_FLAG_DIRTY;
-      }
-   }
-}
 
 int topdown_draw() {
    int in_char = 0,
       i = 0;
    struct MOBILE* mobiles = NULL;
-   uint8_t* tiles_flags = NULL;
+   struct TILEMAP* map = NULL;
 
    /*
    If the screen is scrolling, prioritize that before accepting more
@@ -74,18 +62,16 @@ int topdown_draw() {
       assert( 0 <= g_screen_scroll_x );
       assert( 0 <= g_screen_scroll_tx );
 
-      tiles_flags = memory_lock( g_tiles_flags_handle );
-      topdown_refresh_tiles( tiles_flags );
+      map = memory_lock( g_map_handle );
+      tilemap_refresh_tiles( map );
 #ifdef ANIMATE_SCREEN_MOVEMENT
 #ifndef DISABLE_GRAPHICS
-      tilemap_draw( &g_map, tiles_flags,
-         TILEMAP_TW, TILEMAP_TH,
-         g_screen_scroll_x, g_screen_scroll_y, 1 );
+      tilemap_draw( map, g_screen_scroll_x, g_screen_scroll_y, 1 );
 
       graphics_flip();
 #endif /* !DISABLE_GRAPHICS */
 #endif /* ANIMATE_SCREEN_MOVEMENT */
-      tiles_flags = memory_unlock( g_tiles_flags_handle );
+      map = memory_unlock( g_map_handle );
 
       /* Drain input. */
       in_char = input_poll();
@@ -110,13 +96,11 @@ int topdown_draw() {
       return 1;
    }
 
-   tiles_flags = memory_lock( g_tiles_flags_handle );
 #ifndef DISABLE_GRAPHICS
-   tilemap_draw( &g_map, tiles_flags,
-      TILEMAP_TW, TILEMAP_TH,
-      g_screen_scroll_x, g_screen_scroll_y, 0 );
+   map = memory_lock( g_map_handle );
+   tilemap_draw( map, g_screen_scroll_x, g_screen_scroll_y, 0 );
+   map = memory_unlock( g_map_handle );
 #endif /* !DISABLE_GRAPHICS */
-   tiles_flags = memory_unlock( g_tiles_flags_handle );
 
    mobiles = memory_lock( g_mobiles_handle );
    for( i = 0 ; g_mobiles_count > i ; i++ ) {
@@ -148,24 +132,25 @@ int topdown_loop() {
    struct WINDOW* w = NULL;
    static int initialized = 0;
    struct MOBILE* mobiles = NULL;
-   uint8_t* tiles_flags = NULL;
+   struct TILEMAP* map = NULL;
 
    if( !initialized ) {
-      /* TODO: Generate this dynamically. */
-#ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( tile_field_grass, &(g_map.tileset[0]) );
-      graphics_load_bitmap( tile_field_brick_wall, &(g_map.tileset[1]) );
-      graphics_load_bitmap( tile_field_tree, &(g_map.tileset[2]) );
-#endif /* !DISABLE_GRAPHICS */
 
-      /* TODO: Integrate into tilemap. */
-      g_tiles_flags_handle = memory_alloc( TILEMAP_TH * TILEMAP_TW, 1 );
-      /* assert( NULL != g_tiles_flags ); */
+      g_map_handle = memory_alloc( sizeof( struct TILEMAP ), 1 );
       g_mobiles_handle = memory_alloc( 2, sizeof( struct MOBILE ) );
       if( NULL == g_mobiles_handle ) {
          error_printf( "unable to allocate space for mobiles" );
          return 0;
       }
+
+      /* TODO: Generate this dynamically. */
+#ifndef DISABLE_GRAPHICS
+      map = memory_lock( g_map_handle );
+      graphics_load_bitmap( tile_field_grass, &(map->tileset[0]) );
+      graphics_load_bitmap( tile_field_brick_wall, &(map->tileset[1]) );
+      graphics_load_bitmap( tile_field_tree, &(map->tileset[2]) );
+      map = memory_unlock( g_map_handle );
+#endif /* !DISABLE_GRAPHICS */
 
       mobiles = memory_lock( g_mobiles_handle );
 #ifndef DISABLE_GRAPHICS
@@ -197,15 +182,14 @@ int topdown_loop() {
       g_mobiles_count++;
       mobiles = memory_unlock( g_mobiles_handle );
 
-      tilemap_load( map_field, &g_map );
+      map = memory_lock( g_map_handle );
+      tilemap_load( map_field, map );
 
       /* Make sure the tilemap is drawn at least once behind any initial
        * windows.
        */
-      tiles_flags = memory_lock( g_tiles_flags_handle );
-      tilemap_draw( &g_map, tiles_flags, TILEMAP_TW, TILEMAP_TH,
-         g_screen_scroll_x, g_screen_scroll_y, 1 );
-      tiles_flags = memory_unlock( g_tiles_flags_handle );
+      tilemap_draw( map, g_screen_scroll_x, g_screen_scroll_y, 1 );
+      map = memory_unlock( g_map_handle );
 
       initialized = 1;
    }
@@ -246,12 +230,12 @@ int topdown_loop() {
    }
 
    mobiles = memory_lock( g_mobiles_handle );
-   tiles_flags = memory_lock( g_tiles_flags_handle );
+   map = memory_lock( g_map_handle );
    switch( in_char ) {
    case INPUT_KEY_UP:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &g_map, mobiles[g_player_idx].coords.x,
+         map, mobiles[g_player_idx].coords.x,
          mobiles[g_player_idx].coords.y - 1 )
       ) {
          mobile_walk_start( &(mobiles[g_player_idx]), 0, -1 );
@@ -261,7 +245,7 @@ int topdown_loop() {
    case INPUT_KEY_LEFT:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &g_map, mobiles[g_player_idx].coords.x - 1,
+         map, mobiles[g_player_idx].coords.x - 1,
          mobiles[g_player_idx].coords.y )
       ) {
          mobile_walk_start( &(mobiles[g_player_idx]), -1, 0 );
@@ -271,7 +255,7 @@ int topdown_loop() {
    case INPUT_KEY_DOWN:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &g_map, mobiles[g_player_idx].coords.x,
+         map, mobiles[g_player_idx].coords.x,
          mobiles[g_player_idx].coords.y + 1 )
       ) {
          mobile_walk_start( &(mobiles[g_player_idx]), 0, 1 );
@@ -281,7 +265,7 @@ int topdown_loop() {
    case INPUT_KEY_RIGHT:
       if( 0 < windows_visible() ) { break; }
       if( !tilemap_collide(
-         &g_map, mobiles[g_player_idx].coords.x + 1,
+         map, mobiles[g_player_idx].coords.x + 1,
          mobiles[g_player_idx].coords.y )
       ) {
          mobile_walk_start( &(mobiles[g_player_idx]), 1, 0 );
@@ -290,12 +274,12 @@ int topdown_loop() {
 
    case INPUT_KEY_OK:
       window_pop();
-      topdown_refresh_tiles( tiles_flags );
+      tilemap_refresh_tiles( map );
       break;
 
    case INPUT_KEY_QUIT:
       mobiles = memory_unlock( g_mobiles_handle );
-      tiles_flags = memory_unlock( g_tiles_flags_handle );
+      map = memory_unlock( g_map_handle );
       topdown_deinit();
       return 0;
    }
@@ -316,7 +300,7 @@ int topdown_loop() {
    }
 
    for( i = 0 ; g_mobiles_count > i ; i++ ) {
-      mobile_animate( &(mobiles[i]), tiles_flags, TILEMAP_TW, TILEMAP_TH );
+      mobile_animate( &(mobiles[i]), map );
    }
 
    /* Scroll the screen by one if the player goes off-screen. */
@@ -332,7 +316,7 @@ int topdown_loop() {
       g_screen_scroll_y_tgt = g_screen_scroll_y - SCREEN_H;
    }
    mobiles = memory_unlock( g_mobiles_handle );
-   tiles_flags = memory_unlock( g_tiles_flags_handle );
+   map = memory_unlock( g_map_handle );
 
    graphics_loop_end();
 
@@ -342,6 +326,7 @@ int topdown_loop() {
 void topdown_deinit() {
    int i = 0;
    struct MOBILE* mobiles = NULL;
+   struct TILEMAP* map = NULL;
 
    mobiles = memory_lock( g_mobiles_handle );
    for( i = 0 ; g_mobiles_count > i ; i++ ) {
@@ -349,9 +334,11 @@ void topdown_deinit() {
    }
    mobiles = memory_unlock( g_mobiles_handle );
 
-   tilemap_deinit( &g_map );
+   map = memory_lock( g_map_handle );
+   tilemap_deinit( map );
+   map = memory_unlock( g_map_handle );
 
    memory_free( g_mobiles_handle );
-   memory_free( g_tiles_flags_handle );
+   memory_free( g_map_handle );
 }
 

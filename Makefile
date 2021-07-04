@@ -28,6 +28,8 @@ DSEKAI_C_FILES_DOS_ONLY := \
 DSEKAI_C_FILES_PALM_ONLY := \
    src/main.c \
    src/input/palmi.c \
+   src/memory/palmm.c \
+   src/resource/palmr.c \
    src/graphics/palmg.c \
    src/dio.c
 
@@ -156,7 +158,7 @@ CFLAGS_CONVERT := -DNO_RESEXT -g
 CFLAGS_LOOKUPS := -g
 
 CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG
-CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak
+CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -pg
 
 $(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT -DDEBUG_THRESHOLD=3
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)

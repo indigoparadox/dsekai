@@ -48,7 +48,6 @@
 
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
-#define TILEMAP_JSON
 
 /* ------ */
 #elif defined( PLATFORM_SDL )
@@ -69,7 +68,6 @@
 #endif /* !DRC_ARCHIVE */
 
 #define USE_SOFTWARE_TEXT
-#define TILEMAP_JSON
 
 /* ------ */
 #elif defined( PLATFORM_PALM )
@@ -79,9 +77,7 @@
 
 #include "../gen/palm/resext.h"
 
-#if 0
 #define USE_SOFT_ASSERT
-#endif
 #define DISABLE_FILESYSTEM
 
 #define stringify_line( line ) #line
@@ -151,13 +147,8 @@
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 /* ------ */
 
-#ifdef TILEMAP_JSON
 #define TILEMAP_TW (30)
 #define TILEMAP_TH (30)
-#else
-#define TILEMAP_TW (80)
-#define TILEMAP_TH (44)
-#endif /* TILEMAP_JSON */
 
 #define TILEMAP_TILESETS_MAX  (12)
 

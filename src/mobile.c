@@ -29,10 +29,7 @@ uint8_t mobile_walk_start( struct MOBILE* m, int8_t x_mod, int8_t y_mod ) {
    return 1;
 }
 
-void mobile_animate(
-   struct MOBILE* m, uint8_t* tiles_flags, uint16_t tiles_flags_w,
-   uint16_t tiles_flags_h
-) {
+void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
 
@@ -44,8 +41,10 @@ void mobile_animate(
    assert( SPRITE_H > m->steps_y );
 
    /* Leave a trail of dirty tiles. */
-   tiles_flags[(m->coords.y * tiles_flags_w) + m->coords.x] |= TILEMAP_TILE_FLAG_DIRTY;
-   tiles_flags[(m->coords_prev.y * tiles_flags_w) + m->coords_prev.x] |= TILEMAP_TILE_FLAG_DIRTY;
+   t->tiles_flags[(m->coords.y * TILEMAP_TW) + m->coords.x] |=
+      TILEMAP_TILE_FLAG_DIRTY;
+   t->tiles_flags[(m->coords_prev.y * TILEMAP_TW) + m->coords_prev.x] |=
+      TILEMAP_TILE_FLAG_DIRTY;
 
    if(
       m->coords.x != m->coords_prev.x ||

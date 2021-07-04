@@ -18,22 +18,14 @@ struct TILEMAP_COORDS {
 struct TILEMAP {
    char* name;
    struct GRAPHICS_BITMAP tileset[TILEMAP_TILESETS_MAX];
-#ifdef TILEMAP_JSON
    uint8_t tileset_flags[TILEMAP_TILESETS_MAX];
    uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];
-#else
-   const uint8_t* tileset_flags;
-   const uint8_t* tiles;
-#endif /* !TILEMAP_JSON */
+   uint8_t tiles_flags[TILEMAP_TH * TILEMAP_TW];
 };
 
 int16_t tilemap_load( uint32_t, struct TILEMAP* );
-#ifndef ANCIENT_C
-void tilemap_draw(
-   const struct TILEMAP* t, uint8_t* tiles_flags, uint16_t, uint16_t,
-   uint16_t, uint16_t, uint8_t
-);
-#endif /* ANCIENT_C */
+void tilemap_refresh_tiles( struct TILEMAP* );
+void tilemap_draw( struct TILEMAP*, uint16_t, uint16_t, uint8_t );
 uint8_t tilemap_collide( const struct TILEMAP*, uint8_t, uint8_t );
 void tilemap_deinit( struct TILEMAP* );
 

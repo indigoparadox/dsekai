@@ -56,7 +56,7 @@ int graphics_platform_blit_at(
    MEMORY_HANDLE rsrc = NULL;
    BitmapPtr ptr = NULL;
 
-   if( NULL == bmp ) {
+   if( NULL == bmp || !bmp->initialized ) {
       WinDrawChars( "X", 1, x, y );
       retval = 0;
       goto cleanup;

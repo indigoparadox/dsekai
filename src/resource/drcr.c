@@ -7,9 +7,6 @@
  * \brief Allocate a handle to a resource in DRC archive or OS resource fork.
  */
 MEMORY_HANDLE resource_get_handle( uint32_t id, union DRC_TYPE drc_type ) {
-#ifdef PLATFORM_PALM
-   return DmGetResource( drc_type.u32, id );
-#else
    struct DIO_STREAM drc_file;
    uint8_t* ptr = NULL;
    int32_t ptr_sz = 0;
@@ -52,11 +49,9 @@ cleanup:
    }
 
    return handle;
-#endif /* PLATFORM_PALM */
 }
 
 void resource_free_handle( MEMORY_HANDLE handle ) {
    /* TODO */
 }
-
 

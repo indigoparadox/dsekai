@@ -8,7 +8,7 @@
 #include "drc.h"
 
 #ifdef PLATFORM_PALM
-
+#include "resource/palmr.h"
 #else
 #include "resource/drcr.h"
 #endif /* PLATFORM_* */
