@@ -5,7 +5,7 @@
 #include "../dstypes.h"
 #include "../drc.h"
 
-typedef struct DRC_TYPE RESOURCE_ID;
+typedef union DRC_TYPE RESOURCE_ID;
 
 #include "../resource.h"
 

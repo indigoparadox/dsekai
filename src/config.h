@@ -29,7 +29,7 @@
 #endif /* !GRAPHICS_MODE */
 
 #ifndef LOG_FILE_NAME
-#define LOG_FILE_NAME "logdos.txt",
+#define LOG_FILE_NAME "logdos.txt"
 #endif /* !LOG_FILE_NAME */
 
 #ifndef CGA_COLD

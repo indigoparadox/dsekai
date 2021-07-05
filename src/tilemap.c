@@ -28,8 +28,6 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    uint32_t json_buffer_sz = 0;
    RESOURCE_ID type = DRC_MAP_TYPE;
 
-   return 0;
-
    json_handle = resource_get_handle( id, type );
    if( NULL == json_handle ) {
       error_printf( "could not get tilemap resource handle" );
@@ -47,6 +45,11 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    json_buffer_sz = memory_sz( json_handle );
    json_buffer = memory_lock( json_handle );
    tokens = memory_lock( tokens_handle );
+
+   if( '{' != json_buffer[0] ) {
+      error_printf( "invalid tilemap json (must start with '{')" );
+      goto cleanup;
+   }
 
    jsmn_init( &parser );
    tok_parsed = jsmn_parse(
