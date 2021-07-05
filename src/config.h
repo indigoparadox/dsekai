@@ -29,7 +29,7 @@
 #endif /* !GRAPHICS_MODE */
 
 #ifndef LOG_FILE_NAME
-#define LOG_FILE_NAME "logdos.txt"
+#define LOG_FILE_NAME "logdos.txt",
 #endif /* !LOG_FILE_NAME */
 
 #ifndef CGA_COLD
@@ -45,6 +45,12 @@
 #ifndef DRC_ARCHIVE
 #define DRC_ARCHIVE "doscga.drc"
 #endif /* !DRC_ARCHIVE */
+
+#define platform_file FILE*
+#define platform_fprintf fprintf
+#define platform_fopen fopen
+#define platform_fflush fflush
+#define platform_fclose fclose
 
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
@@ -67,6 +73,12 @@
 #define DRC_ARCHIVE "sdl16.drc"
 #endif /* !DRC_ARCHIVE */
 
+#define platform_file FILE*
+#define platform_fprintf fprintf
+#define platform_fopen fopen
+#define platform_fflush fflush
+#define platform_fclose fclose
+
 #define USE_SOFTWARE_TEXT
 
 /* ------ */
@@ -77,12 +89,23 @@
 
 #include "../gen/palm/resext.h"
 
+#ifndef LOG_FILE_NAME
+#define LOG_FILE_NAME "logpalm.txt"
+#endif /* !LOG_FILE_NAME */
+
 #define USE_SOFT_ASSERT
 #define DISABLE_FILESYSTEM
+#define LOG_TO_FILE
 
 #define stringify_line( line ) #line
 
-#define assert( test ) ErrFatalDisplayIf( !(test), __FILE__ ": " stringify_line( __LINE__ ) ": assert failure" )
+#define platform_file HostFILE*
+#define platform_fprintf HostFPrintF
+#define platform_fopen HostFOpen
+#define platform_fflush HostFFlush
+#define platform_fclose HostFClose
+
+/* #define assert( test ) ErrFatalDisplayIf( !(test), __FILE__ ": " stringify_line( __LINE__ ) ": assert failure" ) */
 
 /* ------ */
 #elif defined( PLATFORM_WIN16 )
@@ -99,6 +122,9 @@
 #ifndef DIO_PATH_SEP
 #define DIO_PATH_SEP '\\'
 #endif /* !DIO_PATH_SEP */
+
+#define platform_fprintf fprintf
+#define platform_fopen fopen
 
 #define USE_SOFTWARE_TEXT
 
@@ -117,6 +143,12 @@
 #ifndef DRC_ARCHIVE
 #define DRC_ARCHIVE "mac7.drc"
 #endif /* !DRC_ARCHIVE */
+
+#define platform_file FILE*
+#define platform_fprintf fprintf
+#define platform_fopen fopen
+#define platform_fflush fflush
+#define platform_fclose fclose
 
 #define USE_SOFTWARE_TEXT
 #define DRC_TOC_INITIAL_ALLOC 20 /* Fake it until we have realloc. */
@@ -140,6 +172,12 @@
 #ifndef NO_RESEXT
 #include "../gen/check_null/resext.h"
 #endif /* NO_RESEXT */
+
+#define platform_file FILE*
+#define platform_fprintf fprintf
+#define platform_fopen fopen
+#define platform_fflush fflush
+#define platform_fclose fclose
 
 #define USE_SOFTWARE_TEXT
 
@@ -225,25 +263,13 @@
 
 #  include <stdio.h>
 
-#  define internal_debug_printf( lvl, ... ) \
-      if( lvl >= DEBUG_THRESHOLD ) { \
-         fprintf( LOG_STD_TARGET, "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); \
-         fprintf( LOG_STD_TARGET, __VA_ARGS__ ); \
-         fprintf( LOG_STD_TARGET, "\n" ); \
-         fflush( LOG_STD_TARGET ); \
-      }
+#  define internal_debug_printf( lvl, ... ) if( lvl >= DEBUG_THRESHOLD ) { platform_fprintf( LOG_STD_TARGET, "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); platform_fprintf( LOG_STD_TARGET, __VA_ARGS__ ); platform_fprintf( LOG_STD_TARGET, "\n" ); platform_fflush( LOG_STD_TARGET ); }
 
-#  define internal_error_printf( ... ) \
-      fprintf( LOG_ERR_TARGET, "(E) " __FILE__ ": %d: ", __LINE__ ); \
-      fprintf( LOG_ERR_TARGET, __VA_ARGS__ ); \
-      fprintf( LOG_ERR_TARGET, "\n" ); \
-      fflush( LOG_ERR_TARGET );
+#  define internal_error_printf( ... ) platform_fprintf( LOG_ERR_TARGET, "(E) " __FILE__ ": %d: ", __LINE__ ); platform_fprintf( LOG_ERR_TARGET, __VA_ARGS__ ); platform_fprintf( LOG_ERR_TARGET, "\n" ); platform_fflush( LOG_ERR_TARGET );
 
-#  define debug_printf( lvl, ... ) \
-      internal_debug_printf( lvl, __VA_ARGS__ )
+#  define debug_printf( lvl, ... ) internal_debug_printf( lvl, __VA_ARGS__ )
 
-#  define error_printf( ... ) \
-      internal_error_printf( __VA_ARGS__ )
+#  define error_printf( ... ) internal_error_printf( __VA_ARGS__ )
 
 /* ! */
 #elif defined( ANCIENT_C )
@@ -312,9 +338,9 @@
 
 #ifdef LOG_TO_FILE
 #ifdef MAIN_C
-FILE* g_log_file = NULL;
+platform_file g_log_file = NULL;
 #else /* !MAIN_C */
-extern FILE* g_log_file;
+extern platform_file g_log_file;
 #endif /* MAIN_C */
 #endif /* LOG_TO_FILE */
 

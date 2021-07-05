@@ -65,7 +65,7 @@ int main( int argc, char* argv[] ) {
 #endif /* PLATFORM_WIN16 */
 
 #ifdef LOG_TO_FILE
-   g_log_file = fopen( LOG_FILE_NAME, "w" );
+   g_log_file = platform_fopen( LOG_FILE_NAME, "w" );
 #endif /* LOG_TO_FILE */
 
    if( !graphics_init() ) {
@@ -122,7 +122,7 @@ int main( int argc, char* argv[] ) {
    graphics_shutdown();
 
 #ifdef LOG_TO_FILE
-   fclose( g_log_file );
+   platform_fclose( g_log_file );
 #endif /* LOG_TO_FILE */
 
 #ifndef DISABLE_MAIN_PARMS
