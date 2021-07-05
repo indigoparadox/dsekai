@@ -114,6 +114,9 @@
 #define DIO_PATH_SEP '\\'
 #endif /* !DIO_PATH_SEP */
 
+#define DRC_BITMAP_TYPE 1
+#define DRC_MAP_TYPE 2
+
 #define USE_SOFTWARE_TEXT
 
 #define SCREEN_BPP 4
@@ -208,6 +211,10 @@
 #ifndef DRC_MAP_TYPE
 #define DRC_MAP_TYPE {'j', 's', 'o', 'n'}
 #endif /* !DRC_MAP_TYPE */
+
+#ifndef JSON_BUFFER_SZ
+#define JSON_BUFFER_SZ 8192
+#endif /* !JSON_BUFFER_SZ */
 
 #ifndef SCREEN_W
 #define SCREEN_W (320)

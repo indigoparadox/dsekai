@@ -71,9 +71,9 @@ int graphics_platform_blit_at(
       goto cleanup;
    }
 
-   ptr = MemHandleLock( rsrc );
+   ptr = resource_lock_handle( rsrc );
    WinDrawBitmap( ptr, x, y );
-   MemHandleUnlock( rsrc );
+   ptr = resource_unlock_handle( rsrc );
 
 cleanup:
 

@@ -15,37 +15,53 @@
 #define FMT_PALM        1
 #define FMT_WIN16       2
 
+#define RTYPE_MISC      0
+#define RTYPE_JSON      1
+#define RTYPE_BITMAP    2
+
 #define FILE_LIST_MAX   255
 
 #define FOI_ID          0
 #define FOI_FILENAME    1
 
-const char gc_res_bitmap[] = "BITMAP";
-const char gc_res_data_json[] = "DATA \"json\"";
-const char gc_res_data_misc[] = "DATA \"misc\"";
+const char gc_win_res_bitmap[] = "BITMAP";
+const char gc_palm_res_bitmap[] = "BITMAP";
+const char gc_palm_res_data_json[] = "DATA \"json\"";
+const char gc_palm_res_data_misc[] = "DATA \"misc\"";
 
 int main( int argc, char* argv[] ) {
    int retval = 0;
    int i = 0,
+      j = 0,
       state = 0,
       fmt = 0,
+      rtype = RTYPE_MISC,
       basename_start = 0,
       id_start = 0,
+      string_list_sz = 0,
+      string_file_sz = 0,
+      read = 0,
       filename_len = 0,
       extension_idx = 0;
    char* header_name = NULL,
       * file_list[FILE_LIST_MAX],
-      * file_basename_list[FILE_LIST_MAX];
+      * file_basename_list[FILE_LIST_MAX],
+      * string_name_list[FILE_LIST_MAX],
+      * string_list[FILE_LIST_MAX],
+      last_c = '\0';
    const char* res_type = NULL;
    char namebuf_header[NAMEBUF_MAX + 1],
       namebuf_res[NAMEBUF_MAX + 1];
    size_t file_list_len = 0;
    FILE * header_file = NULL,
-      * res_file = NULL;
+      * res_file = NULL,
+      * string_file = NULL;
 
    memset( namebuf_header, '\0', NAMEBUF_MAX + 1 );
    memset( namebuf_res, '\0', NAMEBUF_MAX + 1 );
    memset( file_list, '\0', sizeof( char* ) * FILE_LIST_MAX );
+   memset( string_list, '\0', sizeof( char* ) * FILE_LIST_MAX );
+   memset( string_name_list, '\0', sizeof( char* ) * FILE_LIST_MAX );
 
    for( i = 1 ; argc > i ; i++ ) {
       switch( state ) {
@@ -153,25 +169,86 @@ int main( int argc, char* argv[] ) {
          extension_idx = dio_char_idx_r( file_list[i], filename_len, '.' ) + 1;
 
          if( 0 == strncmp( &(file_list[i][extension_idx]), "bmp", 3 ) ) {
-            res_type = gc_res_bitmap;
+            rtype = RTYPE_BITMAP;
          } else if( 0 == strncmp( &(file_list[i][extension_idx]), "jso", 3 ) ) {
-            res_type = gc_res_data_json;
+            rtype = RTYPE_JSON;
+         }
+
+         if( RTYPE_BITMAP == rtype ) {
+            switch( fmt ) {
+            case FMT_PALM:
+               res_type = gc_palm_res_bitmap;
+               break;
+            case FMT_WIN16:
+               res_type = gc_win_res_bitmap;
+               break;
+            }
+         } else if( RTYPE_JSON == rtype ) {
+            switch( fmt ) {
+            case FMT_PALM:
+               res_type = gc_palm_res_data_json;
+               break;
+            }
          } else {
-            res_type = gc_res_data_misc;
+            switch( fmt ) {
+            case FMT_PALM:
+               res_type = gc_palm_res_data_misc;
+               break;
+            }
          }
 
-         switch( fmt ) {
-         case FMT_PALM:
-            fprintf( res_file, "%s ID %s \"%s\"\n",
-               res_type, file_basename_list[i], file_list[i] );
-            break;
+         if( FMT_WIN16 == fmt && RTYPE_JSON == rtype ) {
 
-         case FMT_WIN16:
-            fprintf( res_file, "%s %s \"%s\"\n",
-               file_basename_list[i], res_type, file_list[i] );
-            break;
+            assert( NULL == string_list[string_list_sz] );
+            string_file = fopen( file_list[i], "r" );
+            assert( NULL != string_file );
+            fseek( string_file, 0, SEEK_END );
+            string_file_sz = ftell( string_file ) + 1;
+            fseek( string_file, 0, SEEK_SET );
+            string_list[string_list_sz] = calloc( string_file_sz, 1 );
+            string_name_list[string_list_sz] =
+               calloc( strlen( file_basename_list[i] ) + 1, 1 );
+            strcpy( string_name_list[string_list_sz], file_basename_list[i] );
+            read = fread(
+               string_list[string_list_sz], 1, string_file_sz, string_file );
+            assert( read == string_file_sz - 1 );
+            fclose( string_file );
+            string_list_sz++;
+            
+         } else {
+            switch( fmt ) {
+            case FMT_PALM:
+               fprintf( res_file, "%s ID %s \"%s\"\n",
+                  res_type, file_basename_list[i], file_list[i] );
+               break;
+
+            case FMT_WIN16:
+               fprintf( res_file, "%s %s \"%s\"\n",
+                  file_basename_list[i], res_type, file_list[i] );
+               break;
+            }
          }
+      }
 
+      if( 0 < string_list_sz ) {
+         fprintf( res_file, "STRINGTABLE\n{\n" );
+         for( i = 0 ; string_list_sz > i ; i++ ) {
+            fprintf( res_file, "   %s, \"", string_name_list[i] );
+            for( j = 0 ; strlen( string_list[i] ) > j ; j++ ) {
+               if( '"' == string_list[i][j] || '\\' == string_list[i][j] ) {
+                  fputc( '\\', res_file );
+               }
+               if(
+                  '\n' != string_list[i][j] && '\r' != string_list[i][j] &&
+                  !(last_c == ' ' && string_list[i][j] == ' ')
+               ) {
+                  fputc( string_list[i][j], res_file );
+               }
+               last_c = string_list[i][j];
+            }
+            fprintf( res_file, "\"\n" );
+         }
+         fprintf( res_file, "}\n" );
       }
 
       fclose( res_file );

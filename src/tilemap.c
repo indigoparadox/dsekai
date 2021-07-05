@@ -11,7 +11,6 @@
 
 #define JSON_TOKENS_MAX 1024
 #define JSON_PATH_SZ 255
-#define JSON_BUFFER_SZ 4096
 
 int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    int16_t tok_parsed = 0,
@@ -43,11 +42,12 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    }
 
    json_buffer_sz = memory_sz( json_handle );
-   json_buffer = memory_lock( json_handle );
+   json_buffer = resource_lock_handle( json_handle );
    tokens = memory_lock( tokens_handle );
 
    if( '{' != json_buffer[0] ) {
-      error_printf( "invalid tilemap json (must start with '{')" );
+      error_printf( "invalid tilemap json res %d (must start with '{')", id );
+      error_printf( "found: %s\n", json_buffer );
       goto cleanup;
    }
 
@@ -89,7 +89,7 @@ cleanup:
    }
 
    if( NULL != json_buffer ) {
-      json_buffer = memory_unlock( json_handle );
+      json_buffer = resource_unlock_handle( json_handle );
    }
 
    if( NULL != json_handle ) {

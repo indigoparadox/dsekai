@@ -36,6 +36,8 @@ DSEKAI_C_FILES_PALM_ONLY := \
 DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
    src/input/win16i.c \
+   src/resource/win16r.c \
+   src/memory/fakem.c \
    src/graphics/win16g.c
 
 DSEKAI_C_FILES_MAC7_ONLY := \
@@ -338,7 +340,8 @@ $(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc $(GENDIR_WIN16)/dsekai.ico |
 
 $(GENDIR_WIN16)/win16.rc \
 $(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)
-	$(MKRESH) -f win16 -i 5001 -if $(DSEKAI_ASSETS_BITMAPS) \
+	$(MKRESH) -f win16 -i 5001 \
+      -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) \
       -oh $(GENDIR_WIN16)/resext.h -or $(GENDIR_WIN16)/win16.rc
 
 $(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win16.res $(RESEXT_H)
