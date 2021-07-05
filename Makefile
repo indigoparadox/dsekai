@@ -90,7 +90,6 @@ CONVERT_C_FILES := \
    src/drc.c \
    tools/data/cga.c \
    src/dio.c \
-   tools/data/header.c \
    tools/data/icns.c \
    src/json.c
 

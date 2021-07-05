@@ -30,25 +30,38 @@ void buffer_printf( uint8_t* buffer, int start, int end, int col_break ) {
 }
 
 START_TEST( check_data_cga_read ) {
+   MEMORY_HANDLE grid_handle = NULL;
    struct CONVERT_GRID* grid = NULL;
    struct CONVERT_OPTIONS options;
+   struct DIO_STREAM stream;
 
    memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
    options.cga_use_header = 1;
 
-   grid = cga_read(
-      (const uint8_t*)&gc_test_cga_16_16_4, TEST_CGA_16_16_4_SZ, &options );
+   dio_open_stream_buffer( &gc_test_cga_16_16_4, TEST_CGA_16_16_4_SZ, &stream );
+
+   grid_handle = cga_read( &stream, &options );
+
+   grid = memory_lock( grid_handle );
 
    ck_assert_int_eq( gc_test_grid_16_16_4.sz_x, grid->sz_x );
    ck_assert_int_eq( gc_test_grid_16_16_4.sz_y, grid->sz_y );
    ck_assert_int_eq( gc_test_grid_16_16_4.bpp, grid->bpp );
    ck_assert_int_eq( gc_test_grid_16_16_4.data_sz, grid->data_sz );
+
+   grid_data = memory_lock( grid->data );
+
    ck_assert_int_eq( gc_test_grid_16_16_4_data[_i], grid->data[_i] );
 
    /* dio_print_grid( grid ); */
 
-   free( grid->data );
-   free( grid );
+   grid_data = memory_unlock( grid->data );
+
+   memory_free( grid->data );
+
+   grid = memory_unlock( grid_handle );
+
+   memory_free( grid_handle );
 }
 END_TEST
 
@@ -57,14 +70,18 @@ START_TEST( check_data_cga_write ) {
    uint8_t buffer[TEST_CGA_16_16_4_SZ];
    struct CGA_HEADER* cga_header = (struct CGA_HEADER*)buffer,
       * test_header = (struct CGA_HEADER*)gc_test_cga_16_16_4;
+   struct DIO_STREAM stream;
+
+   dio_open_stream_buffer( buffer, TEST_CGA_16_16_4_SZ, &stream );
 
    memset( &buffer, '\0', TEST_CGA_16_16_4_SZ );
    memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
    options.cga_use_header = 1;
    options.bpp = 2;
 
-   cga_write( 
-      (uint8_t*)&buffer, TEST_CGA_16_16_4_SZ, &gc_test_grid_16_16_4, &options );
+   cga_write( &stream, &gc_test_grid_16_16_4, &options );
+
+   dio_close_stream( &stream );
 
    ck_assert_int_eq( test_header->version, cga_header->version );
    ck_assert_int_eq( test_header->width, cga_header->width );
@@ -130,14 +147,19 @@ START_TEST( check_data_bmp_write_header ) {
    struct BITMAP_DATA_HEADER* data_header = (struct BITMAP_DATA_HEADER*)buffer,
       * test_d_header = (struct BITMAP_DATA_HEADER*)&(gc_test_bmp_16_16_16[
          sizeof( struct BITMAP_FILE_HEADER )]);
+   struct DIO_STREAM stream;
 
    memset( &buffer, '\0', TEST_BMP_16_16_16_SZ );
    memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
    options.bpp = 4;
 
-   bmp_write( 
-      (uint8_t*)&buffer, TEST_BMP_16_16_16_SZ,
-      &gc_test_grid_16_16_4, &options );
+   dio_open_stream_buffer( buffer, TEST_BMP_16_16_16_SZ, &stream );
+
+   bmp_write( &stream, &gc_test_grid_16_16_4, &options );
+
+   dio_close_stream( &stream );
+
+   /* TODO */
 
 }
 END_TEST
@@ -150,14 +172,17 @@ START_TEST( check_data_bmp_write_data ) {
    struct BITMAP_DATA_HEADER* data_header = (struct BITMAP_DATA_HEADER*)buffer,
       * test_d_header = (struct BITMAP_DATA_HEADER*)&(gc_test_bmp_16_16_16[
          sizeof( struct BITMAP_FILE_HEADER )]);
+   struct DIO_STREAM stream;
 
    memset( &buffer, '\0', TEST_BMP_16_16_16_SZ );
    memset( &options, '\0', sizeof( struct CONVERT_OPTIONS ) );
    options.bpp = 4;
 
-   bmp_write( 
-      (uint8_t*)&buffer, TEST_BMP_16_16_16_SZ,
-      &gc_test_grid_16_16_4, &options );
+   dio_open_stream_buffer( buffer, TEST_BMP_16_16_16_SZ, &stream );
+
+   bmp_write( &stream, &gc_test_grid_16_16_4, &options );
+
+   dio_close_stream( &stream );
 
    /* ck_assert_int_eq( test_f_header->file_sz, file_header->file_sz ); */
    ck_assert_int_eq(

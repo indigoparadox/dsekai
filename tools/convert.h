@@ -3,6 +3,7 @@
 #define CONVERT_H
 
 #include "../src/dstypes.h"
+#include "../src/dio.h"
 
 #define CONVERT_BUFFER_SZ 1024
 
@@ -13,7 +14,7 @@ struct CONVERT_GRID {
    int32_t sz_y;
    uint16_t bpp;
    uint32_t data_sz;
-   uint8_t *data;
+   MEMORY_HANDLE data;
 };
 
 struct CONVERT_OPTIONS {
@@ -25,7 +26,6 @@ struct CONVERT_OPTIONS {
    uint32_t plane_padding;
    uint32_t bmp_data_sz;
    uint8_t cga_use_header;
-   uint8_t little_endian;
    uint8_t bmp_no_file_header;
    uint32_t bmp_data_offset_out;
 };

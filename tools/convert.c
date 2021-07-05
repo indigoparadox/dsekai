@@ -247,9 +247,10 @@ int main( int argc, char* argv[] ) {
       options_out.bpp = 2;
    }
 
+   dio_open_stream_file( namebuf_in, "rb", &rstream );
    switch( fmt_in ) {
    case FMT_BITMAP:
-      grid = bmp_read_file( namebuf_in, &options_in );
+      grid = bmp_read( &rstream, &options_in );
       break;
 
    case FMT_CGA:

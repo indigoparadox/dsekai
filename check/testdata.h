@@ -7,21 +7,21 @@
 #define TEST_CGA_16_16_4_SZ (CGA_HEADER_SZ + (2 * 32))
 
 static const uint8_t gc_test_cga_16_16_4[TEST_CGA_16_16_4_SZ] = {
-   'C', 'G',
-   0x02, 0x00,                /* Version      1 */
-   0x10, 0x00,                /* Width:      16 */
-   0x10, 0x00,                /* Height:     16 */
-   0x02, 0x00,                /* BPP:         2 */
-   CGA_HEADER_SZ, 0x00,       /* Plane1 Ofs: 20 */
-   0x20, 0x00,                /* Plane1 Siz: 32 */
-   CGA_HEADER_SZ + 32, 0x00,  /* Plane2 Ofs: 52 */
-   0x20, 0x00,                /* Plane2 Siz: 32 */
-   0x01, 0x00,                /* Palette:     1 */
-   0x00, 0x00,                /* Big Endian     */
-   0x00, 0x00,                /* Reserved       */
-   0x00, 0x00,                /* Reserved       */
-   0x00, 0x00,                /* Reserved       */
-   0x00, 0x00,                /* Reserved       */
+   'C', 'G', 'A', 'G',
+   0x02, 0x00, 0x00, 0x00,                   /* Version      1 */
+   0x10, 0x00, 0x00, 0x00,                   /* Width:      16 */
+   0x10, 0x00, 0x00, 0x00,                   /* Height:     16 */
+   0x02, 0x00, 0x00, 0x00,                   /* BPP:         2 */
+   CGA_HEADER_SZ, 0x00, 0x00, 0x00,          /* Plane1 Ofs: 20 */
+   0x20, 0x00, 0x00, 0x00,                   /* Plane1 Siz: 32 */
+   CGA_HEADER_SZ + 32, 0x00, 0x00, 0x00,     /* Plane2 Ofs: 52 */
+   0x20, 0x00, 0x00, 0x00,                   /* Plane2 Siz: 32 */
+   0x01, 0x00, 0x00, 0x00,                   /* Palette:     1 */
+   0x00, 0x00, 0x00, 0x00,                   /* Big Endian     */
+   0x00, 0x00, 0x00, 0x00,                   /* Reserved       */
+   0x00, 0x00, 0x00, 0x00,                   /* Reserved       */
+   0x00, 0x00, 0x00, 0x00,                   /* Reserved       */
+   0x00, 0x00, 0x00, 0x00,                   /* Reserved       */
 
    /* End Header */
    
