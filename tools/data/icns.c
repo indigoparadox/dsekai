@@ -14,17 +14,11 @@ struct CONVERT_GRID* icns_read_file(
    uint32_t icns_buffer_sz = 0;
    MEMORY_HANDLE icns_buffer_handle = NULL;
    struct CONVERT_GRID* grid_out = NULL;
-
    icns_buffer_sz = dio_read_file( path, &icns_buffer_handle );
-
    icns_buffer = memory_lock( icns_buffer_handle );
-
    grid_out = icns_read( icns_buffer, icns_buffer_sz, o );
-
    icns_buffer = memory_unlock( icns_buffer_handle );
-
    memory_free( icns_buffer_handle );
-
    return grid_out;
 }
 

@@ -356,46 +356,6 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
    return retval;
 }
 
-/* TODO: Remove dio_read_file() and integrate into tools formats. */
-
-uint32_t dio_read_file( const char* path, MEMORY_HANDLE* buffer_handle ) {
-   FILE* file_in = NULL;
-   uint32_t read = 0,
-      read_total = 0,
-      file_in_sz = 0;
-   uint8_t buffer_tmp[DIO_READ_FILE_BLOCK_SZ + 1];
-   uint8_t* buffer_ptr = NULL;
-
-   memset( buffer_tmp, '\0', DIO_READ_FILE_BLOCK_SZ + 1 );
-
-   assert( NULL != buffer_handle );
-
-   file_in = fopen( path, "rb" );
-   assert( NULL != file_in );
-
-   /* Grab and allocate the file size. */
-   fseek( file_in, 0, SEEK_END );
-   file_in_sz = ftell( file_in );
-   fseek( file_in, 0, SEEK_SET );
-   *buffer_handle = memory_alloc( file_in_sz, 1 );
-   assert( NULL != *buffer_handle );
-   buffer_ptr = memory_lock( *buffer_handle );
-
-   while(
-      (read = (fread( buffer_tmp, 1, DIO_READ_FILE_BLOCK_SZ, file_in )))
-   ) {
-      memcpy( buffer_ptr + read_total, buffer_tmp, read );
-      read_total += read;
-   }
-
-   debug_printf( 2, "read %u bytes (vs %u)", read_total, file_in_sz );
-   assert( read_total == file_in_sz );
-
-   buffer_ptr = memory_unlock( *buffer_handle );
-
-   return read_total;
-}
-
 int32_t dio_copy_file( const char* src, const char* dest ) {
    FILE* file_in = NULL,
       * file_out = NULL;
