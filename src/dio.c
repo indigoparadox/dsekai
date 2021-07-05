@@ -339,8 +339,8 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
    MEMORY_HANDLE handle = NULL;
 
    handle = memory_alloc( path_sz + 1, 1 );
-   assert( 0 == handle->locks );
    path_tmp = memory_lock( handle );
+   /* XXX */
    memcpy( path_tmp, path, path_sz );
 
    basename_ptr = strtok( path_tmp, "\\/" );

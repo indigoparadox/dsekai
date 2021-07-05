@@ -124,6 +124,11 @@
 
 #include "../gen/mac7/resext.h"
 
+#ifndef DIO_PATH_TEMP
+/* TODO */
+#define DIO_PATH_TEMP ""
+#endif /* !DIO_PATH_TEMP */
+
 #ifndef DIO_PATH_SEP
 #define DIO_PATH_SEP ':'
 #endif /* !DIO_PATH_SEP */

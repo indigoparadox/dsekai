@@ -42,7 +42,8 @@ DSEKAI_C_FILES_MAC7_ONLY := \
    src/main.c \
    src/input/mac7i.c \
    src/graphics/mac7g.c \
-   src/memory/fakem.c \
+   src/memory/mac7m.c \
+   src/resource/drcr.c \
    src/drc.c
 
 DSEKAI_C_FILES_CHECK_NULL_ONLY := \
@@ -360,7 +361,8 @@ $(GENDIR_MAC7):
 $(BINDIR)/mac7.drc \
 $(GENDIR_MAC7)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | $(GENDIR_SDL)
 	$(DRCPACK) -c -a -af $(BINDIR)/mac7.drc -t PICT -i 5001 \
-      -if $(DSEKAI_ASSETS_PICTS) -lh $(GENDIR_MAC7)/resext.h
+      -if $(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS) \
+      -lh $(GENDIR_MAC7)/resext.h
 
 $(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)
 	$(IMAGEMAGICK) $< $@
