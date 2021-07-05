@@ -31,10 +31,6 @@
 #define DRC_ERROR_COULD_NOT_ALLOC         -10
 #define DRC_ERROR_COULD_NOT_FIND          -11
 
-#define DRC_ARCHIVE_TYPE {'D', 'R', 'C', 'T'}
-#define DRC_BITMAP_TYPE {'B', 'M', 'P', '1'}
-#define DRC_MAP_TYPE {'j', 's', 'o', 'n'}
-
 #define DRC_TYPE_STR( type, a, b, c, d ) type.str[0] = 'a'; type.str[1] = 'b'; type.str[2] = 'c'; type.str[3] = 'd';
 
 union DRC_TYPE {

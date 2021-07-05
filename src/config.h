@@ -46,12 +46,6 @@
 #define DRC_ARCHIVE "doscga.drc"
 #endif /* !DRC_ARCHIVE */
 
-#define platform_file FILE*
-#define platform_fprintf fprintf
-#define platform_fopen fopen
-#define platform_fflush fflush
-#define platform_fclose fclose
-
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
 
@@ -72,12 +66,6 @@
 #ifndef DRC_ARCHIVE
 #define DRC_ARCHIVE "sdl16.drc"
 #endif /* !DRC_ARCHIVE */
-
-#define platform_file FILE*
-#define platform_fprintf fprintf
-#define platform_fopen fopen
-#define platform_fflush fflush
-#define platform_fclose fclose
 
 #define USE_SOFTWARE_TEXT
 
@@ -105,6 +93,9 @@
 #define platform_fflush HostFFlush
 #define platform_fclose HostFClose
 
+#define DRC_BITMAP_TYPE 'Tbmp'
+#define DRC_MAP_TYPE 'json'
+
 /* #define assert( test ) ErrFatalDisplayIf( !(test), __FILE__ ": " stringify_line( __LINE__ ) ": assert failure" ) */
 
 /* ------ */
@@ -122,9 +113,6 @@
 #ifndef DIO_PATH_SEP
 #define DIO_PATH_SEP '\\'
 #endif /* !DIO_PATH_SEP */
-
-#define platform_fprintf fprintf
-#define platform_fopen fopen
 
 #define USE_SOFTWARE_TEXT
 
@@ -173,12 +161,6 @@
 #include "../gen/check_null/resext.h"
 #endif /* NO_RESEXT */
 
-#define platform_file FILE*
-#define platform_fprintf fprintf
-#define platform_fopen fopen
-#define platform_fflush fflush
-#define platform_fclose fclose
-
 #define USE_SOFTWARE_TEXT
 
 /* ------ */
@@ -188,7 +170,39 @@
 #define TILEMAP_TW (30)
 #define TILEMAP_TH (30)
 
-#define TILEMAP_TILESETS_MAX  (12)
+#define TILEMAP_TILESETS_MAX (12)
+
+#ifndef platform_file
+#define platform_file FILE*
+#endif /* !platform_file */
+
+#ifndef platform_fprintf
+#define platform_fprintf fprintf
+#endif /* !platform_fprintf */
+
+#ifndef platform_fopen
+#define platform_fopen fopen
+#endif /* !platform_fopen */
+
+#ifndef platform_fflush
+#define platform_fflush fflush
+#endif /* !platform_fflush */
+
+#ifndef platform_fclose
+#define platform_fclose fclose
+#endif /* !platform_fclose */
+
+#ifndef DRC_ARCHIVE_TYPE
+#define DRC_ARCHIVE_TYPE {'D', 'R', 'C', 'T'}
+#endif /* !DRC_ARCHIVE_TYPE */
+
+#ifndef DRC_BITMAP_TYPE
+#define DRC_BITMAP_TYPE {'B', 'M', 'P', '1'}
+#endif /* !DRC_BITMAP_TYPE */
+
+#ifndef DRC_MAP_TYPE
+#define DRC_MAP_TYPE {'j', 's', 'o', 'n'}
+#endif /* !DRC_MAP_TYPE */
 
 #ifndef SCREEN_W
 #define SCREEN_W (320)

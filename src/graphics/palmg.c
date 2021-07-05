@@ -1,6 +1,7 @@
 
 #include "../graphics.h"
 #include "../dio.h"
+#include "../resource.h"
 
 static BitmapType* g_screen = NULL;
 static WinHandle g_win;
@@ -62,7 +63,7 @@ int graphics_platform_blit_at(
       goto cleanup;
    }
 
-   rsrc = DmGetResource( bmp->id, 'Tbmp' );
+   rsrc = resource_get_handle( bmp->id, DRC_BITMAP_TYPE );
 
    if( NULL == rsrc ) {
       WinDrawChars( "Z", 1, x, y );
@@ -75,6 +76,10 @@ int graphics_platform_blit_at(
    MemHandleUnlock( rsrc );
 
 cleanup:
+
+   if( NULL != rsrc ) {
+      resource_free_handle( rsrc );
+   }
 
    return retval;
 }

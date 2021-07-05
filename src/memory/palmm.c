@@ -4,8 +4,33 @@
 #include <PalmOS.h>
 
 MEMORY_HANDLE memory_alloc( uint32_t sz, uint32_t count ) {
-   /* TODO: Rollover protection. */
-   return MemHandleNew( sz * count );
+   MEMORY_HANDLE handle = NULL;
+   uint32_t handle_sz = 0,
+      new_sz = 0;
+   void* ptr = NULL;
+
+   /* Rollover protection. Naive about negative numbers. */
+   if( sz * count < sz ) {
+      error_printf( "attempted to request impossible amount of memory" );
+      return NULL;
+   }
+
+   new_sz = sz * count;
+   handle = MemHandleNew( new_sz );
+   handle_sz = MemHandleSize( handle );
+
+   if( NULL == handle || new_sz != handle_sz ) {
+      error_printf( "failed to allocate %u bytes dynamic heap", sz * count );
+      return NULL;
+   }
+   debug_printf( 2, "allocated %u bytes dynamic heap (%u requested)",
+      handle_sz, new_sz );
+
+   ptr = MemHandleLock( handle );
+   MemSet( ptr, new_sz, 0 );
+   MemHandleUnlock( handle );
+
+   return handle;
 }
 
 void memory_free( MEMORY_HANDLE handle ) {

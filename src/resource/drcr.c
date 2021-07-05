@@ -6,7 +6,7 @@
 /**
  * \brief Allocate a handle to a resource in DRC archive or OS resource fork.
  */
-MEMORY_HANDLE resource_get_handle( uint32_t id, union DRC_TYPE drc_type ) {
+MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID drc_type ) {
    struct DIO_STREAM drc_file;
    uint8_t* ptr = NULL;
    int32_t ptr_sz = 0;

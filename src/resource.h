@@ -13,7 +13,7 @@
 #include "resource/drcr.h"
 #endif /* PLATFORM_* */
 
-MEMORY_HANDLE resource_get_handle( uint32_t, union DRC_TYPE );
+MEMORY_HANDLE resource_get_handle( uint32_t, RESOURCE_ID );
 void resource_free_handle( MEMORY_HANDLE );
 
 #endif /* RESOURCE_H */

@@ -26,7 +26,9 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    MEMORY_HANDLE json_handle = NULL,
       tokens_handle = NULL;
    uint32_t json_buffer_sz = 0;
-   union DRC_TYPE type = DRC_MAP_TYPE;
+   RESOURCE_ID type = DRC_MAP_TYPE;
+
+   return 0;
 
    json_handle = resource_get_handle( id, type );
    if( NULL == json_handle ) {
