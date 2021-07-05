@@ -326,8 +326,8 @@ MEMORY_HANDLE bmp_read( struct DIO_STREAM* stream, struct CONVERT_OPTIONS* o ) {
    /* Grid starts from top, bitmap starts from bottom. */
    y = grid->sz_y - 1;
    while( bmp_data_size > byte_idx ) {
-      debug_printf( 1, "bmp: byte_idx %u, bit_idx %u, row %u, col %u (%u)\n",
-         byte_idx, bit_idx, y, x, (y * sz_x) + x );
+      /* debug_printf( 1, "bmp: byte_idx %u, bit_idx %u, row %u, col %u (%u)\n",
+         byte_idx, bit_idx, y, x, (y * sz_x) + x ); */
       if( 0 == bit_idx % 8 ) {
          dio_read_stream( &byte_buffer, 1, stream );
          byte_idx++;

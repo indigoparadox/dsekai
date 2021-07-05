@@ -112,7 +112,7 @@ int icns_write_file(
 #endif
 
 int icns_write(
-   struct DIO_STREAM* stream, MEMORY_HANDLE grid_handle,
+   struct DIO_STREAM* stream, const struct CONVERT_GRID* grid,
    struct CONVERT_OPTIONS* o
 ) {
    int retval = 0;
@@ -125,11 +125,8 @@ int icns_write(
    uint8_t byte_buffer = 0;
    struct ICNS_FILE_HEADER file_header;
    struct ICNS_DATA_HEADER data_header;
-   struct CONVERT_GRID* grid = NULL;
-   uint8_t* grid_data;
+   uint8_t* grid_data = NULL;
 
-   grid = memory_lock( grid_handle );
-   if( NULL == grid ) { goto cleanup; }
    grid_data = memory_lock( grid->data );
    if( NULL == grid_data ) { goto cleanup; }
 
@@ -260,10 +257,6 @@ cleanup:
 
    if( NULL != grid_data ) {
       grid_data = memory_unlock( grid->data );
-   }
-
-   if( NULL != grid ) {
-      grid = memory_unlock( grid_handle );
    }
 
    return retval;

@@ -4,7 +4,7 @@
 
 #ifdef CKDATA_IM_C
 
-#define TEST_CGA_16_16_4_SZ (CGA_HEADER_SZ + (2 * 32))
+#define TEST_CGA_16_16_4_SZ (sizeof( struct CGA_HEADER ) + (2 * 32))
 
 static const uint8_t gc_test_cga_16_16_4[TEST_CGA_16_16_4_SZ] = {
    'C', 'G', 'A', 'G',
@@ -12,9 +12,11 @@ static const uint8_t gc_test_cga_16_16_4[TEST_CGA_16_16_4_SZ] = {
    0x10, 0x00, 0x00, 0x00,                   /* Width:      16 */
    0x10, 0x00, 0x00, 0x00,                   /* Height:     16 */
    0x02, 0x00, 0x00, 0x00,                   /* BPP:         2 */
-   CGA_HEADER_SZ, 0x00, 0x00, 0x00,          /* Plane1 Ofs: 20 */
+   sizeof( struct CGA_HEADER ),
+      0x00, 0x00, 0x00,          /* Plane1 Ofs: 20 */
    0x20, 0x00, 0x00, 0x00,                   /* Plane1 Siz: 32 */
-   CGA_HEADER_SZ + 32, 0x00, 0x00, 0x00,     /* Plane2 Ofs: 52 */
+   sizeof( struct CGA_HEADER ) + 32,
+      0x00, 0x00, 0x00,     /* Plane2 Ofs: 52 */
    0x20, 0x00, 0x00, 0x00,                   /* Plane2 Siz: 32 */
    0x01, 0x00, 0x00, 0x00,                   /* Palette:     1 */
    0x00, 0x00, 0x00, 0x00,                   /* Big Endian     */
@@ -92,7 +94,7 @@ static const uint8_t gc_test_cga_16_16_4_le[TEST_CGA_16_16_4_SZ] = {
 
 #define TEST_ICNS_16_16_2_DATA_SZ ((16 * 16) / 8)
 #define TEST_ICNS_16_16_2_SZ \
-   (ICNS_FILE_HEADER_SZ + ICNS_DATA_HEADER_SZ + \
+   (sizeof( struct ICNS_FILE_HEADER ) + sizeof( struct ICNS_DATA_HEADER ) + \
       (2 * TEST_ICNS_16_16_2_DATA_SZ)) /* 2x, since there's a mask. */
 
 static const uint8_t gc_test_icns_16_16_2[TEST_ICNS_16_16_2_SZ] = {

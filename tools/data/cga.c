@@ -12,14 +12,13 @@ const char gc_null = '\0';
 #define PX_PER_BYTE 4
 
 int cga_write(
-   struct DIO_STREAM* stream, MEMORY_HANDLE grid_handle,
+   struct DIO_STREAM* stream, const struct CONVERT_GRID* grid,
    struct CONVERT_OPTIONS* o
 ) {
    int retval = 0;
    struct CGA_HEADER header;
    uint32_t plane1_start = 0,
       plane2_start = 0;
-   struct CONVERT_GRID* grid = NULL;
    uint8_t byte_buffer = 0;
    uint8_t* grid_data = NULL;
    int32_t
@@ -33,8 +32,6 @@ int cga_write(
       byte_idx = 0,
       plane_sz = 0;
 
-   grid = memory_lock( grid_handle );
-   if( NULL == grid ) { goto cleanup; }
    grid_data = memory_lock( grid->data );
    if( NULL == grid_data ) { goto cleanup; }
 
@@ -105,10 +102,6 @@ cleanup:
       grid_data = memory_unlock( grid->data );
    }
 
-   if( NULL != grid ) {
-      grid = memory_unlock( grid_handle );
-   }
-
    return retval;
 }
 
@@ -170,7 +163,7 @@ MEMORY_HANDLE cga_read( struct DIO_STREAM* stream, struct CONVERT_OPTIONS* o ) {
    for( y = 0 ; grid->sz_y > y ; y += 2 /* Every other scanline. */ ) {
       for( x = 0 ; grid->sz_x > x ; x++ ) {
          if( 0 == bit_idx % 8 ) {
-            dio_write_stream( &byte_buffer, 1, stream );
+            dio_read_stream( &byte_buffer, 1, stream );
          }
 
          /* Calculate linear grid indexes. */

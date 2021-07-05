@@ -34,7 +34,8 @@ struct CGA_HEADER {
 struct CONVERT_GRID;
 struct CONVERT_OPTIONS;
 
-int cga_write( struct DIO_STREAM*, MEMORY_HANDLE, struct CONVERT_OPTIONS* );
+int cga_write(
+   struct DIO_STREAM*, const struct CONVERT_GRID*, struct CONVERT_OPTIONS* );
 MEMORY_HANDLE cga_read( struct DIO_STREAM*, struct CONVERT_OPTIONS* );
 
 #endif /* NO_CGA_FUNCTIONS */
