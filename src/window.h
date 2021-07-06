@@ -2,8 +2,6 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "graphics.h"
-
 #define WINDOW_COUNT_MAX 10
 
 #define WINDOW_STATE_EMPTY    0
@@ -23,7 +21,6 @@ struct WINDOW_FRAME {
 };
 
 struct WINDOW {
-   uint8_t state;
    uint8_t dirty;
    uint16_t x;
    uint16_t y;
@@ -37,10 +34,10 @@ struct WINDOW {
 
 void window_init();
 void window_shutdown();
-int window_draw_all();
-uint8_t windows_visible();
-struct WINDOW* window_push();
-void window_pop();
+int window_draw_all( struct DSEKAI_STATE* );
+void window_push(
+   uint16_t, uint16_t, uint16_t, uint16_t, uint8_t, struct DSEKAI_STATE* );
+void window_pop( struct DSEKAI_STATE* );
 
 #endif /* WINDOW_H */
 

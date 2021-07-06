@@ -1,5 +1,5 @@
 
-#include "palmr.h"
+#include "../dstypes.h"
 
 MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID type ) {
    debug_printf( 2, "loading resource %u of type %u", id, type );

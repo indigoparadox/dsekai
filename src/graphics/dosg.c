@@ -1,5 +1,5 @@
 
-#include "../graphics.h"
+#include "../dstypes.h"
 
 #include <string.h>
 #ifndef NO_I86
@@ -12,9 +12,6 @@
 #include "../data/offsets.h"
 #endif /* USE_LOOKUPS */
 #include "../../tools/data/cga.h"
-#include "../drc.h"
-#include "../memory.h"
-#include "../resource.h"
 
 #ifdef USE_DOUBLEBUF
 static uint8_t huge g_buffer[76800]; /* Sized for 0x13. */

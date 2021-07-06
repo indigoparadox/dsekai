@@ -1,19 +1,12 @@
 
-#include "window.h"
-
-#include "graphics.h"
-#include "memory.h"
+#include "dstypes.h"
 
 #include "data/windows.h"
 
 static MEMORY_HANDLE g_frames_handle = NULL;
-static struct WINDOW g_windows[WINDOW_COUNT_MAX];
-static uint8_t g_windows_count = 0;
 
 void window_init() {
    struct WINDOW_FRAME* frames = NULL;
-
-   memory_zero_ptr( g_windows, sizeof( struct WINDOW ) * WINDOW_COUNT_MAX );
 
    debug_printf( 1, "initalizing windowing system..." );
    g_frames_handle = memory_alloc( sizeof( struct WINDOW_FRAME ), 1 );
@@ -41,12 +34,9 @@ void window_shutdown() {
    memory_free( g_frames_handle );
 }
 
-uint8_t windows_visible() {
-   return g_windows_count;
-}
-
-int window_draw_all() {
+int window_draw_all( struct DSEKAI_STATE* state ) {
    struct WINDOW_FRAME* frames = NULL;
+   struct WINDOW* windows = NULL;
    int i = 0,
       j = 0,
       x = 0,
@@ -60,82 +50,81 @@ int window_draw_all() {
    debug_printf( 0, "starting window drawing..." );
 
    frames =  memory_lock( g_frames_handle );
-   for( i = 0 ; g_windows_count > i ; i++ ) {
-      if(
-         WINDOW_STATE_VISIBLE != g_windows[i].state
+   windows = memory_lock( state->windows_handle );
+   for( i = 0 ; state->windows_count > i ; i++ ) {
 #ifndef IGNORE_DIRTY
-         || 0 == g_windows[i].dirty
+      if( 0 == windows[i].dirty
 #endif /* !IGNORE_DIRTY */
       ) {
-         debug_printf( 0, "ignoring window %d (dirty: %d, state: %d)",
-            i, g_windows[i].dirty, g_windows[i].state );
+         debug_printf( 0, "ignoring window %d (dirty: %d)",
+            i, windows[i].dirty );
          continue;
       }
 
-      assert( 0 == g_windows[i].w % PATTERN_W );
-      assert( 0 == g_windows[i].h % PATTERN_H );
-      x_max = (SCREEN_W / 2) + (g_windows[i].w / 2); 
-      y_max = (SCREEN_H / 2) + (g_windows[i].h / 2); 
-      x_min = (SCREEN_W / 2) - (g_windows[i].w / 2);
-      y_min = (SCREEN_H / 2) - (g_windows[i].h / 2);
+      assert( 0 == windows[i].w % PATTERN_W );
+      assert( 0 == windows[i].h % PATTERN_H );
+      x_max = (SCREEN_W / 2) + (windows[i].w / 2); 
+      y_max = (SCREEN_H / 2) + (windows[i].h / 2); 
+      x_min = (SCREEN_W / 2) - (windows[i].w / 2);
+      y_min = (SCREEN_H / 2) - (windows[i].h / 2);
 
       debug_printf( 1, "max: %d, %d; min: %d, %d", x_max, y_max, x_min, y_min );
 
       for( y = y_min ; y < y_max ; y += PATTERN_H ) {
          for( x = x_min ; x < x_max ; x += PATTERN_W ) {
             debug_printf( 1, "drawing window with frame %d...",
-               g_windows[i].frame_idx );
+               windows[i].frame_idx );
             if( x_min == x && y_min == y ) {
                /* Top Left */
                blit_retval = graphics_blit_at(
-                  &(frames[g_windows[i].frame_idx].tl), x, y,
+                  &(frames[windows[i].frame_idx].tl), x, y,
                   PATTERN_W, PATTERN_H );
 
             } else if( x_max - PATTERN_W == x && y_min == y ) {
                /* Top Right */
                blit_retval = graphics_blit_at(
-                  &(frames[g_windows[i].frame_idx].tr), x, y,
+                  &(frames[windows[i].frame_idx].tr), x, y,
                   PATTERN_W, PATTERN_H );
 
             } else if( x_min == x && y_max - PATTERN_H == y ) {
                /* Bottom Left */
                blit_retval = graphics_blit_at(
-                  &(frames[g_windows[i].frame_idx].bl), x, y,
+                  &(frames[windows[i].frame_idx].bl), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_max - PATTERN_W == x && y_max - PATTERN_H == y ) {
                /* Bottom Right */
                blit_retval = graphics_blit_at(
-                  &(frames[g_windows[i].frame_idx].br), x, y,
+                  &(frames[windows[i].frame_idx].br), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_max - PATTERN_W == x ) {
                /* Right */
                blit_retval = graphics_blit_at(
-                  &(frames[g_windows[i].frame_idx].r), x, y,
+                  &(frames[windows[i].frame_idx].r), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_min == x ) {
                /* Left */
                blit_retval = graphics_blit_at(
-                  &(frames[g_windows[i].frame_idx].l), x, y,
+                  &(frames[windows[i].frame_idx].l), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( y_min == y ) {
                /* Top */
                blit_retval = graphics_blit_at(
-                  &(frames[g_windows[i].frame_idx].t), x, y,
+                  &(frames[windows[i].frame_idx].t), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( y_max - PATTERN_H == y ) {
                /* Bottom */
                blit_retval = graphics_blit_at(
-                  &(frames[g_windows[i].frame_idx].b), x, y,
+                  &(frames[windows[i].frame_idx].b), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else {
                blit_retval = graphics_blit_at(
-                  &(frames[g_windows[i].frame_idx].c), x, y,
+                  &(frames[windows[i].frame_idx].c), x, y,
                   PATTERN_W, PATTERN_H );
             }
 
@@ -146,17 +135,21 @@ int window_draw_all() {
          }
       }
 
-      for( j = 0 ; g_windows[i].strings_count > j ; j++ ) {
-         graphics_string_at( g_windows[i].strings[j],
-            strlen( g_windows[i].strings[i] ),
+      for( j = 0 ; windows[i].strings_count > j ; j++ ) {
+         graphics_string_at( windows[i].strings[j],
+            strlen( windows[i].strings[i] ),
             x_min + WINDOW_TEXT_X, y_min + (WINDOW_TEXT_Y * (i + 1)),
-            g_windows[i].strings_color, 1 );
+            windows[i].strings_color, 1 );
       }
 
-      g_windows[i].dirty -= 1;
+      windows[i].dirty -= 1;
    }
 
 cleanup:
+
+   if( NULL != windows ) {
+      windows = memory_unlock( state->windows_handle );
+   }
 
    if( NULL != frames ) {
       frames = memory_unlock( g_frames_handle );
@@ -165,35 +158,58 @@ cleanup:
    return blit_retval;
 }
 
-struct WINDOW* window_push() {
+void window_push(
+   uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t frame_idx,
+   struct DSEKAI_STATE* state
+) {
    int i = 0;
+   struct WINDOW* windows = NULL;
 
-   assert( g_windows_count + 1 < WINDOW_COUNT_MAX );
-
-   for( i = g_windows_count ; 0 < i ; i-- ) {
-      memory_copy_ptr(
-         &(g_windows[i]), &(g_windows[i - 1]), sizeof( struct WINDOW ) );
+   if( NULL == state->windows_handle ) {
+      state->windows_handle =
+         memory_alloc( WINDOW_COUNT_MAX, sizeof( struct WINDOW ) );
    }
 
-   memory_zero_ptr( &(g_windows[0]), sizeof( struct WINDOW ) );
+   assert( state->windows_count + 1 < WINDOW_COUNT_MAX );
 
-   g_windows_count++;
+   windows = memory_lock( state->windows_handle );
 
-   return &(g_windows[0]);
+   for( i = state->windows_count ; 0 < i ; i-- ) {
+      memory_copy_ptr(
+         &(windows[i]), &(windows[i - 1]), sizeof( struct WINDOW ) );
+   }
+
+   memory_zero_ptr( &(windows[0]), sizeof( struct WINDOW ) );
+
+   windows[0].x = x;
+   windows[0].y = y;
+   windows[0].w = w;
+   windows[0].h = h;
+   windows[0].frame_idx = frame_idx;
+   windows[0].dirty = DIRTY_THRESHOLD;
+
+   windows = memory_unlock( state->windows_handle );
+
+   state->windows_count++;
 }
 
-void window_pop() {
+void window_pop( struct DSEKAI_STATE* state ) {
    int i = 0;
+   struct WINDOW* windows = NULL;
 
-   if( 0 == g_windows_count ) {
+   if( 0 == state->windows_count ) {
       return;
    }
+   
+   windows = memory_lock( state->windows_handle );
 
-   for( i = 0 ; g_windows_count > i ; i++ ) {
+   for( i = 0 ; state->windows_count > i ; i++ ) {
       memory_copy_ptr(
-         &(g_windows[i]), &(g_windows[i + 1]), sizeof( struct WINDOW ) );
+         &(windows[i]), &(windows[i + 1]), sizeof( struct WINDOW ) );
    }
 
-   g_windows_count--;
+   windows = memory_unlock( state->windows_handle );
+
+   state->windows_count--;
 }
 

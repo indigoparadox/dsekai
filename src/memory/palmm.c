@@ -1,11 +1,9 @@
 
-#include "../memory.h"
+#include "../dstypes.h"
 
-#include <PalmOS.h>
-
-MEMORY_HANDLE memory_alloc( uint16_t sz, uint16_t count ) {
+MEMORY_HANDLE memory_alloc( uint32_t sz, uint32_t count ) {
    MEMORY_HANDLE handle = NULL;
-   uint16_t handle_sz = 0,
+   uint32_t handle_sz = 0,
       new_sz = 0;
    void* ptr = NULL;
 
@@ -37,11 +35,11 @@ void memory_free( MEMORY_HANDLE handle ) {
    MemHandleFree( handle );
 }
 
-uint16_t memory_sz( MEMORY_HANDLE handle ) {
+uint32_t memory_sz( MEMORY_HANDLE handle ) {
    return MemHandleSize( handle );
 }
 
-uint16_t memory_resize( MEMORY_HANDLE handle, uint16_t sz ) {
+uint32_t memory_resize( MEMORY_HANDLE handle, uint32_t sz ) {
    if( !MemHandleResize( handle, sz ) ) {
       return sz;
    } else {
@@ -49,11 +47,11 @@ uint16_t memory_resize( MEMORY_HANDLE handle, uint16_t sz ) {
    }
 }
 
-void memory_copy_ptr( void* dest, const void* src, uint16_t sz ) {
+void memory_copy_ptr( void* dest, const void* src, uint32_t sz ) {
    memcpy( dest, src, sz );
 }
 
-void memory_zero_ptr( void* ptr, uint16_t sz ) {
+void memory_zero_ptr( void* ptr, uint32_t sz ) {
    MemSet( ptr, sz, 0 );
 }
 

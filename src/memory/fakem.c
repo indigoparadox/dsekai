@@ -1,5 +1,5 @@
 
-#include "../memory.h"
+#include "../dstypes.h"
 
 #include <stdlib.h>
 #include <string.h>

@@ -363,6 +363,8 @@
 #define PATTERN_W 16
 #define PATTERN_H 16
 
+#define WINDOW_CENTERED -1
+
 #define WINDOW_TEXT_X 8
 #define WINDOW_TEXT_Y 8
 #define WINDOW_STRINGS_MAX 5

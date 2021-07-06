@@ -1,11 +1,5 @@
 
-#include "tilemap.h"
-
-#include "json.h"
-#include "dio.h"
-#include "drc.h"
-#include "memory.h"
-#include "resource.h"
+#include "dstypes.h"
 
 #define JSON_TOKENS_MAX 1024
 #define JSON_PATH_SZ 255
@@ -108,9 +102,7 @@ void tilemap_refresh_tiles( struct TILEMAP* t ) {
    }
 }
 
-void tilemap_draw(
-   struct TILEMAP* t, uint16_t screen_x, uint16_t screen_y, uint8_t force
-) {
+void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
    int x = 0,
       y = 0;
    uint8_t tile_id = 0;
@@ -119,8 +111,8 @@ void tilemap_draw(
       viewport_tx2 = 0,
       viewport_ty2 = 0;
 
-   viewport_tx1 = screen_x / TILE_W;
-   viewport_ty1 = screen_y / TILE_H;
+   viewport_tx1 = state->screen_scroll_x / TILE_W;
+   viewport_ty1 = state->screen_scroll_y / TILE_H;
    viewport_tx2 = TILEMAP_TW > viewport_tx1 + SCREEN_TW ?
       viewport_tx1 + SCREEN_TW : viewport_tx1 + (TILEMAP_TW - viewport_tx1);
    viewport_ty2 = TILEMAP_TH > viewport_ty1 + SCREEN_TH ?
@@ -133,7 +125,6 @@ void tilemap_draw(
       for( x = viewport_tx1 ; viewport_tx2 > x ; x++ ) {
 #ifndef IGNORE_DIRTY
          if(
-            !force &&
             !(t->tiles_flags[(y * TILEMAP_TW) + x] & TILEMAP_TILE_FLAG_DIRTY)
          ) {
             continue;
@@ -153,7 +144,8 @@ void tilemap_draw(
          /* Blit the tile. */
          graphics_blit_at(
             &(t->tileset[tile_id]),
-            (x * TILE_W) - screen_x, (y * TILE_H) - screen_y, TILE_W, TILE_H );
+            (x * TILE_W) - state->screen_scroll_x,
+            (y * TILE_H) - state->screen_scroll_y, TILE_W, TILE_H );
       }
    }
 }

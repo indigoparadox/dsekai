@@ -1,12 +1,8 @@
 
 #define SDLG_C
-#include "../graphics.h"
+#include "../dstypes.h"
 
 #include <SDL.h>
-
-#include "../drc.h"
-#include "../memory.h"
-#include "../resource.h"
 
 SDL_Window* g_window = NULL;
 SDL_Surface* g_screen = NULL;

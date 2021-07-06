@@ -1,7 +1,5 @@
 
-#include "../graphics.h"
-#include "../dio.h"
-#include "../resource.h"
+#include "../dstypes.h"
 
 static BitmapType* g_screen = NULL;
 static WinHandle g_win;

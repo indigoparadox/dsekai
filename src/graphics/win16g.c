@@ -1,7 +1,7 @@
 
 #define GRAPHICS_C
-#include "../graphics.h"
-#include "../input.h"
+#include "../dstypes.h"
+
 #include "../win16s.h"
 
 #include <string.h>
@@ -10,6 +10,7 @@ extern uint8_t g_running;
 extern uint8_t g_last_key;
 extern HINSTANCE g_instance;
 extern HWND g_window;
+extern MEMORY_HANDLE g_state_handle;
 
 struct GRAPHICS_BITMAP g_screen;
 volatile uint32_t g_ms;
@@ -88,7 +89,7 @@ static LRESULT CALLBACK WndProc(
          break;
 
       case WM_TIMER:
-         g_running = topdown_loop();
+         g_running = topdown_loop( g_state_handle );
          break;
 
       default:

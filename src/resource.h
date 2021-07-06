@@ -2,11 +2,6 @@
 #ifndef RESOURCE_H
 #define RESOURCE_H
 
-#include "dstypes.h"
-#include "memory.h"
-#include "dio.h"
-#include "drc.h"
-
 #ifdef PLATFORM_PALM
 #include "resource/palmr.h"
 #elif defined( PLATFORM_WIN16 )

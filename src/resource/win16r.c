@@ -1,5 +1,5 @@
 
-#include "win16r.h"
+#include "../dstypes.h"
 
 extern HINSTANCE g_instance;
 

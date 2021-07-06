@@ -1,8 +1,5 @@
 
-#include "dio.h"
-
-#include "drc.h"
-#include "memory.h"
+#include "dstypes.h"
 
 #include <stdarg.h>
 #include <string.h> /* for strtok() */

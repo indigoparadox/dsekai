@@ -1,5 +1,5 @@
 
-#include "graphics.h"
+#include "dstypes.h"
 
 #include "data/font8x8.h"
 

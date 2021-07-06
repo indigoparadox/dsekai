@@ -2,8 +2,6 @@
 #ifndef ITEM_H
 #define ITEM_H
 
-#include "tilemap.h"
-
 #define ITEMS_MAX 500
 #define ITEM_INVENTORY_MAX 50
 
