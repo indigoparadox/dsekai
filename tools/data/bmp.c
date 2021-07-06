@@ -78,10 +78,13 @@ uint8_t bmp_colors_count( uint8_t bpp ) {
 /**
  * \return The number of bytes successfully written.
  */
-int32_t bmp_write(
-   struct DIO_STREAM* stream,
-   const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
-) {
+DECLARE_FMT_WRITE( bmp ) {
+   uint8_t
+      * grid_buffer = NULL,
+      * grid_data = NULL;
+   struct CONVERT_GRID_HEADER* grid = NULL;
+   struct BITMAP_FILE_HEADER file_header;
+   struct BITMAP_DATA_HEADER data_header;
    int32_t x = 0,
       y = 0,
       bit_idx = 0;
@@ -90,12 +93,9 @@ int32_t bmp_write(
       bmp_file_byte_idx = 0;
    uint8_t byte_buffer = 0,
       bit_mask_in = 0,
-      bit_mask_out = 0,
-      * grid_data = NULL;
+      bit_mask_out = 0;
    uint32_t bmp_colors = 0,
       * bmp_palette = 0;
-   struct BITMAP_FILE_HEADER file_header;
-   struct BITMAP_DATA_HEADER data_header;
 
    if( o->bmp_no_file_header ) {
       bmp_file_byte_idx +=
@@ -203,8 +203,7 @@ int32_t bmp_write(
 
    debug_printf( 1, "using write mask: 0x%x\n", bit_mask_out );
 
-   grid_data = memory_lock( grid->data );
-   if( NULL == grid_data ) { goto cleanup; }
+   LOCK_CONVERT_GRID( grid_data, grid, grid_handle );
 
    for( y = grid->sz_y - 1 ; y >= 0 ; y-- ) {
       row_bytes = 0;
@@ -264,14 +263,20 @@ int32_t bmp_write(
 
 cleanup:
 
-   if( NULL != grid_data ) {
-      memory_unlock( grid->data );
+   if( NULL != grid ) {
+      grid = memory_unlock( grid_handle );
    }
 
    return bmp_file_byte_idx;
 }
 
-MEMORY_HANDLE bmp_read( struct DIO_STREAM* stream, struct CONVERT_OPTIONS* o ) {
+DECLARE_FMT_READ( bmp ) {
+   uint8_t
+      * grid_buffer = NULL,
+      * grid_data = NULL;
+   struct CONVERT_GRID_HEADER* grid = NULL;
+   struct BITMAP_FILE_HEADER file_header;
+   struct BITMAP_DATA_HEADER data_header;
    uint32_t x = 0,
       y = 0,
       i = 0,
@@ -279,12 +284,7 @@ MEMORY_HANDLE bmp_read( struct DIO_STREAM* stream, struct CONVERT_OPTIONS* o ) {
       bit_idx = 0,
       bmp_data_size = 0;
    uint16_t bpp = 0;
-   MEMORY_HANDLE grid_handle = NULL;
-   struct CONVERT_GRID* grid = NULL;
    char byte_buffer = 0;
-   uint8_t* grid_data = NULL;
-   struct BITMAP_FILE_HEADER file_header;
-   struct BITMAP_DATA_HEADER data_header;
 
    /* Read the bitmap file header. */
    dio_read_stream( &file_header, sizeof( struct BITMAP_FILE_HEADER ), stream );
@@ -305,21 +305,10 @@ MEMORY_HANDLE bmp_read( struct DIO_STREAM* stream, struct CONVERT_OPTIONS* o ) {
    /* Read the bitmap data. */
    bmp_data_size = file_header.file_sz - file_header.bmp_offset;
    debug_printf( 2, "bitmap data is %u bytes\n", bmp_data_size );
-   /* Allocate new grid. */
-   grid_handle = memory_alloc( 1, sizeof( struct CONVERT_GRID ) );
-   if( NULL == grid_handle ) { goto cleanup; }
-   grid = memory_lock( grid_handle );
-   if( NULL == grid ) { goto cleanup; }
 
-   grid->data_sz = data_header.bitmap_w * data_header.bitmap_h;
-   grid->data = memory_alloc( 1, grid->data_sz );
-   if( NULL == grid->data ) { goto cleanup; }
-   grid_data = memory_lock( grid->data );
-   if( NULL == grid_data ) { goto cleanup; }
-
-   grid->sz_x = data_header.bitmap_w;
-   grid->sz_y = data_header.bitmap_h;
-   grid->bpp = data_header.bpp;
+   NEW_CONVERT_GRID(
+      data_header.bitmap_w, data_header.bitmap_h, data_header.bpp,
+      grid_data, grid, *grid_handle );
 
    dio_seek_stream( stream, file_header.bmp_offset, SEEK_SET );
 
@@ -358,17 +347,10 @@ MEMORY_HANDLE bmp_read( struct DIO_STREAM* stream, struct CONVERT_OPTIONS* o ) {
 
 cleanup:
 
-   if( NULL == grid_data && NULL != grid ) {
-      error_printf( "failed to allocate grid data" );
-      memory_unlock( grid_handle );
-      memory_free( grid_handle );
-      grid = NULL;
-
-   } else if( NULL != grid_data ) {
-      memory_unlock( grid->data );
-      memory_unlock( grid_handle );
+   if( NULL != grid ) {
+      grid = memory_unlock( *grid_handle );
    }
 
-   return grid_handle;
+   return byte_idx;
 }
 

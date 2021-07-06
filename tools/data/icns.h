@@ -16,8 +16,8 @@ struct ICNS_DATA_HEADER {
    uint32_t data_sz;
 };
 
-int icns_write(
-   struct DIO_STREAM*, const struct CONVERT_GRID*, struct CONVERT_OPTIONS* );
-MEMORY_HANDLE icns_read( struct DIO_STREAM*, struct CONVERT_OPTIONS* );
+DECLARE_FMT_READ( icns );
+DECLARE_FMT_WRITE( icns );
+
 #endif /* ICNS_H */
 

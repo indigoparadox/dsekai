@@ -51,6 +51,7 @@ int main( int argc, char* argv[] ) {
    int32_t toc_entries_sz = 0;
    MEMORY_HANDLE toc_entries_handle = NULL;
    MEMORY_HANDLE file_contents_handle = NULL;
+   MEMORY_HANDLE extract_res_handle = NULL;
    FILE* header_file = NULL;
    size_t file_list_len = 0;
    uint8_t* res_buffer = NULL;
@@ -291,8 +292,9 @@ int main( int argc, char* argv[] ) {
       if( 0 >= extract_res_buffer_sz ) {
          error_printf( "unable to find requested resource" );
       }
-      extract_res_buffer = memory_alloc( 1, extract_res_buffer_sz );
+      extract_res_handle = memory_alloc( 1, extract_res_buffer_sz );
 
+      extract_res_buffer = memory_lock( extract_res_handle );
       retval = drc_get_resource(
          &drc_file_in, typebuf_extract, id,
          extract_res_buffer, extract_res_name_sz );
@@ -308,6 +310,8 @@ int main( int argc, char* argv[] ) {
       wrote = fwrite( extract_res_buffer, 1, retval, extract_res_file );
       debug_printf( 2, 
          "wrote %u (%ld) bytes", wrote, ftell( extract_res_file ) );
+      extract_res_buffer = memory_unlock( extract_res_handle );
+      memory_free( extract_res_handle );
       assert( wrote == retval );
 
       retval = 0;

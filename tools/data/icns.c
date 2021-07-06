@@ -7,114 +7,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-MEMORY_HANDLE
-icns_read( struct DIO_STREAM* stream, struct CONVERT_OPTIONS* o ) {
-   int32_t bit_idx = 0,
-      byte_idx = 0,
-      i = 0;
-   MEMORY_HANDLE grid_handle = NULL;
-   struct CONVERT_GRID* grid = NULL;
-   uint8_t byte_buffer = 0;
-   uint8_t* grid_data = NULL;
+DECLARE_FMT_WRITE( icns ) {
+   uint8_t
+      * grid_buffer = NULL,
+      * grid_data = NULL;
+   struct CONVERT_GRID_HEADER* grid = NULL;
+   struct ICNS_FILE_HEADER file_header;
    struct ICNS_DATA_HEADER data_header;
-
-   dio_seek_stream( stream, 0, SEEK_SET );
-   dio_read_stream( &data_header, sizeof( struct ICNS_FILE_HEADER ), stream );
-
-   grid_handle = memory_alloc( 1, sizeof( struct CONVERT_GRID ) );
-   if( NULL == grid_handle ) { goto cleanup; }
-   grid = memory_lock( grid_handle );
-   if( NULL == grid ) { goto cleanup; }
-
-   grid->data = memory_alloc( 256, 1 );
-   if( NULL == grid->data ) { goto cleanup; }
-   grid_data = memory_lock( grid->data );
-   if( NULL == grid_data ) { goto cleanup; }
-
-   grid->data_sz = 256;
-   grid->bpp = 1;
-   grid->sz_x = 16;
-   grid->sz_y = 16;
-
-   for( i = 0 ; 256 > i ; i++ ) {
-      assert( byte_idx < data_header.data_sz );
-      dio_read_stream( &byte_buffer, 1, stream );
-      grid_data[i] |= (byte_buffer & (0x1 << (7 - bit_idx)));
-      grid_data[i] >>= (7 - bit_idx);
-      bit_idx++;
-      if( 8 <= bit_idx ) {
-         byte_idx++;
-         bit_idx = 0;
-      }
-   }
-
-cleanup:
-
-   if( NULL == grid_data && NULL != grid ) {
-      error_printf( "failed to allocate grid data" );
-      memory_unlock( grid_handle );
-      memory_free( grid_handle );
-      grid = NULL;
-
-   } else if( NULL != grid_data ) {
-      memory_unlock( grid->data );
-      memory_unlock( grid_handle );
-   }
-
-   return grid_handle;
-}
-
-#if 0
-int icns_write_file(
-   struct DIO_STREAM stream, const struct CONVERT_GRID* grid,
-   struct CONVERT_OPTIONS* o
-) {
-   uint32_t icns_buffer_sz = 0,
-      icns_canvas_sz = 0;
-   uint8_t* icns_buffer = NULL;
-   FILE* file_out = NULL;
-   int retval = 0;
-
-   icns_canvas_sz = ((grid->sz_x * grid->sz_y * o->bpp) / 8);
-   if( 1 == o->bpp ) {
-      /* Add a mask. */
-      icns_canvas_sz *= 2;
-   }
-
-   icns_buffer_sz = 
-      ICNS_FILE_HEADER_SZ +
-      ICNS_DATA_HEADER_SZ +
-      icns_canvas_sz;
-
-   /* TODO: Use memory architecture. */
-   icns_buffer = calloc( 1, icns_buffer_sz );
-   assert( NULL != icns_buffer );
-
-   retval = icns_write( icns_buffer, icns_buffer_sz, grid, o );
-   assert( !retval );
-   if( retval ) {
-      free( icns_buffer );
-      return retval;
-   }
-
-   file_out = fopen( path, "wb" );
-   assert( NULL != file_out );
-
-   debug_printf( 2, "icns: writing to %s...\n", path );
-
-   fwrite( icns_buffer, 1, icns_buffer_sz, file_out );
-
-   fclose( file_out );
-   free( icns_buffer );
-
-   return retval;
-}
-#endif
-
-int icns_write(
-   struct DIO_STREAM* stream, const struct CONVERT_GRID* grid,
-   struct CONVERT_OPTIONS* o
-) {
    int retval = 0;
    int32_t grid_x = 0,
       grid_y = 0,
@@ -123,12 +22,8 @@ int icns_write(
       bit_idx = 0,
       grid_idx = 0;
    uint8_t byte_buffer = 0;
-   struct ICNS_FILE_HEADER file_header;
-   struct ICNS_DATA_HEADER data_header;
-   uint8_t* grid_data = NULL;
 
-   grid_data = memory_lock( grid->data );
-   if( NULL == grid_data ) { goto cleanup; }
+   LOCK_CONVERT_GRID( grid_data, grid, grid_handle );
 
    file_header.id[0] = 'i';
    file_header.id[1] = 'c';
@@ -255,10 +150,95 @@ int icns_write(
 
 cleanup:
 
-   if( NULL != grid_data ) {
-      grid_data = memory_unlock( grid->data );
+   if( NULL != grid ) {
+      grid = memory_unlock( grid_handle );
    }
+
+   return file_byte_idx;
+}
+
+DECLARE_FMT_READ( icns ) {
+   uint8_t
+      * grid_buffer = NULL,
+      * grid_data = NULL;
+   struct CONVERT_GRID_HEADER* grid = NULL;
+   struct ICNS_DATA_HEADER data_header;
+   int32_t bit_idx = 0,
+      byte_idx = 0,
+      i = 0;
+   uint8_t byte_buffer = 0;
+
+   dio_seek_stream( stream, 0, SEEK_SET );
+   dio_read_stream( &data_header, sizeof( struct ICNS_FILE_HEADER ), stream );
+
+   /* TODO: Handle 32x32. */
+   NEW_CONVERT_GRID( 16, 16, 1, grid_data, grid, *grid_handle );
+
+   for( i = 0 ; 256 > i ; i++ ) {
+      assert( byte_idx < data_header.data_sz );
+      dio_read_stream( &byte_buffer, 1, stream );
+      grid_data[i] |= (byte_buffer & (0x1 << (7 - bit_idx)));
+      grid_data[i] >>= (7 - bit_idx);
+      bit_idx++;
+      if( 8 <= bit_idx ) {
+         byte_idx++;
+         bit_idx = 0;
+      }
+   }
+
+cleanup:
+
+   if( NULL != grid ) {
+      grid = memory_unlock( *grid_handle );
+   }
+
+   return byte_idx;
+}
+
+#if 0
+int icns_write_file(
+   struct DIO_STREAM stream, const struct CONVERT_GRID* grid,
+   struct CONVERT_OPTIONS* o
+) {
+   uint32_t icns_buffer_sz = 0,
+      icns_canvas_sz = 0;
+   uint8_t* icns_buffer = NULL;
+   FILE* file_out = NULL;
+   int retval = 0;
+
+   icns_canvas_sz = ((grid->sz_x * grid->sz_y * o->bpp) / 8);
+   if( 1 == o->bpp ) {
+      /* Add a mask. */
+      icns_canvas_sz *= 2;
+   }
+
+   icns_buffer_sz = 
+      ICNS_FILE_HEADER_SZ +
+      ICNS_DATA_HEADER_SZ +
+      icns_canvas_sz;
+
+   /* TODO: Use memory architecture. */
+   icns_buffer = calloc( 1, icns_buffer_sz );
+   assert( NULL != icns_buffer );
+
+   retval = icns_write( icns_buffer, icns_buffer_sz, grid, o );
+   assert( !retval );
+   if( retval ) {
+      free( icns_buffer );
+      return retval;
+   }
+
+   file_out = fopen( path, "wb" );
+   assert( NULL != file_out );
+
+   debug_printf( 2, "icns: writing to %s...\n", path );
+
+   fwrite( icns_buffer, 1, icns_buffer_sz, file_out );
+
+   fclose( file_out );
+   free( icns_buffer );
 
    return retval;
 }
+#endif
 

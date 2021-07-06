@@ -262,12 +262,11 @@ static const uint8_t gc_test_grid_16_16_4_data[256] = {
    0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, /* 15 Odd  07 */
 };
 
-static const struct CONVERT_GRID gc_test_grid_16_16_4 = {
+static const struct CONVERT_GRID_HEADER gc_test_grid_16_16_4 = {
    16,
    16,
    2,
-   256,
-   (uint8_t*)&gc_test_grid_16_16_4_data
+   256
 };
 
 #endif /* CKDATA_IM_C */

@@ -10,6 +10,7 @@
 #include "../../src/dstypes.h"
 #include "../../src/memory.h"
 #include "../../src/dio.h"
+#include "../convert.h"
 
 struct CGA_HEADER {
    char type[4];
@@ -34,9 +35,8 @@ struct CGA_HEADER {
 struct CONVERT_GRID;
 struct CONVERT_OPTIONS;
 
-int cga_write(
-   struct DIO_STREAM*, const struct CONVERT_GRID*, struct CONVERT_OPTIONS* );
-MEMORY_HANDLE cga_read( struct DIO_STREAM*, struct CONVERT_OPTIONS* );
+DECLARE_FMT_READ( cga );
+DECLARE_FMT_WRITE( cga );
 
 #endif /* NO_CGA_FUNCTIONS */
 

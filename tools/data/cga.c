@@ -11,16 +11,16 @@ const char gc_null = '\0';
 /* #define PX_PER_BYTE 8 */
 #define PX_PER_BYTE 4
 
-int cga_write(
-   struct DIO_STREAM* stream, const struct CONVERT_GRID* grid,
-   struct CONVERT_OPTIONS* o
-) {
-   int retval = 0;
+DECLARE_FMT_WRITE( cga ) {
+   uint8_t
+      * grid_buffer = NULL,
+      * grid_data = NULL;
+   struct CONVERT_GRID_HEADER* grid = NULL;
    struct CGA_HEADER header;
+   int retval = 0;
    uint32_t plane1_start = 0,
       plane2_start = 0;
    uint8_t byte_buffer = 0;
-   uint8_t* grid_data = NULL;
    int32_t
       x = 0,
       y = 0,
@@ -32,8 +32,7 @@ int cga_write(
       byte_idx = 0,
       plane_sz = 0;
 
-   grid_data = memory_lock( grid->data );
-   if( NULL == grid_data ) { goto cleanup; }
+   LOCK_CONVERT_GRID( grid_data, grid, grid_handle );
 
    plane_sz = ((grid->sz_y / 2) * grid->sz_x) / PX_PER_BYTE;
    plane2_start = plane1_start + plane_sz;
@@ -98,14 +97,19 @@ int cga_write(
 
 cleanup:
 
-   if( NULL != grid_data ) {
-      grid_data = memory_unlock( grid->data );
+   if( NULL != grid ) {
+      grid = memory_unlock( grid_handle );
    }
 
    return retval;
 }
 
-MEMORY_HANDLE cga_read( struct DIO_STREAM* stream, struct CONVERT_OPTIONS* o ) {
+DECLARE_FMT_READ( cga ) {
+   uint8_t
+      * grid_buffer = NULL,
+      * grid_data = NULL;
+   struct CONVERT_GRID_HEADER* grid = NULL;
+   struct CGA_HEADER header;
    int32_t
       bit_idx = 0,
       grid_idx_odd = 0,
@@ -116,44 +120,20 @@ MEMORY_HANDLE cga_read( struct DIO_STREAM* stream, struct CONVERT_OPTIONS* o ) {
       plane2_offset = 0,
       y = 0,
       x = 0;
-   MEMORY_HANDLE grid_handle = NULL;
    uint8_t byte_buffer = 0;
-   struct CONVERT_GRID* grid = NULL;
-   struct CGA_HEADER header;
-   uint8_t* grid_data = NULL;
 
    if( o->cga_use_header ) {
       dio_read_stream( &header, sizeof( struct CGA_HEADER ), stream );
-   }
 
-   /* Allocate new grid. */
-   grid_handle = memory_alloc( 1, sizeof( struct CONVERT_GRID ) );
-   if( NULL == grid_handle ) { goto cleanup; }
-   grid = memory_lock( grid_handle );
-   if( NULL == grid ) { goto cleanup; }
+      NEW_CONVERT_GRID(
+         header.width, header.height, 2, grid_data, grid, *grid_handle );
 
-   assert( NULL != grid );
-   if( o->cga_use_header ) {
-      grid->sz_x = header.width;
-      grid->sz_y = header.height;
-      grid->data_sz = header.width * header.height;
       plane1_offset = header.plane1_offset;
       plane2_offset = header.plane2_offset;
    } else {
-      grid->sz_x = o->w;
-      grid->sz_y = o->h;
-      grid->data_sz = o->w * o->h;
+      NEW_CONVERT_GRID( o->w, o->h, 2, grid_data, grid, *grid_handle );
       plane2_offset = o->plane_padding;
    }
-   assert( 0 < grid->sz_x );
-   assert( 0 < grid->sz_y );
-
-   grid->data = memory_alloc( 1, grid->data_sz );
-   if( NULL == grid->data ) { goto cleanup; }
-   grid_data = memory_lock( grid->data );
-   if( NULL == grid_data ) { goto cleanup; }
-
-   grid->bpp = 2; /* CGA is 2bpp or we don't understand it. */
 
    /* Image size is w * h * bpp, / 4 px per byte. Planes break / 2. */
    /* 8 makes castle.4 work... why? */
@@ -213,17 +193,11 @@ MEMORY_HANDLE cga_read( struct DIO_STREAM* stream, struct CONVERT_OPTIONS* o ) {
 
 cleanup:
 
-   if( NULL == grid_data && NULL != grid ) {
-      error_printf( "failed to allocate grid data" );
-      memory_unlock( grid_handle );
-      memory_free( grid_handle );
-      grid = NULL;
-
-   } else if( NULL != grid_data ) {
-      memory_unlock( grid->data );
-      memory_unlock( grid_handle );
+   if( NULL != grid ) {
+      grid = memory_unlock( *grid_handle );
    }
 
-   return grid_handle;
+   /* XXX */
+   return byte_idx_even;
 }
 

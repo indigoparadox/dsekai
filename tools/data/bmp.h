@@ -3,6 +3,7 @@
 #define BMP_H
 
 #include "../../src/dstypes.h"
+#include "../convert.h"
 #include "../../src/memory.h"
 #include "../../src/dio.h"
 
@@ -42,9 +43,8 @@ BITMAP_DATA_HEADER {
 #define BMP_COMPRESSION_NONE (0)
 
 uint8_t bmp_colors_count( uint8_t );
-int32_t bmp_write(
-   struct DIO_STREAM*, const struct CONVERT_GRID*, struct CONVERT_OPTIONS* );
-MEMORY_HANDLE bmp_read( struct DIO_STREAM*, struct CONVERT_OPTIONS* );
+DECLARE_FMT_READ( bmp );
+DECLARE_FMT_WRITE( bmp );
 
 #endif /* BMP_H */
 
