@@ -5,10 +5,6 @@
 
 #include "drc.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 /**
  * \brief Read a struct DRC_TOC_E from the provided DRC archive at its current
  *        offset.
@@ -65,7 +61,7 @@ int32_t drc_list_resources(
    struct DRC_HEADER header;
    struct DRC_TOC_E* toc_ptr = NULL;
 
-   memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
+   memory_zero_ptr( &toc_e_iter, sizeof( struct DRC_TOC_E ) );
 
    debug_printf( 2, "opening drc to list..." );
 
@@ -101,9 +97,10 @@ int32_t drc_list_resources(
          debug_printf( 1, "copying listing result for TOC entry %d",
             toc_e_iter.id );
          /* Move, rather than copy. */
-         memcpy( &(toc_ptr[i]), &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+         memory_copy_ptr(
+            &(toc_ptr[i]), &toc_e_iter, sizeof( struct DRC_TOC_E ) );
          assert( toc_ptr[i].type.u32 == toc_e_iter.type.u32 );
-         memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
+         memory_zero_ptr( &toc_e_iter, sizeof( struct DRC_TOC_E ) );
          toc_ptr = memory_unlock( *htoc );
       }
    }
@@ -181,7 +178,7 @@ int32_t drc_get_resource_info(
          toc_e_iter.type.str[2], toc_e_iter.type.str[3],
          toc_e_iter.data_start, toc_e_iter.data_sz );
 
-      memcpy( e, &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+      memory_copy_ptr( e, &toc_e_iter, sizeof( struct DRC_TOC_E ) );
 
       i = sizeof( struct DRC_TOC_E );
 
@@ -211,7 +208,7 @@ int32_t drc_get_resource(
       read = 0;
    struct DRC_TOC_E toc_e_iter;
 
-   memset( &toc_e_iter, '\0', sizeof( struct DRC_TOC_E ) );
+   memory_zero_ptr( &toc_e_iter, sizeof( struct DRC_TOC_E ) );
 
    debug_printf( 2, "opening drc to get resource..." );
 

@@ -1,9 +1,6 @@
 
 #include "../graphics.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 #include <Multiverse.h>
 
 #include "../drc.h"

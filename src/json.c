@@ -4,10 +4,6 @@
 
 #include "dio.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 int16_t json_get_token_idx(
    const char* contents, uint16_t contents_sz,
    jsmntok_t* tokens, uint16_t tokens_sz,
@@ -90,7 +86,8 @@ int16_t json_get_token_idx(
 }
 
 int16_t json_token_id_from_path(
-   const char* path, jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
+   const char* path, uint16_t path_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
 ) {
    int i = 0,
       path_cur_tok_start = 0,
@@ -98,7 +95,9 @@ int16_t json_token_id_from_path(
 
    debug_printf( 1, "path: %s", path );
 
-   while( path_cur_tok_start + path_cur_tok_sz < strlen( path ) ) {
+   while(
+      path_cur_tok_start + path_cur_tok_sz < memory_strnlen_ptr( path, path_sz )
+   ) {
 
       /* Find the next path token in the path. */
       path_cur_tok_start += path_cur_tok_sz + 1;
@@ -110,10 +109,10 @@ int16_t json_token_id_from_path(
          path_cur_tok_sz++;
       }
 
-      debug_printf( 1, "curtok is %d (starts at %d, %d long) (%d vs %lu) ",
+      debug_printf( 1, "curtok is %d (starts at %d, %d long) (%d vs %d) ",
          i, path_cur_tok_start, path_cur_tok_sz,
          path_cur_tok_start + path_cur_tok_sz,
-         strlen( path ) );
+         memory_strnlen_ptr( path, path_sz ) );
 
       /* Find the element that corresponds to that path token at that position.
        */
@@ -130,10 +129,11 @@ int16_t json_token_id_from_path(
 }
 
 int16_t json_int_from_path(
-   const char* path, jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
+   const char* path, uint16_t path_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
 ) {
    int id = 0;
-   id = json_token_id_from_path( path, tokens, tokens_sz, buf );
+   id = json_token_id_from_path( path, path_sz, tokens, tokens_sz, buf );
    assert( id < tokens_sz );
    assert( 0 <= id );
    return dio_atoi( &(buf[tokens[id].start]), 10 );

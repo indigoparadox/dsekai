@@ -7,8 +7,6 @@
 #include "memory.h"
 #include "resource.h"
 
-#include <string.h>
-
 #define JSON_TOKENS_MAX 1024
 #define JSON_PATH_SZ 255
 
@@ -65,9 +63,10 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    tiles_count = (TILEMAP_TW * TILEMAP_TH);
    for( i = 0 ; tiles_count > i ; i++ ) {
       /* Load tile data into the grid. */
-      dio_snprintf( iter_path, 255, "/layers/0/data/%d", i );
+      dio_snprintf( iter_path, JSON_PATH_SZ, "/layers/0/data/%d", i );
       tile_id_in = 
-         json_int_from_path( iter_path, &(tokens[0]), tok_parsed, json_buffer );
+         json_int_from_path(
+            iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
       tile_id_in--;
       if( 0 == i % 2 ) {
          tile_id_in <<= 4;

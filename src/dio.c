@@ -2,10 +2,10 @@
 #include "dio.h"
 
 #include "drc.h"
+#include "memory.h"
 
-#include <stdlib.h>
-#include <string.h>
 #include <stdarg.h>
+#include <string.h> /* for strtok() */
 
 #define PSITOA_BUF_LEN 6 /* 65535 = 5 digits + NULL. */
 
@@ -191,7 +191,7 @@ int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
 #endif /* !DISABLE_FILESYSTEM */
 
    case DIO_STREAM_BUFFER:
-      memcpy( dest, &(src->buffer.bytes[src->position]), sz );
+      memory_copy_ptr( dest, &(src->buffer.bytes[src->position]), sz );
       src->position += sz;
       return sz;
 
@@ -226,7 +226,7 @@ int32_t dio_write_stream(
 
    case DIO_STREAM_BUFFER:
       assert( dest->position + sz < dest->buffer_sz );
-      memcpy( &(dest->buffer.bytes[dest->position]), src, sz );
+      memory_copy_ptr( &(dest->buffer.bytes[dest->position]), src, sz );
       dest->position += sz;
       return sz;
    }
@@ -314,19 +314,22 @@ int16_t dio_mktemp_path( char* buf, uint16_t buf_sz, const char* tmpfilename ) {
       temp_dir = DIO_PATH_TEMP;
    }
 
-   if( strlen( temp_dir ) + 1 + strlen( tmpfilename ) >= buf_sz ) {
+   if(
+      memory_strnlen_ptr( temp_dir, buf_sz ) + 1 +
+      memory_strnlen_ptr( tmpfilename, buf_sz ) >= buf_sz
+   ) {
       error_printf( "temporary path too long" );
       return -1;
    }
 
-   memset( buf, '\0', buf_sz );
-   strncpy( buf, temp_dir, buf_sz );
+   memory_zero_ptr( buf, buf_sz );
+   memory_strncpy_ptr( buf, temp_dir, buf_sz );
 
-   buf[strlen( temp_dir )] = DIO_PATH_SEP;
-   strncpy( &(buf[strlen( temp_dir ) + 1]), tmpfilename,
-      buf_sz - strlen( temp_dir + 1 ) );
+   buf[memory_strnlen_ptr( temp_dir, 0 )] = DIO_PATH_SEP;
+   memory_strncpy_ptr( &(buf[memory_strnlen_ptr( temp_dir, 0 ) + 1]),
+      tmpfilename, buf_sz - memory_strnlen_ptr( temp_dir + 1, 0 ) );
 
-   return strlen( buf );
+   return memory_strnlen_ptr( buf, buf_sz );
 }
 
 /**
@@ -341,11 +344,12 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
    handle = memory_alloc( path_sz + 1, 1 );
    path_tmp = memory_lock( handle );
    /* XXX */
-   memcpy( path_tmp, path, path_sz );
+   memory_copy_ptr( path_tmp, path, path_sz );
 
    basename_ptr = strtok( path_tmp, "\\/" );
    while( NULL != basename_ptr ) {
-      retval = strlen( path ) - strlen( basename_ptr );
+      retval = memory_strnlen_ptr( path, 0 ) -
+      memory_strnlen_ptr( basename_ptr, 0 );
       assert( retval < path_sz );
       basename_ptr = strtok( NULL, "\\/" );
    }
@@ -366,7 +370,7 @@ uint32_t dio_read_file( const char* path, MEMORY_HANDLE* buffer_handle ) {
    uint8_t buffer_tmp[DIO_READ_FILE_BLOCK_SZ + 1];
    uint8_t* buffer_ptr = NULL;
 
-   memset( buffer_tmp, '\0', DIO_READ_FILE_BLOCK_SZ + 1 );
+   memory_zero_ptr( buffer_tmp, DIO_READ_FILE_BLOCK_SZ + 1 );
 
    assert( NULL != buffer_handle );
 
@@ -384,7 +388,7 @@ uint32_t dio_read_file( const char* path, MEMORY_HANDLE* buffer_handle ) {
    while(
       (read = (fread( buffer_tmp, 1, DIO_READ_FILE_BLOCK_SZ, file_in )))
    ) {
-      memcpy( buffer_ptr + read_total, buffer_tmp, read );
+      memory_copy_ptr( buffer_ptr + read_total, buffer_tmp, read );
       read_total += read;
    }
 
@@ -406,7 +410,7 @@ int32_t dio_copy_file( const char* src, const char* dest ) {
       retval = 0;
    uint8_t buffer_tmp[DIO_READ_FILE_BLOCK_SZ + 1];
 
-   memset( buffer_tmp, '\0', DIO_READ_FILE_BLOCK_SZ + 1 );
+   memory_zero_ptr( buffer_tmp, DIO_READ_FILE_BLOCK_SZ + 1 );
 
    file_in = fopen( src, "rb" );
    if( NULL == file_in ) {
@@ -474,7 +478,7 @@ int16_t dio_itoa(
       d_negative = 0;
    char buffer_tmp[PSITOA_BUF_LEN + 1];
 
-   memset( buffer_tmp, '\0', PSITOA_BUF_LEN + 1 );
+   memory_zero_ptr( buffer_tmp, PSITOA_BUF_LEN + 1 );
 
    if( 0 == d && tmp_idx + 1 ) {
       buffer[idx++] = '0';
@@ -584,6 +588,4 @@ int16_t dio_snprintf(
 
    return idx_out;
 }
-
-
 

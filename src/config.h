@@ -55,6 +55,9 @@
 
 #include "../gen/sdl/resext.h"
 
+/* Doesn't exist on this platform. */
+#define far
+
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "/tmp"
 #endif /* !DIO_PATH_TEMP */
@@ -76,6 +79,8 @@
 #include <PalmOS.h>
 
 #include "../gen/palm/resext.h"
+
+#define far
 
 #ifndef LOG_FILE_NAME
 #define LOG_FILE_NAME "logpalm.txt"
@@ -106,6 +111,9 @@
 
 #include "../gen/win16/resext.h"
 
+/* Doesn't exist on this platform. */
+#define far
+
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "c:\\temp"
 #endif /* !DIO_PATH_TEMP */
@@ -126,6 +134,9 @@
 /* ------ */
 
 #include "../gen/mac7/resext.h"
+
+/* Doesn't exist on this platform. */
+#define far
 
 #ifndef DIO_PATH_TEMP
 /* TODO */
@@ -152,6 +163,9 @@
 /* ------ */
 #else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
 /* ------ */
+
+/* Doesn't exist on this platform. */
+#define far
 
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "/tmp"

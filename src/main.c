@@ -1,6 +1,4 @@
 
-#include <string.h>
-
 #define MAIN_C
 
 #include "input.h"
