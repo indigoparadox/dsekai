@@ -7,11 +7,8 @@
 #include "memory.h"
 #include "resource.h"
 
-#include <string.h>
-
 #define JSON_TOKENS_MAX 1024
 #define JSON_PATH_SZ 255
-#define JSON_BUFFER_SZ 4096
 
 int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    int16_t tok_parsed = 0,
@@ -28,8 +25,6 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    uint32_t json_buffer_sz = 0;
    RESOURCE_ID type = DRC_MAP_TYPE;
 
-   return 0;
-
    json_handle = resource_get_handle( id, type );
    if( NULL == json_handle ) {
       error_printf( "could not get tilemap resource handle" );
@@ -45,8 +40,14 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    }
 
    json_buffer_sz = memory_sz( json_handle );
-   json_buffer = memory_lock( json_handle );
+   json_buffer = resource_lock_handle( json_handle );
    tokens = memory_lock( tokens_handle );
+
+   if( '{' != json_buffer[0] ) {
+      error_printf( "invalid tilemap json res %d (must start with '{')", id );
+      error_printf( "found: %s\n", json_buffer );
+      goto cleanup;
+   }
 
    jsmn_init( &parser );
    tok_parsed = jsmn_parse(
@@ -62,9 +63,10 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    tiles_count = (TILEMAP_TW * TILEMAP_TH);
    for( i = 0 ; tiles_count > i ; i++ ) {
       /* Load tile data into the grid. */
-      dio_snprintf( iter_path, 255, "/layers/0/data/%d", i );
+      dio_snprintf( iter_path, JSON_PATH_SZ, "/layers/0/data/%d", i );
       tile_id_in = 
-         json_int_from_path( iter_path, &(tokens[0]), tok_parsed, json_buffer );
+         json_int_from_path(
+            iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
       tile_id_in--;
       if( 0 == i % 2 ) {
          tile_id_in <<= 4;
@@ -86,7 +88,7 @@ cleanup:
    }
 
    if( NULL != json_buffer ) {
-      json_buffer = memory_unlock( json_handle );
+      json_buffer = resource_unlock_handle( json_handle );
    }
 
    if( NULL != json_handle ) {

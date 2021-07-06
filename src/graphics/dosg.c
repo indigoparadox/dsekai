@@ -100,13 +100,13 @@ static void graphics_remove_timer() {
 int graphics_init() {
    union REGS r;
 
-   memset( &r, '\0', sizeof( union REGS ) );
+   memory_zero_ptr( &r, sizeof( union REGS ) );
 
 	r.h.ah = 0;
 	r.h.al = GRAPHICS_MODE;
 	int86( 0x10, &r, &r );
 
-   memset( &r, '\0', sizeof( union REGS ) );
+   memory_zero_ptr( &r, sizeof( union REGS ) );
 
    r.h.ah = 0x0b;
    r.h.bh = 0x01;
@@ -125,11 +125,11 @@ void graphics_shutdown() {
 void graphics_flip() {
 #ifdef USE_DOUBLEBUF
 #if GRAPHICS_M_320_200_256_VGA == GRAPHICS_MODE
-      _fmemcpy( (char far *)GRAPHICS_M_320_200_256_VGA_A,
+      memory_copy_ptr( (char far *)GRAPHICS_M_320_200_256_VGA_A,
          g_buffer, SCREEN_W * SCREEN_H );
 #elif GRAPHICS_M_320_200_4_CGA == GRAPHICS_MODE
-      /* memcpy both planes. */
-      _fmemcpy( (char far *)0xB8000000, g_buffer, 16000 );
+      /* memory_copy_ptr both planes. */
+      memory_copy_ptr( (char far *)0xB8000000, g_buffer, 16000 );
 #endif /* GRAPHICS_MODE */
 #endif /* USE_DOUBLEBUF */
 }
@@ -208,22 +208,10 @@ int graphics_platform_blit_at(
       /* Divide y by 2 since both planes are SCREEN_H / 2 high. */
       /* Divide result by 4 since it's 2 bits per pixel. */
       byte_offset = ((((y + y_offset) / 2) * SCREEN_W) + x) / 4;
-      /* Shift the bits over by the remainder. */
-      /*bit_offset = 
-         6 - (((((y / 2) * SCREEN_W) + x) % 4) * 2);*/
 #endif /* USE_LOOKUPS */
 
-#if 1
-      _fmemcpy( &(g_buffer[byte_offset]), plane_1, 4 );
-      _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2, 4 );
-
-#else
-      /* Big Endian CGA Fix */
-      _fmemcpy( &(g_buffer[byte_offset]), plane_1 - 2, 2 );
-      _fmemcpy( &(g_buffer[byte_offset + 2]), plane_1, 2 );
-      _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2 - 2, 2 );
-      _fmemcpy( &(g_buffer[0x2000 + byte_offset + 2]), plane_2, 2 );
-#endif
+      memory_copy_ptr( &(g_buffer[byte_offset]), plane_1, 4 );
+      memory_copy_ptr( &(g_buffer[0x2000 + byte_offset]), plane_2, 4 );
 
       /* Advance source address by bytes per copy. */
       plane_1 += 2;
@@ -303,7 +291,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
       retval = 0;
       goto cleanup;
    }
-   memcpy( b->plane_1, &(buffer[plane_offset]), plane_sz );
+   memory_copy_ptr( b->plane_1, &(buffer[plane_offset]), plane_sz );
 
    plane_sz = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_SZ / 2];
    plane_offset = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_PLANE2_OFFSET / 2];
@@ -312,7 +300,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
       retval = 0;
       goto cleanup;
    }
-   memcpy( b->plane_2, &(buffer[plane_offset]), plane_sz );
+   memory_copy_ptr( b->plane_2, &(buffer[plane_offset]), plane_sz );
 
    b->initialized = 1;
 

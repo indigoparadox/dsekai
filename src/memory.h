@@ -27,8 +27,13 @@ MEMORY_HANDLE memory_alloc( uint32_t, uint32_t );
 void memory_free( MEMORY_HANDLE );
 uint32_t memory_sz( MEMORY_HANDLE );
 uint32_t memory_resize( MEMORY_HANDLE, uint32_t );
+void memory_copy_ptr( void far *, const void far *, uint32_t );
+void memory_zero_ptr( void far *, uint32_t );
 void* memory_lock( MEMORY_HANDLE );
 void* memory_unlock( MEMORY_HANDLE );
+char* memory_strncpy_ptr( char*, const char*, uint16_t );
+int16_t memory_strncmp_ptr( const char*, const char*, uint16_t );
+int16_t memory_strnlen_ptr( const char*, uint16_t );
 
 #endif /* !MEMORY_H */
 

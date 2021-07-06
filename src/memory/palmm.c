@@ -3,9 +3,9 @@
 
 #include <PalmOS.h>
 
-MEMORY_HANDLE memory_alloc( uint32_t sz, uint32_t count ) {
+MEMORY_HANDLE memory_alloc( uint16_t sz, uint16_t count ) {
    MEMORY_HANDLE handle = NULL;
-   uint32_t handle_sz = 0,
+   uint16_t handle_sz = 0,
       new_sz = 0;
    void* ptr = NULL;
 
@@ -37,16 +37,24 @@ void memory_free( MEMORY_HANDLE handle ) {
    MemHandleFree( handle );
 }
 
-uint32_t memory_sz( MEMORY_HANDLE handle ) {
+uint16_t memory_sz( MEMORY_HANDLE handle ) {
    return MemHandleSize( handle );
 }
 
-uint32_t memory_resize( MEMORY_HANDLE handle, uint32_t sz ) {
+uint16_t memory_resize( MEMORY_HANDLE handle, uint16_t sz ) {
    if( !MemHandleResize( handle, sz ) ) {
       return sz;
    } else {
       return 0;
    }
+}
+
+void memory_copy_ptr( void* dest, const void* src, uint16_t sz ) {
+   memcpy( dest, src, sz );
+}
+
+void memory_zero_ptr( void* ptr, uint16_t sz ) {
+   MemSet( ptr, sz, 0 );
 }
 
 void* memory_lock( MEMORY_HANDLE handle ) {
@@ -56,5 +64,23 @@ void* memory_lock( MEMORY_HANDLE handle ) {
 void* memory_unlock( MEMORY_HANDLE handle ) {
    MemHandleUnlock( handle );
    return NULL;
+}
+
+char* memory_strncpy_ptr( char* dest, const char* src, uint16_t sz ) {
+   StrNCopy( dest, src, sz );
+   return dest;
+}
+
+int16_t memory_strncmp_ptr( const char* s1, const char* s2, uint16_t sz ) {
+   return StrNCompare( s1, s2, sz );
+}
+
+int16_t memory_strnlen_ptr( const char* s1, uint16_t sz ) {
+   int16_t sz_out = 0;
+   sz_out = StrLen( s1 );
+   if( 0 < sz && sz_out >= sz ) {
+      sz_out = sz;
+   }
+   return sz_out;
 }
 

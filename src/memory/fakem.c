@@ -2,6 +2,7 @@
 #include "../memory.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 static struct FAKE_MEMORY_HANDLE* g_block_first = NULL;
 
@@ -141,6 +142,22 @@ cleanup:
    return handle->ptr_sz;
 }
 
+void memory_copy_ptr( void far * dest, const void far * src, uint32_t sz ) {
+#ifdef PLATFORM_DOS
+   _fmemcpy( dest, src, sz );
+#else
+   memcpy( dest, src, sz );
+#endif /* PLATFORM_DOS */
+}
+
+void memory_zero_ptr( void far * ptr, uint32_t sz ) {
+#ifdef PLATFORM_DOS
+   _fmemset( ptr, 0, sz );
+#else
+   memset( ptr, 0, sz );
+#endif /* PLATFORM_DOS */
+}
+
 void* memory_lock( MEMORY_HANDLE handle ) {
    handle->locks++;
 #if 0
@@ -153,5 +170,26 @@ void* memory_unlock( MEMORY_HANDLE handle ) {
    handle->locks--;
    assert( 0 <= handle->locks );
    return NULL;
+}
+
+char* memory_strncpy_ptr( char* dest, const char* src, uint16_t sz ) {
+   return strncpy( dest, src, sz );
+}
+
+int16_t memory_strncmp_ptr( const char* s1, const char* s2, uint16_t sz ) {
+   return strncmp( s1, s2, sz );
+}
+
+int16_t memory_strnlen_ptr( const char* s1, uint16_t sz ) {
+#ifdef __GNUC__
+   /* TODO: None-GNUC alternative. */
+   if( 0 < sz ) {
+      return strnlen( s1, sz );
+   } else {
+#endif /* __GNUC__ */
+      return strlen( s1 );
+#ifdef __GNUC__
+   }
+#endif /* __GNUC__ */
 }
 

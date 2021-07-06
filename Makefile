@@ -36,13 +36,16 @@ DSEKAI_C_FILES_PALM_ONLY := \
 DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
    src/input/win16i.c \
+   src/resource/win16r.c \
+   src/memory/fakem.c \
    src/graphics/win16g.c
 
 DSEKAI_C_FILES_MAC7_ONLY := \
    src/main.c \
    src/input/mac7i.c \
    src/graphics/mac7g.c \
-   src/memory/fakem.c \
+   src/memory/mac7m.c \
+   src/resource/drcr.c \
    src/drc.c
 
 DSEKAI_C_FILES_CHECK_NULL_ONLY := \
@@ -336,7 +339,8 @@ $(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc $(GENDIR_WIN16)/dsekai.ico |
 
 $(GENDIR_WIN16)/win16.rc \
 $(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)
-	$(MKRESH) -f win16 -i 5001 -if $(DSEKAI_ASSETS_BITMAPS) \
+	$(MKRESH) -f win16 -i 5001 \
+      -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) \
       -oh $(GENDIR_WIN16)/resext.h -or $(GENDIR_WIN16)/win16.rc
 
 $(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win16.res $(RESEXT_H)
@@ -359,7 +363,8 @@ $(GENDIR_MAC7):
 $(BINDIR)/mac7.drc \
 $(GENDIR_MAC7)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | $(GENDIR_SDL)
 	$(DRCPACK) -c -a -af $(BINDIR)/mac7.drc -t PICT -i 5001 \
-      -if $(DSEKAI_ASSETS_PICTS) -lh $(GENDIR_MAC7)/resext.h
+      -if $(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS) \
+      -lh $(GENDIR_MAC7)/resext.h
 
 $(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)
 	$(IMAGEMAGICK) $< $@

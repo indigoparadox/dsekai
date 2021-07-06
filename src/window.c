@@ -1,15 +1,14 @@
 
 #include "window.h"
 
-#include <string.h>
-
 #include "graphics.h"
+#include "memory.h"
 
 static struct WINDOW g_windows[WINDOW_COUNT_MAX];
 static uint8_t g_windows_count = 0;
 
 void window_init() {
-   memset( g_windows, '\0', sizeof( struct WINDOW ) * WINDOW_COUNT_MAX );
+   memory_zero_ptr( g_windows, sizeof( struct WINDOW ) * WINDOW_COUNT_MAX );
 }
 
 uint8_t windows_visible() {
@@ -130,10 +129,11 @@ struct WINDOW* window_push() {
    assert( g_windows_count + 1 < WINDOW_COUNT_MAX );
 
    for( i = g_windows_count ; 0 < i ; i-- ) {
-      memcpy( &(g_windows[i]), &(g_windows[i - 1]), sizeof( struct WINDOW ) );
+      memory_copy_ptr(
+         &(g_windows[i]), &(g_windows[i - 1]), sizeof( struct WINDOW ) );
    }
 
-   memset( &(g_windows[0]), '\0', sizeof( struct WINDOW ) );
+   memory_zero_ptr( &(g_windows[0]), sizeof( struct WINDOW ) );
 
    g_windows_count++;
 
@@ -148,7 +148,8 @@ void window_pop() {
    }
 
    for( i = 0 ; g_windows_count > i ; i++ ) {
-      memcpy( &(g_windows[i]), &(g_windows[i + 1]), sizeof( struct WINDOW ) );
+      memory_copy_ptr(
+         &(g_windows[i]), &(g_windows[i + 1]), sizeof( struct WINDOW ) );
    }
 
    g_windows_count--;

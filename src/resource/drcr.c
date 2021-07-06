@@ -1,8 +1,6 @@
 
 #include "drcr.h"
 
-#include <string.h>
-
 /**
  * \brief Allocate a handle to a resource in DRC archive or OS resource fork.
  */
@@ -14,7 +12,7 @@ MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID drc_type ) {
 
    assert( 0 < id );
 
-   memset( &drc_file, '\0', sizeof( struct DIO_STREAM ) );
+   memory_zero_ptr( &drc_file, sizeof( struct DIO_STREAM ) );
 
    /* Open the DRC archive. */
    dio_open_stream_file( DRC_ARCHIVE, "r", &drc_file );
@@ -51,7 +49,15 @@ cleanup:
    return handle;
 }
 
+void* resource_lock_handle( MEMORY_HANDLE handle ) {
+   return memory_lock( handle );
+}
+
+void* resource_unlock_handle( MEMORY_HANDLE handle ) {
+   return memory_unlock( handle );
+}
+
 void resource_free_handle( MEMORY_HANDLE handle ) {
-   /* TODO */
+   memory_free( handle );
 }
 

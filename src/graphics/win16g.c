@@ -229,7 +229,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into bitmap. */
-   b->bitmap = LoadBitmap( g_instance, MAKEINTRESOURCE( id ) );
+   b->bitmap = resource_get_handle( id, DRC_BITMAP_TYPE );
    if( !b->bitmap ) {
       error_printf( "unable to load resource %u", id );
       return 0;

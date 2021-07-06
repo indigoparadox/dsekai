@@ -1,9 +1,6 @@
 
 #include "../graphics.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 #include <Multiverse.h>
 
 #include "../drc.h"
@@ -99,8 +96,10 @@ void graphics_draw_block(
 }
 
 int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
-   uint8_t buffer[MAC7_RSRC_BUFFER_SZ] = NULL;
-   int32_t buffer_sz = MAC7_RSRC_BUFFER_SZ;
+   /* uint8_t buffer[MAC7_RSRC_BUFFER_SZ] = NULL;
+   int32_t buffer_sz = MAC7_RSRC_BUFFER_SZ; */
+   Handle buffer_handle;
+   union DRC_TYPE type = DRC_BITMAP_TYPE;
    uint32_t id = 0;
    int32_t retval = 0;
 
@@ -114,18 +113,25 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into buffer. */
-   buffer_sz = drc_get_resource(
-      DRC_ARCHIVE, *(uint32_t*)DRC_BMP_TYPE, id, &buffer, MAC7_RSRC_BUFFER_SZ );
-   if( 0 >= buffer_sz ) {
+   buffer_handle = resource_get_handle( id, type );
+   if( NULL == buffer_handle ) {
+      error_printf( "unable to get resource %d info", id );
+      retval = 0;
       goto cleanup;
    }
+
+   /*
+   buffer_sz = memory_sz( buffer_handle );
+   buffer = memory_lock( buffer_handle );
 
    b->pict = (PicHandle)NewHandle( buffer_sz - 512 );
    if( NULL == b->pict ) {
       goto cleanup;
    }
    memcpy( b->pict, buffer, buffer_sz - 512 );
-   b->pict_sz = buffer_sz;
+   b->pict_sz = buffer_sz; */
+
+   b->pict = buffer_handle;
 
    b->ref_count++;
    b->initialized = 1;
@@ -133,9 +139,6 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    retval = 1;
 
 cleanup:
-   if( NULL != buffer ) {
-      free( buffer );
-   }
 
    return retval;
 }

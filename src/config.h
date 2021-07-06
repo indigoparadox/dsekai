@@ -29,7 +29,7 @@
 #endif /* !GRAPHICS_MODE */
 
 #ifndef LOG_FILE_NAME
-#define LOG_FILE_NAME "logdos.txt",
+#define LOG_FILE_NAME "logdos.txt"
 #endif /* !LOG_FILE_NAME */
 
 #ifndef CGA_COLD
@@ -55,6 +55,9 @@
 
 #include "../gen/sdl/resext.h"
 
+/* Doesn't exist on this platform. */
+#define far
+
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "/tmp"
 #endif /* !DIO_PATH_TEMP */
@@ -76,6 +79,8 @@
 #include <PalmOS.h>
 
 #include "../gen/palm/resext.h"
+
+#define far
 
 #ifndef LOG_FILE_NAME
 #define LOG_FILE_NAME "logpalm.txt"
@@ -106,6 +111,9 @@
 
 #include "../gen/win16/resext.h"
 
+/* Doesn't exist on this platform. */
+#define far
+
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "c:\\temp"
 #endif /* !DIO_PATH_TEMP */
@@ -113,6 +121,9 @@
 #ifndef DIO_PATH_SEP
 #define DIO_PATH_SEP '\\'
 #endif /* !DIO_PATH_SEP */
+
+#define DRC_BITMAP_TYPE 1
+#define DRC_MAP_TYPE 2
 
 #define USE_SOFTWARE_TEXT
 
@@ -123,6 +134,14 @@
 /* ------ */
 
 #include "../gen/mac7/resext.h"
+
+/* Doesn't exist on this platform. */
+#define far
+
+#ifndef DIO_PATH_TEMP
+/* TODO */
+#define DIO_PATH_TEMP ""
+#endif /* !DIO_PATH_TEMP */
 
 #ifndef DIO_PATH_SEP
 #define DIO_PATH_SEP ':'
@@ -144,6 +163,9 @@
 /* ------ */
 #else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
 /* ------ */
+
+/* Doesn't exist on this platform. */
+#define far
 
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "/tmp"
@@ -203,6 +225,10 @@
 #ifndef DRC_MAP_TYPE
 #define DRC_MAP_TYPE {'j', 's', 'o', 'n'}
 #endif /* !DRC_MAP_TYPE */
+
+#ifndef JSON_BUFFER_SZ
+#define JSON_BUFFER_SZ 8192
+#endif /* !JSON_BUFFER_SZ */
 
 #ifndef SCREEN_W
 #define SCREEN_W (320)
