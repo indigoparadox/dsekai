@@ -4,7 +4,7 @@
 
 #include "../window.h"
 
-struct WINDOW_FRAME g_pattern_cm_checker = {
+const struct WINDOW_FRAME gc_frame_cm_checker = {
    { pattern_cm_checker_tr, 0, 0, NULL, NULL, 0, 0, 0, 0 },
    { pattern_cm_checker_tl, 0, 0, NULL, NULL, 0, 0, 0, 0 },
    { pattern_cm_checker_br, 0, 0, NULL, NULL, 0, 0, 0, 0 },

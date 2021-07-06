@@ -65,8 +65,9 @@ int graphics_blit_at(
    }
 
    if( !bmp->initialized && 0 < bmp->id ) {
+      debug_printf( 1, "lazy loading bitmap with ID %d...", bmp->id );
       /* Try to load uninitialized, pre-populated bitmap resource. */
-      retval = graphics_load_bitmap( 0, bmp );
+      retval = graphics_load_bitmap( bmp->id, bmp );
       if( !retval ) {
          error_printf( "failed to lazy load bitmap" );
          goto cleanup;

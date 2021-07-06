@@ -15,15 +15,15 @@ int16_t json_get_token_idx(
       child_idx = 0;
    jsmntok_t* parent = &(tokens[tree_depth_id]);
 
-   debug_printf( 1, "parent type is: %d", parent->type );
+   debug_printf( 0, "parent type is: %d", parent->type );
 
    if( JSMN_ARRAY == parent->type ) {
       cmp_str_as_i = dio_atoi( contents, 10 );
-      debug_printf( 1, "idx as int is: %d", cmp_str_as_i );
+      debug_printf( 0, "idx as int is: %d", cmp_str_as_i );
    }
 
    for( i = 0 ; tokens_sz > i ; i++ ) {
-      debug_printf( 1, "str %s sz %d vs  %d, %d", contents, contents_sz,
+      debug_printf( 0, "str %s sz %d vs  %d, %d", contents, contents_sz,
          tokens[i].end - tokens[i].start, tokens[i].size );
       if(
          (
@@ -55,11 +55,11 @@ int16_t json_get_token_idx(
                return i;
             } else {
                /* It's a key, return child. */
-               debug_printf( 1, "redirecting to %d", tentative_child_idx );
+               debug_printf( 0, "redirecting to %d", tentative_child_idx );
                return tentative_child_idx;
             }
          } else if( JSMN_ARRAY == parent->type ) {
-            debug_printf( 1,
+            debug_printf( 0,
                "idx %d cmp to child_idx %d", cmp_str_as_i, child_idx );
             if( cmp_str_as_i == child_idx ) {
                /* List index matches numerically. */
@@ -109,7 +109,7 @@ int16_t json_token_id_from_path(
          path_cur_tok_sz++;
       }
 
-      debug_printf( 1, "curtok is %d (starts at %d, %d long) (%d vs %d) ",
+      debug_printf( 0, "curtok is %d (starts at %d, %d long) (%d vs %d) ",
          i, path_cur_tok_start, path_cur_tok_sz,
          path_cur_tok_start + path_cur_tok_sz,
          memory_strnlen_ptr( path, path_sz ) );

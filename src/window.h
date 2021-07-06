@@ -29,13 +29,14 @@ struct WINDOW {
    uint16_t y;
    uint16_t w;
    uint16_t h;
-   struct WINDOW_FRAME* frame;
+   uint8_t frame_idx;
    char* strings[WINDOW_STRINGS_MAX];
    GRAPHICS_COLOR strings_color;
    uint8_t strings_count;
 };
 
 void window_init();
+void window_shutdown();
 int window_draw_all();
 uint8_t windows_visible();
 struct WINDOW* window_push();

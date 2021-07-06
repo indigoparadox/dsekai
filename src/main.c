@@ -117,6 +117,7 @@ int main( int argc, char* argv[] ) {
 #endif /* USE_SOFT_ASSERT */
    }
 
+   window_shutdown();
    graphics_shutdown();
 
 #ifdef LOG_TO_FILE

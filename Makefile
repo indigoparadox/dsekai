@@ -168,7 +168,7 @@ $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=3 -DHIDE_WELCOME_DIALOG
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=1
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc

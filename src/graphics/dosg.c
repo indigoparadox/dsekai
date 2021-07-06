@@ -259,8 +259,8 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    MEMORY_HANDLE buffer_handle = NULL;
 
    b->ref_count++;
-
    if( 1 > b->ref_count ) {
+      error_printf( "no refcount" );
       return 0;
    }
 

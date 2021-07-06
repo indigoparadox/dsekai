@@ -4,11 +4,41 @@
 #include "graphics.h"
 #include "memory.h"
 
+#include "data/windows.h"
+
+static MEMORY_HANDLE g_frames_handle = NULL;
 static struct WINDOW g_windows[WINDOW_COUNT_MAX];
 static uint8_t g_windows_count = 0;
 
 void window_init() {
+   struct WINDOW_FRAME* frames = NULL;
+
    memory_zero_ptr( g_windows, sizeof( struct WINDOW ) * WINDOW_COUNT_MAX );
+
+   debug_printf( 1, "initalizing windowing system..." );
+   g_frames_handle = memory_alloc( sizeof( struct WINDOW_FRAME ), 1 );
+   frames = memory_lock( g_frames_handle );
+   memory_copy_ptr(
+      frames, &gc_frame_cm_checker, sizeof( struct WINDOW_FRAME ) );
+   frames = memory_unlock( g_frames_handle );
+}
+
+void window_shutdown() {
+   struct WINDOW_FRAME* frames = NULL;
+
+   frames = memory_lock( g_frames_handle );
+   graphics_unload_bitmap( &(frames[0].tr) );
+   graphics_unload_bitmap( &(frames[0].tl) );
+   graphics_unload_bitmap( &(frames[0].br) );
+   graphics_unload_bitmap( &(frames[0].bl) );
+   graphics_unload_bitmap( &(frames[0].t) );
+   graphics_unload_bitmap( &(frames[0].b) );
+   graphics_unload_bitmap( &(frames[0].r) );
+   graphics_unload_bitmap( &(frames[0].l) );
+   graphics_unload_bitmap( &(frames[0].c) );
+   frames = memory_unlock( g_frames_handle );
+
+   memory_free( g_frames_handle );
 }
 
 uint8_t windows_visible() {
@@ -16,6 +46,7 @@ uint8_t windows_visible() {
 }
 
 int window_draw_all() {
+   struct WINDOW_FRAME* frames = NULL;
    int i = 0,
       j = 0,
       x = 0,
@@ -26,8 +57,9 @@ int window_draw_all() {
       y_min = 0,
       blit_retval = 0;
 
-   debug_printf( 1, "starting window drawing..." );
+   debug_printf( 0, "starting window drawing..." );
 
+   frames =  memory_lock( g_frames_handle );
    for( i = 0 ; g_windows_count > i ; i++ ) {
       if(
          WINDOW_STATE_VISIBLE != g_windows[i].state
@@ -35,7 +67,7 @@ int window_draw_all() {
          || 0 == g_windows[i].dirty
 #endif /* !IGNORE_DIRTY */
       ) {
-         debug_printf( 1, "ignoring window %d (dirty: %d, state: %d)",
+         debug_printf( 0, "ignoring window %d (dirty: %d, state: %d)",
             i, g_windows[i].dirty, g_windows[i].state );
          continue;
       }
@@ -51,53 +83,59 @@ int window_draw_all() {
 
       for( y = y_min ; y < y_max ; y += PATTERN_H ) {
          for( x = x_min ; x < x_max ; x += PATTERN_W ) {
-
-            /* TODO: Define window definitions in JSON, then compile them to
-            headers that can be attached to window definitions and called from
-            here. */
-
+            debug_printf( 1, "drawing window with frame %d...",
+               g_windows[i].frame_idx );
             if( x_min == x && y_min == y ) {
                /* Top Left */
-               blit_retval = graphics_blit_at( &(g_windows[i].frame->tl), x, y,
+               blit_retval = graphics_blit_at(
+                  &(frames[g_windows[i].frame_idx].tl), x, y,
                   PATTERN_W, PATTERN_H );
 
             } else if( x_max - PATTERN_W == x && y_min == y ) {
                /* Top Right */
-               blit_retval = graphics_blit_at( &(g_windows[i].frame->tr), x, y,
+               blit_retval = graphics_blit_at(
+                  &(frames[g_windows[i].frame_idx].tr), x, y,
                   PATTERN_W, PATTERN_H );
 
             } else if( x_min == x && y_max - PATTERN_H == y ) {
                /* Bottom Left */
-               blit_retval = graphics_blit_at( &(g_windows[i].frame->bl), x, y,
+               blit_retval = graphics_blit_at(
+                  &(frames[g_windows[i].frame_idx].bl), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_max - PATTERN_W == x && y_max - PATTERN_H == y ) {
                /* Bottom Right */
-               blit_retval = graphics_blit_at( &(g_windows[i].frame->br), x, y,
+               blit_retval = graphics_blit_at(
+                  &(frames[g_windows[i].frame_idx].br), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_max - PATTERN_W == x ) {
                /* Right */
-               blit_retval = graphics_blit_at( &(g_windows[i].frame->r), x, y,
+               blit_retval = graphics_blit_at(
+                  &(frames[g_windows[i].frame_idx].r), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_min == x ) {
                /* Left */
-               blit_retval = graphics_blit_at( &(g_windows[i].frame->l), x, y,
+               blit_retval = graphics_blit_at(
+                  &(frames[g_windows[i].frame_idx].l), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( y_min == y ) {
                /* Top */
-               blit_retval = graphics_blit_at( &(g_windows[i].frame->t), x, y,
+               blit_retval = graphics_blit_at(
+                  &(frames[g_windows[i].frame_idx].t), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( y_max - PATTERN_H == y ) {
                /* Bottom */
-               blit_retval = graphics_blit_at( &(g_windows[i].frame->b), x, y,
+               blit_retval = graphics_blit_at(
+                  &(frames[g_windows[i].frame_idx].b), x, y,
                   PATTERN_W, PATTERN_H );
             
             } else {
-               blit_retval = graphics_blit_at( &(g_windows[i].frame->c), x, y,
+               blit_retval = graphics_blit_at(
+                  &(frames[g_windows[i].frame_idx].c), x, y,
                   PATTERN_W, PATTERN_H );
             }
 
@@ -119,6 +157,10 @@ int window_draw_all() {
    }
 
 cleanup:
+
+   if( NULL != frames ) {
+      frames = memory_unlock( g_frames_handle );
+   }
 
    return blit_retval;
 }

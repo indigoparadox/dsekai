@@ -6,8 +6,6 @@
 #include "engines.h"
 #include "memory.h"
 
-#include "data/windows.h"
-
 #define INPUT_BLOCK_DELAY 5
 #define TOPDOWN_MOBILES_MAX 10
 
@@ -205,7 +203,7 @@ int topdown_loop() {
    if( !g_window_shown ) {
 #ifndef HIDE_WELCOME_DIALOG
       w = window_push();
-      w->frame = &g_pattern_cm_checker;
+      w->frame_idx = 0;
       w->w = 80;
       w->h = 64;
       w->dirty = DIRTY_THRESHOLD;
