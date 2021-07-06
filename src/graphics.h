@@ -58,6 +58,10 @@ void graphics_loop_end();
 void graphics_draw_px( uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_draw_block(
    uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
+void graphics_draw_rect(
+   uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
+void graphics_draw_line(
+   uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_char_at(
    const char, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_string_at(

@@ -243,6 +243,71 @@ void graphics_draw_block(
 
 }
 
+void graphics_draw_rect(
+   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+   
+   /* TODO: Handle thickness. */
+
+   /* Left Wall */
+   graphics_draw_line( x_orig, y_orig, x_orig, y_orig + h, thickness, color );
+   /* Bottom Wall */
+   graphics_draw_line(
+      x_orig, y_orig + h, x_orig + w, y_orig + h, thickness, color );
+   /* Right Wall */
+   graphics_draw_line(
+      x_orig + w, y_orig + h, x_orig + w, y_orig, thickness, color );
+   /* Top Wall */
+   graphics_draw_line( x_orig, y_orig, x_orig + w, y_orig, thickness, color );
+}
+
+void graphics_draw_line(
+   uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t thickness,
+   const GRAPHICS_COLOR color
+) {
+   uint16_t delta_x = 0,
+      delta_y = 0,
+      delta = 0,
+      x_start = 0,
+      y_start = 0,
+      x_end = 0,
+      y_end = 0,
+      x = 0,
+      y = 0;
+
+   /* TODO: Handle thickness. */
+
+   /* Keep coordinates positive. */
+   if( x1 > x2 ) {
+      x_start = x2;
+      x_end = x1;
+   } else {
+      x_start = x1;
+      x_end = x2;
+   }
+   if( y1 > y2 ) {
+      y_start = y2;
+      y_end = y1;
+   } else {
+      y_start = y1;
+      y_end = y2;
+   }
+
+   /* Bresenham's line algorithm. */
+   delta_x = x_end - x_start;
+   delta_y = y_end - y_start;
+   delta = (2 * delta_y) - delta_x;
+   for( x = x_start ; x_end > x ; x++ ) {
+      graphics_draw_px( x, y, color );
+      if( 0 < delta ) {
+         y++;
+         delta -= (2 * delta_x);
+      }
+      delta += (2 * delta_y);
+   }
+}
+
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */

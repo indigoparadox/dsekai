@@ -210,8 +210,55 @@ void graphics_draw_block(
    uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
    const GRAPHICS_COLOR color
 ) {
+   HDC hdcBuffer = NULL;
+   HBITMAP oldHbmBuffer = NULL;
+   RECT rect;
+   HBRUSH brush = NULL;
+
+   rect.left = x_orig;
+   rect.top = y_orig;
+   rect.right = x_orig + w;
+   rect.bottom = y_orig + h;
+
+   /* Create HDC for the off-screen buffer to blit to. */
+   hdcBuffer = CreateCompatibleDC( NULL );
+   oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
+
+   brush = CreateSolidBrush( color );
+
+   FillRect( hdcBuffer, &rect, brush );
+
+   DeleteObject( brush );
+
+   /* Reselect the initial objects into the provided DCs. */
+   SelectObject( hdcBuffer, oldHbmBuffer );
+   DeleteDC( hdcBuffer );
 }
 
+void graphics_draw_line(
+   uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+   HDC hdcBuffer = NULL;
+   HBITMAP oldHbmBuffer = NULL;
+   HPEN pen = NULL;
+   HPEN oldPen = NULL;
+
+   /* Create HDC for the off-screen buffer to blit to. */
+   hdcBuffer = CreateCompatibleDC( NULL );
+   oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
+
+   pen = CreatePen( PS_SOLID, thickness, color );
+   oldPen = SelectObject( hdcBuffer, pen );
+   MoveTo( hdcBuffer, x1, y1 );
+   LineTo( hdcBuffer, x2, y2 );
+   SelectObject( hdcBuffer, oldPen );
+   DeleteObject( pen );
+
+   /* Reselect the initial objects into the provided DCs. */
+   SelectObject( hdcBuffer, oldHbmBuffer );
+   DeleteDC( hdcBuffer );
+}
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */

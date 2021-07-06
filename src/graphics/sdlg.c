@@ -133,6 +133,39 @@ void graphics_draw_block(
    SDL_RenderFillRect( g_renderer, &area );
 }
 
+void graphics_draw_rect(
+   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+   SDL_Rect area;
+
+#ifdef SCALE_2X
+   area.x = x_orig * 2;
+   area.y = y_orig * 2;
+   area.w = w * 2;
+   area.h = h * 2;
+#else
+   area.x = x_orig;
+   area.y = y_orig;
+   area.w = w;
+   area.h = h;
+#endif /* SCALE_2X */
+
+   /* TODO: Handle thickness. */
+
+   SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
+   SDL_RenderDrawRect( g_renderer, &area );
+}
+
+void graphics_draw_line(
+   uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t thickness,
+   const GRAPHICS_COLOR color
+) {
+   SDL_SetRenderDrawColor( g_renderer, color->r, color->g, color->b, 255 );
+   /* TODO: Handle thickness. */
+   SDL_RenderDrawLine( g_renderer, x1, y1, x2, y2 );
+}
+
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
