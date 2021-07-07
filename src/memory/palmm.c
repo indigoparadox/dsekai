@@ -1,6 +1,8 @@
 
 #include "../dstypes.h"
 
+#include <string.h>
+
 MEMORY_HANDLE memory_alloc( uint32_t sz, uint32_t count ) {
    MEMORY_HANDLE handle = NULL;
    uint32_t handle_sz = 0,

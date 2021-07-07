@@ -142,7 +142,7 @@ cleanup:
    return handle->ptr_sz;
 }
 
-void memory_copy_ptr( void far * dest, const void far * src, uint32_t sz ) {
+void memory_copy_ptr( MEMORY_PTR dest, const MEMORY_PTR src, uint32_t sz ) {
 #ifdef PLATFORM_DOS
    _fmemcpy( dest, src, sz );
 #else
@@ -150,7 +150,7 @@ void memory_copy_ptr( void far * dest, const void far * src, uint32_t sz ) {
 #endif /* PLATFORM_DOS */
 }
 
-void memory_zero_ptr( void far * ptr, uint32_t sz ) {
+void memory_zero_ptr( MEMORY_PTR ptr, uint32_t sz ) {
 #ifdef PLATFORM_DOS
    _fmemset( ptr, 0, sz );
 #else
