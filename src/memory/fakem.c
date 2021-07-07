@@ -121,7 +121,7 @@ uint32_t memory_sz( MEMORY_HANDLE handle ) {
  * \return New size of handle; either given size or old size if unsuccessful.
  */
 uint32_t memory_resize( MEMORY_HANDLE handle, uint32_t sz ) {
-   void* new_ptr = NULL;
+   MEMORY_PTR new_ptr = NULL;
 
    if( NULL == handle ) {
       return 0;
@@ -158,7 +158,7 @@ void memory_zero_ptr( void far * ptr, uint32_t sz ) {
 #endif /* PLATFORM_DOS */
 }
 
-void* memory_lock( MEMORY_HANDLE handle ) {
+MEMORY_PTR memory_lock( MEMORY_HANDLE handle ) {
    handle->locks++;
 #if 0
    return &(g_fake_heap[handle->offset]);
@@ -166,7 +166,7 @@ void* memory_lock( MEMORY_HANDLE handle ) {
    return handle->ptr;
 }
 
-void* memory_unlock( MEMORY_HANDLE handle ) {
+MEMORY_PTR memory_unlock( MEMORY_HANDLE handle ) {
    handle->locks--;
    assert( 0 <= handle->locks );
    return NULL;

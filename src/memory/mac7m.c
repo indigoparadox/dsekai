@@ -21,20 +21,20 @@ uint32_t memory_resize( MEMORY_HANDLE handle, uint32_t sz ) {
    return sz;
 }
 
-void memory_copy_ptr( void* dest, const void* src, uint32_t sz ) {
+void memory_copy_ptr( MEMORY_PTR dest, const MEMORY_PTR src, uint32_t sz ) {
    BlockMove( src, dest, sz );
 }
 
-void memory_zero_ptr( void* ptr, uint32_t sz ) {
+void memory_zero_ptr( MEMORY_PTR ptr, uint32_t sz ) {
    memset( ptr, 0, sz );
 }
 
-void* memory_lock( MEMORY_HANDLE handle ) {
+MEMORY_PTR memory_lock( MEMORY_HANDLE handle ) {
    HLock( handle );
    return *handle;
 }
 
-void* memory_unlock( MEMORY_HANDLE handle ) {
+MEMORY_PTR memory_unlock( MEMORY_HANDLE handle ) {
    HUnlock( handle );
    return NULL;
 }

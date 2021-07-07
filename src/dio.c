@@ -164,7 +164,7 @@ uint8_t dio_type_stream( struct DIO_STREAM* stream ) {
    return stream->type;
 }
 
-int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
+int32_t dio_read_stream( MEMORY_PTR dest, uint32_t sz, struct DIO_STREAM* src ) {
    int32_t sz_out = 0;
 
    dio_assert_stream( src );
@@ -198,7 +198,7 @@ int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
 }
 
 int32_t dio_write_stream(
-   const void* src, uint32_t sz, struct DIO_STREAM* dest
+   const MEMORY_PTR src, uint32_t sz, struct DIO_STREAM* dest
 ) {
    int32_t sz_out = 0;
 

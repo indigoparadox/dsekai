@@ -5,7 +5,7 @@ MEMORY_HANDLE memory_alloc( uint32_t sz, uint32_t count ) {
    MEMORY_HANDLE handle = NULL;
    uint32_t handle_sz = 0,
       new_sz = 0;
-   void* ptr = NULL;
+   MEMORY_PTR ptr = NULL;
 
    /* Rollover protection. Naive about negative numbers. */
    if( sz * count < sz ) {
@@ -47,19 +47,19 @@ uint32_t memory_resize( MEMORY_HANDLE handle, uint32_t sz ) {
    }
 }
 
-void memory_copy_ptr( void* dest, const void* src, uint32_t sz ) {
+void memory_copy_ptr( MEMORY_PTR dest, const MEMORY_PTR src, uint32_t sz ) {
    memcpy( dest, src, sz );
 }
 
-void memory_zero_ptr( void* ptr, uint32_t sz ) {
+void memory_zero_ptr( MEMORY_PTR ptr, uint32_t sz ) {
    MemSet( ptr, sz, 0 );
 }
 
-void* memory_lock( MEMORY_HANDLE handle ) {
+MEMORY_PTR memory_lock( MEMORY_HANDLE handle ) {
    return MemHandleLock( handle );
 }
 
-void* memory_unlock( MEMORY_HANDLE handle ) {
+MEMORY_PTR memory_unlock( MEMORY_HANDLE handle ) {
    MemHandleUnlock( handle );
    return NULL;
 }

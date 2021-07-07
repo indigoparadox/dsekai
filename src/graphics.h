@@ -42,8 +42,8 @@ struct GRAPHICS_BITMAP_BASE {
    uint16_t ref_count;
 
    /* Platform-Specific Overrides. */
-   void* ptr1;
-   void* ptr2;
+   MEMORY_PTR ptr1;
+   MEMORY_PTR ptr2;
    uint32_t res1;
    uint32_t res2;
    uint8_t res3;
