@@ -374,7 +374,7 @@
 /* Derived Parameters */
 
 #define SCREEN_MAP_W (SCREEN_W)
-#define SCREEN_MAP_H (SCREEN_H - STATUS_WINDOW_H)
+#define SCREEN_MAP_H (160 - 32)
 
 #define SCREEN_TW (SCREEN_MAP_W / TILE_W)
 #define SCREEN_TH (SCREEN_MAP_H / TILE_H)

@@ -221,7 +221,7 @@ void control_pop(
    if( control_idx > 0 ) {
       for( i = control_idx ; i < windows[window_idx].controls_count ; i++ ) {
          debug_printf( 1, "shifting control %u in window %u down by one...",
-            controls[i + 1], windows[window_idx].id );
+            controls[i + 1].id, windows[window_idx].id );
          memory_copy_ptr(
             &(controls[i]), &(controls[i + 1]), sizeof( struct CONTROL ) );
       }

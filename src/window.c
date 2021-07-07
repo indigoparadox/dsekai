@@ -299,6 +299,6 @@ int16_t window_modal( struct DSEKAI_STATE* state ) {
 
    windows = memory_unlock( state->windows_handle );
 
-   return 0;
+   return modal;
 }
 
