@@ -104,7 +104,7 @@ int graphics_platform_blit_at(
       return 0;
    }
 
-   debug_printf( 1, "blitting resource #%d to %d, %d x %d, %d...",
+   debug_printf( 0, "blitting resource #%d to %d, %d x %d, %d...",
       bmp->id, x, y, w, h );
    SDL_RenderCopy( g_renderer, bmp->texture, NULL, &dest_rect );
 

@@ -21,6 +21,7 @@ struct WINDOW_FRAME {
 };
 
 struct WINDOW {
+   uint32_t id;
    uint8_t dirty;
    uint16_t x;
    uint16_t y;
@@ -34,9 +35,10 @@ struct WINDOW {
 void window_init();
 void window_shutdown();
 int window_draw_all( struct DSEKAI_STATE* );
-void window_push(
+int16_t window_push(
+   uint32_t,
    uint16_t, uint16_t, uint16_t, uint16_t, uint8_t, struct DSEKAI_STATE* );
-void window_pop( struct DSEKAI_STATE* );
+void window_pop( uint32_t, struct DSEKAI_STATE* );
 
 #endif /* WINDOW_H */
 

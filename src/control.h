@@ -14,6 +14,7 @@
 #define CONTROL_STATE_CHECKED       3
 
 struct CONTROL {
+   uint32_t id;
    uint16_t type;
    uint16_t status;
    uint16_t x; /* Relative to containing window. */
@@ -22,6 +23,11 @@ struct CONTROL {
    uint16_t h;
    MEMORY_HANDLE data;
 };
+
+int16_t control_push(
+   uint32_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t,
+   MEMORY_HANDLE, uint32_t, struct DSEKAI_STATE* );
+void control_pop( uint32_t, uint32_t, struct DSEKAI_STATE* );
 
 #endif /* CONTROL_H */
 

@@ -160,21 +160,31 @@ cleanup:
    return blit_retval;
 }
 
-void window_push(
+int16_t window_push(
+   uint32_t id,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t frame_idx,
    struct DSEKAI_STATE* state
 ) {
    int i = 0;
    struct WINDOW* windows = NULL;
+   int16_t retval = 0;
 
    if( NULL == state->windows_handle ) {
       state->windows_handle =
          memory_alloc( WINDOW_COUNT_MAX, sizeof( struct WINDOW ) );
    }
 
-   assert( state->windows_count + 1 < WINDOW_COUNT_MAX );
-
    windows = memory_lock( state->windows_handle );
+
+   for( i = 0 ; state->windows_count > i ; i++ ) {
+      if( windows[i].id == id ) {
+         error_printf( "window with ID %u already exists", id );
+         retval = 0;
+         goto cleanup;
+      }
+   }
+
+   assert( state->windows_count + 1 < WINDOW_COUNT_MAX );
 
    for( i = state->windows_count ; 0 < i ; i-- ) {
       memory_copy_ptr(
@@ -189,29 +199,65 @@ void window_push(
    windows[0].h = h;
    windows[0].frame_idx = frame_idx;
    windows[0].dirty = DIRTY_THRESHOLD;
-
-   windows = memory_unlock( state->windows_handle );
+   windows[0].id = id;
 
    state->windows_count++;
+
+cleanup:
+
+   if( NULL != windows ) {
+      windows = memory_unlock( state->windows_handle );
+   }
+
+   return retval;
 }
 
-void window_pop( struct DSEKAI_STATE* state ) {
+void window_pop( uint32_t id, struct DSEKAI_STATE* state ) {
    int i = 0;
    struct WINDOW* windows = NULL;
+   int16_t idx = -1;
 
    if( 0 == state->windows_count ) {
+      error_printf( "tried to pop window with no windows present" );
       return;
    }
-   
+
    windows = memory_lock( state->windows_handle );
 
    for( i = 0 ; state->windows_count > i ; i++ ) {
+      debug_printf( 1, "searching for window %u (trying window %u)",
+         id, windows[i].id );
+      if( 0 == id || windows[i].id == id ) {
+         idx = i;
+      }
+   }
+
+   debug_printf( 1, "popping window %u...", id );
+
+   if( 0 > idx ) {
+      error_printf( "could not find window with ID %u", id );
+      goto cleanup;
+   }
+
+   /* Clear window controls. */
+   if( NULL != windows[idx].controls_handle ) {
+      while( 0 < windows[idx].controls_count ) {
+         windows = memory_unlock( state->windows_handle );
+         control_pop( id, 0, state );
+         windows = memory_lock( state->windows_handle );
+      }
+      memory_free( windows[idx].controls_handle );
+   }
+
+   for( i = idx ; state->windows_count > i ; i++ ) {
       memory_copy_ptr(
          &(windows[i]), &(windows[i + 1]), sizeof( struct WINDOW ) );
    }
 
-   windows = memory_unlock( state->windows_handle );
-
    state->windows_count--;
+
+cleanup:
+
+   windows = memory_unlock( state->windows_handle );
 }
 

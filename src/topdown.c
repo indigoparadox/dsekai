@@ -161,7 +161,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
    if( !state->window_shown ) {
 #ifndef HIDE_WELCOME_DIALOG
-      window_push( WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state );
+      window_push( 0x1212, WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state );
 #endif /* !HIDE_WELCOME_DIALOG */
       state->window_shown = 1;
    }
@@ -218,7 +218,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       break;
 
    case INPUT_KEY_OK:
-      window_pop( state );
+      window_pop( 0x1212, state );
       tilemap_refresh_tiles( &(state->map) );
       break;
 
