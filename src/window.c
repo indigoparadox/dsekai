@@ -66,8 +66,8 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
       assert( 0 == windows[i].h % PATTERN_H );
 
       debug_printf(
-         1, "max: %d, %d; min: %d, %d",
-         x_max, y_max, windows[i].x, windows[i].y );
+         1, "min: %d, %d; max: %d, %d",
+         windows[i].x, windows[i].y, x_max, y_max );
 
       x_max = windows[i].x + windows[i].w;
       y_max = windows[i].y + windows[i].h;
@@ -138,16 +138,6 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
       }
 
       control_draw_all( &(windows[i]) );
-
-      /*
-      for( j = 0 ; windows[i].strings_count > j ; j++ ) {
-         graphics_string_at( windows[i].strings[j],
-            strlen( windows[i].strings[i] ),
-            windows[i].x + WINDOW_TEXT_X, windows[i].y + (WINDOW_TEXT_Y * (i + 1)),
-            windows[i].strings_color, 1 );
-      }
-      */
-
       windows[i].dirty -= 1;
    }
 
@@ -191,6 +181,8 @@ int16_t window_push(
    assert( state->windows_count + 1 < WINDOW_COUNT_MAX );
 
    for( i = state->windows_count ; 0 < i ; i-- ) {
+      debug_printf( 1, "shifting window %u up by one...",
+         windows[i - 1].id );
       memory_copy_ptr(
          &(windows[i]), &(windows[i - 1]), sizeof( struct WINDOW ) );
    }
@@ -202,6 +194,9 @@ int16_t window_push(
          WINDOW_STATUS_MODAL : WINDOW_STATUS_VISIBLE;
    windows[0].w = w;
    windows[0].h = h;
+
+   assert( 0 < windows[0].w );
+   assert( 0 < windows[0].h );
 
    if( WINDOW_CENTERED == x ) {
       windows[0].x = (SCREEN_W / 2) - (windows[0].w / 2);
@@ -246,6 +241,7 @@ void window_pop( uint32_t id, struct DSEKAI_STATE* state ) {
       debug_printf( 1, "searching for window %u (trying window %u)",
          id, windows[i].id );
       if( 0 == id || windows[i].id == id ) {
+         debug_printf( 1, "window %u is at index %d", id, i );
          idx = i;
       }
    }
@@ -268,6 +264,8 @@ void window_pop( uint32_t id, struct DSEKAI_STATE* state ) {
    }
 
    for( i = idx ; state->windows_count > i ; i++ ) {
+      debug_printf( 1, "shifting window %u down by one...",
+         windows[i + 1].id );
       memory_copy_ptr(
          &(windows[i]), &(windows[i + 1]), sizeof( struct WINDOW ) );
    }
@@ -301,6 +299,6 @@ int16_t window_modal( struct DSEKAI_STATE* state ) {
 
    windows = memory_unlock( state->windows_handle );
 
-   return modal;
+   return 0;
 }
 

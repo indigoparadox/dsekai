@@ -100,9 +100,12 @@ int graphics_platform_blit_at(
       y * SCREEN_SCALE,
       w * SCREEN_SCALE, 
       h * SCREEN_SCALE};
+
    if( NULL == bmp || NULL == bmp->texture ) {
       return 0;
    }
+
+   assert( 65535 > bmp->id );
 
    debug_printf( 0, "blitting resource #%d to %d, %d x %d, %d...",
       bmp->id, x, y, w, h );

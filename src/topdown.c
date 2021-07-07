@@ -163,6 +163,9 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    }
 
    if( !state->window_shown ) {
+      window_push(
+         0x111, WINDOW_STATUS_VISIBLE,
+         0, (SCREEN_TH * 16), STATUS_WINDOW_W, STATUS_WINDOW_H, 0, state );
 #ifndef HIDE_WELCOME_DIALOG
       window_push(
          0x1212, WINDOW_STATUS_MODAL,
@@ -191,7 +194,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
    switch( in_char ) {
    case INPUT_KEY_UP:
-      if( 0 < state->windows_count ) { break; }
+      if( 0 < window_modal( state ) ) { break; }
       if( !tilemap_collide(
          &(state->map), state->mobiles[state->player_idx].coords.x,
          state->mobiles[state->player_idx].coords.y - 1 )
@@ -201,7 +204,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       break;
 
    case INPUT_KEY_LEFT:
-      if( 0 < state->windows_count ) { break; }
+      if( 0 < window_modal( state ) ) { break; }
       if( !tilemap_collide(
          &(state->map), state->mobiles[state->player_idx].coords.x - 1,
          state->mobiles[state->player_idx].coords.y )
@@ -211,7 +214,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       break;
 
    case INPUT_KEY_DOWN:
-      if( 0 < state->windows_count ) { break; }
+      if( 0 < window_modal( state ) ) { break; }
       if( !tilemap_collide(
          &(state->map), state->mobiles[state->player_idx].coords.x,
          state->mobiles[state->player_idx].coords.y + 1 )
@@ -221,7 +224,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       break;
 
    case INPUT_KEY_RIGHT:
-      if( 0 < state->windows_count ) { break; }
+      if( 0 < window_modal( state ) ) { break; }
       if( !tilemap_collide(
          &(state->map), state->mobiles[state->player_idx].coords.x + 1,
          state->mobiles[state->player_idx].coords.y )
@@ -236,6 +239,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       break;
 
    case INPUT_KEY_QUIT:
+      window_pop( 0x111, state );
       state = memory_unlock( state_handle );
       topdown_deinit( state_handle );
       return 0;
@@ -265,23 +269,31 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       state->mobiles[state->player_idx].coords.x >=
          state->screen_scroll_tx + SCREEN_TW
    ) {
-      state->screen_scroll_x_tgt = state->screen_scroll_x + SCREEN_W;
+      state->screen_scroll_x_tgt = state->screen_scroll_x + SCREEN_MAP_W;
+      debug_printf( 1, "scrolling screen right to %d, %d...",
+         state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
 
    } else if(
       state->mobiles[state->player_idx].coords.y >=
          state->screen_scroll_y + SCREEN_TH
    ) {
-      state->screen_scroll_y_tgt = state->screen_scroll_y + SCREEN_H;
+      state->screen_scroll_y_tgt = state->screen_scroll_y + SCREEN_MAP_H;
+      debug_printf( 1, "scrolling screen down to %d, %d...",
+         state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
 
    } else if(
       state->mobiles[state->player_idx].coords.x < state->screen_scroll_tx
    ) {
-      state->screen_scroll_x_tgt = state->screen_scroll_x - SCREEN_W;
+      state->screen_scroll_x_tgt = state->screen_scroll_x - SCREEN_MAP_W;
+      debug_printf( 1, "scrolling screen left to %d, %d...",
+         state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
 
    } else if(
       state->mobiles[state->player_idx].coords.y < state->screen_scroll_ty
    ) {
-      state->screen_scroll_y_tgt = state->screen_scroll_y - SCREEN_H;
+      state->screen_scroll_y_tgt = state->screen_scroll_y - SCREEN_MAP_H;
+      debug_printf( 1, "scrolling screen up to %d, %d...",
+         state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
    }
    state = memory_unlock( state_handle );
 

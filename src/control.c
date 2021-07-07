@@ -105,6 +105,8 @@ int16_t control_push(
    controls = memory_lock( windows[window_idx].controls_handle );
 
    for( i = windows[window_idx].controls_count ; 0 < i ; i-- ) {
+      debug_printf( 1, "shifting control %u in window %u up by one...",
+         controls[i - 1], windows[window_idx].id );
       memory_copy_ptr(
          &(controls[i]), &(controls[i - 1]), sizeof( struct CONTROL ) );
    }
@@ -182,7 +184,10 @@ void control_pop(
 
    /* Find the window IDX for the given ID. */
    for( i = 0 ; state->windows_count > i ; i++ ) {
-      if( 0 == control_id || windows[i].id == window_id ) {
+      debug_printf( 1, "searching for window %u (trying window %u)",
+         window_id, windows[i].id );
+      if( 0 == window_id || windows[i].id == window_id ) {
+         debug_printf( 1, "window %u is at index %d", window_id, i );
          window_idx = i;
       }
    }
@@ -193,6 +198,7 @@ void control_pop(
    }
 
    if( 0 == windows[window_idx].controls_count ) {
+      error_printf( "no controls in window %u", window_id );
       return;
    }
    
@@ -200,6 +206,8 @@ void control_pop(
 
    /* Find the control IDX for the given ID. */
    for( i = 0 ; windows[window_idx].controls_count > i ; i++ ) {
+      debug_printf( 1, "searching for control %u (trying window %u)",
+         control_id, controls[i].id );
       if( 0 == control_id || controls[i].id == control_id ) {
          control_idx = i;
       }
@@ -212,8 +220,10 @@ void control_pop(
 
    if( control_idx > 0 ) {
       for( i = control_idx ; i < windows[window_idx].controls_count ; i++ ) {
+         debug_printf( 1, "shifting control %u in window %u down by one...",
+            controls[i + 1], windows[window_idx].id );
          memory_copy_ptr(
-            &(controls[i]), &(controls[i - 1]), sizeof( struct CONTROL ) );
+            &(controls[i]), &(controls[i + 1]), sizeof( struct CONTROL ) );
       }
    }
 
@@ -233,6 +243,10 @@ cleanup:
 void control_draw_all( struct WINDOW* window ) {
    struct CONTROL* controls = NULL;
    int16_t i = 0;
+
+   if( NULL == window->controls_handle ) {
+      return;
+   }
 
    controls = memory_lock( window->controls_handle );
 
