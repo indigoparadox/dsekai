@@ -73,8 +73,8 @@ struct DSEKAI_STATE;
 #include "item.h"
 #include "tilemap.h"
 #include "mobile.h"
-#include "control.h"
 #include "window.h"
+#include "control.h"
 
 struct WINDOW;
 

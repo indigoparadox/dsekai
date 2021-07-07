@@ -101,6 +101,8 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    uint8_t in_char = 0;
    static int initialized = 0;
    struct DSEKAI_STATE* state = NULL;
+   MEMORY_HANDLE welcome_string_handle = NULL;
+   char* welcome_string = NULL;
 
    state = memory_lock( state_handle );
 
@@ -142,6 +144,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       state->mobiles_count++;
 
       tilemap_load( map_field, &(state->map) );
+      tilemap_refresh_tiles( &(state->map) );
 
       /* Make sure the tilemap is drawn at least once behind any initial
        * windows.
@@ -155,13 +158,23 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
    in_char = 0;
 
-   if( 0 == state->windows_count ) {
+   if( 0 >= window_modal( state ) ) {
       topdown_draw( state );
    }
 
    if( !state->window_shown ) {
 #ifndef HIDE_WELCOME_DIALOG
-      window_push( 0x1212, WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state );
+      window_push(
+         0x1212, WINDOW_STATUS_MODAL,
+         WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state );
+      welcome_string_handle = memory_alloc( 9, 1 );
+      welcome_string = memory_lock( welcome_string_handle );
+      memory_copy_ptr( welcome_string, "Welcome!", 8 );
+      welcome_string = memory_unlock( welcome_string_handle );
+      control_push(
+         0x2323, CONTROL_TYPE_LABEL, CONTROL_STATE_ENABLED,
+         -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
+         welcome_string_handle, 0x1212, state );
 #endif /* !HIDE_WELCOME_DIALOG */
       state->window_shown = 1;
    }

@@ -1,8 +1,6 @@
 
 #define JSON_C
-#include "json.h"
-
-#include "dio.h"
+#include "dstypes.h"
 
 int16_t json_get_token_idx(
    const char* contents, uint16_t contents_sz,

@@ -53,9 +53,10 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
    windows = memory_lock( state->windows_handle );
    for( i = 0 ; state->windows_count > i ; i++ ) {
 #ifndef IGNORE_DIRTY
-      if( 0 == windows[i].dirty
+      if( 0 == windows[i].dirty ) {
+#else
+      if( 0 ) {
 #endif /* !IGNORE_DIRTY */
-      ) {
          debug_printf( 0, "ignoring window %d (dirty: %d)",
             i, windows[i].dirty );
          continue;
@@ -63,30 +64,31 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
 
       assert( 0 == windows[i].w % PATTERN_W );
       assert( 0 == windows[i].h % PATTERN_H );
-      x_max = (SCREEN_W / 2) + (windows[i].w / 2); 
-      y_max = (SCREEN_H / 2) + (windows[i].h / 2); 
-      x_min = (SCREEN_W / 2) - (windows[i].w / 2);
-      y_min = (SCREEN_H / 2) - (windows[i].h / 2);
 
-      debug_printf( 1, "max: %d, %d; min: %d, %d", x_max, y_max, x_min, y_min );
+      debug_printf(
+         1, "max: %d, %d; min: %d, %d",
+         x_max, y_max, windows[i].x, windows[i].y );
 
-      for( y = y_min ; y < y_max ; y += PATTERN_H ) {
-         for( x = x_min ; x < x_max ; x += PATTERN_W ) {
+      x_max = windows[i].x + windows[i].w;
+      y_max = windows[i].y + windows[i].h;
+
+      for( y = windows[i].y ; y < y_max ; y += PATTERN_H ) {
+         for( x = windows[i].x ; x < x_max ; x += PATTERN_W ) {
             debug_printf( 1, "drawing window with frame %d...",
                windows[i].frame_idx );
-            if( x_min == x && y_min == y ) {
+            if( windows[i].x == x && windows[i].y == y ) {
                /* Top Left */
                blit_retval = graphics_blit_at(
                   &(frames[windows[i].frame_idx].tl), x, y,
                   PATTERN_W, PATTERN_H );
 
-            } else if( x_max - PATTERN_W == x && y_min == y ) {
+            } else if( x_max - PATTERN_W == x && windows[i].y == y ) {
                /* Top Right */
                blit_retval = graphics_blit_at(
                   &(frames[windows[i].frame_idx].tr), x, y,
                   PATTERN_W, PATTERN_H );
 
-            } else if( x_min == x && y_max - PATTERN_H == y ) {
+            } else if( windows[i].x == x && y_max - PATTERN_H == y ) {
                /* Bottom Left */
                blit_retval = graphics_blit_at(
                   &(frames[windows[i].frame_idx].bl), x, y,
@@ -104,13 +106,13 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
                   &(frames[windows[i].frame_idx].r), x, y,
                   PATTERN_W, PATTERN_H );
             
-            } else if( x_min == x ) {
+            } else if( windows[i].x == x ) {
                /* Left */
                blit_retval = graphics_blit_at(
                   &(frames[windows[i].frame_idx].l), x, y,
                   PATTERN_W, PATTERN_H );
             
-            } else if( y_min == y ) {
+            } else if( windows[i].y == y ) {
                /* Top */
                blit_retval = graphics_blit_at(
                   &(frames[windows[i].frame_idx].t), x, y,
@@ -135,11 +137,13 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
          }
       }
 
+      control_draw_all( &(windows[i]) );
+
       /*
       for( j = 0 ; windows[i].strings_count > j ; j++ ) {
          graphics_string_at( windows[i].strings[j],
             strlen( windows[i].strings[i] ),
-            x_min + WINDOW_TEXT_X, y_min + (WINDOW_TEXT_Y * (i + 1)),
+            windows[i].x + WINDOW_TEXT_X, windows[i].y + (WINDOW_TEXT_Y * (i + 1)),
             windows[i].strings_color, 1 );
       }
       */
@@ -161,8 +165,8 @@ cleanup:
 }
 
 int16_t window_push(
-   uint32_t id,
-   uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t frame_idx,
+   uint32_t id, uint8_t status,
+   int16_t x, int16_t y, int16_t w, int16_t h, uint8_t frame_idx,
    struct DSEKAI_STATE* state
 ) {
    int i = 0;
@@ -193,10 +197,24 @@ int16_t window_push(
 
    memory_zero_ptr( &(windows[0]), sizeof( struct WINDOW ) );
 
-   windows[0].x = x;
-   windows[0].y = y;
+   windows[0].status =
+      WINDOW_STATUS_MODAL == status ?
+         WINDOW_STATUS_MODAL : WINDOW_STATUS_VISIBLE;
    windows[0].w = w;
    windows[0].h = h;
+
+   if( WINDOW_CENTERED == x ) {
+      windows[0].x = (SCREEN_W / 2) - (windows[0].w / 2);
+   } else {
+      windows[0].x = x;
+   }
+
+   if( WINDOW_CENTERED == y ) {
+      windows[0].y = (SCREEN_H / 2) - (windows[0].h / 2);
+   } else {
+      windows[0].y = y;
+   }
+
    windows[0].frame_idx = frame_idx;
    windows[0].dirty = DIRTY_THRESHOLD;
    windows[0].id = id;
@@ -259,5 +277,30 @@ void window_pop( uint32_t id, struct DSEKAI_STATE* state ) {
 cleanup:
 
    windows = memory_unlock( state->windows_handle );
+}
+
+/**
+ * \return 0 if no modal windows showing, 1+ otherwise.
+ */
+int16_t window_modal( struct DSEKAI_STATE* state ) {
+   int i = 0;
+   struct WINDOW* windows = NULL;
+   int16_t modal = 0;
+
+   if( 0 == state->windows_count ) {
+      return 0;
+   }
+
+   windows = memory_lock( state->windows_handle );
+
+   for( i = 0 ; state->windows_count > i ; i++ ) {
+      if( WINDOW_STATUS_MODAL == windows[i].status ) {
+         modal++;
+      }
+   }
+
+   windows = memory_unlock( state->windows_handle );
+
+   return modal;
 }
 

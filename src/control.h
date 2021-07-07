@@ -17,17 +17,22 @@ struct CONTROL {
    uint32_t id;
    uint16_t type;
    uint16_t status;
-   uint16_t x; /* Relative to containing window. */
-   uint16_t y; /* Relative to containing window. */
-   uint16_t w;
-   uint16_t h;
+   int16_t x; /* Relative to containing window. */
+   int16_t y; /* Relative to containing window. */
+   int16_t w;
+   int16_t h;
+   int8_t scale;
+   GRAPHICS_COLOR fg;
+   GRAPHICS_COLOR bg;
    MEMORY_HANDLE data;
 };
 
 int16_t control_push(
-   uint32_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t,
+   uint32_t, uint16_t, uint16_t, int16_t, int16_t, int16_t, int16_t,
+   GRAPHICS_COLOR, GRAPHICS_COLOR, int8_t,
    MEMORY_HANDLE, uint32_t, struct DSEKAI_STATE* );
 void control_pop( uint32_t, uint32_t, struct DSEKAI_STATE* );
+void control_draw_all( struct WINDOW* );
 
 #endif /* CONTROL_H */
 
