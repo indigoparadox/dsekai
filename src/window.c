@@ -135,12 +135,14 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
          }
       }
 
+      /*
       for( j = 0 ; windows[i].strings_count > j ; j++ ) {
          graphics_string_at( windows[i].strings[j],
             strlen( windows[i].strings[i] ),
             x_min + WINDOW_TEXT_X, y_min + (WINDOW_TEXT_Y * (i + 1)),
             windows[i].strings_color, 1 );
       }
+      */
 
       windows[i].dirty -= 1;
    }

@@ -7,6 +7,7 @@ DSEKAI_C_FILES := \
    src/window.c \
    src/json.c \
    src/dio.c \
+   src/control.c \
    src/topdown.c
 
 DSEKAI_C_FILES_SDL_ONLY := \

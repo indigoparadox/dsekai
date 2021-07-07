@@ -27,9 +27,8 @@ struct WINDOW {
    uint16_t w;
    uint16_t h;
    uint8_t frame_idx;
-   char* strings[WINDOW_STRINGS_MAX];
-   GRAPHICS_COLOR strings_color;
-   uint8_t strings_count;
+   MEMORY_HANDLE controls_handle;
+   uint8_t controls_count;
 };
 
 void window_init();
