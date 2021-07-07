@@ -149,6 +149,9 @@ DSEKAI_ASSETS_PICTS := \
    $(subst .bmp,.pict,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
 
 MD := mkdir -p
+DD := /bin/dd
+MCOPY := mcopy
+MKFSVFAT := /sbin/mkfs.vfat
 IMAGEMAGICK := convert
 
 MKRESH := bin/mkresh
@@ -332,6 +335,11 @@ $(OBJDIR_WIN16):
 
 $(GENDIR_WIN16)/%.ico: $(ASSETDIR)/%.bmp | $(GENDIR_WIN16)
 	$(IMAGEMAGICK) $< $@
+
+$(BINDIR)/dsekai16.img: $(BIN_WIN16)
+	$(DD) if=/dev/zero bs=512 count=2880 of="$@"
+	$(MKFSVFAT) "$@"
+	$(MCOPY) -i "$@" $< ::dsekai16.exe
 
 $(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^
