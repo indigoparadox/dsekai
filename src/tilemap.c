@@ -61,6 +61,10 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       tile_id_in = 
          json_int_from_path(
             iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
+      if( 0 > tile_id_in ) {
+         error_printf( "invalid tile ID received" );
+         continue;
+      }
       tile_id_in--;
       if( 0 == i % 2 ) {
          tile_id_in <<= 4;

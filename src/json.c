@@ -15,14 +15,16 @@ int16_t json_get_token_idx(
 
    debug_printf( 0, "parent type is: %d", parent->type );
 
-   if( JSMN_ARRAY == parent->type ) {
+   if( NULL != contents && JSMN_ARRAY == parent->type ) {
       cmp_str_as_i = dio_atoi( contents, 10 );
       debug_printf( 0, "idx as int is: %d", cmp_str_as_i );
    }
 
    for( i = 0 ; tokens_sz > i ; i++ ) {
-      debug_printf( 0, "str %s sz %d vs  %d, %d", contents, contents_sz,
-         tokens[i].end - tokens[i].start, tokens[i].size );
+      if( NULL != contents ) {
+         debug_printf( 0, "str %s sz %d vs  %d, %d", contents, contents_sz,
+            tokens[i].end - tokens[i].start, tokens[i].size );
+      }
       if(
          (
             /* If parent is array, then string key isn't relevant. */
@@ -31,7 +33,7 @@ int16_t json_get_token_idx(
             (NULL == contents ?
             /* Finally, go by string key comparison. */
             1 : (
-               0 == strncmp(
+               0 == memory_strncmp_ptr(
                   contents,
                   &(buf[tokens[i].start]),
                   contents_sz
@@ -79,7 +81,6 @@ int16_t json_get_token_idx(
          return i;
       }
    }
-
    return -1;
 }
 
@@ -87,7 +88,7 @@ int16_t json_token_id_from_path(
    const char* path, uint16_t path_sz,
    jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
 ) {
-   int i = 0,
+   int16_t i = 0,
       path_cur_tok_start = 0,
       path_cur_tok_sz = 0;
 
@@ -107,7 +108,7 @@ int16_t json_token_id_from_path(
          path_cur_tok_sz++;
       }
 
-      debug_printf( 0, "curtok is %d (starts at %d, %d long) (%d vs %d) ",
+      debug_printf( 0, "cur_path_tok is %d (starts at %d, %d long) (%d vs %d) ",
          i, path_cur_tok_start, path_cur_tok_sz,
          path_cur_tok_start + path_cur_tok_sz,
          memory_strnlen_ptr( path, path_sz ) );
@@ -119,6 +120,7 @@ int16_t json_token_id_from_path(
          tokens, tokens_sz, buf, i );
 
       if( 0 > i ) {
+         error_printf( "could not find %s", path );
          return i;
       }
    }
@@ -130,10 +132,20 @@ int16_t json_int_from_path(
    const char* path, uint16_t path_sz,
    jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
 ) {
-   int id = 0;
+   int16_t out = 0,
+      id = 0;
+   char* offset_buf = NULL;
+
    id = json_token_id_from_path( path, path_sz, tokens, tokens_sz, buf );
+   if( 0 > id ) {
+      return id;
+   }
+   
    assert( id < tokens_sz );
    assert( 0 <= id );
-   return dio_atoi( &(buf[tokens[id].start]), 10 );
+
+   offset_buf = &(buf[tokens[id].start]);
+   out = dio_atoi( offset_buf, 10 );
+   return out;
 }
 

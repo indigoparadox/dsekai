@@ -277,6 +277,7 @@ JSMN_API int jsmn_parse(jsmn_parser *parser, const char *js, const size_t len,
     jsmntype_t type;
 
     c = js[parser->pos];
+    debug_printf( 0, "jsmn char: %c", c );
     switch (c) {
     case '{':
     case '[':
