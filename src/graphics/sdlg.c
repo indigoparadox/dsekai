@@ -1,12 +1,8 @@
 
 #define SDLG_C
-#include "../graphics.h"
+#include "../dstypes.h"
 
 #include <SDL.h>
-
-#include "../drc.h"
-#include "../memory.h"
-#include "../resource.h"
 
 SDL_Window* g_window = NULL;
 SDL_Surface* g_screen = NULL;
@@ -104,11 +100,14 @@ int graphics_platform_blit_at(
       y * SCREEN_SCALE,
       w * SCREEN_SCALE, 
       h * SCREEN_SCALE};
+
    if( NULL == bmp || NULL == bmp->texture ) {
       return 0;
    }
 
-   debug_printf( 1, "blitting resource #%d to %d, %d x %d, %d...",
+   assert( 65535 > bmp->id );
+
+   debug_printf( 0, "blitting resource #%d to %d, %d x %d, %d...",
       bmp->id, x, y, w, h );
    SDL_RenderCopy( g_renderer, bmp->texture, NULL, &dest_rect );
 
@@ -135,6 +134,39 @@ void graphics_draw_block(
 
    SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
    SDL_RenderFillRect( g_renderer, &area );
+}
+
+void graphics_draw_rect(
+   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+   SDL_Rect area;
+
+#ifdef SCALE_2X
+   area.x = x_orig * 2;
+   area.y = y_orig * 2;
+   area.w = w * 2;
+   area.h = h * 2;
+#else
+   area.x = x_orig;
+   area.y = y_orig;
+   area.w = w;
+   area.h = h;
+#endif /* SCALE_2X */
+
+   /* TODO: Handle thickness. */
+
+   SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
+   SDL_RenderDrawRect( g_renderer, &area );
+}
+
+void graphics_draw_line(
+   uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t thickness,
+   const GRAPHICS_COLOR color
+) {
+   SDL_SetRenderDrawColor( g_renderer, color->r, color->g, color->b, 255 );
+   /* TODO: Handle thickness. */
+   SDL_RenderDrawLine( g_renderer, x1, y1, x2, y2 );
 }
 
 /*

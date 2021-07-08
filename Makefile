@@ -7,6 +7,7 @@ DSEKAI_C_FILES := \
    src/window.c \
    src/json.c \
    src/dio.c \
+   src/control.c \
    src/topdown.c
 
 DSEKAI_C_FILES_SDL_ONLY := \
@@ -147,6 +148,9 @@ DSEKAI_ASSETS_PICTS := \
    $(subst .bmp,.pict,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
 
 MD := mkdir -p
+DD := /bin/dd
+MCOPY := mcopy
+MKFSVFAT := /sbin/mkfs.vfat
 IMAGEMAGICK := convert
 
 MKRESH := bin/mkresh
@@ -162,12 +166,12 @@ CFLAGS_LOOKUPS := -g
 CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -pg
 
-$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT -DDEBUG_THRESHOLD=3
+$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT -DDEBUG_THRESHOLD=1
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=3 -DHIDE_WELCOME_DIALOG
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=1
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
@@ -176,7 +180,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
-$(BIN_PALM): CFLAGS := -O0 -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g -DDEBUG_LOG -DDEBUG_THRESHOLD=1 -DHIDE_WELCOME_DIALOG
+$(BIN_PALM): CFLAGS := -Os -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g -DDEBUG_LOG -DDEBUG_THRESHOLD=1 -DHIDE_WELCOME_DIALOG
 $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
@@ -330,6 +334,11 @@ $(OBJDIR_WIN16):
 
 $(GENDIR_WIN16)/%.ico: $(ASSETDIR)/%.bmp | $(GENDIR_WIN16)
 	$(IMAGEMAGICK) $< $@
+
+$(BINDIR)/dsekai16.img: $(BIN_WIN16)
+	$(DD) if=/dev/zero bs=512 count=2880 of="$@"
+	$(MKFSVFAT) "$@"
+	$(MCOPY) -i "$@" $< ::dsekai16.exe
 
 $(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | $(BINDIR)
 	$(LD) $(LDFLAGS) -fe=$@ $^

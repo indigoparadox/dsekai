@@ -1,5 +1,5 @@
 
-#include "drcr.h"
+#include "../dstypes.h"
 
 /**
  * \brief Allocate a handle to a resource in DRC archive or OS resource fork.
@@ -10,7 +10,10 @@ MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID drc_type ) {
    int32_t ptr_sz = 0;
    MEMORY_HANDLE handle = NULL;
 
-   assert( 0 < id );
+   if( 0 >= id ) {
+      error_printf( "attempted to fetch invalid resource id: %u", id );
+      return 0;
+   }
 
    memory_zero_ptr( &drc_file, sizeof( struct DIO_STREAM ) );
 
@@ -49,11 +52,11 @@ cleanup:
    return handle;
 }
 
-void* resource_lock_handle( MEMORY_HANDLE handle ) {
+MEMORY_PTR resource_lock_handle( MEMORY_HANDLE handle ) {
    return memory_lock( handle );
 }
 
-void* resource_unlock_handle( MEMORY_HANDLE handle ) {
+MEMORY_PTR resource_unlock_handle( MEMORY_HANDLE handle ) {
    return memory_unlock( handle );
 }
 

@@ -1,9 +1,9 @@
 
-#include "../memory.h"
+#include "../dstypes.h"
 
 #include <Multiverse.h>
 
-MEMORY_HANDLE memory_alloc( uint16_t sz, uint16_t count ) {
+MEMORY_HANDLE memory_alloc( uint32_t sz, uint32_t count ) {
    /* TODO: Detect overflow. */
    return NewHandleClear( (sz * count) );
 }
@@ -12,29 +12,29 @@ void memory_free( MEMORY_HANDLE handle ) {
    DisposeHandle( handle );
 }
 
-uint16_t memory_sz( MEMORY_HANDLE handle ) {
+uint32_t memory_sz( MEMORY_HANDLE handle ) {
    return GetHandleSize( handle );
 }
 
-uint16_t memory_resize( MEMORY_HANDLE handle, uint16_t sz ) {
+uint32_t memory_resize( MEMORY_HANDLE handle, uint32_t sz ) {
    SetHandleSize( handle, sz );
    return sz;
 }
 
-void memory_copy_ptr( void* dest, const void* src, uint16_t sz ) {
+void memory_copy_ptr( MEMORY_PTR dest, const MEMORY_PTR src, uint32_t sz ) {
    BlockMove( src, dest, sz );
 }
 
-void memory_zero_ptr( void* ptr, uint16_t sz ) {
+void memory_zero_ptr( MEMORY_PTR ptr, uint32_t sz ) {
    memset( ptr, 0, sz );
 }
 
-void* memory_lock( MEMORY_HANDLE handle ) {
+MEMORY_PTR memory_lock( MEMORY_HANDLE handle ) {
    HLock( handle );
    return *handle;
 }
 
-void* memory_unlock( MEMORY_HANDLE handle ) {
+MEMORY_PTR memory_unlock( MEMORY_HANDLE handle ) {
    HUnlock( handle );
    return NULL;
 }

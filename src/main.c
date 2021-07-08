@@ -1,13 +1,10 @@
 
 #define MAIN_C
 
-#include "input.h"
-#include "mobile.h"
-#include "window.h"
-#include "engines.h"
-#include "item.h"
+#include "dstypes.h"
 
 uint8_t g_running = 1;
+MEMORY_HANDLE g_state_handle = NULL;
 
 #ifdef USE_SOFT_ASSERT
 char g_assert_failed[256];
@@ -50,6 +47,8 @@ int main( int argc, char* argv[] ) {
 #endif /* PLATFORM_PALM, PLATFORM_MAC7, PLATFORM_WIN16 */
 /* ------ */
 
+   struct DSEKAI_STATE* state = NULL;
+
 #ifdef PLATFORM_WIN16
    MSG msg;
    int msg_retval = 0;
@@ -85,6 +84,8 @@ int main( int argc, char* argv[] ) {
 
    window_init();
 
+   g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
+
    while( g_running ) {
 #ifdef PLATFORM_WIN16
       /* In Windows, this stuff is handled by the message processor. */
@@ -101,7 +102,7 @@ int main( int argc, char* argv[] ) {
          g_running = 0;
       }
 #else
-      g_running = topdown_loop();
+      g_running = topdown_loop( g_state_handle );
 
 #endif /* SKELETON_LOOP */
 
@@ -117,6 +118,16 @@ int main( int argc, char* argv[] ) {
 #endif /* USE_SOFT_ASSERT */
    }
 
+   state = memory_lock( g_state_handle );
+   while( state->windows_count > 0 ) {
+      window_pop( 0, state );
+   }
+   memory_free( state->windows_handle );
+   state = memory_unlock( g_state_handle );
+
+   memory_free( g_state_handle );
+
+   window_shutdown();
    graphics_shutdown();
 
 #ifdef LOG_TO_FILE

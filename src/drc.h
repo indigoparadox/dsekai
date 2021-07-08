@@ -16,6 +16,8 @@
 #define DRC_PATH_SEP '/'
 #endif /* USE_DOS */
 
+#define DRC_FILENAME_SZ 64
+
 /* This is kind of arbitrary. Test if increasing. */
 #define DRC_MAX_ENTRIES 1024
 
@@ -62,7 +64,7 @@ struct DRC_TOC_E {
    uint32_t data_start;
    uint32_t data_sz;
    uint32_t name_sz;
-   char name[64];          /* Used by packer/preprocessor to map image to ID. */
+   char name[DRC_FILENAME_SZ];
 };
 
 int32_t drc_list_resources( struct DIO_STREAM*, MEMORY_HANDLE*, uint16_t );

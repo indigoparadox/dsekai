@@ -2,7 +2,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include "dstypes.h"
+/* #include "dstypes.h" */
 
 #ifdef PLATFORM_DOS
 #include "graphics/dosg.h"
@@ -42,8 +42,8 @@ struct GRAPHICS_BITMAP_BASE {
    uint16_t ref_count;
 
    /* Platform-Specific Overrides. */
-   void* ptr1;
-   void* ptr2;
+   MEMORY_PTR ptr1;
+   MEMORY_PTR ptr2;
    uint32_t res1;
    uint32_t res2;
    uint8_t res3;
@@ -58,6 +58,10 @@ void graphics_loop_end();
 void graphics_draw_px( uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_draw_block(
    uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
+void graphics_draw_rect(
+   uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
+void graphics_draw_line(
+   uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR );
 void graphics_char_at(
    const char, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_string_at(

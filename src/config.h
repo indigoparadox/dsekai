@@ -363,15 +363,21 @@
 #define PATTERN_W 16
 #define PATTERN_H 16
 
-#define WINDOW_TEXT_X 8
-#define WINDOW_TEXT_Y 8
+#define WINDOW_CENTERED -1
+
 #define WINDOW_STRINGS_MAX 5
 #define WINDOW_STRING_LEN_MAX 64
 
+#define STATUS_WINDOW_W SCREEN_W
+#define STATUS_WINDOW_H 32
+
 /* Derived Parameters */
 
-#define SCREEN_TW (SCREEN_W / TILE_W)
-#define SCREEN_TH (SCREEN_H / TILE_H)
+#define SCREEN_MAP_W (SCREEN_W)
+#define SCREEN_MAP_H (160 - 32)
+
+#define SCREEN_TW (SCREEN_MAP_W / TILE_W)
+#define SCREEN_TH (SCREEN_MAP_H / TILE_H)
 
 #define SCREEN_REAL_W (SCREEN_W * SCREEN_SCALE)
 #define SCREEN_REAL_H (SCREEN_H * SCREEN_SCALE)

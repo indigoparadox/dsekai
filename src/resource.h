@@ -2,11 +2,6 @@
 #ifndef RESOURCE_H
 #define RESOURCE_H
 
-#include "dstypes.h"
-#include "memory.h"
-#include "dio.h"
-#include "drc.h"
-
 #ifdef PLATFORM_PALM
 #include "resource/palmr.h"
 #elif defined( PLATFORM_WIN16 )
@@ -17,8 +12,8 @@
 
 MEMORY_HANDLE resource_get_handle( uint32_t, RESOURCE_ID );
 void resource_free_handle( MEMORY_HANDLE );
-void* resource_lock_handle( MEMORY_HANDLE );
-void* resource_unlock_handle( MEMORY_HANDLE );
+MEMORY_PTR resource_lock_handle( MEMORY_HANDLE );
+MEMORY_PTR resource_unlock_handle( MEMORY_HANDLE );
 
 #endif /* RESOURCE_H */
 

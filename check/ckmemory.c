@@ -1,7 +1,7 @@
 
 #include <check.h>
 
-#include "../src/memory.h"
+#include "../src/dstypes.h"
 
 START_TEST( check_memory_alloc ) {
    struct FAKE_MEMORY_HANDLE* handle = NULL;

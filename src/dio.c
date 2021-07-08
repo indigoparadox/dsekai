@@ -1,8 +1,5 @@
 
-#include "dio.h"
-
-#include "drc.h"
-#include "memory.h"
+#include "dstypes.h"
 
 #include <stdarg.h>
 #include <string.h> /* for strtok() */
@@ -167,14 +164,14 @@ uint8_t dio_type_stream( struct DIO_STREAM* stream ) {
    return stream->type;
 }
 
-int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
+int32_t dio_read_stream( MEMORY_PTR dest, uint32_t sz, struct DIO_STREAM* src ) {
    int32_t sz_out = 0;
 
    dio_assert_stream( src );
 
    assert( NULL != dest );
 
-   debug_printf( 1, "reading %d bytes at %d (out of %d)...",
+   debug_printf( 0, "reading %d bytes at %d (out of %d)...",
       sz, src->position, src->buffer_sz );
 
    /* assert( src->position + sz < src->buffer_sz );
@@ -186,7 +183,7 @@ int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
       sz_out = fread( dest, 1, sz, src->buffer.file );
       src->position += sz_out;
       /* assert( ftell( src->buffer.file ) == src->position ); */
-      debug_printf( 1, "read complete" );
+      debug_printf( 0, "read complete" );
       return sz_out;
 #endif /* !DISABLE_FILESYSTEM */
 
@@ -201,13 +198,13 @@ int32_t dio_read_stream( void* dest, uint32_t sz, struct DIO_STREAM* src ) {
 }
 
 int32_t dio_write_stream(
-   const void* src, uint32_t sz, struct DIO_STREAM* dest
+   const MEMORY_PTR src, uint32_t sz, struct DIO_STREAM* dest
 ) {
    int32_t sz_out = 0;
 
    dio_assert_stream( dest );
 
-   debug_printf( 1, "writing %d bytes at %d (out of %d)...",
+   debug_printf( 0, "writing %d bytes at %d (out of %d)...",
       sz, dest->position, dest->buffer_sz );
 
    assert( dest->position + sz >= dest->position );

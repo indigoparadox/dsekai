@@ -34,8 +34,6 @@ typedef unsigned short uint16_t;
 typedef long int32_t;
 typedef unsigned long uint32_t;
 
-#define RESOURCE_SPRITE_HEADERS
-
 /* ------ */
 #elif defined( PLATFORM_WIN16 )
 /* ------ */
@@ -47,19 +45,62 @@ typedef unsigned short uint16_t;
 typedef long int32_t;
 typedef unsigned long uint32_t;
 
-#define RESOURCE_SPRITE_HEADERS
-
 /* ------ */
 #else
 /* ------ */
 
 #include <stdint.h>
 
-#define RESOURCE_SPRITE_HEADERS
-
 /* ------ */
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 /* ------ */
+
+struct TILEMAP_COORDS {
+   uint8_t x;
+   uint8_t y;
+};
+
+struct DSEKAI_STATE;
+
+#include "memory.h"
+#include "engines.h"
+#include "graphics.h"
+#include "input.h"
+#include "dio.h"
+#include "drc.h"
+#include "json.h"
+#include "resource.h"
+#include "item.h"
+#include "tilemap.h"
+#include "mobile.h"
+#include "window.h"
+#include "control.h"
+
+struct WINDOW;
+
+struct DSEKAI_STATE {
+   int player_idx;
+   int initalized;
+
+   struct MOBILE mobiles[MOBILES_MAX];
+   uint8_t mobiles_count; 
+
+   struct TILEMAP map;
+
+   int semi_cycles;
+   int walk_offset;
+   uint8_t input_blocked_countdown;
+   int screen_scroll_x;
+   int screen_scroll_y;
+   int screen_scroll_tx;
+   int screen_scroll_ty;
+   int screen_scroll_x_tgt;
+   int screen_scroll_y_tgt;
+
+   uint8_t window_shown;
+   MEMORY_HANDLE windows_handle;
+   uint8_t windows_count;
+};
 
 #endif /* DSTYPES_H */
 

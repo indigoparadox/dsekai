@@ -2,12 +2,6 @@
 #ifndef MOBILE_H
 #define MOBILE_H
 
-#include "dstypes.h"
-#include "graphics.h"
-#include "tilemap.h"
-
-struct ITEM;
-
 struct MOBILE {
    struct GRAPHICS_BITMAP sprite;
    uint8_t hp;

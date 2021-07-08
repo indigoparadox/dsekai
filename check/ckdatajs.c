@@ -1,7 +1,7 @@
 
 #include <check.h>
 
-#include "../src/json.h"
+#include "../src/dstypes.h"
 
 #define CKDATA_JS_C
 #include "testdata.h"
@@ -31,7 +31,7 @@ START_TEST( check_data_json_parse_obj_first ) {
       id = 0;
 
    id = json_token_id_from_path(
-      "/objects/0/name", &(g_tokens[0]), g_tokens_parsed, gc_test_json );
+      "/objects/0/name", 15, &(g_tokens[0]), g_tokens_parsed, gc_test_json );
 
    ck_assert_int_eq( id, 7 );
 }
@@ -42,7 +42,7 @@ START_TEST( check_data_json_parse_multi_obj ) {
       id = 0;
 
    id = json_token_id_from_path(
-      "/objects_sz", &(g_tokens[0]), g_tokens_parsed, gc_test_json );
+      "/objects_sz", 11, &(g_tokens[0]), g_tokens_parsed, gc_test_json );
 
    ck_assert_int_eq( id, 2 );
 }
@@ -54,7 +54,7 @@ START_TEST( check_data_json_parse_list ) {
       val = 0;
 
    id = json_token_id_from_path(
-      "/items/3", &(g_tokens[0]), g_tokens_parsed, gc_test_json );
+      "/items/3", 8, &(g_tokens[0]), g_tokens_parsed, gc_test_json );
 
    ck_assert_int_eq( id, 24 );
 
@@ -69,7 +69,7 @@ START_TEST( check_data_json_parse_through_combi ) {
       val = 0;
 
    id = json_token_id_from_path(
-      "/objects/0/extra/2", &(g_tokens[0]), g_tokens_parsed, gc_test_json );
+      "/objects/0/extra/2", 18, &(g_tokens[0]), g_tokens_parsed, gc_test_json );
 
    ck_assert_int_eq( id, 16 );
    ck_assert_int_eq( gc_test_json[g_tokens[id].start], 'z' );

@@ -1,5 +1,5 @@
 
-#include "win16r.h"
+#include "../dstypes.h"
 
 extern HINSTANCE g_instance;
 
@@ -29,11 +29,11 @@ MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID type ) {
    return NULL;
 }
 
-void* resource_lock_handle( MEMORY_HANDLE handle ) {
+MEMORY_PTR resource_lock_handle( MEMORY_HANDLE handle ) {
    return memory_lock( handle );
 }
 
-void* resource_unlock_handle( MEMORY_HANDLE handle ) {
+MEMORY_PTR resource_unlock_handle( MEMORY_HANDLE handle ) {
    return memory_unlock( handle );
 }
 
