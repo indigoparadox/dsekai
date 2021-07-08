@@ -160,7 +160,7 @@ int32_t drc_get_resource_info(
    for( i = 0 ; header.toc_entries > i ; i++ ) {
       drc_read_toc_e( drc_file, &toc_e_iter );
 
-      debug_printf( 1, "comparing: %c%c%c%c vs %c%c%c%c, %d vs %d",
+      debug_printf( 0, "comparing: %c%c%c%c vs %c%c%c%c, %d vs %d",
          toc_e_iter.type.str[0], toc_e_iter.type.str[1],
          toc_e_iter.type.str[2], toc_e_iter.type.str[3],
          type.str[0], type.str[1], type.str[2], type.str[3],
@@ -302,5 +302,42 @@ int32_t drc_get_resource_name(
 #endif
 
    return name_sz_out;
+}
+
+int32_t drc_get_resource_id_by_name(
+   struct DIO_STREAM* drc_file, union DRC_TYPE* type_out,
+   const char* name, uint16_t name_sz
+) {
+   int32_t
+      id_out = -1,
+      i = 0;
+   struct DRC_TOC_E toc_e_iter;
+   MEMORY_HANDLE toc_handle = NULL;
+   struct DRC_TOC_E* toc = NULL;
+   int16_t toc_sz = 0;
+
+   memory_zero_ptr( &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+
+   debug_printf( 2, "opening drc to get resource by name..." );
+
+   toc_sz = drc_list_resources( drc_file, &toc_handle, 0 );
+   if( NULL == toc_handle ) {
+      error_printf( "could not get DRC TOC" );
+      return DRC_ERROR_COULD_NOT_FIND;
+   }
+   toc = memory_lock( toc_handle );
+   for( i = 0 ; toc_sz > i ; i++ ) {
+      if( 0 == dio_strncmp( toc[i].name, name, name_sz, '\0' ) ) {
+         id_out = toc[i].id;
+         type_out->u32 = toc[i].type.u32;
+         break;
+      }
+   }
+   toc = memory_unlock( toc_handle );
+   memory_free( toc_handle );
+
+cleanup:
+
+   return id_out;
 }
 

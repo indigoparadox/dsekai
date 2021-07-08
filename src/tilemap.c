@@ -8,7 +8,8 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    int16_t tok_parsed = 0,
       tiles_count = 0,
       i = 0,
-      retval = 1;
+      retval = 1,
+      tileset_source_sz = 0;
    uint8_t tile_id_in = 0,
       * json_buffer = NULL;
    jsmn_parser parser;
@@ -18,6 +19,9 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       tokens_handle = NULL;
    uint32_t json_buffer_sz = 0;
    RESOURCE_ID type = DRC_MAP_TYPE;
+   char tileset_name[DRC_FILENAME_SZ];
+
+   memory_zero_ptr( tileset_name, DRC_FILENAME_SZ );
 
    json_handle = resource_get_handle( id, type );
    if( NULL == json_handle ) {
@@ -52,6 +56,17 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       retval = 0;
       goto cleanup;
    }
+
+   tileset_source_sz = json_str_from_path(
+      "/tilesets/0/source", 18, /* Path Sz */
+      tileset_name, DRC_FILENAME_SZ,
+      &(tokens[0]), tok_parsed, json_buffer );
+   if( 0 >= tileset_source_sz ) {
+      error_printf( "tileset source not found" );
+      goto cleanup;
+   }
+   debug_printf( 1, "tileset source is %s (%d)",
+      tileset_name, tileset_source_sz );
 
    /* Load map properties. */
    tiles_count = (TILEMAP_TW * TILEMAP_TH);

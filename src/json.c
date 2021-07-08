@@ -15,6 +15,8 @@ int16_t json_get_token_idx(
 
    debug_printf( 0, "parent type is: %d", parent->type );
 
+   debug_printf( 1, "path spec: %s", contents );
+
    if( NULL != contents && JSMN_ARRAY == parent->type ) {
       cmp_str_as_i = dio_atoi( contents, 10 );
       debug_printf( 0, "idx as int is: %d", cmp_str_as_i );
@@ -147,5 +149,33 @@ int16_t json_int_from_path(
    offset_buf = &(buf[tokens[id].start]);
    out = dio_atoi( offset_buf, 10 );
    return out;
+}
+
+int16_t json_str_from_path(
+   const char* path, uint16_t path_sz,
+   char* buffer, uint16_t buffer_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
+) {
+   int16_t out = 0,
+      id = 0;
+   char* offset_buf = NULL;
+
+   debug_printf( 1, "fetching JSON path %s...", path );
+
+   id = json_token_id_from_path( path, path_sz, tokens, tokens_sz, buf );
+   if( 0 > id ) {
+      return id;
+   }
+   
+   assert( id < tokens_sz );
+   assert( 0 <= id );
+
+   offset_buf = &(buf[tokens[id].start]);
+   if( buffer_sz <= tokens[id].size ) {
+      error_printf( "insufficient buffer length" );
+      return 0;
+   }
+   memory_copy_ptr( buffer, &(buf[tokens[id].start]), tokens[id].size );
+   return tokens[id].size;
 }
 
