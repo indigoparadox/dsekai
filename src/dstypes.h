@@ -68,7 +68,9 @@ struct DSEKAI_STATE;
 #include "input.h"
 #include "dio.h"
 #include "drc.h"
+#ifdef USE_JSON_MAPS
 #include "json.h"
+#endif /* USE_JSON_MAPS */
 #include "resource.h"
 #include "item.h"
 #include "tilemap.h"

@@ -143,7 +143,9 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       state->mobiles[1].inventory = NULL;
       state->mobiles_count++;
 
+#ifdef USE_JSON_MAPS
       tilemap_load( map_field, &(state->map) );
+#endif /* USE_JSON_MAPS */
       tilemap_refresh_tiles( &(state->map) );
 
       /* Make sure the tilemap is drawn at least once behind any initial

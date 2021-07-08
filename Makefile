@@ -1,14 +1,23 @@
 
+DSEKAI_DEFINES := -DANIMATE_SCREEN_MOVEMENT
+DSEKAI_ASSETS_MAPS := 
+
 DSEKAI_C_FILES := \
    src/tilemap.c \
    src/graphics.c \
    src/mobile.c \
    src/item.c \
    src/window.c \
-   src/json.c \
    src/dio.c \
    src/control.c \
    src/topdown.c
+
+ifneq ($(JSON),0)
+   DSEKAI_C_FILES += src/json.c
+   DSEKAI_DEFINES += -DUSE_JSON_MAPS
+   DSEKAI_ASSETS_MAPS := \
+      assets/map_field.json
+endif
 
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
@@ -68,7 +77,6 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    tools/data/cga.c \
    tools/data/bmp.c \
    tools/data/icns.c \
-   src/json.c \
    tools/data/drcwrite.c \
    src/memory/fakem.c \
    src/drc.c \
@@ -135,8 +143,6 @@ DSEKAI_ASSETS_BITMAPS := \
    $(DSEKAI_ASSETS_SPRITES) \
    $(DSEKAI_ASSETS_TILES) \
    $(DSEKAI_ASSETS_PATTERNS)
-DSEKAI_ASSETS_MAPS := \
-   assets/map_field.json
 DSEKAI_ASSETS_DOS_CGA := \
    $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_PALM := \
@@ -159,20 +165,20 @@ DRCPACK := bin/drcpack
 CONVERT := bin/convert
 LOOKUPS := bin/lookups
 
-CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=2
-CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3
-CFLAGS_CONVERT := -DNO_RESEXT -g
+CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=2 -DUSE_JSON_MAPS
+CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DUSE_JSON_MAPS
+CFLAGS_CONVERT := -DNO_RESEXT -g -DUSE_JSON_MAPS
 CFLAGS_LOOKUPS := -g
 
-CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG
+CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=1
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -pg
 
-$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT -DDEBUG_THRESHOLD=1
+$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC) $(DSEKAI_DEFINES)
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=1
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=1 $(DSEKAI_DEFINES)
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
@@ -181,7 +187,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
-$(BIN_PALM): CFLAGS := -Os -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g -DDEBUG_LOG -DDEBUG_THRESHOLD=1 -DHIDE_WELCOME_DIALOG
+$(BIN_PALM): CFLAGS := -Os -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g -DDEBUG_THRESHOLD=1 $(DSEKAI_DEFINES) $(CFLAGS_DEBUG_GENERIC)
 $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
@@ -190,13 +196,13 @@ $(BIN_PALM): PALMS_RCP := src/palms.rcp
 $(BIN_WIN16): CC := wcc
 $(BIN_WIN16): LD := wcl
 $(BIN_WIN16): RC := wrc
-$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1
+$(BIN_WIN16): CFLAGS := -bt=windows -i=$(INCLUDE)/win -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1 $(DSEKAI_DEFINES)
 $(BIN_WIN16): LDFLAGS := -l=windows -zp=1
 
 $(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
 $(BIN_MAC7): CC := m68k-apple-macos-gcc
 $(BIN_MAC7): CXX := m68k-apple-macos-g++
-$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes
+$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_DEBUG_GENERIC) $(DSEKAI_DEFINES)
 $(BIN_MAC7): LDFLAGS := -lRetroConsole
 $(BIN_MAC7): REZ := Rez
 $(BIN_MAC7): REZFLAGS :=

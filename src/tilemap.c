@@ -1,6 +1,8 @@
 
 #include "dstypes.h"
 
+#ifdef USE_JSON_MAPS
+
 #define JSON_TOKENS_MAX 1024
 #define JSON_PATH_SZ 255
 
@@ -63,7 +65,7 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       &(tokens[0]), tok_parsed, json_buffer );
    if( 0 >= tileset_source_sz ) {
       error_printf( "tileset source not found" );
-      goto cleanup;
+      /* XXX goto cleanup;*/
    }
    debug_printf( 1, "tileset source is %s (%d)",
       tileset_name, tileset_source_sz );
@@ -110,6 +112,8 @@ cleanup:
 
    return retval;
 }
+
+#endif /* USE_JSON_MAPS */
 
 void tilemap_refresh_tiles( struct TILEMAP* t ) {
    int x = 0, y = 0;
