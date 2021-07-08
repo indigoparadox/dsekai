@@ -1,6 +1,7 @@
 
 #include <check.h>
 
+#include "../src/dstypes.h"
 #include "../tools/convert.h"
 #include "../tools/data/cga.h"
 #include "../tools/data/bmp.h"
