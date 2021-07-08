@@ -166,7 +166,7 @@ void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
 
          /* Blit the tile. */
          graphics_blit_at(
-            &(t->tileset[tile_id]),
+            &(t->tileset[tile_id].image),
             (x * TILE_W) - state->screen_scroll_x,
             (y * TILE_H) - state->screen_scroll_y, TILE_W, TILE_H );
       }
@@ -177,7 +177,7 @@ uint8_t tilemap_collide( const struct TILEMAP* t, uint8_t x, uint8_t y ) {
    uint8_t tile_id = 0;
 
    tile_id = tilemap_get_tile_id( t, x, y );
-   if( t->tileset_flags[tile_id] & (uint8_t)TILEMAP_TILESET_FLAG_BLOCK ) {
+   if( t->tileset[tile_id].flags & (uint8_t)TILEMAP_TILESET_FLAG_BLOCK ) {
       return 1;
    }
    return 0;
@@ -191,7 +191,7 @@ void tilemap_deinit( struct TILEMAP* t ) {
    }
 
    for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
-      graphics_unload_bitmap( &(t->tileset[i]) );
+      graphics_unload_bitmap( &(t->tileset[i].image) );
    }
 }
 

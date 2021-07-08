@@ -1,6 +1,8 @@
 
 #include "dstypes.h"
 
+#include "data/tiles.h"
+
 #define INPUT_BLOCK_DELAY 5
 #define TOPDOWN_MOBILES_MAX 10
 
@@ -109,11 +111,6 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    if( !initialized ) {
 
       /* TODO: Generate this dynamically. */
-#ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( tile_field_grass, &(state->map.tileset[0]) );
-      graphics_load_bitmap( tile_field_brick_wall, &(state->map.tileset[1]) );
-      graphics_load_bitmap( tile_field_tree, &(state->map.tileset[2]) );
-#endif /* !DISABLE_GRAPHICS */
 
 #ifndef DISABLE_GRAPHICS
       graphics_load_bitmap( sprite_robe, &(state->mobiles[0].sprite) );
@@ -146,6 +143,8 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 #ifdef USE_JSON_MAPS
       tilemap_load( map_field, &(state->map) );
 #endif /* USE_JSON_MAPS */
+      memory_copy_ptr( &(state->map.tileset[0]), &(gc_tiles_field[0]),
+         TILEMAP_TILESETS_MAX * sizeof( struct TILESET_TILE ) );
       tilemap_refresh_tiles( &(state->map) );
 
       /* Make sure the tilemap is drawn at least once behind any initial
