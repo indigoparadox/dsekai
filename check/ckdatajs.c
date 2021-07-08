@@ -76,6 +76,19 @@ START_TEST( check_data_json_parse_through_combi ) {
 }
 END_TEST
 
+START_TEST( check_data_json_parse_tileset_path ) {
+   int retval = 0,
+      id = 0,
+      val = 0;
+
+   id = json_token_id_from_path(
+      "/tilesets/0/source", 18, &(g_tokens[0]), g_tokens_parsed, gc_test_json );
+
+   ck_assert_int_eq( id, 33 );
+   ck_assert_int_eq( gc_test_json[g_tokens[id].start], 'f' );
+}
+END_TEST
+
 Suite* data_js_suite( void ) {
    Suite* s;
    TCase* tc_core;
@@ -90,6 +103,7 @@ Suite* data_js_suite( void ) {
    tcase_add_test( tc_core, check_data_json_parse_multi_obj );
    tcase_add_test( tc_core, check_data_json_parse_list );
    tcase_add_test( tc_core, check_data_json_parse_through_combi );
+   tcase_add_test( tc_core, check_data_json_parse_tileset_path );
 
    suite_add_tcase( s, tc_core );
 

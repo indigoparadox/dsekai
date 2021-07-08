@@ -65,11 +65,11 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       &(tokens[0]), tok_parsed, json_buffer );
    if( 0 >= tileset_source_sz ) {
       error_printf( "tileset source not found" );
-      /* XXX goto cleanup;*/
+      goto cleanup;
    }
    debug_printf( 1, "tileset source is %s (%d)",
       tileset_name, tileset_source_sz );
-
+   
    /* Load map properties. */
    tiles_count = (TILEMAP_TW * TILEMAP_TH);
    for( i = 0 ; tiles_count > i ; i++ ) {

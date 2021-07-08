@@ -92,7 +92,7 @@ int32_t dio_seek_stream( struct DIO_STREAM* stream, int32_t seek, uint8_t m ) {
 
    switch( m ) {
    case SEEK_SET:
-      debug_printf( 2, "seeking stream %d to %d...", stream->id, seek );
+      debug_printf( 0, "seeking stream %d to %d...", stream->id, seek );
       assert( 0 <= seek );
       assert( stream->buffer_sz >= seek );
       if( seek >= stream->buffer_sz ) {
@@ -104,7 +104,7 @@ int32_t dio_seek_stream( struct DIO_STREAM* stream, int32_t seek, uint8_t m ) {
       break;
 
    case SEEK_CUR:
-      debug_printf( 2, "seeking stream %d by +%d...", stream->id, seek );
+      debug_printf( 0, "seeking stream %d by +%d...", stream->id, seek );
       assert( stream->buffer_sz > stream->position + seek );
       if( seek >= stream->buffer_sz || stream->position + seek < 0 ) {
          error_printf( "attempted to seek beyond stream %d end",
@@ -115,7 +115,7 @@ int32_t dio_seek_stream( struct DIO_STREAM* stream, int32_t seek, uint8_t m ) {
       break;
 
    case SEEK_END:
-      debug_printf( 2, "seeking stream %d to %d from end...",
+      debug_printf( 0, "seeking stream %d to %d from end...",
          stream->id, seek );
       assert( 0 <= stream->buffer_sz - 1 - seek );
       if( 
