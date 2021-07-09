@@ -12,7 +12,7 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       i = 0,
       retval = 1,
       tileset_source_sz = 0;
-   uint8_t tile_id_in = 0;
+   int8_t tile_id_in = 0;
    char* json_buffer = NULL;
    jsmn_parser parser;
    jsmntok_t* tokens = NULL;

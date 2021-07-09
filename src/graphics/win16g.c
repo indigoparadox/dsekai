@@ -100,7 +100,7 @@ static LRESULT CALLBACK WndProc(
    return 0;
 }
 
-int graphics_init() {
+int16_t graphics_platform_init() {
    MSG msg;
    WNDCLASS wc = { 0 };
 
@@ -137,7 +137,7 @@ int graphics_init() {
    return 1;
 }
 
-void graphics_shutdown() {
+void graphics_platform_shutdown() {
 }
 
 void graphics_flip() {

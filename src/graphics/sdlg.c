@@ -121,17 +121,10 @@ void graphics_draw_block(
 ) {
    SDL_Rect area;
 
-#ifdef SCALE_2X
-   area.x = x_orig * 2;
-   area.y = y_orig * 2;
-   area.w = w * 2;
-   area.h = h * 2;
-#else
-   area.x = x_orig;
-   area.y = y_orig;
-   area.w = w;
-   area.h = h;
-#endif /* SCALE_2X */
+   area.x = x_orig * SCREEN_SCALE;
+   area.y = y_orig * SCREEN_SCALE;
+   area.w = w * SCREEN_SCALE;
+   area.h = h * SCREEN_SCALE;
 
    SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
    SDL_RenderFillRect( g_renderer, &area );
@@ -143,17 +136,10 @@ void graphics_draw_rect(
 ) {
    SDL_Rect area;
 
-#ifdef SCALE_2X
-   area.x = x_orig * 2;
-   area.y = y_orig * 2;
-   area.w = w * 2;
-   area.h = h * 2;
-#else
-   area.x = x_orig;
-   area.y = y_orig;
-   area.w = w;
-   area.h = h;
-#endif /* SCALE_2X */
+   area.x = x_orig * SCREEN_SCALE;
+   area.y = y_orig * SCREEN_SCALE;
+   area.w = w * SCREEN_SCALE;
+   area.h = h * SCREEN_SCALE;
 
    /* TODO: Handle thickness. */
 
