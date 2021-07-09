@@ -48,6 +48,8 @@
 
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
+#define USE_JSON_MAPS
+#define ANIMATE_SCREEN_MOVEMENT
 
 /* ------ */
 #elif defined( PLATFORM_SDL )
@@ -71,6 +73,8 @@
 #endif /* !DRC_ARCHIVE */
 
 #define USE_SOFTWARE_TEXT
+#define USE_JSON_MAPS
+#define ANIMATE_SCREEN_MOVEMENT
 
 /* ------ */
 #elif defined( PLATFORM_PALM )
@@ -89,6 +93,8 @@
 #define USE_SOFT_ASSERT
 #define DISABLE_FILESYSTEM
 #define LOG_TO_FILE
+#define USE_JSON_MAPS
+#define ANIMATE_SCREEN_MOVEMENT
 
 #define stringify_line( line ) #line
 
@@ -114,6 +120,10 @@
 /* Doesn't exist on this platform. */
 #define far
 
+#ifndef LOG_FILE_NAME
+#define LOG_FILE_NAME "logwin16.txt"
+#endif /* !LOG_FILE_NAME */
+
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "c:\\temp"
 #endif /* !DIO_PATH_TEMP */
@@ -125,7 +135,9 @@
 #define DRC_BITMAP_TYPE 1
 #define DRC_MAP_TYPE 2
 
+#define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
+#define ANIMATE_SCREEN_MOVEMENT
 
 #define SCREEN_BPP 4
 
@@ -158,6 +170,7 @@
 #define platform_fclose fclose
 
 #define USE_SOFTWARE_TEXT
+#define ANIMATE_SCREEN_MOVEMENT
 #define DRC_TOC_INITIAL_ALLOC 20 /* Fake it until we have realloc. */
 
 /* ------ */
@@ -183,7 +196,9 @@
 #include "../gen/check_null/resext.h"
 #endif /* NO_RESEXT */
 
+#define ANIMATE_SCREEN_MOVEMENT
 #define USE_SOFTWARE_TEXT
+#define USE_JSON_MAPS
 
 /* ------ */
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */

@@ -2,6 +2,9 @@
 #include "dstypes.h"
 
 #include "data/tiles.h"
+#ifndef USE_JSON_MAPS
+#include "../gen/win16/map_field.h"
+#endif /* USE_JSON_MAPS */
 
 #define INPUT_BLOCK_DELAY 5
 #define TOPDOWN_MOBILES_MAX 10
@@ -142,6 +145,8 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
 #ifdef USE_JSON_MAPS
       tilemap_load( map_field, &(state->map) );
+#else
+      memory_copy_ptr( &(state->map), &gc_map_field, sizeof( struct TILEMAP ) );
 #endif /* USE_JSON_MAPS */
       memory_copy_ptr( &(state->map.tileset[0]), &(gc_tiles_field[0]),
          TILEMAP_TILESETS_MAX * sizeof( struct TILESET_TILE ) );

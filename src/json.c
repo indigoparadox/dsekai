@@ -2,6 +2,8 @@
 #define JSON_C
 #include "dstypes.h"
 
+#ifdef USE_JSON_MAPS
+
 int16_t json_get_token_idx(
    const char* contents, uint16_t contents_sz,
    jsmntok_t* tokens, uint16_t tokens_sz,
@@ -185,4 +187,6 @@ int16_t json_str_from_path(
    memory_copy_ptr( buffer, &(buf[tokens[id].start]), excerpt_sz );
    return excerpt_sz;
 }
+
+#endif /* USE_JSON_MAPS */
 

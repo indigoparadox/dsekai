@@ -41,6 +41,7 @@ int16_t window_push(
    uint32_t, uint8_t,
    int16_t, int16_t, int16_t, int16_t, uint8_t, struct DSEKAI_STATE* );
 void window_pop( uint32_t, struct DSEKAI_STATE* );
+int16_t window_modal( struct DSEKAI_STATE* );
 
 #endif /* WINDOW_H */
 

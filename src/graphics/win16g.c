@@ -51,7 +51,7 @@ static LRESULT CALLBACK WndProc(
          /* Load parameters of the buffer into info object (srcBitmap). */
          GetObject( g_screen.bitmap, sizeof( BITMAP ), &srcBitmap );
 
-         debug_printf( 1, "blitting buffer bitmap (%d x %d)",
+         debug_printf( 0, "blitting buffer bitmap (%d x %d)",
             srcBitmap.bmWidth, srcBitmap.bmHeight );
 
          BitBlt(
@@ -168,7 +168,7 @@ int graphics_platform_blit_at(
       return 0;
    }
 
-   debug_printf( 1, "blitting resource #%d to %d, %d x %d, %d...",
+   debug_printf( 0, "blitting resource #%d to %d, %d x %d, %d...",
       bmp->id, x, y, w, h );
 
    /* Create HDC for the off-screen buffer to blit to. */
