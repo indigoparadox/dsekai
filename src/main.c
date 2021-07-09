@@ -65,6 +65,10 @@ int main( int argc, char* argv[] ) {
    g_log_file = platform_fopen( LOG_FILE_NAME, "w" );
 #endif /* LOG_TO_FILE */
 
+   debug_printf( 2,
+      "dsekai compiled " __DATE__ __TIME__ ", state size is %d bytes",
+      sizeof( struct DSEKAI_STATE ) );
+
    if( !graphics_init() ) {
       error_printf( "unable to initialize graphics" );
 #ifdef DISABLE_MAIN_PARMS
