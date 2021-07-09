@@ -15,7 +15,7 @@ MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID drc_type ) {
       return 0;
    }
 
-   memory_zero_ptr( &drc_file, sizeof( struct DIO_STREAM ) );
+   memory_zero_ptr( (MEMORY_PTR)&drc_file, sizeof( struct DIO_STREAM ) );
 
    /* Open the DRC archive. */
    dio_open_stream_file( DRC_ARCHIVE, "r", &drc_file );
@@ -41,7 +41,7 @@ MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID drc_type ) {
    ptr = memory_lock( handle );
    assert( NULL != ptr );
    drc_get_resource( &drc_file, drc_type, id, ptr, ptr_sz );
-   memory_unlock( handle );
+   ptr = memory_unlock( handle );
 
 cleanup:
 

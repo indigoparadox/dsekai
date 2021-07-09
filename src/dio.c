@@ -188,7 +188,8 @@ int32_t dio_read_stream( MEMORY_PTR dest, uint32_t sz, struct DIO_STREAM* src ) 
 #endif /* !DISABLE_FILESYSTEM */
 
    case DIO_STREAM_BUFFER:
-      memory_copy_ptr( dest, &(src->buffer.bytes[src->position]), sz );
+      memory_copy_ptr( (MEMORY_PTR)dest,
+         (MEMORY_PTR)&(src->buffer.bytes[src->position]), sz );
       src->position += sz;
       return sz;
 
@@ -339,9 +340,9 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
    MEMORY_HANDLE handle = NULL;
 
    handle = memory_alloc( path_sz + 1, 1 );
-   path_tmp = memory_lock( handle );
+   path_tmp = (char*)memory_lock( handle );
    /* XXX */
-   memory_copy_ptr( path_tmp, path, path_sz );
+   memory_copy_ptr( (MEMORY_PTR)path_tmp, (MEMORY_PTR)path, path_sz );
 
    basename_ptr = strtok( path_tmp, "\\/" );
    while( NULL != basename_ptr ) {
@@ -351,7 +352,7 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
       basename_ptr = strtok( NULL, "\\/" );
    }
 
-   memory_unlock( handle );
+   path_tmp = (char*)memory_unlock( handle );
    memory_free( handle );
 
    return retval;
@@ -385,7 +386,8 @@ uint32_t dio_read_file( const char* path, MEMORY_HANDLE* buffer_handle ) {
    while(
       (read = (fread( buffer_tmp, 1, DIO_READ_FILE_BLOCK_SZ, file_in )))
    ) {
-      memory_copy_ptr( buffer_ptr + read_total, buffer_tmp, read );
+      memory_copy_ptr( (MEMORY_PTR)(buffer_ptr + read_total),
+         (MEMORY_PTR)buffer_tmp, read );
       read_total += read;
    }
 

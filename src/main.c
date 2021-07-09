@@ -122,12 +122,12 @@ int main( int argc, char* argv[] ) {
 #endif /* USE_SOFT_ASSERT */
    }
 
-   state = memory_lock( g_state_handle );
+   state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    while( state->windows_count > 0 ) {
       window_pop( 0, state );
    }
    memory_free( state->windows_handle );
-   state = memory_unlock( g_state_handle );
+   state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
 
    memory_free( g_state_handle );
 

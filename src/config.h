@@ -316,6 +316,12 @@
 #define LOG_STD_TARGET stdout
 #endif /* LOG_TO_FILE */
 
+#ifdef __GNUC__
+#define WARN_UNUSED __attribute__( (warn_unused_result) )
+#else
+#define WARN_UNUSED
+#endif /* __GNUC__ */
+
 /* ! */
 #ifdef DEBUG_LOG
 /* ! */

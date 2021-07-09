@@ -10,10 +10,11 @@ void window_init() {
 
    debug_printf( 1, "initalizing windowing system..." );
    g_frames_handle = memory_alloc( sizeof( struct WINDOW_FRAME ), 1 );
-   frames = memory_lock( g_frames_handle );
+   frames = (struct WINDOW_FRAME*)memory_lock( g_frames_handle );
    memory_copy_ptr(
-      frames, &gc_frame_cm_checker, sizeof( struct WINDOW_FRAME ) );
-   frames = memory_unlock( g_frames_handle );
+      (MEMORY_PTR)frames, (MEMORY_PTR)&gc_frame_cm_checker,
+      sizeof( struct WINDOW_FRAME ) );
+   frames = (struct WINDOW_FRAME*)memory_unlock( g_frames_handle );
 }
 
 void window_shutdown() {
@@ -32,8 +33,8 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
 
    debug_printf( 0, "starting window drawing..." );
 
-   frames =  memory_lock( g_frames_handle );
-   windows = memory_lock( state->windows_handle );
+   frames =  (struct WINDOW_FRAME*)memory_lock( g_frames_handle );
+   windows = (struct WINDOW*)memory_lock( state->windows_handle );
    for( i = state->windows_count - 1 ; 0 <= i ; i-- ) {
 #ifndef IGNORE_DIRTY
       if( 0 == windows[i].dirty ) {
@@ -55,10 +56,11 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
       x_max = windows[i].x + windows[i].w;
       y_max = windows[i].y + windows[i].h;
 
+      debug_printf( 1, "drawing window with frame %d...",
+         windows[i].frame_idx );
+
       for( y = windows[i].y ; y < y_max ; y += PATTERN_H ) {
          for( x = windows[i].x ; x < x_max ; x += PATTERN_W ) {
-            debug_printf( 1, "drawing window with frame %d...",
-               windows[i].frame_idx );
             if( windows[i].x == x && windows[i].y == y ) {
                /* Top Left */
                blit_retval = graphics_blit_at(
@@ -127,11 +129,11 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
 cleanup:
 
    if( NULL != windows ) {
-      windows = memory_unlock( state->windows_handle );
+      windows = (struct WINDOW*)memory_unlock( state->windows_handle );
    }
 
    if( NULL != frames ) {
-      frames = memory_unlock( g_frames_handle );
+      frames = (struct WINDOW_FRAME*)memory_unlock( g_frames_handle );
    }
 
    return blit_retval;
@@ -151,7 +153,7 @@ int16_t window_push(
          memory_alloc( WINDOW_COUNT_MAX, sizeof( struct WINDOW ) );
    }
 
-   windows = memory_lock( state->windows_handle );
+   windows = (struct WINDOW*)memory_lock( state->windows_handle );
 
    for( i = 0 ; state->windows_count > i ; i++ ) {
       if( windows[i].id == id ) {
@@ -167,10 +169,11 @@ int16_t window_push(
       debug_printf( 1, "shifting window %u up by one...",
          windows[i - 1].id );
       memory_copy_ptr(
-         &(windows[i]), &(windows[i - 1]), sizeof( struct WINDOW ) );
+         (MEMORY_PTR)&(windows[i]), (MEMORY_PTR)&(windows[i - 1]),
+         sizeof( struct WINDOW ) );
    }
 
-   memory_zero_ptr( &(windows[0]), sizeof( struct WINDOW ) );
+   memory_zero_ptr( (MEMORY_PTR)&(windows[0]), sizeof( struct WINDOW ) );
 
    windows[0].status =
       WINDOW_STATUS_MODAL == status ?
@@ -202,7 +205,7 @@ int16_t window_push(
 cleanup:
 
    if( NULL != windows ) {
-      windows = memory_unlock( state->windows_handle );
+      windows = (struct WINDOW*)memory_unlock( state->windows_handle );
    }
 
    return retval;
@@ -218,7 +221,7 @@ void window_pop( uint32_t id, struct DSEKAI_STATE* state ) {
       return;
    }
 
-   windows = memory_lock( state->windows_handle );
+   windows = (struct WINDOW*)memory_lock( state->windows_handle );
 
    for( i = 0 ; state->windows_count > i ; i++ ) {
       debug_printf( 1, "searching for window %u (trying window %u)",
@@ -239,9 +242,9 @@ void window_pop( uint32_t id, struct DSEKAI_STATE* state ) {
    /* Clear window controls. */
    if( NULL != windows[idx].controls_handle ) {
       while( 0 < windows[idx].controls_count ) {
-         windows = memory_unlock( state->windows_handle );
+         windows = (struct WINDOW*)memory_unlock( state->windows_handle );
          control_pop( id, 0, state );
-         windows = memory_lock( state->windows_handle );
+         windows = (struct WINDOW*)memory_lock( state->windows_handle );
       }
       memory_free( windows[idx].controls_handle );
    }
@@ -250,14 +253,15 @@ void window_pop( uint32_t id, struct DSEKAI_STATE* state ) {
       debug_printf( 1, "shifting window %u down by one...",
          windows[i + 1].id );
       memory_copy_ptr(
-         &(windows[i]), &(windows[i + 1]), sizeof( struct WINDOW ) );
+         (MEMORY_PTR)&(windows[i]), (MEMORY_PTR)&(windows[i + 1]),
+         sizeof( struct WINDOW ) );
    }
 
    state->windows_count--;
 
 cleanup:
 
-   windows = memory_unlock( state->windows_handle );
+   windows = (struct WINDOW*)memory_unlock( state->windows_handle );
 }
 
 /**
@@ -272,7 +276,7 @@ int16_t window_modal( struct DSEKAI_STATE* state ) {
       return 0;
    }
 
-   windows = memory_lock( state->windows_handle );
+   windows = (struct WINDOW*)memory_lock( state->windows_handle );
 
    for( i = 0 ; state->windows_count > i ; i++ ) {
       if( WINDOW_STATUS_MODAL == windows[i].status ) {
@@ -280,7 +284,7 @@ int16_t window_modal( struct DSEKAI_STATE* state ) {
       }
    }
 
-   windows = memory_unlock( state->windows_handle );
+   windows = (struct WINDOW*)memory_unlock( state->windows_handle );
 
    return modal;
 }

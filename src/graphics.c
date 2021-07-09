@@ -13,7 +13,6 @@ int graphics_platform_shutdown();
 
 int16_t graphics_init() {
    int16_t retval = 1;
-   struct GRAPHICS_BITMAP* bitmaps = NULL;
 
    retval = graphics_platform_init();
    if( !retval ) {
@@ -24,10 +23,6 @@ int16_t graphics_init() {
       GRAPHICS_CACHE_INITIAL_SZ, sizeof( struct GRAPHICS_BITMAP ) );
    gs_graphics_cache_sz = GRAPHICS_CACHE_INITIAL_SZ;
 
-   /* bitmaps = memory_lock( gs_graphics_cache_handle );
-   memory_zero_ptr( bitmaps, GRAPHICS_CACHE_INITIAL_SZ * sizeof( struct GRAPHICS_BITMAP ) );
-   bitmaps = memory_unlock( gs_graphics_cache_handle ); */
-
 cleanup:
    return retval;
 }
@@ -36,13 +31,13 @@ void graphics_shutdown() {
    int16_t i = 0;
    struct GRAPHICS_BITMAP* bitmaps = NULL;
 
-   bitmaps = memory_lock( gs_graphics_cache_handle );
+   bitmaps = (struct GRAPHICS_BITMAP*)memory_lock( gs_graphics_cache_handle );
    for( i = 0 ; gs_graphics_cache_sz > i ; i++ ) {
       if( 1 == bitmaps[i].initialized ) {
          graphics_unload_bitmap( &(bitmaps[i]) );
       }
    }
-   bitmaps = memory_unlock( gs_graphics_cache_handle );
+   bitmaps = (struct GRAPHICS_BITMAP*)memory_unlock( gs_graphics_cache_handle );
 
    memory_free( gs_graphics_cache_handle );
 
@@ -103,7 +98,7 @@ int16_t graphics_blit_at(
    struct GRAPHICS_BITMAP* bitmaps = NULL,
       * bitmap_blit = NULL;
 
-   bitmaps = memory_lock( gs_graphics_cache_handle );
+   bitmaps = (struct GRAPHICS_BITMAP*)memory_lock( gs_graphics_cache_handle );
 
    /* Try to find the bitmap already in the cache. */
    for( i = 0 ; gs_graphics_cache_sz > i ; i++ ) {
@@ -144,7 +139,8 @@ int16_t graphics_blit_at(
 cleanup:
 
    if( NULL != bitmaps ) {
-      bitmaps = memory_unlock( gs_graphics_cache_handle );
+      bitmaps = (struct GRAPHICS_BITMAP*)memory_unlock(
+         gs_graphics_cache_handle );
    }
 
    return retval;
