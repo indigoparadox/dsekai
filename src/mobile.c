@@ -83,7 +83,7 @@ void mobile_draw(
    assert( SPRITE_H > y_offset );
 
    graphics_blit_at(
-      &(m->sprite),
+      m->sprite,
       ((m->coords.x * SPRITE_W) + x_offset) - screen_x,
       (((m->coords.y * SPRITE_H) + y_offset + walk_offset ) - screen_y),
       /* Chop off bottom 2px of sprite to fit it within bounds accounting
