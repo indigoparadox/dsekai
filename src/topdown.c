@@ -115,9 +115,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
       /* TODO: Generate this dynamically. */
 
-#ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( sprite_robe, &(state->mobiles[0].sprite) );
-#endif /* !DISABLE_GRAPHICS */
+      state->mobiles[0].sprite = sprite_robe;
       state->mobiles[0].hp = 100;
       state->mobiles[0].mp = 100;
       state->mobiles[0].coords.x = 3;
@@ -129,9 +127,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       state->mobiles[0].inventory = NULL;
       state->mobiles_count++;
 
-#ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( sprite_princess, &(state->mobiles[1].sprite) );
-#endif /* !DISABLE_GRAPHICS */
+      state->mobiles[1].sprite = sprite_princess;
       state->mobiles[1].hp = 100;
       state->mobiles[1].mp = 100;
       state->mobiles[1].coords.x = 5;

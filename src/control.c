@@ -106,7 +106,7 @@ int16_t control_push(
 
    for( i = windows[window_idx].controls_count ; 0 < i ; i-- ) {
       debug_printf( 1, "shifting control %u in window %u up by one...",
-         controls[i - 1], windows[window_idx].id );
+         controls[i - 1].id, windows[window_idx].id );
       memory_copy_ptr(
          &(controls[i]), &(controls[i - 1]), sizeof( struct CONTROL ) );
    }
@@ -253,8 +253,6 @@ void control_draw_all( struct WINDOW* window ) {
    for( i = window->controls_count - 1 ; 0 <= i ; i-- ) {
       gc_control_draw_callbacks[controls[i].type]( window, &(controls[i]) );
    }
-
-cleanup:
 
    if( NULL != controls ) {
       controls = memory_unlock( window->controls_handle );

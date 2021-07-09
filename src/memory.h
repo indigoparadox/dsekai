@@ -27,7 +27,7 @@ MEMORY_HANDLE memory_alloc( uint32_t, uint32_t );
 void memory_free( MEMORY_HANDLE );
 uint32_t memory_sz( MEMORY_HANDLE );
 uint32_t memory_resize( MEMORY_HANDLE, uint32_t );
-void memory_copy_ptr( MEMORY_PTR, const MEMORY_PTR, uint32_t );
+void memory_copy_ptr( MEMORY_PTR, CONST_MEMORY_PTR, uint32_t );
 void memory_zero_ptr( MEMORY_PTR, uint32_t );
 MEMORY_PTR memory_lock( MEMORY_HANDLE );
 MEMORY_PTR memory_unlock( MEMORY_HANDLE );

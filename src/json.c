@@ -163,10 +163,8 @@ int16_t json_str_from_path(
    char* buffer, uint16_t buffer_sz,
    jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
 ) {
-   int16_t out = 0,
-      id = 0,
+   int16_t id = 0,
       excerpt_sz = 0;
-   char* offset_buf = NULL;
 
    debug_printf( 1, "fetching JSON path %s...", path );
 
@@ -178,7 +176,6 @@ int16_t json_str_from_path(
    assert( id < tokens_sz );
    assert( 0 <= id );
 
-   offset_buf = &(buf[tokens[id].start]);
    excerpt_sz = tokens[id].end - tokens[id].start;
    if( buffer_sz <= excerpt_sz ) {
       error_printf( "insufficient buffer length (need %d)", excerpt_sz );

@@ -10,8 +10,10 @@ typedef char* MEMORY_PTR;
 #else
 #  ifdef PLATFORM_DOS
 typedef void far * MEMORY_PTR;
+typedef const void far * CONST_MEMORY_PTR;
 #  else
 typedef void* MEMORY_PTR;
+typedef const void* CONST_MEMORY_PTR;
 #  endif
 #endif /* ANCIENT_C */
 

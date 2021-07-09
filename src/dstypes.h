@@ -64,6 +64,7 @@ struct DSEKAI_STATE;
 
 #include "memory.h"
 #include "engines.h"
+#include "resource.h"
 #include "graphics.h"
 #include "input.h"
 #include "dio.h"
@@ -71,7 +72,6 @@ struct DSEKAI_STATE;
 #ifdef USE_JSON_MAPS
 #include "json.h"
 #endif /* USE_JSON_MAPS */
-#include "resource.h"
 #include "item.h"
 #include "tilemap.h"
 #include "mobile.h"

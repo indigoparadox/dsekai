@@ -19,6 +19,8 @@ int16_t json_token_id_from_path(
    const char*, uint16_t, jsmntok_t*, uint16_t, const char* );
 int16_t json_int_from_path(
    const char*, uint16_t, jsmntok_t*, uint16_t, const char* );
+int16_t json_str_from_path(
+   const char*, uint16_t, char*, uint16_t, jsmntok_t*, uint16_t, const char* );
 
 #endif /* JSON_H */
 

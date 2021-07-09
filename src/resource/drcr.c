@@ -26,13 +26,13 @@ MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID drc_type ) {
 
    /* Allocate a handle, lock it, copy in the file, release it. */
    ptr_sz = drc_get_resource_sz( &drc_file, drc_type, id );
-   debug_printf( 2, "allocating %d bytes for resource", ptr_sz );
    if( 0 > ptr_sz ) {
       error_printf( "could not find resource %u with type %c%c%c%c in archive",
          id, drc_type.str[0], drc_type.str[1],
          drc_type.str[2], drc_type.str[3] );
       goto cleanup;
    }
+   debug_printf( 2, "allocating %d bytes for resource", ptr_sz );
    handle = memory_alloc( ptr_sz, 1 );
    if( NULL == handle ) {
       error_printf( "could not allocate space for resource" );

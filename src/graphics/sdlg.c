@@ -16,7 +16,7 @@ static uint32_t g_ms_start = 0;
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int graphics_init() {
+int16_t graphics_platform_init() {
 #ifdef DEBUG_CGA_EMU
    SDL_Rect area;
 #endif /* DEBUG_CGA_EMU */
@@ -54,7 +54,7 @@ int graphics_init() {
    return 1;
 }
 
-void graphics_shutdown() {
+void graphics_platform_shutdown() {
    SDL_DestroyWindow( g_window );
    SDL_Quit();
 }
@@ -102,6 +102,7 @@ int graphics_platform_blit_at(
       h * SCREEN_SCALE};
 
    if( NULL == bmp || NULL == bmp->texture ) {
+      error_printf( "NULL bitmap passed" );
       return 0;
    }
 

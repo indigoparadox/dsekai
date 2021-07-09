@@ -3,8 +3,51 @@
 
 #include "data/font8x8.h"
 
+static MEMORY_HANDLE gs_graphics_cache_handle = NULL;
+static int16_t gs_graphics_cache_sz = 0;
+
 int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP*, uint16_t, uint16_t, uint16_t, uint16_t );
+int graphics_platform_init();
+int graphics_platform_shutdown();
+
+int16_t graphics_init() {
+   int16_t retval = 1;
+   struct GRAPHICS_BITMAP* bitmaps = NULL;
+
+   retval = graphics_platform_init();
+   if( !retval ) {
+      goto cleanup;
+   }
+
+   gs_graphics_cache_handle = memory_alloc(
+      GRAPHICS_CACHE_INITIAL_SZ, sizeof( struct GRAPHICS_BITMAP ) );
+   gs_graphics_cache_sz = GRAPHICS_CACHE_INITIAL_SZ;
+
+   /* bitmaps = memory_lock( gs_graphics_cache_handle );
+   memory_zero_ptr( bitmaps, GRAPHICS_CACHE_INITIAL_SZ * sizeof( struct GRAPHICS_BITMAP ) );
+   bitmaps = memory_unlock( gs_graphics_cache_handle ); */
+
+cleanup:
+   return retval;
+}
+
+void graphics_shutdown() {
+   int16_t i = 0;
+   struct GRAPHICS_BITMAP* bitmaps = NULL;
+
+   bitmaps = memory_lock( gs_graphics_cache_handle );
+   for( i = 0 ; gs_graphics_cache_sz > i ; i++ ) {
+      if( 1 == bitmaps[i].initialized ) {
+         graphics_unload_bitmap( &(bitmaps[i]) );
+      }
+   }
+   bitmaps = memory_unlock( gs_graphics_cache_handle );
+
+   memory_free( gs_graphics_cache_handle );
+
+   graphics_platform_shutdown();
+}
 
 #ifdef USE_SOFTWARE_TEXT
 
@@ -52,37 +95,58 @@ void graphics_string_at(
 /*
  * @return 1 if blit was successful and 0 otherwise.
  */
-int graphics_blit_at(
-   struct GRAPHICS_BITMAP* bmp,
-   uint16_t x, uint16_t y, uint16_t w, uint16_t h
+int16_t graphics_blit_at(
+   uint32_t resource, uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
-   int retval = 0;
+   int16_t retval = 0,
+      i = 0;
+   struct GRAPHICS_BITMAP* bitmaps = NULL,
+      * bitmap_blit = NULL;
 
-   if( NULL == bmp ) {
-      /* Can't do anything. */
-      error_printf( "tried to blit empty bitmap" );
+   bitmaps = memory_lock( gs_graphics_cache_handle );
+
+   /* Try to find the bitmap already in the cache. */
+   for( i = 0 ; gs_graphics_cache_sz > i ; i++ ) {
+      if( bitmaps[i].id == resource ) {
+         bitmap_blit = &(bitmaps[i]);
+         break;
+      }
+   }
+
+   if( NULL == bitmap_blit ) {
+      /* Bitmap not found. */
+      debug_printf( 1, "bitmap %u not found in cache; loading...", resource );
+      for( i = 0 ; gs_graphics_cache_sz > i ; i++ ) {
+         if( 0 == bitmaps[i].initialized ) {
+            bitmaps[i].id = resource;
+            retval = graphics_load_bitmap( resource, &(bitmaps[i]) );
+            if( !retval ) {
+               error_printf( "failed to lazy load bitmap" );
+               goto cleanup;
+            }
+            bitmap_blit = &(bitmaps[i]);
+            break;
+         }
+      }
+   }
+
+   if( NULL == bitmap_blit ) {
+      error_printf( "unable to load bitmap; cache full" );
       goto cleanup;
    }
 
-   if( !bmp->initialized && 0 < bmp->id ) {
-      debug_printf( 1, "lazy loading bitmap with ID %d...", bmp->id );
-      /* Try to load uninitialized, pre-populated bitmap resource. */
-      retval = graphics_load_bitmap( bmp->id, bmp );
-      if( !retval ) {
-         error_printf( "failed to lazy load bitmap" );
-         goto cleanup;
-      }
-   }
-
-   if( bmp->initialized ) {
-      retval = graphics_platform_blit_at( bmp, x, y, w, h );
-      if( !retval ) {
-         error_printf( "failed to blit bitmap" );
-         goto cleanup;
-      }
+   retval = graphics_platform_blit_at( bitmap_blit, x, y, w, h );
+   if( !retval ) {
+      error_printf( "failed to blit bitmap" );
+      goto cleanup;
    }
 
 cleanup:
+
+   if( NULL != bitmaps ) {
+      bitmaps = memory_unlock( gs_graphics_cache_handle );
+   }
+
    return retval;
 }
 

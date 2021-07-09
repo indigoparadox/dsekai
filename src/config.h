@@ -301,6 +301,10 @@
 #define DIO_PATH_MAX 254
 #endif /* DIO_PATH_MAX */
 
+#ifndef GRAPHICS_CACHE_INITIAL_SZ
+#define GRAPHICS_CACHE_INITIAL_SZ 20
+#endif /* !GRAPHICS_CACHE_INITIAL_SZ */
+
 #ifdef LOG_TO_FILE
 #ifndef DEBUG_LOG
 #define DEBUG_LOG

@@ -66,7 +66,7 @@ int main( int argc, char* argv[] ) {
 #endif /* LOG_TO_FILE */
 
    debug_printf( 2,
-      "dsekai compiled " __DATE__ __TIME__ ", state size is %d bytes",
+      "dsekai compiled " __DATE__ __TIME__ ", state size is %lu bytes",
       sizeof( struct DSEKAI_STATE ) );
 
    if( !graphics_init() ) {

@@ -95,6 +95,5 @@ void mobile_deinit( struct MOBILE* m ) {
    if( NULL != m ) {
       return;
    }
-   graphics_unload_bitmap( &(m->sprite) );
 }
 

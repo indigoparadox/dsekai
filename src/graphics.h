@@ -50,7 +50,7 @@ struct GRAPHICS_BITMAP_BASE {
    uint8_t res4;
 };
 
-int graphics_init();
+int16_t graphics_init();
 void graphics_shutdown();
 void graphics_flip();
 void graphics_loop_start();
@@ -66,8 +66,7 @@ void graphics_char_at(
    const char, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_string_at(
    const char*, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
-int graphics_blit_at( struct GRAPHICS_BITMAP*,
-   uint16_t, uint16_t, uint16_t, uint16_t );
+int16_t graphics_blit_at( uint32_t, uint16_t, uint16_t, uint16_t, uint16_t );
 int32_t graphics_load_bitmap( uint32_t, struct GRAPHICS_BITMAP* );
 int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* );
 void graphics_blit_masked_at(

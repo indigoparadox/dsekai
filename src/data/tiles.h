@@ -13,18 +13,18 @@ This needs to be reorganized/automated.
 */
 
 const struct TILESET_TILE gc_tiles_field[TILEMAP_TILESETS_MAX] = {
-   { { tile_field_grass,      0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x00 },
-   { { tile_field_brick_wall, 0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 },
-   { { tile_field_tree,       0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 },
-   { { 0, 0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 },
-   { { 0, 0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 },
-   { { 0, 0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 },
-   { { 0, 0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 },
-   { { 0, 0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 },
-   { { 0, 0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 },
-   { { 0, 0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 },
-   { { 0, 0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 },
-   { { 0, 0, 0, NULL, NULL, 0, 0, 0, 0 }, 0x01 }
+   { tile_field_grass,      0x00 },
+   { tile_field_brick_wall, 0x01 },
+   { tile_field_tree,       0x01 },
+   { 0, 0x01 },
+   { 0, 0x01 },
+   { 0, 0x01 },
+   { 0, 0x01 },
+   { 0, 0x01 },
+   { 0, 0x01 },
+   { 0, 0x01 },
+   { 0, 0x01 },
+   { 0, 0x01 }
 };
 
 #endif /* TILES_H */

@@ -3,9 +3,9 @@
 #define MOBILE_H
 
 struct MOBILE {
-   struct GRAPHICS_BITMAP sprite;
    uint8_t hp;
    uint8_t mp;
+   uint32_t sprite;
    struct TILEMAP_COORDS coords;
    struct TILEMAP_COORDS coords_prev;
    uint8_t steps_x;
