@@ -92,7 +92,7 @@ int32_t dio_seek_stream( struct DIO_STREAM* stream, int32_t seek, uint8_t m ) {
 
    switch( m ) {
    case SEEK_SET:
-      debug_printf( 2, "seeking stream %d to %d...", stream->id, seek );
+      debug_printf( 0, "seeking stream %d to %d...", stream->id, seek );
       assert( 0 <= seek );
       assert( stream->buffer_sz >= seek );
       if( seek >= stream->buffer_sz ) {
@@ -104,7 +104,7 @@ int32_t dio_seek_stream( struct DIO_STREAM* stream, int32_t seek, uint8_t m ) {
       break;
 
    case SEEK_CUR:
-      debug_printf( 2, "seeking stream %d by +%d...", stream->id, seek );
+      debug_printf( 0, "seeking stream %d by +%d...", stream->id, seek );
       assert( stream->buffer_sz > stream->position + seek );
       if( seek >= stream->buffer_sz || stream->position + seek < 0 ) {
          error_printf( "attempted to seek beyond stream %d end",
@@ -115,7 +115,7 @@ int32_t dio_seek_stream( struct DIO_STREAM* stream, int32_t seek, uint8_t m ) {
       break;
 
    case SEEK_END:
-      debug_printf( 2, "seeking stream %d to %d from end...",
+      debug_printf( 0, "seeking stream %d to %d from end...",
          stream->id, seek );
       assert( 0 <= stream->buffer_sz - 1 - seek );
       if( 
@@ -188,7 +188,8 @@ int32_t dio_read_stream( MEMORY_PTR dest, uint32_t sz, struct DIO_STREAM* src ) 
 #endif /* !DISABLE_FILESYSTEM */
 
    case DIO_STREAM_BUFFER:
-      memory_copy_ptr( dest, &(src->buffer.bytes[src->position]), sz );
+      memory_copy_ptr( (MEMORY_PTR)dest,
+         (MEMORY_PTR)&(src->buffer.bytes[src->position]), sz );
       src->position += sz;
       return sz;
 
@@ -339,9 +340,9 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
    MEMORY_HANDLE handle = NULL;
 
    handle = memory_alloc( path_sz + 1, 1 );
-   path_tmp = memory_lock( handle );
+   path_tmp = (char*)memory_lock( handle );
    /* XXX */
-   memory_copy_ptr( path_tmp, path, path_sz );
+   memory_copy_ptr( (MEMORY_PTR)path_tmp, (MEMORY_PTR)path, path_sz );
 
    basename_ptr = strtok( path_tmp, "\\/" );
    while( NULL != basename_ptr ) {
@@ -351,7 +352,7 @@ int32_t dio_basename( const char* path, uint32_t path_sz ) {
       basename_ptr = strtok( NULL, "\\/" );
    }
 
-   memory_unlock( handle );
+   path_tmp = (char*)memory_unlock( handle );
    memory_free( handle );
 
    return retval;

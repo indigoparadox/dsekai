@@ -15,7 +15,7 @@ MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID drc_type ) {
       return 0;
    }
 
-   memory_zero_ptr( &drc_file, sizeof( struct DIO_STREAM ) );
+   memory_zero_ptr( (MEMORY_PTR)&drc_file, sizeof( struct DIO_STREAM ) );
 
    /* Open the DRC archive. */
    dio_open_stream_file( DRC_ARCHIVE, "r", &drc_file );
@@ -26,13 +26,13 @@ MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID drc_type ) {
 
    /* Allocate a handle, lock it, copy in the file, release it. */
    ptr_sz = drc_get_resource_sz( &drc_file, drc_type, id );
-   debug_printf( 2, "allocating %d bytes for resource", ptr_sz );
    if( 0 > ptr_sz ) {
       error_printf( "could not find resource %u with type %c%c%c%c in archive",
          id, drc_type.str[0], drc_type.str[1],
          drc_type.str[2], drc_type.str[3] );
       goto cleanup;
    }
+   debug_printf( 2, "allocating %d bytes for resource", ptr_sz );
    handle = memory_alloc( ptr_sz, 1 );
    if( NULL == handle ) {
       error_printf( "could not allocate space for resource" );
@@ -41,7 +41,7 @@ MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID drc_type ) {
    ptr = memory_lock( handle );
    assert( NULL != ptr );
    drc_get_resource( &drc_file, drc_type, id, ptr, ptr_sz );
-   memory_unlock( handle );
+   ptr = memory_unlock( handle );
 
 cleanup:
 

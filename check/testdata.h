@@ -289,7 +289,12 @@ static const char gc_test_json[] = {
          "],"
       "\"items\": ["
          "\"item_a\", \"item_b\", item_c\", 44, 55 ,66"
-      "]"
+      "], "
+      "\"tilesets\":["
+         "{"
+            "\"firstgid\":1,"
+            "\"source\":\"field_tiles.json\""
+      "}]"
    "}"
 };
 

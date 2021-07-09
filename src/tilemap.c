@@ -1,6 +1,8 @@
 
 #include "dstypes.h"
 
+#ifdef USE_JSON_MAPS
+
 #define JSON_TOKENS_MAX 1024
 #define JSON_PATH_SZ 255
 
@@ -10,8 +12,8 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       i = 0,
       retval = 1,
       tileset_source_sz = 0;
-   uint8_t tile_id_in = 0,
-      * json_buffer = NULL;
+   int8_t tile_id_in = 0;
+   char* json_buffer = NULL;
    jsmn_parser parser;
    jsmntok_t* tokens = NULL;
    char iter_path[JSON_PATH_SZ];
@@ -67,7 +69,7 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    }
    debug_printf( 1, "tileset source is %s (%d)",
       tileset_name, tileset_source_sz );
-
+   
    /* Load map properties. */
    tiles_count = (TILEMAP_TW * TILEMAP_TH);
    for( i = 0 ; tiles_count > i ; i++ ) {
@@ -110,6 +112,8 @@ cleanup:
 
    return retval;
 }
+
+#endif /* USE_JSON_MAPS */
 
 void tilemap_refresh_tiles( struct TILEMAP* t ) {
    int x = 0, y = 0;
@@ -162,7 +166,7 @@ void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
 
          /* Blit the tile. */
          graphics_blit_at(
-            &(t->tileset[tile_id]),
+            t->tileset[tile_id].image,
             (x * TILE_W) - state->screen_scroll_x,
             (y * TILE_H) - state->screen_scroll_y, TILE_W, TILE_H );
       }
@@ -173,21 +177,15 @@ uint8_t tilemap_collide( const struct TILEMAP* t, uint8_t x, uint8_t y ) {
    uint8_t tile_id = 0;
 
    tile_id = tilemap_get_tile_id( t, x, y );
-   if( t->tileset_flags[tile_id] & (uint8_t)TILEMAP_TILESET_FLAG_BLOCK ) {
+   if( t->tileset[tile_id].flags & (uint8_t)TILEMAP_TILESET_FLAG_BLOCK ) {
       return 1;
    }
    return 0;
 }
 
 void tilemap_deinit( struct TILEMAP* t ) {
-   int i = 0;
-
    if( NULL == t ) {
       return;
-   }
-
-   for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
-      graphics_unload_bitmap( &(t->tileset[i]) );
    }
 }
 

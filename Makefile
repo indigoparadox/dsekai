@@ -5,9 +5,9 @@ DSEKAI_C_FILES := \
    src/mobile.c \
    src/item.c \
    src/window.c \
-   src/json.c \
    src/dio.c \
    src/control.c \
+   src/json.c \
    src/topdown.c
 
 DSEKAI_C_FILES_SDL_ONLY := \
@@ -68,7 +68,6 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    tools/data/cga.c \
    tools/data/bmp.c \
    tools/data/icns.c \
-   src/json.c \
    tools/data/drcwrite.c \
    src/memory/fakem.c \
    src/drc.c \
@@ -135,7 +134,7 @@ DSEKAI_ASSETS_BITMAPS := \
    $(DSEKAI_ASSETS_TILES) \
    $(DSEKAI_ASSETS_PATTERNS)
 DSEKAI_ASSETS_MAPS := \
-   assets/map_field.json
+   $(ASSETDIR)/map_field.json
 DSEKAI_ASSETS_DOS_CGA := \
    $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_PALM := \
@@ -146,32 +145,37 @@ DSEKAI_ASSETS_RSRC := \
    $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_PICTS := \
    $(subst .bmp,.pict,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
+DSEKAI_ASSETS_MAPS_WIN16 := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN16)/,$(DSEKAI_ASSETS_MAPS)))
 
 MD := mkdir -p
 DD := /bin/dd
 MCOPY := mcopy
 MKFSVFAT := /sbin/mkfs.vfat
 IMAGEMAGICK := convert
+PYTHON := python3
+
+MAPC := scripts/mapc.py
 
 MKRESH := bin/mkresh
 DRCPACK := bin/drcpack
 CONVERT := bin/convert
 LOOKUPS := bin/lookups
 
-CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=2
-CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3
-CFLAGS_CONVERT := -DNO_RESEXT -g
+CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=2 -DUSE_JSON_MAPS
+CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DUSE_JSON_MAPS
+CFLAGS_CONVERT := -DNO_RESEXT -g -DUSE_JSON_MAPS
 CFLAGS_LOOKUPS := -g
 
-CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG
+CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=1
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -pg
 
-$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DDIO_SILENT $(CFLAGS_DEBUG_GCC) -DDEBUG_LOG -DANIMATE_SCREEN_MOVEMENT -DDEBUG_THRESHOLD=1
+$(BIN_SDL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC)
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
-$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DSCALE_2X -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=1
+$(BIN_DOS): CFLAGS := -hw -d3 -0 -mm -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=1
 $(BIN_DOS): LDFLAGS := $(CFLAGS)
 
 $(BIN_PALM): CC := m68k-palmos-gcc
@@ -180,7 +184,7 @@ $(BIN_PALM): TXT2BITM := txt2bitm
 $(BIN_PALM): OBJRES := m68k-palmos-obj-res
 $(BIN_PALM): BUILDPRC := build-prc
 $(BIN_PALM): INCLUDES := -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/
-$(BIN_PALM): CFLAGS := -Os -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g -DDEBUG_LOG -DDEBUG_THRESHOLD=1 -DHIDE_WELCOME_DIALOG
+$(BIN_PALM): CFLAGS := -Os -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g -DDEBUG_THRESHOLD=1 $(CFLAGS_DEBUG_GENERIC)
 $(BIN_PALM): LDFLAGS = -g
 $(BIN_PALM): ICONTEXT := "dsekai"
 $(BIN_PALM): APPID := DSEK
@@ -195,12 +199,12 @@ $(BIN_WIN16): LDFLAGS := -l=windows -zp=1
 $(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
 $(BIN_MAC7): CC := m68k-apple-macos-gcc
 $(BIN_MAC7): CXX := m68k-apple-macos-g++
-$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes
+$(BIN_MAC7): CFLAGS := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_DEBUG_GENERIC)
 $(BIN_MAC7): LDFLAGS := -lRetroConsole
 $(BIN_MAC7): REZ := Rez
 $(BIN_MAC7): REZFLAGS :=
 
-$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=3 -DCHECK
+$(BIN_CHECK_NULL): CFLAGS := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=3 -DCHECK -DUSE_JSON_MAPS
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(CFLAGS_DEBUG_GCC)
 
 DSEKAI_C_FILES_CHECK_NULL := $(DSEKAI_C_FILES) $(DSEKAI_C_FILES_CHECK_NULL_ONLY)
@@ -335,12 +339,16 @@ $(OBJDIR_WIN16):
 $(GENDIR_WIN16)/%.ico: $(ASSETDIR)/%.bmp | $(GENDIR_WIN16)
 	$(IMAGEMAGICK) $< $@
 
+$(GENDIR_WIN16)/%.h: $(ASSETDIR)/%.json $(MAPC) | $(GENDIR_WIN16)
+	$(PYTHON) $(MAPC) -j $< -o $@
+
 $(BINDIR)/dsekai16.img: $(BIN_WIN16)
 	$(DD) if=/dev/zero bs=512 count=2880 of="$@"
 	$(MKFSVFAT) "$@"
 	$(MCOPY) -i "$@" $< ::dsekai16.exe
 
-$(BIN_WIN16): $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | $(BINDIR)
+$(BIN_WIN16): \
+$(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | $(BINDIR) $(DSEKAI_ASSETS_MAPS_WIN16)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
 $(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc $(GENDIR_WIN16)/dsekai.ico | $(OBJDIR_WIN16)
@@ -352,7 +360,8 @@ $(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)
       -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) \
       -oh $(GENDIR_WIN16)/resext.h -or $(GENDIR_WIN16)/win16.rc
 
-$(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win16.res $(RESEXT_H)
+$(OBJDIR_WIN16)/%.o: \
+%.c $(OBJDIR_WIN16)/win16.res $(RESEXT_H) $(DSEKAI_ASSETS_MAPS_WIN16)
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS) -fo=$@ $(<:%.c=%)
 

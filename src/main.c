@@ -65,6 +65,10 @@ int main( int argc, char* argv[] ) {
    g_log_file = platform_fopen( LOG_FILE_NAME, "w" );
 #endif /* LOG_TO_FILE */
 
+   debug_printf( 2,
+      "dsekai compiled " __DATE__ __TIME__ ", state size is %lu bytes",
+      sizeof( struct DSEKAI_STATE ) );
+
    if( !graphics_init() ) {
       error_printf( "unable to initialize graphics" );
 #ifdef DISABLE_MAIN_PARMS
@@ -118,12 +122,12 @@ int main( int argc, char* argv[] ) {
 #endif /* USE_SOFT_ASSERT */
    }
 
-   state = memory_lock( g_state_handle );
+   state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    while( state->windows_count > 0 ) {
       window_pop( 0, state );
    }
    memory_free( state->windows_handle );
-   state = memory_unlock( g_state_handle );
+   state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
 
    memory_free( g_state_handle );
 

@@ -10,15 +10,15 @@
 #define WINDOW_STATUS_MODAL  3
 
 struct WINDOW_FRAME {
-   struct GRAPHICS_BITMAP tr;
-   struct GRAPHICS_BITMAP tl;
-   struct GRAPHICS_BITMAP br;
-   struct GRAPHICS_BITMAP bl;
-   struct GRAPHICS_BITMAP t;
-   struct GRAPHICS_BITMAP b;
-   struct GRAPHICS_BITMAP r;
-   struct GRAPHICS_BITMAP l;
-   struct GRAPHICS_BITMAP c;
+   uint32_t tr;
+   uint32_t tl;
+   uint32_t br;
+   uint32_t bl;
+   uint32_t t;
+   uint32_t b;
+   uint32_t r;
+   uint32_t l;
+   uint32_t c;
 };
 
 struct WINDOW {
@@ -41,6 +41,7 @@ int16_t window_push(
    uint32_t, uint8_t,
    int16_t, int16_t, int16_t, int16_t, uint8_t, struct DSEKAI_STATE* );
 void window_pop( uint32_t, struct DSEKAI_STATE* );
+int16_t window_modal( struct DSEKAI_STATE* );
 
 #endif /* WINDOW_H */
 

@@ -2,6 +2,8 @@
 #define JSON_C
 #include "dstypes.h"
 
+#ifdef USE_JSON_MAPS
+
 int16_t json_get_token_idx(
    const char* contents, uint16_t contents_sz,
    jsmntok_t* tokens, uint16_t tokens_sz,
@@ -13,18 +15,19 @@ int16_t json_get_token_idx(
       child_idx = 0;
    jsmntok_t* parent = &(tokens[tree_depth_id]);
 
-   debug_printf( 0, "parent type is: %d", parent->type );
+   debug_printf( 0, "(%u) parent type is: %d", tree_depth_id, parent->type );
 
-   debug_printf( 1, "path spec: %s", contents );
+   debug_printf( 1, "(%u) path spec: %s", tree_depth_id, contents );
 
    if( NULL != contents && JSMN_ARRAY == parent->type ) {
       cmp_str_as_i = dio_atoi( contents, 10 );
-      debug_printf( 0, "idx as int is: %d", cmp_str_as_i );
+      debug_printf( 0, "(%u) idx as int is: %d", tree_depth_id, cmp_str_as_i );
    }
 
    for( i = 0 ; tokens_sz > i ; i++ ) {
       if( NULL != contents ) {
-         debug_printf( 0, "str %s sz %d vs  %d, %d", contents, contents_sz,
+         debug_printf( 0, "(%u) str %s sz %d vs  %d, %d",
+            tree_depth_id, contents, contents_sz,
             tokens[i].end - tokens[i].start, tokens[i].size );
       }
       if(
@@ -54,15 +57,19 @@ int16_t json_get_token_idx(
             tentative_child_idx = json_get_token_idx(
                NULL, 0, tokens, tokens_sz, buf, i );
             if( -1 == tentative_child_idx ) {
+               debug_printf( 1, "(%u) no tentative child found",  
+                  tree_depth_id );
                return i;
             } else {
                /* It's a key, return child. */
-               debug_printf( 0, "redirecting to %d", tentative_child_idx );
+               debug_printf( 1, "(%u) redirected to %d",
+                  tree_depth_id, tentative_child_idx );
                return tentative_child_idx;
             }
          } else if( JSMN_ARRAY == parent->type ) {
             debug_printf( 0,
-               "idx %d cmp to child_idx %d", cmp_str_as_i, child_idx );
+               "(%u) idx %d cmp to child_idx %d",
+                  tree_depth_id, cmp_str_as_i, child_idx );
             if( cmp_str_as_i == child_idx ) {
                /* List index matches numerically. */
                return i;
@@ -156,9 +163,8 @@ int16_t json_str_from_path(
    char* buffer, uint16_t buffer_sz,
    jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
 ) {
-   int16_t out = 0,
-      id = 0;
-   char* offset_buf = NULL;
+   int16_t id = 0,
+      excerpt_sz = 0;
 
    debug_printf( 1, "fetching JSON path %s...", path );
 
@@ -170,12 +176,14 @@ int16_t json_str_from_path(
    assert( id < tokens_sz );
    assert( 0 <= id );
 
-   offset_buf = &(buf[tokens[id].start]);
-   if( buffer_sz <= tokens[id].size ) {
-      error_printf( "insufficient buffer length" );
+   excerpt_sz = tokens[id].end - tokens[id].start;
+   if( buffer_sz <= excerpt_sz ) {
+      error_printf( "insufficient buffer length (need %d)", excerpt_sz );
       return 0;
    }
-   memory_copy_ptr( buffer, &(buf[tokens[id].start]), tokens[id].size );
-   return tokens[id].size;
+   memory_copy_ptr( buffer, &(buf[tokens[id].start]), excerpt_sz );
+   return excerpt_sz;
 }
+
+#endif /* USE_JSON_MAPS */
 

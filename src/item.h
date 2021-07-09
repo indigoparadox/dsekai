@@ -6,7 +6,7 @@
 #define ITEM_INVENTORY_MAX 50
 
 struct ITEM {
-   struct GRAPHICS_BITMAP* sprite;
+   uint32_t sprite;
    struct TILEMAP_COORDS coords;
    struct ITEM* inventory;
 };

@@ -16,7 +16,7 @@ static uint32_t g_ms_start = 0;
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int graphics_init() {
+int16_t graphics_platform_init() {
 #ifdef DEBUG_CGA_EMU
    SDL_Rect area;
 #endif /* DEBUG_CGA_EMU */
@@ -54,7 +54,7 @@ int graphics_init() {
    return 1;
 }
 
-void graphics_shutdown() {
+void graphics_platform_shutdown() {
    SDL_DestroyWindow( g_window );
    SDL_Quit();
 }
@@ -102,6 +102,7 @@ int graphics_platform_blit_at(
       h * SCREEN_SCALE};
 
    if( NULL == bmp || NULL == bmp->texture ) {
+      error_printf( "NULL bitmap passed" );
       return 0;
    }
 
@@ -120,17 +121,10 @@ void graphics_draw_block(
 ) {
    SDL_Rect area;
 
-#ifdef SCALE_2X
-   area.x = x_orig * 2;
-   area.y = y_orig * 2;
-   area.w = w * 2;
-   area.h = h * 2;
-#else
-   area.x = x_orig;
-   area.y = y_orig;
-   area.w = w;
-   area.h = h;
-#endif /* SCALE_2X */
+   area.x = x_orig * SCREEN_SCALE;
+   area.y = y_orig * SCREEN_SCALE;
+   area.w = w * SCREEN_SCALE;
+   area.h = h * SCREEN_SCALE;
 
    SDL_SetRenderDrawColor( g_renderer,  color->r, color->g, color->b, 255 );
    SDL_RenderFillRect( g_renderer, &area );
@@ -142,17 +136,10 @@ void graphics_draw_rect(
 ) {
    SDL_Rect area;
 
-#ifdef SCALE_2X
-   area.x = x_orig * 2;
-   area.y = y_orig * 2;
-   area.w = w * 2;
-   area.h = h * 2;
-#else
-   area.x = x_orig;
-   area.y = y_orig;
-   area.w = w;
-   area.h = h;
-#endif /* SCALE_2X */
+   area.x = x_orig * SCREEN_SCALE;
+   area.y = y_orig * SCREEN_SCALE;
+   area.w = w * SCREEN_SCALE;
+   area.h = h * SCREEN_SCALE;
 
    /* TODO: Handle thickness. */
 

@@ -1,6 +1,11 @@
 
 #include "dstypes.h"
 
+#include "data/tiles.h"
+#ifndef USE_JSON_MAPS
+#include "../gen/win16/map_field.h"
+#endif /* USE_JSON_MAPS */
+
 #define INPUT_BLOCK_DELAY 5
 #define TOPDOWN_MOBILES_MAX 10
 
@@ -104,20 +109,13 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    MEMORY_HANDLE welcome_string_handle = NULL;
    char* welcome_string = NULL;
 
-   state = memory_lock( state_handle );
+   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
 
    if( !initialized ) {
 
       /* TODO: Generate this dynamically. */
-#ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( tile_field_grass, &(state->map.tileset[0]) );
-      graphics_load_bitmap( tile_field_brick_wall, &(state->map.tileset[1]) );
-      graphics_load_bitmap( tile_field_tree, &(state->map.tileset[2]) );
-#endif /* !DISABLE_GRAPHICS */
 
-#ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( sprite_robe, &(state->mobiles[0].sprite) );
-#endif /* !DISABLE_GRAPHICS */
+      state->mobiles[0].sprite = sprite_robe;
       state->mobiles[0].hp = 100;
       state->mobiles[0].mp = 100;
       state->mobiles[0].coords.x = 3;
@@ -129,9 +127,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       state->mobiles[0].inventory = NULL;
       state->mobiles_count++;
 
-#ifndef DISABLE_GRAPHICS
-      graphics_load_bitmap( sprite_princess, &(state->mobiles[1].sprite) );
-#endif /* !DISABLE_GRAPHICS */
+      state->mobiles[1].sprite = sprite_princess;
       state->mobiles[1].hp = 100;
       state->mobiles[1].mp = 100;
       state->mobiles[1].coords.x = 5;
@@ -143,7 +139,15 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       state->mobiles[1].inventory = NULL;
       state->mobiles_count++;
 
+#ifdef USE_JSON_MAPS
       tilemap_load( map_field, &(state->map) );
+#else
+      memory_copy_ptr( (MEMORY_PTR)&(state->map), (MEMORY_PTR)&gc_map_field,
+         sizeof( struct TILEMAP ) );
+#endif /* USE_JSON_MAPS */
+      memory_copy_ptr( (MEMORY_PTR)&(state->map.tileset[0]),
+         (MEMORY_PTR)&(gc_tiles_field[0]),
+         TILEMAP_TILESETS_MAX * sizeof( struct TILESET_TILE ) );
       tilemap_refresh_tiles( &(state->map) );
 
       /* Make sure the tilemap is drawn at least once behind any initial
@@ -171,9 +175,9 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
          0x1212, WINDOW_STATUS_MODAL,
          WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state );
       welcome_string_handle = memory_alloc( 9, 1 );
-      welcome_string = memory_lock( welcome_string_handle );
+      welcome_string = (char*)memory_lock( welcome_string_handle );
       memory_copy_ptr( welcome_string, "Welcome!", 8 );
-      welcome_string = memory_unlock( welcome_string_handle );
+      welcome_string = (char*)memory_unlock( welcome_string_handle );
       control_push(
          0x2323, CONTROL_TYPE_LABEL, CONTROL_STATE_ENABLED,
          -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
@@ -240,7 +244,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
    case INPUT_KEY_QUIT:
       window_pop( 0x111, state );
-      state = memory_unlock( state_handle );
+      state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
       topdown_deinit( state_handle );
       return 0;
    }
@@ -295,7 +299,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       debug_printf( 1, "scrolling screen up to %d, %d...",
          state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
    }
-   state = memory_unlock( state_handle );
+   state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
 
    graphics_loop_end();
 
@@ -306,7 +310,7 @@ void topdown_deinit( MEMORY_HANDLE state_handle ) {
    int i = 0;
    struct DSEKAI_STATE* state = NULL;
 
-   state = memory_lock( state_handle );
+   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
 
    for( i = 0 ; state->mobiles_count > i ; i++ ) {
       mobile_deinit( &(state->mobiles[i]) );
@@ -314,6 +318,6 @@ void topdown_deinit( MEMORY_HANDLE state_handle ) {
 
    tilemap_deinit( &(state->map) );
 
-   state = memory_unlock( state_handle );
+   state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
 }
 

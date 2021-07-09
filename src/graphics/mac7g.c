@@ -1,9 +1,7 @@
 
-#include "../graphics.h"
+#include "../dstypes.h"
 
 #include <Multiverse.h>
-
-#include "../drc.h"
 
 QDGlobals g_qd;
 WindowPtr g_window;
@@ -13,7 +11,7 @@ Rect g_window_rect;
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int graphics_init() {
+int16_t graphics_platform_init() {
    ControlHandle beepbutton;
    Rect r;
 
@@ -54,7 +52,7 @@ int graphics_init() {
    return 1;
 }
 
-void graphics_shutdown() {
+void graphics_platform_shutdown() {
 }
 
 void graphics_flip() {

@@ -9,12 +9,12 @@ static int16_t g_ticks_target = 0;
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int graphics_init() {
+int16_t graphics_platform_init() {
    g_ticks_target = SysTicksPerSecond();
    return 1;
 }
 
-void graphics_shutdown() {
+void graphics_platform_shutdown() {
 }
 
 void graphics_flip() {

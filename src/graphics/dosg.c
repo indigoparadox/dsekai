@@ -94,7 +94,7 @@ static void graphics_remove_timer() {
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int graphics_init() {
+int16_t graphics_platform_init() {
    union REGS r;
 
    memory_zero_ptr( &r, sizeof( union REGS ) );
@@ -115,7 +115,7 @@ int graphics_init() {
    return 1;
 }
 
-void graphics_shutdown() {
+void graphics_platform_shutdown() {
    graphics_remove_timer();
 }
 

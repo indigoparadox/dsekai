@@ -7,16 +7,19 @@ typedef int16_t (*CONTROL_CB)( struct WINDOW*, struct CONTROL* );
 
 static int16_t control_draw_label( struct WINDOW* w, struct CONTROL* c ) {
    char* str = NULL;
+   int16_t str_len = 0;
 
    assert( NULL != c );
    assert( NULL != c->data );
 
-   str = memory_lock( c->data );
+   str = (char*)memory_lock( c->data );
 
+   str_len = memory_sz( c->data );
+   assert( 0 < str_len );
    graphics_string_at( 
-      str, strlen( str ), w->x + c->x, w->y + c->y, c->fg, c->scale );
+      str, str_len, w->x + c->x, w->y + c->y, c->fg, c->scale );
 
-   str = memory_unlock( c->data );
+   str = (char*)memory_unlock( c->data );
 
    return 1;
 }
@@ -34,7 +37,7 @@ static int16_t control_width_label( struct WINDOW* w, struct CONTROL* c ) {
    assert( NULL != c );
    assert( NULL != c->data );
 
-   str = memory_lock( c->data );
+   str = (char*)memory_lock( c->data );
 
    width_out += 
       (((memory_strnlen_ptr( str, memory_sz( c->data ) ) *
@@ -43,7 +46,7 @@ static int16_t control_width_label( struct WINDOW* w, struct CONTROL* c ) {
          FONT_SPACE) *
       c->scale);
 
-   str = memory_unlock( c->data );
+   str = (char*)memory_unlock( c->data );
 
    return width_out;
 }
@@ -79,7 +82,7 @@ int16_t control_push(
       control_id, window_id );
 
    assert( NULL != state->windows_handle );
-   windows = memory_lock( state->windows_handle );
+   windows = (struct WINDOW*)memory_lock( state->windows_handle );
 
    for( i = 0 ; state->windows_count > i ; i++ ) {
       if( windows[i].id == window_id ) {
@@ -102,16 +105,18 @@ int16_t control_push(
 
    assert( windows[window_idx].controls_count + 1 < CONTROL_COUNT_MAX );
 
-   controls = memory_lock( windows[window_idx].controls_handle );
+   controls = (struct CONTROL*)memory_lock(
+      windows[window_idx].controls_handle );
 
    for( i = windows[window_idx].controls_count ; 0 < i ; i-- ) {
       debug_printf( 1, "shifting control %u in window %u up by one...",
-         controls[i - 1], windows[window_idx].id );
+         controls[i - 1].id, windows[window_idx].id );
       memory_copy_ptr(
-         &(controls[i]), &(controls[i - 1]), sizeof( struct CONTROL ) );
+         (MEMORY_PTR)&(controls[i]), (MEMORY_PTR)&(controls[i - 1]),
+         sizeof( struct CONTROL ) );
    }
 
-   memory_zero_ptr( &(controls[0]), sizeof( struct CONTROL ) );
+   memory_zero_ptr( (MEMORY_PTR)&(controls[0]), sizeof( struct CONTROL ) );
 
    /* Sizing callbacks below might need these. */
    controls[0].type = type;
@@ -157,11 +162,12 @@ int16_t control_push(
 cleanup:
 
    if( NULL != controls ) {
-      controls = memory_unlock( windows[window_idx].controls_handle );
+      controls = (struct CONTROL*)memory_unlock(
+         windows[window_idx].controls_handle );
    }
 
    if( NULL != windows ) {
-      windows = memory_unlock( state->windows_handle );
+      windows = (struct WINDOW*)memory_unlock( state->windows_handle );
    }
 
    return retval;
@@ -180,7 +186,7 @@ void control_pop(
       return;
    }
    
-   windows = memory_lock( state->windows_handle );
+   windows = (struct WINDOW*)memory_lock( state->windows_handle );
 
    /* Find the window IDX for the given ID. */
    for( i = 0 ; state->windows_count > i ; i++ ) {
@@ -202,7 +208,8 @@ void control_pop(
       return;
    }
    
-   controls = memory_lock( windows[window_idx].controls_handle );
+   controls = (struct CONTROL*)memory_lock(
+      windows[window_idx].controls_handle );
 
    /* Find the control IDX for the given ID. */
    for( i = 0 ; windows[window_idx].controls_count > i ; i++ ) {
@@ -223,7 +230,8 @@ void control_pop(
          debug_printf( 1, "shifting control %u in window %u down by one...",
             controls[i + 1].id, windows[window_idx].id );
          memory_copy_ptr(
-            &(controls[i]), &(controls[i + 1]), sizeof( struct CONTROL ) );
+            (MEMORY_PTR)&(controls[i]), (MEMORY_PTR)&(controls[i + 1]),
+            sizeof( struct CONTROL ) );
       }
    }
 
@@ -232,11 +240,12 @@ void control_pop(
 cleanup:
 
    if( NULL != controls ) {
-      controls = memory_unlock( windows[window_idx].controls_handle );
+      controls = (struct CONTROL*)memory_unlock(
+         windows[window_idx].controls_handle );
    }
 
    if( NULL != windows ) {
-      windows = memory_unlock( state->windows_handle );
+      windows = (struct WINDOW*)memory_unlock( state->windows_handle );
    }
 }
 
@@ -248,16 +257,14 @@ void control_draw_all( struct WINDOW* window ) {
       return;
    }
 
-   controls = memory_lock( window->controls_handle );
+   controls = (struct CONTROL*)memory_lock( window->controls_handle );
 
    for( i = window->controls_count - 1 ; 0 <= i ; i-- ) {
       gc_control_draw_callbacks[controls[i].type]( window, &(controls[i]) );
    }
 
-cleanup:
-
    if( NULL != controls ) {
-      controls = memory_unlock( window->controls_handle );
+      controls = (struct CONTROL*)memory_unlock( window->controls_handle );
    }
 }
 

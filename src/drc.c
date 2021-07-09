@@ -18,7 +18,7 @@ static int32_t drc_read_toc_e(
 ) {
    if(
       sizeof( struct DRC_TOC_E ) !=
-      dio_read_stream( toc_e, sizeof( struct DRC_TOC_E ), drc_file )
+      dio_read_stream( (MEMORY_PTR)toc_e, sizeof( struct DRC_TOC_E ), drc_file )
    ) {
       return -1;
    }
@@ -31,7 +31,7 @@ static int32_t drc_read_header(
    struct DIO_STREAM* drc_file, struct DRC_HEADER* h
 ) {
    dio_seek_stream( drc_file, 0, SEEK_SET );
-   dio_read_stream( h, sizeof( struct DRC_HEADER ), drc_file );
+   dio_read_stream( (MEMORY_PTR)h, sizeof( struct DRC_HEADER ), drc_file );
    if( 0 > dio_seek_stream(
       drc_file, offsetof( struct DRC_HEADER, filesize ), SEEK_SET )
    ) {
@@ -61,7 +61,7 @@ int32_t drc_list_resources(
    struct DRC_HEADER header;
    struct DRC_TOC_E* toc_ptr = NULL;
 
-   memory_zero_ptr( &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+   memory_zero_ptr( (MEMORY_PTR)&toc_e_iter, sizeof( struct DRC_TOC_E ) );
 
    debug_printf( 2, "opening drc to list..." );
 
@@ -93,15 +93,16 @@ int32_t drc_list_resources(
          }
          assert( NULL != *htoc );
 
-         toc_ptr = memory_lock( *htoc );
+         toc_ptr = (struct DRC_TOC_E*)memory_lock( *htoc );
          debug_printf( 1, "copying listing result for TOC entry %d",
             toc_e_iter.id );
          /* Move, rather than copy. */
          memory_copy_ptr(
-            &(toc_ptr[i]), &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+            (MEMORY_PTR)&(toc_ptr[i]), (MEMORY_PTR)&toc_e_iter,
+            sizeof( struct DRC_TOC_E ) );
          assert( toc_ptr[i].type.u32 == toc_e_iter.type.u32 );
-         memory_zero_ptr( &toc_e_iter, sizeof( struct DRC_TOC_E ) );
-         toc_ptr = memory_unlock( *htoc );
+         memory_zero_ptr( (MEMORY_PTR)&toc_e_iter, sizeof( struct DRC_TOC_E ) );
+         toc_ptr = (struct DRC_TOC_E*)memory_unlock( *htoc );
       }
    }
 
@@ -178,7 +179,8 @@ int32_t drc_get_resource_info(
          toc_e_iter.type.str[2], toc_e_iter.type.str[3],
          toc_e_iter.data_start, toc_e_iter.data_sz );
 
-      memory_copy_ptr( e, &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+      memory_copy_ptr(
+         (MEMORY_PTR)e, (MEMORY_PTR)&toc_e_iter, sizeof( struct DRC_TOC_E ) );
 
       i = sizeof( struct DRC_TOC_E );
 
@@ -208,7 +210,7 @@ int32_t drc_get_resource(
       read = 0;
    struct DRC_TOC_E toc_e_iter;
 
-   memory_zero_ptr( &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+   memory_zero_ptr( (MEMORY_PTR)&toc_e_iter, sizeof( struct DRC_TOC_E ) );
 
    debug_printf( 2, "opening drc to get resource..." );
 
@@ -316,7 +318,7 @@ int32_t drc_get_resource_id_by_name(
    struct DRC_TOC_E* toc = NULL;
    int16_t toc_sz = 0;
 
-   memory_zero_ptr( &toc_e_iter, sizeof( struct DRC_TOC_E ) );
+   memory_zero_ptr( (MEMORY_PTR)&toc_e_iter, sizeof( struct DRC_TOC_E ) );
 
    debug_printf( 2, "opening drc to get resource by name..." );
 
@@ -325,7 +327,7 @@ int32_t drc_get_resource_id_by_name(
       error_printf( "could not get DRC TOC" );
       return DRC_ERROR_COULD_NOT_FIND;
    }
-   toc = memory_lock( toc_handle );
+   toc = (struct DRC_TOC_E*)memory_lock( toc_handle );
    for( i = 0 ; toc_sz > i ; i++ ) {
       if( 0 == dio_strncmp( toc[i].name, name, name_sz, '\0' ) ) {
          id_out = toc[i].id;
@@ -333,10 +335,8 @@ int32_t drc_get_resource_id_by_name(
          break;
       }
    }
-   toc = memory_unlock( toc_handle );
+   toc = (struct DRC_TOC_E*)memory_unlock( toc_handle );
    memory_free( toc_handle );
-
-cleanup:
 
    return id_out;
 }
