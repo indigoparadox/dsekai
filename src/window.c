@@ -34,7 +34,7 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
 
    frames =  memory_lock( g_frames_handle );
    windows = memory_lock( state->windows_handle );
-   for( i = 0 ; state->windows_count > i ; i++ ) {
+   for( i = state->windows_count - 1 ; 0 <= i ; i-- ) {
 #ifndef IGNORE_DIRTY
       if( 0 == windows[i].dirty ) {
 #else
@@ -182,13 +182,13 @@ int16_t window_push(
    assert( 0 < windows[0].h );
 
    if( WINDOW_CENTERED == x ) {
-      windows[0].x = (SCREEN_W / 2) - (windows[0].w / 2);
+      windows[0].x = (SCREEN_MAP_W / 2) - (windows[0].w / 2);
    } else {
       windows[0].x = x;
    }
 
    if( WINDOW_CENTERED == y ) {
-      windows[0].y = (SCREEN_H / 2) - (windows[0].h / 2);
+      windows[0].y = (SCREEN_MAP_H / 2) - (windows[0].h / 2);
    } else {
       windows[0].y = y;
    }
