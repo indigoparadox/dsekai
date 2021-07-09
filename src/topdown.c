@@ -181,7 +181,11 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       control_push(
          0x2323, CONTROL_TYPE_LABEL, CONTROL_STATE_ENABLED,
          -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
-         welcome_string_handle, 0x1212, state );
+         welcome_string_handle, 0, 0x1212, state );
+      control_push(
+         0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED,
+         -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
+         NULL, sprite_princess, 0x1212, state );
 #endif /* !HIDE_WELCOME_DIALOG */
       state->window_shown = 1;
    }

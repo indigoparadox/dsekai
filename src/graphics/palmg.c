@@ -88,6 +88,18 @@ void graphics_draw_block(
 ) {
 }
 
+void graphics_draw_rect(
+   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+}
+
+void graphics_draw_line(
+   uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t thickness,
+   const GRAPHICS_COLOR color
+) {
+}
+
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */

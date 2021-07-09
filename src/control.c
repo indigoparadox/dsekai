@@ -10,22 +10,42 @@ static int16_t control_draw_label( struct WINDOW* w, struct CONTROL* c ) {
    int16_t str_len = 0;
 
    assert( NULL != c );
-   assert( NULL != c->data );
+   assert( NULL != c->data.handle );
 
-   str = (char*)memory_lock( c->data );
+   str = (char*)memory_lock( c->data.handle );
 
-   str_len = memory_sz( c->data );
+   str_len = memory_sz( c->data.handle );
    assert( 0 < str_len );
    graphics_string_at( 
       str, str_len, w->x + c->x, w->y + c->y, c->fg, c->scale );
 
-   str = (char*)memory_unlock( c->data );
+   str = (char*)memory_unlock( c->data.handle );
+
+   return 1;
+}
+
+static int16_t control_draw_sprite( struct WINDOW* w, struct CONTROL* c ) {
+
+   assert( NULL != c );
+
+   graphics_blit_at(
+      c->data.scalar, w->x + c->x + 2, w->y + c->y + 2, SPRITE_W, SPRITE_H );
+
+   graphics_draw_rect( w->x + c->x, w->y + c->y, SPRITE_W + 4, SPRITE_H + 4,
+      1, GRAPHICS_COLOR_BLACK );
+
+   graphics_draw_rect(
+      w->x + c->x + 1, w->y + c->y + 1, SPRITE_W + 3, SPRITE_H + 3,
+      1, GRAPHICS_COLOR_WHITE );
 
    return 1;
 }
 
 const CONTROL_CB gc_control_draw_callbacks[] = {
-   control_draw_label
+   control_draw_label,
+   NULL,
+   NULL,
+   control_draw_sprite
 };
 
 /* Sizing Callbacks */
@@ -35,18 +55,18 @@ static int16_t control_width_label( struct WINDOW* w, struct CONTROL* c ) {
    char* str = NULL;
 
    assert( NULL != c );
-   assert( NULL != c->data );
+   assert( NULL != c->data.handle );
 
-   str = (char*)memory_lock( c->data );
+   str = (char*)memory_lock( c->data.handle );
 
    width_out += 
-      (((memory_strnlen_ptr( str, memory_sz( c->data ) ) *
+      (((memory_strnlen_ptr( str, memory_sz( c->data.handle ) ) *
       (FONT_W + FONT_SPACE)) - 
          /* Take off one space for the end. */
          FONT_SPACE) *
       c->scale);
 
-   str = (char*)memory_unlock( c->data );
+   str = (char*)memory_unlock( c->data.handle );
 
    return width_out;
 }
@@ -56,12 +76,26 @@ static int16_t control_height_label( struct WINDOW* w, struct CONTROL* c ) {
    return FONT_H;
 }
 
+static int16_t control_width_sprite( struct WINDOW* w, struct CONTROL* c ) {
+   return SPRITE_W + 4; /* For border. */
+}
+
+static int16_t control_height_sprite( struct WINDOW* w, struct CONTROL* c ) {
+   return SPRITE_H + 4; /* For border. */
+}
+
 const CONTROL_CB gc_control_width_callbacks[] = {
-   control_width_label
+   control_width_label,
+   NULL,
+   NULL,
+   control_width_sprite
 };
 
 const CONTROL_CB gc_control_height_callbacks[] = {
-   control_height_label
+   control_height_label,
+   NULL,
+   NULL,
+   control_height_sprite
 };
 
 /* General Functions */
@@ -70,7 +104,8 @@ int16_t control_push(
    uint32_t control_id, uint16_t type, uint16_t status,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
-   MEMORY_HANDLE data, uint32_t window_id, struct DSEKAI_STATE* state
+   MEMORY_HANDLE data_handle, uint32_t data_scalar,
+   uint32_t window_id, struct DSEKAI_STATE* state
 ) {
    int i = 0;
    struct WINDOW* windows = NULL;
@@ -120,7 +155,11 @@ int16_t control_push(
 
    /* Sizing callbacks below might need these. */
    controls[0].type = type;
-   controls[0].data = data;
+   if( 0 != data_scalar ) {
+      controls[0].data.scalar = data_scalar;
+   } else {
+      controls[0].data.handle = data_handle;
+   }
    controls[0].scale = scale;
    controls[0].status = status;
    controls[0].id = control_id;
