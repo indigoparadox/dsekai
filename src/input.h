@@ -10,7 +10,7 @@
 #include "input/sdli.h"
 #elif defined( PLATFORM_PALM )
 #include "input/palmi.h"
-#elif defined( PLATFORM_WIN16 )
+#elif defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
 #include "input/win16i.h"
 #elif defined( PLATFORM_MAC7 )
 #include "input/mac7i.h"

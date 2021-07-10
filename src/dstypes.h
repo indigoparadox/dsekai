@@ -35,7 +35,7 @@ typedef long int32_t;
 typedef unsigned long uint32_t;
 
 /* ------ */
-#elif defined( PLATFORM_WIN16 )
+#elif defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
 /* ------ */
 
 typedef signed char int8_t;

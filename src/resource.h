@@ -4,7 +4,7 @@
 
 #ifdef PLATFORM_PALM
 #include "resource/palmr.h"
-#elif defined( PLATFORM_WIN16 )
+#elif defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
 #include "resource/win16r.h"
 #else
 #include "resource/drcr.h"

@@ -139,6 +139,41 @@
 #define USE_SOFTWARE_TEXT
 #define ANIMATE_SCREEN_MOVEMENT
 
+#define PLATFORM_API PASCAL
+
+#define SCREEN_BPP 4
+
+/* ------ */
+#elif defined( PLATFORM_WINCE )
+/* ------ */
+
+#include <windows.h>
+
+#include "../gen/win16/resext.h"
+
+/* Doesn't exist on this platform. */
+#define far
+
+#ifndef LOG_FILE_NAME
+#define LOG_FILE_NAME "logwin16.txt"
+#endif /* !LOG_FILE_NAME */
+
+#ifndef DIO_PATH_TEMP
+#define DIO_PATH_TEMP "c:\\temp"
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP '\\'
+#endif /* !DIO_PATH_SEP */
+
+#define DRC_BITMAP_TYPE 1
+#define DRC_MAP_TYPE 2
+
+#define USE_SOFTWARE_TEXT
+#define ANIMATE_SCREEN_MOVEMENT
+
+#define PLATFORM_API WINAPI
+
 #define SCREEN_BPP 4
 
 /* ------ */
@@ -323,7 +358,14 @@
 #endif /* __GNUC__ */
 
 /* ! */
-#ifdef DEBUG_LOG
+#ifdef ANCIENT_C
+/* ! */
+
+#  define debug_printf
+#  define error_printf
+
+/* ! */
+#elif defined( DEBUG_LOG )
 /* ! */
 
 #  include <stdio.h>
@@ -335,13 +377,6 @@
 #  define debug_printf( lvl, ... ) internal_debug_printf( lvl, __VA_ARGS__ )
 
 #  define error_printf( ... ) internal_error_printf( __VA_ARGS__ )
-
-/* ! */
-#elif defined( ANCIENT_C )
-/* ! */
-
-#  define debug_printf( x )
-#  define error_printf( x )
 
 /* ! */
 #else /* !DEBUG_LOG, !ANCIENT_C */

@@ -27,13 +27,13 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
    if( cmd == sysAppLaunchCmdNormalLaunch ) {
 
 /* ------ */
-#elif defined( PLATFORM_WIN16 )
+#elif defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
 /* ------ */
 
 HINSTANCE g_instance = NULL;
 HWND g_window = NULL;
 
-int PASCAL WinMain(
+int PLATFORM_API WinMain(
    HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow
 ) {
 
@@ -49,7 +49,7 @@ int main( int argc, char* argv[] ) {
 
    struct DSEKAI_STATE* state = NULL;
 
-#ifdef PLATFORM_WIN16
+#if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
    MSG msg;
    int msg_retval = 0;
 
