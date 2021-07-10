@@ -9,3 +9,6 @@ QC.INI
 .finf
 .rsrc
 doc
+*.vcb
+*.vcl
+*.vco

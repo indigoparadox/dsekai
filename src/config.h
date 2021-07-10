@@ -400,7 +400,13 @@
 #endif /* ANCIENT_C */
 
 /* ! */
-#ifdef USE_SOFT_ASSERT
+#ifdef DISABLE_ASSERT
+/* ! */
+
+#define assert( comp )
+
+/* ! */
+#elif defined( USE_SOFT_ASSERT )
 /* ! */
 
 #  define assert( comp ) if( !(comp) ) { g_assert_failed_len = dio_snprintf( g_assert_failed, 255, __FILE__ ": %d: ASSERT FAILED", __LINE__ ); }
