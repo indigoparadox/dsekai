@@ -254,12 +254,14 @@ void graphics_draw_line(
    hdcBuffer = CreateCompatibleDC( NULL );
    oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
 
+#ifndef PLATFORM_WINCE
    pen = CreatePen( PS_SOLID, thickness, color );
    oldPen = SelectObject( hdcBuffer, pen );
    MoveTo( hdcBuffer, x1, y1 );
    LineTo( hdcBuffer, x2, y2 );
    SelectObject( hdcBuffer, oldPen );
    DeleteObject( pen );
+#endif /* PLATFORM_WINCE */
 
    /* Reselect the initial objects into the provided DCs. */
    SelectObject( hdcBuffer, oldHbmBuffer );
