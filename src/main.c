@@ -82,7 +82,7 @@ int main( int argc, char* argv[] ) {
       error_printf( "unable to initialize input" );
    }
 
-#ifdef PLATFORM_WIN16
+#if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
    ShowWindow( g_window, nCmdShow );
 #endif /* PLATFORM_WIN16 */
 
@@ -91,7 +91,7 @@ int main( int argc, char* argv[] ) {
    g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
 
    while( g_running ) {
-#ifdef PLATFORM_WIN16
+#if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
       /* In Windows, this stuff is handled by the message processor. */
       msg_retval = GetMessage( &msg, NULL, 0, 0 );
       if( 0 >= msg_retval ) {

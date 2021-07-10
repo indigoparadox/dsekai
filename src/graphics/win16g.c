@@ -250,6 +250,7 @@ void graphics_draw_line(
    HPEN pen = NULL;
    HPEN oldPen = NULL;
 
+#ifndef PLATFORM_WINCE /* TODO */
    /* Create HDC for the off-screen buffer to blit to. */
    hdcBuffer = CreateCompatibleDC( NULL );
    oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
@@ -260,6 +261,7 @@ void graphics_draw_line(
    LineTo( hdcBuffer, x2, y2 );
    SelectObject( hdcBuffer, oldPen );
    DeleteObject( pen );
+#endif
 
    /* Reselect the initial objects into the provided DCs. */
    SelectObject( hdcBuffer, oldHbmBuffer );
