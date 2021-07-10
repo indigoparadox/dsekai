@@ -161,6 +161,8 @@ CONVERT := bin/convert
 LOOKUPS := bin/lookups
 HEADPACK := bin/headpack
 
+RETRO68_PREFIX := /opt/Retro68-build/toolchain
+
 CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=2 -DUSE_JSON_MAPS -DRESOURCE_DRC
 CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DUSE_JSON_MAPS -DRESOURCE_DRC
 CFLAGS_CONVERT := -DNO_RESEXT -g -DUSE_JSON_MAPS -DRESOURCE_DRC
@@ -199,7 +201,6 @@ $(BIN_WIN16): LD := wcl
 $(BIN_WIN16): RC := wrc
 $(BIN_WIN16): LDFLAGS := -l=windows -zp=1
 
-$(BIN_MAC7): RETRO68_PREFIX := /opt/Retro68-build/toolchain
 $(BIN_MAC7): CC := m68k-apple-macos-gcc
 $(BIN_MAC7): CXX := m68k-apple-macos-g++
 $(BIN_MAC7): LDFLAGS := -lRetroConsole
@@ -390,11 +391,15 @@ $(GENDIR_MAC7):
 #      -if $(DSEKAI_ASSETS_ICNS) \
 #      -oh $(GENDIR_MAC7)/resext.h \
 
-$(BINDIR)/mac7.drc \
-$(GENDIR_MAC7)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | $(GENDIR_SDL)
-	$(DRCPACK) -c -a -af $(BINDIR)/mac7.drc -t PICT -i 5001 \
-      -if $(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS) \
-      -lh $(GENDIR_MAC7)/resext.h
+#$(BINDIR)/mac7.drc \
+#$(GENDIR_MAC7)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | $(GENDIR_SDL)
+#	$(DRCPACK) -c -a -af $(BINDIR)/mac7.drc -t PICT -i 5001 \
+#      -if $(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS) \
+#      -lh $(GENDIR_MAC7)/resext.h
+
+$(GENDIR_MAC7)/resext.h: \
+$(HEADPACK) $(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_MAC7)
+	$(HEADPACK) $@ $(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS)
 
 $(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)
 	$(IMAGEMAGICK) $< $@
@@ -417,8 +422,7 @@ $(BIN_MAC7): $(OBJDIR_MAC7)/dsekai.code.bin
       --cc $(BINDIR)/dsekai.APPL \
       --cc $(BINDIR)/dsekai.dsk
 
-$(OBJDIR_MAC7)/%.o: \
-%.c $(BINDIR)/mac7.drc $(GENDIR_MAC7)/resext.h | $(OBJDIR_MAC7)
+$(OBJDIR_MAC7)/%.o: %.c $(GENDIR_MAC7)/resext.h | $(OBJDIR_MAC7)
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_MAC7) -c -o $@ $(<:%.o=%)
 

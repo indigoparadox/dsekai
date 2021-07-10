@@ -209,6 +209,7 @@
 #define USE_SOFTWARE_TEXT
 #define ANIMATE_SCREEN_MOVEMENT
 #define DRC_TOC_INITIAL_ALLOC 50 /* Fake it until we have realloc. */
+#define RESOURCE_HEADER
 
 /* ------ */
 #else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */

@@ -93,6 +93,18 @@ void graphics_draw_block(
 ) {
 }
 
+void graphics_draw_rect(
+   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+}
+
+void graphics_draw_line(
+   uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+}
+
 int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    /* uint8_t buffer[MAC7_RSRC_BUFFER_SZ] = NULL;
    int32_t buffer_sz = MAC7_RSRC_BUFFER_SZ; */
@@ -111,7 +123,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into buffer. */
-   buffer_handle = resource_get_handle( id, type );
+   buffer_handle = resource_get_bitmap_handle( id );
    if( NULL == buffer_handle ) {
       error_printf( "unable to get resource %d info", id );
       retval = 0;
