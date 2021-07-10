@@ -109,7 +109,6 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    /* uint8_t buffer[MAC7_RSRC_BUFFER_SZ] = NULL;
    int32_t buffer_sz = MAC7_RSRC_BUFFER_SZ; */
    Handle buffer_handle;
-   union DRC_TYPE type = DRC_BITMAP_TYPE;
    uint32_t id = 0;
    int32_t retval = 0;
 

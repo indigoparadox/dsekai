@@ -3,7 +3,11 @@
 
 #include "data/tiles.h"
 #ifndef USE_JSON_MAPS
+#ifdef PLATFORM_WIN16
 #include "../gen/win16/map_field.h"
+#elif defined( PLATFORM_MAC7 )
+#include "../gen/mac7/map_field.h"
+#endif
 #endif /* USE_JSON_MAPS */
 
 #define INPUT_BLOCK_DELAY 5

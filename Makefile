@@ -145,6 +145,8 @@ DSEKAI_ASSETS_PICTS := \
    $(subst .bmp,.pict,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_MAPS_WIN16 := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN16)/,$(DSEKAI_ASSETS_MAPS)))
+DSEKAI_ASSETS_MAPS_MAC7 := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_MAPS)))
 
 MD := mkdir -p
 DD := /bin/dd
@@ -386,6 +388,9 @@ $(OBJDIR_MAC7):
 $(GENDIR_MAC7):
 	$(MD) $@
 
+$(GENDIR_MAC7)/%.h: $(ASSETDIR)/%.json $(MAPC) | $(GENDIR_MAC7)
+	$(PYTHON) $(MAPC) -j $< -o $@
+
 #$(GENDIR_MAC7)/resext.h: $(GENDIR_MAC7) $(MKRESH)
 #	$(MKRESH) -f palm -i 5001 \
 #      -if $(DSEKAI_ASSETS_ICNS) \
@@ -422,7 +427,8 @@ $(BIN_MAC7): $(OBJDIR_MAC7)/dsekai.code.bin
       --cc $(BINDIR)/dsekai.APPL \
       --cc $(BINDIR)/dsekai.dsk
 
-$(OBJDIR_MAC7)/%.o: %.c $(GENDIR_MAC7)/resext.h | $(OBJDIR_MAC7)
+$(OBJDIR_MAC7)/%.o: \
+%.c $(DSEKAI_ASSETS_MAPS_MAC7) $(GENDIR_MAC7)/resext.h | $(OBJDIR_MAC7)
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_MAC7) -c -o $@ $(<:%.o=%)
 
