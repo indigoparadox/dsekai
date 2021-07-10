@@ -30,7 +30,6 @@ uint32_t memory_resize( MEMORY_HANDLE handle, uint32_t sz ) {
 }
 
 void memory_copy_ptr( MEMORY_PTR dest, CONST_MEMORY_PTR src, uint32_t sz ) {
-   printf( "%d\n", sz );
    memcpy( dest, src, sz );
 }
 

@@ -6,7 +6,7 @@
 #define JSON_TOKENS_MAX 1024
 #define JSON_PATH_SZ 255
 
-int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
+int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    int16_t tok_parsed = 0,
       tiles_count = 0,
       i = 0,
@@ -17,15 +17,14 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    jsmn_parser parser;
    jsmntok_t* tokens = NULL;
    char iter_path[JSON_PATH_SZ];
-   MEMORY_HANDLE json_handle = NULL,
-      tokens_handle = NULL;
+   RESOURCE_JSON_HANDLE json_handle = NULL;
+   MEMORY_HANDLE tokens_handle = NULL;
    uint32_t json_buffer_sz = 0;
-   RESOURCE_ID type = DRC_MAP_TYPE;
    char tileset_name[DRC_FILENAME_SZ];
 
    memory_zero_ptr( tileset_name, DRC_FILENAME_SZ );
 
-   json_handle = resource_get_handle( id, type );
+   json_handle = resource_get_json_handle( id );
    if( NULL == json_handle ) {
       error_printf( "could not get tilemap resource handle" );
       retval = 0;

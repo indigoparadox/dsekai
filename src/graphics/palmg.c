@@ -61,7 +61,7 @@ int graphics_platform_blit_at(
       goto cleanup;
    }
 
-   rsrc = resource_get_handle( bmp->id, DRC_BITMAP_TYPE );
+   rsrc = resource_get_bitmap_handle( bmp->id );
 
    if( NULL == rsrc ) {
       WinDrawChars( "Z", 1, x, y );
@@ -103,7 +103,7 @@ void graphics_draw_line(
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
-int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
+int32_t graphics_load_bitmap( RESOURCE_ID id, struct GRAPHICS_BITMAP* b ) {
    int retval = 1;
 
    if( 0 != b->ref_count ) {

@@ -161,8 +161,7 @@ void graphics_draw_line(
  */
 int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
-   MEMORY_HANDLE buffer_handle = NULL;
-   union DRC_TYPE type = DRC_BITMAP_TYPE;
+   RESOURCE_BITMAP_HANDLE buffer_handle = NULL;
    uint32_t id = 0,
       retval = 1,
       buffer_sz = 0;
@@ -178,7 +177,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into buffer. */
-   buffer_handle = resource_get_handle( id, type );
+   buffer_handle = resource_get_bitmap_handle( id );
    if( NULL == buffer_handle ) {
       retval = 0;
       error_printf( "unable to get resource handle" );

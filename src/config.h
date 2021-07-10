@@ -105,7 +105,7 @@
 #define platform_fclose HostFClose
 
 #define DRC_BITMAP_TYPE 'Tbmp'
-#define DRC_MAP_TYPE 'json'
+#define DRC_JSON_TYPE 'json'
 
 /* #define assert( test ) ErrFatalDisplayIf( !(test), __FILE__ ": " stringify_line( __LINE__ ) ": assert failure" ) */
 
@@ -133,7 +133,7 @@
 #endif /* !DIO_PATH_SEP */
 
 #define DRC_BITMAP_TYPE 1
-#define DRC_MAP_TYPE 2
+#define DRC_JSON_TYPE 2
 
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
@@ -167,7 +167,7 @@
 #endif /* !DIO_PATH_SEP */
 
 #define DRC_BITMAP_TYPE 1
-#define DRC_MAP_TYPE 2
+#define DRC_JSON_TYPE 2
 
 #define USE_SOFTWARE_TEXT
 #define ANIMATE_SCREEN_MOVEMENT
@@ -272,9 +272,9 @@
 #define DRC_BITMAP_TYPE {'B', 'M', 'P', '1'}
 #endif /* !DRC_BITMAP_TYPE */
 
-#ifndef DRC_MAP_TYPE
-#define DRC_MAP_TYPE {'j', 's', 'o', 'n'}
-#endif /* !DRC_MAP_TYPE */
+#ifndef DRC_JSON_TYPE
+#define DRC_JSON_TYPE {'j', 's', 'o', 'n'}
+#endif /* !DRC_JSON_TYPE */
 
 #ifndef JSON_BUFFER_SZ
 #define JSON_BUFFER_SZ 8192

@@ -133,7 +133,6 @@ int32_t drc_get_resource_info(
       header.first_entry_start == 0 ||
       header.first_entry_start > dio_sz_stream( drc_file ) ||
       header.first_entry_start < header.toc_start ||
-      header.toc_entries < 0 ||
       header.toc_entries >= DRC_MAX_ENTRIES
    ) {
       error_printf( "invalid archive header" );
@@ -155,13 +154,13 @@ int32_t drc_get_resource_info(
       error_printf( "   first_entry_start: %u", header.first_entry_start );
       return -1;
    }
-   debug_printf( 2, "drc is %d bytes long; found %d TOC entries",
+   debug_printf( 2, "drc is %u bytes long; found %u TOC entries",
       header.filesize, header.toc_entries );
    dio_seek_stream( drc_file, header.toc_start, SEEK_SET );
    for( i = 0 ; header.toc_entries > i ; i++ ) {
       drc_read_toc_e( drc_file, &toc_e_iter );
 
-      debug_printf( 0, "comparing: %c%c%c%c vs %c%c%c%c, %d vs %d",
+      debug_printf( 2, "comparing: %c%c%c%c vs %c%c%c%c, %d vs %d",
          toc_e_iter.type.str[0], toc_e_iter.type.str[1],
          toc_e_iter.type.str[2], toc_e_iter.type.str[3],
          type.str[0], type.str[1], type.str[2], type.str[3],
@@ -203,7 +202,7 @@ cleanup:
  */
 int32_t drc_get_resource(
    struct DIO_STREAM* drc_file, union DRC_TYPE type, uint32_t id,
-   uint8_t* buffer, uint16_t buffer_sz
+   MEMORY_PTR buffer, uint16_t buffer_sz
 ) {
    int32_t
       resource_sz = 0,

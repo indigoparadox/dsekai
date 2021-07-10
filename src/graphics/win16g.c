@@ -272,7 +272,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
    uint32_t id = 0;
-   MEMORY_HANDLE res_handle = NULL;
+   HBITMAP res_handle = NULL;
 
    assert( NULL != b );
    assert( 0 == b->ref_count );
@@ -284,10 +284,10 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into bitmap. */
-   res_handle = resource_get_handle( id, DRC_BITMAP_TYPE );
+   res_handle = resource_get_bitmap_handle( id, DRC_BITMAP_TYPE );
    if( NULL != res_handle ) {
       /* TODO: Handle non-Windows resources. */
-      b->bitmap = res_handle->ptr;
+      b->bitmap = res_handle;
       free( res_handle );
    } else {
       error_printf( "NULL handle returned" );

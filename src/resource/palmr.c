@@ -1,10 +1,18 @@
 
 #include "../dstypes.h"
 
-MEMORY_HANDLE resource_get_handle( uint32_t id, RESOURCE_ID type ) {
+static MEMORY_HANDLE resource_get_handle( RESOURCE_ID id, RESOURCE_TYPE type ) {
    debug_printf( 2, "loading resource %u of type %u", id, type );
 
    return DmGetResource( type, id );
+}
+
+RESOURCE_BITMAP_HANDLE resource_get_bitmap_handle( RESOURCE_ID id ) {
+   return resource_get_handle( id, DRC_BITMAP_TYPE );
+}
+
+RESOURCE_BITMAP_HANDLE resource_get_json_handle( RESOURCE_ID id ) {
+   return resource_get_handle( id, DRC_JSON_TYPE );
 }
 
 MEMORY_PTR resource_lock_handle( MEMORY_HANDLE handle ) {

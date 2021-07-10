@@ -69,7 +69,7 @@ struct DRC_TOC_E {
 
 int32_t drc_list_resources( struct DIO_STREAM*, MEMORY_HANDLE*, uint16_t );
 int32_t drc_get_resource(
-   struct DIO_STREAM*, union DRC_TYPE, uint32_t, uint8_t*, uint16_t );
+   struct DIO_STREAM*, union DRC_TYPE, uint32_t, MEMORY_PTR, uint16_t );
 int32_t drc_get_resource_sz( struct DIO_STREAM*, union DRC_TYPE, uint32_t );
 int32_t drc_get_resource_name(
    struct DIO_STREAM*, union DRC_TYPE, uint32_t, char** );

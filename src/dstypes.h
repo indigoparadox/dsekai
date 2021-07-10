@@ -64,6 +64,15 @@ struct DSEKAI_STATE;
 
 #include "memory.h"
 #include "engines.h"
+
+#ifdef PLATFORM_PALM
+#include "resource/palmr.h"
+#elif defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
+#include "resource/win16r.h"
+#else
+#include "resource/drcr.h"
+#endif /* PLATFORM_* */
+
 #include "resource.h"
 #include "graphics.h"
 #include "input.h"
