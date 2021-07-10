@@ -235,6 +235,12 @@ void graphics_draw_block(
    DeleteDC( hdcBuffer );
 }
 
+void graphics_draw_rect(
+   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+}
+
 void graphics_draw_line(
    uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
    uint16_t thickness, const GRAPHICS_COLOR color
@@ -266,6 +272,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
    uint32_t id = 0;
+   MEMORY_HANDLE res_handle = NULL;
 
    assert( NULL != b );
    assert( 0 == b->ref_count );
@@ -277,7 +284,14 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into bitmap. */
-   b->bitmap = resource_get_handle( id, DRC_BITMAP_TYPE );
+   res_handle = resource_get_handle( id, DRC_BITMAP_TYPE );
+   if( NULL != res_handle ) {
+      /* TODO: Handle non-Windows resources. */
+      b->bitmap = res_handle->ptr;
+      free( res_handle );
+   } else {
+      error_printf( "NULL handle returned" );
+   }
    if( !b->bitmap ) {
       error_printf( "unable to load resource %u", id );
       return 0;
