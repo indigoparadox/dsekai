@@ -38,7 +38,7 @@ DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
    src/input/win16i.c \
    src/resource/win16r.c \
-   src/memory/fakem.c \
+   src/memory/win16m.c \
    src/graphics/win16g.c
 
 DSEKAI_C_FILES_MAC7_ONLY := \
