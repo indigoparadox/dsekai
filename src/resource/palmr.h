@@ -5,6 +5,7 @@
 #include "../dstypes.h"
 
 typedef uint32_t RESOURCE_TYPE;
+typedef uint32_t RESOURCE_ID;
 typedef MEMORY_HANDLE RESOURCE_BITMAP_HANDLE;
 typedef MEMORY_HANDLE RESOURCE_JSON_HANDLE;
 
