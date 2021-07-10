@@ -317,7 +317,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    uint16_t plane_sz = 0,
       plane_offset = 0;
    int32_t retval = 1;
-   MEMORY_HANDLE buffer_handle = NULL;
+   RESOURCE_BITMAP_HANDLE buffer_handle = NULL;
 
    b->ref_count++;
    if( 1 > b->ref_count ) {
@@ -326,7 +326,6 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load the resource. */
-   error_printf( "getid: %u\n", id );
    buffer_handle = resource_get_bitmap_handle( id );
    if( NULL == buffer_handle ) {
       error_printf( "unable to get resource %d info", id );
@@ -335,7 +334,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    }
 
    buffer_sz = memory_sz( buffer_handle );
-   buffer = memory_lock( buffer_handle );
+   buffer = resource_lock_handle( buffer_handle );
 
    /* Parse the resource into a usable struct. */
    b->id = id;
@@ -377,7 +376,7 @@ cleanup:
    }
 
    if( NULL != buffer ) {
-      buffer = memory_unlock( buffer_handle );
+      buffer = resource_unlock_handle( buffer_handle );
    }
 
    if( NULL != buffer_handle ) {

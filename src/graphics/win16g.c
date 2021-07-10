@@ -284,7 +284,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into bitmap. */
-   res_handle = resource_get_bitmap_handle( id, DRC_BITMAP_TYPE );
+   res_handle = resource_get_bitmap_handle( id );
    if( NULL != res_handle ) {
       /* TODO: Handle non-Windows resources. */
       b->bitmap = res_handle;

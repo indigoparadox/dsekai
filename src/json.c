@@ -17,7 +17,7 @@ int16_t json_get_token_idx(
 
    debug_printf( 0, "(%u) parent type is: %d", tree_depth_id, parent->type );
 
-   debug_printf( 1, "(%u) path spec: %s", tree_depth_id, contents );
+   debug_printf( 0, "(%u) path spec: %s", tree_depth_id, contents );
 
    if( NULL != contents && JSMN_ARRAY == parent->type ) {
       cmp_str_as_i = dio_atoi( contents, 10 );
@@ -62,7 +62,7 @@ int16_t json_get_token_idx(
                return i;
             } else {
                /* It's a key, return child. */
-               debug_printf( 1, "(%u) redirected to %d",
+               debug_printf( 0, "(%u) redirected to %d",
                   tree_depth_id, tentative_child_idx );
                return tentative_child_idx;
             }
@@ -101,7 +101,7 @@ int16_t json_token_id_from_path(
       path_cur_tok_start = 0,
       path_cur_tok_sz = 0;
 
-   debug_printf( 1, "path: %s", path );
+   debug_printf( 0, "path: %s", path );
 
    while(
       path_cur_tok_start + path_cur_tok_sz < memory_strnlen_ptr( path, path_sz )

@@ -185,7 +185,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    buffer_sz = memory_sz( buffer_handle );
-   buffer = memory_lock( buffer_handle );
+   buffer = resource_lock_handle( buffer_handle );
 
    /* Parse buffered resource into SDL. */
    bmp_stream = SDL_RWFromMem( buffer, buffer_sz );
@@ -214,7 +214,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
 cleanup:
 
    if( NULL != buffer ) {
-      buffer = memory_unlock( buffer_handle );
+      buffer = resource_unlock_handle( buffer_handle );
    }
 
    if( NULL != buffer_handle ) {

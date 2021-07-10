@@ -50,6 +50,7 @@
 #define USE_SOFTWARE_TEXT
 #define USE_JSON_MAPS
 #define ANIMATE_SCREEN_MOVEMENT
+#define RESOURCE_HEADER
 
 /* ------ */
 #elif defined( PLATFORM_SDL )
@@ -75,6 +76,7 @@
 #define USE_SOFTWARE_TEXT
 #define USE_JSON_MAPS
 #define ANIMATE_SCREEN_MOVEMENT
+#define RESOURCE_HEADER
 
 /* ------ */
 #elif defined( PLATFORM_PALM )
