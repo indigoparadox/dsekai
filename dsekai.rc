@@ -10,7 +10,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "newres.h"
+#include "src\winceres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -27,7 +27,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_DSEKAI       ICON    DISCARDABLE     "dsekai.ICO"
+IDI_DSEKAI       ICON    DISCARDABLE     "assets/dsekai.ICO"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ END
 
 2 TEXTINCLUDE DISCARDABLE 
 BEGIN
-	"#include ""newres.h""\r\n"
+	"#include ""src\\winceres.h""\r\n"
     "\0"
 END
 
@@ -127,7 +127,6 @@ STRINGTABLE DISCARDABLE
 BEGIN
    IDC_DSEKAI   "DSEKAI"
    IDS_APP_TITLE       "dsekai"
-   IDS_HELLO           "Hello World!"
 END
 
 #endif
@@ -146,7 +145,6 @@ END
 #endif    // not APSTUDIO_INVOKED
 
 sprite_looking_glass BITMAP "assets/sprite_looking_glass.bmp"
-sprite_maid BITMAP "assets/sprite_maid.bmp"
 sprite_princess BITMAP "assets/sprite_princess.bmp"
 sprite_robe BITMAP "assets/sprite_robe.bmp"
 tile_field_brick_wall BITMAP "assets/tile_field_brick_wall.bmp"

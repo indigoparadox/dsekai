@@ -4257,15 +4257,7 @@ SOURCE=.\dsekai.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\newres.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\resource.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\StdAfx.h
+SOURCE=.\src\winceres.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
@@ -4273,16 +4265,12 @@ SOURCE=.\StdAfx.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
-SOURCE=.\dsekai.ico
+SOURCE=.\assets\dsekai.ico
 # End Source File
 # Begin Source File
 
 SOURCE=.\assets\pattern_cm_checker_b.bmp
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=.\ReadMe.txt
-# End Source File
 # End Target
 # End Project

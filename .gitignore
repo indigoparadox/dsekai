@@ -12,3 +12,5 @@ doc
 *.vcb
 *.vcl
 *.vco
+*.aps
+tmp

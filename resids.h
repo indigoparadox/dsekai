@@ -3,7 +3,6 @@
 // Used by DSEKAI.RC
 //
 #define IDS_APP_TITLE					1
-#define IDS_HELLO						2
 #define IDC_DSEKAI				3
 #define IDI_DSEKAI				101
 #define IDM_MENU						102
