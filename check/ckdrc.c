@@ -311,6 +311,8 @@ START_TEST( check_drc_get ) {
       header_type = DRC_ARCHIVE_TYPE;
    char test_string_1[] = "This is a test string.",
       test_string_2[] = "Another tstrng.",
+      test_data_buffer[1024],
+      test_name_buffer[1024],
       reader[24];
    struct DRC_HEADER* header = (struct DRC_HEADER*)&g_buffer_r;
    struct DRC_TOC_E* toc_e =
@@ -324,12 +326,30 @@ START_TEST( check_drc_get ) {
       test_string_1, 22 );
 
    memcpy( g_buffer_r, g_buffer_w, DRC_CKBUFFER_SZ );
+   memset( g_buffer_w, '\0', DRC_CKBUFFER_SZ );
 
    drc_add_resource(
       &g_drc_stream_r, &g_drc_stream_w, toc_type, 5002, "test2.bmp", 9,
       test_string_2, 15 );
 
    memcpy( g_buffer_r, g_buffer_w, DRC_CKBUFFER_SZ );
+   memset( g_buffer_w, '\0', DRC_CKBUFFER_SZ );
+
+   for( i = 0 ; 20 > i ; i++ ) {
+      memset( test_data_buffer, '\0', 1024 );
+      memset( test_name_buffer, '\0', 1024 );
+      snprintf( test_data_buffer, 1024, "String %02d here.", i );
+      snprintf( test_name_buffer, 1024, "test%d.bmp", i );
+      printf( "adding %s\n", test_name_buffer );
+
+      drc_add_resource(
+         &g_drc_stream_r, &g_drc_stream_w, toc_type,
+         5010 + i, test_name_buffer, 9,
+         test_data_buffer, 15 );
+
+      memcpy( g_buffer_r, g_buffer_w, DRC_CKBUFFER_SZ );
+      memset( g_buffer_w, '\0', DRC_CKBUFFER_SZ );
+   }
 
    dio_close_stream( &g_drc_stream_r );
    dio_open_stream_buffer( g_buffer_r, DRC_CKBUFFER_SZ, &g_drc_stream_r );

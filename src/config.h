@@ -206,7 +206,7 @@
 
 #define USE_SOFTWARE_TEXT
 #define ANIMATE_SCREEN_MOVEMENT
-#define DRC_TOC_INITIAL_ALLOC 20 /* Fake it until we have realloc. */
+#define DRC_TOC_INITIAL_ALLOC 50 /* Fake it until we have realloc. */
 
 /* ------ */
 #else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
@@ -329,7 +329,7 @@
 #endif /* !FAKE_HEAP_SIZE */
 
 #ifndef DRC_TOC_INITIAL_ALLOC
-#define DRC_TOC_INITIAL_ALLOC 1
+#define DRC_TOC_INITIAL_ALLOC 50
 #endif /* !DRC_TOC_INITIAL_ALLOC */
 
 #ifndef DIO_PATH_MAX
@@ -337,7 +337,7 @@
 #endif /* DIO_PATH_MAX */
 
 #ifndef GRAPHICS_CACHE_INITIAL_SZ
-#define GRAPHICS_CACHE_INITIAL_SZ 20
+#define GRAPHICS_CACHE_INITIAL_SZ 50
 #endif /* !GRAPHICS_CACHE_INITIAL_SZ */
 
 #ifdef LOG_TO_FILE

@@ -122,11 +122,11 @@ void graphics_platform_shutdown() {
 void graphics_flip() {
 #ifdef USE_DOUBLEBUF
 #if GRAPHICS_M_320_200_256_VGA == GRAPHICS_MODE
-      memory_copy_ptr( (char far *)GRAPHICS_M_320_200_256_VGA_A,
+      _fmemcpy( GRAPHICS_M_320_200_256_VGA_A,
          g_buffer, SCREEN_W * SCREEN_H );
 #elif GRAPHICS_M_320_200_4_CGA == GRAPHICS_MODE
       /* memory_copy_ptr both planes. */
-      memory_copy_ptr( (char far *)0xB8000000, g_buffer, 16000 );
+      _fmemcpy( (char far *)0xB8000000, g_buffer, 16000 );
 #endif /* GRAPHICS_MODE */
 #endif /* USE_DOUBLEBUF */
 }
@@ -207,8 +207,8 @@ int graphics_platform_blit_at(
       byte_offset = ((((y + y_offset) / 2) * SCREEN_W) + x) / 4;
 #endif /* USE_LOOKUPS */
 
-      memory_copy_ptr( &(g_buffer[byte_offset]), plane_1, 4 );
-      memory_copy_ptr( &(g_buffer[0x2000 + byte_offset]), plane_2, 4 );
+      _fmemcpy( &(g_buffer[byte_offset]), plane_1, 4 );
+      _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2, 4 );
 
       /* Advance source address by bytes per copy. */
       plane_1 += 2;
@@ -326,6 +326,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load the resource. */
+   error_printf( "getid: %u\n", id );
    buffer_handle = resource_get_bitmap_handle( id );
    if( NULL == buffer_handle ) {
       error_printf( "unable to get resource %d info", id );

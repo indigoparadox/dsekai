@@ -127,6 +127,9 @@ uint32_t memory_resize( MEMORY_HANDLE handle, uint32_t sz ) {
       return 0;
    }
 
+   debug_printf( 1, "reallocating %u-byte block to %u bytes",
+      handle->ptr_sz, sz );
+
    assert( NULL != handle->ptr );
 
    new_ptr = realloc( handle->ptr, sz );

@@ -1,11 +1,11 @@
 
 #include "../dstypes.h"
 
-int graphics_init() {
+int16_t graphics_platform_init() {
    return 1;
 }
 
-void graphics_shutdown() {
+void graphics_platform_shutdown() {
 
 }
 
