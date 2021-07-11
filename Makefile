@@ -32,12 +32,12 @@ DSEKAI_C_FILES_PALM_ONLY := \
    src/graphics/palmg.c \
    src/dio.c
 
-DSEKAI_C_FILES_WIN16_ONLY := \
+DSEKAI_C_FILES_WIN_ONLY := \
    src/main.c \
-   src/input/win16i.c \
-   src/resource/win16r.c \
-   src/memory/win16m.c \
-   src/graphics/win16g.c
+   src/input/wini.c \
+   src/resource/winr.c \
+   src/memory/winm.c \
+   src/graphics/wing.c
 
 DSEKAI_C_FILES_MAC7_ONLY := \
    src/main.c \
@@ -104,6 +104,7 @@ OBJDIR_SDL := obj/sdl
 OBJDIR_DOS := obj/dos
 OBJDIR_PALM := obj/palm
 OBJDIR_WIN16 := obj/win16
+OBJDIR_WIN32 := obj/win32
 OBJDIR_MAC7 := obj/mac7
 OBJDIR_CHECK_NULL := obj/check_null
 
@@ -111,6 +112,7 @@ GENDIR_SDL := gen/sdl
 GENDIR_DOS := gen/dos
 GENDIR_PALM := gen/palm
 GENDIR_WIN16 := gen/win16
+GENDIR_WIN32 := gen/win32
 GENDIR_MAC7 := gen/mac7
 GENDIR_CHECK_NULL := gen/check_null
 
@@ -120,6 +122,7 @@ BIN_SDL := $(BINDIR)/dsekai
 BIN_DOS := $(BINDIR)/dsekai.exe
 BIN_PALM := $(BINDIR)/dsekai.prc
 BIN_WIN16 := $(BINDIR)/dsekai16.exe
+BIN_WIN32 := $(BINDIR)/dsekai32.exe
 BIN_MAC7 := $(BINDIR)/dsekai.bin $(BINDIR)/dsekai.APPL $(BINDIR)/dsekai.dsk
 
 BIN_CHECK_NULL := $(BINDIR)/check
@@ -145,6 +148,8 @@ DSEKAI_ASSETS_PICTS := \
    $(subst .bmp,.pict,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
 DSEKAI_ASSETS_MAPS_WIN16 := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN16)/,$(DSEKAI_ASSETS_MAPS)))
+DSEKAI_ASSETS_MAPS_WIN32 := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN32)/,$(DSEKAI_ASSETS_MAPS)))
 DSEKAI_ASSETS_MAPS_MAC7 := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_MAPS)))
 
@@ -177,7 +182,8 @@ CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-
 CFLAGS_SDL := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC)
 CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=1
 CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g -DDEBUG_THRESHOLD=1 $(CFLAGS_DEBUG_GENERIC)
-CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1
+CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1
+CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1
 CFLAGS_MAC7 := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_DEBUG_GENERIC)
 CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=3 -DCHECK -DUSE_JSON_MAPS -DRESOURCE_DRC
 
@@ -203,6 +209,11 @@ $(BIN_WIN16): LD := wcl
 $(BIN_WIN16): RC := wrc
 $(BIN_WIN16): LDFLAGS := -l=windows -zp=1
 
+$(BIN_WIN32): CC := wcc386
+$(BIN_WIN32): LD := wcl386
+$(BIN_WIN32): RC := wrc
+$(BIN_WIN32): LDFLAGS := -bcl=nt_win -zp=1
+
 $(BIN_MAC7): CC := m68k-apple-macos-gcc
 $(BIN_MAC7): CXX := m68k-apple-macos-g++
 $(BIN_MAC7): LDFLAGS := -lRetroConsole
@@ -224,7 +235,10 @@ DSEKAI_O_FILES_PALM := \
    $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_PALM_ONLY)))
 DSEKAI_O_FILES_WIN16 := \
    $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN16_ONLY)))
+   $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN_ONLY)))
+DSEKAI_O_FILES_WIN32 := \
+   $(addprefix $(OBJDIR_WIN32)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_WIN32)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN_ONLY)))
 DSEKAI_O_FILES_MAC7 := \
    $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
    $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC7_ONLY)))
@@ -366,8 +380,9 @@ $(BIN_WIN16): \
 $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | $(BINDIR) $(DSEKAI_ASSETS_MAPS_WIN16)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_WIN16)/win16.res: $(GENDIR_WIN16)/win16.rc $(GENDIR_WIN16)/dsekai.ico | $(OBJDIR_WIN16)
-	$(RC) -r -i $(INCLUDE)win src/win16s.rc -o $@
+$(OBJDIR_WIN16)/win16.res: \
+$(GENDIR_WIN16)/win16.rc $(ASSETDIR)/dsekai.ico | $(OBJDIR_WIN16)
+	$(RC) -r -DPLATFORM_WIN16 -i $(INCLUDE)win src/winstat.rc -o $@
 
 $(GENDIR_WIN16)/win16.rc \
 $(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)
@@ -376,9 +391,40 @@ $(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)
       -oh $(GENDIR_WIN16)/resext.h -or $(GENDIR_WIN16)/win16.rc
 
 $(OBJDIR_WIN16)/%.o: \
-%.c $(OBJDIR_WIN16)/win16.res $(RESEXT_H) $(DSEKAI_ASSETS_MAPS_WIN16)
+%.c $(OBJDIR_WIN16)/win16.res $(GENDIR_WIN16)/resext.h $(DSEKAI_ASSETS_MAPS_WIN16)
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_WIN16) -fo=$@ $(<:%.c=%)
+
+# ====== Main: Win32 ======
+
+$(GENDIR_WIN32):
+	$(MD) $@
+
+$(OBJDIR_WIN32):
+	$(MD) $@
+
+$(GENDIR_WIN32)/%.h: $(ASSETDIR)/%.json $(MAPC) | $(GENDIR_WIN32)
+	$(PYTHON) $(MAPC) -j $< -o $@
+
+$(BIN_WIN32): \
+$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win32.res | \
+$(BINDIR) $(DSEKAI_ASSETS_MAPS_WIN32)
+	$(LD) $(LDFLAGS) -fe=$@ $^
+
+$(OBJDIR_WIN32)/win32.res: \
+$(GENDIR_WIN32)/win32.rc $(ASSETDIR)/dsekai.ico | $(OBJDIR_WIN32)
+	$(RC) -r -DPLATFORM_WIN32 -i $(INCLUDE)win src/winstat.rc -o $@
+
+$(GENDIR_WIN32)/win32.rc \
+$(GENDIR_WIN32)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN32)
+	$(MKRESH) -f win16 -i 5001 \
+      -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) \
+      -oh $(GENDIR_WIN32)/resext.h -or $(GENDIR_WIN32)/win32.rc
+
+$(OBJDIR_WIN32)/%.o: \
+%.c $(OBJDIR_WIN32)/win32.res $(GENDIR_WIN32)/resext.h $(DSEKAI_ASSETS_MAPS_WIN32)
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS_WIN32) -fo=$@ $(<:%.c=%)
 
 # ====== Main: MacOS 7 ======
 

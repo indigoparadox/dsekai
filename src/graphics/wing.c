@@ -2,7 +2,7 @@
 #define GRAPHICS_C
 #include "../dstypes.h"
 
-#include "../win16s.h"
+#include "../winstat.h"
 
 #include <string.h>
 

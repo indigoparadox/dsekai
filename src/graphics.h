@@ -10,8 +10,8 @@
 #include "graphics/sdlg.h"
 #elif defined( PLATFORM_PALM )
 #include "graphics/palmg.h"
-#elif defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
-#include "graphics/win16g.h"
+#elif defined( PLATFORM_WIN )
+#include "graphics/wing.h"
 #elif defined( PLATFORM_MAC7 )
 #include "graphics/mac7g.h"
 #else

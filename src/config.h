@@ -140,6 +140,7 @@
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
 #define ANIMATE_SCREEN_MOVEMENT
+#define PLATFORM_WIN
 
 #define PLATFORM_API PASCAL
 
@@ -173,6 +174,41 @@
 
 #define USE_SOFTWARE_TEXT
 #define ANIMATE_SCREEN_MOVEMENT
+#define PLATFORM_WIN
+
+#define PLATFORM_API WINAPI
+
+#define SCREEN_BPP 4
+
+/* ------ */
+#elif defined( PLATFORM_WIN32 )
+/* ------ */
+
+#include <windows.h>
+
+#include "../gen/win32/resext.h"
+
+/* Doesn't exist on this platform. */
+#define far
+
+#ifndef LOG_FILE_NAME
+#define LOG_FILE_NAME "logwince.txt"
+#endif /* !LOG_FILE_NAME */
+
+#ifndef DIO_PATH_TEMP
+#define DIO_PATH_TEMP "c:\\temp"
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP '\\'
+#endif /* !DIO_PATH_SEP */
+
+#define DRC_BITMAP_TYPE 1
+#define DRC_JSON_TYPE 2
+
+#define USE_SOFTWARE_TEXT
+#define ANIMATE_SCREEN_MOVEMENT
+#define PLATFORM_WIN
 
 #define PLATFORM_API WINAPI
 

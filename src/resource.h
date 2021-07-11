@@ -8,8 +8,8 @@
 #include "resource/header.h"
 #elif defined( PLATFORM_PALM )
 #include "resource/palmr.h"
-#elif defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
-#include "resource/win16r.h"
+#elif defined( PLATFORM_WIN )
+#include "resource/winr.h"
 #else
 #error "No resource system defined!"
 #endif /* PLATFORM_* */

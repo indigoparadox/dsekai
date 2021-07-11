@@ -27,7 +27,7 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
    if( cmd == sysAppLaunchCmdNormalLaunch ) {
 
 /* ------ */
-#elif defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
+#elif defined( PLATFORM_WIN )
 /* ------ */
 
 HINSTANCE g_instance = NULL;
@@ -44,12 +44,12 @@ int PLATFORM_API WinMain(
 int main( int argc, char* argv[] ) {
 
 /* ------ */
-#endif /* PLATFORM_PALM, PLATFORM_MAC7, PLATFORM_WIN16 */
+#endif /* PLATFORM_PALM, PLATFORM_MAC7, PLATFORM_WIN */
 /* ------ */
 
    struct DSEKAI_STATE* state = NULL;
 
-#if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
+#if defined( PLATFORM_WIN )
    MSG msg;
    int msg_retval = 0;
 
@@ -59,7 +59,7 @@ int main( int argc, char* argv[] ) {
       error_printf( "previous instance detected" );
       return 1;
    }
-#endif /* PLATFORM_WIN16 */
+#endif /* PLATFORM_WIN */
 
 #ifdef LOG_TO_FILE
    g_log_file = platform_fopen( LOG_FILE_NAME, "w" );
@@ -82,9 +82,9 @@ int main( int argc, char* argv[] ) {
       error_printf( "unable to initialize input" );
    }
 
-#if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
+#if defined( PLATFORM_WIN )
    ShowWindow( g_window, nCmdShow );
-#endif /* PLATFORM_WIN16 */
+#endif /* PLATFORM_WIN */
 
    window_init();
 
@@ -99,7 +99,7 @@ int main( int argc, char* argv[] ) {
    }
 
    while( g_running ) {
-#if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
+#if defined( PLATFORM_WIN )
       /* In Windows, this stuff is handled by the message processor. */
       msg_retval = GetMessage( &msg, NULL, 0, 0 );
       if( 0 >= msg_retval ) {
