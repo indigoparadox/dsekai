@@ -3,7 +3,7 @@
 
 #include "data/tiles.h"
 #ifndef USE_JSON_MAPS
-#ifdef PLATFORM_WIN16
+#if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
 #include "../gen/win16/map_field.h"
 #elif defined( PLATFORM_MAC7 )
 #include "../gen/mac7/map_field.h"

@@ -55,7 +55,7 @@ RSC=rc.exe
 # ADD RSC /l 0x409 /d UNDER_CE=$(CEVersion) /d _WIN32_WCE=$(CEVersion) /d "NDEBUG" /d "UNICODE" /d "_UNICODE" /d "$(CePlatform)" /d "SHx" /d "SH4" /d "_SH4_" /r
 CPP=shcl.exe
 # ADD BASE CPP /nologo /W3 /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "SHx" /D "SH4" /D "_SH4_" /D UNDER_CE=$(CEVersion) /D "UNICODE" /D "_UNICODE" /D "NDEBUG" /Yu"stdafx.h" /Qsh4 /Oxs /M$(CECrtMT) /c
-# ADD CPP /nologo /W3 /D "SHx" /D "SH4" /D "_SH4_" /D "NDEBUG" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /Qsh4 /Oxs /M$(CECrtMT) /c
+# ADD CPP /nologo /W3 /D "SHx" /D "SH4" /D "_SH4_" /D "NDEBUG" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /D "LOG_TO_FILE" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /Qsh4 /Oxs /M$(CECrtMT) /c
 # SUBTRACT CPP /YX /Yc /Yu
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -89,7 +89,7 @@ RSC=rc.exe
 # ADD RSC /l 0x409 /d UNDER_CE=$(CEVersion) /d _WIN32_WCE=$(CEVersion) /d "DEBUG" /d "UNICODE" /d "_UNICODE" /d "$(CePlatform)" /d "SHx" /d "SH4" /d "_SH4_" /r
 CPP=shcl.exe
 # ADD BASE CPP /nologo /W3 /Zi /Od /D "DEBUG" /D "SHx" /D "SH4" /D "_SH4_" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /Yu"stdafx.h" /Qsh4 /M$(CECrtMTDebug) /c
-# ADD CPP /nologo /W3 /Zi /Od /D "DEBUG" /D "SHx" /D "SH4" /D "_SH4_" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /Qsh4 /M$(CECrtMTDebug) /c
+# ADD CPP /nologo /W3 /Zi /Od /D "DEBUG" /D "SHx" /D "SH4" /D "_SH4_" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /D "LOG_TO_FILE" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /Qsh4 /M$(CECrtMTDebug) /c
 # SUBTRACT CPP /u /YX /Yc /Yu
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -123,7 +123,7 @@ RSC=rc.exe
 # ADD RSC /l 0x409 /d UNDER_CE=$(CEVersion) /d _WIN32_WCE=$(CEVersion) /d "UNICODE" /d "_UNICODE" /d "NDEBUG" /d "$(CePlatform)" /d "SHx" /d "SH3" /d "_SH3_" /r
 CPP=shcl.exe
 # ADD BASE CPP /nologo /W3 /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "SHx" /D "SH3" /D "_SH3_" /D UNDER_CE=$(CEVersion) /D "UNICODE" /D "_UNICODE" /D "NDEBUG" /Yu"stdafx.h" /Oxs /M$(CECrtMT) /c
-# ADD CPP /nologo /W3 /D "SHx" /D "SH3" /D "_SH3_" /D "NDEBUG" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /Oxs /M$(CECrtMT) /c
+# ADD CPP /nologo /W3 /D "SHx" /D "SH3" /D "_SH3_" /D "NDEBUG" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /D "LOG_TO_FILE" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /Oxs /M$(CECrtMT) /c
 # SUBTRACT CPP /YX /Yc /Yu
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -157,7 +157,7 @@ RSC=rc.exe
 # ADD RSC /l 0x409 /d UNDER_CE=$(CEVersion) /d _WIN32_WCE=$(CEVersion) /d "UNICODE" /d "_UNICODE" /d "DEBUG" /d "$(CePlatform)" /d "SHx" /d "SH3" /d "_SH3_" /r
 CPP=shcl.exe
 # ADD BASE CPP /nologo /W3 /Zi /Od /D "DEBUG" /D "SHx" /D "SH3" /D "_SH3_" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /Yu"stdafx.h" /M$(CECrtMTDebug) /c
-# ADD CPP /nologo /W3 /Zi /Od /D "DEBUG" /D "SHx" /D "SH3" /D "_SH3_" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /M$(CECrtMTDebug) /c
+# ADD CPP /nologo /W3 /Zi /Od /D "DEBUG" /D "SHx" /D "SH3" /D "_SH3_" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /D "LOG_TO_FILE" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /M$(CECrtMTDebug) /c
 # SUBTRACT CPP /YX /Yc /Yu
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -191,7 +191,7 @@ RSC=rc.exe
 # ADD RSC /l 0x409 /d UNDER_CE=$(CEVersion) /d _WIN32_WCE=$(CEVersion) /d "UNICODE" /d "_UNICODE" /d "NDEBUG" /d "$(CePlatform)" /d "_X86_" /d "x86" /d "i486" /r
 CPP=cl.exe
 # ADD BASE CPP /nologo /W3 /D _WIN32_WCE=$(CEVersion) /D "WIN32" /D "STRICT" /D "_WIN32_WCE_EMULATION" /D "INTERNATIONAL" /D "USA" /D "INTLMSG_CODEPAGE" /D "$(CePlatform)" /D "i486" /D UNDER_CE=$(CEVersion) /D "UNICODE" /D "_UNICODE" /D "_X86_" /D "x86" /D "NDEBUG" /Yu"stdafx.h" /Gz /Oxs /c
-# ADD CPP /nologo /W3 /D "WIN32" /D "STRICT" /D "_WIN32_WCE_EMULATION" /D "INTERNATIONAL" /D "USA" /D "INTLMSG_CODEPAGE" /D "i486" /D "_X86_" /D "x86" /D "NDEBUG" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /Gz /Oxs /c
+# ADD CPP /nologo /W3 /D "WIN32" /D "STRICT" /D "_WIN32_WCE_EMULATION" /D "INTERNATIONAL" /D "USA" /D "INTLMSG_CODEPAGE" /D "i486" /D "_X86_" /D "x86" /D "NDEBUG" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /D "LOG_TO_FILE" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /Gz /Oxs /c
 # SUBTRACT CPP /YX /Yc /Yu
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -225,7 +225,7 @@ RSC=rc.exe
 # ADD RSC /l 0x409 /d UNDER_CE=$(CEVersion) /d _WIN32_WCE=$(CEVersion) /d "UNICODE" /d "_UNICODE" /d "DEBUG" /d "$(CePlatform)" /d "_X86_" /d "x86" /d "i486" /r
 CPP=cl.exe
 # ADD BASE CPP /nologo /W3 /Zi /Od /D "DEBUG" /D "i486" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "WIN32" /D "STRICT" /D "_WIN32_WCE_EMULATION" /D "INTERNATIONAL" /D "USA" /D "INTLMSG_CODEPAGE" /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "_X86_" /D "x86" /Yu"stdafx.h" /Gz /c
-# ADD CPP /nologo /W3 /Zi /Od /D "DEBUG" /D "i486" /D "WIN32" /D "STRICT" /D "_WIN32_WCE_EMULATION" /D "INTERNATIONAL" /D "USA" /D "INTLMSG_CODEPAGE" /D "_X86_" /D "x86" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /Gz /c
+# ADD CPP /nologo /W3 /Zi /Od /D "DEBUG" /D "i486" /D "WIN32" /D "STRICT" /D "_WIN32_WCE_EMULATION" /D "INTERNATIONAL" /D "USA" /D "INTLMSG_CODEPAGE" /D "_X86_" /D "x86" /D "PLATFORM_WINCE" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "ANCIENT_C" /D "DISABLE_ASSERT" /D "DISABLE_FILESYSTEM" /D "LOG_TO_FILE" /U "PLATFORM_DOS" /U "PLATFORM_WIN16" /U "PLATFORM_MAC7" /U "PLATFORM_SDL" /U "PLATFORM_PALM" /Gz /c
 # SUBTRACT CPP /YX /Yc /Yu
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -343,6 +343,7 @@ NODEP_CPP_CONTR=\
 DEP_CPP_CONTR=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -370,6 +371,7 @@ DEP_CPP_CONTR=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -377,7 +379,6 @@ DEP_CPP_CONTR=\
 	
 NODEP_CPP_CONTR=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -428,6 +429,7 @@ NODEP_CPP_CONTR=\
 DEP_CPP_CONTR=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -455,6 +457,7 @@ DEP_CPP_CONTR=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -462,7 +465,6 @@ DEP_CPP_CONTR=\
 	
 NODEP_CPP_CONTR=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -603,6 +605,7 @@ NODEP_CPP_DIO_C=\
 DEP_CPP_DIO_C=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -630,6 +633,7 @@ DEP_CPP_DIO_C=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -637,7 +641,6 @@ DEP_CPP_DIO_C=\
 	
 NODEP_CPP_DIO_C=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -688,6 +691,7 @@ NODEP_CPP_DIO_C=\
 DEP_CPP_DIO_C=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -715,6 +719,7 @@ DEP_CPP_DIO_C=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -722,7 +727,6 @@ DEP_CPP_DIO_C=\
 	
 NODEP_CPP_DIO_C=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -863,6 +867,7 @@ NODEP_CPP_DRC_C=\
 DEP_CPP_DRC_C=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -890,6 +895,7 @@ DEP_CPP_DRC_C=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -897,7 +903,6 @@ DEP_CPP_DRC_C=\
 	
 NODEP_CPP_DRC_C=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -948,6 +953,7 @@ NODEP_CPP_DRC_C=\
 DEP_CPP_DRC_C=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -975,6 +981,7 @@ DEP_CPP_DRC_C=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -982,7 +989,6 @@ DEP_CPP_DRC_C=\
 	
 NODEP_CPP_DRC_C=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -1187,6 +1193,7 @@ NODEP_CPP_GRAPH=\
 DEP_CPP_GRAPH=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -1215,6 +1222,7 @@ DEP_CPP_GRAPH=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -1222,7 +1230,6 @@ DEP_CPP_GRAPH=\
 	
 NODEP_CPP_GRAPH=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -1274,6 +1281,7 @@ NODEP_CPP_GRAPH=\
 DEP_CPP_GRAPH=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -1302,6 +1310,7 @@ DEP_CPP_GRAPH=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -1309,7 +1318,6 @@ DEP_CPP_GRAPH=\
 	
 NODEP_CPP_GRAPH=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -1451,6 +1459,7 @@ NODEP_CPP_ITEM_=\
 DEP_CPP_ITEM_=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -1478,6 +1487,7 @@ DEP_CPP_ITEM_=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -1485,7 +1495,6 @@ DEP_CPP_ITEM_=\
 	
 NODEP_CPP_ITEM_=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -1536,6 +1545,7 @@ NODEP_CPP_ITEM_=\
 DEP_CPP_ITEM_=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -1563,6 +1573,7 @@ DEP_CPP_ITEM_=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -1570,7 +1581,6 @@ DEP_CPP_ITEM_=\
 	
 NODEP_CPP_ITEM_=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -1711,6 +1721,7 @@ NODEP_CPP_JSON_=\
 DEP_CPP_JSON_=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -1738,6 +1749,7 @@ DEP_CPP_JSON_=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -1745,7 +1757,6 @@ DEP_CPP_JSON_=\
 	
 NODEP_CPP_JSON_=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -1796,6 +1807,7 @@ NODEP_CPP_JSON_=\
 DEP_CPP_JSON_=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -1823,6 +1835,7 @@ DEP_CPP_JSON_=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -1830,7 +1843,6 @@ DEP_CPP_JSON_=\
 	
 NODEP_CPP_JSON_=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -1971,6 +1983,7 @@ NODEP_CPP_MAIN_=\
 DEP_CPP_MAIN_=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -1998,6 +2011,7 @@ DEP_CPP_MAIN_=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -2005,7 +2019,6 @@ DEP_CPP_MAIN_=\
 	
 NODEP_CPP_MAIN_=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -2056,6 +2069,7 @@ NODEP_CPP_MAIN_=\
 DEP_CPP_MAIN_=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -2083,6 +2097,7 @@ DEP_CPP_MAIN_=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -2090,7 +2105,6 @@ DEP_CPP_MAIN_=\
 	
 NODEP_CPP_MAIN_=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -2231,6 +2245,7 @@ NODEP_CPP_MOBIL=\
 DEP_CPP_MOBIL=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -2258,6 +2273,7 @@ DEP_CPP_MOBIL=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -2265,7 +2281,6 @@ DEP_CPP_MOBIL=\
 	
 NODEP_CPP_MOBIL=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -2316,6 +2331,7 @@ NODEP_CPP_MOBIL=\
 DEP_CPP_MOBIL=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -2343,6 +2359,7 @@ DEP_CPP_MOBIL=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -2350,7 +2367,6 @@ DEP_CPP_MOBIL=\
 	
 NODEP_CPP_MOBIL=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -2491,6 +2507,7 @@ NODEP_CPP_TILEM=\
 DEP_CPP_TILEM=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -2518,6 +2535,7 @@ DEP_CPP_TILEM=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -2525,7 +2543,6 @@ DEP_CPP_TILEM=\
 	
 NODEP_CPP_TILEM=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -2576,6 +2593,7 @@ NODEP_CPP_TILEM=\
 DEP_CPP_TILEM=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -2603,6 +2621,7 @@ DEP_CPP_TILEM=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -2610,7 +2629,6 @@ DEP_CPP_TILEM=\
 	
 NODEP_CPP_TILEM=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -2755,6 +2773,7 @@ NODEP_CPP_TOPDO=\
 DEP_CPP_TOPDO=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\map_field.h"\
 	".\gen\win16\resext.h"\
@@ -2784,14 +2803,15 @@ DEP_CPP_TOPDO=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
 	".\src\window.h"\
 	
 NODEP_CPP_TOPDO=\
+	".\gen\mac7\map_field.h"\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -2844,6 +2864,7 @@ NODEP_CPP_TOPDO=\
 DEP_CPP_TOPDO=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\map_field.h"\
 	".\gen\win16\resext.h"\
@@ -2873,14 +2894,15 @@ DEP_CPP_TOPDO=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
 	".\src\window.h"\
 	
 NODEP_CPP_TOPDO=\
+	".\gen\mac7\map_field.h"\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -3025,6 +3047,7 @@ NODEP_CPP_WIN16=\
 DEP_CPP_WIN16=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -3052,6 +3075,7 @@ DEP_CPP_WIN16=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -3060,7 +3084,6 @@ DEP_CPP_WIN16=\
 	
 NODEP_CPP_WIN16=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -3112,6 +3135,7 @@ NODEP_CPP_WIN16=\
 DEP_CPP_WIN16=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -3139,6 +3163,7 @@ DEP_CPP_WIN16=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -3147,7 +3172,6 @@ DEP_CPP_WIN16=\
 	
 NODEP_CPP_WIN16=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -3289,6 +3313,7 @@ NODEP_CPP_WIN16I=\
 DEP_CPP_WIN16I=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -3316,6 +3341,7 @@ DEP_CPP_WIN16I=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -3323,7 +3349,6 @@ DEP_CPP_WIN16I=\
 	
 NODEP_CPP_WIN16I=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -3374,6 +3399,7 @@ NODEP_CPP_WIN16I=\
 DEP_CPP_WIN16I=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -3401,6 +3427,7 @@ DEP_CPP_WIN16I=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -3408,7 +3435,6 @@ DEP_CPP_WIN16I=\
 	
 NODEP_CPP_WIN16I=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -3551,6 +3577,7 @@ NODEP_CPP_WIN16M=\
 DEP_CPP_WIN16M=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -3586,7 +3613,6 @@ DEP_CPP_WIN16M=\
 	
 NODEP_CPP_WIN16M=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -3637,6 +3663,7 @@ NODEP_CPP_WIN16M=\
 DEP_CPP_WIN16M=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -3672,7 +3699,6 @@ DEP_CPP_WIN16M=\
 	
 NODEP_CPP_WIN16M=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -3814,6 +3840,7 @@ NODEP_CPP_WIN16R=\
 DEP_CPP_WIN16R=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -3841,6 +3868,7 @@ DEP_CPP_WIN16R=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -3848,7 +3876,6 @@ DEP_CPP_WIN16R=\
 	
 NODEP_CPP_WIN16R=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -3899,6 +3926,7 @@ NODEP_CPP_WIN16R=\
 DEP_CPP_WIN16R=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -3926,6 +3954,7 @@ DEP_CPP_WIN16R=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -3933,7 +3962,6 @@ DEP_CPP_WIN16R=\
 	
 NODEP_CPP_WIN16R=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -4076,6 +4104,7 @@ NODEP_CPP_WINDO=\
 DEP_CPP_WINDO=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -4104,6 +4133,7 @@ DEP_CPP_WINDO=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -4111,7 +4141,6 @@ DEP_CPP_WINDO=\
 	
 NODEP_CPP_WINDO=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE SH3) Debug"
@@ -4163,6 +4192,7 @@ NODEP_CPP_WINDO=\
 DEP_CPP_WINDO=\
 	".\gen\check_null\resext.h"\
 	".\gen\dos\resext.h"\
+	".\gen\palm\resext.h"\
 	".\gen\sdl\resext.h"\
 	".\gen\win16\resext.h"\
 	".\src\config.h"\
@@ -4191,6 +4221,7 @@ DEP_CPP_WINDO=\
 	".\src\mobile.h"\
 	".\src\resource.h"\
 	".\src\resource\drcr.h"\
+	".\src\resource\header.h"\
 	".\src\resource\palmr.h"\
 	".\src\resource\win16r.h"\
 	".\src\tilemap.h"\
@@ -4198,7 +4229,6 @@ DEP_CPP_WINDO=\
 	
 NODEP_CPP_WINDO=\
 	".\gen\mac7\resext.h"\
-	".\gen\palm\resext.h"\
 	
 
 !ELSEIF  "$(CFG)" == "dsekai - Win32 (WCE x86em) Debug"
@@ -4270,6 +4300,10 @@ SOURCE=.\assets\dsekai.ico
 # Begin Source File
 
 SOURCE=.\assets\pattern_cm_checker_b.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\assets\pattern_cm_checker_c.bmp
 # End Source File
 # End Group
 # End Target

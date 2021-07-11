@@ -157,7 +157,7 @@
 #define far
 
 #ifndef LOG_FILE_NAME
-#define LOG_FILE_NAME "logwin16.txt"
+#define LOG_FILE_NAME "logwince.txt"
 #endif /* !LOG_FILE_NAME */
 
 #ifndef DIO_PATH_TEMP
