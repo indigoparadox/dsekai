@@ -218,6 +218,24 @@ int graphics_platform_blit_at(
 }
 
 void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
+   HDC hdcBuffer = NULL;
+   HBITMAP oldHbmBuffer = NULL;
+
+   /* Create HDC for the off-screen buffer to blit to. */
+   hdcBuffer = CreateCompatibleDC( NULL );
+   if( NULL == hdcBuffer ) {
+      error_printf( "screen buffer HDC is NULL" );
+      return;
+   }
+   oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
+
+   if( 0 > SetPixel( hdcBuffer, x * SCREEN_SCALE, y * SCREEN_SCALE, color ) ) {
+      error_printf( "unable to plot pixel %u, %u", x, y );
+   }
+
+   /* Reselect the initial objects into the provided DCs. */
+   SelectObject( hdcBuffer, oldHbmBuffer );
+   DeleteDC( hdcBuffer );
 }
 
 void graphics_draw_block(
@@ -399,4 +417,72 @@ int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
    }
    return 0;
 }
+
+#ifndef USE_SOFTWARE_TEXT
+
+void graphics_string_sz(
+   const char* str, uint16_t str_sz, uint8_t scale, struct GRAPHICS_RECT* sz_out
+) {
+   HDC hdcBuffer = NULL;
+   HBITMAP oldHbmBuffer = NULL;
+   SIZE sz;
+   int16_t str_len = 0;
+
+   hdcBuffer = CreateCompatibleDC( NULL );
+   if( NULL == hdcBuffer ) {
+      error_printf( "screen buffer HDC is NULL" );
+      return;
+   }
+   oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
+
+   str_len = memory_strnlen_ptr( str, str_sz );
+   GetTextExtentPoint( hdcBuffer, str, str_len, &sz );
+   sz_out->w = sz.cx;
+   sz_out->h = sz.cy;
+
+   /* Reselect the initial objects into the provided DCs. */
+   SelectObject( hdcBuffer, oldHbmBuffer );
+   DeleteDC( hdcBuffer );
+}
+
+void graphics_string_at(
+   const char* str, uint16_t str_sz, uint16_t x_orig, uint16_t y_orig,
+   GRAPHICS_COLOR color, uint8_t scale
+) {
+   HDC hdcBuffer = NULL;
+   HBITMAP oldHbmBuffer = NULL;
+   RECT rect;
+   SIZE sz;
+   int16_t str_len = 0;
+
+   assert( x_orig < SCREEN_W );
+   assert( y_orig < SCREEN_H );
+
+   memory_zero_ptr( &sz, sizeof( SIZE ) );
+
+   /* Create HDC for the off-screen buffer to blit to. */
+   hdcBuffer = CreateCompatibleDC( NULL );
+   if( NULL == hdcBuffer ) {
+      error_printf( "screen buffer HDC is NULL" );
+      return;
+   }
+   oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
+
+   str_len = memory_strnlen_ptr( str, str_sz );
+   GetTextExtentPoint( hdcBuffer, str, str_len, &sz );
+   rect.left = x_orig * SCREEN_SCALE;
+   rect.top = y_orig * SCREEN_SCALE;
+   rect.right = (x_orig + sz.cx) * SCREEN_SCALE;
+   rect.bottom = (y_orig + sz.cy) * SCREEN_SCALE;
+
+   if( 0 == DrawText( hdcBuffer, str, str_len, &rect, 0 ) ) {
+      error_printf( "unable to draw string at %u, %u", x_orig, y_orig );
+   }
+
+   /* Reselect the initial objects into the provided DCs. */
+   SelectObject( hdcBuffer, oldHbmBuffer );
+   DeleteDC( hdcBuffer );
+}
+
+#endif /* !USE_SOFTWARE_TEXT */
 

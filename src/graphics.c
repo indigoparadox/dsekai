@@ -68,21 +68,31 @@ void graphics_char_at(
 }
 
 void graphics_string_at(
-   const char* s, uint16_t s_len, uint16_t x_orig, uint16_t y_orig,
+   const char* str, uint16_t str_sz, uint16_t x_orig, uint16_t y_orig,
    GRAPHICS_COLOR color, uint8_t scale
 ) {
    uint16_t i = 0,
       x_o = 0; /* X offset. */
 
    while(
-      '\0' != s[i] &&
+      '\0' != str[i] &&
       x_orig + FONT_W < SCREEN_REAL_W && /* On-screen (x-axis). */
       y_orig + FONT_H < SCREEN_REAL_H    /* On-screen (y-axis). */
    ) {
-      graphics_char_at( s[i], x_orig + x_o, y_orig, color, scale );
+      graphics_char_at( str[i], x_orig + x_o, y_orig, color, scale );
       x_o += FONT_W + FONT_SPACE;
       i++;
    }
+}
+
+void graphics_string_sz(
+   const char* str, uint16_t str_sz, uint8_t scale, struct GRAPHICS_RECT* sz_out
+) {
+   sz_out->w = memory_strnlen_ptr( str, str_sz ) * (FONT_W + FONT_SPACE);
+   if( sz_out->w > 0 ) {
+      sz_out -= FONT_SPACE; /* Remove trailing space. */
+   }
+   sz_out->h = FONT_H;
 }
 
 #endif /* USE_SOFTWARE_TEXT */

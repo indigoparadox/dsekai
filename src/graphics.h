@@ -32,6 +32,13 @@ typedef struct GRAPHICS_PATTERN {
    graphics_blit_at( spr, x, y, PATTERN_W, PATTERN_H )
 */
 
+struct GRAPHICS_RECT {
+   int16_t x;
+   int16_t y;
+   int16_t w;
+   int16_t h;
+};
+
 /**
  * This struct should be equivalent in size to whatever the bitmap struct for
  * the current platform looks like.
@@ -66,6 +73,8 @@ void graphics_char_at(
    const char, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_string_at(
    const char*, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
+void graphics_string_sz(
+   const char*, uint16_t, uint8_t, struct GRAPHICS_RECT* );
 int16_t graphics_blit_at( uint32_t, uint16_t, uint16_t, uint16_t, uint16_t );
 int32_t graphics_load_bitmap( uint32_t, struct GRAPHICS_BITMAP* );
 int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* );
