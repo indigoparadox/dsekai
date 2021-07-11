@@ -89,6 +89,14 @@ int main( int argc, char* argv[] ) {
    window_init();
 
    g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
+   if( NULL == g_state_handle ) {
+      error_printf( "unable to allocate state" );
+#ifdef DISABLE_MAIN_PARMS
+      return;
+#else
+      return 1;
+#endif /* DISABLE_MAIN_PARMS */
+   }
 
    while( g_running ) {
 #if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
@@ -123,6 +131,14 @@ int main( int argc, char* argv[] ) {
    }
 
    state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
+   if( NULL == state ) {
+      error_printf( "unable to lock state" );
+#ifdef DISABLE_MAIN_PARMS
+      return;
+#else
+      return 1;
+#endif /* DISABLE_MAIN_PARMS */
+   }
    while( state->windows_count > 0 ) {
       window_pop( 0, state );
    }

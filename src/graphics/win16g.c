@@ -35,6 +35,10 @@ static LRESULT CALLBACK WndProc(
 
          /* Create HDC for screen. */
          hdcScreen = BeginPaint( hWnd, &ps );
+         if( NULL == hdcScreen ) {
+            error_printf( "screen HDC is NULL" );
+            break;
+         }
 
          if( 0 == g_screen.initialized ) {
             debug_printf( 2, "creating screen buffer..." );
@@ -42,10 +46,17 @@ static LRESULT CALLBACK WndProc(
                SCREEN_REAL_W, SCREEN_REAL_H );
             g_screen.initialized = 1;
          }
-         assert( NULL != g_screen.bitmap );
+         if( NULL == g_screen.bitmap ) {
+            error_printf( "screen buffer bitmap is NULL" );
+            break;
+         }
 
          /* Create a new HDC for buffer and select buffer into it. */
          hdcBuffer = CreateCompatibleDC( hdcScreen );
+         if( NULL == hdcBuffer ) {
+            error_printf( "screen buffer HDC is NULL" );
+            break;
+         }
          oldHbm = SelectObject( hdcBuffer, g_screen.bitmap );
 
          /* Load parameters of the buffer into info object (srcBitmap). */
@@ -142,7 +153,9 @@ void graphics_platform_shutdown() {
 
 void graphics_flip() {
    /*UpdateWindow( g_screen.window );*/
-   InvalidateRect( g_window, 0, TRUE );
+   if( NULL != g_window ) {
+      InvalidateRect( g_window, 0, TRUE );
+   }
 }
 
 void graphics_loop_start() {
@@ -165,6 +178,7 @@ int graphics_platform_blit_at(
    HBITMAP oldHbmBuffer = NULL;
 
    if( NULL == bmp || NULL == bmp->bitmap ) {
+      error_printf( "blit bmp is NULL" );
       return 0;
    }
 
@@ -222,9 +236,17 @@ void graphics_draw_block(
 
    /* Create HDC for the off-screen buffer to blit to. */
    hdcBuffer = CreateCompatibleDC( NULL );
+   if( NULL == hdcBuffer ) {
+      error_printf( "screen buffer HDC is NULL" );
+      return;
+   }
    oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
 
    brush = CreateSolidBrush( color );
+   if( NULL == brush ) {
+      error_printf( "brush is NULL" );
+      return;
+   }
 
    FillRect( hdcBuffer, &rect, brush );
 
@@ -239,6 +261,51 @@ void graphics_draw_rect(
    uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
    uint16_t thickness, const GRAPHICS_COLOR color
 ) {
+   HDC hdcBuffer = NULL;
+   HBITMAP oldHbmBuffer = NULL;
+   HPEN pen = NULL;
+   HPEN oldPen = NULL;
+   POINT points[5];
+
+#ifndef PLATFORM_WINCE /* TODO */
+   /* Create HDC for the off-screen buffer to blit to. */
+   hdcBuffer = CreateCompatibleDC( NULL );
+   if( NULL == hdcBuffer ) {
+      error_printf( "screen buffer HDC is NULL" );
+      return;
+   }
+   oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
+
+   pen = CreatePen( PS_SOLID, thickness * SCREEN_SCALE, color );
+   if( NULL == pen ) {
+      error_printf( "pen is NULL" );
+      return;
+   }
+   oldPen = SelectObject( hdcBuffer, pen );
+   /* MoveTo( hdcBuffer, x1, y1 );
+   LineTo( hdcBuffer, x2, y2 );*/
+   points[0].x = SCREEN_SCALE * (x_orig);
+   points[0].y = SCREEN_SCALE * (y_orig);
+   
+   points[1].x = SCREEN_SCALE * (x_orig);
+   points[1].y = SCREEN_SCALE * (y_orig + h);
+
+   points[2].x = SCREEN_SCALE * (x_orig + w);
+   points[2].y = SCREEN_SCALE * (y_orig + h);
+   
+   points[3].x = SCREEN_SCALE * (x_orig + w);
+   points[3].y = SCREEN_SCALE * (y_orig);
+
+   points[4].x = SCREEN_SCALE * (x_orig);
+   points[4].y = SCREEN_SCALE * (y_orig);
+   Polyline( hdcBuffer, points, 5 );
+   SelectObject( hdcBuffer, oldPen );
+   DeleteObject( pen );
+
+   /* Reselect the initial objects into the provided DCs. */
+   SelectObject( hdcBuffer, oldHbmBuffer );
+   DeleteDC( hdcBuffer );
+#endif /* PLATFORM_WINCE */
 }
 
 void graphics_draw_line(
@@ -249,6 +316,7 @@ void graphics_draw_line(
    HBITMAP oldHbmBuffer = NULL;
    HPEN pen = NULL;
    HPEN oldPen = NULL;
+   POINT points[2];
 
 #ifndef PLATFORM_WINCE /* TODO */
    /* Create HDC for the off-screen buffer to blit to. */
@@ -256,9 +324,18 @@ void graphics_draw_line(
    oldHbmBuffer = SelectObject( hdcBuffer, g_screen.bitmap );
 
    pen = CreatePen( PS_SOLID, thickness, color );
+   if( NULL == pen ) {
+      error_printf( "pen is NULL" );
+      return;
+   }
    oldPen = SelectObject( hdcBuffer, pen );
-   MoveTo( hdcBuffer, x1, y1 );
-   LineTo( hdcBuffer, x2, y2 );
+   /* MoveTo( hdcBuffer, x1, y1 );
+   LineTo( hdcBuffer, x2, y2 );*/
+   points[0].x = x1;
+   points[0].y = y1;
+   points[1].x = x2;
+   points[1].y = y2;
+   Polyline( hdcBuffer, points, 2 );
    SelectObject( hdcBuffer, oldPen );
    DeleteObject( pen );
 
