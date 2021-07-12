@@ -101,17 +101,22 @@ static LRESULT CALLBACK WndProc(
 
       case WM_TIMER:
          g_running = topdown_loop( g_state_handle );
+         graphics_flip( NULL );
          break;
 
       default:
          return DefWindowProc( hWnd, message, wParam, lParam );
-         break;
    }
 
    return 0;
 }
 
-int16_t graphics_platform_init() {
+static void CALLBACK FPSTProc( HWND hWnd, UINT u1, UINT_PTR u2, DWORD i3 ) {
+   g_running = topdown_loop( g_state_handle );
+   graphics_flip( NULL );
+}
+
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
    MSG msg;
    WNDCLASS wc = { 0 };
 
@@ -143,15 +148,24 @@ int16_t graphics_platform_init() {
       return 0;
    }
 
-   SetTimer( g_window, WIN_GFX_TIMER_ID, 1000 / FPS, NULL );
+   assert( NULL != g_window );
+
+   if( !SetTimer( g_window, WIN_GFX_TIMER_ID, (int)(1000 / FPS), FPSTProc ) ) {
+      error_printf( "could not set graphics update timer\n" );
+      return 0;
+   }
+   debug_printf( 2, "set graphics update timer %d to %dms",
+      WIN_GFX_TIMER_ID, (int)(1000 / FPS) );
+
+   ShowWindow( g_window, args->cmd_show );
 
    return 1;
 }
 
-void graphics_platform_shutdown() {
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* args ) {
 }
 
-void graphics_flip() {
+void graphics_flip( struct GRAPHICS_ARGS* args ) {
    /*UpdateWindow( g_screen.window );*/
    if( NULL != g_window ) {
       InvalidateRect( g_window, 0, TRUE );

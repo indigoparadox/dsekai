@@ -235,6 +235,7 @@
 #define ANIMATE_SCREEN_MOVEMENT
 #define DRC_TOC_INITIAL_ALLOC 50 /* Fake it until we have realloc. */
 #define RESOURCE_HEADER
+#define DISABLE_MAIN_PARMS
 
 /* ------ */
 #elif defined( PLATFORM_NDS )

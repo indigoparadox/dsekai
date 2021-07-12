@@ -2,9 +2,9 @@
 #ifndef MAC7G_H
 #define MAC7G_H
 
-#include <Quickdraw.h>
+#include "../dstypes.h"
 
-#include "../graphics.h"
+#include <Quickdraw.h>
 
 typedef int GRAPHICS_COLOR;
 struct GRAPHICS_BITMAP {
@@ -19,6 +19,9 @@ struct GRAPHICS_BITMAP {
    uint32_t res2;
    uint8_t res3;
    uint8_t res4;
+};
+
+struct GRAPHICS_ARGS {
 };
 
 #define GRAPHICS_COLOR_BLACK        0

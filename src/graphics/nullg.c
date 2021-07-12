@@ -1,4 +1,5 @@
 
+#define GRAPHICS_C
 #include "../dstypes.h"
 
 int16_t graphics_platform_init() {

@@ -1,4 +1,5 @@
 
+#define GRAPHICS_C
 #include "../dstypes.h"
 
 #include <Multiverse.h>
@@ -11,7 +12,7 @@ Rect g_window_rect;
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int16_t graphics_platform_init() {
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
    ControlHandle beepbutton;
    Rect r;
 
@@ -52,10 +53,10 @@ int16_t graphics_platform_init() {
    return 1;
 }
 
-void graphics_platform_shutdown() {
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* args ) {
 }
 
-void graphics_flip() {
+void graphics_flip( struct GRAPHICS_ARGS* args ) {
 }
 
 void graphics_loop_start() {

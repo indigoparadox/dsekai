@@ -2,9 +2,9 @@
 #ifndef PALMG_H
 #define PALMG_H
 
-#include <PalmOS.h>
+#include "../dstypes.h"
 
-#include "../graphics.h"
+#include <PalmOS.h>
 
 typedef IndexedColorType GRAPHICS_COLOR;
 struct GRAPHICS_BITMAP {
@@ -20,6 +20,9 @@ struct GRAPHICS_BITMAP {
    uint32_t res2;
    uint8_t res3;
    uint8_t res4;
+};
+
+struct GRAPHICS_ARGS {
 };
 
 #define GRAPHICS_COLOR_BLACK        0

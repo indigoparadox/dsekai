@@ -1,4 +1,5 @@
 
+#define GRAPHICS_C
 #define SDLG_C
 #include "../dstypes.h"
 
@@ -16,7 +17,7 @@ static uint32_t g_ms_start = 0;
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int16_t graphics_platform_init() {
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
 #ifdef DEBUG_CGA_EMU
    SDL_Rect area;
 #endif /* DEBUG_CGA_EMU */
@@ -54,12 +55,12 @@ int16_t graphics_platform_init() {
    return 1;
 }
 
-void graphics_platform_shutdown() {
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* args ) {
    SDL_DestroyWindow( g_window );
    SDL_Quit();
 }
 
-void graphics_flip() {
+void graphics_flip( struct GRAPHICS_ARGS* args ) {
    /* SDL_RenderPresent( g_renderer ); */
    SDL_UpdateWindowSurface( g_window );
 }

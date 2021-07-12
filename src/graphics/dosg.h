@@ -3,7 +3,6 @@
 #define DOSG_H
 
 #include "../dstypes.h"
-#include "../graphics.h"
 
 typedef uint8_t GRAPHICS_COLOR;
 
@@ -20,6 +19,10 @@ struct GRAPHICS_BITMAP {
 
    /* Unused Overrides */
    uint8_t res4;
+};
+
+struct GRAPHICS_ARGS {
+   uint8_t mode;
 };
 
 #define GRAPHICS_COLOR_BLACK        0

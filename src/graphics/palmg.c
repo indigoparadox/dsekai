@@ -10,15 +10,15 @@ static int16_t g_ticks_target = 0;
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int16_t graphics_platform_init() {
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
    g_ticks_target = SysTicksPerSecond();
    return 1;
 }
 
-void graphics_platform_shutdown() {
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* args ) {
 }
 
-void graphics_flip() {
+void graphics_flip( struct GRAPHICS_ARGS* args ) {
 }
 
 void graphics_loop_start() {

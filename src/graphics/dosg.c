@@ -1,4 +1,5 @@
 
+#define GRAPHICS_C
 #include "../dstypes.h"
 
 #include <string.h>
@@ -94,7 +95,7 @@ static void graphics_remove_timer() {
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int16_t graphics_platform_init() {
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
    union REGS r;
 
    memory_zero_ptr( &r, sizeof( union REGS ) );
@@ -115,11 +116,11 @@ int16_t graphics_platform_init() {
    return 1;
 }
 
-void graphics_platform_shutdown() {
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* args ) {
    graphics_remove_timer();
 }
 
-void graphics_flip() {
+void graphics_flip( struct GRAPHICS_ARGS* args ) {
 #ifdef USE_DOUBLEBUF
 #if GRAPHICS_M_320_200_256_VGA == GRAPHICS_MODE
       _fmemcpy( GRAPHICS_M_320_200_256_VGA_A,
