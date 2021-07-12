@@ -1,4 +1,5 @@
 
+#define GRAPHICS_C
 #include "dstypes.h"
 
 #include "data/font8x8.h"
@@ -6,15 +7,10 @@
 static MEMORY_HANDLE gs_graphics_cache_handle = NULL;
 static int16_t gs_graphics_cache_sz = 0;
 
-int graphics_platform_blit_at(
-   const struct GRAPHICS_BITMAP*, uint16_t, uint16_t, uint16_t, uint16_t );
-int graphics_platform_init();
-int graphics_platform_shutdown();
-
-int16_t graphics_init() {
+int16_t graphics_init( struct GRAPHICS_ARGS* args ) {
    int16_t retval = 1;
 
-   retval = graphics_platform_init();
+   retval = graphics_platform_init( args );
    if( !retval ) {
       goto cleanup;
    }
@@ -27,7 +23,7 @@ cleanup:
    return retval;
 }
 
-void graphics_shutdown() {
+void graphics_shutdown( struct GRAPHICS_ARGS* args ) {
    int16_t i = 0;
    struct GRAPHICS_BITMAP* bitmaps = NULL;
 
@@ -41,7 +37,7 @@ void graphics_shutdown() {
 
    memory_free( gs_graphics_cache_handle );
 
-   graphics_platform_shutdown();
+   graphics_platform_shutdown( args );
 }
 
 #ifdef USE_SOFTWARE_TEXT
