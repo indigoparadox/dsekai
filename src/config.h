@@ -119,9 +119,6 @@
 
 #include "../gen/win16/resext.h"
 
-/* Doesn't exist on this platform. */
-#define far
-
 #ifndef LOG_FILE_NAME
 #define LOG_FILE_NAME "logwin16.txt"
 #endif /* !LOG_FILE_NAME */
@@ -154,9 +151,6 @@
 
 #include "../gen/win16/resext.h"
 
-/* Doesn't exist on this platform. */
-#define far
-
 #ifndef LOG_FILE_NAME
 #define LOG_FILE_NAME "logwince.txt"
 #endif /* !LOG_FILE_NAME */
@@ -186,9 +180,6 @@
 #include <windows.h>
 
 #include "../gen/win32/resext.h"
-
-/* Doesn't exist on this platform. */
-#define far
 
 #ifndef LOG_FILE_NAME
 #define LOG_FILE_NAME "logwince.txt"
@@ -246,11 +237,34 @@
 #define RESOURCE_HEADER
 
 /* ------ */
-#else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
+#elif defined( PLATFORM_NDS )
 /* ------ */
 
-/* Doesn't exist on this platform. */
-#define far
+#include "../gen/nds/resext.h"
+
+#ifndef DIO_PATH_TEMP
+/* TODO */
+#define DIO_PATH_TEMP ""
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP ':'
+#endif /* !DIO_PATH_SEP */
+
+#define platform_file FILE*
+#define platform_fprintf fprintf
+#define platform_fopen fopen
+#define platform_fflush fflush
+#define platform_fclose fclose
+
+#define USE_SOFTWARE_TEXT
+#define ANIMATE_SCREEN_MOVEMENT
+#define DRC_TOC_INITIAL_ALLOC 50 /* Fake it until we have realloc. */
+#define RESOURCE_HEADER
+
+/* ------ */
+#else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
+/* ------ */
 
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "/tmp"

@@ -14,6 +14,8 @@
 #include "input/wini.h"
 #elif defined( PLATFORM_MAC7 )
 #include "input/mac7i.h"
+#elif defined( PLATFORM_NDS )
+#include "input/ndsi.h"
 #elif defined( PLATFORM_NULL )
 #include "input/nulli.h"
 #endif /*

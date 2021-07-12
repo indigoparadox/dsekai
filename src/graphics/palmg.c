@@ -1,4 +1,5 @@
 
+#define GRAPHICS_C
 #include "../dstypes.h"
 
 static BitmapType* g_screen = NULL;
@@ -145,6 +146,12 @@ void graphics_string_at(
    GRAPHICS_COLOR color, uint8_t scale
 ) {
    WinDrawChars( s, s_len, x_orig, y_orig );
+}
+
+void graphics_string_sz(
+   const char* str, uint16_t str_sz, uint8_t scale, struct GRAPHICS_RECT* sz_out
+) {
+   /* TODO */
 }
 
 #endif /* !USE_SOFTWARE_TEXT */

@@ -1,5 +1,6 @@
 
 DSEKAI_C_FILES := \
+   src/main.c \
    src/tilemap.c \
    src/graphics.c \
    src/mobile.c \
@@ -11,39 +12,39 @@ DSEKAI_C_FILES := \
    src/topdown.c
 
 DSEKAI_C_FILES_SDL_ONLY := \
-   src/main.c \
    src/input/sdli.c \
    src/graphics/sdlg.c \
    src/memory/fakem.c \
    src/resource/header.c
 
 DSEKAI_C_FILES_DOS_ONLY := \
-   src/main.c \
    src/input/dosi.c \
    src/graphics/dosg.c \
    src/memory/fakem.c \
    src/resource/header.c
 
 DSEKAI_C_FILES_PALM_ONLY := \
-   src/main.c \
    src/input/palmi.c \
    src/memory/palmm.c \
    src/resource/palmr.c \
-   src/graphics/palmg.c \
-   src/dio.c
+   src/graphics/palmg.c
 
 DSEKAI_C_FILES_WIN_ONLY := \
-   src/main.c \
    src/input/wini.c \
    src/resource/winr.c \
    src/memory/winm.c \
    src/graphics/wing.c
 
 DSEKAI_C_FILES_MAC7_ONLY := \
-   src/main.c \
    src/input/mac7i.c \
    src/graphics/mac7g.c \
    src/memory/mac7m.c \
+   src/resource/header.c
+
+DSEKAI_C_FILES_NDS_ONLY := \
+   src/input/ndsi.c \
+   src/graphics/ndsg.c \
+   src/memory/fakem.c \
    src/resource/header.c
 
 DSEKAI_C_FILES_CHECK_NULL_ONLY := \
@@ -59,8 +60,7 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    src/resource/drcr.c \
    check/ckdio.c \
    check/ckdrc.c \
-   check/ckmemory.c \
-   src/graphics/nullg.c \
+   check/ckmemory.c ndsrc/graphics/nullg.c \
    src/input/nulli.c \
    tools/data/cga.c \
    tools/data/bmp.c \
@@ -106,6 +106,7 @@ OBJDIR_PALM := obj/palm
 OBJDIR_WIN16 := obj/win16
 OBJDIR_WIN32 := obj/win32
 OBJDIR_MAC7 := obj/mac7
+OBJDIR_NDS := obj/nds
 OBJDIR_CHECK_NULL := obj/check_null
 
 GENDIR_SDL := gen/sdl
@@ -114,6 +115,7 @@ GENDIR_PALM := gen/palm
 GENDIR_WIN16 := gen/win16
 GENDIR_WIN32 := gen/win32
 GENDIR_MAC7 := gen/mac7
+GENDIR_NDS := gen/nds
 GENDIR_CHECK_NULL := gen/check_null
 
 BINDIR := bin
@@ -124,6 +126,7 @@ BIN_PALM := $(BINDIR)/dsekai.prc
 BIN_WIN16 := $(BINDIR)/dsekai16.exe
 BIN_WIN32 := $(BINDIR)/dsekai32.exe
 BIN_MAC7 := $(BINDIR)/dsekai.bin $(BINDIR)/dsekai.APPL $(BINDIR)/dsekai.dsk
+BIN_NDS := $(BINDIR)/dsekai.nds
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
@@ -152,6 +155,8 @@ DSEKAI_ASSETS_MAPS_WIN32 := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN32)/,$(DSEKAI_ASSETS_MAPS)))
 DSEKAI_ASSETS_MAPS_MAC7 := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_MAPS)))
+DSEKAI_ASSETS_MAPS_NDS := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS)))
 
 MD := mkdir -p
 DD := /bin/dd
@@ -185,6 +190,7 @@ CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g 
 CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1
 CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1
 CFLAGS_MAC7 := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_DEBUG_GENERIC)
+CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math
 CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=3 -DCHECK -DUSE_JSON_MAPS -DRESOURCE_DRC
 
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
@@ -220,6 +226,15 @@ $(BIN_MAC7): LDFLAGS := -lRetroConsole
 $(BIN_MAC7): REZ := Rez
 $(BIN_MAC7): REZFLAGS :=
 
+$(BIN_NDS): CC := arm-none-eabi-gcc
+$(BIN_NDS): LD := arm-none-eabi-gcc
+$(BIN_NDS): ARCH := -mthumb -mthumb-interwork
+$(BIN_NDS): DEVKITPATH := $(shell echo "$(DEVKITPRO)" | sed -e 's/^\([a-zA-Z]\):/\/\1/')
+$(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
+$(BIN_NDS): CFLAGS_NDS += $(ARCH)
+$(BIN_NDS): LDFLAGS := -specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(OBJDIR_NDS)/dsekai.map
+$(BIN_NDS): LIBS := -L$(DEVKITPRO)/libnds/lib -lnds9
+
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(CFLAGS_DEBUG_GCC)
 
 DSEKAI_C_FILES_CHECK_NULL := $(DSEKAI_C_FILES) $(DSEKAI_C_FILES_CHECK_NULL_ONLY)
@@ -242,6 +257,9 @@ DSEKAI_O_FILES_WIN32 := \
 DSEKAI_O_FILES_MAC7 := \
    $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
    $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC7_ONLY)))
+DSEKAI_O_FILES_NDS := \
+   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY)))
 DSEKAI_O_FILES_CHECK_NULL := \
    $(addprefix $(OBJDIR_CHECK_NULL)/,$(subst .c,.o,$(DSEKAI_C_FILES_CHECK_NULL)))
 
@@ -478,6 +496,35 @@ $(OBJDIR_MAC7)/%.o: \
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_MAC7) -c -o $@ $(<:%.o=%)
 
+# ====== Check: NDS ======
+
+$(OBJDIR_NDS):
+	$(MD) $@
+
+$(GENDIR_NDS):
+	$(MD) $@
+
+$(GENDIR_NDS)/%.h: $(ASSETDIR)/%.json $(MAPC) | $(GENDIR_NDS)
+	$(PYTHON) $(MAPC) -j $< -o $@
+
+$(GENDIR_NDS)/resext.h: \
+$(HEADPACK) $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_NDS)
+	$(HEADPACK) $@ $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS)
+
+$(BIN_NDS): $(OBJDIR_NDS)/dsekai.elf $(GENDIR_NDS)/dsekai-1.bmp
+	ndstool -c $@ -9 $< -b $(GENDIR_NDS)/dsekai-1.bmp "dsekai;dsekai;dsekai"
+
+$(GENDIR_NDS)/dsekai-1.bmp: $(ASSETDIR)/dsekai.ico
+	$(IMAGEMAGICK) $< -compress none -colors 16 $(GENDIR_NDS)/dsekai.bmp
+
+$(OBJDIR_NDS)/dsekai.elf: $(DSEKAI_O_FILES_NDS)
+	$(CC) $(LDFLAGS) $^ $(LIBS) -o $@
+
+$(OBJDIR_NDS)/%.o: \
+%.c $(DSEKAI_ASSETS_MAPS_NDS) $(GENDIR_NDS)/resext.h | $(OBJDIR_NDS)
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS_NDS) -c -o $@ $(<:%.o=%)
+
 # ====== Check: Null ======
 
 $(GENDIR_CHECK_NULL):
@@ -491,12 +538,12 @@ $(GENDIR_CHECK_NULL)/resext.h: $(GENDIR_CHECK_NULL) $(MKRESH)
 $(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR_CHECK_NULL)/%.d: %.c $(GENDIR_CHECK_NULL)/resext.h
-	$(MD) $(dir $@)
-	$(CC) $(CFLAGS_CHECK_NULL) -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(OBJDIR_CHECK_NULL)/,$<)) -MF $@
-
-include $(DSEKAI_O_FILES_CHECK_NULL:.o=.d)
+#$(OBJDIR_CHECK_NULL)/%.d: %.c $(GENDIR_CHECK_NULL)/resext.h
+#	$(MD) $(dir $@)
+#	$(CC) $(CFLAGS_D) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(OBJDIR_CHECK_NULL)/,$<)) -MF $@
+#
+#include $(DSEKAI_O_FILES_CHECK_NULL:.o=.d)
 	
 $(OBJDIR_CHECK_NULL)/%.o: %.c $(GENDIR_CHECK_NULL)/resext.h
 	$(MD) $(dir $@)

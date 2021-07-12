@@ -9,6 +9,8 @@
 #include "../gen/win32/map_field.h"
 #elif defined( PLATFORM_MAC7 )
 #include "../gen/mac7/map_field.h"
+#elif defined( PLATFORM_NDS )
+#include "../gen/nds/map_field.h"
 #endif
 #endif /* USE_JSON_MAPS */
 
