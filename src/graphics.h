@@ -14,6 +14,8 @@
 #include "graphics/wing.h"
 #elif defined( PLATFORM_MAC7 )
 #include "graphics/mac7g.h"
+#elif defined( PLATFORM_NDS )
+#include "graphics/ndsg.h"
 #else
 #include "graphics/nullg.h"
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */

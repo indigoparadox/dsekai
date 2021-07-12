@@ -5,7 +5,10 @@
  * @return 1 if init was successful and 0 otherwise.
  */
 int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
-   videoSetModeSub(MODE_0_2D);
+   powerOn( POWER_ALL );
+   vramSetBankA( VRAM_A_LCD );
+   videoSetMode( MODE_FB0 );
+   lcdSwap();
    return 1;
 }
 
@@ -19,9 +22,11 @@ void graphics_loop_start() {
 }
 
 void graphics_loop_end() {
+   swiWaitForVBlank();
 }
 
 void graphics_draw_px( uint16_t x, uint16_t y, const GRAPHICS_COLOR color ) {
+   VRAM_A[(y * SCREEN_H) + x] = color;
 }
 
 int graphics_platform_blit_at(
