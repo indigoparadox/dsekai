@@ -55,8 +55,6 @@ int topdown_draw( struct DSEKAI_STATE* state ) {
 #ifdef ANIMATE_SCREEN_MOVEMENT
 #ifndef DISABLE_GRAPHICS
       tilemap_draw( &(state->map), state );
-
-      graphics_flip( NULL );
 #endif /* !DISABLE_GRAPHICS */
 #endif /* ANIMATE_SCREEN_MOVEMENT */
 
@@ -199,8 +197,6 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    }
 
    window_draw_all( state );
-
-   graphics_flip( NULL );
 
    if( state->input_blocked_countdown ) {
       state->input_blocked_countdown--;

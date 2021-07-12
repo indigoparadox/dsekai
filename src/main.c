@@ -132,6 +132,7 @@ int main( int argc, char* argv[] ) {
       }
 #else
       g_running = topdown_loop( g_state_handle );
+      graphics_flip( &graphics_args );
 
 #endif /* SKELETON_LOOP */
 
