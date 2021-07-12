@@ -6,36 +6,39 @@
 uint8_t g_running = 1;
 MEMORY_HANDLE g_state_handle = NULL;
 
+#ifdef PLATFORM_WIN
+HINSTANCE g_instance = NULL;
+HWND g_window = NULL;
+#endif /* PLATFORM_WIN */
+
 #ifdef USE_SOFT_ASSERT
 char g_assert_failed[256];
 int g_assert_failed_len;
 #endif /* USE_SOFT_ASSERT */
 
-/* ------ */
-#ifdef PLATFORM_MAC7
-/* ------ */
 
-void main() {
-#define DISABLE_MAIN_PARMS
+
+/* === Main Class Definition === */
 
 /* ------ */
-#elif defined( PLATFORM_PALM )
+#if defined( PLATFORM_PALM )
 /* ------ */
 
 UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
-
-   if( cmd == sysAppLaunchCmdNormalLaunch ) {
 
 /* ------ */
 #elif defined( PLATFORM_WIN )
 /* ------ */
 
-HINSTANCE g_instance = NULL;
-HWND g_window = NULL;
-
 int PLATFORM_API WinMain(
    HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow
 ) {
+
+/* ------ */
+#elif defined( DISABLE_MAIN_PARMS )
+/* ------ */
+
+void main() {
 
 /* ------ */
 #else
@@ -47,19 +50,33 @@ int main( int argc, char* argv[] ) {
 #endif /* PLATFORM_PALM, PLATFORM_MAC7, PLATFORM_WIN */
 /* ------ */
 
-   struct DSEKAI_STATE* state = NULL;
 
-#if defined( PLATFORM_WIN )
+
+/* === Main Preamble === */
+
+   struct DSEKAI_STATE* state = NULL;
+   struct GRAPHICS_ARGS graphics_args;
+
+#ifdef PLATFORM_PALM
+   if( cmd == sysAppLaunchCmdNormalLaunch ) {
+
+#elif defined( PLATFORM_WIN )
    MSG msg;
    int msg_retval = 0;
 
    g_instance = hInstance;
+   graphics_args.cmd_show = nCmdShow;
 
    if( hPrevInstance ) {
       error_printf( "previous instance detected" );
       return 1;
    }
+
 #endif /* PLATFORM_WIN */
+
+
+
+/* === Subsystem Initialization === */
 
 #ifdef LOG_TO_FILE
    g_log_file = platform_fopen( LOG_FILE_NAME, "w" );
@@ -69,7 +86,7 @@ int main( int argc, char* argv[] ) {
       "dsekai compiled " __DATE__ __TIME__ ", state size is %lu bytes",
       sizeof( struct DSEKAI_STATE ) );
 
-   if( !graphics_init() ) {
+   if( !graphics_init( &graphics_args ) ) {
       error_printf( "unable to initialize graphics" );
 #ifdef DISABLE_MAIN_PARMS
       return;
@@ -82,10 +99,6 @@ int main( int argc, char* argv[] ) {
       error_printf( "unable to initialize input" );
    }
 
-#if defined( PLATFORM_WIN )
-   ShowWindow( g_window, nCmdShow );
-#endif /* PLATFORM_WIN */
-
    window_init();
 
    g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
@@ -97,6 +110,10 @@ int main( int argc, char* argv[] ) {
       return 1;
 #endif /* DISABLE_MAIN_PARMS */
    }
+
+
+
+/* === Main Loop === */
 
    while( g_running ) {
 #if defined( PLATFORM_WIN )
@@ -130,6 +147,10 @@ int main( int argc, char* argv[] ) {
 #endif /* USE_SOFT_ASSERT */
    }
 
+
+
+/* === Shutdown === */
+
    state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    if( NULL == state ) {
       error_printf( "unable to lock state" );
@@ -147,7 +168,7 @@ int main( int argc, char* argv[] ) {
 
    memory_free( g_state_handle );
 
-   window_shutdown();
+   window_shutdown( NULL );
    graphics_shutdown();
 
 #ifdef LOG_TO_FILE

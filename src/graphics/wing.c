@@ -111,11 +111,6 @@ static LRESULT CALLBACK WndProc(
    return 0;
 }
 
-static void CALLBACK FPSTProc( HWND hWnd, UINT u1, UINT_PTR u2, DWORD i3 ) {
-   g_running = topdown_loop( g_state_handle );
-   graphics_flip( NULL );
-}
-
 int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
    MSG msg;
    WNDCLASS wc = { 0 };
@@ -150,7 +145,7 @@ int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
 
    assert( NULL != g_window );
 
-   if( !SetTimer( g_window, WIN_GFX_TIMER_ID, (int)(1000 / FPS), FPSTProc ) ) {
+   if( !SetTimer( g_window, WIN_GFX_TIMER_ID, (int)(1000 / FPS), NULL ) ) {
       error_printf( "could not set graphics update timer\n" );
       return 0;
    }
