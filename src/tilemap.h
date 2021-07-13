@@ -13,11 +13,17 @@ struct TILESET_TILE {
    uint8_t flags;
 };
 
+struct TILEMAP_SPAWN {
+   struct TILEMAP_COORDS coords;
+   int16_t type;
+};
+
 struct TILEMAP {
    char* name;
    struct TILESET_TILE tileset[TILEMAP_TILESETS_MAX];
    uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];
    uint8_t tiles_flags[TILEMAP_TH * TILEMAP_TW];
+   struct TILEMAP_SPAWN spawns[20];
 };
 
 int16_t tilemap_load( uint32_t, struct TILEMAP* );

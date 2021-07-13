@@ -97,6 +97,23 @@ START_TEST( check_data_json_parse_attribs ) {
 }
 END_TEST
 
+START_TEST( check_data_json_oob ) {
+   int id = 0;
+
+   id = json_token_id_from_path(
+      "/objects/2/extra/0", 27,
+      &(g_tokens[0]), g_tokens_parsed, gc_test_json );
+
+   ck_assert_int_eq( id, -1 );
+
+   id = json_token_id_from_path(
+      "/objects/[name=hurl]/extra/0", 27,
+      &(g_tokens[0]), g_tokens_parsed, gc_test_json );
+
+   ck_assert_int_eq( id, -1 );
+}
+END_TEST
+
 Suite* data_js_suite( void ) {
    Suite* s;
    TCase* tc_core;
@@ -113,6 +130,7 @@ Suite* data_js_suite( void ) {
    tcase_add_test( tc_core, check_data_json_parse_through_combi );
    tcase_add_test( tc_core, check_data_json_parse_tileset_path );
    tcase_add_test( tc_core, check_data_json_parse_attribs );
+   tcase_add_test( tc_core, check_data_json_oob );
 
    suite_add_tcase( s, tc_core );
 

@@ -3,14 +3,16 @@
 
 #ifdef USE_JSON_MAPS
 
-#define JSON_TOKENS_MAX 1024
+#define JSON_TOKENS_MAX 2048
 #define JSON_PATH_SZ 255
+#define SPAWN_TYPE_MAX 32
 
 int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    int16_t tok_parsed = 0,
       tiles_count = 0,
       i = 0,
       retval = 1,
+      spawn_type_sz = 0,
       tileset_source_sz = 0;
    int8_t tile_id_in = 0;
    char* json_buffer = NULL;
@@ -21,6 +23,7 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    MEMORY_HANDLE tokens_handle = NULL;
    uint32_t json_buffer_sz = 0;
    char tileset_name[DRC_FILENAME_SZ];
+   char spawn_type[SPAWN_TYPE_MAX];
 
    memory_zero_ptr( tileset_name, DRC_FILENAME_SZ );
 
@@ -38,6 +41,9 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
       goto cleanup;
    }
 
+   debug_printf( 2, "JSON token buffer allocated: %lu bytes",
+      sizeof( jsmntok_t ) * JSON_TOKENS_MAX );
+
    json_buffer_sz = memory_sz( json_handle );
    json_buffer = resource_lock_handle( json_handle );
    tokens = memory_lock( tokens_handle );
@@ -53,7 +59,7 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
       &parser, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
 
    debug_printf( 2, "%d tokens parsed", tok_parsed );
-   if( 0 == tok_parsed ) {
+   if( 0 >= tok_parsed ) {
       retval = 0;
       goto cleanup;
    }
@@ -73,7 +79,8 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    tiles_count = (TILEMAP_TW * TILEMAP_TH);
    for( i = 0 ; tiles_count > i ; i++ ) {
       /* Load tile data into the grid. */
-      dio_snprintf( iter_path, JSON_PATH_SZ, "/layers/0/data/%d", i );
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ, "/layers/[name=terrain]/data/%d", i );
       tile_id_in = 
          json_int_from_path(
             iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
@@ -91,6 +98,32 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
       t->tiles[i / 2] |= tile_id_in;
    }
 
+   i = 0;
+   dio_snprintf(
+      iter_path, JSON_PATH_SZ, "/layers/[name=mobiles]/objects/%d/name", i );
+   spawn_type_sz = json_str_from_path(
+      iter_path, JSON_PATH_SZ,
+      spawn_type, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+   while( 0 <= spawn_type_sz ) {
+      if( 0 == memory_strncmp_ptr( "player", spawn_type, 6 ) ) {
+         t->spawns[i].type = MOBILE_TYPE_PLAYER;
+         t->spawns[i].coords.x = (dio_snprintf(
+            iter_path, JSON_PATH_SZ,
+            "/layers/[name=mobiles]/objects/%d/x", i ) / TILE_W);
+         t->spawns[i].coords.y = (dio_snprintf(
+            iter_path, JSON_PATH_SZ,
+            "/layers/[name=mobiles]/objects/%d/y", i ) / TILE_H);
+         debug_printf( 2, "player spawn at %d, %d",
+            t->spawns[i].coords.x, t->spawns[i].coords.y );
+      }
+
+      i++;
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ, "/layers/[name=mobiles]/objects/%d/name", i );
+      spawn_type_sz = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         spawn_type, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+   }
 cleanup:
 
    if( NULL != tokens ) {

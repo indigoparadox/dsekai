@@ -19,6 +19,11 @@ struct MOBILE {
 #define MOBILE_FACING_RIGHT   2
 #define MOBILE_FACING_LEFT    3
 
+#define MOBILE_TYPE_PLAYER    1
+#define MOBILE_TYPE_PRINCESS  2
+#define MOBILE_TYPE_FOUNTAIN  3
+#define MOBILE_TYPE_RASPTOR   4
+
 #define MOBILE_IACT_NONE      0
 #define MOBILE_IACT_TALK      1
 #define MOBILE_IACT_ATTACK    2
