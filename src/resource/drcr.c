@@ -6,7 +6,7 @@
  */
 MEMORY_HANDLE resource_get_handle( RESOURCE_ID id, RESOURCE_TYPE drc_type ) {
    struct DIO_STREAM drc_file;
-   uint8_t far* ptr = NULL;
+   MEMORY_FAR_PTR ptr = NULL;
    int32_t ptr_sz = 0;
    MEMORY_HANDLE handle_out = NULL;
 

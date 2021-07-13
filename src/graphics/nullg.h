@@ -11,6 +11,9 @@ struct GRAPHICS_BITMAP {
    uint16_t ref_count;
 };
 
+struct GRAPHICS_ARGS {
+};
+
 #define GRAPHICS_COLOR_BLACK     0
 #define GRAPHICS_COLOR_CYAN      1
 #define GRAPHICS_COLOR_MAGENTA   2
