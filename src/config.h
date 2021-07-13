@@ -48,7 +48,7 @@
 
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
-#define USE_JSON_MAPS
+/* #define USE_JSON_MAPS */
 #define ANIMATE_SCREEN_MOVEMENT
 #define RESOURCE_HEADER
 
@@ -291,11 +291,6 @@
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 /* ------ */
 
-#define TILEMAP_TW (30)
-#define TILEMAP_TH (30)
-
-#define TILEMAP_TILESETS_MAX (12)
-
 #ifndef platform_file
 #define platform_file FILE*
 #endif /* !platform_file */
@@ -333,51 +328,51 @@
 #endif /* !JSON_BUFFER_SZ */
 
 #ifndef SCREEN_W
-#define SCREEN_W (320)
+#define SCREEN_W 320
 #endif /* !SCREEN_W */
 
 #ifndef SCREEN_H
-#define SCREEN_H (200)
+#define SCREEN_H 200
 #endif /* !SCREEN_H */
 
 #ifndef SCREEN_SCALE
-#define SCREEN_SCALE (1)
-#endif /* SCREEN_SCALE */
+#define SCREEN_SCALE 1
+#endif /* !SCREEN_SCALE */
 
 #ifndef FPS
-#define FPS (30)
-#endif /* FPS */
+#define FPS 30
+#endif /* !FPS */
 
 #ifndef MEMORY_FAKE_HEAP_SZ
-#define MEMORY_FAKE_HEAP_SZ (112500)
+#define MEMORY_FAKE_HEAP_SZ 112500
 #endif /* !MEMORY_FAKE_HEAP_S */
 
 #ifndef DIO_READ_FILE_BLOCK_SZ
-#define DIO_READ_FILE_BLOCK_SZ (4096)
+#define DIO_READ_FILE_BLOCK_SZ 4096
 #endif /* !DIO_READ_FILE_BLOCK_SZ */
 
 #ifndef NAMEBUF_MAX
-#define NAMEBUF_MAX (255)
+#define NAMEBUF_MAX 255
 #endif /* !NAMEBUF_MAX */
 
 #ifndef DRC_COPY_BLOCK_SZ
-#define DRC_COPY_BLOCK_SZ (1024)
+#define DRC_COPY_BLOCK_SZ 1024
 #endif /* !DRC_COPY_BLOCK_SZ */
 
 #ifndef MOBILES_MAX
-#define MOBILES_MAX (10)
+#define MOBILES_MAX 20
 #endif /* !MOBILES_MAX */
 
 #ifndef DEBUG_THRESHOLD
-#define DEBUG_THRESHOLD (2)
+#define DEBUG_THRESHOLD 2
 #endif /* !DEBUG_THRESHOLD */
 
 #ifndef DIRTY_THRESHOLD
-#define DIRTY_THRESHOLD (3)
+#define DIRTY_THRESHOLD 3
 #endif /* !DIRTY_THRESHOLD */
 
 #ifndef FAKE_HEAP_SIZE
-#define FAKE_HEAP_SIZE (524288)
+#define FAKE_HEAP_SIZE 524288
 #endif /* !FAKE_HEAP_SIZE */
 
 #ifndef DRC_TOC_INITIAL_ALLOC
@@ -386,11 +381,27 @@
 
 #ifndef DIO_PATH_MAX
 #define DIO_PATH_MAX 254
-#endif /* DIO_PATH_MAX */
+#endif /* !DIO_PATH_MAX */
+
+#ifndef ANI_SEMICYCLES_MAX
+#define ANI_SEMICYCLES_MAX 10
+#endif /* !ANI_SEMICYCLES_MAX */
+
+#ifndef INPUT_BLOCK_DELAY
+#define INPUT_BLOCK_DELAY 5
+#endif /* !INPUT_BLOCK_DELAY */
 
 #ifndef GRAPHICS_CACHE_INITIAL_SZ
 #define GRAPHICS_CACHE_INITIAL_SZ 50
 #endif /* !GRAPHICS_CACHE_INITIAL_SZ */
+
+#ifndef JSON_TOKENS_MAX
+#define JSON_TOKENS_MAX 2048
+#endif /* !JSON_TOKENS_MAX */
+
+#ifndef JSON_PATH_SZ
+#define JSON_PATH_SZ 255
+#endif /* !JSON_PATH_SZ */
 
 #ifdef LOG_TO_FILE
 #ifndef DEBUG_LOG
@@ -493,9 +504,6 @@
 
 #define SCREEN_MAP_W (SCREEN_W)
 #define SCREEN_MAP_H (160 - 32)
-
-#define SCREEN_TW (SCREEN_MAP_W / TILE_W)
-#define SCREEN_TH (SCREEN_MAP_H / TILE_H)
 
 #define SCREEN_REAL_W (SCREEN_W * SCREEN_SCALE)
 #define SCREEN_REAL_H (SCREEN_H * SCREEN_SCALE)

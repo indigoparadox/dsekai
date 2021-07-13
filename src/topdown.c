@@ -11,11 +11,12 @@
 #include "../gen/mac7/map_field.h"
 #elif defined( PLATFORM_NDS )
 #include "../gen/nds/map_field.h"
+#elif defined( PLATFORM_DOS )
+#include "../gen/dos/map_field.h"
 #endif
 #endif /* USE_JSON_MAPS */
 
-#define INPUT_BLOCK_DELAY 5
-#define TOPDOWN_MOBILES_MAX 10
+#define TOPDOWN_STATE_WELCOME 1
 
 int topdown_draw( struct DSEKAI_STATE* state ) {
    int in_char = 0,
@@ -161,22 +162,12 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
        */
       tilemap_draw( &(state->map), state );
 
-      initialized = 1;
-   }
-
-   graphics_loop_start();
-
-   in_char = 0;
-
-   if( 0 >= window_modal( state ) ) {
-      topdown_draw( state );
-   }
-
-   if( !state->window_shown ) {
       window_push(
          0x111, WINDOW_STATUS_VISIBLE,
          0, (SCREEN_TH * 16), STATUS_WINDOW_W, STATUS_WINDOW_H, 0, state );
+
 #ifndef HIDE_WELCOME_DIALOG
+      state->engine_state = TOPDOWN_STATE_WELCOME;
       window_push(
          0x1212, WINDOW_STATUS_MODAL,
          WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state );
@@ -193,7 +184,16 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
          -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
          NULL, sprite_princess, 0x1212, state );
 #endif /* !HIDE_WELCOME_DIALOG */
-      state->window_shown = 1;
+
+      initialized = 1;
+   }
+
+   graphics_loop_start();
+
+   in_char = 0;
+
+   if( 0 >= window_modal( state ) ) {
+      topdown_draw( state );
    }
 
    window_draw_all( state );
@@ -258,7 +258,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    }
 
    /* Animate. */
-   if( 10 < state->semi_cycles ) {
+   if( ANI_SEMICYCLES_MAX < state->semi_cycles ) {
       state->semi_cycles = 0;
 
       if( 0 == state->walk_offset ) {

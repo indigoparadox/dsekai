@@ -74,6 +74,9 @@ int main( int argc, char* argv[] ) {
 
 #endif /* PLATFORM_WIN */
 
+   assert( 0 == TILEMAP_TW % 4 );
+   assert( 0 == TILEMAP_TH % 4 );
+
 
 
 /* === Subsystem Initialization === */

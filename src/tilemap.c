@@ -3,8 +3,6 @@
 
 #ifdef USE_JSON_MAPS
 
-#define JSON_TOKENS_MAX 2048
-#define JSON_PATH_SZ 255
 #define SPAWN_TYPE_MAX 32
 
 int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {

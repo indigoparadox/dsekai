@@ -7,11 +7,11 @@ DSEKAI_C_FILES := \
    src/window.c \
    src/dio.c \
    src/control.c \
-   src/json.c \
    src/topdown.c
 
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
+   src/json.c \
    src/input/sdli.c \
    src/graphics/sdlg.c \
    src/memory/fakem.c \
@@ -26,6 +26,7 @@ DSEKAI_C_FILES_DOS_ONLY := \
 
 DSEKAI_C_FILES_PALM_ONLY := \
    src/main.c \
+   src/json.c \
    src/input/palmi.c \
    src/memory/palmm.c \
    src/resource/palmr.c \
@@ -53,6 +54,7 @@ DSEKAI_C_FILES_NDS_ONLY := \
    src/resource/header.c
 
 DSEKAI_C_FILES_CHECK_NULL_ONLY := \
+   src/json.c \
    check/check.c \
    check/ckmobile.c \
    check/ckitem.c \
@@ -106,14 +108,23 @@ TOPDOWN_O: src/topdown.o
 
 ASSETDIR := assets
 
-OBJDIR_SDL := obj/sdl
-OBJDIR_DOS := obj/dos
-OBJDIR_PALM := obj/palm
-OBJDIR_WIN16 := obj/win16
-OBJDIR_WIN32 := obj/win32
-OBJDIR_MAC7 := obj/mac7
-OBJDIR_NDS := obj/nds
+OBJDIR_SDL :=        obj/sdl
+OBJDIR_DOS :=        obj/dos
+OBJDIR_PALM :=       obj/palm
+OBJDIR_WIN16 :=      obj/win16
+OBJDIR_WIN32 :=      obj/win32
+OBJDIR_MAC7 :=       obj/mac7
+OBJDIR_NDS :=        obj/nds
 OBJDIR_CHECK_NULL := obj/check_null
+
+DEPDIR_SDL :=        dep/sdl
+DEPDIR_DOS :=        dep/dos
+DEPDIR_PALM :=       dep/palm
+DEPDIR_WIN16 :=      dep/win16
+DEPDIR_WIN32 :=      dep/win32
+DEPDIR_MAC7 :=       dep/mac7
+DEPDIR_NDS :=        dep/nds
+DEPDIR_CHECK_NULL := dep/check_null
 
 GENDIR_SDL := gen/sdl
 GENDIR_DOS := gen/dos
@@ -163,6 +174,8 @@ DSEKAI_ASSETS_MAPS_MAC7 := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_MAPS)))
 DSEKAI_ASSETS_MAPS_NDS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS)))
+DSEKAI_ASSETS_MAPS_DOS := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
 
 MD := mkdir -p
 DD := /bin/dd
@@ -319,6 +332,13 @@ $(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_SDL) -c -o $@ $(<:%.o=%)
 
+$(DEPDIR_SDL)/%.d: %.c $(GENDIR_SDL)/resext.h
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS_SDL) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL)/,$<)) -MF $@
+
+include $(subst obj/,dep/,$(DSEKAI_O_FILES_SDL:.o=.d))
+
 # ====== Main: MS-DOS ======
 
 #$(BINDIR)/doscga.drc: res_doscga_drc
@@ -327,6 +347,9 @@ $(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h
 #	rm $(BINDIR)/doscga.drc || true
 #	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -i 5001 \
 #      -if $(GENDIR_DOS)/*.cga $(DSEKAI_ASSETS_MAPS) -lh $(GENDIR_DOS)/resext.h
+
+$(GENDIR_DOS)/map_%.h: $(ASSETDIR)/map_%.json $(MAPC) | $(GENDIR_DOS)
+	$(PYTHON) $(MAPC) -j $< -o $@
 
 $(GENDIR_DOS)/resext.h: \
 $(HEADPACK) $(DSEKAI_ASSETS_DOS_CGA) $(DSEKAI_ASSETS_MAPS)
@@ -338,10 +361,10 @@ $(GENDIR_DOS):
 $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
-$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)
+$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR) $(DSEKAI_ASSETS_MAPS_DOS)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
-$(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h
+$(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h $(DSEKAI_ASSETS_MAPS_DOS)
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_DOS) -fo=$@ $(<:%.c=%)
 
@@ -429,7 +452,7 @@ $(GENDIR_WIN32):
 $(OBJDIR_WIN32):
 	$(MD) $@
 
-$(GENDIR_WIN32)/%.h: $(ASSETDIR)/%.json $(MAPC) | $(GENDIR_WIN32)
+$(GENDIR_WIN32)/map_%.h: $(ASSETDIR)/map_%.json $(MAPC) | $(GENDIR_WIN32)
 	$(PYTHON) $(MAPC) -j $< -o $@
 
 $(BIN_WIN32): \
@@ -533,6 +556,13 @@ $(OBJDIR_NDS)/%.o: \
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_NDS) -c -o $@ $(<:%.o=%)
 
+$(DEPDIR_NDS)/%.d: %.c $(GENDIR_NDS)/resext.h
+	$(MD) $(dir $@)
+	arm-none-eabi-gcc $(CFLAGS_NDS) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_NDS)/,$<)) -MF $@ || touch $@
+
+include $(subst obj/,dep/,$(DSEKAI_O_FILES_NDS:.o=.d))
+
 # ====== Check: Null ======
 
 $(GENDIR_CHECK_NULL):
@@ -546,12 +576,12 @@ $(GENDIR_CHECK_NULL)/resext.h: $(GENDIR_CHECK_NULL) $(MKRESH)
 $(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-#$(OBJDIR_CHECK_NULL)/%.d: %.c $(GENDIR_CHECK_NULL)/resext.h
-#	$(MD) $(dir $@)
-#	$(CC) $(CFLAGS_D) -MM $< \
-#      -MT $(subst .c,.o,$(addprefix $(OBJDIR_CHECK_NULL)/,$<)) -MF $@
-#
-#include $(DSEKAI_O_FILES_CHECK_NULL:.o=.d)
+$(DEPDIR_CHECK_NULL)/%.d: %.c $(GENDIR_CHECK_NULL)/resext.h
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS_CHECK_NULL) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_CHECK_NULL)/,$<)) -MF $@
+
+include $(subst obj/,dep/,$(DSEKAI_O_FILES_CHECK_NULL:.o=.d))
 	
 $(OBJDIR_CHECK_NULL)/%.o: %.c check/testdata.h $(GENDIR_CHECK_NULL)/resext.h
 	$(MD) $(dir $@)

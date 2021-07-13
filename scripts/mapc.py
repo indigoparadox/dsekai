@@ -20,8 +20,8 @@ def main():
             map_basename = os.path.basename( args.json ).split( '.' )[0]
             height = json_data['height']
             width = json_data['width']
-            assert( width == 30 )
-            assert( height == 30 )
+            assert( width == 40 )
+            assert( height == 40 )
             tile_out = 0
 
             h_file.write( 'const struct TILEMAP gc_%s = {\n' % map_basename )
@@ -55,7 +55,7 @@ def main():
                     h_file.write( '\n      ' )
                     
                 tile_idx += 1
-            assert( 900 == tile_idx )
+            assert( 1600 == tile_idx )
             h_file.write( '\n   },\n' )
 
             # Tile Flags
