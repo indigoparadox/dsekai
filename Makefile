@@ -1,6 +1,5 @@
 
 DSEKAI_C_FILES := \
-   src/main.c \
    src/tilemap.c \
    src/graphics.c \
    src/mobile.c \
@@ -12,36 +11,42 @@ DSEKAI_C_FILES := \
    src/topdown.c
 
 DSEKAI_C_FILES_SDL_ONLY := \
+   src/main.c \
    src/input/sdli.c \
    src/graphics/sdlg.c \
    src/memory/fakem.c \
    src/resource/header.c
 
 DSEKAI_C_FILES_DOS_ONLY := \
+   src/main.c \
    src/input/dosi.c \
    src/graphics/dosg.c \
    src/memory/fakem.c \
    src/resource/header.c
 
 DSEKAI_C_FILES_PALM_ONLY := \
+   src/main.c \
    src/input/palmi.c \
    src/memory/palmm.c \
    src/resource/palmr.c \
    src/graphics/palmg.c
 
 DSEKAI_C_FILES_WIN_ONLY := \
+   src/main.c \
    src/input/wini.c \
    src/resource/winr.c \
    src/memory/winm.c \
    src/graphics/wing.c
 
 DSEKAI_C_FILES_MAC7_ONLY := \
+   src/main.c \
    src/input/mac7i.c \
    src/graphics/mac7g.c \
    src/memory/mac7m.c \
    src/resource/header.c
 
 DSEKAI_C_FILES_NDS_ONLY := \
+   src/main.c \
    src/input/ndsi.c \
    src/graphics/ndsg.c \
    src/memory/fakem.c \
@@ -60,7 +65,8 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    src/resource/drcr.c \
    check/ckdio.c \
    check/ckdrc.c \
-   check/ckmemory.c ndsrc/graphics/nullg.c \
+   check/ckmemory.c \
+   src/graphics/nullg.c \
    src/input/nulli.c \
    tools/data/cga.c \
    tools/data/bmp.c \
@@ -181,17 +187,17 @@ CFLAGS_CONVERT := -DNO_RESEXT -g -DUSE_JSON_MAPS -DRESOURCE_DRC
 CFLAGS_LOOKUPS := -g -DRESOURCE_HEADER
 CFLAGS_HEADPACK := -g -DRESOURCE_HEADER
 
-CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=1
+CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=0
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -pg
 
 CFLAGS_SDL := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC)
 CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=1
-CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g -DDEBUG_THRESHOLD=1 $(CFLAGS_DEBUG_GENERIC)
+CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC)
 CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1
 CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1
 CFLAGS_MAC7 := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_DEBUG_GENERIC)
 CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math
-CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DDEBUG_THRESHOLD=3 -DCHECK -DUSE_JSON_MAPS -DRESOURCE_DRC
+CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DRESOURCE_DRC
 
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
@@ -545,7 +551,7 @@ $(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)
 #
 #include $(DSEKAI_O_FILES_CHECK_NULL:.o=.d)
 	
-$(OBJDIR_CHECK_NULL)/%.o: %.c $(GENDIR_CHECK_NULL)/resext.h
+$(OBJDIR_CHECK_NULL)/%.o: %.c check/testdata.h $(GENDIR_CHECK_NULL)/resext.h
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_CHECK_NULL) -c -o $@ $(<:%.o=%)
 
