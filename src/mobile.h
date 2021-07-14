@@ -15,9 +15,6 @@ struct MOBILE {
    struct TILEMAP_COORDS coords_prev;
    uint8_t steps_x;
    uint8_t steps_y;
-   uint8_t interaction;
-   uint8_t interaction_data_sz;
-   MEMORY_PTR interaction_data;
    struct ITEM* inventory;
 };
 
