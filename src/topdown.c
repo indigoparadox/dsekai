@@ -120,32 +120,6 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
    if( !initialized ) {
 
-      /* TODO: Generate this dynamically. */
-
-      state->mobiles[0].sprite = sprite_robe;
-      state->mobiles[0].hp = 100;
-      state->mobiles[0].mp = 100;
-      state->mobiles[0].coords.x = 3;
-      state->mobiles[0].coords.y = 4;
-      state->mobiles[0].coords_prev.x = 3;
-      state->mobiles[0].coords_prev.y = 4;
-      state->mobiles[0].steps_x = 0;
-      state->mobiles[0].steps_y = 0;
-      state->mobiles[0].inventory = NULL;
-      state->mobiles_count++;
-
-      state->mobiles[1].sprite = sprite_princess;
-      state->mobiles[1].hp = 100;
-      state->mobiles[1].mp = 100;
-      state->mobiles[1].coords.x = 5;
-      state->mobiles[1].coords.y = 5;
-      state->mobiles[1].coords_prev.x = 5;
-      state->mobiles[1].coords_prev.y = 5;
-      state->mobiles[1].steps_x = 0;
-      state->mobiles[1].steps_y = 0;
-      state->mobiles[1].inventory = NULL;
-      state->mobiles_count++;
-
 #ifdef USE_JSON_MAPS
       tilemap_load( map_field, &(state->map) );
 #else
@@ -161,6 +135,49 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
        * windows.
        */
       tilemap_draw( &(state->map), state );
+
+      /* TODO: Generate this dynamically. */
+      for( i = 0 ; state->map.spawns_count > i ; i++ ) {
+         state->mobiles[i].hp = 100;
+         state->mobiles[i].mp = 100;
+         state->mobiles[i].coords.x = state->map.spawns[i].coords.x;
+         state->mobiles[i].coords.y = state->map.spawns[i].coords.y;
+         state->mobiles[i].coords_prev.x = state->map.spawns[i].coords.x;
+         state->mobiles[i].coords_prev.y = state->map.spawns[i].coords.y;
+         state->mobiles[i].steps_x = 0;
+         state->mobiles[i].steps_y = 0;
+         state->mobiles[i].inventory = NULL;
+         state->mobiles_count++;
+         switch( state->map.spawns[i].type ) {
+         case MOBILE_TYPE_PLAYER:
+            state->mobiles[i].active = 1;
+            state->player_idx = i;
+            state->mobiles[i].sprite = sprite_robe;
+            break;
+
+         case MOBILE_TYPE_PRINCESS:
+            state->mobiles[i].active = 1;
+            state->mobiles[i].sprite = sprite_princess;
+            break;
+
+         default:
+            break;
+         }
+      }
+
+      /*
+      state->mobiles[1].sprite = sprite_princess;
+      state->mobiles[1].hp = 100;
+      state->mobiles[1].mp = 100;
+      state->mobiles[1].coords.x = 5;
+      state->mobiles[1].coords.y = 5;
+      state->mobiles[1].coords_prev.x = 5;
+      state->mobiles[1].coords_prev.y = 5;
+      state->mobiles[1].steps_x = 0;
+      state->mobiles[1].steps_y = 0;
+      state->mobiles[1].inventory = NULL;
+      state->mobiles_count++;
+      */
 
       window_push(
          0x111, WINDOW_STATUS_VISIBLE,

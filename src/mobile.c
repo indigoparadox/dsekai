@@ -66,6 +66,10 @@ void mobile_draw(
    int16_t x_offset = 0,
       y_offset = 0;
 
+   if( !m->active ) {
+      return;
+   }
+
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
 

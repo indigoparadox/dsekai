@@ -102,19 +102,34 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    spawn_type_sz = json_str_from_path(
       iter_path, JSON_PATH_SZ,
       spawn_type, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+   debug_printf( 1, "loading spawns" ); 
    while( 0 <= spawn_type_sz ) {
       if( 0 == memory_strncmp_ptr( "player", spawn_type, 6 ) ) {
          t->spawns[i].type = MOBILE_TYPE_PLAYER;
-         t->spawns[i].coords.x = (dio_snprintf(
-            iter_path, JSON_PATH_SZ,
-            "/layers/[name=mobiles]/objects/%d/x", i ) / TILE_W);
-         t->spawns[i].coords.y = (dio_snprintf(
-            iter_path, JSON_PATH_SZ,
-            "/layers/[name=mobiles]/objects/%d/y", i ) / TILE_H);
-         debug_printf( 2, "player spawn at %d, %d",
-            t->spawns[i].coords.x, t->spawns[i].coords.y );
+      } else if( 0 == memory_strncmp_ptr( "princess", spawn_type, 8 ) ) {
+         t->spawns[i].type = MOBILE_TYPE_PRINCESS;
       }
 
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ,
+         "/layers/[name=mobiles]/objects/%d/x", i );
+      t->spawns[i].coords.x = json_int_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
+      t->spawns[i].coords.x /= TILE_W;
+
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ,
+         "/layers/[name=mobiles]/objects/%d/y", i );
+      t->spawns[i].coords.y = json_int_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
+      t->spawns[i].coords.y /= TILE_H;
+
+      debug_printf( 2, "%d spawn at %d, %d",
+         t->spawns[i].type, t->spawns[i].coords.x, t->spawns[i].coords.y );
+
+      t->spawns_count++;
+
+      /* Iterate to the next spawn. */
       i++;
       dio_snprintf(
          iter_path, JSON_PATH_SZ, "/layers/[name=mobiles]/objects/%d/name", i );

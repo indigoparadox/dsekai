@@ -40,6 +40,7 @@ struct TILEMAP {
    uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];
    uint8_t tiles_flags[TILEMAP_TH * TILEMAP_TW];
    struct TILEMAP_SPAWN spawns[20];
+   uint32_t spawns_count;
 };
 
 int16_t tilemap_load( uint32_t, struct TILEMAP* );

@@ -75,7 +75,9 @@ def main():
             for spawn in layer_spawns['objects']:
                 h_file.write( '      { { %d, %d }, MOBILE_TYPE_%s },\n' % 
                     (spawn['x'], spawn['y'], spawn['name'].upper()) )
-            h_file.write( '   }\n' )
+            h_file.write( '   },\n' )
+
+            h_file.write( '   %d\n' % len( layer_spawns['objects'] ) )
 
             #uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];
             #uint8_t tiles_flags[TILEMAP_TH * TILEMAP_TW];

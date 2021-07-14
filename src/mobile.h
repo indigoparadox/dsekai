@@ -2,7 +2,12 @@
 #ifndef MOBILE_H
 #define MOBILE_H
 
+#ifdef __GNUC__
+__attribute__( (__packed__) )
+#endif /* __GNUC__ */
 struct MOBILE {
+   uint8_t facing;
+   uint8_t active;
    uint8_t hp;
    uint8_t mp;
    uint32_t sprite;
@@ -10,7 +15,6 @@ struct MOBILE {
    struct TILEMAP_COORDS coords_prev;
    uint8_t steps_x;
    uint8_t steps_y;
-   uint8_t facing;
    struct ITEM* inventory;
 };
 
