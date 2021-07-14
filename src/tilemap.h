@@ -6,6 +6,8 @@
 #define TILEMAP_TH 40
 #define TILEMAP_NAME_SZ 32
 #define TILEMAP_TILESETS_MAX 12
+#define TILEMAP_STRINGS_MAX 20
+#define TILEMAP_STRINGS_SZ 128
 #define SCREEN_TW (SCREEN_MAP_W / TILE_W)
 #define SCREEN_TH (SCREEN_MAP_H / TILE_H)
 
@@ -29,6 +31,10 @@ __attribute__( (__packed__) )
 struct TILEMAP_SPAWN {
    struct TILEMAP_COORDS coords;
    int16_t type;
+   uint8_t interaction;
+   uint8_t res1;
+   uint16_t interaction_data_sz;
+   MEMORY_PTR interaction_data;
 };
 
 #ifdef __GNUC__
@@ -40,7 +46,9 @@ struct TILEMAP {
    uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];
    uint8_t tiles_flags[TILEMAP_TH * TILEMAP_TW];
    struct TILEMAP_SPAWN spawns[20];
-   uint32_t spawns_count;
+   char strings[TILEMAP_STRINGS_MAX][TILEMAP_STRINGS_SZ];
+   uint16_t strings_count;
+   uint16_t spawns_count;
 };
 
 int16_t tilemap_load( uint32_t, struct TILEMAP* );

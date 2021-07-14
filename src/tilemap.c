@@ -9,8 +9,9 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    int16_t tok_parsed = 0,
       tiles_count = 0,
       i = 0,
+      j = 0,
       retval = 1,
-      spawn_type_sz = 0,
+      spawn_buffer_sz = 0,
       tileset_source_sz = 0;
    int8_t tile_id_in = 0;
    char* json_buffer = NULL;
@@ -21,7 +22,7 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    MEMORY_HANDLE tokens_handle = NULL;
    uint32_t json_buffer_sz = 0;
    char tileset_name[DRC_FILENAME_SZ];
-   char spawn_type[SPAWN_TYPE_MAX];
+   char spawn_buffer[SPAWN_TYPE_MAX];
 
    memory_zero_ptr( tileset_name, DRC_FILENAME_SZ );
 
@@ -99,17 +100,20 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    i = 0;
    dio_snprintf(
       iter_path, JSON_PATH_SZ, "/layers/[name=mobiles]/objects/%d/name", i );
-   spawn_type_sz = json_str_from_path(
+   spawn_buffer_sz = json_str_from_path(
       iter_path, JSON_PATH_SZ,
-      spawn_type, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+      spawn_buffer, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
    debug_printf( 1, "loading spawns" ); 
-   while( 0 <= spawn_type_sz ) {
-      if( 0 == memory_strncmp_ptr( "player", spawn_type, 6 ) ) {
+   while( 0 <= spawn_buffer_sz ) {
+
+      /* Parse Type */
+      if( 0 == memory_strncmp_ptr( "player", spawn_buffer, 6 ) ) {
          t->spawns[i].type = MOBILE_TYPE_PLAYER;
-      } else if( 0 == memory_strncmp_ptr( "princess", spawn_type, 8 ) ) {
+      } else if( 0 == memory_strncmp_ptr( "princess", spawn_buffer, 8 ) ) {
          t->spawns[i].type = MOBILE_TYPE_PRINCESS;
       }
 
+      /* Parse X */
       dio_snprintf(
          iter_path, JSON_PATH_SZ,
          "/layers/[name=mobiles]/objects/%d/x", i );
@@ -117,12 +121,66 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
          iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
       t->spawns[i].coords.x /= TILE_W;
 
+      /* Parse Y */
       dio_snprintf(
          iter_path, JSON_PATH_SZ,
          "/layers/[name=mobiles]/objects/%d/y", i );
       t->spawns[i].coords.y = json_int_from_path(
          iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
       t->spawns[i].coords.y /= TILE_H;
+
+      /* Parse Interaction */
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ,
+         "/layers/[name=mobiles]/objects/%d/properties/[name=interaction]/value", i );
+      spawn_buffer_sz = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         spawn_buffer, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+      if( 0 == memory_strncmp_ptr( "talk", spawn_buffer, 4 ) ) {
+         t->spawns[i].interaction = MOBILE_IACT_TALK;
+         debug_printf( 1, "mobile interaction: talk" );
+      }
+
+      /* Parse Interaction Data */
+      switch( t->spawns[i].interaction ) {
+      case MOBILE_IACT_TALK:
+         dio_snprintf(
+            iter_path, JSON_PATH_SZ,
+            "/layers/[name=mobiles]/objects/%d/properties/[name=data]/value",
+            i );
+         spawn_buffer_sz = json_str_from_path(
+            iter_path, JSON_PATH_SZ,
+            spawn_buffer, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+         
+         /* Try to find string already in table. */
+         for( j = 0 ; t->strings_count > j ; j++ ) {
+            if( 0 == memory_strncmp_ptr(
+               spawn_buffer, &(t->strings[j][0]), spawn_buffer_sz
+            ) ) {
+               debug_printf( 2, "found string \"%s\" at index %d",
+                  spawn_buffer, j );
+               t->spawns[i].interaction_data = &(t->strings[j]);
+               break;
+            }
+            t->spawns[i].interaction_data_sz = spawn_buffer_sz;
+         }
+
+         if( 0 == t->spawns[i].interaction_data_sz ) {
+            if( TILEMAP_STRINGS_MAX <= t->strings_count + 1 ) {
+               error_printf( "tilemap string table full" );
+               break;
+            }
+            memory_strncpy_ptr(
+               &(t->strings[t->strings_count][0]),
+               spawn_buffer,
+               spawn_buffer_sz );
+            debug_printf( 2, "added string \"%s\" at index %d",
+               spawn_buffer, t->strings_count );
+            t->strings_count++;
+         }
+
+         break;
+      }
 
       debug_printf( 2, "%d spawn at %d, %d",
          t->spawns[i].type, t->spawns[i].coords.x, t->spawns[i].coords.y );
@@ -133,9 +191,9 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
       i++;
       dio_snprintf(
          iter_path, JSON_PATH_SZ, "/layers/[name=mobiles]/objects/%d/name", i );
-      spawn_type_sz = json_str_from_path(
+      spawn_buffer_sz = json_str_from_path(
          iter_path, JSON_PATH_SZ,
-         spawn_type, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+         spawn_buffer, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
    }
 cleanup:
 

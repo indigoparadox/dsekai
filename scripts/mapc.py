@@ -65,18 +65,26 @@ def main():
                 h_file.write( '0x00, ' )
             h_file.write( '\n   },\n' )
 
-            # Spawns
-            h_file.write( '   {\n' )
+            # Find spawns layer.
             layer_spawns = None
             for layer in json_data['layers']:
                 if layer['name'] == 'mobiles':
                     layer_spawns = layer
                     break
+
+            # Spawns
+            h_file.write( '   {\n' )
+            strings = []
             for spawn in layer_spawns['objects']:
                 h_file.write( '      { { %d, %d }, MOBILE_TYPE_%s },\n' % 
                     (spawn['x'], spawn['y'], spawn['name'].upper()) )
             h_file.write( '   },\n' )
 
+            # Strings
+
+            # Strings Count
+
+            # Spawns Count
             h_file.write( '   %d\n' % len( layer_spawns['objects'] ) )
 
             #uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];
