@@ -2,6 +2,8 @@
 #include "dstypes.h"
 
 typedef int16_t (*CONTROL_CB)( struct WINDOW*, struct CONTROL* );
+typedef void (*CONTROL_CB_SZ)(
+   struct WINDOW*, struct CONTROL*, struct GRAPHICS_RECT* );
 
 /* Drawing Callbacks */
 
@@ -10,58 +12,85 @@ static int16_t control_draw_label( struct WINDOW* w, struct CONTROL* c ) {
    int16_t str_len = 0;
 
    assert( NULL != c );
-   assert( NULL != c->data );
+   assert( NULL != c->data.handle );
 
-   str = (char*)memory_lock( c->data );
+   str = (char*)memory_lock( c->data.handle );
 
-   str_len = memory_sz( c->data );
-   assert( 0 < str_len );
+   str_len = memory_sz( c->data.handle );
+
+   assert( 0 <= str_len );
+   assert( w->x < SCREEN_W );
+   assert( w->y < SCREEN_H );
+   assert( c->x < SCREEN_W );
+   assert( c->y < SCREEN_H );
+   assert( w->x + c->x < SCREEN_W );
+   assert( w->y + c->y < SCREEN_H );
+   assert( w->x >= 0 );
+   assert( w->y >= 0 );
+   assert( c->x >= 0 );
+   assert( c->y >= 0 );
+
    graphics_string_at( 
       str, str_len, w->x + c->x, w->y + c->y, c->fg, c->scale );
 
-   str = (char*)memory_unlock( c->data );
+   str = (char*)memory_unlock( c->data.handle );
+
+   return 1;
+}
+
+static int16_t control_draw_sprite( struct WINDOW* w, struct CONTROL* c ) {
+
+   assert( NULL != c );
+
+   graphics_blit_at(
+      c->data.scalar, w->x + c->x + 2, w->y + c->y + 2, SPRITE_W, SPRITE_H );
+
+   graphics_draw_rect( w->x + c->x, w->y + c->y, SPRITE_W + 4, SPRITE_H + 4,
+      1, GRAPHICS_COLOR_BLACK );
+
+   graphics_draw_rect(
+      w->x + c->x + 1, w->y + c->y + 1, SPRITE_W + 3, SPRITE_H + 3,
+      1, GRAPHICS_COLOR_WHITE );
 
    return 1;
 }
 
 const CONTROL_CB gc_control_draw_callbacks[] = {
-   control_draw_label
+   control_draw_label,
+   NULL,
+   NULL,
+   control_draw_sprite
 };
 
 /* Sizing Callbacks */
 
-static int16_t control_width_label( struct WINDOW* w, struct CONTROL* c ) {
-   int16_t width_out = 0;
+static void control_sz_label(
+   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz
+) {
    char* str = NULL;
 
    assert( NULL != c );
-   assert( NULL != c->data );
+   assert( NULL != c->data.handle );
 
-   str = (char*)memory_lock( c->data );
+   str = (char*)memory_lock( c->data.handle );
 
-   width_out += 
-      (((memory_strnlen_ptr( str, memory_sz( c->data ) ) *
-      (FONT_W + FONT_SPACE)) - 
-         /* Take off one space for the end. */
-         FONT_SPACE) *
-      c->scale);
+   graphics_string_sz( str, memory_sz( c->data.handle ), c->scale, sz );
 
-   str = (char*)memory_unlock( c->data );
-
-   return width_out;
+   str = (char*)memory_unlock( c->data.handle );
 }
 
-static int16_t control_height_label( struct WINDOW* w, struct CONTROL* c ) {
-   /* TODO: Based on newlines in text. */
-   return FONT_H;
+static void control_sz_sprite(
+   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz
+) {
+   sz->w = SPRITE_W + 4; /* For border. */
+   sz->h = SPRITE_W + 4; /* For border. */
 }
 
-const CONTROL_CB gc_control_width_callbacks[] = {
-   control_width_label
-};
-
-const CONTROL_CB gc_control_height_callbacks[] = {
-   control_height_label
+const CONTROL_CB_SZ gc_control_sz_callbacks[] = {
+   control_sz_label,
+   NULL,
+   NULL,
+   control_sz_sprite
 };
 
 /* General Functions */
@@ -70,19 +99,23 @@ int16_t control_push(
    uint32_t control_id, uint16_t type, uint16_t status,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
-   MEMORY_HANDLE data, uint32_t window_id, struct DSEKAI_STATE* state
+   MEMORY_HANDLE data_handle, uint32_t data_scalar,
+   uint32_t window_id, struct DSEKAI_STATE* state
 ) {
    int i = 0;
    struct WINDOW* windows = NULL;
    struct CONTROL* controls = NULL;
    int16_t window_idx = -1,
       retval = 1;
+   struct GRAPHICS_RECT control_sz;
 
    debug_printf( 1, "pushing new control %u to window %u",
       control_id, window_id );
 
    assert( NULL != state->windows_handle );
    windows = (struct WINDOW*)memory_lock( state->windows_handle );
+
+   memory_zero_ptr( &control_sz, sizeof( struct GRAPHICS_RECT ) );
 
    for( i = 0 ; state->windows_count > i ; i++ ) {
       if( windows[i].id == window_id ) {
@@ -120,23 +153,26 @@ int16_t control_push(
 
    /* Sizing callbacks below might need these. */
    controls[0].type = type;
-   controls[0].data = data;
+   if( 0 != data_scalar ) {
+      controls[0].data.scalar = data_scalar;
+   } else {
+      controls[0].data.handle = data_handle;
+   }
    controls[0].scale = scale;
    controls[0].status = status;
    controls[0].id = control_id;
-   
+
+   gc_control_sz_callbacks[type](
+      &(windows[window_idx]), &(controls[0]), &control_sz );
+
    if( WINDOW_CENTERED == w ) {
-      controls[0].w = gc_control_width_callbacks[type](
-         &(windows[window_idx]),
-         &(controls[0]) );
+      controls[0].w = control_sz.w;
    } else {
       controls[0].w = w;
    }
 
    if( WINDOW_CENTERED == h ) {
-      controls[0].h = gc_control_height_callbacks[type](
-         &(windows[window_idx]),
-         &(controls[0]) );
+      controls[0].h = control_sz.h;
    } else {
       controls[0].h = h;
    }

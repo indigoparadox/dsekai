@@ -1,15 +1,16 @@
 
+#define GRAPHICS_C
 #include "../dstypes.h"
 
-int graphics_init() {
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
    return 1;
 }
 
-void graphics_shutdown() {
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* args ) {
 
 }
 
-void graphics_flip() {
+void graphics_flip( struct GRAPHICS_ARGS* args ) {
 }
 
 void graphics_loop_start() {
@@ -39,7 +40,7 @@ void graphics_draw_rect(
 ) {
 }
 
-void graphics_platform_blit_at(
+int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP* bmp,
    uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {

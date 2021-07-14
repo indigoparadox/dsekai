@@ -5,6 +5,7 @@
 #include "../dstypes.h"
 
 typedef uint32_t RESOURCE_ID;
+typedef HBITMAP RESOURCE_BITMAP_HANDLE;
 
 #include "../resource.h"
 

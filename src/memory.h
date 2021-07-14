@@ -6,6 +6,8 @@
 
 #ifdef PLATFORM_PALM
 #include "memory/palmm.h"
+#elif defined( PLATFORM_WIN )
+#include "memory/winm.h"
 #elif defined( PLATFORM_MAC7 )
 #include "memory/mac7m.h"
 #else

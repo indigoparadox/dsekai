@@ -10,10 +10,12 @@
 #include "graphics/sdlg.h"
 #elif defined( PLATFORM_PALM )
 #include "graphics/palmg.h"
-#elif defined( PLATFORM_WIN16 )
-#include "graphics/win16g.h"
+#elif defined( PLATFORM_WIN )
+#include "graphics/wing.h"
 #elif defined( PLATFORM_MAC7 )
 #include "graphics/mac7g.h"
+#elif defined( PLATFORM_NDS )
+#include "graphics/ndsg.h"
 #else
 #include "graphics/nullg.h"
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
@@ -31,6 +33,13 @@ typedef struct GRAPHICS_PATTERN {
 #define graphics_pattern_at( spr, x, y ) \
    graphics_blit_at( spr, x, y, PATTERN_W, PATTERN_H )
 */
+
+struct GRAPHICS_RECT {
+   int16_t x;
+   int16_t y;
+   int16_t w;
+   int16_t h;
+};
 
 /**
  * This struct should be equivalent in size to whatever the bitmap struct for
@@ -52,7 +61,7 @@ struct GRAPHICS_BITMAP_BASE {
 
 int16_t graphics_init();
 void graphics_shutdown();
-void graphics_flip();
+void graphics_flip( struct GRAPHICS_ARGS* );
 void graphics_loop_start();
 void graphics_loop_end();
 void graphics_draw_px( uint16_t, uint16_t, const GRAPHICS_COLOR );
@@ -66,12 +75,20 @@ void graphics_char_at(
    const char, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_string_at(
    const char*, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
+void graphics_string_sz(
+   const char*, uint16_t, uint8_t, struct GRAPHICS_RECT* );
 int16_t graphics_blit_at( uint32_t, uint16_t, uint16_t, uint16_t, uint16_t );
 int32_t graphics_load_bitmap( uint32_t, struct GRAPHICS_BITMAP* );
 int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* );
 void graphics_blit_masked_at(
    const struct GRAPHICS_BITMAP*, const uint8_t*, uint16_t,
    uint16_t, uint16_t, uint16_t, uint16_t );
+#ifdef GRAPHICS_C
+int graphics_platform_blit_at(
+   const struct GRAPHICS_BITMAP*, uint16_t, uint16_t, uint16_t, uint16_t );
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* );
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* );
+#endif /* GRAPHICS_C */
 
 #endif /* GRAPHICS_H */
 

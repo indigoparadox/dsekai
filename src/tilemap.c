@@ -3,29 +3,30 @@
 
 #ifdef USE_JSON_MAPS
 
-#define JSON_TOKENS_MAX 1024
-#define JSON_PATH_SZ 255
+#define SPAWN_TYPE_MAX 32
 
-int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
+int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    int16_t tok_parsed = 0,
       tiles_count = 0,
       i = 0,
+      j = 0,
       retval = 1,
+      spawn_buffer_sz = 0,
       tileset_source_sz = 0;
    int8_t tile_id_in = 0;
    char* json_buffer = NULL;
    jsmn_parser parser;
    jsmntok_t* tokens = NULL;
    char iter_path[JSON_PATH_SZ];
-   MEMORY_HANDLE json_handle = NULL,
-      tokens_handle = NULL;
+   RESOURCE_JSON_HANDLE json_handle = NULL;
+   MEMORY_HANDLE tokens_handle = NULL;
    uint32_t json_buffer_sz = 0;
-   RESOURCE_ID type = DRC_MAP_TYPE;
    char tileset_name[DRC_FILENAME_SZ];
+   char spawn_buffer[SPAWN_TYPE_MAX];
 
    memory_zero_ptr( tileset_name, DRC_FILENAME_SZ );
 
-   json_handle = resource_get_handle( id, type );
+   json_handle = resource_get_json_handle( id );
    if( NULL == json_handle ) {
       error_printf( "could not get tilemap resource handle" );
       retval = 0;
@@ -38,6 +39,9 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       retval = 0;
       goto cleanup;
    }
+
+   debug_printf( 2, "JSON token buffer allocated: %lu bytes",
+      sizeof( jsmntok_t ) * JSON_TOKENS_MAX );
 
    json_buffer_sz = memory_sz( json_handle );
    json_buffer = resource_lock_handle( json_handle );
@@ -54,7 +58,7 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       &parser, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
 
    debug_printf( 2, "%d tokens parsed", tok_parsed );
-   if( 0 == tok_parsed ) {
+   if( 0 >= tok_parsed ) {
       retval = 0;
       goto cleanup;
    }
@@ -74,7 +78,8 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
    tiles_count = (TILEMAP_TW * TILEMAP_TH);
    for( i = 0 ; tiles_count > i ; i++ ) {
       /* Load tile data into the grid. */
-      dio_snprintf( iter_path, JSON_PATH_SZ, "/layers/0/data/%d", i );
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ, "/layers/[name=terrain]/data/%d", i );
       tile_id_in = 
          json_int_from_path(
             iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
@@ -92,6 +97,104 @@ int16_t tilemap_load( uint32_t id, struct TILEMAP* t ) {
       t->tiles[i / 2] |= tile_id_in;
    }
 
+   i = 0;
+   dio_snprintf(
+      iter_path, JSON_PATH_SZ, "/layers/[name=mobiles]/objects/%d/name", i );
+   spawn_buffer_sz = json_str_from_path(
+      iter_path, JSON_PATH_SZ,
+      spawn_buffer, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+   debug_printf( 1, "loading spawns" ); 
+   while( 0 <= spawn_buffer_sz ) {
+
+      /* Parse Type */
+      if( 0 == memory_strncmp_ptr( "player", spawn_buffer, 6 ) ) {
+         t->spawns[i].type = MOBILE_TYPE_PLAYER;
+      } else if( 0 == memory_strncmp_ptr( "princess", spawn_buffer, 8 ) ) {
+         t->spawns[i].type = MOBILE_TYPE_PRINCESS;
+      }
+
+      /* Parse X */
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ,
+         "/layers/[name=mobiles]/objects/%d/x", i );
+      t->spawns[i].coords.x = json_int_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
+      t->spawns[i].coords.x /= TILE_W;
+
+      /* Parse Y */
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ,
+         "/layers/[name=mobiles]/objects/%d/y", i );
+      t->spawns[i].coords.y = json_int_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tok_parsed, json_buffer );
+      t->spawns[i].coords.y /= TILE_H;
+
+      /* Parse Interaction */
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ,
+         "/layers/[name=mobiles]/objects/%d/properties/[name=interaction]/value", i );
+      spawn_buffer_sz = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         spawn_buffer, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+      if( 0 == memory_strncmp_ptr( "talk", spawn_buffer, 4 ) ) {
+         t->spawns[i].interaction = MOBILE_IACT_TALK;
+         debug_printf( 1, "mobile interaction: talk" );
+      }
+
+      /* Parse Interaction Data */
+      switch( t->spawns[i].interaction ) {
+      case MOBILE_IACT_TALK:
+         dio_snprintf(
+            iter_path, JSON_PATH_SZ,
+            "/layers/[name=mobiles]/objects/%d/properties/[name=data]/value",
+            i );
+         spawn_buffer_sz = json_str_from_path(
+            iter_path, JSON_PATH_SZ,
+            spawn_buffer, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+         
+         /* Try to find string already in table. */
+         for( j = 0 ; t->strings_count > j ; j++ ) {
+            if( 0 == memory_strncmp_ptr(
+               spawn_buffer, &(t->strings[j][0]), spawn_buffer_sz
+            ) ) {
+               debug_printf( 2, "found string \"%s\" at index %d",
+                  spawn_buffer, j );
+               t->spawns[i].interaction_data = &(t->strings[j]);
+               break;
+            }
+            t->spawns[i].interaction_data_sz = spawn_buffer_sz;
+         }
+
+         if( 0 == t->spawns[i].interaction_data_sz ) {
+            if( TILEMAP_STRINGS_MAX <= t->strings_count + 1 ) {
+               error_printf( "tilemap string table full" );
+               break;
+            }
+            memory_strncpy_ptr(
+               &(t->strings[t->strings_count][0]),
+               spawn_buffer,
+               spawn_buffer_sz );
+            debug_printf( 2, "added string \"%s\" at index %d",
+               spawn_buffer, t->strings_count );
+            t->strings_count++;
+         }
+
+         break;
+      }
+
+      debug_printf( 2, "%d spawn at %d, %d",
+         t->spawns[i].type, t->spawns[i].coords.x, t->spawns[i].coords.y );
+
+      t->spawns_count++;
+
+      /* Iterate to the next spawn. */
+      i++;
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ, "/layers/[name=mobiles]/objects/%d/name", i );
+      spawn_buffer_sz = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         spawn_buffer, SPAWN_TYPE_MAX, &(tokens[0]), tok_parsed, json_buffer );
+   }
 cleanup:
 
    if( NULL != tokens ) {

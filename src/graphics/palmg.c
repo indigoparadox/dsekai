@@ -1,4 +1,5 @@
 
+#define GRAPHICS_C
 #include "../dstypes.h"
 
 static BitmapType* g_screen = NULL;
@@ -9,15 +10,15 @@ static int16_t g_ticks_target = 0;
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int16_t graphics_platform_init() {
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
    g_ticks_target = SysTicksPerSecond();
    return 1;
 }
 
-void graphics_platform_shutdown() {
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* args ) {
 }
 
-void graphics_flip() {
+void graphics_flip( struct GRAPHICS_ARGS* args ) {
 }
 
 void graphics_loop_start() {
@@ -61,7 +62,7 @@ int graphics_platform_blit_at(
       goto cleanup;
    }
 
-   rsrc = resource_get_handle( bmp->id, DRC_BITMAP_TYPE );
+   rsrc = resource_get_bitmap_handle( bmp->id );
 
    if( NULL == rsrc ) {
       WinDrawChars( "Z", 1, x, y );
@@ -88,10 +89,22 @@ void graphics_draw_block(
 ) {
 }
 
+void graphics_draw_rect(
+   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+}
+
+void graphics_draw_line(
+   uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t thickness,
+   const GRAPHICS_COLOR color
+) {
+}
+
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
-int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
+int32_t graphics_load_bitmap( RESOURCE_ID id, struct GRAPHICS_BITMAP* b ) {
    int retval = 1;
 
    if( 0 != b->ref_count ) {
@@ -133,6 +146,12 @@ void graphics_string_at(
    GRAPHICS_COLOR color, uint8_t scale
 ) {
    WinDrawChars( s, s_len, x_orig, y_orig );
+}
+
+void graphics_string_sz(
+   const char* str, uint16_t str_sz, uint8_t scale, struct GRAPHICS_RECT* sz_out
+) {
+   /* TODO */
 }
 
 #endif /* !USE_SOFTWARE_TEXT */

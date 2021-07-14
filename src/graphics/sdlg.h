@@ -2,9 +2,9 @@
 #ifndef SDLG_H
 #define SDLG_H
 
-#include <SDL.h>
+#include "../dstypes.h"
 
-#include "../graphics.h"
+#include <SDL.h>
 
 typedef const SDL_Color* GRAPHICS_COLOR;
 struct GRAPHICS_BITMAP {
@@ -20,6 +20,9 @@ struct GRAPHICS_BITMAP {
    uint32_t res2;
    uint8_t res3;
    uint8_t res4;
+};
+
+struct GRAPHICS_ARGS {
 };
 
 #ifdef SDLG_C

@@ -35,7 +35,7 @@ typedef long int32_t;
 typedef unsigned long uint32_t;
 
 /* ------ */
-#elif defined( PLATFORM_WIN16 )
+#elif defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
 /* ------ */
 
 typedef signed char int8_t;
@@ -55,9 +55,12 @@ typedef unsigned long uint32_t;
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 /* ------ */
 
+#ifdef __GNUC__
+__attribute__( (__packed__) )
+#endif /* __GNUC__ */
 struct TILEMAP_COORDS {
-   uint8_t x;
-   uint8_t y;
+   int32_t x;
+   int32_t y;
 };
 
 struct DSEKAI_STATE;
@@ -80,28 +83,33 @@ struct DSEKAI_STATE;
 
 struct WINDOW;
 
+#ifdef __GNUC__
+__attribute__( (__packed__) )
+#endif /* __GNUC__ */
 struct DSEKAI_STATE {
-   int player_idx;
-   int initalized;
-
-   struct MOBILE mobiles[MOBILES_MAX];
-   uint8_t mobiles_count; 
+   uint32_t version;
 
    struct TILEMAP map;
+   struct MOBILE mobiles[MOBILES_MAX];
+   uint16_t mobiles_count; 
+   uint16_t player_idx;
 
-   int semi_cycles;
-   int walk_offset;
+   uint8_t semi_cycles;
+   uint8_t walk_offset;
    uint8_t input_blocked_countdown;
-   int screen_scroll_x;
-   int screen_scroll_y;
-   int screen_scroll_tx;
-   int screen_scroll_ty;
-   int screen_scroll_x_tgt;
-   int screen_scroll_y_tgt;
+   uint8_t reserved;
+   uint32_t screen_scroll_x;
+   uint32_t screen_scroll_y;
+   uint32_t screen_scroll_tx;
+   uint32_t screen_scroll_ty;
+   uint32_t screen_scroll_x_tgt;
+   uint32_t screen_scroll_y_tgt;
 
-   uint8_t window_shown;
    MEMORY_HANDLE windows_handle;
-   uint8_t windows_count;
+   uint16_t windows_count;
+
+   uint16_t engine_state;
+
 };
 
 #endif /* DSTYPES_H */

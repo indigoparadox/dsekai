@@ -1,6 +1,8 @@
 
-#ifndef WIN16G_H
-#define WIN16G_H
+#ifndef WING_H
+#define WING_H
+
+#include "../dstypes.h"
 
 typedef COLORREF GRAPHICS_COLOR;
 struct GRAPHICS_BITMAP {
@@ -17,6 +19,11 @@ struct GRAPHICS_BITMAP {
    uint8_t res4;
 };
 
+struct GRAPHICS_ARGS {
+   int cmd_show;
+   uint8_t scale;
+};
+
 #define WIN_GFX_TIMER_ID 6001
 
 #define GRAPHICS_COLOR_BLACK        RGB(0, 0, 0)
@@ -24,5 +31,5 @@ struct GRAPHICS_BITMAP {
 #define GRAPHICS_COLOR_MAGENTA      RGB(255, 0, 255)
 #define GRAPHICS_COLOR_WHITE        RGB(255, 255, 255)
 
-#endif /* WIN16G_H */
+#endif /* WING_H */
 

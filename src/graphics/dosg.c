@@ -1,4 +1,5 @@
 
+#define GRAPHICS_C
 #include "../dstypes.h"
 
 #include <string.h>
@@ -94,7 +95,7 @@ static void graphics_remove_timer() {
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int16_t graphics_platform_init() {
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
    union REGS r;
 
    memory_zero_ptr( &r, sizeof( union REGS ) );
@@ -115,18 +116,18 @@ int16_t graphics_platform_init() {
    return 1;
 }
 
-void graphics_platform_shutdown() {
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* args ) {
    graphics_remove_timer();
 }
 
-void graphics_flip() {
+void graphics_flip( struct GRAPHICS_ARGS* args ) {
 #ifdef USE_DOUBLEBUF
 #if GRAPHICS_M_320_200_256_VGA == GRAPHICS_MODE
-      memory_copy_ptr( (char far *)GRAPHICS_M_320_200_256_VGA_A,
+      _fmemcpy( GRAPHICS_M_320_200_256_VGA_A,
          g_buffer, SCREEN_W * SCREEN_H );
 #elif GRAPHICS_M_320_200_4_CGA == GRAPHICS_MODE
       /* memory_copy_ptr both planes. */
-      memory_copy_ptr( (char far *)0xB8000000, g_buffer, 16000 );
+      _fmemcpy( (char far *)0xB8000000, g_buffer, 16000 );
 #endif /* GRAPHICS_MODE */
 #endif /* USE_DOUBLEBUF */
 }
@@ -207,8 +208,8 @@ int graphics_platform_blit_at(
       byte_offset = ((((y + y_offset) / 2) * SCREEN_W) + x) / 4;
 #endif /* USE_LOOKUPS */
 
-      memory_copy_ptr( &(g_buffer[byte_offset]), plane_1, 4 );
-      memory_copy_ptr( &(g_buffer[0x2000 + byte_offset]), plane_2, 4 );
+      _fmemcpy( &(g_buffer[byte_offset]), plane_1, 4 );
+      _fmemcpy( &(g_buffer[0x2000 + byte_offset]), plane_2, 4 );
 
       /* Advance source address by bytes per copy. */
       plane_1 += 2;
@@ -314,11 +315,10 @@ void graphics_draw_line(
 int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
-   union DRC_TYPE type = DRC_BITMAP_TYPE;
    uint16_t plane_sz = 0,
       plane_offset = 0;
    int32_t retval = 1;
-   MEMORY_HANDLE buffer_handle = NULL;
+   RESOURCE_BITMAP_HANDLE buffer_handle = NULL;
 
    b->ref_count++;
    if( 1 > b->ref_count ) {
@@ -327,7 +327,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load the resource. */
-   buffer_handle = resource_get_handle( id, type );
+   buffer_handle = resource_get_bitmap_handle( id );
    if( NULL == buffer_handle ) {
       error_printf( "unable to get resource %d info", id );
       retval = 0;
@@ -335,7 +335,7 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    }
 
    buffer_sz = memory_sz( buffer_handle );
-   buffer = memory_lock( buffer_handle );
+   buffer = resource_lock_handle( buffer_handle );
 
    /* Parse the resource into a usable struct. */
    b->id = id;
@@ -377,7 +377,7 @@ cleanup:
    }
 
    if( NULL != buffer ) {
-      buffer = memory_unlock( buffer_handle );
+      buffer = resource_unlock_handle( buffer_handle );
    }
 
    if( NULL != buffer_handle ) {

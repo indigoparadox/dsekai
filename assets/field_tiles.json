@@ -8,45 +8,94 @@
  "margin":0,
  "name":"field_tiles",
  "spacing":0,
- "terrains":[
-        {
-         "name":"grass",
-         "tile":0
-        }, 
-        {
-         "name":"brick_wall",
-         "tile":1
-        },
-        {
-         "name":"tree",
-         "tile":2
-        }], 
- "tilecount":3,
+ "tilecount":5,
+ "tiledversion":"1.7.1",
  "tileheight":16,
- "tiles":
-    {
-     "0":
+ "tiles":[
         {
+         "id":0,
          "image":"tile_field_grass.bmp",
          "imageheight":16,
-         "imagewidth":16,
-         "terrain":[0, 0, 0, 0]
-        },
-     "1":
+         "imagewidth":16
+        }, 
         {
+         "id":1,
          "image":"tile_field_brick_wall.bmp",
          "imageheight":16,
-         "imagewidth":16,
-         "terrain":[1, 1, 1, 1]
-        },
-     "2":
+         "imagewidth":16
+        }, 
         {
+         "id":2,
          "image":"tile_field_tree.bmp",
          "imageheight":16,
          "imagewidth":16,
-         "terrain":[2, 2, 2, 2]
-        }
-    },
+         "probability":0.0500000007450581
+        }, 
+        {
+         "id":3,
+         "image":"tile_pillar.bmp",
+         "imageheight":16,
+         "imagewidth":16,
+         "probability":0.00100000004749745
+        }, 
+        {
+         "id":4,
+         "image":"tile_pool.bmp",
+         "imageheight":16,
+         "imagewidth":16,
+         "probability":0.00999999977648258
+        }],
  "tilewidth":16,
- "type":"tileset"
+ "type":"tileset",
+ "version":"1.6",
+ "wangsets":[
+        {
+         "colors":[
+                {
+                 "color":"#ff0000",
+                 "name":"grass",
+                 "probability":1,
+                 "tile":0
+                }, 
+                {
+                 "color":"#00ff00",
+                 "name":"brick_wall",
+                 "probability":1,
+                 "tile":1
+                }, 
+                {
+                 "color":"#0000ff",
+                 "name":"tree",
+                 "probability":1,
+                 "tile":2
+                }, 
+                {
+                 "color":"#ff7700",
+                 "name":"pillar",
+                 "probability":1,
+                 "tile":-1
+                }, 
+                {
+                 "color":"#00e9ff",
+                 "name":"pool",
+                 "probability":1,
+                 "tile":-1
+                }],
+         "name":"Terrains",
+         "tile":-1,
+         "type":"corner",
+         "wangtiles":[
+                {
+                 "tileid":0,
+                 "wangid":[0, 1, 0, 1, 0, 1, 0, 1]
+                }, 
+                {
+                 "tileid":1,
+                 "wangid":[0, 2, 0, 2, 0, 2, 0, 2]
+                }, 
+                {
+                 "tileid":2,
+                 "wangid":[0, 3, 0, 3, 0, 3, 0, 3]
+                }]
+        }]
 }

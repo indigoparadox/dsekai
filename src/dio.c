@@ -427,6 +427,18 @@ int32_t dio_remove_file( const char* path ) {
 
 #endif /* !DISABLE_FILESYSTEM */
 
+int16_t dio_strnchr( char* buffer, uint16_t buffer_len, char c ) {
+   int16_t i = 0;
+
+   for( i = 0 ; buffer_len > i ; i++ ) {
+      if( buffer[i] == c ) {
+         return i;
+      }
+   }
+
+   return -1;
+}
+
 int16_t dio_itoa(
    char* buffer, uint16_t buffer_len, int16_t d, uint8_t d_base
 ) {

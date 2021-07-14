@@ -4,7 +4,10 @@
 
 #include "../dstypes.h"
 
-typedef union DRC_TYPE RESOURCE_ID;
+typedef uint32_t RESOURCE_ID;
+typedef union DRC_TYPE RESOURCE_TYPE;
+typedef MEMORY_HANDLE RESOURCE_BITMAP_HANDLE;
+typedef MEMORY_HANDLE RESOURCE_JSON_HANDLE;
 
 #include "../resource.h"
 

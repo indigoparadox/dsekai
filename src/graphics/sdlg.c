@@ -1,4 +1,5 @@
 
+#define GRAPHICS_C
 #define SDLG_C
 #include "../dstypes.h"
 
@@ -16,7 +17,7 @@ static uint32_t g_ms_start = 0;
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int16_t graphics_platform_init() {
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
 #ifdef DEBUG_CGA_EMU
    SDL_Rect area;
 #endif /* DEBUG_CGA_EMU */
@@ -54,12 +55,12 @@ int16_t graphics_platform_init() {
    return 1;
 }
 
-void graphics_platform_shutdown() {
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* args ) {
    SDL_DestroyWindow( g_window );
    SDL_Quit();
 }
 
-void graphics_flip() {
+void graphics_flip( struct GRAPHICS_ARGS* args ) {
    /* SDL_RenderPresent( g_renderer ); */
    SDL_UpdateWindowSurface( g_window );
 }
@@ -161,8 +162,7 @@ void graphics_draw_line(
  */
 int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
-   MEMORY_HANDLE buffer_handle = NULL;
-   union DRC_TYPE type = DRC_BITMAP_TYPE;
+   RESOURCE_BITMAP_HANDLE buffer_handle = NULL;
    uint32_t id = 0,
       retval = 1,
       buffer_sz = 0;
@@ -178,7 +178,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into buffer. */
-   buffer_handle = resource_get_handle( id, type );
+   buffer_handle = resource_get_bitmap_handle( id );
    if( NULL == buffer_handle ) {
       retval = 0;
       error_printf( "unable to get resource handle" );
@@ -186,7 +186,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    buffer_sz = memory_sz( buffer_handle );
-   buffer = memory_lock( buffer_handle );
+   buffer = resource_lock_handle( buffer_handle );
 
    /* Parse buffered resource into SDL. */
    bmp_stream = SDL_RWFromMem( buffer, buffer_sz );
@@ -215,7 +215,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
 cleanup:
 
    if( NULL != buffer ) {
-      buffer = memory_unlock( buffer_handle );
+      buffer = resource_unlock_handle( buffer_handle );
    }
 
    if( NULL != buffer_handle ) {

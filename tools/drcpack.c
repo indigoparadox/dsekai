@@ -262,11 +262,12 @@ int main( int argc, char* argv[] ) {
 
       toc_entries = memory_lock( toc_entries_handle );
       for( i = 0 ; toc_entries_sz > i ; i++ ) {
-         printf( "TOC entry %d | type %c%c%c%c | size %d bytes @ offset %d\n",
+         printf( "TOC entry %d | type %c%c%c%c | size %d bytes @ offset %d\n%s\n",
             toc_entries[i].id,
             toc_entries[i].type.str[0], toc_entries[i].type.str[1],
             toc_entries[i].type.str[2], toc_entries[i].type.str[3],
-            toc_entries[i].data_sz, toc_entries[i].data_start );
+            toc_entries[i].data_sz, toc_entries[i].data_start,
+            toc_entries[i].name );
       }
       toc_entries = memory_unlock( toc_entries_handle );
 

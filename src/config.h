@@ -48,8 +48,9 @@
 
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
-#define USE_JSON_MAPS
+/* #define USE_JSON_MAPS */
 #define ANIMATE_SCREEN_MOVEMENT
+#define RESOURCE_HEADER
 
 /* ------ */
 #elif defined( PLATFORM_SDL )
@@ -75,6 +76,7 @@
 #define USE_SOFTWARE_TEXT
 #define USE_JSON_MAPS
 #define ANIMATE_SCREEN_MOVEMENT
+#define RESOURCE_HEADER
 
 /* ------ */
 #elif defined( PLATFORM_PALM )
@@ -105,7 +107,7 @@
 #define platform_fclose HostFClose
 
 #define DRC_BITMAP_TYPE 'Tbmp'
-#define DRC_MAP_TYPE 'json'
+#define DRC_JSON_TYPE 'json'
 
 /* #define assert( test ) ErrFatalDisplayIf( !(test), __FILE__ ": " stringify_line( __LINE__ ) ": assert failure" ) */
 
@@ -116,9 +118,6 @@
 #include <windows.h>
 
 #include "../gen/win16/resext.h"
-
-/* Doesn't exist on this platform. */
-#define far
 
 #ifndef LOG_FILE_NAME
 #define LOG_FILE_NAME "logwin16.txt"
@@ -133,11 +132,74 @@
 #endif /* !DIO_PATH_SEP */
 
 #define DRC_BITMAP_TYPE 1
-#define DRC_MAP_TYPE 2
+#define DRC_JSON_TYPE 2
 
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
 #define ANIMATE_SCREEN_MOVEMENT
+#define PLATFORM_WIN
+
+#define PLATFORM_API PASCAL
+
+#define SCREEN_BPP 4
+
+/* ------ */
+#elif defined( PLATFORM_WINCE )
+/* ------ */
+
+#include <windows.h>
+
+#include "../gen/win16/resext.h"
+
+#ifndef LOG_FILE_NAME
+#define LOG_FILE_NAME "logwince.txt"
+#endif /* !LOG_FILE_NAME */
+
+#ifndef DIO_PATH_TEMP
+#define DIO_PATH_TEMP "c:\\temp"
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP '\\'
+#endif /* !DIO_PATH_SEP */
+
+#define DRC_BITMAP_TYPE 1
+#define DRC_JSON_TYPE 2
+
+#define ANIMATE_SCREEN_MOVEMENT
+#define PLATFORM_WIN
+
+#define PLATFORM_API WINAPI
+
+#define SCREEN_BPP 4
+
+/* ------ */
+#elif defined( PLATFORM_WIN32 )
+/* ------ */
+
+#include <windows.h>
+
+#include "../gen/win32/resext.h"
+
+#ifndef LOG_FILE_NAME
+#define LOG_FILE_NAME "logwince.txt"
+#endif /* !LOG_FILE_NAME */
+
+#ifndef DIO_PATH_TEMP
+#define DIO_PATH_TEMP "c:\\temp"
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP '\\'
+#endif /* !DIO_PATH_SEP */
+
+#define DRC_BITMAP_TYPE 1
+#define DRC_JSON_TYPE 2
+
+#define ANIMATE_SCREEN_MOVEMENT
+#define PLATFORM_WIN
+
+#define PLATFORM_API WINAPI
 
 #define SCREEN_BPP 4
 
@@ -171,14 +233,39 @@
 
 #define USE_SOFTWARE_TEXT
 #define ANIMATE_SCREEN_MOVEMENT
-#define DRC_TOC_INITIAL_ALLOC 20 /* Fake it until we have realloc. */
+#define DRC_TOC_INITIAL_ALLOC 50 /* Fake it until we have realloc. */
+#define RESOURCE_HEADER
+#define DISABLE_MAIN_PARMS
+
+/* ------ */
+#elif defined( PLATFORM_NDS )
+/* ------ */
+
+#include "../gen/nds/resext.h"
+
+#ifndef DIO_PATH_TEMP
+/* TODO */
+#define DIO_PATH_TEMP ""
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP ':'
+#endif /* !DIO_PATH_SEP */
+
+#define platform_file FILE*
+#define platform_fprintf fprintf
+#define platform_fopen fopen
+#define platform_fflush fflush
+#define platform_fclose fclose
+
+#define USE_SOFTWARE_TEXT
+#define ANIMATE_SCREEN_MOVEMENT
+#define DRC_TOC_INITIAL_ALLOC 50 /* Fake it until we have realloc. */
+#define RESOURCE_HEADER
 
 /* ------ */
 #else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
 /* ------ */
-
-/* Doesn't exist on this platform. */
-#define far
 
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "/tmp"
@@ -203,11 +290,6 @@
 /* ------ */
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 /* ------ */
-
-#define TILEMAP_TW (30)
-#define TILEMAP_TH (30)
-
-#define TILEMAP_TILESETS_MAX (12)
 
 #ifndef platform_file
 #define platform_file FILE*
@@ -237,73 +319,89 @@
 #define DRC_BITMAP_TYPE {'B', 'M', 'P', '1'}
 #endif /* !DRC_BITMAP_TYPE */
 
-#ifndef DRC_MAP_TYPE
-#define DRC_MAP_TYPE {'j', 's', 'o', 'n'}
-#endif /* !DRC_MAP_TYPE */
+#ifndef DRC_JSON_TYPE
+#define DRC_JSON_TYPE {'j', 's', 'o', 'n'}
+#endif /* !DRC_JSON_TYPE */
 
 #ifndef JSON_BUFFER_SZ
 #define JSON_BUFFER_SZ 8192
 #endif /* !JSON_BUFFER_SZ */
 
 #ifndef SCREEN_W
-#define SCREEN_W (320)
+#define SCREEN_W 320
 #endif /* !SCREEN_W */
 
 #ifndef SCREEN_H
-#define SCREEN_H (200)
+#define SCREEN_H 200
 #endif /* !SCREEN_H */
 
 #ifndef SCREEN_SCALE
-#define SCREEN_SCALE (1)
-#endif /* SCREEN_SCALE */
+#define SCREEN_SCALE 1
+#endif /* !SCREEN_SCALE */
 
 #ifndef FPS
-#define FPS (30)
-#endif /* FPS */
+#define FPS 30
+#endif /* !FPS */
 
 #ifndef MEMORY_FAKE_HEAP_SZ
-#define MEMORY_FAKE_HEAP_SZ (112500)
+#define MEMORY_FAKE_HEAP_SZ 112500
 #endif /* !MEMORY_FAKE_HEAP_S */
 
 #ifndef DIO_READ_FILE_BLOCK_SZ
-#define DIO_READ_FILE_BLOCK_SZ (4096)
+#define DIO_READ_FILE_BLOCK_SZ 4096
 #endif /* !DIO_READ_FILE_BLOCK_SZ */
 
 #ifndef NAMEBUF_MAX
-#define NAMEBUF_MAX (255)
+#define NAMEBUF_MAX 255
 #endif /* !NAMEBUF_MAX */
 
 #ifndef DRC_COPY_BLOCK_SZ
-#define DRC_COPY_BLOCK_SZ (1024)
+#define DRC_COPY_BLOCK_SZ 1024
 #endif /* !DRC_COPY_BLOCK_SZ */
 
 #ifndef MOBILES_MAX
-#define MOBILES_MAX (10)
+#define MOBILES_MAX 20
 #endif /* !MOBILES_MAX */
 
 #ifndef DEBUG_THRESHOLD
-#define DEBUG_THRESHOLD (2)
+#define DEBUG_THRESHOLD 2
 #endif /* !DEBUG_THRESHOLD */
 
 #ifndef DIRTY_THRESHOLD
-#define DIRTY_THRESHOLD (3)
+#define DIRTY_THRESHOLD 3
 #endif /* !DIRTY_THRESHOLD */
 
 #ifndef FAKE_HEAP_SIZE
-#define FAKE_HEAP_SIZE (524288)
+#define FAKE_HEAP_SIZE 524288
 #endif /* !FAKE_HEAP_SIZE */
 
 #ifndef DRC_TOC_INITIAL_ALLOC
-#define DRC_TOC_INITIAL_ALLOC 1
+#define DRC_TOC_INITIAL_ALLOC 50
 #endif /* !DRC_TOC_INITIAL_ALLOC */
 
 #ifndef DIO_PATH_MAX
 #define DIO_PATH_MAX 254
-#endif /* DIO_PATH_MAX */
+#endif /* !DIO_PATH_MAX */
+
+#ifndef ANI_SEMICYCLES_MAX
+#define ANI_SEMICYCLES_MAX 10
+#endif /* !ANI_SEMICYCLES_MAX */
+
+#ifndef INPUT_BLOCK_DELAY
+#define INPUT_BLOCK_DELAY 5
+#endif /* !INPUT_BLOCK_DELAY */
 
 #ifndef GRAPHICS_CACHE_INITIAL_SZ
-#define GRAPHICS_CACHE_INITIAL_SZ 20
+#define GRAPHICS_CACHE_INITIAL_SZ 50
 #endif /* !GRAPHICS_CACHE_INITIAL_SZ */
+
+#ifndef JSON_TOKENS_MAX
+#define JSON_TOKENS_MAX 2048
+#endif /* !JSON_TOKENS_MAX */
+
+#ifndef JSON_PATH_SZ
+#define JSON_PATH_SZ 255
+#endif /* !JSON_PATH_SZ */
 
 #ifdef LOG_TO_FILE
 #ifndef DEBUG_LOG
@@ -323,25 +421,25 @@
 #endif /* __GNUC__ */
 
 /* ! */
-#ifdef DEBUG_LOG
+#ifdef ANCIENT_C
+/* ! */
+
+#  define debug_printf
+#  define error_printf
+
+/* ! */
+#elif defined( DEBUG_LOG )
 /* ! */
 
 #  include <stdio.h>
 
-#  define internal_debug_printf( lvl, ... ) if( lvl >= DEBUG_THRESHOLD ) { platform_fprintf( LOG_STD_TARGET, "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); platform_fprintf( LOG_STD_TARGET, __VA_ARGS__ ); platform_fprintf( LOG_STD_TARGET, "\n" ); platform_fflush( LOG_STD_TARGET ); }
+#  define internal_debug_printf( lvl, ... ) if( NULL != LOG_ERR_TARGET && lvl >= DEBUG_THRESHOLD ) { platform_fprintf( LOG_STD_TARGET, "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); platform_fprintf( LOG_STD_TARGET, __VA_ARGS__ ); platform_fprintf( LOG_STD_TARGET, "\n" ); platform_fflush( LOG_STD_TARGET ); }
 
-#  define internal_error_printf( ... ) platform_fprintf( LOG_ERR_TARGET, "(E) " __FILE__ ": %d: ", __LINE__ ); platform_fprintf( LOG_ERR_TARGET, __VA_ARGS__ ); platform_fprintf( LOG_ERR_TARGET, "\n" ); platform_fflush( LOG_ERR_TARGET );
+#  define internal_error_printf( ... ) if( NULL != LOG_ERR_TARGET ) { platform_fprintf( LOG_ERR_TARGET, "(E) " __FILE__ ": %d: ", __LINE__ ); platform_fprintf( LOG_ERR_TARGET, __VA_ARGS__ ); platform_fprintf( LOG_ERR_TARGET, "\n" ); platform_fflush( LOG_ERR_TARGET ); }
 
 #  define debug_printf( lvl, ... ) internal_debug_printf( lvl, __VA_ARGS__ )
 
 #  define error_printf( ... ) internal_error_printf( __VA_ARGS__ )
-
-/* ! */
-#elif defined( ANCIENT_C )
-/* ! */
-
-#  define debug_printf( x )
-#  define error_printf( x )
 
 /* ! */
 #else /* !DEBUG_LOG, !ANCIENT_C */
@@ -363,7 +461,13 @@
 #endif /* ANCIENT_C */
 
 /* ! */
-#ifdef USE_SOFT_ASSERT
+#ifdef DISABLE_ASSERT
+/* ! */
+
+#define assert( comp )
+
+/* ! */
+#elif defined( USE_SOFT_ASSERT )
 /* ! */
 
 #  define assert( comp ) if( !(comp) ) { g_assert_failed_len = dio_snprintf( g_assert_failed, 255, __FILE__ ": %d: ASSERT FAILED", __LINE__ ); }
@@ -400,9 +504,6 @@
 
 #define SCREEN_MAP_W (SCREEN_W)
 #define SCREEN_MAP_H (160 - 32)
-
-#define SCREEN_TW (SCREEN_MAP_W / TILE_W)
-#define SCREEN_TH (SCREEN_MAP_H / TILE_H)
 
 #define SCREEN_REAL_W (SCREEN_W * SCREEN_SCALE)
 #define SCREEN_REAL_H (SCREEN_H * SCREEN_SCALE)

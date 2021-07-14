@@ -3,11 +3,20 @@
 
 #include "data/tiles.h"
 #ifndef USE_JSON_MAPS
+#if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
 #include "../gen/win16/map_field.h"
+#elif defined( PLATFORM_WIN32 )
+#include "../gen/win32/map_field.h"
+#elif defined( PLATFORM_MAC7 )
+#include "../gen/mac7/map_field.h"
+#elif defined( PLATFORM_NDS )
+#include "../gen/nds/map_field.h"
+#elif defined( PLATFORM_DOS )
+#include "../gen/dos/map_field.h"
+#endif
 #endif /* USE_JSON_MAPS */
 
-#define INPUT_BLOCK_DELAY 5
-#define TOPDOWN_MOBILES_MAX 10
+#define TOPDOWN_STATE_WELCOME 1
 
 int topdown_draw( struct DSEKAI_STATE* state ) {
    int in_char = 0,
@@ -47,8 +56,6 @@ int topdown_draw( struct DSEKAI_STATE* state ) {
 #ifdef ANIMATE_SCREEN_MOVEMENT
 #ifndef DISABLE_GRAPHICS
       tilemap_draw( &(state->map), state );
-
-      graphics_flip();
 #endif /* !DISABLE_GRAPHICS */
 #endif /* ANIMATE_SCREEN_MOVEMENT */
 
@@ -113,32 +120,6 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
    if( !initialized ) {
 
-      /* TODO: Generate this dynamically. */
-
-      state->mobiles[0].sprite = sprite_robe;
-      state->mobiles[0].hp = 100;
-      state->mobiles[0].mp = 100;
-      state->mobiles[0].coords.x = 3;
-      state->mobiles[0].coords.y = 4;
-      state->mobiles[0].coords_prev.x = 3;
-      state->mobiles[0].coords_prev.y = 4;
-      state->mobiles[0].steps_x = 0;
-      state->mobiles[0].steps_y = 0;
-      state->mobiles[0].inventory = NULL;
-      state->mobiles_count++;
-
-      state->mobiles[1].sprite = sprite_princess;
-      state->mobiles[1].hp = 100;
-      state->mobiles[1].mp = 100;
-      state->mobiles[1].coords.x = 5;
-      state->mobiles[1].coords.y = 5;
-      state->mobiles[1].coords_prev.x = 5;
-      state->mobiles[1].coords_prev.y = 5;
-      state->mobiles[1].steps_x = 0;
-      state->mobiles[1].steps_y = 0;
-      state->mobiles[1].inventory = NULL;
-      state->mobiles_count++;
-
 #ifdef USE_JSON_MAPS
       tilemap_load( map_field, &(state->map) );
 #else
@@ -155,6 +136,72 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
        */
       tilemap_draw( &(state->map), state );
 
+      /* TODO: Generate this dynamically. */
+      for( i = 0 ; state->map.spawns_count > i ; i++ ) {
+         state->mobiles[i].hp = 100;
+         state->mobiles[i].mp = 100;
+         state->mobiles[i].coords.x = state->map.spawns[i].coords.x;
+         state->mobiles[i].coords.y = state->map.spawns[i].coords.y;
+         state->mobiles[i].coords_prev.x = state->map.spawns[i].coords.x;
+         state->mobiles[i].coords_prev.y = state->map.spawns[i].coords.y;
+         state->mobiles[i].steps_x = 0;
+         state->mobiles[i].steps_y = 0;
+         state->mobiles[i].inventory = NULL;
+         state->mobiles_count++;
+         switch( state->map.spawns[i].type ) {
+         case MOBILE_TYPE_PLAYER:
+            state->mobiles[i].active = 1;
+            state->player_idx = i;
+            state->mobiles[i].sprite = sprite_robe;
+            break;
+
+         case MOBILE_TYPE_PRINCESS:
+            state->mobiles[i].active = 1;
+            state->mobiles[i].sprite = sprite_princess;
+            break;
+
+         default:
+            break;
+         }
+      }
+
+      /*
+      state->mobiles[1].sprite = sprite_princess;
+      state->mobiles[1].hp = 100;
+      state->mobiles[1].mp = 100;
+      state->mobiles[1].coords.x = 5;
+      state->mobiles[1].coords.y = 5;
+      state->mobiles[1].coords_prev.x = 5;
+      state->mobiles[1].coords_prev.y = 5;
+      state->mobiles[1].steps_x = 0;
+      state->mobiles[1].steps_y = 0;
+      state->mobiles[1].inventory = NULL;
+      state->mobiles_count++;
+      */
+
+      window_push(
+         0x111, WINDOW_STATUS_VISIBLE,
+         0, (SCREEN_TH * 16), STATUS_WINDOW_W, STATUS_WINDOW_H, 0, state );
+
+#ifndef HIDE_WELCOME_DIALOG
+      state->engine_state = TOPDOWN_STATE_WELCOME;
+      window_push(
+         0x1212, WINDOW_STATUS_MODAL,
+         WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state );
+      welcome_string_handle = memory_alloc( 9, 1 );
+      welcome_string = (char*)memory_lock( welcome_string_handle );
+      memory_copy_ptr( welcome_string, "Welcome!", 8 );
+      welcome_string = (char*)memory_unlock( welcome_string_handle );
+      control_push(
+         0x2323, CONTROL_TYPE_LABEL, CONTROL_STATE_ENABLED,
+         -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
+         welcome_string_handle, 0, 0x1212, state );
+      control_push(
+         0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED,
+         -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
+         NULL, sprite_princess, 0x1212, state );
+#endif /* !HIDE_WELCOME_DIALOG */
+
       initialized = 1;
    }
 
@@ -166,29 +213,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       topdown_draw( state );
    }
 
-   if( !state->window_shown ) {
-      window_push(
-         0x111, WINDOW_STATUS_VISIBLE,
-         0, (SCREEN_TH * 16), STATUS_WINDOW_W, STATUS_WINDOW_H, 0, state );
-#ifndef HIDE_WELCOME_DIALOG
-      window_push(
-         0x1212, WINDOW_STATUS_MODAL,
-         WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state );
-      welcome_string_handle = memory_alloc( 9, 1 );
-      welcome_string = (char*)memory_lock( welcome_string_handle );
-      memory_copy_ptr( welcome_string, "Welcome!", 8 );
-      welcome_string = (char*)memory_unlock( welcome_string_handle );
-      control_push(
-         0x2323, CONTROL_TYPE_LABEL, CONTROL_STATE_ENABLED,
-         -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
-         welcome_string_handle, 0x1212, state );
-#endif /* !HIDE_WELCOME_DIALOG */
-      state->window_shown = 1;
-   }
-
    window_draw_all( state );
-
-   graphics_flip();
 
    if( state->input_blocked_countdown ) {
       state->input_blocked_countdown--;
@@ -250,7 +275,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    }
 
    /* Animate. */
-   if( 10 < state->semi_cycles ) {
+   if( ANI_SEMICYCLES_MAX < state->semi_cycles ) {
       state->semi_cycles = 0;
 
       if( 0 == state->walk_offset ) {

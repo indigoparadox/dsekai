@@ -5,45 +5,90 @@
 #ifdef USE_JSON_MAPS
 
 int16_t json_get_token_idx(
-   const char* contents, uint16_t contents_sz,
+   const char* path, uint16_t path_sz,
    jsmntok_t* tokens, uint16_t tokens_sz,
    const char* buf, uint16_t tree_depth_id
 ) {
    int i = 0;
    int16_t tentative_child_idx = -1,
       cmp_str_as_i = 0,
-      child_idx = 0;
+      child_idx = 0,
+      path_cmp_len = 0,
+      path_cmp_start = 0;
    jsmntok_t* parent = &(tokens[tree_depth_id]);
 
    debug_printf( 0, "(%u) parent type is: %d", tree_depth_id, parent->type );
 
-   debug_printf( 1, "(%u) path spec: %s", tree_depth_id, contents );
+   debug_printf( 0, "(%u) path spec: %s", tree_depth_id, path );
 
-   if( NULL != contents && JSMN_ARRAY == parent->type ) {
-      cmp_str_as_i = dio_atoi( contents, 10 );
+   if( NULL != path && JSMN_ARRAY == parent->type ) {
+      cmp_str_as_i = dio_atoi( path, 10 );
       debug_printf( 0, "(%u) idx as int is: %d", tree_depth_id, cmp_str_as_i );
    }
 
    for( i = 0 ; tokens_sz > i ; i++ ) {
-      if( NULL != contents ) {
+      if( NULL != path ) {
          debug_printf( 0, "(%u) str %s sz %d vs  %d, %d",
-            tree_depth_id, contents, contents_sz,
+            tree_depth_id, path, path_sz,
             tokens[i].end - tokens[i].start, tokens[i].size );
       }
       if(
+         /* If we're searching by sibling value. */
+         NULL != path && '[' == path[0] &&
+         /* If this token is subordinate to the current search root. */
+         tokens[i].parent == tree_depth_id &&
+         /* If this token is a type with children. */
+         (JSMN_ARRAY == tokens[i].type || JSMN_OBJECT == tokens[i].type)
+      ) {
+         /* Up to position of = or ], else just the end of the path. */
+         path_cmp_len = 
+            dio_strnchr( path, dio_strnchr( path, path_sz, ']' ) - 1, '=' ) - 1;
+
+         if( 0 > path_cmp_len ) {
+            error_printf( "no = in token comparison" );
+            return path_cmp_len;
+         }
+
+         /* Search for the left of the comparison. */
+         tentative_child_idx = json_get_token_idx(
+            &(path[1]), path_cmp_len, tokens, tokens_sz, buf, i );
+
+         if( 0 <= tentative_child_idx ) {
+            path_cmp_start = dio_strnchr( path, path_sz, '=' ) + 1;
+            path_cmp_len = dio_strnchr( &(path[path_cmp_start]), path_sz, ']' );
+            debug_printf( 0, "cmp starts at %d and ends %d past that",
+               path_cmp_start, path_cmp_len );
+            debug_printf( 0, 
+               "comparing %d chars of path %s to subchild: %d: %s",
+               path_cmp_len,
+               &(path[path_cmp_start]),
+               tentative_child_idx,
+               &(buf[tokens[tentative_child_idx].start]) );
+            
+            /* Compare the right of the comparison. */
+            if( 0 == memory_strncmp_ptr(
+               &(path[path_cmp_start]),
+               &(buf[tokens[tentative_child_idx].start]),
+               path_cmp_len
+            ) ) {
+               debug_printf( 0, "token %d matches", i );
+               return i;
+            }
+         }
+      } else if(
          (
             /* If parent is array, then string key isn't relevant. */
             JSMN_ARRAY == parent->type ||
-            /* If contents is NULL, just go by parent. */
-            (NULL == contents ?
+            /* If path is NULL, just go by parent. */
+            (NULL == path ?
             /* Finally, go by string key comparison. */
             1 : (
                0 == memory_strncmp_ptr(
-                  contents,
+                  path,
                   &(buf[tokens[i].start]),
-                  contents_sz
+                  path_sz
                /* Also, make sure we're comparing the WHOLE token. */
-               ) && (contents_sz == (tokens[i].end - tokens[i].start))
+               ) && (path_sz == (tokens[i].end - tokens[i].start))
             ) )
          ) &&
          /* Always limit to children of current tree_depth_id. */
@@ -62,7 +107,7 @@ int16_t json_get_token_idx(
                return i;
             } else {
                /* It's a key, return child. */
-               debug_printf( 1, "(%u) redirected to %d",
+               debug_printf( 0, "(%u) redirected to %d",
                   tree_depth_id, tentative_child_idx );
                return tentative_child_idx;
             }
@@ -101,7 +146,7 @@ int16_t json_token_id_from_path(
       path_cur_tok_start = 0,
       path_cur_tok_sz = 0;
 
-   debug_printf( 1, "path: %s", path );
+   debug_printf( 0, "path: %s", path );
 
    while(
       path_cur_tok_start + path_cur_tok_sz < memory_strnlen_ptr( path, path_sz )

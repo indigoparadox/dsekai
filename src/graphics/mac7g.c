@@ -1,4 +1,5 @@
 
+#define GRAPHICS_C
 #include "../dstypes.h"
 
 #include <Multiverse.h>
@@ -11,7 +12,7 @@ Rect g_window_rect;
 /*
  * @return 1 if init was successful and 0 otherwise.
  */
-int16_t graphics_platform_init() {
+int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
    ControlHandle beepbutton;
    Rect r;
 
@@ -52,10 +53,10 @@ int16_t graphics_platform_init() {
    return 1;
 }
 
-void graphics_platform_shutdown() {
+void graphics_platform_shutdown( struct GRAPHICS_ARGS* args ) {
 }
 
-void graphics_flip() {
+void graphics_flip( struct GRAPHICS_ARGS* args ) {
 }
 
 void graphics_loop_start() {
@@ -93,11 +94,22 @@ void graphics_draw_block(
 ) {
 }
 
+void graphics_draw_rect(
+   uint16_t x_orig, uint16_t y_orig, uint16_t w, uint16_t h,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+}
+
+void graphics_draw_line(
+   uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
+   uint16_t thickness, const GRAPHICS_COLOR color
+) {
+}
+
 int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    /* uint8_t buffer[MAC7_RSRC_BUFFER_SZ] = NULL;
    int32_t buffer_sz = MAC7_RSRC_BUFFER_SZ; */
    Handle buffer_handle;
-   union DRC_TYPE type = DRC_BITMAP_TYPE;
    uint32_t id = 0;
    int32_t retval = 0;
 
@@ -111,7 +123,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    }
 
    /* Load resource into buffer. */
-   buffer_handle = resource_get_handle( id, type );
+   buffer_handle = resource_get_bitmap_handle( id );
    if( NULL == buffer_handle ) {
       error_printf( "unable to get resource %d info", id );
       retval = 0;

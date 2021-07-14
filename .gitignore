@@ -4,8 +4,15 @@
 bin
 obj
 gen
+dep
 resext.h
 QC.INI
 .finf
 .rsrc
 doc
+*.vcb
+*.vcl
+*.vco
+*.aps
+tmp
+gmon.out
