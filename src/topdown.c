@@ -13,6 +13,8 @@
 #include "../gen/nds/map_field.h"
 #elif defined( PLATFORM_DOS )
 #include "../gen/dos/map_field.h"
+#elif defined( PLATFORM_SDL )
+#include "../gen/sdl-nj/map_field.h"
 #endif
 #endif /* USE_JSON_MAPS */
 

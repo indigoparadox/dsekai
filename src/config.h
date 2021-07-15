@@ -74,7 +74,7 @@
 #endif /* !DRC_ARCHIVE */
 
 #define USE_SOFTWARE_TEXT
-#define USE_JSON_MAPS
+/* #define USE_JSON_MAPS */
 #define ANIMATE_SCREEN_MOVEMENT
 #define RESOURCE_HEADER
 

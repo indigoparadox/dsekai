@@ -11,7 +11,6 @@ DSEKAI_C_FILES := \
 
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
-   src/json.c \
    src/input/sdli.c \
    src/graphics/sdlg.c \
    src/memory/fakem.c \
@@ -188,6 +187,8 @@ DSEKAI_ASSETS_MAPS_NDS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS)))
 DSEKAI_ASSETS_MAPS_DOS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
+DSEKAI_ASSETS_MAPS_SDL_NJ := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_SDL)-nj/,$(DSEKAI_ASSETS_MAPS)))
 
 HOST_CC := gcc
 MD := mkdir -p
@@ -226,6 +227,8 @@ CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include
 CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DRESOURCE_DRC
 
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
+
+$(BIN_SDL)-nj: LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
@@ -339,21 +342,40 @@ $(GENDIR_SDL)/resext.h: \
 $(HEADPACK) $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_SDL)
 	$(HEADPACK) $@ $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS)
 
-$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)
+$(BIN_SDL): $(DSEKAI_O_FILES_SDL) src/json.o | $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR_SDL)/src/topdown.o: $(DSEKAI_ASSETS_MAPS)
-
-$(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h
+$(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS)
 	$(MD) $(dir $@)
-	$(CC) $(CFLAGS_SDL) -c -o $@ $(<:%.o=%)
+	$(CC) $(CFLAGS_SDL) -DUSE_JSON_MAPS -c -o $@ $(<:%.o=%)
 
 $(DEPDIR_SDL)/%.d: %.c $(GENDIR_SDL)/resext.h
 	$(MD) $(dir $@)
-	$(CC) $(CFLAGS_SDL) -MM $< \
+	$(CC) $(CFLAGS_SDL) -DUSE_JSON_MAPS -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL)/,$<)) -MF $@
 
 include $(subst obj/,dep/,$(DSEKAI_O_FILES_SDL:.o=.d))
+
+# ====== Main: SDL (No JSON) ======
+
+$(GENDIR_SDL)-nj:
+	$(MD) $@
+
+$(GENDIR_SDL)-nj/map_%.h: $(ASSETDIR)/map_%.json $(MAP2H) | $(GENDIR_SDL)-nj
+	$(MAP2H) $< $@
+
+$(GENDIR_SDL)-nj/resext.h: \
+$(HEADPACK) $(DSEKAI_ASSETS_BITMAPS) | $(GENDIR_SDL)-nj
+	$(HEADPACK) $@ $(subst /sdl/,/sdl-nj/,$^)
+
+$(BIN_SDL)-nj: $(subst /sdl/,/sdl-nj/,$(DSEKAI_O_FILES_SDL)) | \
+$(BINDIR) $(DSEKAI_ASSETS_MAPS_SDL_NJ)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+$(OBJDIR_SDL)-nj/%.o: %.c $(GENDIR_SDL)-nj/resext.h | \
+$(DSEKAI_ASSETS_MAPS_SDL_NJ)
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS_SDL) -c -o $@ $(<:%.o=%)
 
 # ====== Main: MS-DOS ======
 
