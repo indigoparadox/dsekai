@@ -102,7 +102,19 @@ CONVERT_C_FILES := \
    tools/data/icns.c \
    src/json.c
 
-LOOKUPS_C_FILES: tools/lookups.c
+LOOKUPS_C_FILES := \
+   tools/lookups.c
+
+MAP2H_C_FILES := \
+   tools/map2h.c \
+   src/tilemap.c \
+   src/mobile.c \
+   src/memory/fakem.c \
+   src/dio.c \
+   src/json.c \
+   src/resource/nullr.c \
+   src/graphics.c \
+   src/graphics/nullg.c
 
 TOPDOWN_O: src/topdown.o
 
@@ -177,6 +189,7 @@ DSEKAI_ASSETS_MAPS_NDS := \
 DSEKAI_ASSETS_MAPS_DOS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
 
+HOST_CC := gcc
 MD := mkdir -p
 DD := /bin/dd
 MCOPY := mcopy
@@ -184,21 +197,21 @@ MKFSVFAT := /sbin/mkfs.vfat
 IMAGEMAGICK := convert
 PYTHON := python3
 
-MAPC := scripts/mapc.py
-
 MKRESH := bin/mkresh
 DRCPACK := bin/drcpack
 CONVERT := bin/convert
 LOOKUPS := bin/lookups
 HEADPACK := bin/headpack
+MAP2H := bin/map2h
 
 RETRO68_PREFIX := /opt/Retro68-build/toolchain
 
 CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DUSE_JSON_MAPS -DRESOURCE_DRC
 CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DUSE_JSON_MAPS -DRESOURCE_DRC
 CFLAGS_CONVERT := -DNO_RESEXT -g -DUSE_JSON_MAPS -DRESOURCE_DRC
-CFLAGS_LOOKUPS := -g -DRESOURCE_HEADER
-CFLAGS_HEADPACK := -g -DRESOURCE_HEADER
+CFLAGS_LOOKUPS := -g
+CFLAGS_HEADPACK := -g
+CFLAGS_MAP2H := -g
 
 CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=2
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -fsanitize=undefined -pg
@@ -292,19 +305,22 @@ $(BINDIR):
 # ====== Utilities ======
 
 $(MKRESH): $(MKRESH_C_FILES) | $(BINDIR)
-	gcc $(CFLAGS_MKRESH) -o $@ $^
+	$(HOST_CC) $(CFLAGS_MKRESH) -o $@ $^
 
 $(DRCPACK): $(DRCPACK_C_FILES) | $(BINDIR)
-	gcc $(CFLAGS_DRCPACK) -o $@ $^
+	$(HOST_CC) $(CFLAGS_DRCPACK) -o $@ $^
 
 $(CONVERT): $(CONVERT_C_FILES) | $(BINDIR)
-	gcc $(CFLAGS_CONVERT) -o $@ $^
+	$(HOST_CC) $(CFLAGS_CONVERT) -o $@ $^
 
 $(LOOKUPS): $(LOOKUPS_C_FILES) | $(BINDIR)
-	gcc $(CFLAGS_LOOKUPS) -o $@ tools/lookups.c
+	$(HOST_CC) $(CFLAGS_LOOKUPS) -o $@ $^
 
 $(HEADPACK): tools/headpack.c | $(BINDIR)
-	gcc $(CFLAGS_HEADPACK) -o $@ tools/headpack.c
+	$(HOST_CC) $(CFLAGS_HEADPACK) -o $@ tools/headpack.c
+
+$(MAP2H): $(MAP2H_C_FILES) | $(BINDIR)
+	$(HOST_CC) $(CFLAGS_MAP2H) -o $@ $^
 
 # ====== Main: SDL ======
 
@@ -348,8 +364,8 @@ include $(subst obj/,dep/,$(DSEKAI_O_FILES_SDL:.o=.d))
 #	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -i 5001 \
 #      -if $(GENDIR_DOS)/*.cga $(DSEKAI_ASSETS_MAPS) -lh $(GENDIR_DOS)/resext.h
 
-$(GENDIR_DOS)/map_%.h: $(ASSETDIR)/map_%.json $(MAPC) | $(GENDIR_DOS)
-	$(PYTHON) $(MAPC) -j $< -o $@
+$(GENDIR_DOS)/map_%.h: $(ASSETDIR)/map_%.json $(MAP2H) | $(GENDIR_DOS)
+	$(MAP2H) $< $@
 
 $(GENDIR_DOS)/resext.h: \
 $(HEADPACK) $(DSEKAI_ASSETS_DOS_CGA) $(DSEKAI_ASSETS_MAPS)
@@ -417,8 +433,8 @@ $(OBJDIR_WIN16):
 $(GENDIR_WIN16)/%.ico: $(ASSETDIR)/%.bmp | $(GENDIR_WIN16)
 	$(IMAGEMAGICK) $< $@
 
-$(GENDIR_WIN16)/%.h: $(ASSETDIR)/%.json $(MAPC) | $(GENDIR_WIN16)
-	$(PYTHON) $(MAPC) -j $< -o $@
+$(GENDIR_WIN16)/%.h: $(ASSETDIR)/%.json $(MAP2H) | $(GENDIR_WIN16)
+	$(MAP2H) $< $@
 
 $(BINDIR)/dsekai16.img: $(BIN_WIN16)
 	$(DD) if=/dev/zero bs=512 count=2880 of="$@"
@@ -444,6 +460,13 @@ $(OBJDIR_WIN16)/%.o: \
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_WIN16) -fo=$@ $(<:%.c=%)
 
+$(DEPDIR_WIN16)/%.d: %.c $(GENDIR_WIN16)/resext.h $(DSEKAI_ASSETS_MAPS_WIN16)
+	$(MD) $(dir $@)
+	$(HOST_CC) -DPLATFORM_WIN16 -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN16)/,$<)) -MF $@ || touch $@
+
+include $(subst obj/,dep/,$(DSEKAI_O_FILES_WIN16:.o=.d))
+
 # ====== Main: Win32 ======
 
 $(GENDIR_WIN32):
@@ -452,8 +475,8 @@ $(GENDIR_WIN32):
 $(OBJDIR_WIN32):
 	$(MD) $@
 
-$(GENDIR_WIN32)/map_%.h: $(ASSETDIR)/map_%.json $(MAPC) | $(GENDIR_WIN32)
-	$(PYTHON) $(MAPC) -j $< -o $@
+$(GENDIR_WIN32)/map_%.h: $(ASSETDIR)/map_%.json $(MAP2H) | $(GENDIR_WIN32)
+	$(MAP2H) $< $@
 
 $(BIN_WIN32): \
 $(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win32.res | \
@@ -475,6 +498,13 @@ $(OBJDIR_WIN32)/%.o: \
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_WIN32) -fo=$@ $(<:%.c=%)
 
+$(DEPDIR_WIN32)/%.d: %.c $(GENDIR_WIN32)/resext.h $(DSEKAI_ASSETS_MAPS_WIN32)
+	$(MD) $(dir $@)
+	$(HOST_CC) -DPLATFORM_WIN32 -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN32)/,$<)) -MF $@ || touch $@
+
+include $(subst obj/,dep/,$(DSEKAI_O_FILES_WIN32:.o=.d))
+
 # ====== Main: MacOS 7 ======
 
 $(OBJDIR_MAC7):
@@ -483,8 +513,8 @@ $(OBJDIR_MAC7):
 $(GENDIR_MAC7):
 	$(MD) $@
 
-$(GENDIR_MAC7)/%.h: $(ASSETDIR)/%.json $(MAPC) | $(GENDIR_MAC7)
-	$(PYTHON) $(MAPC) -j $< -o $@
+$(GENDIR_MAC7)/%.h: $(ASSETDIR)/%.json $(MAP2H) | $(GENDIR_MAC7)
+	$(MAP2H) $< $@
 
 #$(GENDIR_MAC7)/resext.h: $(GENDIR_MAC7) $(MKRESH)
 #	$(MKRESH) -f palm -i 5001 \
@@ -535,8 +565,8 @@ $(OBJDIR_NDS):
 $(GENDIR_NDS):
 	$(MD) $@
 
-$(GENDIR_NDS)/%.h: $(ASSETDIR)/%.json $(MAPC) | $(GENDIR_NDS)
-	$(PYTHON) $(MAPC) -j $< -o $@
+$(GENDIR_NDS)/%.h: $(ASSETDIR)/%.json $(MAP2H) | $(GENDIR_NDS)
+	$(MAP2H) $< $@
 
 $(GENDIR_NDS)/resext.h: \
 $(HEADPACK) $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_NDS)

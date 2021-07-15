@@ -33,6 +33,10 @@ struct MOBILE {
 #define MOBILE_IACT_ATTACK    2
 #define MOBILE_IACT_SHOP      3
 
+#define MOBILE_STEP_NOP       0
+#define MOBILE_STEP_WAIT_TALK 1
+#define MOBILE_STEP_TALK      2
+
 uint8_t mobile_walk_start( struct MOBILE*, int8_t, int8_t );
 void mobile_interact( struct MOBILE*, struct MOBILE* );
 void mobile_interact_txy( struct MOBILE*, struct MOBILE*, uint16_t, uint16_t );

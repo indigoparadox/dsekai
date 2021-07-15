@@ -98,12 +98,12 @@ struct DSEKAI_STATE {
    uint8_t walk_offset;
    uint8_t input_blocked_countdown;
    uint8_t reserved;
-   uint32_t screen_scroll_x;
-   uint32_t screen_scroll_y;
-   uint32_t screen_scroll_tx;
-   uint32_t screen_scroll_ty;
-   uint32_t screen_scroll_x_tgt;
-   uint32_t screen_scroll_y_tgt;
+   int32_t screen_scroll_x;
+   int32_t screen_scroll_y;
+   int32_t screen_scroll_tx;
+   int32_t screen_scroll_ty;
+   int32_t screen_scroll_x_tgt;
+   int32_t screen_scroll_y_tgt;
 
    MEMORY_HANDLE windows_handle;
    uint16_t windows_count;

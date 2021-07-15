@@ -11,7 +11,7 @@
 #elif defined( PLATFORM_WIN )
 #include "resource/winr.h"
 #else
-#error "No resource system defined!"
+#include "resource/nullr.h"
 #endif /* PLATFORM_* */
 
 RESOURCE_BITMAP_HANDLE resource_get_bitmap_handle( RESOURCE_ID );

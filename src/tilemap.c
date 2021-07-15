@@ -153,6 +153,7 @@ int16_t tilemap_parse(
 ) {
    int16_t tok_parsed = 0,
       tiles_count = 0,
+      name_len = 0,
       i = 0,
       j = 0;
    int8_t tile_id_in = 0;
@@ -183,6 +184,16 @@ int16_t tilemap_parse(
          t, i, tokens, tok_parsed, json_buffer,
          iter_path, JSON_PATH_SZ );
    }
+
+   /* Parse Name */
+   name_len = json_str_from_path(
+      "/properties/[name=name]/value", 29, /* Path Sz */
+      t->name, TILEMAP_NAME_MAX, tokens, tok_parsed, json_buffer );
+   if( 0 >= name_len ) {
+      error_printf( "tilemap name not found" );
+      return 0;
+   }
+   debug_printf( 2, "tilemap name is %s (%d)", t->name, name_len ); 
 
    debug_printf( 1, "loading spawns" ); 
    while( tilemap_parse_spawn(

@@ -69,6 +69,12 @@
  "nextlayerid":3,
  "nextobjectid":9,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"name",
+         "type":"string",
+         "value":"field"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.7.1",
  "tileheight":16,
