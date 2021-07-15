@@ -16,6 +16,13 @@ DSEKAI_C_FILES_SDL_ONLY := \
    src/memory/fakem.c \
    src/resource/header.c
 
+DSEKAI_C_FILES_XLIB_ONLY := \
+   src/main.c \
+   src/input/xi.c \
+   src/graphics/xg.c \
+   src/memory/fakem.c \
+   src/resource/header.c
+
 DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
    src/input/dosi.c \
@@ -120,6 +127,7 @@ TOPDOWN_O: src/topdown.o
 ASSETDIR := assets
 
 OBJDIR_SDL :=        obj/sdl
+OBJDIR_XLIB :=       obj/xlib
 OBJDIR_DOS :=        obj/dos
 OBJDIR_PALM :=       obj/palm
 OBJDIR_WIN16 :=      obj/win16
@@ -129,6 +137,7 @@ OBJDIR_NDS :=        obj/nds
 OBJDIR_CHECK_NULL := obj/check_null
 
 DEPDIR_SDL :=        dep/sdl
+DEPDIR_XLIB :=       dep/xlib
 DEPDIR_DOS :=        dep/dos
 DEPDIR_PALM :=       dep/palm
 DEPDIR_WIN16 :=      dep/win16
@@ -138,6 +147,7 @@ DEPDIR_NDS :=        dep/nds
 DEPDIR_CHECK_NULL := dep/check_null
 
 GENDIR_SDL := gen/sdl
+GENDIR_XLIB := gen/xlib
 GENDIR_DOS := gen/dos
 GENDIR_PALM := gen/palm
 GENDIR_WIN16 := gen/win16
@@ -149,6 +159,7 @@ GENDIR_CHECK_NULL := gen/check_null
 BINDIR := bin
 
 BIN_SDL := $(BINDIR)/dsekai
+BIN_XLIB := $(BINDIR)/dsekaix
 BIN_DOS := $(BINDIR)/dsekai.exe
 BIN_PALM := $(BINDIR)/dsekai.prc
 BIN_WIN16 := $(BINDIR)/dsekai16.exe
@@ -189,6 +200,8 @@ DSEKAI_ASSETS_MAPS_DOS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
 DSEKAI_ASSETS_MAPS_SDL_NJ := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_SDL)-nj/,$(DSEKAI_ASSETS_MAPS)))
+DSEKAI_ASSETS_MAPS_XLIB := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_XLIB)/,$(DSEKAI_ASSETS_MAPS)))
 
 HOST_CC := gcc
 MD := mkdir -p
@@ -218,6 +231,7 @@ CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=2
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -fsanitize=undefined -pg
 
 CFLAGS_SDL := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC)
+CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_DEBUG_GCC)
 CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DDEBUG_THRESHOLD=1
 CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 $(INCLUDES) -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC)
 CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1
@@ -229,6 +243,8 @@ CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSC
 $(BIN_SDL): LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_SDL)-nj: LDFLAGS := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
+
+$(BIN_XLIB): LDFLAGS := -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_DOS): CC := wcc
 $(BIN_DOS): LD := wcl
@@ -277,6 +293,9 @@ DSEKAI_C_FILES_CHECK_NULL := $(DSEKAI_C_FILES) $(DSEKAI_C_FILES_CHECK_NULL_ONLY)
 DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY)))
+DSEKAI_O_FILES_XLIB := \
+   $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES_XLIB_ONLY)))
 DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY)))
@@ -298,7 +317,7 @@ DSEKAI_O_FILES_NDS := \
 DSEKAI_O_FILES_CHECK_NULL := \
    $(addprefix $(OBJDIR_CHECK_NULL)/,$(subst .c,.o,$(DSEKAI_C_FILES_CHECK_NULL)))
 
-.PHONY: clean res_sdl16_drc res_doscga_drc res_palm grc_palm res_mac7
+.PHONY: clean res_doscga_drc res_palm grc_palm res_mac7
 
 all: $(BIN_DOS) $(BIN_SDL) $(BIN_PALM)
 
@@ -330,17 +349,9 @@ $(MAP2H): $(MAP2H_C_FILES) | $(BINDIR)
 $(GENDIR_SDL):
 	$(MD) $@
 
-#res_sdl16_drc: $(DRCPACK) | $(GENDIR_SDL)
-#	rm $(BINDIR)/sdl16.drc || true
-#	$(DRCPACK) -c -a -af $(BINDIR)/sdl16.drc -i 5001 \
-#      -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) \
-#      -lh $(GENDIR_SDL)/resext.h
-
-#$(BINDIR)/sdl16.drc: 
-
 $(GENDIR_SDL)/resext.h: \
 $(HEADPACK) $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_SDL)
-	$(HEADPACK) $@ $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS)
+	$(HEADPACK) $@ $^
 
 $(BIN_SDL): $(DSEKAI_O_FILES_SDL) src/json.o | $(BINDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -376,6 +387,32 @@ $(OBJDIR_SDL)-nj/%.o: %.c $(GENDIR_SDL)-nj/resext.h | \
 $(DSEKAI_ASSETS_MAPS_SDL_NJ)
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_SDL) -c -o $@ $(<:%.o=%)
+
+# ====== Main: xlib ======
+
+$(GENDIR_XLIB):
+	$(MD) $@
+
+$(GENDIR_XLIB)/map_%.h: $(ASSETDIR)/map_%.json $(MAP2H) | $(GENDIR_XLIB)
+	$(MAP2H) $< $@
+
+$(GENDIR_XLIB)/resext.h: \
+$(HEADPACK) $(DSEKAI_ASSETS_BITMAPS) | $(GENDIR_XLIB)
+	$(HEADPACK) $@ $^
+
+$(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(DSEKAI_ASSETS_MAPS_XLIB)
+	$(CC) -o $@ $^ $(LDFLAGS) -lX11
+
+$(OBJDIR_XLIB)/%.o: %.c $(GENDIR_XLIB)/resext.h | $(DSEKAI_ASSETS_MAPS_XLIB)
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS_XLIB) -c -o $@ $(<:%.o=%)
+
+$(DEPDIR_XLIB)/%.d: %.c $(GENDIR_XLIB)/resext.h | $(DSEKAI_ASSETS_MAPS_XLIB)
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS_XLIB) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_XLIB)/,$<)) -MF $@
+
+include $(subst obj/,dep/,$(DSEKAI_O_FILES_XLIB:.o=.d))
 
 # ====== Main: MS-DOS ======
 
@@ -592,7 +629,7 @@ $(GENDIR_NDS)/%.h: $(ASSETDIR)/%.json $(MAP2H) | $(GENDIR_NDS)
 
 $(GENDIR_NDS)/resext.h: \
 $(HEADPACK) $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_NDS)
-	$(HEADPACK) $@ $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS)
+	$(HEADPACK) $@ $^
 
 $(BIN_NDS): $(OBJDIR_NDS)/dsekai.elf $(GENDIR_NDS)/dsekai-1.bmp
 	ndstool -c $@ -9 $< -b $(GENDIR_NDS)/dsekai-1.bmp "dsekai;dsekai;dsekai"
@@ -608,7 +645,7 @@ $(OBJDIR_NDS)/%.o: \
 	$(MD) $(dir $@)
 	$(CC) $(CFLAGS_NDS) -c -o $@ $(<:%.o=%)
 
-$(DEPDIR_NDS)/%.d: %.c $(GENDIR_NDS)/resext.h
+$(DEPDIR_NDS)/%.d: %.c $(GENDIR_NDS)/resext.h $(DSEKAI_ASSETS_MAPS_NDS)
 	$(MD) $(dir $@)
 	arm-none-eabi-gcc $(CFLAGS_NDS) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_NDS)/,$<)) -MF $@ || touch $@

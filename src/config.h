@@ -58,9 +58,6 @@
 
 #include "../gen/sdl/resext.h"
 
-/* Doesn't exist on this platform. */
-#define far
-
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "/tmp"
 #endif /* !DIO_PATH_TEMP */
@@ -72,6 +69,25 @@
 #ifndef DRC_ARCHIVE
 #define DRC_ARCHIVE "sdl16.drc"
 #endif /* !DRC_ARCHIVE */
+
+#define USE_SOFTWARE_TEXT
+/* #define USE_JSON_MAPS */
+#define ANIMATE_SCREEN_MOVEMENT
+#define RESOURCE_HEADER
+
+/* ------ */
+#elif defined( PLATFORM_XLIB )
+/* ------ */
+
+#include "../gen/xlib/resext.h"
+
+#ifndef DIO_PATH_TEMP
+#define DIO_PATH_TEMP "/tmp"
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP '/'
+#endif /* !DIO_PATH_SEP */
 
 #define USE_SOFTWARE_TEXT
 /* #define USE_JSON_MAPS */

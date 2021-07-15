@@ -8,6 +8,8 @@
 #include "graphics/dosg.h"
 #elif defined( PLATFORM_SDL )
 #include "graphics/sdlg.h"
+#elif defined( PLATFORM_XLIB )
+#include "graphics/xg.h"
 #elif defined( PLATFORM_PALM )
 #include "graphics/palmg.h"
 #elif defined( PLATFORM_WIN )
