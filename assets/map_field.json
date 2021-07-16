@@ -42,17 +42,6 @@
                  "height":0,
                  "id":6,
                  "name":"princess",
-                 "properties":[
-                        {
-                         "name":"data",
-                         "type":"string",
-                         "value":"Lovely weather, isn't it?"
-                        }, 
-                        {
-                         "name":"interaction",
-                         "type":"string",
-                         "value":"talk"
-                        }],
                  "rotation":0,
                  "type":"princess",
                  "visible":true,
@@ -80,6 +69,12 @@
  "nextlayerid":3,
  "nextobjectid":9,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"name",
+         "type":"string",
+         "value":"field"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.7.1",
  "tileheight":16,

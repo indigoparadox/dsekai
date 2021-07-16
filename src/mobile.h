@@ -15,9 +15,6 @@ struct MOBILE {
    struct TILEMAP_COORDS coords_prev;
    uint8_t steps_x;
    uint8_t steps_y;
-   uint8_t interaction;
-   uint8_t interaction_data_sz;
-   MEMORY_PTR interaction_data;
    struct ITEM* inventory;
 };
 
@@ -35,6 +32,10 @@ struct MOBILE {
 #define MOBILE_IACT_TALK      1
 #define MOBILE_IACT_ATTACK    2
 #define MOBILE_IACT_SHOP      3
+
+#define MOBILE_STEP_NOP       0
+#define MOBILE_STEP_WAIT_TALK 1
+#define MOBILE_STEP_TALK      2
 
 uint8_t mobile_walk_start( struct MOBILE*, int8_t, int8_t );
 void mobile_interact( struct MOBILE*, struct MOBILE* );

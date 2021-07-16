@@ -8,6 +8,8 @@
 #include "input/dosi.h"
 #elif defined( PLATFORM_SDL )
 #include "input/sdli.h"
+#elif defined( PLATFORM_XLIB )
+#include "input/xi.h"
 #elif defined( PLATFORM_PALM )
 #include "input/palmi.h"
 #elif defined( PLATFORM_WIN )

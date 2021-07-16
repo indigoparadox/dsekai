@@ -427,7 +427,7 @@ int32_t dio_remove_file( const char* path ) {
 
 #endif /* !DISABLE_FILESYSTEM */
 
-int16_t dio_strnchr( char* buffer, uint16_t buffer_len, char c ) {
+int16_t dio_strnchr( const char* buffer, uint16_t buffer_len, char c ) {
    int16_t i = 0;
 
    for( i = 0 ; buffer_len > i ; i++ ) {

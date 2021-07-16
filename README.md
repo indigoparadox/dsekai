@@ -17,6 +17,10 @@ In general, these restrictions are relaxed for items in the tools/ and check/ su
 
 Items in the tools/ and check/ subdirectories may depend on the src/ directory freely.
 
+## Resources
+
+This engine uses OS-level resources where it can to store assets. On platforms without this facility, assets are converted into headers during compile time and referenced via the same resource-loading mechanisms.
+
 ## Platforms
 
 The following platforms are currently supported:
