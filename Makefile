@@ -181,27 +181,43 @@ DSEKAI_O_FILES_CHECK_NULL := \
 
 all: $(BIN_DOS) $(BIN_SDL) $(BIN_PALM)
 
-$(BINDIR):
+STAMPFILE := .stamp
+
+$(BINDIR)/$(STAMPFILE):
 	$(MD) $(BINDIR)
+	touch $@
+
+$(OBJDIR)/%/$(STAMPFILE):
+	$(MD) $(dir $@)
+	touch $@
+
+$(GENDIR)/%/$(STAMPFILE):
+	$(MD) $(dir $@)
+	touch $@
+
+$(GENDIR)/%/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(GENDIR)/%/$(STAMPFILE) $(HEADPACK)
+	$(HEADPACK) $@ $^
 
 # ====== Utilities ======
 
-$(MKRESH): $(MKRESH_C_FILES) | $(BINDIR)
+$(MKRESH): $(MKRESH_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_MKRESH) -o $@ $^
 
-$(DRCPACK): $(DRCPACK_C_FILES) | $(BINDIR)
+$(DRCPACK): $(DRCPACK_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_DRCPACK) -o $@ $^
 
-$(CONVERT): $(CONVERT_C_FILES) | $(BINDIR)
+$(CONVERT): $(CONVERT_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_CONVERT) -o $@ $^
 
-$(LOOKUPS): $(LOOKUPS_C_FILES) | $(BINDIR)
+$(LOOKUPS): $(LOOKUPS_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_LOOKUPS) -o $@ $^
 
-$(HEADPACK): tools/headpack.c | $(BINDIR)
+$(HEADPACK): tools/headpack.c | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_HEADPACK) -o $@ tools/headpack.c
 
-$(MAP2H): $(MAP2H_C_FILES) | $(BINDIR)
+$(MAP2H): $(MAP2H_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_MAP2H) -o $@ $^
 
 # ====== Main: SDL ======
@@ -237,14 +253,7 @@ LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 # 5. Targets
 
-$(GENDIR_SDL):
-	$(MD) $@
-
-$(GENDIR_SDL)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_SDL) $(HEADPACK)
-	$(HEADPACK) $@ $^
-
-$(BIN_SDL): $(DSEKAI_O_FILES_SDL) src/json.o | $(BINDIR)
+$(BIN_SDL): $(DSEKAI_O_FILES_SDL) src/json.o | $(BINDIR)/$(STAMPFILE)
 	$(CC_SDL) -o $@ $^ $(LDFLAGS_SDL)
 
 $(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS)
@@ -275,15 +284,9 @@ LDFLAGS_SDL_NJ := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 # 5. Targets
 
-$(GENDIR_SDL)-nj:
-	$(MD) $@
-
-$(GENDIR_SDL)-nj/map_%.h: $(ASSETDIR)/map_%.json $(MAP2H) | $(GENDIR_SDL)-nj
+$(GENDIR_SDL)-nj/map_%.h: $(ASSETDIR)/map_%.json $(MAP2H) | \
+$(GENDIR_SDL)-nj/$(STAMPFILE)
 	$(MAP2H) $< $@
-
-$(GENDIR_SDL)-nj/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) | $(GENDIR_SDL)-nj $(HEADPACK)
-	$(HEADPACK) $@ $(subst /sdl/,/sdl-nj/,$^)
 
 $(BIN_SDL)-nj: $(subst /sdl/,/sdl-nj/,$(DSEKAI_O_FILES_SDL)) | \
 $(BINDIR) $(DSEKAI_ASSETS_MAPS_SDL_NJ)
@@ -331,14 +334,9 @@ DSEKAI_O_FILES_XLIB := \
 
 # 5. Targets
 
-$(GENDIR_XLIB):
-	$(MD) $@
-
-$(GENDIR_XLIB)/map_%.h: $(ASSETDIR)/map_%.json | $(GENDIR_XLIB) $(MAP2H)
+$(GENDIR_XLIB)/map_%.h: $(ASSETDIR)/map_%.json | \
+$(GENDIR_XLIB)/$(STAMPFILE) $(MAP2H)
 	$(MAP2H) $< $@
-
-$(GENDIR_XLIB)/resext.h: $(DSEKAI_ASSETS_BITMAPS) | $(GENDIR_XLIB) $(HEADPACK)
-	$(HEADPACK) $@ $^
 
 $(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(DSEKAI_ASSETS_MAPS_XLIB)
 	$(LD_XLIB) -o $@ $^ $(LDFLAGS_XLIB)
@@ -394,6 +392,10 @@ LDFLAGS_DOS := $(CFLAGS_DOS)
 
 # 5. Targets
 
+$(GENDIR_DOS)/resext.h: \
+$(DSEKAI_ASSETS_DOS_CGA) $(DSEKAI_ASSETS_MAPS) | $(HEADPACK)
+	$(HEADPACK) $@ $^
+
 #$(BINDIR)/doscga.drc: res_doscga_drc
 
 #res_doscga_drc: $(DRCPACK) $(DSEKAI_ASSETS_DOS_CGA)
@@ -401,17 +403,10 @@ LDFLAGS_DOS := $(CFLAGS_DOS)
 #	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -i 5001 \
 #      -if $(GENDIR_DOS)/*.cga $(DSEKAI_ASSETS_MAPS) -lh $(GENDIR_DOS)/resext.h
 
-$(GENDIR_DOS)/map_%.h: $(ASSETDIR)/map_%.json $(MAP2H) | $(GENDIR_DOS)
+$(GENDIR_DOS)/map_%.h: $(ASSETDIR)/map_%.json $(MAP2H) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MAP2H) $< $@
 
-$(GENDIR_DOS)/resext.h: \
-$(DSEKAI_ASSETS_DOS_CGA) $(DSEKAI_ASSETS_MAPS) | $(HEADPACK)
-	$(HEADPACK) $@ $^
-
-$(GENDIR_DOS):
-	$(MD) $@
-
-$(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)
+$(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR) $(DSEKAI_ASSETS_MAPS_DOS)
@@ -464,15 +459,12 @@ APPID := DSEK
 
 # 5. Targets
 
-$(GENDIR_PALM):
-	$(MD) $@
-
-$(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_PALM)
+$(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_PALM)/$(STAMPFILE)
 	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc bitmap
 
 $(GENDIR_PALM)/resext.h \
 $(GENDIR_PALM)/palmd.rcp: \
-$(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_PALM) $(MKRESH)
+$(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_PALM)/$(STAMPFILE) $(MKRESH)
 	$(MKRESH) -f palm -i 5001 \
       -if $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) \
       -oh $(GENDIR_PALM)/resext.h \
@@ -484,11 +476,11 @@ grc_palm: $(OBJDIR_PALM)/dsekai
 $(OBJDIR_PALM)/dsekai: $(DSEKAI_O_FILES_PALM)
 	$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@
 	
-$(OBJDIR_PALM)/bin.stamp: src/palms.rcp $(GENDIR_PALM)/palmd.rcp
+$(OBJDIR_PALM)/bin$(STAMPFILE): src/palms.rcp $(GENDIR_PALM)/palmd.rcp
 	$(PILRC) $< $(OBJDIR_PALM)
 	touch $@
 
-$(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin.stamp | $(BINDIR)
+$(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
 	$(BUILDPRC) $@ $(DSEKAI) $(APPID) $(OBJDIR_PALM)/*.grc $(OBJDIR_PALM)/*.bin
 
 $(OBJDIR_PALM)/%.o: %.c $(GENDIR_PALM)/palmd.rcp $(GENDIR_PALM)/resext.h
@@ -500,13 +492,10 @@ $(OBJDIR_PALM)/%.o: %.c $(GENDIR_PALM)/palmd.rcp $(GENDIR_PALM)/resext.h
 $(GENDIR_WIN16):
 	$(MD) $@
 
-$(OBJDIR_WIN16):
-	$(MD) $@
-
-$(GENDIR_WIN16)/%.ico: $(ASSETDIR)/%.bmp | $(GENDIR_WIN16)
+$(GENDIR_WIN16)/%.ico: $(ASSETDIR)/%.bmp | $(GENDIR_WIN16)/$(STAMPFILE)
 	$(IMAGEMAGICK) $< $@
 
-$(GENDIR_WIN16)/%.h: $(ASSETDIR)/%.json $(MAP2H) | $(GENDIR_WIN16)
+$(GENDIR_WIN16)/%.h: $(ASSETDIR)/%.json $(MAP2H) | $(GENDIR_WIN16)/$(STAMPFILE)
 	$(MAP2H) $< $@
 
 $(BINDIR)/dsekai16.img: $(BIN_WIN16)
@@ -515,15 +504,17 @@ $(BINDIR)/dsekai16.img: $(BIN_WIN16)
 	$(MCOPY) -i "$@" $< ::dsekai16.exe
 
 $(BIN_WIN16): \
-$(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | $(BINDIR) $(DSEKAI_ASSETS_MAPS_WIN16)
+$(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | \
+$(BINDIR)/$(STAMPFILE) $(DSEKAI_ASSETS_MAPS_WIN16)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
 $(OBJDIR_WIN16)/win16.res: \
-$(GENDIR_WIN16)/win16.rc $(ASSETDIR)/dsekai.ico | $(OBJDIR_WIN16)
+$(GENDIR_WIN16)/win16.rc $(ASSETDIR)/dsekai.ico | $(OBJDIR_WIN16)/$(STAMPFILE)
 	$(RC) -r -DPLATFORM_WIN16 -i $(INCLUDE)win src/winstat.rc -o $@
 
 $(GENDIR_WIN16)/win16.rc \
-$(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN16)
+$(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | \
+$(GENDIR_WIN16)/$(STAMPFILE)
 	$(MKRESH) -f win16 -i 5001 \
       -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) \
       -oh $(GENDIR_WIN16)/resext.h -or $(GENDIR_WIN16)/win16.rc
@@ -542,26 +533,22 @@ include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN16:.o=.d))
 
 # ====== Main: Win32 ======
 
-$(GENDIR_WIN32):
-	$(MD) $@
-
-$(OBJDIR_WIN32):
-	$(MD) $@
-
-$(GENDIR_WIN32)/map_%.h: $(ASSETDIR)/map_%.json $(MAP2H) | $(GENDIR_WIN32)
+$(GENDIR_WIN32)/map_%.h: $(ASSETDIR)/map_%.json $(MAP2H) | \
+$(GENDIR_WIN32)/$(STAMPFILE)
 	$(MAP2H) $< $@
 
 $(BIN_WIN32): \
 $(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win32.res | \
-$(BINDIR) $(DSEKAI_ASSETS_MAPS_WIN32)
+$(BINDIR)/$(STAMPFILE) $(DSEKAI_ASSETS_MAPS_WIN32)
 	$(LD) $(LDFLAGS) -fe=$@ $^
 
 $(OBJDIR_WIN32)/win32.res: \
-$(GENDIR_WIN32)/win32.rc $(ASSETDIR)/dsekai.ico | $(OBJDIR_WIN32)
+$(GENDIR_WIN32)/win32.rc $(ASSETDIR)/dsekai.ico | $(OBJDIR_WIN32)/$(STAMPFILE)
 	$(RC) -r -DPLATFORM_WIN32 -i $(INCLUDE)win src/winstat.rc -o $@
 
 $(GENDIR_WIN32)/win32.rc \
-$(GENDIR_WIN32)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | $(GENDIR_WIN32)
+$(GENDIR_WIN32)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | \
+$(GENDIR_WIN32)/$(STAMPFILE)
 	$(MKRESH) -f win16 -i 5001 \
       -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) \
       -oh $(GENDIR_WIN32)/resext.h -or $(GENDIR_WIN32)/win32.rc
@@ -626,19 +613,8 @@ CFLAGS_MAC7 := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAG
 
 # 5. Targets
 
-$(OBJDIR_MAC7):
-	$(MD) $@
-
-$(GENDIR_MAC7):
-	$(MD) $@
-
-$(GENDIR_MAC7)/%.h: $(ASSETDIR)/%.json $(MAP2H) | $(GENDIR_MAC7)
+$(GENDIR_MAC7)/%.h: $(ASSETDIR)/%.json $(MAP2H) | $(GENDIR_MAC7)/$(STAMPFILE)
 	$(MAP2H) $< $@
-
-#$(GENDIR_MAC7)/resext.h: $(GENDIR_MAC7) $(MKRESH)
-#	$(MKRESH) -f palm -i 5001 \
-#      -if $(DSEKAI_ASSETS_ICNS) \
-#      -oh $(GENDIR_MAC7)/resext.h \
 
 #$(BINDIR)/mac7.drc \
 #$(GENDIR_MAC7)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | $(GENDIR_SDL)
@@ -650,13 +626,13 @@ $(GENDIR_MAC7)/resext.h: \
 $(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_MAC7) $(HEADPACK)
 	$(HEADPACK) $@ $^
 
-$(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)
+$(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)/$(STAMPFILE)
 	$(IMAGEMAGICK) $< $@
 
 #$(GENDIR_MAC7)/%.rsrc: $(GENDIR_MAC7)/%.icns
 #	echo "read 'icns' (-16455) \"$<\";" > $@
 
-$(GENDIR_MAC7)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC7)
+$(GENDIR_MAC7)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC7)/$(STAMPFILE)
 	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
 
 $(OBJDIR_MAC7)/dsekai.code.bin: $(DSEKAI_O_FILES_MAC7) | $(OBJDIR_MAC7)
@@ -672,7 +648,7 @@ $(BIN_MAC7): $(OBJDIR_MAC7)/dsekai.code.bin
       --cc $(BINDIR)/dsekai.dsk
 
 $(OBJDIR_MAC7)/%.o: \
-%.c $(DSEKAI_ASSETS_MAPS_MAC7) $(GENDIR_MAC7)/resext.h | $(OBJDIR_MAC7)
+%.c $(DSEKAI_ASSETS_MAPS_MAC7) $(GENDIR_MAC7)/resext.h
 	$(MD) $(dir $@)
 	$(CC_MAC7) $(CFLAGS_MAC7) -c -o $@ $(<:%.o=%)
 
@@ -706,6 +682,7 @@ DSEKAI_O_FILES_NDS := \
 
 CC_NDS := arm-none-eabi-gcc
 LD_NDS := arm-none-eabi-gcc
+NDSTOOL := ndstool
 
 # 4. Arguments
 
@@ -721,15 +698,8 @@ $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 
 # 5. Targets
 
-$(GENDIR_NDS):
-	$(MD) $@
-
-$(GENDIR_NDS)/%.h: $(ASSETDIR)/%.json $(MAP2H) | $(GENDIR_NDS)
+$(GENDIR_NDS)/%.h: $(ASSETDIR)/%.json $(MAP2H) | $(GENDIR_NDS)/$(STAMPFILE)
 	$(MAP2H) $< $@
-
-$(GENDIR_NDS)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_NDS) $(HEADPACK)
-	$(HEADPACK) $@ $^
 
 $(BIN_NDS): $(OBJDIR_NDS)/dsekai.elf $(GENDIR_NDS)/dsekai-1.bmp
 	$(NDSTOOL) -c $@ -9 $< -b $(GENDIR_NDS)/dsekai-1.bmp "dsekai;dsekai;dsekai"
@@ -754,15 +724,12 @@ include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_NDS:.o=.d))
 
 # ====== Check: Null ======
 
-$(GENDIR_CHECK_NULL):
-	$(MD) $@
-
-$(GENDIR_CHECK_NULL)/resext.h: $(GENDIR_CHECK_NULL) $(MKRESH)
+$(GENDIR_CHECK_NULL)/resext.h: $(GENDIR_CHECK_NULL)/$(STAMPFILE) $(MKRESH)
 	$(MKRESH) -f palm -i 5001 \
       -if $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) \
       -oh $(GENDIR_CHECK_NULL)/resext.h
 
-$(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)
+$(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)/$(STAMPFILE)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(DEPDIR_CHECK_NULL)/%.d: %.c $(GENDIR_CHECK_NULL)/resext.h
