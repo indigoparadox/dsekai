@@ -11,11 +11,17 @@ int input_init() {
 
 int input_poll() {
    XEvent event;
+   int mask = 0;
 
-   XNextEvent( g_display, &event );
+   mask = ExposureMask | KeyPressMask | KeyReleaseMask;
 
-   if( KeyPress == event.type ) {
-      return INPUT_KEY_QUIT;
+   /* XNextEvent( g_display, &event ); */
+   if( (
+      XCheckWindowEvent( g_display, g_window, mask, &event ) ||
+      XCheckTypedWindowEvent( g_display, g_window, KeyPress, &event )
+   ) && KeyPress == event.type ) {
+      /* printf( "%lu\n", event.xkey.keycode ); */
+      return event.xkey.keycode;
    }
    return 0;
 }

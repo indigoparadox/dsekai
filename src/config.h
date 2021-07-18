@@ -56,6 +56,11 @@
 #elif defined( PLATFORM_SDL )
 /* ------ */
 
+#ifdef __GNUC__
+/* For strnlen(). */
+#define _POSIX_C_SOURCE 200809L
+#endif /* __GNUC__ */
+
 #include "../gen/sdl/resext.h"
 
 #ifndef DIO_PATH_TEMP
@@ -78,6 +83,11 @@
 /* ------ */
 #elif defined( PLATFORM_XLIB )
 /* ------ */
+
+#ifdef __GNUC__
+/* For strnlen(). */
+#define _POSIX_C_SOURCE 200809L
+#endif /* __GNUC__ */
 
 #include "../gen/xlib/resext.h"
 

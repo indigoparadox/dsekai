@@ -11,7 +11,7 @@ const int8_t gc_mobile_step_table_normal_pos[16] = {
 uint16_t mobile_parse_script( 
    struct MOBILE_SCRIPT_STEP* steps, uint16_t steps_sz
 ) {
-
+   return 0;
 }
 
 uint8_t mobile_walk_start( struct MOBILE* m, int8_t x_mod, int8_t y_mod ) {

@@ -2,6 +2,7 @@
 #include "dstypes.h"
 
 #include <stdarg.h>
+#include <stdlib.h> /* for getenv() */
 #include <string.h> /* for strtok() */
 
 #define PSITOA_BUF_LEN 6 /* 65535 = 5 digits + NULL. */
