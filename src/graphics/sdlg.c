@@ -160,7 +160,7 @@ void graphics_draw_line(
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
-int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
+int32_t graphics_load_bitmap( RESOURCE_ID id_in, struct GRAPHICS_BITMAP* b ) {
    uint8_t* buffer = NULL;
    RESOURCE_BITMAP_HANDLE buffer_handle = NULL;
    uint32_t id = 0,

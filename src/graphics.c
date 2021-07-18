@@ -97,7 +97,7 @@ void graphics_string_sz(
  * @return 1 if blit was successful and 0 otherwise.
  */
 int16_t graphics_blit_at(
-   uint32_t resource, uint16_t x, uint16_t y, uint16_t w, uint16_t h
+   RESOURCE_ID res_id, uint16_t x, uint16_t y, uint16_t w, uint16_t h
 ) {
    int16_t retval = 0,
       i = 0;
@@ -108,7 +108,7 @@ int16_t graphics_blit_at(
 
    /* Try to find the bitmap already in the cache. */
    for( i = 0 ; gs_graphics_cache_sz > i ; i++ ) {
-      if( bitmaps[i].id == resource ) {
+      if( bitmaps[i].id == res_id ) {
          bitmap_blit = &(bitmaps[i]);
          break;
       }
@@ -116,11 +116,11 @@ int16_t graphics_blit_at(
 
    if( NULL == bitmap_blit ) {
       /* Bitmap not found. */
-      debug_printf( 1, "bitmap %u not found in cache; loading...", resource );
+      debug_printf( 1, "bitmap %u not found in cache; loading...", res_id );
       for( i = 0 ; gs_graphics_cache_sz > i ; i++ ) {
          if( 0 == bitmaps[i].initialized ) {
-            bitmaps[i].id = resource;
-            retval = graphics_load_bitmap( resource, &(bitmaps[i]) );
+            bitmaps[i].id = res_id;
+            retval = graphics_load_bitmap( res_id, &(bitmaps[i]) );
             if( !retval ) {
                error_printf( "failed to lazy load bitmap" );
                goto cleanup;

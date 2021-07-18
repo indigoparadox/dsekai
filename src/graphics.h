@@ -50,10 +50,9 @@ struct GRAPHICS_RECT {
  * the current platform looks like.
  */
 struct GRAPHICS_BITMAP_BASE {
-   uint32_t id;
+   RESOURCE_ID id;
    uint8_t initialized;
    uint16_t ref_count;
-   char path[GRAPHICS_MAX_PATH];
 
    /* Platform-Specific Overrides. */
    MEMORY_PTR ptr1;
@@ -82,8 +81,8 @@ void graphics_string_at(
    const char*, uint16_t, uint16_t, uint16_t, const GRAPHICS_COLOR, uint8_t );
 void graphics_string_sz(
    const char*, uint16_t, uint8_t, struct GRAPHICS_RECT* );
-int16_t graphics_blit_at( uint32_t, uint16_t, uint16_t, uint16_t, uint16_t );
-int32_t graphics_load_bitmap( uint32_t, struct GRAPHICS_BITMAP* );
+int16_t graphics_blit_at( RESOURCE_ID, uint16_t, uint16_t, uint16_t, uint16_t );
+int32_t graphics_load_bitmap( RESOURCE_ID, struct GRAPHICS_BITMAP* );
 int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* );
 void graphics_blit_masked_at(
    const struct GRAPHICS_BITMAP*, const uint8_t*, uint16_t,
