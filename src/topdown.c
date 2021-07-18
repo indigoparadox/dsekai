@@ -22,7 +22,9 @@
 
 #define TOPDOWN_STATE_WELCOME 1
 
-int topdown_draw( struct DSEKAI_STATE* state ) {
+int topdown_draw(
+   struct DSEKAI_STATE* state, struct TILEMAP* map, struct MOBILE* mobiles
+) {
    int in_char = 0,
       i = 0;
 
@@ -56,10 +58,10 @@ int topdown_draw( struct DSEKAI_STATE* state ) {
       assert( 0 <= state->screen_scroll_x );
       assert( 0 <= state->screen_scroll_tx );
 
-      tilemap_refresh_tiles( &(state->map) );
+      tilemap_refresh_tiles( map );
 #ifdef ANIMATE_SCREEN_MOVEMENT
 #ifndef DISABLE_GRAPHICS
-      tilemap_draw( &(state->map), state );
+      tilemap_draw( map, state );
 #endif /* !DISABLE_GRAPHICS */
 #endif /* ANIMATE_SCREEN_MOVEMENT */
 
@@ -74,12 +76,12 @@ int topdown_draw( struct DSEKAI_STATE* state ) {
          state->screen_scroll_x == state->screen_scroll_x_tgt
       ) {
          /* Screen scroll finished. */
-         state->mobiles[state->player_idx].coords_prev.x =
-            state->mobiles[state->player_idx].coords.x;
-         state->mobiles[state->player_idx].coords_prev.y =
-            state->mobiles[state->player_idx].coords.y;
-         state->mobiles[state->player_idx].steps_x = 0;
-         state->mobiles[state->player_idx].steps_y = 0;
+         mobiles[state->player_idx].coords_prev.x =
+            mobiles[state->player_idx].coords.x;
+         mobiles[state->player_idx].coords_prev.y =
+            mobiles[state->player_idx].coords.y;
+         mobiles[state->player_idx].steps_x = 0;
+         mobiles[state->player_idx].steps_y = 0;
       }
 
       /* Keep running. */
@@ -87,24 +89,24 @@ int topdown_draw( struct DSEKAI_STATE* state ) {
    }
 
 #ifndef DISABLE_GRAPHICS
-   tilemap_draw( &(state->map), state );
+   tilemap_draw( map, state );
 #endif /* !DISABLE_GRAPHICS */
 
    for( i = 0 ; state->mobiles_count > i ; i++ ) {
       if(
-         state->mobiles[i].coords.x < state->screen_scroll_tx ||
-         state->mobiles[i].coords.y < state->screen_scroll_ty ||
-         state->mobiles[i].coords.x > state->screen_scroll_tx + SCREEN_TW ||
-         state->mobiles[i].coords.y > state->screen_scroll_ty + SCREEN_TH
+         mobiles[i].coords.x < state->screen_scroll_tx ||
+         mobiles[i].coords.y < state->screen_scroll_ty ||
+         mobiles[i].coords.x > state->screen_scroll_tx + SCREEN_TW ||
+         mobiles[i].coords.y > state->screen_scroll_ty + SCREEN_TH
       ) {
          /* Mobile is off-screen. */
          continue;
       }
 #ifndef DISABLE_GRAPHICS
       mobile_draw(
-         &(state->mobiles[i]),
+         &(mobiles[i]),
          state->walk_offset, state->screen_scroll_x, state->screen_scroll_y );
-      assert( NULL != &(state->mobiles[state->player_idx]) );
+      assert( NULL != &(mobiles[state->player_idx]) );
 #endif /* !DISABLE_GRAPHICS */
    }
 
@@ -119,49 +121,63 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    struct DSEKAI_STATE* state = NULL;
    MEMORY_HANDLE welcome_string_handle = NULL;
    char* welcome_string = NULL;
+   struct TILEMAP* map = NULL;
+   struct MOBILE* mobiles = NULL;
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
 
    if( !initialized ) {
 
+      assert( NULL == state->map );
+      state->map = memory_alloc( sizeof( struct TILEMAP ), 1 );
+      assert( NULL != state->map );
+      map = memory_lock( state->map );
+      assert( NULL != map );
+
+      assert( NULL == state->mobiles );
+      state->mobiles = memory_alloc( sizeof( struct MOBILE ), MOBILES_MAX );
+      assert( NULL != state->mobiles );
+      mobiles = memory_lock( state->mobiles );
+      assert( NULL != mobiles );
+
 #ifdef USE_JSON_MAPS
-      tilemap_load( map_field, &(state->map) );
+      tilemap_load( map_field, map );
 #else
-      memory_copy_ptr( (MEMORY_PTR)&(state->map), (MEMORY_PTR)&gc_map_field,
+      memory_copy_ptr( (MEMORY_PTR)map, (MEMORY_PTR)&gc_map_field,
          sizeof( struct TILEMAP ) );
 #endif /* USE_JSON_MAPS */
-      memory_copy_ptr( (MEMORY_PTR)&(state->map.tileset[0]),
+      memory_copy_ptr( (MEMORY_PTR)&(map->tileset[0]),
          (MEMORY_PTR)&(gc_tiles_field[0]),
          TILEMAP_TILESETS_MAX * sizeof( struct TILESET_TILE ) );
-      tilemap_refresh_tiles( &(state->map) );
+      tilemap_refresh_tiles( map );
 
       /* Make sure the tilemap is drawn at least once behind any initial
        * windows.
        */
-      tilemap_draw( &(state->map), state );
+      tilemap_draw( map, state );
 
       /* TODO: Generate this dynamically. */
-      for( i = 0 ; state->map.spawns_count > i ; i++ ) {
-         state->mobiles[i].hp = 100;
-         state->mobiles[i].mp = 100;
-         state->mobiles[i].coords.x = state->map.spawns[i].coords.x;
-         state->mobiles[i].coords.y = state->map.spawns[i].coords.y;
-         state->mobiles[i].coords_prev.x = state->map.spawns[i].coords.x;
-         state->mobiles[i].coords_prev.y = state->map.spawns[i].coords.y;
-         state->mobiles[i].steps_x = 0;
-         state->mobiles[i].steps_y = 0;
-         state->mobiles[i].inventory = NULL;
+      for( i = 0 ; map->spawns_count > i ; i++ ) {
+         mobiles[i].hp = 100;
+         mobiles[i].mp = 100;
+         mobiles[i].coords.x = map->spawns[i].coords.x;
+         mobiles[i].coords.y = map->spawns[i].coords.y;
+         mobiles[i].coords_prev.x = map->spawns[i].coords.x;
+         mobiles[i].coords_prev.y = map->spawns[i].coords.y;
+         mobiles[i].steps_x = 0;
+         mobiles[i].steps_y = 0;
+         mobiles[i].inventory = NULL;
          state->mobiles_count++;
-         switch( state->map.spawns[i].type ) {
+         switch( map->spawns[i].type ) {
          case MOBILE_TYPE_PLAYER:
-            state->mobiles[i].active = 1;
+            mobiles[i].active = 1;
             state->player_idx = i;
-            state->mobiles[i].sprite = sprite_robe;
+            mobiles[i].sprite = sprite_robe;
             break;
 
          case MOBILE_TYPE_PRINCESS:
-            state->mobiles[i].active = 1;
-            state->mobiles[i].sprite = sprite_princess;
+            mobiles[i].active = 1;
+            mobiles[i].sprite = sprite_princess;
             break;
 
          default:
@@ -169,19 +185,8 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
          }
       }
 
-      /*
-      state->mobiles[1].sprite = sprite_princess;
-      state->mobiles[1].hp = 100;
-      state->mobiles[1].mp = 100;
-      state->mobiles[1].coords.x = 5;
-      state->mobiles[1].coords.y = 5;
-      state->mobiles[1].coords_prev.x = 5;
-      state->mobiles[1].coords_prev.y = 5;
-      state->mobiles[1].steps_x = 0;
-      state->mobiles[1].steps_y = 0;
-      state->mobiles[1].inventory = NULL;
-      state->mobiles_count++;
-      */
+      mobiles = memory_unlock( state->mobiles );
+      map = memory_unlock( state->map );
 
       window_push(
          0x111, WINDOW_STATUS_VISIBLE,
@@ -213,8 +218,13 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
    in_char = 0;
 
+   map = memory_lock( state->map );
+   assert( NULL != map );
+   mobiles = memory_lock( state->mobiles );
+   assert( NULL != mobiles );
+
    if( 0 >= window_modal( state ) ) {
-      topdown_draw( state );
+      topdown_draw( state, map, mobiles );
    }
 
    window_draw_all( state );
@@ -229,50 +239,52 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    case INPUT_KEY_UP:
       if( 0 < window_modal( state ) ) { break; }
       if( !tilemap_collide(
-         &(state->map), state->mobiles[state->player_idx].coords.x,
-         state->mobiles[state->player_idx].coords.y - 1 )
+         map, mobiles[state->player_idx].coords.x,
+         mobiles[state->player_idx].coords.y - 1 )
       ) {
-         mobile_walk_start( &(state->mobiles[state->player_idx]), 0, -1 );
+         mobile_walk_start( &(mobiles[state->player_idx]), 0, -1 );
       }
       break;
 
    case INPUT_KEY_LEFT:
       if( 0 < window_modal( state ) ) { break; }
       if( !tilemap_collide(
-         &(state->map), state->mobiles[state->player_idx].coords.x - 1,
-         state->mobiles[state->player_idx].coords.y )
+         map, mobiles[state->player_idx].coords.x - 1,
+         mobiles[state->player_idx].coords.y )
       ) {
-         mobile_walk_start( &(state->mobiles[state->player_idx]), -1, 0 );
+         mobile_walk_start( &(mobiles[state->player_idx]), -1, 0 );
       }
       break;
 
    case INPUT_KEY_DOWN:
       if( 0 < window_modal( state ) ) { break; }
       if( !tilemap_collide(
-         &(state->map), state->mobiles[state->player_idx].coords.x,
-         state->mobiles[state->player_idx].coords.y + 1 )
+         map, mobiles[state->player_idx].coords.x,
+         mobiles[state->player_idx].coords.y + 1 )
       ) {
-         mobile_walk_start( &(state->mobiles[state->player_idx]), 0, 1 );
+         mobile_walk_start( &(mobiles[state->player_idx]), 0, 1 );
       }
       break;
 
    case INPUT_KEY_RIGHT:
       if( 0 < window_modal( state ) ) { break; }
       if( !tilemap_collide(
-         &(state->map), state->mobiles[state->player_idx].coords.x + 1,
-         state->mobiles[state->player_idx].coords.y )
+         map, mobiles[state->player_idx].coords.x + 1,
+         mobiles[state->player_idx].coords.y )
       ) {
-         mobile_walk_start( &(state->mobiles[state->player_idx]), 1, 0 );
+         mobile_walk_start( &(mobiles[state->player_idx]), 1, 0 );
       }
       break;
 
    case INPUT_KEY_OK:
       window_pop( 0x1212, state );
-      tilemap_refresh_tiles( &(state->map) );
+      tilemap_refresh_tiles( map );
       break;
 
    case INPUT_KEY_QUIT:
       window_pop( 0x111, state );
+      mobiles =  memory_unlock( state->mobiles );
+      map = memory_unlock( state->map );
       state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
       topdown_deinit( state_handle );
       return 0;
@@ -294,40 +306,40 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    }
 
    for( i = 0 ; state->mobiles_count > i ; i++ ) {
-      mobile_animate( &(state->mobiles[i]), &(state->map) );
+      mobile_animate( &(mobiles[i]), map );
    }
 
    /* Scroll the screen by one if the player goes off-screen. */
    if(
-      state->mobiles[state->player_idx].coords.x >=
-         state->screen_scroll_tx + SCREEN_TW
+      mobiles[state->player_idx].coords.x >= state->screen_scroll_tx + SCREEN_TW
    ) {
       state->screen_scroll_x_tgt = state->screen_scroll_x + SCREEN_MAP_W;
       debug_printf( 1, "scrolling screen right to %d, %d...",
          state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
 
    } else if(
-      state->mobiles[state->player_idx].coords.y >=
-         state->screen_scroll_y + SCREEN_TH
+      mobiles[state->player_idx].coords.y >= state->screen_scroll_y + SCREEN_TH
    ) {
       state->screen_scroll_y_tgt = state->screen_scroll_y + SCREEN_MAP_H;
       debug_printf( 1, "scrolling screen down to %d, %d...",
          state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
 
    } else if(
-      state->mobiles[state->player_idx].coords.x < state->screen_scroll_tx
+      mobiles[state->player_idx].coords.x < state->screen_scroll_tx
    ) {
       state->screen_scroll_x_tgt = state->screen_scroll_x - SCREEN_MAP_W;
       debug_printf( 1, "scrolling screen left to %d, %d...",
          state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
 
    } else if(
-      state->mobiles[state->player_idx].coords.y < state->screen_scroll_ty
+      mobiles[state->player_idx].coords.y < state->screen_scroll_ty
    ) {
       state->screen_scroll_y_tgt = state->screen_scroll_y - SCREEN_MAP_H;
       debug_printf( 1, "scrolling screen up to %d, %d...",
          state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
    }
+   mobiles = memory_unlock( state->mobiles );
+   map = memory_unlock( state->map );
    state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
 
    graphics_loop_end();
@@ -338,15 +350,21 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 void topdown_deinit( MEMORY_HANDLE state_handle ) {
    int i = 0;
    struct DSEKAI_STATE* state = NULL;
+   struct TILEMAP* map = NULL;
+   struct MOBILE* mobiles = NULL;
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
+   mobiles = memory_lock( state->mobiles );
+   map = memory_lock( state->map );
 
    for( i = 0 ; state->mobiles_count > i ; i++ ) {
-      mobile_deinit( &(state->mobiles[i]) );
+      mobile_deinit( &(mobiles[i]) );
    }
 
-   tilemap_deinit( &(state->map) );
+   tilemap_deinit( map );
 
+   map = memory_unlock( state->map );
+   mobiles = memory_unlock( state->mobiles );
    state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
 }
 

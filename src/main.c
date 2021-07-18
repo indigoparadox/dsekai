@@ -89,6 +89,10 @@ int main( int argc, char* argv[] ) {
       "dsekai compiled " __DATE__ __TIME__ ", state size is %lu bytes",
       sizeof( struct DSEKAI_STATE ) );
 
+   debug_printf( 2,
+      "map size is %lu bytes; mobiles size is %lu bytes",
+      sizeof( struct TILEMAP ), sizeof( struct MOBILE ) * MOBILES_MAX );
+
    if( !graphics_init( &graphics_args ) ) {
       error_printf( "unable to initialize graphics" );
 #ifdef DISABLE_MAIN_PARMS

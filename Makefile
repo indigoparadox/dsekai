@@ -247,12 +247,12 @@ $(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS)
 	$(MD) $(dir $@)
 	$(CC_SDL) $(CFLAGS_SDL) -DUSE_JSON_MAPS -c -o $@ $(<:%.o=%)
 
-#$(DEPDIR_SDL)/%.d: %.c $(GENDIR_SDL)/resext.h
-#	$(MD) $(dir $@)
-#	$(CC_SDL) $(CFLAGS_SDL) -DUSE_JSON_MAPS -MM $< \
-#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL)/,$<)) -MF $@
-#
-#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
+$(DEPDIR_SDL)/%.d: %.c $(GENDIR_SDL)/resext.h
+	$(MD) $(dir $@)
+	$(CC_SDL) $(CFLAGS_SDL) -DUSE_JSON_MAPS -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL)/,$<)) -MF $@
+
+include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
 
 # ====== Main: SDL (No JSON) ======
 

@@ -89,8 +89,8 @@ __attribute__( (__packed__) )
 struct DSEKAI_STATE {
    uint32_t version;
 
-   struct TILEMAP map;
-   struct MOBILE mobiles[MOBILES_MAX];
+   MEMORY_HANDLE map;
+   MEMORY_HANDLE mobiles;
    uint16_t mobiles_count; 
    uint16_t player_idx;
 

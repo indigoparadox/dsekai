@@ -22,6 +22,8 @@
 #include "graphics/nullg.h"
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 
+#define GRAPHICS_MAX_PATH 32
+
 /*
 typedef struct GRAPHICS_MASK {uint8_t bits[16]; } GRAPHICS_MASK;
 typedef struct GRAPHICS_PATTERN {
@@ -51,6 +53,7 @@ struct GRAPHICS_BITMAP_BASE {
    uint32_t id;
    uint8_t initialized;
    uint16_t ref_count;
+   char path[GRAPHICS_MAX_PATH];
 
    /* Platform-Specific Overrides. */
    MEMORY_PTR ptr1;
