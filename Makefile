@@ -11,13 +11,6 @@ DSEKAI_C_FILES := \
    src/control.c \
    src/topdown.c
 
-DSEKAI_C_FILES_WIN_ONLY := \
-   src/main.c \
-   src/input/wini.c \
-   src/resource/winr.c \
-   src/memory/winm.c \
-   src/graphics/wing.c
-
 DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    src/json.c \
    check/check.c \
@@ -88,16 +81,10 @@ OBJDIR := obj
 DEPDIR := dep
 GENDIR := gen
 
-OBJDIR_WIN16 :=      $(OBJDIR)/win16
-OBJDIR_WIN32 :=      $(OBJDIR)/win32
 OBJDIR_CHECK_NULL := $(OBJDIR)/check_null
 
-DEPDIR_WIN16 :=      $(DEPDIR)/win16
-DEPDIR_WIN32 :=      $(DEPDIR)/win32
 DEPDIR_CHECK_NULL := $(DEPDIR)/check_null
 
-GENDIR_WIN16 := $(GENDIR)/win16
-GENDIR_WIN32 := $(GENDIR)/win32
 GENDIR_CHECK_NULL := $(GENDIR)/check_null
 
 BINDIR := bin
@@ -122,10 +109,6 @@ DSEKAI_ASSETS_BITMAPS := \
    $(DSEKAI_ASSETS_PATTERNS)
 DSEKAI_ASSETS_MAPS := \
    $(ASSETDIR)/map_field.json
-DSEKAI_ASSETS_MAPS_WIN16 := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN16)/,$(DSEKAI_ASSETS_MAPS)))
-DSEKAI_ASSETS_MAPS_WIN32 := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN32)/,$(DSEKAI_ASSETS_MAPS)))
 
 HOST_CC := gcc
 MD := mkdir -p
@@ -152,36 +135,18 @@ CFLAGS_MAP2H := -g
 CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=2
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -fsanitize=undefined -pg
 
-CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1
-CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1
 CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DRESOURCE_DRC
-
-$(BIN_WIN16): CC := wcc
-$(BIN_WIN16): LD := wcl
-$(BIN_WIN16): RC := wrc
-$(BIN_WIN16): LDFLAGS := -l=windows -zp=1
-
-$(BIN_WIN32): CC := wcc386
-$(BIN_WIN32): LD := wcl386
-$(BIN_WIN32): RC := wrc
-$(BIN_WIN32): LDFLAGS := -bcl=nt_win -zp=1
 
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(CFLAGS_DEBUG_GCC)
 
 DSEKAI_C_FILES_CHECK_NULL := $(DSEKAI_C_FILES) $(DSEKAI_C_FILES_CHECK_NULL_ONLY)
 
-DSEKAI_O_FILES_WIN16 := \
-   $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN_ONLY)))
-DSEKAI_O_FILES_WIN32 := \
-   $(addprefix $(OBJDIR_WIN32)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_WIN32)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN_ONLY)))
 DSEKAI_O_FILES_CHECK_NULL := \
    $(addprefix $(OBJDIR_CHECK_NULL)/,$(subst .c,.o,$(DSEKAI_C_FILES_CHECK_NULL)))
 
 .PHONY: clean grc_palm
 
-all: $(BIN_DOS) $(BIN_SDL) $(BIN_PALM)
+all: $(BIN_DOS) $(BIN_SDL) $(BIN_PALM) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
 
 STAMPFILE := .stamp
 
@@ -206,8 +171,17 @@ $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR)/%/$(STAMPFILE) $(HEADPACK)
 	$(HEADPACK) $@ $^
 
+define ICO_RULE
+$(GENDIR)/$(platform)/%.ico: $(ASSETDIR)/%.bmp | \
+$(GENDIR)/$(platform)/$(STAMPFILE)
+	$(IMAGEMAGICK) $$< $$@
+endef
+
+$(foreach platform,$(PLATFORMS), $(eval $(ICO_RULE)))
+
 define MAPS_H_RULE
-$(GENDIR)/$(platform)/map_%.h: $(ASSETDIR)/map_%.json $(GENDIR)/$(platform)/$(STAMPFILE) $(MAP2H)
+$(GENDIR)/$(platform)/map_%.h: $(ASSETDIR)/map_%.json | \
+$(GENDIR)/$(platform)/$(STAMPFILE) $(MAP2H)
 	$(MAP2H) $$< $$@
 endef
 
@@ -490,11 +464,43 @@ $(OBJDIR_PALM)/%.o: %.c $(GENDIR_PALM)/palmd.rcp $(GENDIR_PALM)/resext.h
 
 # ====== Main: Win16 ======
 
-$(GENDIR_WIN16):
-	$(MD) $@
+# 1. Directories
 
-$(GENDIR_WIN16)/%.ico: $(ASSETDIR)/%.bmp | $(GENDIR_WIN16)/$(STAMPFILE)
-	$(IMAGEMAGICK) $< $@
+OBJDIR_WIN16 := $(OBJDIR)/win16
+DEPDIR_WIN16 := $(DEPDIR)/win16
+GENDIR_WIN16 := $(GENDIR)/win16
+
+# 2. Files
+
+DSEKAI_C_FILES_WIN16_ONLY := \
+   src/main.c \
+   src/input/wini.c \
+   src/resource/winr.c \
+   src/memory/winm.c \
+   src/graphics/wing.c
+
+DSEKAI_ASSETS_MAPS_WIN16 := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN16)/,$(DSEKAI_ASSETS_MAPS)))
+
+DSEKAI_O_FILES_WIN16 := \
+   $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN16_ONLY)))
+
+# 3. Programs
+
+CC_WIN16 := wcc
+LD_WIN16 := wcl
+RC_WIN16 := wrc
+
+# 4. Arguments
+
+CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1
+
+LDFLAGS_WIN16 := -l=windows -zp=1
+
+RCFLAGS_WIN16 := -r -DPLATFORM_WIN16 -i $(INCLUDE)win
+
+# 5. Targets
 
 $(BINDIR)/dsekai16.img: $(BIN_WIN16)
 	$(DD) if=/dev/zero bs=512 count=2880 of="$@"
@@ -504,23 +510,24 @@ $(BINDIR)/dsekai16.img: $(BIN_WIN16)
 $(BIN_WIN16): \
 $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | \
 $(BINDIR)/$(STAMPFILE) $(DSEKAI_ASSETS_MAPS_WIN16)
-	$(LD) $(LDFLAGS) -fe=$@ $^
+	$(LD_WIN16) $(LDFLAGS_WIN16) -fe=$@ $^
 
 $(OBJDIR_WIN16)/win16.res: \
-$(GENDIR_WIN16)/win16.rc $(ASSETDIR)/dsekai.ico | $(OBJDIR_WIN16)/$(STAMPFILE)
-	$(RC) -r -DPLATFORM_WIN16 -i $(INCLUDE)win src/winstat.rc -o $@
+src/winstat.rc $(GENDIR_WIN16)/win16.rc $(ASSETDIR)/dsekai.ico | \
+$(OBJDIR_WIN16)/$(STAMPFILE)
+	$(RC_WIN16) $(RCFLAGS_WIN16) $< -o $@
 
 $(GENDIR_WIN16)/win16.rc \
 $(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | \
 $(GENDIR_WIN16)/$(STAMPFILE)
 	$(MKRESH) -f win16 -i 5001 \
-      -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) \
+      -if $(DSEKAI_ASSETS_BITMAPS) \
       -oh $(GENDIR_WIN16)/resext.h -or $(GENDIR_WIN16)/win16.rc
 
 $(OBJDIR_WIN16)/%.o: \
 %.c $(OBJDIR_WIN16)/win16.res $(GENDIR_WIN16)/resext.h $(DSEKAI_ASSETS_MAPS_WIN16)
 	$(MD) $(dir $@)
-	$(CC) $(CFLAGS_WIN16) -fo=$@ $(<:%.c=%)
+	$(CC_WIN16) $(CFLAGS_WIN16) -fo=$@ $(<:%.c=%)
 
 $(DEPDIR_WIN16)/%.d: %.c $(GENDIR_WIN16)/resext.h $(DSEKAI_ASSETS_MAPS_WIN16)
 	$(MD) $(dir $@)
@@ -531,14 +538,53 @@ include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN16:.o=.d))
 
 # ====== Main: Win32 ======
 
+# 1. Directories
+
+OBJDIR_WIN32 := $(OBJDIR)/win32
+DEPDIR_WIN32 := $(DEPDIR)/win32
+GENDIR_WIN32 := $(GENDIR)/win32
+
+# 2. Files
+
+DSEKAI_C_FILES_WIN32_ONLY := \
+   src/main.c \
+   src/input/wini.c \
+   src/resource/winr.c \
+   src/memory/winm.c \
+   src/graphics/wing.c
+
+DSEKAI_ASSETS_MAPS_WIN32 := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN32)/,$(DSEKAI_ASSETS_MAPS)))
+
+DSEKAI_O_FILES_WIN32 := \
+   $(addprefix $(OBJDIR_WIN32)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_WIN32)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN32_ONLY)))
+
+# 3. Programs
+
+CC_WIN32 := wcc386
+LD_WIN32 := wcl386
+RC_WIN32 := wrc
+
+# 4. Arguments
+
+CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1
+
+LDFLAGS_WIN32 := -bcl=nt_win -zp=1
+
+RCFLAGS_WIN32 := -r -DPLATFORM_WIN32 -i $(INCLUDE)win
+
+# 5. Targets
+
 $(BIN_WIN32): \
 $(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win32.res | \
 $(BINDIR)/$(STAMPFILE) $(DSEKAI_ASSETS_MAPS_WIN32)
-	$(LD) $(LDFLAGS) -fe=$@ $^
+	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
 
 $(OBJDIR_WIN32)/win32.res: \
-$(GENDIR_WIN32)/win32.rc $(ASSETDIR)/dsekai.ico | $(OBJDIR_WIN32)/$(STAMPFILE)
-	$(RC) -r -DPLATFORM_WIN32 -i $(INCLUDE)win src/winstat.rc -o $@
+src/winstat.rc $(GENDIR_WIN32)/win32.rc $(ASSETDIR)/dsekai.ico | \
+$(OBJDIR_WIN32)/$(STAMPFILE)
+	$(RC_WIN32) $(RCFLAGS_WIN32) $< -o $@
 
 $(GENDIR_WIN32)/win32.rc \
 $(GENDIR_WIN32)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | \
@@ -550,7 +596,7 @@ $(GENDIR_WIN32)/$(STAMPFILE)
 $(OBJDIR_WIN32)/%.o: \
 %.c $(OBJDIR_WIN32)/win32.res $(GENDIR_WIN32)/resext.h $(DSEKAI_ASSETS_MAPS_WIN32)
 	$(MD) $(dir $@)
-	$(CC) $(CFLAGS_WIN32) -fo=$@ $(<:%.c=%)
+	$(CC_WIN32) $(CFLAGS_WIN32) -fo=$@ $(<:%.c=%)
 
 $(DEPDIR_WIN32)/%.d: %.c $(GENDIR_WIN32)/resext.h $(DSEKAI_ASSETS_MAPS_WIN32)
 	$(MD) $(dir $@)
