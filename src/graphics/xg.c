@@ -166,13 +166,14 @@ void graphics_draw_line(
 ) {
 }
 
-int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_platform_load_bitmap(
+   RESOURCE_BITMAP_HANDLE res_handle, struct GRAPHICS_BITMAP* b
+) {
    struct BITMAP_FILE_HEADER* file_header = NULL;
    struct BITMAP_DATA_HEADER* data_header = NULL;
    uint8_t* bitmap_bits = NULL;
    uint8_t* buffer = NULL;
    uint32_t* palette = NULL;
-   RESOURCE_BITMAP_HANDLE buffer_handle = NULL;
    uint32_t id = 0,
       retval = 1,
       buffer_sz = 0,
@@ -182,30 +183,13 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
       x = 0,
       y = 0;
 
-   assert( NULL != b );
-   assert( 0 == b->ref_count );
-
-   if( 0 < id_in ) {
-      id = id_in;
-   } else {
-      id = b->id;
-   }
-
-   /* Load resource into buffer. */
-   buffer_handle = resource_get_bitmap_handle( id );
-   if( NULL == buffer_handle ) {
-      retval = 0;
-      error_printf( "unable to get resource handle" );
-      goto cleanup;
-   }
-
-   buffer_sz = memory_sz( buffer_handle );
+   buffer_sz = memory_sz( res_handle );
    if( 0 == buffer_sz ) {
       retval = 0;
       error_printf( "zero resource buffer sz" );
       goto cleanup;
    }
-   buffer = resource_lock_handle( buffer_handle );
+   buffer = resource_lock_handle( res_handle );
 
    file_header = (struct BITMAP_FILE_HEADER*)buffer;
    data_header =
@@ -249,17 +233,17 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
 cleanup:
 
    if( NULL != buffer ) {
-      buffer = resource_unlock_handle( buffer_handle );
+      buffer = resource_unlock_handle( res_handle );
    }
 
-   if( NULL != buffer_handle ) {
-      resource_free_handle( buffer_handle );
+   if( NULL != res_handle ) {
+      resource_free_handle( res_handle );
    }
 
    return retval;
 }
 
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
    XDestroyImage( b->pixmap );
    free( b->bits );
 

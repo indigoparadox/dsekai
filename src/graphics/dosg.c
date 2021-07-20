@@ -312,33 +312,19 @@ void graphics_draw_line(
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
-int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_platform_load_bitmap(
+   RESOURCE_BITMAP_HANDLE res_handle, struct GRAPHICS_BITMAP* b
+) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
    uint16_t plane_sz = 0,
       plane_offset = 0;
    int32_t retval = 1;
-   RESOURCE_BITMAP_HANDLE buffer_handle = NULL;
 
-   b->ref_count++;
-   if( 1 > b->ref_count ) {
-      error_printf( "no refcount" );
-      return 0;
-   }
-
-   /* Load the resource. */
-   buffer_handle = resource_get_bitmap_handle( id );
-   if( NULL == buffer_handle ) {
-      error_printf( "unable to get resource %d info", id );
-      retval = 0;
-      goto cleanup;
-   }
-
-   buffer_sz = memory_sz( buffer_handle );
-   buffer = resource_lock_handle( buffer_handle );
+   buffer_sz = memory_sz( res_handle );
+   buffer = resource_lock_handle( res_handle );
 
    /* Parse the resource into a usable struct. */
-   b->id = id;
    b->w = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_WIDTH / 2];
    assert( 16 == b->w );
    b->h = ((uint16_t*)buffer)[CGA_HEADER_OFFSET_HEIGHT / 2];
@@ -364,8 +350,6 @@ int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
    }
    memory_copy_ptr( b->plane_2, &(buffer[plane_offset]), plane_sz );
 
-   b->initialized = 1;
-
 cleanup:
 
    if( 0 >= retval && b->plane_1 ) {
@@ -377,31 +361,20 @@ cleanup:
    }
 
    if( NULL != buffer ) {
-      buffer = resource_unlock_handle( buffer_handle );
+      buffer = resource_unlock_handle( res_handle );
    }
 
-   if( NULL != buffer_handle ) {
-      resource_free_handle( buffer_handle );
+   if( NULL != res_handle ) {
+      resource_free_handle( res_handle );
    }
 
-   return 1;
-}
-
-int32_t graphics_load_bitmap_dyn( uint32_t id, struct GRAPHICS_BITMAP** b ) {
-
-   assert( NULL != b );
-   assert( NULL == *b );
-
-   *b = calloc( 1, sizeof( struct GRAPHICS_BITMAP ) );
-   assert( 0 == (*b)->ref_count );
-
-   return graphics_load_bitmap( id, *b );
+   return retval;
 }
 
 /*
  * @return 1 if bitmap is unloaded and 0 otherwise.
  */
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
    assert( NULL != b );
    b->ref_count--;
    if( 0 == b->ref_count ) {
@@ -411,13 +384,5 @@ int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
       return 1;
    }
    return 0;
-}
-
-int32_t graphics_unload_bitmap_dyn( struct GRAPHICS_BITMAP** b ) {
-   int32_t retval = 0;
-   assert( NULL != b );
-   retval = graphics_unload_bitmap( *b );
-   *b = NULL;
-   return retval;
 }
 

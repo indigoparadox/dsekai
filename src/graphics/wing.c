@@ -371,41 +371,28 @@ void graphics_draw_line(
    DeleteDC( hdcBuffer );
 #endif /* PLATFORM_WINCE */
 }
+
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
-int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_platform_load_bitmap(
+   RESOURCE_BITMAP_HANDLE res_handle, struct GRAPHICS_BITMAP* b
+) {
    uint8_t* buffer = NULL;
    int32_t buffer_sz = 0;
-   uint32_t id = 0;
-   HBITMAP res_handle = NULL;
-
-   assert( NULL != b );
-   assert( 0 == b->ref_count );
-
-   if( 0 < id_in ) {
-      id = id_in;
-   } else {
-      id = b->id;
-   }
 
    /* Load resource into bitmap. */
-   res_handle = resource_get_bitmap_handle( id );
    if( NULL != res_handle ) {
       /* TODO: Handle non-Windows resources. */
       b->bitmap = res_handle;
-      free( res_handle );
+      /* free( res_handle ); */
    } else {
       error_printf( "NULL handle returned" );
    }
    if( !b->bitmap ) {
-      error_printf( "unable to load resource %u", id );
+      error_printf( "unable to load resource" );
       return 0;
    }
-
-   b->id = id_in;
-   b->ref_count++;
-   b->initialized = 1;
 
    return 1;
 }
@@ -413,7 +400,7 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
 /*
  * @return 1 if bitmap is unloaded and 0 otherwise.
  */
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
    if( NULL == b ) {
       return 0;
    }

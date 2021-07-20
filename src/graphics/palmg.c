@@ -104,7 +104,9 @@ void graphics_draw_line(
 /*
  * @return 1 if bitmap is loaded and 0 otherwise.
  */
-int32_t graphics_load_bitmap( RESOURCE_ID id, struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_platform_load_bitmap(
+   RESOURCE_BITMAP_HANDLE res_handle, struct GRAPHICS_BITMAP* b
+) {
    int retval = 1;
 
    if( 0 != b->ref_count ) {
@@ -112,12 +114,7 @@ int32_t graphics_load_bitmap( RESOURCE_ID id, struct GRAPHICS_BITMAP* b ) {
       goto cleanup;
    }
 
-   b->id = id;
-   b->initialized = 1;
-
    /* "Loading" happens in draw routine, since it's coming from RAM anyway. */
-
-   b->ref_count++;
 
 cleanup:
    return retval;
@@ -126,7 +123,7 @@ cleanup:
 /*
  * @return 1 if bitmap is unloaded and 0 otherwise.
  */
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
    if( NULL == b ) {
       return 0;
    }

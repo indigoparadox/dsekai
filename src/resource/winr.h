@@ -1,13 +1,12 @@
 
-#ifndef WIN16R_H
-#define WIN16R_H
-
-#include "../dstypes.h"
+#ifndef WINR_H
+#define WINR_H
 
 typedef uint32_t RESOURCE_ID;
 typedef HBITMAP RESOURCE_BITMAP_HANDLE;
 
-#include "../resource.h"
+#define resource_compare_id( a, b ) (a == b)
+#define resource_assign_id( dest, source ) dest = source
 
-#endif /* WIN16R_H */
+#endif /* WINR_H */
 

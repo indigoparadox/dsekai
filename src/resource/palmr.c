@@ -1,7 +1,7 @@
 
 #include "../dstypes.h"
 
-static MEMORY_HANDLE resource_get_handle( RESOURCE_ID id, RESOURCE_TYPE type ) {
+static MEMORY_HANDLE resource_get_handle( RESOURCE_ID id, char type[4] ) {
    debug_printf( 2, "loading resource %u of type %u", id, type );
 
    return DmGetResource( type, id );
