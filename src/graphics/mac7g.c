@@ -106,29 +106,12 @@ void graphics_draw_line(
 ) {
 }
 
-int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_platform_load_bitmap(
+   RESOURCE_BITMAP_HANDLE res_handle, struct GRAPHICS_BITMAP* b
+) {
    /* uint8_t buffer[MAC7_RSRC_BUFFER_SZ] = NULL;
    int32_t buffer_sz = MAC7_RSRC_BUFFER_SZ; */
-   Handle buffer_handle;
-   uint32_t id = 0;
-   int32_t retval = 0;
-
-   assert( NULL != b );
-   assert( 0 == b->ref_count );
-
-   if( 0 < id_in ) {
-      id = id_in;
-   } else {
-      id = b->id;
-   }
-
-   /* Load resource into buffer. */
-   buffer_handle = resource_get_bitmap_handle( id );
-   if( NULL == buffer_handle ) {
-      error_printf( "unable to get resource %d info", id );
-      retval = 0;
-      goto cleanup;
-   }
+   int16_t retval = 1;
 
    /*
    buffer_sz = memory_sz( buffer_handle );
@@ -141,18 +124,17 @@ int32_t graphics_load_bitmap( uint32_t id_in, struct GRAPHICS_BITMAP* b ) {
    memcpy( b->pict, buffer, buffer_sz - 512 );
    b->pict_sz = buffer_sz; */
 
-   b->pict = buffer_handle;
-
-   b->ref_count++;
-   b->initialized = 1;
-
-   retval = 1;
+   b->pict = res_handle;
 
 cleanup:
 
    return retval;
 }
 
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+   if( NULL != b->pict ) {
+      /* resource_free_handle( b->pict );
+      b->pict = NULL; */
+   }
 }
 
