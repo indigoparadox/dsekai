@@ -6,7 +6,7 @@
 
 typedef COLORREF GRAPHICS_COLOR;
 struct GRAPHICS_BITMAP {
-   uint32_t id;
+   RESOURCE_ID id;
    uint8_t initialized;
    uint16_t ref_count;
    HBITMAP bitmap;

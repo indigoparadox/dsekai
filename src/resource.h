@@ -6,6 +6,8 @@
 #include "resource/drcr.h"
 #elif defined RESOURCE_HEADER
 #include "resource/header.h"
+#elif defined( RESOURCE_FILE )
+#include "resource/file.h"
 #elif defined( PLATFORM_PALM )
 #include "resource/palmr.h"
 #elif defined( PLATFORM_WIN )

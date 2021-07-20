@@ -17,6 +17,7 @@
 union CONTROL_DATA {
    uint32_t scalar;
    MEMORY_HANDLE handle;
+   RESOURCE_ID res_id;
 };
 
 struct CONTROL {
@@ -36,7 +37,7 @@ struct CONTROL {
 int16_t control_push(
    uint32_t, uint16_t, uint16_t, int16_t, int16_t, int16_t, int16_t,
    GRAPHICS_COLOR, GRAPHICS_COLOR, int8_t,
-   MEMORY_HANDLE, uint32_t, uint32_t, struct DSEKAI_STATE* );
+   MEMORY_HANDLE, uint32_t, RESOURCE_ID, uint32_t, struct DSEKAI_STATE* );
 void control_pop( uint32_t, uint32_t, struct DSEKAI_STATE* );
 void control_draw_all( struct WINDOW* );
 

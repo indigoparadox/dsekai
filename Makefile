@@ -74,7 +74,7 @@ MAP2H_C_FILES := \
    src/graphics.c \
    src/graphics/nullg.c
 
-PLATFORMS := sdl sdl-nj xlib dos win16 win32 palm mac7 nds check_null
+PLATFORMS := sdl sdl-nj sdl-file xlib dos win16 win32 palm mac7 nds check_null
 
 ASSETDIR := assets
 OBJDIR := obj
@@ -231,6 +231,7 @@ DSEKAI_O_FILES_SDL := \
 # 3. Programs
 
 CC_SDL := gcc
+LD_SDL := gcc
 
 # 4. Arguments
 
@@ -241,7 +242,7 @@ LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 # 5. Targets
 
 $(BIN_SDL): $(DSEKAI_O_FILES_SDL) src/json.o | $(BINDIR)/$(STAMPFILE)
-	$(CC_SDL) -o $@ $^ $(LDFLAGS_SDL)
+	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL)
 
 $(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS)
 	$(MD) $(dir $@)
@@ -273,12 +274,63 @@ LDFLAGS_SDL_NJ := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 $(BIN_SDL)-nj: $(subst /sdl/,/sdl-nj/,$(DSEKAI_O_FILES_SDL)) | \
 $(BINDIR) $(DSEKAI_ASSETS_MAPS_SDL_NJ)
-	$(CC_SDL) -o $@ $^ $(LDFLAGS_SDL_NJ)
+	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL_NJ)
 
 $(OBJDIR_SDL)-nj/%.o: %.c $(GENDIR_SDL)-nj/resext.h | \
 $(DSEKAI_ASSETS_MAPS_SDL_NJ)
 	$(MD) $(dir $@)
 	$(CC_SDL) $(CFLAGS_SDL) -c -o $@ $(<:%.o=%)
+
+# ====== Main: SDL (File Res) ======
+
+# 1. Directories
+
+OBJDIR_SDL_FILE := $(OBJDIR)/sdl-file
+DEPDIR_SDL_FILE := $(DEPDIR)/sdl-file
+GENDIR_SDL_FILE := $(GENDIR)/sdl-file
+
+# 2. Files
+
+DSEKAI_C_FILES_SDL_FILE_ONLY := \
+   src/main.c \
+   src/input/sdli.c \
+   src/graphics/sdlg.c \
+   src/memory/fakem.c \
+   src/json.o \
+   src/resource/file.c
+
+DSEKAI_O_FILES_SDL_FILE := \
+   $(addprefix $(OBJDIR_SDL_FILE)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_SDL_FILE)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_FILE_ONLY)))
+
+# 3. Programs
+
+# 4. Arguments
+
+CFLAGS_SDL_FILE := $(CFLAGS_SDL) -DRESOURCE_FILE
+
+LDFLAGS_SDL_FILE := $(LDFLAGS_SDL)
+
+# 5. Targets
+
+$(GENDIR_SDL_FILE)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(MKRESH) $(GENDIR_SDL_FILE)/$(STAMPFILE)
+	$(MKRESH) -f file -if $^ -oh $@
+
+$(BIN_SDL)-file: $(DSEKAI_O_FILES_SDL_FILE) | \
+$(BINDIR)/$(STAMPFILE) $(GENDIR_SDL_FILE)/resext.h
+	$(CC_SDL) -o $@ $^ $(LDFLAGS_SDL)
+
+$(OBJDIR_SDL_FILE)/%.o: %.c $(GENDIR_SDL_FILE)/resext.h | $(DSEKAI_ASSETS_MAPS)
+	$(MD) $(dir $@)
+	$(CC_SDL) $(CFLAGS_SDL_FILE) -DUSE_JSON_MAPS -c -o $@ $(<:%.o=%)
+
+#$(DEPDIR_SDL_FILE)/%.d: %.c $(GENDIR_SDL_FILE)/resext.h
+#	$(MD) $(dir $@)
+#	$(CC_SDL) $(CFLAGS_SDL_FILE) -DUSE_JSON_MAPS -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL_FILE)/,$<)) -MF $@
+#
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL_FILE:.o=.d))
 
 # ====== Main: xlib ======
 

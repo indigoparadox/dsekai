@@ -61,7 +61,11 @@
 #define _POSIX_C_SOURCE 200809L
 #endif /* __GNUC__ */
 
+#ifdef RESOURCE_FILE
+#include "../gen/sdl-file/resext.h"
+#else
 #include "../gen/sdl/resext.h"
+#endif /* RESOURCE_FILE */
 
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "/tmp"
@@ -78,7 +82,9 @@
 #define USE_SOFTWARE_TEXT
 /* #define USE_JSON_MAPS */
 #define ANIMATE_SCREEN_MOVEMENT
+#ifndef RESOURCE_FILE
 #define RESOURCE_HEADER
+#endif /* !RESOURCE_FILE */
 
 /* ------ */
 #elif defined( PLATFORM_XLIB )

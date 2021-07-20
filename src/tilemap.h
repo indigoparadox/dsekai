@@ -24,7 +24,7 @@ struct jsmntok;
 __attribute__( (__packed__) )
 #endif /* __GNUC__ */
 struct TILESET_TILE {
-   uint32_t image;
+   RESOURCE_ID image;
    uint32_t flags;
 };
 
@@ -61,7 +61,7 @@ struct TILEMAP {
 
 int16_t tilemap_parse(
    struct TILEMAP*, char*, uint16_t, struct jsmntok*, uint16_t );
-int16_t tilemap_load( uint32_t, struct TILEMAP* );
+int16_t tilemap_load( RESOURCE_ID, struct TILEMAP* );
 void tilemap_refresh_tiles( struct TILEMAP* );
 void tilemap_draw( struct TILEMAP*, struct DSEKAI_STATE* );
 uint8_t tilemap_collide( const struct TILEMAP*, uint8_t, uint8_t );

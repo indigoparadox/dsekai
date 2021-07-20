@@ -93,7 +93,45 @@ void graphics_string_sz(
 
 #endif /* USE_SOFTWARE_TEXT */
 
-/*
+/** 
+ * \brief Load the graphics resource into a handle and pass that into the
+ *        platform-specific loader.
+ */
+int16_t graphics_load_bitmap( RESOURCE_ID id, struct GRAPHICS_BITMAP* b ) {
+   int16_t retval = 0;
+   RESOURCE_BITMAP_HANDLE bitmap_handle = NULL;
+   
+   /* Load resource into buffer. */
+   bitmap_handle = resource_get_bitmap_handle( id );
+   if( NULL == bitmap_handle ) {
+      retval = 0;
+      error_printf( "unable to get resource handle" );
+      goto cleanup;
+   }
+
+   assert( NULL != b );
+
+   resource_assign_id( b->id, id );
+   retval = graphics_platform_load_bitmap( bitmap_handle, b );
+   if( !retval ) {
+      error_printf( "failed to lazy load bitmap" );
+      goto cleanup;
+   }
+
+   /* Assume the load was a success. */
+   b->ref_count++;
+   b->initialized = 1;
+
+cleanup:
+
+   /* The platform-specific loader should dispose of the resource if needed.
+    * This is because some platforms use the resource directly.
+    */
+
+   return retval;
+}
+
+/**
  * @return 1 if blit was successful and 0 otherwise.
  */
 int16_t graphics_blit_at(
@@ -108,7 +146,7 @@ int16_t graphics_blit_at(
 
    /* Try to find the bitmap already in the cache. */
    for( i = 0 ; gs_graphics_cache_sz > i ; i++ ) {
-      if( bitmaps[i].id == res_id ) {
+      if( resource_compare_id( bitmaps[i].id, res_id ) ) {
          bitmap_blit = &(bitmaps[i]);
          break;
       }
@@ -116,16 +154,12 @@ int16_t graphics_blit_at(
 
    if( NULL == bitmap_blit ) {
       /* Bitmap not found. */
-      debug_printf( 1, "bitmap %u not found in cache; loading...", res_id );
+      debug_printf( 1, "bitmap not found in cache; loading..." );
       for( i = 0 ; gs_graphics_cache_sz > i ; i++ ) {
          if( 0 == bitmaps[i].initialized ) {
-            bitmaps[i].id = res_id;
-            retval = graphics_load_bitmap( res_id, &(bitmaps[i]) );
-            if( !retval ) {
-               error_printf( "failed to lazy load bitmap" );
-               goto cleanup;
+            if( graphics_load_bitmap( res_id, &(bitmaps[i]) ) ) {
+               bitmap_blit = &(bitmaps[i]);
             }
-            bitmap_blit = &(bitmaps[i]);
             break;
          }
       }

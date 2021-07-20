@@ -46,11 +46,13 @@ int graphics_platform_blit_at(
 ) {
 }
 
-int32_t graphics_load_bitmap( uint32_t id, struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_platform_load_bitmap(
+   RESOURCE_BITMAP_HANDLE res_handle, struct GRAPHICS_BITMAP* b
+) {
    return 0;
 }
 
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
+int16_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
    return 0;
 }
 

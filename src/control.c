@@ -43,7 +43,7 @@ static int16_t control_draw_sprite( struct WINDOW* w, struct CONTROL* c ) {
    assert( NULL != c );
 
    graphics_blit_at(
-      c->data.scalar, w->x + c->x + 2, w->y + c->y + 2, SPRITE_W, SPRITE_H );
+      c->data.res_id, w->x + c->x + 2, w->y + c->y + 2, SPRITE_W, SPRITE_H );
 
    graphics_draw_rect( w->x + c->x, w->y + c->y, SPRITE_W + 4, SPRITE_H + 4,
       1, GRAPHICS_COLOR_BLACK );
@@ -99,7 +99,7 @@ int16_t control_push(
    uint32_t control_id, uint16_t type, uint16_t status,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
-   MEMORY_HANDLE data_handle, uint32_t data_scalar,
+   MEMORY_HANDLE data_handle, uint32_t data_scalar, RESOURCE_ID data_res_id,
    uint32_t window_id, struct DSEKAI_STATE* state
 ) {
    int i = 0;
@@ -155,8 +155,10 @@ int16_t control_push(
    controls[0].type = type;
    if( 0 != data_scalar ) {
       controls[0].data.scalar = data_scalar;
-   } else {
+   } else if( NULL != data_handle ) {
       controls[0].data.handle = data_handle;
+   } else if( 0 != (int)data_res_id ) {
+      resource_assign_id( controls[0].data.res_id, data_res_id );
    }
    controls[0].scale = scale;
    controls[0].status = status;

@@ -14,6 +14,7 @@
 
 #define FMT_PALM        1
 #define FMT_WIN16       2
+#define FMT_FILE        3
 
 #define RTYPE_MISC      0
 #define RTYPE_JSON      1
@@ -91,7 +92,9 @@ int main( int argc, char* argv[] ) {
          break;
 
       case STATE_FMT:
-         if( 0 == strncmp( argv[i], "palm", 4 ) ) {
+         if( 0 == strncmp( argv[i], "file", 4 ) ) {
+            fmt = FMT_FILE;
+         } else if( 0 == strncmp( argv[i], "palm", 4 ) ) {
             fmt = FMT_PALM;
          } else if( 0 == strncmp( argv[i], "win16", 5 ) ) {
             fmt = FMT_WIN16;
@@ -149,8 +152,17 @@ int main( int argc, char* argv[] ) {
       fprintf( header_file, "\n#ifndef RESEXT_H\n#define RESEXT_H\n\n" );
 
       for( i = 0 ; file_list_len > i ; i++ ) {
-         fprintf( header_file, "#define %s %d\n",
-            file_basename_list[i], id_start + i );
+         switch( fmt ) {
+         case FMT_FILE:
+            fprintf( header_file, "#define %s \"../%s\"\n",
+               file_basename_list[i], file_list[i] );
+            break;
+
+         default:
+            fprintf( header_file, "#define %s %d\n",
+               file_basename_list[i], id_start + i );
+            break;
+         }
       }
 
       fprintf( header_file, "\n#endif /* RESEXT_H */\n" );

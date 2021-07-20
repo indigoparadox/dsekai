@@ -82,8 +82,8 @@ void graphics_string_at(
 void graphics_string_sz(
    const char*, uint16_t, uint8_t, struct GRAPHICS_RECT* );
 int16_t graphics_blit_at( RESOURCE_ID, uint16_t, uint16_t, uint16_t, uint16_t );
-int32_t graphics_load_bitmap( RESOURCE_ID, struct GRAPHICS_BITMAP* );
-int32_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* );
+int16_t graphics_load_bitmap( RESOURCE_ID, struct GRAPHICS_BITMAP* );
+int16_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* );
 void graphics_blit_masked_at(
    const struct GRAPHICS_BITMAP*, const uint8_t*, uint16_t,
    uint16_t, uint16_t, uint16_t, uint16_t );
@@ -92,6 +92,8 @@ int graphics_platform_blit_at(
    const struct GRAPHICS_BITMAP*, uint16_t, uint16_t, uint16_t, uint16_t );
 int16_t graphics_platform_init( struct GRAPHICS_ARGS* );
 void graphics_platform_shutdown( struct GRAPHICS_ARGS* );
+int16_t graphics_platform_load_bitmap(
+   RESOURCE_BITMAP_HANDLE, struct GRAPHICS_BITMAP* );
 #endif /* GRAPHICS_C */
 
 #endif /* GRAPHICS_H */

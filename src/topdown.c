@@ -1,7 +1,6 @@
 
 #include "dstypes.h"
 
-#include "data/tiles.h"
 #ifndef USE_JSON_MAPS
 #if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
 #include "../gen/win16/map_field.h"
@@ -146,9 +145,22 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       memory_copy_ptr( (MEMORY_PTR)map, (MEMORY_PTR)&gc_map_field,
          sizeof( struct TILEMAP ) );
 #endif /* USE_JSON_MAPS */
-      memory_copy_ptr( (MEMORY_PTR)&(map->tileset[0]),
+      /* memory_copy_ptr( (MEMORY_PTR)&(map->tileset[0]),
          (MEMORY_PTR)&(gc_tiles_field[0]),
-         TILEMAP_TILESETS_MAX * sizeof( struct TILESET_TILE ) );
+         TILEMAP_TILESETS_MAX * sizeof( struct TILESET_TILE ) ); */
+
+      /* TODO: Load this dynamically. */
+      resource_assign_id( map->tileset[0].image, tile_field_grass );
+      map->tileset[0].flags = 0x00;
+      resource_assign_id( map->tileset[1].image, tile_field_brick_wall );
+      map->tileset[1].flags = 0x01;
+      resource_assign_id( map->tileset[2].image, tile_field_tree );
+      map->tileset[2].flags = 0x01;
+      resource_assign_id( map->tileset[3].image, tile_pillar );
+      map->tileset[3].flags = 0x01;
+      resource_assign_id( map->tileset[4].image, tile_pool );
+      map->tileset[4].flags = 0x01;
+
       tilemap_refresh_tiles( map );
 
       /* Make sure the tilemap is drawn at least once behind any initial
@@ -172,12 +184,12 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
          case MOBILE_TYPE_PLAYER:
             mobiles[i].active = 1;
             state->player_idx = i;
-            mobiles[i].sprite = sprite_robe;
+            resource_assign_id( mobiles[i].sprite, sprite_robe );
             break;
 
          case MOBILE_TYPE_PRINCESS:
             mobiles[i].active = 1;
-            mobiles[i].sprite = sprite_princess;
+            resource_assign_id( mobiles[i].sprite, sprite_princess );
             break;
 
          default:
@@ -204,11 +216,11 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       control_push(
          0x2323, CONTROL_TYPE_LABEL, CONTROL_STATE_ENABLED,
          -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
-         welcome_string_handle, 0, 0x1212, state );
+         welcome_string_handle, 0, 0, 0x1212, state );
       control_push(
          0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED,
          -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
-         NULL, sprite_princess, 0x1212, state );
+         NULL, 0, sprite_princess, 0x1212, state );
 #endif /* !HIDE_WELCOME_DIALOG */
 
       initialized = 1;

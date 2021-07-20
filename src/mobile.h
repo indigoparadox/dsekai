@@ -10,7 +10,7 @@ struct MOBILE {
    uint8_t active;
    uint8_t hp;
    uint8_t mp;
-   uint32_t sprite;
+   RESOURCE_ID sprite;
    struct TILEMAP_COORDS coords;
    struct TILEMAP_COORDS coords_prev;
    uint8_t steps_x;

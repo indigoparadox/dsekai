@@ -10,15 +10,15 @@
 #define WINDOW_STATUS_MODAL  3
 
 struct WINDOW_FRAME {
-   uint32_t tr;
-   uint32_t tl;
-   uint32_t br;
-   uint32_t bl;
-   uint32_t t;
-   uint32_t b;
-   uint32_t r;
-   uint32_t l;
-   uint32_t c;
+   RESOURCE_ID tr;
+   RESOURCE_ID tl;
+   RESOURCE_ID br;
+   RESOURCE_ID bl;
+   RESOURCE_ID t;
+   RESOURCE_ID b;
+   RESOURCE_ID r;
+   RESOURCE_ID l;
+   RESOURCE_ID c;
 };
 
 struct WINDOW {

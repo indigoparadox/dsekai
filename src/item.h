@@ -6,7 +6,7 @@
 #define ITEM_INVENTORY_MAX 50
 
 struct ITEM {
-   uint32_t sprite;
+   RESOURCE_ID sprite;
    struct TILEMAP_COORDS coords;
    struct ITEM* inventory;
 };
