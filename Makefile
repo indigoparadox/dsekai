@@ -97,6 +97,7 @@ BIN_WIN16 := $(BINDIR)/dsekai16.exe
 BIN_WIN32 := $(BINDIR)/dsekai32.exe
 BIN_MAC7 := $(BINDIR)/dsekai.bin $(BINDIR)/dsekai.APPL $(BINDIR)/dsekai.dsk
 BIN_NDS := $(BINDIR)/dsekai.nds
+BIN_WEB := $(BINDIR)/dsekai.js
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
@@ -831,6 +832,59 @@ $(DEPDIR_NDS)/%.d: %.c $(GENDIR_NDS)/resext.h $(DSEKAI_ASSETS_MAPS_NDS)
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_NDS)/,$<)) -MF $@ || touch $@
 
 include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_NDS:.o=.d))
+
+# ====== Main: emcripten ======
+
+# 1. Directories
+
+OBJDIR_WEB := $(OBJDIR)/web
+DEPDIR_WEB := $(DEPDIR)/web
+GENDIR_WEB := $(GENDIR)/web
+
+# 2. Files
+
+DSEKAI_C_FILES_WEB_ONLY := \
+   src/main.c \
+   src/input/gli.c \
+   src/graphics/glg.c \
+   src/memory/fakem.c \
+   src/json.c \
+   src/resource/header.c
+
+DSEKAI_O_FILES_WEB := \
+   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES_WEB_ONLY)))
+
+# 3. Programs
+
+CC_WEB := emcc
+LD_WEB := emcc
+
+# 4. Arguments
+
+CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_GL -DUSE_JSON_MAPS
+
+LDFLAGS_WEB :=
+
+# 5. Targets
+
+$(GENDIR_WEB)/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(GENDIR_WEB)/$(STAMPFILE) $(HEADPACK)
+
+$(BIN_WEB): $(DSEKAI_O_FILES_WEB) | $(BINDIR)/$(STAMPFILE)
+	$(LD_WEB) -o $@ $^ $(LDFLAGS_WEB)
+
+$(OBJDIR_WEB)/%.o: %.c $(GENDIR_WEB)/resext.h | $(DSEKAI_ASSETS_MAPS)
+	$(MD) $(dir $@)
+	$(CC_WEB) $(CFLAGS_WEB) -c -o $@ $(<:%.o=%)
+
+$(DEPDIR_WEB)/%.d: %.c $(GENDIR_SDL)/resext.h
+	$(MD) $(dir $@)
+	$(CC_WEB) $(CFLAGS_WEB) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WEB)/,$<)) -MF $@
+
+include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WEB:.o=.d))
 
 # ====== Check: Null ======
 

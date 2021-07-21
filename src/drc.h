@@ -40,10 +40,11 @@ union DRC_TYPE {
    uint32_t u32;
 };
 
+struct
 #ifdef __GNUC__
 __attribute__( (__packed__) )
 #endif /* __GNUC__ */
-struct DRC_HEADER {
+DRC_HEADER {
    union DRC_TYPE type;
    uint32_t version;
    uint32_t crc32; /* TODO */
@@ -54,10 +55,11 @@ struct DRC_HEADER {
    uint32_t first_entry_start;
 };
 
+struct
 #ifdef __GNUC__
 __attribute__( (__packed__) )
 #endif /* __GNUC__ */
-struct DRC_TOC_E {
+DRC_TOC_E {
    union DRC_TYPE type;
    uint32_t reserved; /* NULL byte for type to emulate a string. */
    uint32_t id;

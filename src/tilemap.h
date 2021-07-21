@@ -20,35 +20,39 @@
 
 struct jsmntok;
 
+struct
 #ifdef __GNUC__
 __attribute__( (__packed__) )
 #endif /* __GNUC__ */
-struct TILESET_TILE {
+TILESET_TILE {
    RESOURCE_ID image;
    uint32_t flags;
 };
 
+struct
 #ifdef __GNUC__
 __attribute__( (__packed__) )
 #endif /* __GNUC__ */
-struct MOBILE_SCRIPT_STEP {
+MOBILE_SCRIPT_STEP {
    uint16_t action;
    uint16_t arg;
 };
 
+struct
 #ifdef __GNUC__
 __attribute__( (__packed__) )
 #endif /* __GNUC__ */
-struct TILEMAP_SPAWN {
+TILEMAP_SPAWN {
    struct TILEMAP_COORDS coords;
    int16_t type;
    struct MOBILE_SCRIPT_STEP script[MOBILE_SCRIPT_STEPS_MAX];
 };
 
+struct
 #ifdef __GNUC__
 __attribute__( (__packed__) )
 #endif /* __GNUC__ */
-struct TILEMAP {
+TILEMAP {
    char name[TILEMAP_NAME_MAX];
    struct TILESET_TILE tileset[TILEMAP_TILESETS_MAX];
    uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];

@@ -302,6 +302,40 @@
 #define RESOURCE_HEADER
 
 /* ------ */
+#elif defined( PLATFORM_GL )
+/* ------ */
+
+#ifdef __GNUC__
+/* For strnlen(). */
+#define _POSIX_C_SOURCE 200809L
+#endif /* __GNUC__ */
+
+#ifdef RESOURCE_FILE
+#include "../gen/sdl-file/resext.h"
+#else
+#include "../gen/sdl/resext.h"
+#endif /* RESOURCE_FILE */
+
+#ifndef DIO_PATH_TEMP
+#define DIO_PATH_TEMP "/tmp"
+#endif /* !DIO_PATH_TEMP */
+
+#ifndef DIO_PATH_SEP
+#define DIO_PATH_SEP '/'
+#endif /* !DIO_PATH_SEP */
+
+#ifndef DRC_ARCHIVE
+#define DRC_ARCHIVE "sdl16.drc"
+#endif /* !DRC_ARCHIVE */
+
+#define USE_SOFTWARE_TEXT
+/* #define USE_JSON_MAPS */
+#define ANIMATE_SCREEN_MOVEMENT
+#ifndef RESOURCE_FILE
+#define RESOURCE_HEADER
+#endif /* !RESOURCE_FILE */
+
+/* ------ */
 #else /* !PLATFORM_DOS, !PLATFORM_SDL, !PLATFORM_PALM, !PLATFORM_WIN16 */
 /* ------ */
 

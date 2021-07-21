@@ -55,10 +55,11 @@ typedef unsigned long uint32_t;
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
 /* ------ */
 
+struct
 #ifdef __GNUC__
 __attribute__( (__packed__) )
 #endif /* __GNUC__ */
-struct TILEMAP_COORDS {
+TILEMAP_COORDS {
    int32_t x;
    int32_t y;
 };
@@ -83,10 +84,11 @@ struct DSEKAI_STATE;
 
 struct WINDOW;
 
+struct
 #ifdef __GNUC__
 __attribute__( (__packed__) )
 #endif /* __GNUC__ */
-struct DSEKAI_STATE {
+DSEKAI_STATE {
    uint32_t version;
 
    MEMORY_HANDLE map;
