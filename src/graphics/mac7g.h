@@ -11,7 +11,7 @@ struct GRAPHICS_BITMAP {
    RESOURCE_ID id;
    uint8_t initialized;
    uint16_t ref_count;
-   PicHandle pict;
+   BitMap qd_bitmap;
    MEMORY_PTR ptr2; /* Unused */
 
    /* Unused Overrides */

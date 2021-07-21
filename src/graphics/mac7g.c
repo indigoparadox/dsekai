@@ -97,12 +97,14 @@ int graphics_platform_blit_at(
 ) {
    Rect r;
 
+   /*
    if( NULL == b || NULL == b->pict ) {
       return 0;
    }
+   */
 
    SetRect( &r, x, y, x + w, y + h );
-   DrawPicture( b->pict, &r );
+   /* DrawPicture( b->pict, &r ); */
 
    /*DrawPicture( &(b->pict[512]), &r );*/
    /*HLock(
@@ -134,6 +136,7 @@ int16_t graphics_platform_load_bitmap(
 ) {
    struct BITMAP_FILE_HEADER* file_header = NULL;
    struct BITMAP_DATA_HEADER* data_header = NULL;
+   int16_t tmp_row_bytes = 0;
    uint8_t* bitmap_bits = NULL;
    uint8_t* buffer = NULL;
    uint32_t* palette = NULL;
@@ -151,6 +154,8 @@ int16_t graphics_platform_load_bitmap(
       x = 0,
       y = 0;
    Rect r;
+   GrafPort bitmap_port;
+   GrafPtr prev_port;
 
    buffer_sz = memory_sz( res_handle );
    if( 0 == buffer_sz ) {
@@ -166,6 +171,7 @@ int16_t graphics_platform_load_bitmap(
       goto cleanup;
    }
 
+   /* Setup resource bitmap areas to get info from. */
    file_header = (struct BITMAP_FILE_HEADER*)buffer;
    data_header =
       (struct BITMAP_DATA_HEADER*)&(buffer[sizeof( struct BITMAP_FILE_HEADER )]);
@@ -194,11 +200,22 @@ int16_t graphics_platform_load_bitmap(
    bitmap_h = dio_reverse_endian_32( data_header->bitmap_h );
    debug_printf( 1, "bitmap dimensions are %u by %u", bitmap_w, bitmap_h );
 
-   SetRect( &r, 0, 0, bitmap_w, bitmap_h );
-   b->pict = OpenPicture( &r );
-   if( NULL == b->pict ) {
-      error_printf( "unable to create pict handle" );
+   /* Setup the target QuickDraw bitmap. */
+   tmp_row_bytes = ((bitmap_w / 16) + 1) * 2;
+   b->qd_bitmap.baseAddr = NewPtr( (long)tmp_row_bytes * (long)bitmap_h );
+   if( NULL == b->qd_bitmap.baseAddr ) {
+      error_printf( "unable to allocate QuickDraw bitmap" );
+      retval = 0;
+      goto cleanup;
    }
+   b->qd_bitmap.rowBytes = tmp_row_bytes;
+   SetRect( &(b->qd_bitmap.bounds), 0, 0, bitmap_w, bitmap_h );
+
+   /* Draw the resource bitmap into the QuickDraw bitmap. */
+   GetPort( &prev_port );
+   OpenPort( &bitmap_port );
+   SetPort( &bitmap_port );
+   SetPortBits( &(b->qd_bitmap) );
 
    /* Load the image px by px into bit buffer. */
    for( y = 0 ; y < bitmap_h ; y++ ) {
@@ -216,7 +233,7 @@ int16_t graphics_platform_load_bitmap(
       }
    }
 
-   ClosePicture( b->pict );
+   SetPort( &prev_port );
 
 cleanup:
 
@@ -233,10 +250,10 @@ cleanup:
 }
 
 int16_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {
-   if( NULL != b->pict ) {
+   /* if( NULL != b->pict ) { */
       /* resource_free_handle( b->pict );
       b->pict = NULL; */
-   }
+   /* } */
 }
 
 #ifndef USE_SOFTWARE_TEXT
