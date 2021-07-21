@@ -132,7 +132,7 @@ CFLAGS_LOOKUPS := -g
 CFLAGS_HEADPACK := -g
 CFLAGS_MAP2H := -g
 
-CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=2
+CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=3
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -fsanitize=undefined -pg
 
 CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DRESOURCE_DRC
@@ -712,9 +712,6 @@ DSEKAI_O_FILES_MAC7 := \
    $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
    $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC7_ONLY)))
 
-DSEKAI_ASSETS_PICTS := \
-   $(subst .bmp,.pict,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
-
 # 3. Programs
 
 CC_MAC7 := m68k-apple-macos-gcc
@@ -735,11 +732,11 @@ CFLAGS_MAC7 := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAG
 #      -lh $(GENDIR_MAC7)/resext.h
 
 $(GENDIR_MAC7)/resext.h: \
-$(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_MAC7)/$(STAMPFILE) $(HEADPACK)
 
-$(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)/$(STAMPFILE)
-	$(IMAGEMAGICK) $< $@
+#$(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)/$(STAMPFILE)
+#	$(IMAGEMAGICK) $< $@
 
 #$(GENDIR_MAC7)/%.rsrc: $(GENDIR_MAC7)/%.icns
 #	echo "read 'icns' (-16455) \"$<\";" > $@

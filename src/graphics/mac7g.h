@@ -13,9 +13,9 @@ struct GRAPHICS_BITMAP {
    uint16_t ref_count;
    PicHandle pict;
    MEMORY_PTR ptr2; /* Unused */
-   uint32_t pict_sz;
 
    /* Unused Overrides */
+   uint32_t res1;
    uint32_t res2;
    uint8_t res3;
    uint8_t res4;

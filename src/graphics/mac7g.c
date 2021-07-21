@@ -2,7 +2,11 @@
 #define GRAPHICS_C
 #include "../dstypes.h"
 
+#include "../../tools/data/bmp.h"
+
 #include <Multiverse.h>
+
+#include <string.h>
 
 QDGlobals g_qd;
 WindowPtr g_window;
@@ -98,6 +102,7 @@ int graphics_platform_blit_at(
    }
 
    SetRect( &r, x, y, x + w, y + h );
+   DrawPicture( b->pict, &r );
 
    /*DrawPicture( &(b->pict[512]), &r );*/
    /*HLock(
@@ -127,26 +132,104 @@ void graphics_draw_line(
 int16_t graphics_platform_load_bitmap(
    RESOURCE_BITMAP_HANDLE res_handle, struct GRAPHICS_BITMAP* b
 ) {
-   /* uint8_t buffer[MAC7_RSRC_BUFFER_SZ] = NULL;
-   int32_t buffer_sz = MAC7_RSRC_BUFFER_SZ; */
-   int16_t retval = 1;
+   struct BITMAP_FILE_HEADER* file_header = NULL;
+   struct BITMAP_DATA_HEADER* data_header = NULL;
+   uint8_t* bitmap_bits = NULL;
+   uint8_t* buffer = NULL;
+   uint32_t* palette = NULL;
+   uint32_t id = 0,
+      file_sz = 0,
+      bmp_offset = 0,
+      retval = 1,
+      buffer_sz = 0,
+      px_idx = 0,
+      bitmap_w = 0,
+      bitmap_h = 0,
+      px = 0;
+   int
+      px_offset = 0,
+      x = 0,
+      y = 0;
+   Rect r;
 
-   /*
-   buffer_sz = memory_sz( buffer_handle );
-   buffer = memory_lock( buffer_handle );
-
-   b->pict = (PicHandle)NewHandle( buffer_sz - 512 );
-   if( NULL == b->pict ) {
+   buffer_sz = memory_sz( res_handle );
+   if( 0 == buffer_sz ) {
+      retval = 0;
+      error_printf( "zero resource buffer sz" );
       goto cleanup;
    }
-   memcpy( b->pict, buffer, buffer_sz - 512 );
-   b->pict_sz = buffer_sz; */
+   debug_printf( 0, "resource buffer %u bytes", buffer_sz );
+   buffer = resource_lock_handle( res_handle );
+   if( NULL == buffer ) {
+      error_printf( "resource buffer is NULL" );
+      retval = 0;
+      goto cleanup;
+   }
 
-   b->pict = res_handle;
+   file_header = (struct BITMAP_FILE_HEADER*)buffer;
+   data_header =
+      (struct BITMAP_DATA_HEADER*)&(buffer[sizeof( struct BITMAP_FILE_HEADER )]);
+
+   palette = 
+      (uint32_t*)&(buffer[
+         sizeof( struct BITMAP_DATA_HEADER ) +
+         sizeof( struct BITMAP_FILE_HEADER )]);
+
+   bitmap_bits = &(buffer[bmp_offset]);
+
+   if( 'B' != file_header->id[0] || 'M' != file_header->id[1] ) {
+      error_printf( "invalid bitmap; first bytes are: 0x%02x 0x%02x",
+         file_header->id[0], file_header->id[1] );
+      retval = 0;
+      goto cleanup;
+   }
+
+   file_sz = dio_reverse_endian_32( file_header->file_sz );
+   bmp_offset = dio_reverse_endian_32( file_header->bmp_offset );
+
+   debug_printf( 1, "bitmap is %d bytes long, data at %d bytes",
+      file_sz, bmp_offset );
+
+   bitmap_w = dio_reverse_endian_32( data_header->bitmap_w );
+   bitmap_h = dio_reverse_endian_32( data_header->bitmap_h );
+   debug_printf( 1, "bitmap dimensions are %u by %u", bitmap_w, bitmap_h );
+
+   SetRect( &r, 0, 0, bitmap_w, bitmap_h );
+   b->pict = OpenPicture( &r );
+   if( NULL == b->pict ) {
+      error_printf( "unable to create pict handle" );
+   }
+
+   /* Load the image px by px into bit buffer. */
+   for( y = 0 ; y < bitmap_h ; y++ ) {
+      for( x = 0 ; x < bitmap_w ; x++ ) {
+         px_offset = ((bitmap_h - y - 1) * bitmap_w) + x;
+         px_idx = bitmap_bits[px_offset];
+         px = dio_reverse_endian_32( palette[px_idx] );
+         SetRect( &r, x, y, x + 1, y + 1 );
+         debug_printf( 0, "%d, %d px color: %u (%u)", x, y, px, px_idx );
+         if( 0 < px_idx ) {
+            FillRect( &r, &g_qd.black );
+         } else {
+            FillRect( &r, &g_qd.white );
+         }
+      }
+   }
+
+   ClosePicture( b->pict );
 
 cleanup:
 
+   if( NULL != buffer ) {
+      buffer = resource_unlock_handle( res_handle );
+   }
+
+   if( NULL != res_handle ) {
+      resource_free_handle( res_handle );
+   }
+
    return retval;
+
 }
 
 int16_t graphics_unload_bitmap( struct GRAPHICS_BITMAP* b ) {

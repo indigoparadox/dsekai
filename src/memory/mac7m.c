@@ -3,6 +3,8 @@
 
 #include <Multiverse.h>
 
+#include <string.h>
+
 MEMORY_HANDLE memory_alloc( uint32_t sz, uint32_t count ) {
    /* TODO: Detect overflow. */
    return NewHandleClear( (sz * count) );

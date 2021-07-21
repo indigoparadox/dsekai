@@ -272,6 +272,8 @@
 #define DRC_TOC_INITIAL_ALLOC 50 /* Fake it until we have realloc. */
 #define RESOURCE_HEADER
 #define DISABLE_MAIN_PARMS
+#define LOG_TO_FILE
+#define PLATFORM_NEWLINE "\r"
 
 /* ------ */
 #elif defined( PLATFORM_NDS )
@@ -439,6 +441,10 @@
 #define JSON_PATH_SZ 255
 #endif /* !JSON_PATH_SZ */
 
+#ifndef PLATFORM_NEWLINE
+#define PLATFORM_NEWLINE "\n"
+#endif /* !PLATFORM_NEWLINE */
+
 #ifdef LOG_TO_FILE
 #ifndef DEBUG_LOG
 #define DEBUG_LOG
@@ -469,9 +475,9 @@
 
 #  include <stdio.h>
 
-#  define internal_debug_printf( lvl, ... ) if( NULL != LOG_ERR_TARGET && lvl >= DEBUG_THRESHOLD ) { platform_fprintf( LOG_STD_TARGET, "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); platform_fprintf( LOG_STD_TARGET, __VA_ARGS__ ); platform_fprintf( LOG_STD_TARGET, "\n" ); platform_fflush( LOG_STD_TARGET ); }
+#  define internal_debug_printf( lvl, ... ) if( NULL != LOG_ERR_TARGET && lvl >= DEBUG_THRESHOLD ) { platform_fprintf( LOG_STD_TARGET, "(%d) " __FILE__ ": %d: ", lvl, __LINE__ ); platform_fprintf( LOG_STD_TARGET, __VA_ARGS__ ); platform_fprintf( LOG_STD_TARGET, PLATFORM_NEWLINE ); platform_fflush( LOG_STD_TARGET ); }
 
-#  define internal_error_printf( ... ) if( NULL != LOG_ERR_TARGET ) { platform_fprintf( LOG_ERR_TARGET, "(E) " __FILE__ ": %d: ", __LINE__ ); platform_fprintf( LOG_ERR_TARGET, __VA_ARGS__ ); platform_fprintf( LOG_ERR_TARGET, "\n" ); platform_fflush( LOG_ERR_TARGET ); }
+#  define internal_error_printf( ... ) if( NULL != LOG_ERR_TARGET ) { platform_fprintf( LOG_ERR_TARGET, "(E) " __FILE__ ": %d: ", __LINE__ ); platform_fprintf( LOG_ERR_TARGET, __VA_ARGS__ ); platform_fprintf( LOG_ERR_TARGET, PLATFORM_NEWLINE ); platform_fflush( LOG_ERR_TARGET ); }
 
 #  define debug_printf( lvl, ... ) internal_debug_printf( lvl, __VA_ARGS__ )
 
