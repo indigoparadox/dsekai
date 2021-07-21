@@ -125,7 +125,7 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
             }
 
             if( !blit_retval ) {
-               error_printf( "window blit failed" );
+               /* error_printf( "window blit failed" ); */
                goto cleanup;
             }
          }

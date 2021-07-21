@@ -257,6 +257,10 @@
 #define DRC_ARCHIVE "mac7.drc"
 #endif /* !DRC_ARCHIVE */
 
+#ifndef LOG_FILE_NAME
+#define LOG_FILE_NAME "logmac.txt"
+#endif /* !LOG_FILE_NAME */
+
 #define platform_file FILE*
 #define platform_fprintf fprintf
 #define platform_fopen fopen

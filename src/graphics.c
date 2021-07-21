@@ -172,7 +172,7 @@ int16_t graphics_blit_at(
 
    retval = graphics_platform_blit_at( bitmap_blit, x, y, w, h );
    if( !retval ) {
-      error_printf( "failed to blit bitmap" );
+      /* error_printf( "failed to blit bitmap" ); */
       goto cleanup;
    }
 

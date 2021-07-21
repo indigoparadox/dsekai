@@ -15,6 +15,7 @@ int input_poll() {
    /* SystemTask(); */
 
    if( GetNextEvent( everyEvent, &event ) ) {
+      SystemTask();
       if( keyDown == event.what ) {
          key = (uint8_t)((event.message & keyCodeMask) >> 8);
          switch( key ) {
