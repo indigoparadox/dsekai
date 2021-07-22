@@ -314,7 +314,7 @@ DSEKAI_O_FILES_SDL_FILE := \
 
 # 4. Arguments
 
-CFLAGS_SDL_FILE := $(CFLAGS_SDL) -DRESOURCE_FILE
+CFLAGS_SDL_FILE := $(CFLAGS_SDL) -DRESOURCE_FILE -DUSE_JSON_MAPS
 
 LDFLAGS_SDL_FILE := $(LDFLAGS_SDL)
 
@@ -330,14 +330,14 @@ $(BINDIR)/$(STAMPFILE) $(GENDIR_SDL_FILE)/resext.h
 
 $(OBJDIR_SDL_FILE)/%.o: %.c $(GENDIR_SDL_FILE)/resext.h | $(DSEKAI_ASSETS_MAPS)
 	$(MD) $(dir $@)
-	$(CC_SDL) $(CFLAGS_SDL_FILE) -DUSE_JSON_MAPS -c -o $@ $(<:%.o=%)
+	$(CC_SDL) $(CFLAGS_SDL_FILE) -c -o $@ $(<:%.o=%)
 
-#$(DEPDIR_SDL_FILE)/%.d: %.c $(GENDIR_SDL_FILE)/resext.h
-#	$(MD) $(dir $@)
-#	$(CC_SDL) $(CFLAGS_SDL_FILE) -DUSE_JSON_MAPS -MM $< \
-#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL_FILE)/,$<)) -MF $@
-#
-#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL_FILE:.o=.d))
+$(DEPDIR_SDL_FILE)/%.d: %.c $(GENDIR_SDL_FILE)/resext.h
+	$(MD) $(dir $@)
+	$(CC_SDL) $(CFLAGS_SDL_FILE) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL_FILE)/,$<)) -MF $@
+
+include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL_FILE:.o=.d))
 
 # ====== Main: xlib ======
 
@@ -727,7 +727,8 @@ CFLAGS_MAC7 := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAG
 # 5. Targets
 
 #$(BINDIR)/mac7.drc \
-#$(GENDIR_MAC7)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | $(GENDIR_SDL)
+#$(GENDIR_MAC7)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | \
+#$(GENDIR_MAC7)/$(STAMPFILE)
 #	$(DRCPACK) -c -a -af $(BINDIR)/mac7.drc -t PICT -i 5001 \
 #      -if $(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS) \
 #      -lh $(GENDIR_MAC7)/resext.h
@@ -833,7 +834,7 @@ $(DEPDIR_NDS)/%.d: %.c $(GENDIR_NDS)/resext.h $(DSEKAI_ASSETS_MAPS_NDS)
 
 include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_NDS:.o=.d))
 
-# ====== Main: emcripten ======
+# ====== Main: emscripten ======
 
 # 1. Directories
 
@@ -862,7 +863,7 @@ LD_WEB := emcc
 
 # 4. Arguments
 
-CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_GL -DUSE_JSON_MAPS
+CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_JSON_MAPS
 
 LDFLAGS_WEB :=
 
@@ -879,7 +880,7 @@ $(OBJDIR_WEB)/%.o: %.c $(GENDIR_WEB)/resext.h | $(DSEKAI_ASSETS_MAPS)
 	$(MD) $(dir $@)
 	$(CC_WEB) $(CFLAGS_WEB) -c -o $@ $(<:%.o=%)
 
-$(DEPDIR_WEB)/%.d: %.c $(GENDIR_SDL)/resext.h
+$(DEPDIR_WEB)/%.d: %.c $(GENDIR_WEB)/resext.h
 	$(MD) $(dir $@)
 	$(CC_WEB) $(CFLAGS_WEB) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_WEB)/,$<)) -MF $@

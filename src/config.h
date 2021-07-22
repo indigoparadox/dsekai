@@ -4,6 +4,10 @@
 
 /* Do platform tests first, so they can force options below if they need to. */
 
+#ifdef PLATFORM_WEB
+#define PLATFORM_GL
+#endif /* PLATFORM_WEB */
+
 /* ------ */
 #ifdef PLATFORM_DOS
 /* ------ */
@@ -310,11 +314,11 @@
 #define _POSIX_C_SOURCE 200809L
 #endif /* __GNUC__ */
 
-#ifdef RESOURCE_FILE
-#include "../gen/sdl-file/resext.h"
+#ifdef PLATFORM_WEB
+#include "../gen/web/resext.h"
 #else
-#include "../gen/sdl/resext.h"
-#endif /* RESOURCE_FILE */
+#include "../gen/gl/resext.h"
+#endif /* PLATFORM_WEB */
 
 #ifndef DIO_PATH_TEMP
 #define DIO_PATH_TEMP "/tmp"
@@ -325,7 +329,7 @@
 #endif /* !DIO_PATH_SEP */
 
 #ifndef DRC_ARCHIVE
-#define DRC_ARCHIVE "sdl16.drc"
+#define DRC_ARCHIVE "gl.drc"
 #endif /* !DRC_ARCHIVE */
 
 #define USE_SOFTWARE_TEXT
