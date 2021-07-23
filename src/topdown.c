@@ -122,6 +122,8 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    char* welcome_string = NULL;
    struct TILEMAP* map = NULL;
    struct MOBILE* mobiles = NULL;
+   struct ITEM* items = NULL;
+   int retval = 1;
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
 
@@ -129,15 +131,33 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
       assert( NULL == state->map );
       state->map = memory_alloc( sizeof( struct TILEMAP ), 1 );
-      assert( NULL != state->map );
+      if( NULL == state->map ) {
+         error_printf( "unable to allocate map" );
+         retval = 0;
+         goto cleanup;
+      }
       map = memory_lock( state->map );
       assert( NULL != map );
 
       assert( NULL == state->mobiles );
       state->mobiles = memory_alloc( sizeof( struct MOBILE ), MOBILES_MAX );
-      assert( NULL != state->mobiles );
+      if( NULL == state->mobiles ) {
+         error_printf( "unable to allocate mobiles" );
+         retval = 0;
+         goto cleanup;
+      }
       mobiles = memory_lock( state->mobiles );
       assert( NULL != mobiles );
+
+      assert( NULL == state->items );
+      state->items = memory_alloc( sizeof( struct ITEM ), ITEMS_MAX );
+      if( NULL == state->items ) {
+         error_printf( "unable to allocate items" );
+         retval = 0;
+         goto cleanup;
+      }
+      items = (struct ITEM*)memory_lock( state->items );
+      assert( NULL != items );
 
 #ifdef USE_JSON_MAPS
       tilemap_load( map_field, map );
@@ -295,11 +315,8 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
    case INPUT_KEY_QUIT:
       window_pop( 0x111, state );
-      mobiles =  memory_unlock( state->mobiles );
-      map = memory_unlock( state->map );
-      state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
-      topdown_deinit( state_handle );
-      return 0;
+      retval = 0;
+      goto cleanup;
    }
 
    /* Animate. */
@@ -356,7 +373,23 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
    graphics_loop_end();
 
-   return 1;
+cleanup:
+
+   if( 0 == retval ) {
+      /* We're closing, so deinit. */
+      if( NULL != mobiles ) {
+         mobiles = memory_unlock( state->mobiles );
+      }
+      if( NULL != map ) {
+         map = memory_unlock( state->map );
+      }
+      if( NULL != state ) {
+         state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
+      }
+      topdown_deinit( state_handle );
+   }
+
+   return retval;
 }
 
 void topdown_deinit( MEMORY_HANDLE state_handle ) {
@@ -365,18 +398,33 @@ void topdown_deinit( MEMORY_HANDLE state_handle ) {
    struct TILEMAP* map = NULL;
    struct MOBILE* mobiles = NULL;
 
-   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
-   mobiles = memory_lock( state->mobiles );
-   map = memory_lock( state->map );
-
-   for( i = 0 ; state->mobiles_count > i ; i++ ) {
-      mobile_deinit( &(mobiles[i]) );
+   if( NULL == state_handle ) {
+      return;
    }
 
-   tilemap_deinit( map );
+   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
+   if( NULL == state ) {
+      return;
+   }
 
-   map = memory_unlock( state->map );
-   mobiles = memory_unlock( state->mobiles );
+   if( NULL != state->mobiles ) {
+      mobiles = memory_lock( state->mobiles );
+      if( NULL != mobiles ) {
+         for( i = 0 ; state->mobiles_count > i ; i++ ) {
+            mobile_deinit( &(mobiles[i]) );
+         }
+         mobiles = memory_unlock( state->mobiles );
+      }
+   }
+
+   if( NULL != state->map ) {
+      map = memory_lock( state->map );
+      if( NULL != map ) {
+         tilemap_deinit( map );
+         map = memory_unlock( state->map );
+      }
+   }
+
    state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
 }
 

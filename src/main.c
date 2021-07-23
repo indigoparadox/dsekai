@@ -85,13 +85,17 @@ int main( int argc, char* argv[] ) {
    g_log_file = platform_fopen( LOG_FILE_NAME, "w" );
 #endif /* LOG_TO_FILE */
 
-   debug_printf( 2,
+   debug_printf( 3,
       "dsekai compiled " __DATE__ __TIME__ ", state size is %lu bytes",
       sizeof( struct DSEKAI_STATE ) );
 
-   debug_printf( 2,
-      "map size is %lu bytes; mobiles size is %lu bytes",
-      sizeof( struct TILEMAP ), sizeof( struct MOBILE ) * MOBILES_MAX );
+   debug_printf( 3, "map size is %lu bytes", sizeof( struct TILEMAP ) );
+
+   debug_printf( 3, "mobiles size is %lu bytes",
+      sizeof( struct MOBILE ) * MOBILES_MAX );
+
+   debug_printf( 3, "items size is %lu bytes",
+      sizeof( struct ITEM ) * ITEMS_MAX );
 
    if( !graphics_init( &graphics_args ) ) {
       error_printf( "unable to initialize graphics" );

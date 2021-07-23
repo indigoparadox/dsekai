@@ -439,6 +439,14 @@
 #define MOBILES_MAX 20
 #endif /* !MOBILES_MAX */
 
+#ifndef ITEMS_MAX
+#define ITEMS_MAX 200
+#endif /* !ITEMS_MAX */
+
+#ifndef ITEM_INVENTORY_MAX
+#define ITEM_INVENTORY_MAX 20
+#endif /* !ITEM_INVENTORY_MAX */
+
 #ifndef DEBUG_THRESHOLD
 #define DEBUG_THRESHOLD 2
 #endif /* !DEBUG_THRESHOLD */

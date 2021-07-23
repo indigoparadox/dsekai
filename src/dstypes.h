@@ -91,6 +91,9 @@ __attribute__( (__packed__) )
 DSEKAI_STATE {
    uint32_t version;
 
+   MEMORY_HANDLE items;
+   uint16_t items_count;
+
    MEMORY_HANDLE map;
    MEMORY_HANDLE mobiles;
    uint16_t mobiles_count; 
