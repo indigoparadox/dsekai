@@ -101,13 +101,23 @@ BIN_WEB := $(BINDIR)/dsekai.js
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
-DSEKAI_ASSETS_SPRITES := $(wildcard $(ASSETDIR)/sprite_*.bmp)
-DSEKAI_ASSETS_TILES := $(wildcard $(ASSETDIR)/tile_*.bmp)
-DSEKAI_ASSETS_PATTERNS := $(wildcard $(ASSETDIR)/pattern_*.bmp)
-DSEKAI_ASSETS_BITMAPS := \
-   $(DSEKAI_ASSETS_SPRITES) \
-   $(DSEKAI_ASSETS_TILES) \
-   $(DSEKAI_ASSETS_PATTERNS)
+define BITMAPS_RULE
+DSEKAI_ASSETS_SPRITES_$(DEPTH) := \
+   $(wildcard $(ASSETDIR)/$(DEPTH)/sprite_*.bmp)
+DSEKAI_ASSETS_TILES_$(DEPTH) := \
+   $(wildcard $(ASSETDIR)/$(DEPTH)/tile_*.bmp)
+DSEKAI_ASSETS_PATTERNS_$(DEPTH) := \
+   $(wildcard $(ASSETDIR)/$(DEPTH)/pattern_*.bmp)
+DSEKAI_ASSETS_BITMAPS_$(DEPTH) := \
+   $(wildcard $(ASSETDIR)/$(DEPTH)/sprite_*.bmp) \
+   $(wildcard $(ASSETDIR)/$(DEPTH)/tile_*.bmp) \
+   $(wildcard $(ASSETDIR)/$(DEPTH)/pattern_*.bmp)
+endef
+
+DEPTHS := 16x16x4
+
+$(foreach DEPTH,$(DEPTHS), $(eval $(BITMAPS_RULE)))
+
 DSEKAI_ASSETS_MAPS := \
    $(ASSETDIR)/map_field.json
 
@@ -241,7 +251,7 @@ LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 # 5. Targets
 
 $(GENDIR_SDL)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_SDL)/$(STAMPFILE) $(HEADPACK)
 
 $(BIN_SDL): $(DSEKAI_O_FILES_SDL) src/json.o | $(BINDIR)/$(STAMPFILE)
@@ -276,7 +286,7 @@ LDFLAGS_SDL_NJ := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 # 5. Targets
 
 $(GENDIR_SDL)-nj/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_SDL)-nj/$(STAMPFILE) $(HEADPACK)
 
 $(BIN_SDL)-nj: $(subst /sdl/,/sdl-nj/,$(DSEKAI_O_FILES_SDL)) | \
@@ -320,7 +330,8 @@ LDFLAGS_SDL_FILE := $(LDFLAGS_SDL)
 
 # 5. Targets
 
-$(GENDIR_SDL_FILE)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(GENDIR_SDL_FILE)/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(MKRESH) $(GENDIR_SDL_FILE)/$(STAMPFILE)
 	$(MKRESH) -f file -if $^ -oh $@
 
@@ -377,7 +388,7 @@ DSEKAI_O_FILES_XLIB := \
 # 5. Targets
 
 $(GENDIR_XLIB)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_XLIB)/$(STAMPFILE) $(HEADPACK)
 
 $(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(DSEKAI_ASSETS_MAPS_XLIB) $(GENDIR_XLIB)/resext.h
@@ -415,7 +426,7 @@ DSEKAI_ASSETS_MAPS_DOS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
 
 DSEKAI_ASSETS_DOS_CGA := \
-   $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
+   $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
 
 DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -474,7 +485,7 @@ DSEKAI_C_FILES_PALM_ONLY := \
    src/graphics/palmg.c
 
 DSEKAI_ASSETS_PALM := \
-   $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BITMAPS))
+   $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4))
 
 DSEKAI_O_FILES_PALM := \
    $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -499,7 +510,7 @@ APPID := DSEK
 # 5. Targets
 
 $(GENDIR_PALM)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_PALM)/$(STAMPFILE) $(HEADPACK)
 
 $(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_PALM)/$(STAMPFILE)
@@ -571,7 +582,7 @@ RCFLAGS_WIN16 := -r -DPLATFORM_WIN16 -i $(INCLUDE)win
 # 5. Targets
 
 $(GENDIR_WIN16)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_WIN16)/$(STAMPFILE) $(HEADPACK)
 
 $(BINDIR)/dsekai16.img: $(BIN_WIN16)
@@ -590,10 +601,10 @@ $(OBJDIR_WIN16)/$(STAMPFILE)
 	$(RC_WIN16) $(RCFLAGS_WIN16) $< -o $@
 
 $(GENDIR_WIN16)/win16.rc \
-$(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | \
-$(GENDIR_WIN16)/$(STAMPFILE)
+$(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS_16x16x4) | \
+$(MKRESH) $(GENDIR_WIN16)/$(STAMPFILE)
 	$(MKRESH) -f win16 -i 5001 \
-      -if $(DSEKAI_ASSETS_BITMAPS) \
+      -if $^ \
       -oh $(GENDIR_WIN16)/resext.h -or $(GENDIR_WIN16)/win16.rc
 
 $(OBJDIR_WIN16)/%.o: \
@@ -649,7 +660,7 @@ RCFLAGS_WIN32 := -r -DPLATFORM_WIN32 -i $(INCLUDE)win
 # 5. Targets
 
 $(GENDIR_WIN32)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_WIN32)/$(STAMPFILE) $(HEADPACK)
 
 $(BIN_WIN32): \
@@ -663,10 +674,11 @@ $(OBJDIR_WIN32)/$(STAMPFILE)
 	$(RC_WIN32) $(RCFLAGS_WIN32) $< -o $@
 
 $(GENDIR_WIN32)/win32.rc \
-$(GENDIR_WIN32)/resext.h: $(DSEKAI_ASSETS_BITMAPS) $(MKRESH) | \
-$(GENDIR_WIN32)/$(STAMPFILE)
+$(GENDIR_WIN32)/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS_WIN32) | \
+$(MKRESH) $(GENDIR_WIN32)/$(STAMPFILE)
 	$(MKRESH) -f win16 -i 5001 \
-      -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) \
+      -if $^ \
       -oh $(GENDIR_WIN32)/resext.h -or $(GENDIR_WIN32)/win32.rc
 
 $(OBJDIR_WIN32)/%.o: \
@@ -701,10 +713,10 @@ DSEKAI_C_FILES_MAC7_ONLY := \
    src/resource/header.c
 
 DSEKAI_ASSETS_ICNS := \
-   $(subst .bmp,.icns,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
+   $(subst .bmp,.icns,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
 
 DSEKAI_ASSETS_RSRC := \
-   $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS)))
+   $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
 
 DSEKAI_ASSETS_MAPS_MAC7 := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_MAPS)))
@@ -734,7 +746,7 @@ CFLAGS_MAC7 := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAG
 #      -lh $(GENDIR_MAC7)/resext.h
 
 $(GENDIR_MAC7)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_MAC7)/$(STAMPFILE) $(HEADPACK)
 
 #$(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)/$(STAMPFILE)
@@ -810,7 +822,7 @@ $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 # 5. Targets
 
 $(GENDIR_NDS)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_NDS)/$(STAMPFILE) $(HEADPACK)
 
 $(BIN_NDS): $(OBJDIR_NDS)/dsekai.elf $(GENDIR_NDS)/dsekai-1.bmp
@@ -870,7 +882,7 @@ LDFLAGS_WEB :=
 # 5. Targets
 
 $(GENDIR_WEB)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_WEB)/$(STAMPFILE) $(HEADPACK)
 
 $(BIN_WEB): $(DSEKAI_O_FILES_WEB) | $(BINDIR)/$(STAMPFILE)
