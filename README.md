@@ -1,6 +1,8 @@
 
 # dsekai
 
+![Overworld Screenshot](screens/overwrld.png)
+
 dsekai is an extremely minimal world engine, intended to run on very old hardware. It is originally targeted to the 8086/8088 CPU with the intention to make it more portable later. See below for a list of supported platforms.
 
 There are also some rough examples of CGA graphics programming in graphics/dosg.c, if that's what you're into.
@@ -53,8 +55,9 @@ The following targets may be built:
 | Win32    | bin/dsekai32.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | *MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
 | *NDS     | bin/dsekai.nds   | [DevKitPro](https://devkitpro.org/)
+| *WebASM  \ bin/dsekai.js    | emscripten
 
-Items marked with * are currently broken.
+Platforms marked with * are currently broken.
 
 Just doing "make" will attempt to build all currently working targets.
 
