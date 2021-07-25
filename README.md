@@ -5,7 +5,18 @@
 
 dsekai is an extremely minimal world engine, intended to run on very old hardware. It is originally targeted to the 8086/8088 CPU with the intention to make it more portable later. See below for a list of supported platforms.
 
-There are also some rough examples of CGA graphics programming in graphics/dosg.c, if that's what you're into.
+This project is being built around/in tandem with the unilayer project, in order to create a somewhat-universal framework/library for games on legacy/weird platforms.
+
+There are also some rough examples of CGA graphics programming in unilayer/graphics/dosg.c, if that's what you're into.
+
+## Planned Features
+
+* 256-Color graphics on some platforms while keeping 4-color/2-color support.
+* Simple and consistent data structures for binary save dumps.
+* Housing system based on in-game map editing.
+* Item usage and crafting.
+* Mobile interactions.
+* Minimal resource use (shooting for <64k RAM).
 
 ## Rules
 
@@ -27,11 +38,18 @@ This engine uses OS-level resources where it can to store assets. On platforms w
 
 The following platforms are currently supported:
 
-* **MS-DOS w/ CGA Graphics**
+* **MS-DOS w/ CGA Graphics** (Maybe VGA graphics in the future...)
 * **PalmOS >= 3.5**
 * **GNU/Linux with SDL** (May work with other POSIX platforms.)
-* **Windows (16-bit)** (And maybe 32-bit.)
-* **Mac-OS 6/7** (Coming soon...ish...)
+* **Windows (16-bit/32-bit)**
+
+The following platforms are planned to be supported but not yet functional:
+
+* **Mac-OS 6/7**
+* **GNU/Linux with Xlib** (May work with other POSIX platforms.)
+* **GNU/Linux with NCurses** (May work with other POSIX platforms.)
+* **Nintendo DS**
+* **WebASM/WebGL**
 
 ## Compiling
 
@@ -56,6 +74,7 @@ The following targets may be built:
 | *MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
 | *NDS     | bin/dsekai.nds   | [DevKitPro](https://devkitpro.org/)
 | *WebASM  \ bin/dsekai.js    | emscripten
+| *Curses  | bin/dsekait      | NCurses
 
 Platforms marked with * are currently broken.
 

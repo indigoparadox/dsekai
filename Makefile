@@ -89,16 +89,16 @@ GENDIR_CHECK_NULL := $(GENDIR)/check_null
 
 BINDIR := bin
 
-BIN_SDL := $(BINDIR)/dsekai
-BIN_DOS := $(BINDIR)/dsekai.exe
-BIN_XLIB := $(BINDIR)/dsekaix
-BIN_PALM := $(BINDIR)/dsekai.prc
-BIN_WIN16 := $(BINDIR)/dsekai16.exe
-BIN_WIN32 := $(BINDIR)/dsekai32.exe
-BIN_MAC7 := $(BINDIR)/dsekai.bin $(BINDIR)/dsekai.APPL $(BINDIR)/dsekai.dsk
-BIN_NDS := $(BINDIR)/dsekai.nds
-BIN_WEB := $(BINDIR)/dsekai.js
-BIN_CURSES := $(BINDIR)/dsekait
+BIN_SDL := $(BINDIR)/$(DSEKAI)
+BIN_DOS := $(BINDIR)/$(DSEKAI).exe
+BIN_XLIB := $(BINDIR)/$(DSEKAI)x
+BIN_PALM := $(BINDIR)/$(DSEKAI).prc
+BIN_WIN16 := $(BINDIR)/$(DSEKAI)16.exe
+BIN_WIN32 := $(BINDIR)/$(DSEKAI)32.exe
+BIN_MAC7 := $(BINDIR)/$(DSEKAI).bin $(BINDIR)/$(DSEKAI).APPL $(BINDIR)/$(DSEKAI).dsk
+BIN_NDS := $(BINDIR)/$(DSEKAI).nds
+BIN_WEB := $(BINDIR)/$(DSEKAI).js
+BIN_CURSES := $(BINDIR)/$(DSEKAI)t
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
@@ -498,10 +498,10 @@ $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_PALM)/$(STAMPFILE) $(MKRE
       -oh $(GENDIR_PALM)/resext.h \
       -or $(GENDIR_PALM)/palmd.rcp
 
-grc_palm: $(OBJDIR_PALM)/dsekai
-	cd $(OBJDIR_PALM) && $(OBJRES) dsekai
+grc_palm: $(OBJDIR_PALM)/$(DSEKAI)
+	cd $(OBJDIR_PALM) && $(OBJRES) $(DSEKAI)
 
-$(OBJDIR_PALM)/dsekai: $(DSEKAI_O_FILES_PALM)
+$(OBJDIR_PALM)/$(DSEKAI): $(DSEKAI_O_FILES_PALM)
 	$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@
 	
 $(OBJDIR_PALM)/bin$(STAMPFILE): src/palms.rcp $(GENDIR_PALM)/palmd.rcp
@@ -559,10 +559,10 @@ $(GENDIR_WIN16)/resext.h: \
 $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_WIN16)/$(STAMPFILE) $(HEADPACK)
 
-$(BINDIR)/dsekai16.img: $(BIN_WIN16)
+$(BINDIR)/$(DSEKAI)16.img: $(BIN_WIN16)
 	$(DD) if=/dev/zero bs=512 count=2880 of="$@"
 	$(MKFSVFAT) "$@"
-	$(MCOPY) -i "$@" $< ::dsekai16.exe
+	$(MCOPY) -i "$@" $< ::$(DSEKAI)16.exe
 
 $(BIN_WIN16): \
 $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | \
@@ -570,7 +570,7 @@ $(BINDIR)/$(STAMPFILE) $(DSEKAI_ASSETS_MAPS_WIN16)
 	$(LD_WIN16) $(LDFLAGS_WIN16) -fe=$@ $^
 
 $(OBJDIR_WIN16)/win16.res: \
-src/winstat.rc $(GENDIR_WIN16)/win16.rc $(ASSETDIR)/dsekai.ico | \
+src/winstat.rc $(GENDIR_WIN16)/win16.rc $(ASSETDIR)/$(DSEKAI).ico | \
 $(OBJDIR_WIN16)/$(STAMPFILE)
 	$(RC_WIN16) $(RCFLAGS_WIN16) $< -o $@
 
@@ -643,7 +643,7 @@ $(BINDIR)/$(STAMPFILE) $(DSEKAI_ASSETS_MAPS_WIN32)
 	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
 
 $(OBJDIR_WIN32)/win32.res: \
-src/winstat.rc $(GENDIR_WIN32)/win32.rc $(ASSETDIR)/dsekai.ico | \
+src/winstat.rc $(GENDIR_WIN32)/win32.rc $(ASSETDIR)/$(DSEKAI).ico | \
 $(OBJDIR_WIN32)/$(STAMPFILE)
 	$(RC_WIN32) $(RCFLAGS_WIN32) $< -o $@
 
@@ -733,17 +733,17 @@ $(GENDIR_MAC7)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC7)/$(STAMPFILE
 	$(MD) $(dir $@)
 	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
 
-$(OBJDIR_MAC7)/dsekai.code.bin: $(DSEKAI_O_FILES_MAC7) | $(OBJDIR_MAC7)
+$(OBJDIR_MAC7)/$(DSEKAI).code.bin: $(DSEKAI_O_FILES_MAC7) | $(OBJDIR_MAC7)
 	$(CXX_MAC7) $(LDFLAGS_MAC7) -o $@ $^ # Use CXX to link for RetroConsole.
 
-$(BIN_MAC7): $(OBJDIR_MAC7)/dsekai.code.bin
+$(BIN_MAC7): $(OBJDIR_MAC7)/$(DSEKAI).code.bin
 	$(REZ_MAC7) -I$(RETRO68_PREFIX)/RIncludes \
       --copy $^ \
       "$(RETRO68_PREFIX)/RIncludes/Retro68APPL.r" \
       -t "APPL" -c "DSEK" \
-      -o $(BINDIR)/dsekai.bin \
-      --cc $(BINDIR)/dsekai.APPL \
-      --cc $(BINDIR)/dsekai.dsk
+      -o $(BINDIR)/$(DSEKAI).bin \
+      --cc $(BINDIR)/$(DSEKAI).APPL \
+      --cc $(BINDIR)/$(DSEKAI).dsk
 
 $(OBJDIR_MAC7)/%.o: \
 %.c $(DSEKAI_ASSETS_MAPS_MAC7) $(GENDIR_MAC7)/resext.h
@@ -790,7 +790,7 @@ CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include
 
 LIBS_NDS := -L$(DEVKITPRO)/libnds/lib -lnds9
 
-LDFLAGS_NDS := -specs=ds_arm9.specs -g $(ARCH_NDS) -Wl,-Map,$(OBJDIR_NDS)/dsekai.map
+LDFLAGS_NDS := -specs=ds_arm9.specs -g $(ARCH_NDS) -Wl,-Map,$(OBJDIR_NDS)/$(DSEKAI).map
 
 $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 
@@ -800,13 +800,13 @@ $(GENDIR_NDS)/resext.h: \
 $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_NDS)/$(STAMPFILE) $(HEADPACK)
 
-$(BIN_NDS): $(OBJDIR_NDS)/dsekai.elf $(GENDIR_NDS)/dsekai-1.bmp
-	$(NDSTOOL) -c $@ -9 $< -b $(GENDIR_NDS)/dsekai-1.bmp "dsekai;dsekai;dsekai"
+$(BIN_NDS): $(OBJDIR_NDS)/$(DSEKAI).elf $(GENDIR_NDS)/$(DSEKAI)-1.bmp
+	$(NDSTOOL) -c $@ -9 $< -b $(GENDIR_NDS)/$(DSEKAI)-1.bmp "$(DSEKAI);$(DSEKAI);$(DSEKAI)"
 
-$(GENDIR_NDS)/dsekai-1.bmp: $(ASSETDIR)/dsekai.ico
-	$(IMAGEMAGICK) $< -compress none -colors 16 $(GENDIR_NDS)/dsekai.bmp
+$(GENDIR_NDS)/$(DSEKAI)-1.bmp: $(ASSETDIR)/$(DSEKAI).ico
+	$(IMAGEMAGICK) $< -compress none -colors 16 $(GENDIR_NDS)/$(DSEKAI).bmp
 
-$(OBJDIR_NDS)/dsekai.elf: $(DSEKAI_O_FILES_NDS)
+$(OBJDIR_NDS)/$(DSEKAI).elf: $(DSEKAI_O_FILES_NDS)
 	$(LD_NDS) $(LDFLAGS_NDS) $^ $(LIBS_NDS) -o $@
 
 $(OBJDIR_NDS)/%.o: \
