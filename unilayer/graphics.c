@@ -1,8 +1,10 @@
 
 #define GRAPHICS_C
-#include "dstypes.h"
+#include "unilayer.h"
 
+#ifdef USE_SOFTWARE_TEXT
 #include "data/font8x8.h"
+#endif /* USE_SOFTWARE_TEXT */
 
 static MEMORY_HANDLE gs_graphics_cache_handle = NULL;
 static int16_t gs_graphics_cache_sz = 0;

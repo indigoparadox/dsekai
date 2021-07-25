@@ -2,7 +2,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include "dstypes.h"
+#include "unilayer.h"
 
 #ifdef PLATFORM_PALM
 #include "memory/palmm.h"

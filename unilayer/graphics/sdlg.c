@@ -1,7 +1,7 @@
 
 #define GRAPHICS_C
 #define SDLG_C
-#include "../dstypes.h"
+#include "../unilayer.h"
 
 #include <SDL.h>
 

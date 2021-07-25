@@ -4,9 +4,9 @@
 #ifndef DRC_H
 #define DRC_H
 
-#include "dstypes.h"
-#include "memory.h"
-#include "dio.h"
+#ifndef DRC_COPY_BLOCK_SZ
+#define DRC_COPY_BLOCK_SZ 1024
+#endif /* !DRC_COPY_BLOCK_SZ */
 
 #ifdef USE_DOS
 #define DRC_DEFAULT_TEMP "c:\\temp"

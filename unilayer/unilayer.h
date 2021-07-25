@@ -4,6 +4,12 @@
 
 #include "config.h"
 
+#ifdef __GNUC__
+#define WARN_UNUSED __attribute__( (warn_unused_result) )
+#else
+#define WARN_UNUSED
+#endif /* __GNUC__ */
+
 #include <stddef.h>
 
 #if !defined( offsetof )
@@ -64,58 +70,12 @@ TILEMAP_COORDS {
    int32_t y;
 };
 
-struct DSEKAI_STATE;
-
 #include "memory.h"
-#include "engines.h"
 #include "resource.h"
 #include "graphics.h"
 #include "input.h"
 #include "dio.h"
 #include "drc.h"
-#ifdef USE_JSON_MAPS
-#include "json.h"
-#endif /* USE_JSON_MAPS */
-#include "item.h"
-#include "tilemap.h"
-#include "mobile.h"
-#include "window.h"
-#include "control.h"
-
-struct WINDOW;
-
-struct
-#ifdef __GNUC__
-__attribute__( (__packed__) )
-#endif /* __GNUC__ */
-DSEKAI_STATE {
-   uint32_t version;
-
-   MEMORY_HANDLE items;
-   uint16_t items_count;
-
-   MEMORY_HANDLE map;
-   MEMORY_HANDLE mobiles;
-   uint16_t mobiles_count; 
-   uint16_t player_idx;
-
-   uint8_t semi_cycles;
-   uint8_t walk_offset;
-   uint8_t input_blocked_countdown;
-   uint8_t reserved;
-   int32_t screen_scroll_x;
-   int32_t screen_scroll_y;
-   int32_t screen_scroll_tx;
-   int32_t screen_scroll_ty;
-   int32_t screen_scroll_x_tgt;
-   int32_t screen_scroll_y_tgt;
-
-   MEMORY_HANDLE windows_handle;
-   uint16_t windows_count;
-
-   uint16_t engine_state;
-
-};
 
 #endif /* DSTYPES_H */
 

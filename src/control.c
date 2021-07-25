@@ -1,5 +1,5 @@
 
-#include "dstypes.h"
+#include "dsekai.h"
 
 typedef int16_t (*CONTROL_CB)( struct WINDOW*, struct CONTROL* );
 typedef void (*CONTROL_CB_SZ)(

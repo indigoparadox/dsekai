@@ -1,5 +1,5 @@
 
-#include "dstypes.h"
+#include "dsekai.h"
 
 const int8_t gc_mobile_step_table_normal_pos[16] = {
    0, 0, 0, 0,       /*  0,  1,  2,  3 */

@@ -1,6 +1,8 @@
 
 #define RESOURCE_C
-#include "../dstypes.h"
+#include "../unilayer.h"
+
+#include <resext.h>
 
 RESOURCE_BITMAP_HANDLE resource_get_bitmap_handle( RESOURCE_ID id ) {
    return gsc_resources[id];

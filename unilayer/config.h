@@ -22,29 +22,9 @@
 #define DIO_PATH_SEP '\\'
 #endif /* !DIO_PATH_SEP */
 
-#define GRAPHICS_M_320_200_4_CGA  0x05
-#define GRAPHICS_M_320_200_256_V  0x13
-
-#define GRAPHICS_M_320_200_256_VGA_A   0xA0000000L
-#define GRAPHICS_M_320_200_4_CGA_A     0xB8000000L
-
-#ifndef GRAPHICS_MODE
-#define GRAPHICS_MODE      0x05
-#endif /* !GRAPHICS_MODE */
-
 #ifndef LOG_FILE_NAME
 #define LOG_FILE_NAME "logdos.txt"
 #endif /* !LOG_FILE_NAME */
-
-#ifndef CGA_COLD
-#define CGA_COLD           0x01
-#endif /* CGA_COLD */
-
-#if GRAPHICS_M_320_200_4_CGA == GRAPHICS_MODE
-#define GRAPHICS_ADDR     GRAPHICS_M_320_200_4_CGA_A
-#elif GRAPHICS_M_320_200_256_VGA == GRAPHICS_MODE
-#define GRAPHICS_ADDR     GRAPHICS_M_320_200_256_VGA_A
-#endif /* GRAPHICS_MODE */
 
 #ifndef DRC_ARCHIVE
 #define DRC_ARCHIVE "doscga.drc"
@@ -416,7 +396,7 @@
 #endif /* !SCREEN_SCALE */
 
 #ifndef FPS
-#define FPS 30
+#define FPS 15
 #endif /* !FPS */
 
 #ifndef MEMORY_FAKE_HEAP_SZ
@@ -466,10 +446,6 @@
 #ifndef DIO_PATH_MAX
 #define DIO_PATH_MAX 254
 #endif /* !DIO_PATH_MAX */
-
-#ifndef ANI_SEMICYCLES_MAX
-#define ANI_SEMICYCLES_MAX 10
-#endif /* !ANI_SEMICYCLES_MAX */
 
 #ifndef INPUT_BLOCK_DELAY
 #define INPUT_BLOCK_DELAY 5

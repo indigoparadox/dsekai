@@ -1,5 +1,5 @@
 
-#include "dstypes.h"
+#include "dsekai.h"
 
 #ifndef USE_JSON_MAPS
 #if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
@@ -320,18 +320,11 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    }
 
    /* Animate. */
-   if( ANI_SEMICYCLES_MAX < state->semi_cycles ) {
-      state->semi_cycles = 0;
-
-      if( 0 == state->walk_offset ) {
-         /* Walk offset must be divisible by 2 for CGA blitting to work. */
-         state->walk_offset = 2;
-      } else {
-         state->walk_offset = 0;
-      }
-
+   if( 0 == state->walk_offset ) {
+      /* Walk offset must be divisible by 2 for CGA blitting to work. */
+      state->walk_offset = 2;
    } else {
-      state->semi_cycles++;
+      state->walk_offset = 0;
    }
 
    for( i = 0 ; state->mobiles_count > i ; i++ ) {

@@ -2,8 +2,6 @@
 #ifndef SDLG_H
 #define SDLG_H
 
-#include "../dstypes.h"
-
 #include <SDL.h>
 
 typedef const SDL_Color* GRAPHICS_COLOR;

@@ -2,8 +2,6 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-/* #include "dstypes.h" */
-
 #ifdef PLATFORM_DOS
 #include "graphics/dosg.h"
 #elif defined( PLATFORM_SDL )

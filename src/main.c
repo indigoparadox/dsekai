@@ -1,7 +1,7 @@
 
 #define MAIN_C
 
-#include "dstypes.h"
+#include "dsekai.h"
 
 uint8_t g_running = 1;
 MEMORY_HANDLE g_state_handle = NULL;

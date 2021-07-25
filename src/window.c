@@ -1,5 +1,5 @@
 
-#include "dstypes.h"
+#include "dsekai.h"
 
 static MEMORY_HANDLE g_frames_handle = NULL;
 

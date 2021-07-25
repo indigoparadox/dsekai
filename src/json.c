@@ -1,6 +1,6 @@
 
 #define JSON_C
-#include "dstypes.h"
+#include "dsekai.h"
 
 #ifdef USE_JSON_MAPS
 

@@ -2,8 +2,6 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "dstypes.h"
-
 #ifdef PLATFORM_DOS
 #include "input/dosi.h"
 #elif defined( PLATFORM_SDL )

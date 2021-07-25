@@ -3,11 +3,11 @@ DSEKAI := "dsekai"
 
 DSEKAI_C_FILES := \
    src/tilemap.c \
-   src/graphics.c \
+   unilayer/graphics.c \
    src/mobile.c \
    src/item.c \
    src/window.c \
-   src/dio.c \
+   unilayer/dio.c \
    src/control.c \
    src/topdown.c
 
@@ -22,40 +22,40 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    check/cktopdwn.c \
    check/ckdataim.c \
    check/ckdatajs.c \
-   src/resource/drcr.c \
+   unilayer/resource/drcr.c \
    check/ckdio.c \
    check/ckdrc.c \
    check/ckmemory.c \
-   src/graphics/nullg.c \
-   src/input/nulli.c \
+   unilayer/graphics/nullg.c \
+   unilayer/input/nulli.c \
    tools/data/cga.c \
    tools/data/bmp.c \
    tools/data/icns.c \
    tools/data/drcwrite.c \
-   src/memory/fakem.c \
+   unilayer/memory/fakem.c \
    src/drc.c \
-   src/dio.c
+   unilayer/dio.c
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
-   src/memory/fakem.c \
+   unilayer/memory/fakem.c \
    src/drc.c \
-   src/dio.c
+   unilayer/dio.c
 
 DRCPACK_C_FILES := \
    tools/drcpack.c \
    tools/data/drcwrite.c \
-   src/memory/fakem.c \
+   unilayer/memory/fakem.c \
    src/drc.c \
-   src/dio.c
+   unilayer/dio.c
 
 CONVERT_C_FILES := \
    tools/convert.c \
    tools/data/bmp.c \
-   src/memory/fakem.c \
+   unilayer/memory/fakem.c \
    src/drc.c \
    tools/data/cga.c \
-   src/dio.c \
+   unilayer/dio.c \
    tools/data/header.c \
    tools/data/icns.c \
    src/json.c
@@ -67,12 +67,12 @@ MAP2H_C_FILES := \
    tools/map2h.c \
    src/tilemap.c \
    src/mobile.c \
-   src/memory/fakem.c \
-   src/dio.c \
+   unilayer/memory/fakem.c \
+   unilayer/dio.c \
    src/json.c \
-   src/resource/nullr.c \
-   src/graphics.c \
-   src/graphics/nullg.c
+   unilayer/resource/nullr.c \
+   unilayer/graphics.c \
+   unilayer/graphics/nullg.c
 
 PLATFORMS := sdl sdl-nj sdl-file xlib dos win16 win32 palm mac7 nds curses check_null
 
@@ -229,10 +229,11 @@ GENDIR_SDL := $(GENDIR)/sdl
 
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
-   src/input/sdli.c \
-   src/graphics/sdlg.c \
-   src/memory/fakem.c \
-   src/resource/header.c
+   src/json.c \
+   unilayer/input/sdli.c \
+   unilayer/graphics/sdlg.c \
+   unilayer/memory/fakem.c \
+   unilayer/resource/header.c
 
 DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -245,7 +246,7 @@ LD_SDL := gcc
 
 # 4. Arguments
 
-CFLAGS_SDL := -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC)
+CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC)
 
 LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
@@ -255,7 +256,7 @@ $(GENDIR_SDL)/resext.h: \
 $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_SDL)/$(STAMPFILE) $(HEADPACK)
 
-$(BIN_SDL): $(DSEKAI_O_FILES_SDL) src/json.o | $(BINDIR)/$(STAMPFILE)
+$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE)
 	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL)
 
 $(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS)
@@ -267,37 +268,7 @@ $(DEPDIR_SDL)/%.d: %.c $(GENDIR_SDL)/resext.h
 	$(CC_SDL) $(CFLAGS_SDL) -DUSE_JSON_MAPS -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL)/,$<)) -MF $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
-
-# ====== Main: SDL (No JSON) ======
-
-# 1. Directories
-
-# 2. Files
-
-DSEKAI_ASSETS_MAPS_SDL_NJ := \
-$(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_SDL)-nj/,$(DSEKAI_ASSETS_MAPS)))
-
-# 3. Programs
-
-# 4. Arguments
-
-LDFLAGS_SDL_NJ := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
-
-# 5. Targets
-
-$(GENDIR_SDL)-nj/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
-$(GENDIR_SDL)-nj/$(STAMPFILE) $(HEADPACK)
-
-$(BIN_SDL)-nj: $(subst /sdl/,/sdl-nj/,$(DSEKAI_O_FILES_SDL)) | \
-$(BINDIR) $(DSEKAI_ASSETS_MAPS_SDL_NJ)
-	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL_NJ)
-
-$(OBJDIR_SDL)-nj/%.o: %.c $(GENDIR_SDL)-nj/resext.h | \
-$(DSEKAI_ASSETS_MAPS_SDL_NJ)
-	$(MD) $(dir $@)
-	$(CC_SDL) $(CFLAGS_SDL) -c -o $@ $(<:%.o=%)
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
 
 # ====== Main: SDL (File Res) ======
 
@@ -311,11 +282,11 @@ GENDIR_SDL_FILE := $(GENDIR)/sdl-file
 
 DSEKAI_C_FILES_SDL_FILE_ONLY := \
    src/main.c \
-   src/input/sdli.c \
-   src/graphics/sdlg.c \
-   src/memory/fakem.c \
+   unilayer/input/sdli.c \
+   unilayer/graphics/sdlg.c \
+   unilayer/memory/fakem.c \
    src/json.o \
-   src/resource/file.c
+   unilayer/resource/file.c
 
 DSEKAI_O_FILES_SDL_FILE := \
    $(addprefix $(OBJDIR_SDL_FILE)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -349,7 +320,7 @@ $(DEPDIR_SDL_FILE)/%.d: %.c $(GENDIR_SDL_FILE)/resext.h
 	$(CC_SDL) $(CFLAGS_SDL_FILE) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL_FILE)/,$<)) -MF $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL_FILE:.o=.d))
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL_FILE:.o=.d))
 
 # ====== Main: xlib ======
 
@@ -363,10 +334,10 @@ GENDIR_XLIB := $(GENDIR)/xlib
 
 DSEKAI_C_FILES_XLIB_ONLY := \
    src/main.c \
-   src/input/xi.c \
-   src/graphics/xg.c \
-   src/memory/fakem.c \
-   src/resource/header.c
+   unilayer/input/xi.c \
+   unilayer/graphics/xg.c \
+   unilayer/memory/fakem.c \
+   unilayer/resource/header.c
 
 DSEKAI_ASSETS_MAPS_XLIB := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_XLIB)/,$(DSEKAI_ASSETS_MAPS)))
@@ -404,7 +375,7 @@ $(DEPDIR_XLIB)/%.d: %.c $(GENDIR_XLIB)/resext.h | $(DSEKAI_ASSETS_MAPS_XLIB)
 	$(CC_XLIB) $(CFLAGS_XLIB) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_XLIB)/,$<)) -MF $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_XLIB:.o=.d))
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_XLIB:.o=.d))
 
 # ====== Main: MS-DOS ======
 
@@ -418,10 +389,10 @@ GENDIR_DOS := $(GENDIR)/dos
 
 DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
-   src/input/dosi.c \
-   src/graphics/dosg.c \
-   src/memory/fakem.c \
-   src/resource/header.c
+   unilayer/input/dosi.c \
+   unilayer/graphics/dosg.c \
+   unilayer/memory/fakem.c \
+   unilayer/resource/header.c
 
 DSEKAI_ASSETS_MAPS_DOS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
@@ -480,10 +451,10 @@ GENDIR_PALM := $(GENDIR)/palm
 DSEKAI_C_FILES_PALM_ONLY := \
    src/main.c \
    src/json.c \
-   src/input/palmi.c \
-   src/memory/palmm.c \
-   src/resource/palmr.c \
-   src/graphics/palmg.c
+   unilayer/input/palmi.c \
+   unilayer/memory/palmm.c \
+   unilayer/resource/palmr.c \
+   unilayer/graphics/palmg.c
 
 DSEKAI_ASSETS_PALM := \
    $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4))
@@ -554,10 +525,10 @@ GENDIR_WIN16 := $(GENDIR)/win16
 
 DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
-   src/input/wini.c \
-   src/resource/winr.c \
-   src/memory/winm.c \
-   src/graphics/wing.c
+   unilayer/input/wini.c \
+   unilayer/resource/winr.c \
+   unilayer/memory/winm.c \
+   unilayer/graphics/wing.c
 
 DSEKAI_ASSETS_MAPS_WIN16 := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN16)/,$(DSEKAI_ASSETS_MAPS)))
@@ -618,7 +589,7 @@ $(DEPDIR_WIN16)/%.d: %.c $(GENDIR_WIN16)/resext.h $(DSEKAI_ASSETS_MAPS_WIN16)
 	$(HOST_CC) -DPLATFORM_WIN16 -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN16)/,$<)) -MF $@ || touch $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN16:.o=.d))
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN16:.o=.d))
 
 # ====== Main: Win32 ======
 
@@ -632,10 +603,10 @@ GENDIR_WIN32 := $(GENDIR)/win32
 
 DSEKAI_C_FILES_WIN32_ONLY := \
    src/main.c \
-   src/input/wini.c \
-   src/resource/winr.c \
-   src/memory/winm.c \
-   src/graphics/wing.c
+   unilayer/input/wini.c \
+   unilayer/resource/winr.c \
+   unilayer/memory/winm.c \
+   unilayer/graphics/wing.c
 
 DSEKAI_ASSETS_MAPS_WIN32 := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN32)/,$(DSEKAI_ASSETS_MAPS)))
@@ -692,7 +663,7 @@ $(DEPDIR_WIN32)/%.d: %.c $(GENDIR_WIN32)/resext.h $(DSEKAI_ASSETS_MAPS_WIN32)
 	$(HOST_CC) -DPLATFORM_WIN32 -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN32)/,$<)) -MF $@ || touch $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN32:.o=.d))
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN32:.o=.d))
 
 # ====== Main: MacOS 7 ======
 
@@ -708,10 +679,10 @@ RETRO68_PREFIX := /opt/Retro68-build/toolchain
 
 DSEKAI_C_FILES_MAC7_ONLY := \
    src/main.c \
-   src/input/mac7i.c \
-   src/graphics/mac7g.c \
-   src/memory/mac7m.c \
-   src/resource/header.c
+   unilayer/input/mac7i.c \
+   unilayer/graphics/mac7g.c \
+   unilayer/memory/mac7m.c \
+   unilayer/resource/header.c
 
 DSEKAI_ASSETS_ICNS := \
    $(subst .bmp,.icns,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
@@ -790,10 +761,10 @@ DEVKITPATH := $(shell echo "$(DEVKITPRO)" | sed -e 's/^\([a-zA-Z]\):/\/\1/')
 
 DSEKAI_C_FILES_NDS_ONLY := \
    src/main.c \
-   src/input/ndsi.c \
-   src/graphics/ndsg.c \
-   src/memory/fakem.c \
-   src/resource/header.c
+   unilayer/input/ndsi.c \
+   unilayer/graphics/ndsg.c \
+   unilayer/memory/fakem.c \
+   unilayer/resource/header.c
 
 DSEKAI_ASSETS_MAPS_NDS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS)))
@@ -845,7 +816,7 @@ $(DEPDIR_NDS)/%.d: %.c $(GENDIR_NDS)/resext.h $(DSEKAI_ASSETS_MAPS_NDS)
 	$(CC_NDS) $(CFLAGS_NDS) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_NDS)/,$<)) -MF $@ || touch $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_NDS:.o=.d))
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_NDS:.o=.d))
 
 # ====== Main: emscripten ======
 
@@ -859,11 +830,11 @@ GENDIR_WEB := $(GENDIR)/web
 
 DSEKAI_C_FILES_WEB_ONLY := \
    src/main.c \
-   src/input/gli.c \
-   src/graphics/glg.c \
-   src/memory/fakem.c \
+   unilayer/input/gli.c \
+   unilayer/graphics/glg.c \
+   unilayer/memory/fakem.c \
    src/json.c \
-   src/resource/header.c
+   unilayer/resource/header.c
 
 DSEKAI_O_FILES_WEB := \
    $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -898,7 +869,7 @@ $(DEPDIR_WEB)/%.d: %.c $(GENDIR_WEB)/resext.h
 	$(CC_WEB) $(CFLAGS_WEB) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_WEB)/,$<)) -MF $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WEB:.o=.d))
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WEB:.o=.d))
 
 # ====== Main: Curses ======
 
@@ -912,11 +883,11 @@ GENDIR_CURSES := $(GENDIR)/curses
 
 DSEKAI_C_FILES_CURSES_ONLY := \
    src/main.c \
-   src/input/cursesi.c \
-   src/graphics/cursesg.c \
-   src/memory/fakem.c \
+   unilayer/input/cursesi.c \
+   unilayer/graphics/cursesg.c \
+   unilayer/memory/fakem.c \
    src/json.o \
-   src/resource/file.c
+   unilayer/resource/file.c
 
 DSEKAI_O_FILES_CURSES := \
    $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -951,7 +922,7 @@ $(DEPDIR_CURSES)/%.d: %.c $(GENDIR_CURSES)/resext.h
 	$(CC_CURSES) $(CFLAGS_CURSES) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_CURSES)/,$<)) -MF $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CURSES:.o=.d))
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CURSES:.o=.d))
 
 # ====== Check: Null ======
 
@@ -968,7 +939,7 @@ $(DEPDIR_CHECK_NULL)/%.d: %.c $(GENDIR_CHECK_NULL)/resext.h
 	$(CC) $(CFLAGS_CHECK_NULL) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_CHECK_NULL)/,$<)) -MF $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CHECK_NULL:.o=.d))
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CHECK_NULL:.o=.d))
 	
 $(OBJDIR_CHECK_NULL)/%.o: %.c check/testdata.h $(GENDIR_CHECK_NULL)/resext.h
 	$(MD) $(dir $@)
