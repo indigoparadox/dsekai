@@ -74,7 +74,7 @@ MAP2H_C_FILES := \
    src/graphics.c \
    src/graphics/nullg.c
 
-PLATFORMS := sdl sdl-nj sdl-file xlib dos win16 win32 palm mac7 nds check_null
+PLATFORMS := sdl sdl-nj sdl-file xlib dos win16 win32 palm mac7 nds curses check_null
 
 ASSETDIR := assets
 OBJDIR := obj
@@ -98,6 +98,7 @@ BIN_WIN32 := $(BINDIR)/dsekai32.exe
 BIN_MAC7 := $(BINDIR)/dsekai.bin $(BINDIR)/dsekai.APPL $(BINDIR)/dsekai.dsk
 BIN_NDS := $(BINDIR)/dsekai.nds
 BIN_WEB := $(BINDIR)/dsekai.js
+BIN_CURSES := $(BINDIR)/dsekait
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
@@ -898,6 +899,59 @@ $(DEPDIR_WEB)/%.d: %.c $(GENDIR_WEB)/resext.h
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_WEB)/,$<)) -MF $@
 
 include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WEB:.o=.d))
+
+# ====== Main: Curses ======
+
+# 1. Directories
+
+OBJDIR_CURSES := $(OBJDIR)/curses
+DEPDIR_CURSES := $(DEPDIR)/curses
+GENDIR_CURSES := $(GENDIR)/curses
+
+# 2. Files
+
+DSEKAI_C_FILES_CURSES_ONLY := \
+   src/main.c \
+   src/input/cursesi.c \
+   src/graphics/cursesg.c \
+   src/memory/fakem.c \
+   src/json.o \
+   src/resource/file.c
+
+DSEKAI_O_FILES_CURSES := \
+   $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES_CURSES_ONLY)))
+
+# 3. Programs
+
+CC_CURSES := gcc
+LD_CURSES := gcc
+
+# 4. Arguments
+
+CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_DEBUG_GCC) -DUSE_JSON_MAPS
+
+LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) -g $(CFLAGS_DEBUG_GCC)
+
+# 5. Targets
+
+$(GENDIR_CURSES)/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
+$(GENDIR_CURSES)/$(STAMPFILE) $(HEADPACK)
+
+$(BIN_CURSES): $(DSEKAI_O_FILES_CURSES) | $(BINDIR)/$(STAMPFILE)
+	$(LD_CURSES) -o $@ $^ $(LDFLAGS_CURSES)
+
+$(OBJDIR_CURSES)/%.o: %.c $(GENDIR_CURSES)/resext.h | $(DSEKAI_ASSETS_MAPS)
+	$(MD) $(dir $@)
+	$(CC_CURSES) $(CFLAGS_CURSES) -c -o $@ $(<:%.o=%)
+
+$(DEPDIR_CURSES)/%.d: %.c $(GENDIR_CURSES)/resext.h
+	$(MD) $(dir $@)
+	$(CC_CURSES) $(CFLAGS_CURSES) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_CURSES)/,$<)) -MF $@
+
+include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CURSES:.o=.d))
 
 # ====== Check: Null ======
 
