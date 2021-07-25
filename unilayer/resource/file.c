@@ -1,6 +1,6 @@
 
 #define RESOURCE_C
-#include "../dstypes.h"
+#include "../unilayer.h"
 
 static MEMORY_HANDLE resource_get_handle( RESOURCE_ID id ) {
    FILE* res_file = NULL;

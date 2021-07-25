@@ -1,8 +1,6 @@
 
 #define GRAPHICS_C
-#include "../dstypes.h"
-
-#include "../winstat.h"
+#include "../unilayer.h"
 
 #include <string.h>
 
@@ -120,7 +118,7 @@ int16_t graphics_platform_init( struct GRAPHICS_ARGS* args ) {
 
    wc.lpfnWndProc   = (WNDPROC)&WndProc;
    wc.hInstance     = g_instance;
-   wc.hIcon         = LoadIcon( g_instance, MAKEINTRESOURCE( icon_dsekai ) );
+   wc.hIcon         = LoadIcon( g_instance, MAKEINTRESOURCE( args->icon_res ) );
    wc.hCursor       = LoadCursor( NULL, IDC_ARROW );
    wc.hbrBackground = (HBRUSH)( COLOR_BTNFACE + 1 );
    /* wc.lpszMenuName  = MAKEINTRESOURCE( IDR_MAINMENU ); */

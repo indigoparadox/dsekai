@@ -2,10 +2,6 @@
 #ifndef PALMG_H
 #define PALMG_H
 
-#include "../dstypes.h"
-
-#include <PalmOS.h>
-
 typedef IndexedColorType GRAPHICS_COLOR;
 struct GRAPHICS_BITMAP {
    RESOURCE_ID id;

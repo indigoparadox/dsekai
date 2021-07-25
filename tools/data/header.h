@@ -2,8 +2,6 @@
 #ifndef HEADER_H
 #define HEADER_H
 
-#include "../../src/dstypes.h"
-
 struct CONVERT_GRID;
 struct CONVERT_OPTIONS;
 

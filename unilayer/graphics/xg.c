@@ -1,6 +1,6 @@
 
 #define GRAPHICS_C
-#include "../dstypes.h"
+#include "../unilayer.h"
 
 #include "../../tools/data/bmp.h"
 

@@ -1,15 +1,12 @@
 
-#include "bmp.h"
+#include "../convert.h"
 
-#include "../../src/dio.h"
-#include "../../src/memory.h"
+#include "bmp.h"
 
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-
-#include "../convert.h"
 
 #define BMP_FMT_FILE_HEADER_SZ   14
 #define BMP_FMT_BMP_HEADER_SZ    40

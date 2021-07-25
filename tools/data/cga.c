@@ -1,10 +1,10 @@
 
+#include "../convert.h"
+
 #include "cga.h"
 
-#include "../../src/memory.h"
-#include "../../src/dio.h"
-
-#include "../convert.h"
+#include <string.h>
+#include <stdlib.h>
 
 const char gc_null = '\0';
 
@@ -40,6 +40,7 @@ int cga_write_file(
    assert( NULL != cga_buffer );
 
    /* Perform the conversion and write the result to file. */
+   printf( "path: %s\n", path );
    cga_file = fopen( path, "wb" );
    assert( NULL != cga_file );
    retval = cga_write( cga_buffer, cga_buffer_sz, grid, o );

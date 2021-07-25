@@ -73,9 +73,12 @@ void graphics_string_at(
       x_o = 0; /* X offset. */
 
    while(
-      '\0' != str[i] &&
+      '\0' != str[i]
+#if defined( SCREEN_REAL_W ) && defined( SCREEN_REAL_H )
+      &&
       x_orig + FONT_W < SCREEN_REAL_W && /* On-screen (x-axis). */
       y_orig + FONT_H < SCREEN_REAL_H    /* On-screen (y-axis). */
+#endif /* SCREEN_REAL_W && SCREEN_REAL_H */
    ) {
       graphics_char_at( str[i], x_orig + x_o, y_orig, color, scale );
       x_o += FONT_W + FONT_SPACE;

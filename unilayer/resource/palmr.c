@@ -1,5 +1,5 @@
 
-#include "../dstypes.h"
+#include "../unilayer.h"
 
 static MEMORY_HANDLE resource_get_handle( RESOURCE_ID id, char type[4] ) {
    debug_printf( 2, "loading resource %u of type %u", id, type );
@@ -8,11 +8,11 @@ static MEMORY_HANDLE resource_get_handle( RESOURCE_ID id, char type[4] ) {
 }
 
 RESOURCE_BITMAP_HANDLE resource_get_bitmap_handle( RESOURCE_ID id ) {
-   return resource_get_handle( id, DRC_BITMAP_TYPE );
+   return resource_get_handle( id, 'Tbmp' );
 }
 
 RESOURCE_BITMAP_HANDLE resource_get_json_handle( RESOURCE_ID id ) {
-   return resource_get_handle( id, DRC_JSON_TYPE );
+   return resource_get_handle( id, 'json' );
 }
 
 MEMORY_PTR resource_lock_handle( MEMORY_HANDLE handle ) {

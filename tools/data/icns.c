@@ -1,8 +1,7 @@
 
-#include "icns.h"
+#include "../convert.h"
 
-#include "../../src/dio.h"
-#include "../../src/memory.h"
+#include "icns.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,5 +1,5 @@
 
-#include "../input.h"
+#include "../unilayer.h"
 
 /* This is set by the window message processor in win16g.c. */
 uint32_t g_last_key = 0;

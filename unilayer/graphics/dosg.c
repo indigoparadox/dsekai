@@ -1,6 +1,26 @@
 
 #define GRAPHICS_C
-#include "../dstypes.h"
+#include "../unilayer.h"
+
+#define GRAPHICS_M_320_200_4_CGA  0x05
+#define GRAPHICS_M_320_200_256_V  0x13
+
+#define GRAPHICS_M_320_200_256_VGA_A   0xA0000000L
+#define GRAPHICS_M_320_200_4_CGA_A     0xB8000000L
+
+#ifndef GRAPHICS_MODE
+#define GRAPHICS_MODE      0x05
+#endif /* !GRAPHICS_MODE */
+
+#ifndef CGA_COLD
+#define CGA_COLD           0x01
+#endif /* CGA_COLD */
+
+#if GRAPHICS_M_320_200_4_CGA == GRAPHICS_MODE
+#define GRAPHICS_ADDR     GRAPHICS_M_320_200_4_CGA_A
+#elif GRAPHICS_M_320_200_256_VGA == GRAPHICS_MODE
+#define GRAPHICS_ADDR     GRAPHICS_M_320_200_256_VGA_A
+#endif /* GRAPHICS_MODE */
 
 #include <string.h>
 #ifndef NO_I86

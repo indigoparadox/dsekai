@@ -7,6 +7,7 @@ uint8_t g_running = 1;
 MEMORY_HANDLE g_state_handle = NULL;
 
 #ifdef PLATFORM_WIN
+#include "winstat.h"
 HINSTANCE g_instance = NULL;
 HWND g_window = NULL;
 #endif /* PLATFORM_WIN */
@@ -66,6 +67,7 @@ int main( int argc, char* argv[] ) {
 
    g_instance = hInstance;
    graphics_args.cmd_show = nCmdShow;
+   graphics_args.icon_res = icon_dsekai;
 
    if( hPrevInstance ) {
       error_printf( "previous instance detected" );

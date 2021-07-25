@@ -2,13 +2,6 @@
 #ifndef CGA_H
 #define CGA_H
 
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-
-#include "../../src/dstypes.h"
-
 #define CGA_HEADER_SZ                     30
 
 #define CGA_HEADER_OFFSET_VERSION         2

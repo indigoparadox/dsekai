@@ -32,8 +32,6 @@
 
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
-/* #define USE_JSON_MAPS */
-#define ANIMATE_SCREEN_MOVEMENT
 #define RESOURCE_HEADER
 
 /* ------ */
@@ -64,8 +62,6 @@
 #endif /* !DRC_ARCHIVE */
 
 #define USE_SOFTWARE_TEXT
-/* #define USE_JSON_MAPS */
-#define ANIMATE_SCREEN_MOVEMENT
 #ifndef RESOURCE_FILE
 #define RESOURCE_HEADER
 #endif /* !RESOURCE_FILE */
@@ -79,6 +75,8 @@
 #define _POSIX_C_SOURCE 200809L
 #endif /* __GNUC__ */
 
+#include <X11/Xlib.h>
+
 #include "../gen/xlib/resext.h"
 
 #ifndef DIO_PATH_TEMP
@@ -90,8 +88,6 @@
 #endif /* !DIO_PATH_SEP */
 
 #define USE_SOFTWARE_TEXT
-/* #define USE_JSON_MAPS */
-#define ANIMATE_SCREEN_MOVEMENT
 #define RESOURCE_HEADER
 
 /* ------ */
@@ -102,8 +98,6 @@
 
 #include "../gen/palm/resext.h"
 
-#define far
-
 #ifndef LOG_FILE_NAME
 #define LOG_FILE_NAME "logpalm.txt"
 #endif /* !LOG_FILE_NAME */
@@ -111,8 +105,6 @@
 #define USE_SOFT_ASSERT
 #define DISABLE_FILESYSTEM
 #define LOG_TO_FILE
-#define USE_JSON_MAPS
-#define ANIMATE_SCREEN_MOVEMENT
 
 #define stringify_line( line ) #line
 
@@ -121,9 +113,6 @@
 #define platform_fopen HostFOpen
 #define platform_fflush HostFFlush
 #define platform_fclose HostFClose
-
-#define DRC_BITMAP_TYPE 'Tbmp'
-#define DRC_JSON_TYPE 'json'
 
 /* #define assert( test ) ErrFatalDisplayIf( !(test), __FILE__ ": " stringify_line( __LINE__ ) ": assert failure" ) */
 
@@ -147,12 +136,8 @@
 #define DIO_PATH_SEP '\\'
 #endif /* !DIO_PATH_SEP */
 
-#define DRC_BITMAP_TYPE 1
-#define DRC_JSON_TYPE 2
-
 #define LOG_TO_FILE
 #define USE_SOFTWARE_TEXT
-#define ANIMATE_SCREEN_MOVEMENT
 #define PLATFORM_WIN
 
 #define PLATFORM_API PASCAL
@@ -179,10 +164,6 @@
 #define DIO_PATH_SEP '\\'
 #endif /* !DIO_PATH_SEP */
 
-#define DRC_BITMAP_TYPE 1
-#define DRC_JSON_TYPE 2
-
-#define ANIMATE_SCREEN_MOVEMENT
 #define PLATFORM_WIN
 
 #define PLATFORM_API WINAPI
@@ -209,10 +190,6 @@
 #define DIO_PATH_SEP '\\'
 #endif /* !DIO_PATH_SEP */
 
-#define DRC_BITMAP_TYPE 1
-#define DRC_JSON_TYPE 2
-
-#define ANIMATE_SCREEN_MOVEMENT
 #define PLATFORM_WIN
 
 #define PLATFORM_API WINAPI
@@ -252,7 +229,6 @@
 #define platform_fclose fclose
 
 #define USE_SOFTWARE_TEXT
-#define ANIMATE_SCREEN_MOVEMENT
 #define DRC_TOC_INITIAL_ALLOC 50 /* Fake it until we have realloc. */
 #define RESOURCE_HEADER
 #define DISABLE_MAIN_PARMS
@@ -281,7 +257,6 @@
 #define platform_fclose fclose
 
 #define USE_SOFTWARE_TEXT
-#define ANIMATE_SCREEN_MOVEMENT
 #define DRC_TOC_INITIAL_ALLOC 50 /* Fake it until we have realloc. */
 #define RESOURCE_HEADER
 
@@ -313,8 +288,6 @@
 #endif /* !DRC_ARCHIVE */
 
 #define USE_SOFTWARE_TEXT
-/* #define USE_JSON_MAPS */
-#define ANIMATE_SCREEN_MOVEMENT
 #ifndef RESOURCE_FILE
 #define RESOURCE_HEADER
 #endif /* !RESOURCE_FILE */
@@ -339,9 +312,7 @@
 #include "../gen/check_null/resext.h"
 #endif /* NO_RESEXT */
 
-#define ANIMATE_SCREEN_MOVEMENT
 #define USE_SOFTWARE_TEXT
-#define USE_JSON_MAPS
 
 /* ------ */
 #endif /* PLATFORM_DOS, PLATFORM_SDL, PLATFORM_PALM, PLATFORM_WIN16 */
@@ -367,29 +338,9 @@
 #define platform_fclose fclose
 #endif /* !platform_fclose */
 
-#ifndef DRC_ARCHIVE_TYPE
-#define DRC_ARCHIVE_TYPE {'D', 'R', 'C', 'T'}
-#endif /* !DRC_ARCHIVE_TYPE */
-
-#ifndef DRC_BITMAP_TYPE
-#define DRC_BITMAP_TYPE {'B', 'M', 'P', '1'}
-#endif /* !DRC_BITMAP_TYPE */
-
-#ifndef DRC_JSON_TYPE
-#define DRC_JSON_TYPE {'j', 's', 'o', 'n'}
-#endif /* !DRC_JSON_TYPE */
-
 #ifndef JSON_BUFFER_SZ
 #define JSON_BUFFER_SZ 8192
 #endif /* !JSON_BUFFER_SZ */
-
-#ifndef SCREEN_W
-#define SCREEN_W 320
-#endif /* !SCREEN_W */
-
-#ifndef SCREEN_H
-#define SCREEN_H 200
-#endif /* !SCREEN_H */
 
 #ifndef SCREEN_SCALE
 #define SCREEN_SCALE 1
@@ -556,21 +507,15 @@
 #define PATTERN_W 16
 #define PATTERN_H 16
 
-#define WINDOW_CENTERED -1
-
-#define WINDOW_STRINGS_MAX 5
-#define WINDOW_STRING_LEN_MAX 64
-
-#define STATUS_WINDOW_W SCREEN_W
-#define STATUS_WINDOW_H 32
-
 /* Derived Parameters */
 
-#define SCREEN_MAP_W (SCREEN_W)
-#define SCREEN_MAP_H (160 - 32)
-
+#if defined( SCREEN_W ) && defined( SCREEN_SCALE )
 #define SCREEN_REAL_W (SCREEN_W * SCREEN_SCALE)
+#endif /* SCREEN_W, SCREEN_SCALE */
+
+#if defined( SCREEN_H ) && defined( SCREEN_SCALE )
 #define SCREEN_REAL_H (SCREEN_H * SCREEN_SCALE)
+#endif /* SCREEN_H, SCREEN_SCALE */
 
 #ifdef LOG_TO_FILE
 #ifdef MAIN_C

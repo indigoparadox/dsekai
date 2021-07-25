@@ -1,5 +1,5 @@
 
-#include "../dstypes.h"
+#include "../unilayer.h"
 
 /**
  * \brief Allocate a handle to a resource in DRC archive or OS resource fork.

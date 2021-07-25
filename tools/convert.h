@@ -2,7 +2,7 @@
 #ifndef CONVERT_H
 #define CONVERT_H
 
-#include "../src/dstypes.h"
+#include "../unilayer/unilayer.h"
 
 #define CONVERT_BUFFER_SZ 1024
 

@@ -274,6 +274,8 @@ void tilemap_refresh_tiles( struct TILEMAP* t ) {
    }
 }
 
+#if defined( SCREEN_W ) && defined( SCREEN_H )
+
 void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
    int x = 0,
       y = 0;
@@ -321,6 +323,8 @@ void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
       }
    }
 }
+
+#endif /* SCREEN_W && SCREEN_H */
 
 uint8_t tilemap_collide( const struct TILEMAP* t, uint8_t x, uint8_t y ) {
    uint8_t tile_id = 0;

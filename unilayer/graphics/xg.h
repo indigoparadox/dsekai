@@ -2,10 +2,6 @@
 #ifndef XG_H
 #define XG_H
 
-#include "../dstypes.h"
-
-#include <X11/Xlib.h>
-
 typedef uint32_t GRAPHICS_COLOR;
 struct GRAPHICS_BITMAP {
    RESOURCE_ID id;

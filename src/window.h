@@ -2,6 +2,8 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#define WINDOW_CENTERED -1
+
 #define WINDOW_COUNT_MAX 10
 
 #define WINDOW_STATUS_EMPTY    0

@@ -2,7 +2,6 @@
 #ifndef ICNS_H
 #define ICNS_H
 
-#include "../../src/dstypes.h"
 #include "../convert.h"
 
 #define ICNS_FILE_HEADER_SZ               8

@@ -1,10 +1,10 @@
 
 #include "convert.h"
+
 #include "data/drcwrite.h"
 #include "data/bmp.h"
 #include "data/cga.h"
 #include "data/icns.h"
-#include "../src/dio.h"
 #include "data/header.h"
 
 #include <stdio.h>

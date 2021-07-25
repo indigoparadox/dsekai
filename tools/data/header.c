@@ -1,12 +1,11 @@
 
+#include "../convert.h"
+
 #include "header.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "../../src/dio.h"
-#include "../convert.h"
 
 int header_img_write_file(
    const char* path, const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o

@@ -2,8 +2,6 @@
 #ifndef WING_H
 #define WING_H
 
-#include "../dstypes.h"
-
 typedef COLORREF GRAPHICS_COLOR;
 struct GRAPHICS_BITMAP {
    RESOURCE_ID id;
@@ -21,6 +19,7 @@ struct GRAPHICS_BITMAP {
 
 struct GRAPHICS_ARGS {
    int cmd_show;
+   int icon_res;
    uint8_t scale;
 };
 

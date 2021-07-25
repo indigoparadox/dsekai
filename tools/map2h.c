@@ -1,5 +1,5 @@
 
-#include "../src/dstypes.h"
+#include "../src/dsekai.h"
 
 #include <stdio.h>
 #include <stdlib.h>

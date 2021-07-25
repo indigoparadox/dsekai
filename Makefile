@@ -33,27 +33,27 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    tools/data/icns.c \
    tools/data/drcwrite.c \
    unilayer/memory/fakem.c \
-   src/drc.c \
+   unilayer/drc.c \
    unilayer/dio.c
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
    unilayer/memory/fakem.c \
-   src/drc.c \
+   unilayer/drc.c \
    unilayer/dio.c
 
 DRCPACK_C_FILES := \
    tools/drcpack.c \
    tools/data/drcwrite.c \
    unilayer/memory/fakem.c \
-   src/drc.c \
+   unilayer/drc.c \
    unilayer/dio.c
 
 CONVERT_C_FILES := \
    tools/convert.c \
    tools/data/bmp.c \
    unilayer/memory/fakem.c \
-   src/drc.c \
+   unilayer/drc.c \
    tools/data/cga.c \
    unilayer/dio.c \
    tools/data/header.c \
@@ -142,7 +142,7 @@ CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=
 CFLAGS_CONVERT := -DNO_RESEXT -g -DUSE_JSON_MAPS -DRESOURCE_DRC
 CFLAGS_LOOKUPS := -g
 CFLAGS_HEADPACK := -g
-CFLAGS_MAP2H := -g
+CFLAGS_MAP2H := -g -DUSE_JSON_MAPS
 
 CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=3
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -fsanitize=undefined -pg
@@ -349,7 +349,7 @@ LD_XLIB := gcc
 
 # 4. Arguments
 
-CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_DEBUG_GCC)
+CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_DEBUG_GCC) -I$(GENDIR_XLIB)
 
 LDFLAGS_XLIB := -g -lX11 $(CFLAGS_DEBUG_GCC)
 
@@ -411,7 +411,7 @@ LD_DOS := wcl
 
 # 4. Arguments
 
-CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1
+CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS)
 
 LDFLAGS_DOS := $(CFLAGS_DOS)
 
@@ -429,6 +429,7 @@ $(GENDIR_DOS)/$(STAMPFILE) $(HEADPACK)
 #      -if $(GENDIR_DOS)/*.cga $(DSEKAI_ASSETS_MAPS) -lh $(GENDIR_DOS)/resext.h
 
 $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
+	$(MD) $(dir $@)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR) $(DSEKAI_ASSETS_MAPS_DOS)
@@ -473,7 +474,7 @@ BUILDPRC := build-prc
 
 # 4. Arguments
 
-CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC)
+CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC) -DUSE_JSON_MAPS
 
 LDFLAGS_PALM = -g $(CFLAGS_PALM)
 
@@ -486,6 +487,7 @@ $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_PALM)/$(STAMPFILE) $(HEADPACK)
 
 $(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_PALM)/$(STAMPFILE)
+	$(MD) $(dir $@)
 	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc bitmap
 
 $(GENDIR_PALM)/resext.h \
@@ -545,7 +547,7 @@ RC_WIN16 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1
+CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160
 
 LDFLAGS_WIN16 := -l=windows -zp=1
 
@@ -623,7 +625,7 @@ RC_WIN32 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1
+CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160
 
 LDFLAGS_WIN32 := -bcl=nt_win -zp=1
 
@@ -647,7 +649,7 @@ $(OBJDIR_WIN32)/$(STAMPFILE)
 
 $(GENDIR_WIN32)/win32.rc \
 $(GENDIR_WIN32)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS_WIN32) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) | \
 $(MKRESH) $(GENDIR_WIN32)/$(STAMPFILE)
 	$(MKRESH) -f win16 -i 5001 \
       -if $^ \
@@ -728,6 +730,7 @@ $(GENDIR_MAC7)/$(STAMPFILE) $(HEADPACK)
 #	echo "read 'icns' (-16455) \"$<\";" > $@
 
 $(GENDIR_MAC7)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC7)/$(STAMPFILE)
+	$(MD) $(dir $@)
 	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
 
 $(OBJDIR_MAC7)/dsekai.code.bin: $(DSEKAI_O_FILES_MAC7) | $(OBJDIR_MAC7)

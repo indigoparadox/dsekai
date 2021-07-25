@@ -58,11 +58,7 @@ int topdown_draw(
       assert( 0 <= state->screen_scroll_tx );
 
       tilemap_refresh_tiles( map );
-#ifdef ANIMATE_SCREEN_MOVEMENT
-#ifndef DISABLE_GRAPHICS
       tilemap_draw( map, state );
-#endif /* !DISABLE_GRAPHICS */
-#endif /* ANIMATE_SCREEN_MOVEMENT */
 
       /* Drain input. */
       in_char = input_poll();
@@ -87,9 +83,7 @@ int topdown_draw(
       return 1;
    }
 
-#ifndef DISABLE_GRAPHICS
    tilemap_draw( map, state );
-#endif /* !DISABLE_GRAPHICS */
 
    for( i = 0 ; state->mobiles_count > i ; i++ ) {
       if(
@@ -101,12 +95,10 @@ int topdown_draw(
          /* Mobile is off-screen. */
          continue;
       }
-#ifndef DISABLE_GRAPHICS
       mobile_draw(
          &(mobiles[i]),
          state->walk_offset, state->screen_scroll_x, state->screen_scroll_y );
       assert( NULL != &(mobiles[state->player_idx]) );
-#endif /* !DISABLE_GRAPHICS */
    }
 
    /* Keep running. */

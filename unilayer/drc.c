@@ -116,7 +116,7 @@ int32_t drc_get_resource_info(
    union DRC_TYPE type, uint32_t id, struct DRC_TOC_E* e
 ) {
    int32_t i = 0;
-   union DRC_TYPE header_type = DRC_ARCHIVE_TYPE;
+   union DRC_TYPE header_type = {'D', 'R', 'C', 'T'};
    struct DRC_HEADER header;
    uint8_t* header_bytes = (uint8_t*)&header;
    struct DRC_TOC_E toc_e_iter;

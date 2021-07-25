@@ -2,8 +2,6 @@
 #ifndef BMP_H
 #define BMP_H
 
-#include "../../src/dstypes.h"
-
 struct CONVERT_GRID;
 struct CONVERT_OPTIONS;
 
