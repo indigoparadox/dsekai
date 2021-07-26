@@ -15,7 +15,7 @@ There are also some rough examples of CGA graphics programming in unilayer/graph
 * Simple and consistent data structures for binary save dumps.
 * Housing system based on in-game map editing.
 * Item usage and crafting.
-* Mobile interactions.
+* Mobile scripting language w/ wait for interaction instruction.
 * Minimal resource use (shooting for <64k RAM).
 
 ## Rules

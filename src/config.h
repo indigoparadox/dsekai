@@ -2,16 +2,6 @@
 #ifndef DSEKAI_CONFIG_H
 #define DSEKAI_CONFIG_H
 
-/* ------ */
-#if defined( PLATFORM_PALM )
-/* ------ */
-
-#define USE_JSON_MAPS
-
-/* ------ */
-#endif
-/* ------ */
-
 #define SCREEN_MAP_W (SCREEN_W)
 #define SCREEN_MAP_H (160 - 32)
 

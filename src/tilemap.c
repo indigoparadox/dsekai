@@ -3,23 +3,19 @@
 
 #ifdef USE_JSON_MAPS
 
-#define SPAWN_TYPE_MAX 32
-
 int16_t tilemap_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
    jsmntok_t* tokens, uint16_t tokens_sz, char* json_buffer,
    char* iter_path, uint16_t iter_path_sz
 ) {
    struct TILEMAP_SPAWN* spawn = (struct TILEMAP_SPAWN*)&(t->spawns[spawn_idx]);
-   char spawn_buffer[SPAWN_TYPE_MAX];
+   char spawn_buffer[TILEMAP_SPAWN_T_MAX];
    int16_t spawn_buffer_sz = 0;
 
-   dio_snprintf(
-      iter_path, iter_path_sz, "/layers/[name=mobiles]/objects/%d/name",
-         spawn_idx );
+   dio_snprintf( iter_path, iter_path_sz, TILEMAP_JPATH_MOB_NAME, spawn_idx );
    spawn_buffer_sz = json_str_from_path(
       iter_path, JSON_PATH_SZ,
-      spawn_buffer, SPAWN_TYPE_MAX, tokens, tokens_sz, json_buffer );
+      spawn_buffer, TILEMAP_SPAWN_T_MAX, tokens, tokens_sz, json_buffer );
 
    if( 0 > spawn_buffer_sz ) {
       error_printf( "unable to parse mobile name" );
@@ -35,8 +31,7 @@ int16_t tilemap_parse_spawn(
 
    /* Parse X */
    dio_snprintf(
-      iter_path, iter_path_sz,
-      "/layers/[name=mobiles]/objects/%d/x", spawn_idx );
+      iter_path, iter_path_sz, TILEMAP_JPATH_MOB_X, spawn_idx );
    spawn->coords.x = json_int_from_path(
       iter_path, iter_path_sz, &(tokens[0]), tokens_sz, json_buffer );
    spawn->coords.x /= TILE_W;
@@ -44,7 +39,7 @@ int16_t tilemap_parse_spawn(
    /* Parse Y */
    dio_snprintf(
       iter_path, iter_path_sz,
-      "/layers/[name=mobiles]/objects/%d/y", spawn_idx );
+      iter_path, iter_path_sz, TILEMAP_JPATH_MOB_Y, spawn_idx );
    spawn->coords.y = json_int_from_path(
       iter_path, iter_path_sz, &(tokens[0]), tokens_sz, json_buffer );
    spawn->coords.y /= TILE_H;
@@ -57,7 +52,7 @@ int16_t tilemap_parse_spawn(
       spawn_idx );
    spawn_buffer_sz = json_str_from_path(
       iter_path, iter_path_sz,
-      spawn_buffer, SPAWN_TYPE_MAX, &(tokens[0]), tokens_sz, json_buffer );
+      spawn_buffer, TILEMAP_SPAWN_T_MAX, &(tokens[0]), tokens_sz, json_buffer );
    if( 0 == memory_strncmp_ptr( "talk", spawn_buffer, 4 ) ) {
       spawn->interaction = MOBILE_IACT_TALK;
       debug_printf( 1, "mobile interaction: talk" );
@@ -72,7 +67,7 @@ int16_t tilemap_parse_spawn(
          spawn_idx );
       spawn_buffer_sz = json_str_from_path(
          iter_path, iter_path_sz,
-         spawn_buffer, SPAWN_TYPE_MAX, &(tokens[0]), tokens_sz, json_buffer );
+         spawn_buffer, TILEMAP_SPAWN_T_MAX, &(tokens[0]), tokens_sz, json_buffer );
       if( TILEMAP_STRINGS_MAX <= t->strings_count + 1 ) {
          error_printf( "tilemap string table full" );
          break;
@@ -106,7 +101,7 @@ int16_t tilemap_parse_tileset(
    memory_zero_ptr( tileset_name, DRC_FILENAME_SZ );
 
    tileset_source_len = json_str_from_path(
-      "/tilesets/0/source", 18, /* Path Sz */
+      TILEMAP_JPATH_TS_SRC, sizeof( TILEMAP_JPATH_TS_SRC ),
       tileset_name, DRC_FILENAME_SZ, tokens, tokens_sz, json_buffer );
    if( 0 >= tileset_source_len ) {
       error_printf( "tileset source not found" );
@@ -126,8 +121,7 @@ int8_t tilemap_parse_tile(
    int8_t tile_id_in = 0;
 
    /* Load tile data into the grid. */
-   dio_snprintf(
-      iter_path, iter_path_sz, "/layers/[name=terrain]/data/%d", tile_idx );
+   dio_snprintf( iter_path, iter_path_sz, TILEMAP_JPATH_TILE, tile_idx );
    tile_id_in = 
       json_int_from_path(
          iter_path, iter_path_sz, tokens, tokens_sz, json_buffer );
@@ -185,7 +179,7 @@ int16_t tilemap_parse(
 
    /* Parse Name */
    name_len = json_str_from_path(
-      "/properties/[name=name]/value", 29, /* Path Sz */
+      TILEMAP_JPATH_PROP_NAME, sizeof( TILEMAP_JPATH_PROP_NAME ),
       t->name, TILEMAP_NAME_MAX, tokens, tok_parsed, json_buffer );
    if( 0 >= name_len ) {
       error_printf( "tilemap name not found" );

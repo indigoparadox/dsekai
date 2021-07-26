@@ -8,6 +8,7 @@
 #define TILEMAP_TILESETS_MAX 12
 #define TILEMAP_STRINGS_MAX 20
 #define TILEMAP_STRINGS_SZ 128
+#define TILEMAP_SPAWN_T_MAX 32
 #define MOBILE_SCRIPT_STEPS_MAX 16
 #define SCREEN_TW (SCREEN_MAP_W / TILE_W)
 #define SCREEN_TH (SCREEN_MAP_H / TILE_H)
@@ -16,43 +17,34 @@
 
 #define TILEMAP_TILE_FLAG_DIRTY     0x01
 
+#define TILEMAP_JPATH_TS_SRC     "/tilesets/0/source"
+#define TILEMAP_JPATH_TILE       "/layers/[name=terrain]/data/%d"
+#define TILEMAP_JPATH_PROP_NAME  "/properties/[name=name]/value"
+#define TILEMAP_JPATH_MOB_X      "/layers/[name=mobiles]/objects/%d/x"
+#define TILEMAP_JPATH_MOB_Y      "/layers/[name=mobiles]/objects/%d/y"
+#define TILEMAP_JPATH_MOB_NAME   "/layers/[name=mobiles]/objects/%d/name"
+
 #define tilemap_get_tile_id( t, x, y ) ((t->tiles[((y * TILEMAP_TW) + x) / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
 
 struct jsmntok;
 
-struct
-#ifdef __GNUC__
-__attribute__( (__packed__) )
-#endif /* __GNUC__ */
-TILESET_TILE {
+struct PACKED TILESET_TILE {
    RESOURCE_ID image;
    uint32_t flags;
 };
 
-struct
-#ifdef __GNUC__
-__attribute__( (__packed__) )
-#endif /* __GNUC__ */
-MOBILE_SCRIPT_STEP {
+struct PACKED MOBILE_SCRIPT_STEP {
    uint16_t action;
    uint16_t arg;
 };
 
-struct
-#ifdef __GNUC__
-__attribute__( (__packed__) )
-#endif /* __GNUC__ */
-TILEMAP_SPAWN {
+struct PACKED TILEMAP_SPAWN {
    struct TILEMAP_COORDS coords;
    int16_t type;
    struct MOBILE_SCRIPT_STEP script[MOBILE_SCRIPT_STEPS_MAX];
 };
 
-struct
-#ifdef __GNUC__
-__attribute__( (__packed__) )
-#endif /* __GNUC__ */
-TILEMAP {
+struct PACKED TILEMAP {
    char name[TILEMAP_NAME_MAX];
    struct TILESET_TILE tileset[TILEMAP_TILESETS_MAX];
    uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];

@@ -4,6 +4,8 @@ DSEKAI := dsekai
 DSEKAI_C_FILES := \
    src/tilemap.c \
    unilayer/graphics.c \
+   unilayer/resource/header.c \
+   unilayer/resource/file.c \
    src/mobile.c \
    src/item.c \
    src/window.c \
@@ -74,7 +76,7 @@ MAP2H_C_FILES := \
    unilayer/graphics.c \
    unilayer/graphics/nullg.c
 
-PLATFORMS := sdl sdl-nj sdl-file xlib dos win16 win32 palm mac7 nds curses check_null
+PLATFORMS := sdl sdl-nj sdl-file xlib dos win16 win32 palm mac6 nds curses check_null
 
 ASSETDIR := assets
 OBJDIR := obj
@@ -95,12 +97,19 @@ BIN_XLIB := $(BINDIR)/$(DSEKAI)x
 BIN_PALM := $(BINDIR)/$(DSEKAI).prc
 BIN_WIN16 := $(BINDIR)/$(DSEKAI)16.exe
 BIN_WIN32 := $(BINDIR)/$(DSEKAI)32.exe
-BIN_MAC7 := $(BINDIR)/$(DSEKAI).bin $(BINDIR)/$(DSEKAI).APPL $(BINDIR)/$(DSEKAI).dsk
+BIN_MAC6 := $(BINDIR)/$(DSEKAI).bin $(BINDIR)/$(DSEKAI).APPL $(BINDIR)/$(DSEKAI).dsk
 BIN_NDS := $(BINDIR)/$(DSEKAI).nds
 BIN_WEB := $(BINDIR)/$(DSEKAI).js
 BIN_CURSES := $(BINDIR)/$(DSEKAI)t
 
 BIN_CHECK_NULL := $(BINDIR)/check
+
+CFLAGS_OPT :=
+ifeq ($(RESOURCE),"FILE")
+CFLAGS_OPT += -DRESOURCE_FILE
+else ifeq ($(RESOURCE),"HEADER")
+CFLAGS_OPT += -DRESOURCE_HEADER
+endif
 
 define BITMAPS_RULE
 DSEKAI_ASSETS_SPRITES_$(DEPTH) := \
@@ -176,10 +185,13 @@ $(GENDIR)/%/$(STAMPFILE):
 	$(MD) $(dir $@)
 	touch $@
 
+ifneq ($(RESOURCE),"FILE")
 # This may be overridden by the individual targets, as they may need different
 # resources for their platform.
 $(GENDIR)/%/resext.h: | $(GENDIR)/%/$(STAMPFILE) $(HEADPACK)
 	$(HEADPACK) $@ $^
+RESOURCE := HEADER
+endif
 
 define ICO_RULE
 $(GENDIR)/$(platform)/%.ico: $(ASSETDIR)/%.bmp | \
@@ -232,8 +244,7 @@ DSEKAI_C_FILES_SDL_ONLY := \
    src/json.c \
    unilayer/input/sdli.c \
    unilayer/graphics/sdlg.c \
-   unilayer/memory/fakem.c \
-   unilayer/resource/header.c
+   unilayer/memory/fakem.c
 
 DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -246,15 +257,22 @@ LD_SDL := gcc
 
 # 4. Arguments
 
-CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC)
+CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT)
 
 LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
 # 5. Targets
 
+ifeq ($(RESOURCE),"FILE")
 $(GENDIR_SDL)/resext.h: \
 $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_SDL)/$(STAMPFILE) $(HEADPACK)
+else ifeq ($(RESOURCE),"HEADER")
+$(GENDIR_SDL)/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
+$(GENDIR_SDL)/$(STAMPFILE) $(MKRESH)
+	$(MKRESH) -f file -if $^ -oh $@
+endif
 
 $(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE)
 	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL)
@@ -270,58 +288,6 @@ $(DEPDIR_SDL)/%.d: %.c $(GENDIR_SDL)/resext.h
 
 #include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
 
-# ====== Main: SDL (File Res) ======
-
-# 1. Directories
-
-OBJDIR_SDL_FILE := $(OBJDIR)/sdl-file
-DEPDIR_SDL_FILE := $(DEPDIR)/sdl-file
-GENDIR_SDL_FILE := $(GENDIR)/sdl-file
-
-# 2. Files
-
-DSEKAI_C_FILES_SDL_FILE_ONLY := \
-   src/main.c \
-   unilayer/input/sdli.c \
-   unilayer/graphics/sdlg.c \
-   unilayer/memory/fakem.c \
-   src/json.o \
-   unilayer/resource/file.c
-
-DSEKAI_O_FILES_SDL_FILE := \
-   $(addprefix $(OBJDIR_SDL_FILE)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_SDL_FILE)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_FILE_ONLY)))
-
-# 3. Programs
-
-# 4. Arguments
-
-CFLAGS_SDL_FILE := $(CFLAGS_SDL) -DRESOURCE_FILE -DUSE_JSON_MAPS
-
-LDFLAGS_SDL_FILE := $(LDFLAGS_SDL)
-
-# 5. Targets
-
-$(GENDIR_SDL_FILE)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
-$(MKRESH) $(GENDIR_SDL_FILE)/$(STAMPFILE)
-	$(MKRESH) -f file -if $^ -oh $@
-
-$(BIN_SDL)-file: $(DSEKAI_O_FILES_SDL_FILE) | \
-$(BINDIR)/$(STAMPFILE) $(GENDIR_SDL_FILE)/resext.h
-	$(CC_SDL) -o $@ $^ $(LDFLAGS_SDL)
-
-$(OBJDIR_SDL_FILE)/%.o: %.c $(GENDIR_SDL_FILE)/resext.h | $(DSEKAI_ASSETS_MAPS)
-	$(MD) $(dir $@)
-	$(CC_SDL) $(CFLAGS_SDL_FILE) -c -o $@ $(<:%.o=%)
-
-$(DEPDIR_SDL_FILE)/%.d: %.c $(GENDIR_SDL_FILE)/resext.h
-	$(MD) $(dir $@)
-	$(CC_SDL) $(CFLAGS_SDL_FILE) -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL_FILE)/,$<)) -MF $@
-
-#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL_FILE:.o=.d))
-
 # ====== Main: xlib ======
 
 # 1. Directories
@@ -336,8 +302,7 @@ DSEKAI_C_FILES_XLIB_ONLY := \
    src/main.c \
    unilayer/input/xi.c \
    unilayer/graphics/xg.c \
-   unilayer/memory/fakem.c \
-   unilayer/resource/header.c
+   unilayer/memory/fakem.c
 
 DSEKAI_ASSETS_MAPS_XLIB := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_XLIB)/,$(DSEKAI_ASSETS_MAPS)))
@@ -349,7 +314,7 @@ LD_XLIB := gcc
 
 # 4. Arguments
 
-CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_DEBUG_GCC) -I$(GENDIR_XLIB)
+CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_DEBUG_GCC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT)
 
 LDFLAGS_XLIB := -g -lX11 $(CFLAGS_DEBUG_GCC)
 
@@ -359,9 +324,16 @@ DSEKAI_O_FILES_XLIB := \
 
 # 5. Targets
 
+ifeq ($(RESOURCE),"FILE")
 $(GENDIR_XLIB)/resext.h: \
 $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_XLIB)/$(STAMPFILE) $(HEADPACK)
+else ifeq ($(RESOURCE),"HEADER")
+$(GENDIR_XLIB)/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
+$(GENDIR_XLIB)/$(STAMPFILE) $(MKRESH)
+	$(MKRESH) -f file -if $^ -oh $@
+endif
 
 $(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(DSEKAI_ASSETS_MAPS_XLIB) $(GENDIR_XLIB)/resext.h
 	$(LD_XLIB) -o $@ $^ $(LDFLAGS_XLIB)
@@ -391,8 +363,7 @@ DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
    unilayer/input/dosi.c \
    unilayer/graphics/dosg.c \
-   unilayer/memory/fakem.c \
-   unilayer/resource/header.c
+   unilayer/memory/fakem.c
 
 DSEKAI_ASSETS_MAPS_DOS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
@@ -411,15 +382,22 @@ LD_DOS := wcl
 
 # 4. Arguments
 
-CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS)
+CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT)
 
 LDFLAGS_DOS := $(CFLAGS_DOS)
 
 # 5. Targets
 
+ifeq ($(RESOURCE),"FILE")
 $(GENDIR_DOS)/resext.h: \
 $(DSEKAI_ASSETS_DOS_CGA) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_DOS)/$(STAMPFILE) $(HEADPACK)
+else ifeq ($(RESOURCE),"HEADER")
+$(GENDIR_DOS/resext.h: \
+$(DSEKAI_ASSETS_DOS_CGA) $(DSEKAI_ASSETS_MAPS) | \
+$(GENDIR_DOS)/$(STAMPFILE) $(MKRESH)
+	$(MKRESH) -f file -if $^ -oh $@
+endif
 
 #$(BINDIR)/doscga.drc: res_doscga_drc
 
@@ -474,7 +452,7 @@ BUILDPRC := build-prc
 
 # 4. Arguments
 
-CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC) -DUSE_JSON_MAPS
+CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC) -DUSE_JSON_MAPS $(CFLAGS_OPT)
 
 LDFLAGS_PALM = -g $(CFLAGS_PALM)
 
@@ -547,7 +525,7 @@ RC_WIN16 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160
+CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT)
 
 LDFLAGS_WIN16 := -l=windows -zp=1
 
@@ -625,7 +603,7 @@ RC_WIN32 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160
+CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT)
 
 LDFLAGS_WIN32 := -bcl=nt_win -zp=1
 
@@ -671,73 +649,79 @@ $(DEPDIR_WIN32)/%.d: %.c $(GENDIR_WIN32)/resext.h $(DSEKAI_ASSETS_MAPS_WIN32)
 
 # 1. Directories
 
-OBJDIR_MAC7 := $(OBJDIR)/mac7
-DEPDIR_MAC7 := $(DEPDIR)/mac7
-GENDIR_MAC7 := $(GENDIR)/mac7
+OBJDIR_MAC6 := $(OBJDIR)/mac6
+DEPDIR_MAC6 := $(DEPDIR)/mac6
+GENDIR_MAC6 := $(GENDIR)/mac6
 
 RETRO68_PREFIX := /opt/Retro68-build/toolchain
 
 # 2. Files
 
-DSEKAI_C_FILES_MAC7_ONLY := \
+DSEKAI_C_FILES_MAC6_ONLY := \
    src/main.c \
-   unilayer/input/mac7i.c \
-   unilayer/graphics/mac7g.c \
-   unilayer/memory/mac7m.c \
-   unilayer/resource/header.c
+   unilayer/input/mac6i.c \
+   unilayer/graphics/mac6g.c \
+   unilayer/memory/mac6m.c
 
 DSEKAI_ASSETS_ICNS := \
-   $(subst .bmp,.icns,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
+   $(subst .bmp,.icns,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
 
 DSEKAI_ASSETS_RSRC := \
-   $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
+   $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
 
-DSEKAI_ASSETS_MAPS_MAC7 := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC7)/,$(DSEKAI_ASSETS_MAPS)))
+DSEKAI_ASSETS_MAPS_MAC6 := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_MAPS)))
 
-DSEKAI_O_FILES_MAC7 := \
-   $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_MAC7)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC7_ONLY)))
+DSEKAI_O_FILES_MAC6 := \
+   $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC6_ONLY)))
 
 # 3. Programs
 
-CC_MAC7 := m68k-apple-macos-gcc
-CXX_MAC7 := m68k-apple-macos-g++
-LDFLAGS_MAC7 := -lRetroConsole
-REZ_MAC7 := Rez
+CC_MAC6 := m68k-apple-macos-gcc
+CXX_MAC6 := m68k-apple-macos-g++
+LDFLAGS_MAC6 := -lRetroConsole
+REZ_MAC6 := Rez
 
 # 4. Arguments
 
-CFLAGS_MAC7 := -DPLATFORM_MAC7 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_DEBUG_GENERIC)
+CFLAGS_MAC6 := -DPLATFORM_MAC6 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_DEBUG_GENERIC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT)
 
 # 5. Targets
 
-#$(BINDIR)/mac7.drc \
-#$(GENDIR_MAC7)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | \
-#$(GENDIR_MAC7)/$(STAMPFILE)
-#	$(DRCPACK) -c -a -af $(BINDIR)/mac7.drc -t PICT -i 5001 \
+#$(BINDIR)/mac6.drc \
+#$(GENDIR_MAC6)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | \
+#$(GENDIR_MAC6)/$(STAMPFILE)
+#	$(DRCPACK) -c -a -af $(BINDIR)/mac6.drc -t PICT -i 5001 \
 #      -if $(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS) \
-#      -lh $(GENDIR_MAC7)/resext.h
+#      -lh $(GENDIR_MAC6)/resext.h
 
-$(GENDIR_MAC7)/resext.h: \
+ifeq ($(RESOURCE),"FILE")
+$(GENDIR_MAC6)/resext.h: \
 $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
-$(GENDIR_MAC7)/$(STAMPFILE) $(HEADPACK)
+$(GENDIR_MAC6)/$(STAMPFILE) $(HEADPACK)
+else ifeq ($(RESOURCE),"HEADER")
+$(GENDIR_MAC6)/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
+$(GENDIR_MAC6)/$(STAMPFILE) $(MKRESH)
+	$(MKRESH) -f file -if $^ -oh $@
+endif
 
-#$(GENDIR_MAC7)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC7)/$(STAMPFILE)
+#$(GENDIR_MAC6)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC6)/$(STAMPFILE)
 #	$(IMAGEMAGICK) $< $@
 
-#$(GENDIR_MAC7)/%.rsrc: $(GENDIR_MAC7)/%.icns
+#$(GENDIR_MAC6)/%.rsrc: $(GENDIR_MAC6)/%.icns
 #	echo "read 'icns' (-16455) \"$<\";" > $@
 
-$(GENDIR_MAC7)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC7)/$(STAMPFILE)
+$(GENDIR_MAC6)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC6)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
 
-$(OBJDIR_MAC7)/$(DSEKAI).code.bin: $(DSEKAI_O_FILES_MAC7) | $(OBJDIR_MAC7)
-	$(CXX_MAC7) $(LDFLAGS_MAC7) -o $@ $^ # Use CXX to link for RetroConsole.
+$(OBJDIR_MAC6)/$(DSEKAI).code.bin: $(DSEKAI_O_FILES_MAC6) | $(OBJDIR_MAC6)
+	$(CXX_MAC6) $(LDFLAGS_MAC6) -o $@ $^ # Use CXX to link for RetroConsole.
 
-$(BIN_MAC7): $(OBJDIR_MAC7)/$(DSEKAI).code.bin
-	$(REZ_MAC7) -I$(RETRO68_PREFIX)/RIncludes \
+$(BIN_MAC6): $(OBJDIR_MAC6)/$(DSEKAI).code.bin
+	$(REZ_MAC6) -I$(RETRO68_PREFIX)/RIncludes \
       --copy $^ \
       "$(RETRO68_PREFIX)/RIncludes/Retro68APPL.r" \
       -t "APPL" -c "DSEK" \
@@ -745,12 +729,12 @@ $(BIN_MAC7): $(OBJDIR_MAC7)/$(DSEKAI).code.bin
       --cc $(BINDIR)/$(DSEKAI).APPL \
       --cc $(BINDIR)/$(DSEKAI).dsk
 
-$(OBJDIR_MAC7)/%.o: \
-%.c $(DSEKAI_ASSETS_MAPS_MAC7) $(GENDIR_MAC7)/resext.h
+$(OBJDIR_MAC6)/%.o: \
+%.c $(DSEKAI_ASSETS_MAPS_MAC6) $(GENDIR_MAC6)/resext.h
 	$(MD) $(dir $@)
-	$(CC_MAC7) $(CFLAGS_MAC7) -c -o $@ $(<:%.o=%)
+	$(CC_MAC6) $(CFLAGS_MAC6) -c -o $@ $(<:%.o=%)
 
-# ====== Check: NDS ======
+# ====== Main: NDS ======
 
 # 1. Directories
 
@@ -766,8 +750,7 @@ DSEKAI_C_FILES_NDS_ONLY := \
    src/main.c \
    unilayer/input/ndsi.c \
    unilayer/graphics/ndsg.c \
-   unilayer/memory/fakem.c \
-   unilayer/resource/header.c
+   unilayer/memory/fakem.c
 
 DSEKAI_ASSETS_MAPS_NDS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS)))
@@ -786,7 +769,7 @@ NDSTOOL := ndstool
 
 ARCH_NDS := -mthumb -mthumb-interwork
 
-CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS)
+CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT)
 
 LIBS_NDS := -L$(DEVKITPRO)/libnds/lib -lnds9
 
@@ -796,9 +779,16 @@ $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 
 # 5. Targets
 
+ifeq ($(RESOURCE),"FILE")
 $(GENDIR_NDS)/resext.h: \
 $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_NDS)/$(STAMPFILE) $(HEADPACK)
+else ifeq ($(RESOURCE),"HEADER")
+$(GENDIR_NDS)/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
+$(GENDIR_NDS)/$(STAMPFILE) $(MKRESH)
+	$(MKRESH) -f file -if $^ -oh $@
+endif
 
 $(BIN_NDS): $(OBJDIR_NDS)/$(DSEKAI).elf $(GENDIR_NDS)/$(DSEKAI)-1.bmp
 	$(NDSTOOL) -c $@ -9 $< -b $(GENDIR_NDS)/$(DSEKAI)-1.bmp "$(DSEKAI);$(DSEKAI);$(DSEKAI)"
@@ -836,8 +826,7 @@ DSEKAI_C_FILES_WEB_ONLY := \
    unilayer/input/gli.c \
    unilayer/graphics/glg.c \
    unilayer/memory/fakem.c \
-   src/json.c \
-   unilayer/resource/header.c
+   src/json.c
 
 DSEKAI_O_FILES_WEB := \
    $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -850,7 +839,7 @@ LD_WEB := emcc
 
 # 4. Arguments
 
-CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_JSON_MAPS
+CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_JSON_MAPS -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -DRESOURCE_HEADER
 
 LDFLAGS_WEB :=
 
@@ -889,8 +878,7 @@ DSEKAI_C_FILES_CURSES_ONLY := \
    unilayer/input/cursesi.c \
    unilayer/graphics/cursesg.c \
    unilayer/memory/fakem.c \
-   src/json.o \
-   unilayer/resource/file.c
+   src/json.o
 
 DSEKAI_O_FILES_CURSES := \
    $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -903,15 +891,22 @@ LD_CURSES := gcc
 
 # 4. Arguments
 
-CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_DEBUG_GCC) -DUSE_JSON_MAPS
+CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_DEBUG_GCC) -DUSE_JSON_MAPS $(CFLAGS_OPT)
 
 LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) -g $(CFLAGS_DEBUG_GCC)
 
 # 5. Targets
 
+ifeq ($(RESOURCE),"FILE")
 $(GENDIR_CURSES)/resext.h: \
 $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
 $(GENDIR_CURSES)/$(STAMPFILE) $(HEADPACK)
+else ifeq ($(RESOURCE),"HEADER")
+$(GENDIR_CURSES)/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
+$(GENDIR_CURSES)/$(STAMPFILE) $(MKRESH)
+	$(MKRESH) -f file -if $^ -oh $@
+endif
 
 $(BIN_CURSES): $(DSEKAI_O_FILES_CURSES) | $(BINDIR)/$(STAMPFILE)
 	$(LD_CURSES) -o $@ $^ $(LDFLAGS_CURSES)
