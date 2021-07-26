@@ -3,7 +3,7 @@
 #define DSEKAI_H
 
 #include "config.h"
-#include "../unilayer/unilayer.h"
+#include <unilayer.h>
 
 struct DSEKAI_STATE;
 

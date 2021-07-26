@@ -4,12 +4,12 @@
 #include "dsekai.h"
 
 uint8_t g_running = 1;
-MEMORY_HANDLE g_state_handle = NULL;
+MEMORY_HANDLE g_state_handle = (MEMORY_HANDLE)NULL;
 
 #ifdef PLATFORM_WIN
 #include "winstat.h"
-HINSTANCE g_instance = NULL;
-HWND g_window = NULL;
+HINSTANCE g_instance = (HINSTANCE)NULL;
+HWND g_window = (HWND)NULL;
 #endif /* PLATFORM_WIN */
 
 #ifdef USE_SOFT_ASSERT
@@ -115,7 +115,7 @@ int main( int argc, char* argv[] ) {
    window_init();
 
    g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
-   if( NULL == g_state_handle ) {
+   if( (MEMORY_HANDLE)NULL == g_state_handle ) {
       error_printf( "unable to allocate state" );
 #ifdef DISABLE_MAIN_PARMS
       return;
@@ -131,7 +131,7 @@ int main( int argc, char* argv[] ) {
    while( g_running ) {
 #if defined( PLATFORM_WIN )
       /* In Windows, this stuff is handled by the message processor. */
-      msg_retval = GetMessage( &msg, NULL, 0, 0 );
+      msg_retval = GetMessage( &msg, 0, 0, 0 );
       if( 0 >= msg_retval ) {
          g_running = 0;
          break;

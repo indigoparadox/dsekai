@@ -2,6 +2,12 @@
 #ifndef TILEMAP_H
 #define TILEMAP_H
 
+#ifndef PACKED
+#error "no packed"
+#endif
+
+#define TILE_W 16
+#define TILE_H 16
 #define TILEMAP_TW 40
 #define TILEMAP_TH 40
 #define TILEMAP_NAME_MAX 32

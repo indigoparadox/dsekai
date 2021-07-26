@@ -157,7 +157,7 @@ int16_t window_push(
    struct WINDOW* windows = NULL;
    int16_t retval = 0;
 
-   if( NULL == state->windows_handle ) {
+   if( (MEMORY_HANDLE)NULL == state->windows_handle ) {
       state->windows_handle =
          memory_alloc( WINDOW_COUNT_MAX, sizeof( struct WINDOW ) );
    }
@@ -249,7 +249,7 @@ void window_pop( uint32_t id, struct DSEKAI_STATE* state ) {
    }
 
    /* Clear window controls. */
-   if( NULL != windows[idx].controls_handle ) {
+   if( (MEMORY_HANDLE)NULL != windows[idx].controls_handle ) {
       while( 0 < windows[idx].controls_count ) {
          windows = (struct WINDOW*)memory_unlock( state->windows_handle );
          control_pop( id, 0, state );

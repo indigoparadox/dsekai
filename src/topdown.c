@@ -110,7 +110,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    uint8_t in_char = 0;
    static int initialized = 0;
    struct DSEKAI_STATE* state = NULL;
-   MEMORY_HANDLE welcome_string_handle = NULL;
+   MEMORY_HANDLE welcome_string_handle = (MEMORY_HANDLE)NULL;
    char* welcome_string = NULL;
    struct TILEMAP* map = NULL;
    struct MOBILE* mobiles = NULL;
@@ -121,9 +121,9 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
 
    if( !initialized ) {
 
-      assert( NULL == state->map );
+      assert( (MEMORY_HANDLE)NULL == state->map );
       state->map = memory_alloc( sizeof( struct TILEMAP ), 1 );
-      if( NULL == state->map ) {
+      if( (MEMORY_HANDLE)NULL == state->map ) {
          error_printf( "unable to allocate map" );
          retval = 0;
          goto cleanup;
@@ -131,9 +131,9 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       map = memory_lock( state->map );
       assert( NULL != map );
 
-      assert( NULL == state->mobiles );
+      assert( (MEMORY_HANDLE)NULL == state->mobiles );
       state->mobiles = memory_alloc( sizeof( struct MOBILE ), MOBILES_MAX );
-      if( NULL == state->mobiles ) {
+      if( (MEMORY_HANDLE)NULL == state->mobiles ) {
          error_printf( "unable to allocate mobiles" );
          retval = 0;
          goto cleanup;
@@ -141,9 +141,9 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       mobiles = memory_lock( state->mobiles );
       assert( NULL != mobiles );
 
-      assert( NULL == state->items );
+      assert( (MEMORY_HANDLE)NULL == state->items );
       state->items = memory_alloc( sizeof( struct ITEM ), ITEMS_MAX );
-      if( NULL == state->items ) {
+      if( (MEMORY_HANDLE)NULL == state->items ) {
          error_printf( "unable to allocate items" );
          retval = 0;
          goto cleanup;
@@ -232,7 +232,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       control_push(
          0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED,
          -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
-         NULL, 0, sprite_princess, 0x1212, state );
+         (MEMORY_HANDLE)NULL, 0, sprite_princess, 0x1212, state );
 #endif /* !HIDE_WELCOME_DIALOG */
 
       initialized = 1;
@@ -383,7 +383,7 @@ void topdown_deinit( MEMORY_HANDLE state_handle ) {
    struct TILEMAP* map = NULL;
    struct MOBILE* mobiles = NULL;
 
-   if( NULL == state_handle ) {
+   if( (MEMORY_HANDLE)NULL == state_handle ) {
       return;
    }
 
@@ -392,7 +392,7 @@ void topdown_deinit( MEMORY_HANDLE state_handle ) {
       return;
    }
 
-   if( NULL != state->mobiles ) {
+   if( (MEMORY_HANDLE)NULL != state->mobiles ) {
       mobiles = memory_lock( state->mobiles );
       if( NULL != mobiles ) {
          for( i = 0 ; state->mobiles_count > i ; i++ ) {
@@ -402,7 +402,7 @@ void topdown_deinit( MEMORY_HANDLE state_handle ) {
       }
    }
 
-   if( NULL != state->map ) {
+   if( (MEMORY_HANDLE)NULL != state->map ) {
       map = memory_lock( state->map );
       if( NULL != map ) {
          tilemap_deinit( map );

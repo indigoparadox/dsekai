@@ -12,7 +12,7 @@ static int16_t control_draw_label( struct WINDOW* w, struct CONTROL* c ) {
    int16_t str_len = 0;
 
    assert( NULL != c );
-   assert( NULL != c->data.handle );
+   assert( (MEMORY_HANDLE)NULL != c->data.handle );
 
    str = (char*)memory_lock( c->data.handle );
 
@@ -70,7 +70,7 @@ static void control_sz_label(
    char* str = NULL;
 
    assert( NULL != c );
-   assert( NULL != c->data.handle );
+   assert( (MEMORY_HANDLE)NULL != c->data.handle );
 
    str = (char*)memory_lock( c->data.handle );
 
@@ -112,7 +112,7 @@ int16_t control_push(
    debug_printf( 1, "pushing new control %u to window %u",
       control_id, window_id );
 
-   assert( NULL != state->windows_handle );
+   assert( (MEMORY_HANDLE)NULL != state->windows_handle );
    windows = (struct WINDOW*)memory_lock( state->windows_handle );
 
    memory_zero_ptr( &control_sz, sizeof( struct GRAPHICS_RECT ) );
@@ -131,7 +131,7 @@ int16_t control_push(
    }
 
    /* Move the controls on the window up to make room at the bottom. */
-   if( NULL == windows[window_idx].controls_handle ) {
+   if( (MEMORY_HANDLE)NULL == windows[window_idx].controls_handle ) {
       windows[window_idx].controls_handle = memory_alloc(
          sizeof( struct CONTROL ), CONTROL_COUNT_MAX );
    }
@@ -155,7 +155,7 @@ int16_t control_push(
    controls[0].type = type;
    if( 0 != data_scalar ) {
       controls[0].data.scalar = data_scalar;
-   } else if( NULL != data_handle ) {
+   } else if( (MEMORY_HANDLE)NULL != data_handle ) {
       controls[0].data.handle = data_handle;
    } else if( 0 != (int)data_res_id ) {
       resource_assign_id( controls[0].data.res_id, data_res_id );
@@ -291,7 +291,7 @@ void control_draw_all( struct WINDOW* window ) {
    struct CONTROL* controls = NULL;
    int16_t i = 0;
 
-   if( NULL == window->controls_handle ) {
+   if( (MEMORY_HANDLE)NULL == window->controls_handle ) {
       return;
    }
 
