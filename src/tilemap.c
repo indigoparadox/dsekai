@@ -154,9 +154,7 @@ int16_t tilemap_parse(
    int16_t tok_parsed = 0,
       tiles_count = 0,
       name_len = 0,
-      i = 0,
-      j = 0;
-   int8_t tile_id_in = 0;
+      i = 0;
    jsmn_parser parser;
    char iter_path[JSON_PATH_SZ];
 

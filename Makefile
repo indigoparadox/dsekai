@@ -1,5 +1,5 @@
 
-DSEKAI := "dsekai"
+DSEKAI := dsekai
 
 DSEKAI_C_FILES := \
    src/tilemap.c \
