@@ -104,6 +104,8 @@ BIN_CURSES := $(BINDIR)/$(DSEKAI)t
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
+DSEKAI_DEFINES := -DUNILAYER_PROJECT_NAME=\"dsekai\"
+
 CFLAGS_OPT :=
 ifeq ($(RESOURCE),FILE)
 CFLAGS_OPT += -DRESOURCE_FILE
@@ -264,7 +266,7 @@ LD_SDL := gcc
 
 # 4. Arguments
 
-CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer
+CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer $(DSEKAI_DEFINES)
 
 LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
@@ -314,7 +316,7 @@ LD_XLIB := gcc
 
 # 4. Arguments
 
-CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_DEBUG_GCC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer
+CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_DEBUG_GCC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer $(DSEKAI_DEFINES)
 
 LDFLAGS_XLIB := -g -lX11 $(CFLAGS_DEBUG_GCC)
 
@@ -375,7 +377,7 @@ LD_DOS := wcl
 
 # 4. Arguments
 
-CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -i=unilayer
+CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -i=unilayer $(DSEKAI_DEFINES)
 
 LDFLAGS_DOS := $(CFLAGS_DOS)
 
@@ -438,7 +440,7 @@ BUILDPRC := build-prc
 
 # 4. Arguments
 
-CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC) -DUSE_JSON_MAPS $(CFLAGS_OPT) -Iunilayer -I$(GENDIR_PALM)
+CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC) -DUSE_JSON_MAPS $(CFLAGS_OPT) -Iunilayer -I$(GENDIR_PALM) $(DSEKAI_DEFINES)
 
 LDFLAGS_PALM = -g $(CFLAGS_PALM)
 
@@ -507,7 +509,7 @@ RC_WIN16 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -i=unilayer
+CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -i=unilayer $(DSEKAI_DEFINES)
 
 LDFLAGS_WIN16 := -l=windows -zp=1
 
@@ -581,7 +583,7 @@ RC_WIN32 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -i=unilayer
+CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -i=unilayer $(DSEKAI_DEFINES)
 
 LDFLAGS_WIN32 := -bcl=nt_win -zp=1
 
@@ -659,7 +661,7 @@ REZ_MAC6 := Rez
 
 # 4. Arguments
 
-CFLAGS_MAC6 := -DPLATFORM_MAC6 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_DEBUG_GENERIC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer
+CFLAGS_MAC6 := -DPLATFORM_MAC6 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_DEBUG_GENERIC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer $(DSEKAI_DEFINES)
 
 # 5. Targets
 
@@ -736,7 +738,7 @@ NDSTOOL := ndstool
 
 ARCH_NDS := -mthumb -mthumb-interwork
 
-CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer
+CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer $(DSEKAI_DEFINES)
 
 LIBS_NDS := -L$(DEVKITPRO)/libnds/lib -lnds9
 
@@ -799,7 +801,7 @@ LD_WEB := emcc
 
 # 4. Arguments
 
-CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_JSON_MAPS -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -DRESOURCE_HEADER -Iunilayer
+CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_JSON_MAPS -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -DRESOURCE_HEADER -Iunilayer $(DSEKAI_DEFINES)
 
 LDFLAGS_WEB :=
 
@@ -852,7 +854,7 @@ LD_CURSES := gcc
 
 # 4. Arguments
 
-CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_DEBUG_GCC) -DUSE_JSON_MAPS $(CFLAGS_OPT) -Iunilayer
+CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_DEBUG_GCC) -DUSE_JSON_MAPS $(CFLAGS_OPT) -Iunilayer $(DSEKAI_DEFINES)
 
 LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) -g $(CFLAGS_DEBUG_GCC)
 

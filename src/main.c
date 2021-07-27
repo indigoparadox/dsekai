@@ -21,37 +21,7 @@ int g_assert_failed_len;
 
 /* === Main Class Definition === */
 
-/* ------ */
-#if defined( PLATFORM_PALM )
-/* ------ */
-
-UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags ) {
-
-/* ------ */
-#elif defined( PLATFORM_WIN )
-/* ------ */
-
-int PLATFORM_API WinMain(
-   HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow
-) {
-
-/* ------ */
-#elif defined( DISABLE_MAIN_PARMS )
-/* ------ */
-
-void main() {
-
-/* ------ */
-#else
-/* ------ */
-
-int main( int argc, char* argv[] ) {
-
-/* ------ */
-#endif /* PLATFORM_PALM, PLATFORM_MAC7, PLATFORM_WIN */
-/* ------ */
-
-
+unilayer_main() {
 
 /* === Main Preamble === */
 
