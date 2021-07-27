@@ -34,7 +34,6 @@ DSEKAI_STATE {
    uint16_t mobiles_count; 
    uint16_t player_idx;
 
-   uint8_t walk_offset;
    uint8_t input_blocked_countdown;
    uint8_t reserved;
    int32_t screen_scroll_x;

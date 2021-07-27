@@ -65,10 +65,7 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
    }
 }
 
-void mobile_draw(
-   const struct MOBILE* m,
-   int8_t walk_offset, int16_t screen_x, int16_t screen_y
-) {
+void mobile_draw( const struct MOBILE* m, int16_t screen_x, int16_t screen_y ) {
    int16_t x_offset = 0,
       y_offset = 0;
 
@@ -79,14 +76,15 @@ void mobile_draw(
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
 
+   /* Figure out direction to offset steps in. */
    if( m->coords_prev.x > m->coords.x ) {
       x_offset = SPRITE_W - m->steps_x;
    } else if( m->coords_prev.x < m->coords.x ) {
-      x_offset = (SPRITE_W - m->steps_y) * -1;
+      x_offset = (SPRITE_W - m->steps_x) * -1;
    } else if( m->coords_prev.y > m->coords.y ) {
       y_offset = SPRITE_H - m->steps_y;
    } else if( m->coords_prev.y < m->coords.y ) {
-      y_offset = (SPRITE_H - m->steps_x) * -1;
+      y_offset = (SPRITE_H - m->steps_y) * -1;
    }
 
    assert( SPRITE_W > x_offset );
@@ -95,10 +93,8 @@ void mobile_draw(
    graphics_blit_at(
       m->sprite,
       ((m->coords.x * SPRITE_W) + x_offset) - screen_x,
-      (((m->coords.y * SPRITE_H) + y_offset + walk_offset ) - screen_y),
-      /* Chop off bottom 2px of sprite to fit it within bounds accounting
-         for walking offset. */
-      SPRITE_W, SPRITE_H - 2 );
+      (((m->coords.y * SPRITE_H) + y_offset ) - screen_y),
+      SPRITE_W, SPRITE_H );
 }
 
 void mobile_deinit( struct MOBILE* m ) {

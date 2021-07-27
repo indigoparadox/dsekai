@@ -96,8 +96,7 @@ int topdown_draw(
          continue;
       }
       mobile_draw(
-         &(mobiles[i]),
-         state->walk_offset, state->screen_scroll_x, state->screen_scroll_y );
+         &(mobiles[i]), state->screen_scroll_x, state->screen_scroll_y );
       assert( NULL != &(mobiles[state->player_idx]) );
    }
 
@@ -309,14 +308,6 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       window_pop( 0x111, state );
       retval = 0;
       goto cleanup;
-   }
-
-   /* Animate. */
-   if( 0 == state->walk_offset ) {
-      /* Walk offset must be divisible by 2 for CGA blitting to work. */
-      state->walk_offset = 2;
-   } else {
-      state->walk_offset = 0;
    }
 
    for( i = 0 ; state->mobiles_count > i ; i++ ) {
