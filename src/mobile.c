@@ -29,6 +29,16 @@ uint8_t mobile_walk_start( struct MOBILE* m, int8_t x_mod, int8_t y_mod ) {
    m->steps_x = gc_mobile_step_table_normal_pos[SPRITE_W - 1];
    m->steps_y = gc_mobile_step_table_normal_pos[SPRITE_H - 1];
 
+   if( 1 == x_mod ) {
+      m->facing = MOBILE_FACING_EAST;
+   } else if( 1 == y_mod ) {
+      m->facing = MOBILE_FACING_SOUTH;
+   } else if( -1 == x_mod ) {
+      m->facing = MOBILE_FACING_WEST;
+   } else if( -1 == y_mod ) {
+      m->facing = MOBILE_FACING_NORTH;
+   }
+
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
 
@@ -36,6 +46,12 @@ uint8_t mobile_walk_start( struct MOBILE* m, int8_t x_mod, int8_t y_mod ) {
 }
 
 void mobile_state_animate( struct DSEKAI_STATE* state ) {
+   if( ANI_SPRITE_COUNTDOWN_MAX > state->ani_sprite_countdown ) {
+      state->ani_sprite_countdown++;
+      return;
+   }
+   state->ani_sprite_countdown = 0;
+
    if( 0 == state->ani_sprite_x ) {
       state->ani_sprite_x = 16;
    } else {
@@ -104,7 +120,7 @@ void mobile_draw(
    graphics_blit_at(
       m->sprite,
       state->ani_sprite_x,
-      0,
+      m->facing * SPRITE_H,
       ((m->coords.x * SPRITE_W) + x_offset) - screen_x,
       (((m->coords.y * SPRITE_H) + y_offset ) - screen_y),
       SPRITE_W, SPRITE_H );
