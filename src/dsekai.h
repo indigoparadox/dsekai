@@ -19,23 +19,18 @@ struct DSEKAI_STATE;
 
 struct WINDOW;
 
-struct
-#ifdef __GNUC__
-__attribute__( (__packed__) )
-#endif /* __GNUC__ */
-DSEKAI_STATE {
-   uint32_t version;
-
+struct PACKED DSEKAI_STATE {
    MEMORY_HANDLE items;
    uint16_t items_count;
 
    MEMORY_HANDLE map;
+
    MEMORY_HANDLE mobiles;
    uint16_t mobiles_count; 
+
    uint16_t player_idx;
 
    uint8_t input_blocked_countdown;
-   uint8_t reserved;
    int32_t screen_scroll_x;
    int32_t screen_scroll_y;
    int32_t screen_scroll_tx;
