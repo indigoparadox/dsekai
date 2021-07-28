@@ -35,6 +35,14 @@ uint8_t mobile_walk_start( struct MOBILE* m, int8_t x_mod, int8_t y_mod ) {
    return 1;
 }
 
+void mobile_state_animate( struct DSEKAI_STATE* state ) {
+   if( 0 == state->ani_sprite_x ) {
+      state->ani_sprite_x = 16;
+   } else {
+      state->ani_sprite_x = 0;
+   }
+}
+
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
@@ -65,7 +73,10 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
    }
 }
 
-void mobile_draw( const struct MOBILE* m, int16_t screen_x, int16_t screen_y ) {
+void mobile_draw(
+   const struct MOBILE* m, const struct DSEKAI_STATE* state,
+   int16_t screen_x, int16_t screen_y
+) {
    int16_t x_offset = 0,
       y_offset = 0;
 
@@ -92,6 +103,8 @@ void mobile_draw( const struct MOBILE* m, int16_t screen_x, int16_t screen_y ) {
 
    graphics_blit_at(
       m->sprite,
+      state->ani_sprite_x,
+      0,
       ((m->coords.x * SPRITE_W) + x_offset) - screen_x,
       (((m->coords.y * SPRITE_H) + y_offset ) - screen_y),
       SPRITE_W, SPRITE_H );

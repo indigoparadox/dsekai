@@ -310,6 +310,7 @@ void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
          /* Blit the tile. */
          graphics_blit_at(
             t->tileset[tile_id].image,
+            0, 0,
             (x * TILE_W) - state->screen_scroll_x,
             (y * TILE_H) - state->screen_scroll_y, TILE_W, TILE_H );
       }

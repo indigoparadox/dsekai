@@ -7,6 +7,7 @@ void item_draw( const struct ITEM* i, int16_t screen_x, int16_t screen_y ) {
 
    graphics_blit_at(
       i->sprite,
+      0, 0,
       (i->coords.x * SPRITE_W) - screen_x,
       (i->coords.y * SPRITE_H) - screen_y,
       SPRITE_W, SPRITE_H);

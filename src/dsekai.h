@@ -31,6 +31,8 @@ struct PACKED DSEKAI_STATE {
    uint16_t player_idx;
 
    uint8_t input_blocked_countdown;
+   uint8_t ani_sprite_countdown;
+   uint16_t ani_sprite_x;
    int32_t screen_scroll_x;
    int32_t screen_scroll_y;
    int32_t screen_scroll_tx;

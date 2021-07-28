@@ -43,7 +43,8 @@ static int16_t control_draw_sprite( struct WINDOW* w, struct CONTROL* c ) {
    assert( NULL != c );
 
    graphics_blit_at(
-      c->data.res_id, w->x + c->x + 2, w->y + c->y + 2, SPRITE_W, SPRITE_H );
+      c->data.res_id,
+      0, 0, w->x + c->x + 2, w->y + c->y + 2, SPRITE_W, SPRITE_H );
 
    graphics_draw_rect( w->x + c->x, w->y + c->y, SPRITE_W + 4, SPRITE_H + 4,
       1, GRAPHICS_COLOR_BLACK );

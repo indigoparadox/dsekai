@@ -41,8 +41,10 @@ MOBILE {
 uint8_t mobile_walk_start( struct MOBILE*, int8_t, int8_t );
 void mobile_interact( struct MOBILE*, struct MOBILE* );
 void mobile_interact_txy( struct MOBILE*, struct MOBILE*, uint16_t, uint16_t );
+void mobile_state_animate( struct DSEKAI_STATE* );
 void mobile_animate( struct MOBILE*, struct TILEMAP* );
-void mobile_draw( const struct MOBILE*, int16_t, int16_t );
+void mobile_draw(
+   const struct MOBILE*, const struct DSEKAI_STATE*, int16_t, int16_t );
 void mobile_deinit( struct MOBILE* );
 
 #endif /* MOBILE_H */

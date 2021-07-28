@@ -96,7 +96,7 @@ int topdown_draw(
          continue;
       }
       mobile_draw(
-         &(mobiles[i]), state->screen_scroll_x, state->screen_scroll_y );
+         &(mobiles[i]), state, state->screen_scroll_x, state->screen_scroll_y );
       assert( NULL != &(mobiles[state->player_idx]) );
    }
 
@@ -310,6 +310,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       goto cleanup;
    }
 
+   mobile_state_animate( state );
    for( i = 0 ; state->mobiles_count > i ; i++ ) {
       mobile_animate( &(mobiles[i]), map );
    }
