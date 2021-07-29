@@ -3,19 +3,11 @@
 
 #include "dsekai.h"
 
-uint8_t g_running = 1;
 MEMORY_HANDLE g_state_handle = (MEMORY_HANDLE)NULL;
 
 #ifdef PLATFORM_WIN
 #include "winstat.h"
-HINSTANCE g_instance = (HINSTANCE)NULL;
-HWND g_window = (HWND)NULL;
 #endif /* PLATFORM_WIN */
-
-#ifdef USE_SOFT_ASSERT
-char g_assert_failed[256];
-int g_assert_failed_len;
-#endif /* USE_SOFT_ASSERT */
 
 
 
@@ -32,8 +24,6 @@ unilayer_main() {
    if( cmd == sysAppLaunchCmdNormalLaunch ) {
 
 #elif defined( PLATFORM_WIN )
-   MSG msg;
-   int msg_retval = 0;
 
    g_instance = hInstance;
    graphics_args.cmd_show = nCmdShow;
@@ -53,9 +43,7 @@ unilayer_main() {
 
 /* === Subsystem Initialization === */
 
-#ifdef LOG_TO_FILE
-   g_log_file = platform_fopen( LOG_FILE_NAME, "w" );
-#endif /* LOG_TO_FILE */
+   logging_init();
 
    debug_printf( 3,
       "dsekai compiled " __DATE__ __TIME__ ", state size is %lu bytes",
@@ -98,26 +86,10 @@ unilayer_main() {
 
 /* === Main Loop === */
 
+   loop_set( topdown_loop, g_state_handle );
+
    while( g_running ) {
-#if defined( PLATFORM_WIN )
-      /* In Windows, this stuff is handled by the message processor. */
-      msg_retval = GetMessage( &msg, 0, 0, 0 );
-      if( 0 >= msg_retval ) {
-         g_running = 0;
-         break;
-      }
-
-      TranslateMessage( &msg );
-      DispatchMessage( &msg );
-#elif defined( SKELETON_LOOP )
-      if( INPUT_KEY_QUIT == input_poll() ) {
-         g_running = 0;
-      }
-#else
-      g_running = topdown_loop( g_state_handle );
-      graphics_flip( &graphics_args );
-
-#endif /* SKELETON_LOOP */
+      unilayer_loop_iter();
 
 #ifdef USE_SOFT_ASSERT
       if( 0 < g_assert_failed_len ) {
@@ -155,9 +127,7 @@ unilayer_main() {
    window_shutdown( NULL );
    graphics_shutdown();
 
-#ifdef LOG_TO_FILE
-   platform_fclose( g_log_file );
-#endif /* LOG_TO_FILE */
+   logging_shutdown();
 
 #ifndef DISABLE_MAIN_PARMS
    return 0;

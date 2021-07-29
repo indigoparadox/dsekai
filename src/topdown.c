@@ -63,6 +63,7 @@ int topdown_draw(
       /* Drain input. */
       in_char = input_poll();
       if( INPUT_KEY_QUIT == in_char ) {
+         graphics_flip();
          return 0;
       }
 
@@ -80,6 +81,7 @@ int topdown_draw(
       }
 
       /* Keep running. */
+      graphics_flip();
       return 1;
    }
 
@@ -101,6 +103,7 @@ int topdown_draw(
    }
 
    /* Keep running. */
+   graphics_flip();
    return 1;
 }
 
@@ -366,6 +369,7 @@ cleanup:
       topdown_deinit( state_handle );
    }
 
+   graphics_flip();
    return retval;
 }
 
