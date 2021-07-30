@@ -2,6 +2,23 @@
 #ifndef DSEKAI_CONFIG_H
 #define DSEKAI_CONFIG_H
 
+#define SPRITE_H 16
+#define SPRITE_W 16
+#define PATTERN_W 16
+#define PATTERN_H 16
+
+#ifndef MOBILES_MAX
+#define MOBILES_MAX 20
+#endif /* !MOBILES_MAX */
+
+#ifndef ITEMS_MAX
+#define ITEMS_MAX 200
+#endif /* !ITEMS_MAX */
+
+#ifndef ITEM_INVENTORY_MAX
+#define ITEM_INVENTORY_MAX 20
+#endif /* !ITEM_INVENTORY_MAX */
+
 #define SCREEN_MAP_W (SCREEN_W)
 #define SCREEN_MAP_H (160 - 32)
 
