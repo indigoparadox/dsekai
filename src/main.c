@@ -20,28 +20,10 @@ unilayer_main() {
    struct DSEKAI_STATE* state = NULL;
    struct GRAPHICS_ARGS graphics_args;
 
-#ifdef PLATFORM_PALM
-   if( cmd == sysAppLaunchCmdNormalLaunch ) {
-
-#elif defined( PLATFORM_WIN )
-
-   g_instance = hInstance;
-   graphics_args.cmd_show = nCmdShow;
-   graphics_args.icon_res = icon_dsekai;
-
-   if( hPrevInstance ) {
-      error_printf( "previous instance detected" );
-      return 1;
-   }
-
-#endif /* PLATFORM_WIN */
+   platform_init( graphics_args, icon_dsekai );
 
    assert( 0 == TILEMAP_TW % 4 );
    assert( 0 == TILEMAP_TH % 4 );
-
-
-
-/* === Subsystem Initialization === */
 
    logging_init();
 
@@ -128,13 +110,11 @@ unilayer_main() {
    graphics_shutdown();
 
    logging_shutdown();
+ 
+   platform_shutdown();
 
 #ifndef DISABLE_MAIN_PARMS
    return 0;
 #endif /* !DISABLE_MAIN_PARMS */
-
-#ifdef PLATFORM_PALM
-   }
-#endif /* PLATFORM_PALM */
 }
 
