@@ -2,11 +2,7 @@
 #ifndef MOBILE_H
 #define MOBILE_H
 
-struct
-#ifdef __GNUC__
-__attribute__( (__packed__) )
-#endif /* __GNUC__ */
-MOBILE {
+struct PACKED MOBILE {
    uint8_t facing;
    uint8_t active;
    uint8_t hp;

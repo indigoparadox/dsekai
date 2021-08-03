@@ -2,7 +2,7 @@
 #ifndef ITEM_H
 #define ITEM_H
 
-struct ITEM {
+struct PACKED ITEM {
    RESOURCE_ID sprite;
    struct TILEMAP_COORDS coords;
    struct ITEM* inventory;

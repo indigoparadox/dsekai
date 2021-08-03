@@ -15,7 +15,6 @@
 #define TILEMAP_STRINGS_MAX 20
 #define TILEMAP_STRINGS_SZ 128
 #define TILEMAP_SPAWN_T_MAX 32
-#define MOBILE_SCRIPT_STEPS_MAX 16
 #define SCREEN_TW (SCREEN_MAP_W / TILE_W)
 #define SCREEN_TH (SCREEN_MAP_H / TILE_H)
 
@@ -39,15 +38,10 @@ struct PACKED TILESET_TILE {
    uint32_t flags;
 };
 
-struct PACKED MOBILE_SCRIPT_STEP {
-   uint16_t action;
-   uint16_t arg;
-};
-
 struct PACKED TILEMAP_SPAWN {
    struct TILEMAP_COORDS coords;
    int16_t type;
-   struct MOBILE_SCRIPT_STEP script[MOBILE_SCRIPT_STEPS_MAX];
+   struct SCRIPT_STEP script[MOBILE_SCRIPT_STEPS_MAX];
 };
 
 struct PACKED TILEMAP {

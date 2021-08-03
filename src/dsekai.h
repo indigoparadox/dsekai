@@ -7,10 +7,13 @@
 
 struct DSEKAI_STATE;
 
+#define MOBILE_SCRIPT_STEPS_MAX 16
+
 #include "engines.h"
 #ifdef USE_JSON_MAPS
 #include "json.h"
 #endif /* USE_JSON_MAPS */
+#include "script.h"
 #include "item.h"
 #include "tilemap.h"
 #include "mobile.h"

@@ -9,6 +9,7 @@ DSEKAI_C_FILES := \
    src/mobile.c \
    src/item.c \
    src/window.c \
+   src/script.c \
    unilayer/dio.c \
    src/control.c \
    src/topdown.c
