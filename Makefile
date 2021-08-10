@@ -102,6 +102,7 @@ BIN_MAC6 := $(BINDIR)/$(DSEKAI).bin $(BINDIR)/$(DSEKAI).APPL $(BINDIR)/$(DSEKAI)
 BIN_NDS := $(BINDIR)/$(DSEKAI).nds
 BIN_WEB := $(BINDIR)/$(DSEKAI).js
 BIN_CURSES := $(BINDIR)/$(DSEKAI)t
+BIN_SDL_ARM := $(BINDIR)/$(DSEKAI)r
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
@@ -878,6 +879,42 @@ $(DEPDIR_CURSES)/%.d: %.c $(GENDIR_CURSES)/resext.h
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_CURSES)/,$<)) -MF $@
 
 #include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CURSES:.o=.d))
+
+# ====== Main: SDLarm ======
+
+# 1. Directories
+
+OBJDIR_SDL_ARM := $(OBJDIR)/sdlarm
+DEPDIR_SDL_ARM := $(DEPDIR)/sdlarm
+GENDIR_SDL_ARM := $(GENDIR)/sdlarm
+
+DSEKAI_O_FILES_SDL_ARM := \
+   $(addprefix $(OBJDIR_SDL_ARM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_SDL_ARM)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY)))
+
+# 3. Programs
+
+CC_SDL_ARM := arm-linux-gnueabihf-gcc
+LD_SDL_ARM := arm-linux-gnueabihf-gcc
+
+# 4. Arguments
+
+CFLAGS_SDL_ARM := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer $(DSEKAI_DEFINES) -DUSE_JSON_MAPS
+
+LDFLAGS_SDL_ARM := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
+
+# 5. Targets
+
+platform := sdlarm
+resources := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS)
+$(eval $(RESEXT_H_RULE))
+
+$(BIN_SDL_ARM): $(DSEKAI_O_FILES_SDL_ARM) | $(BINDIR)/$(STAMPFILE)
+	$(LD_SDL_ARM) -o $@ $^ $(LDFLAGS_SDL_ARM)
+
+$(OBJDIR_SDL_ARM)/%.o: %.c $(GENDIR_SDL_ARM)/resext.h | $(DSEKAI_ASSETS_MAPS)
+	$(MD) $(dir $@)
+	$(CC_SDL_ARM) $(CFLAGS_SDL_ARM) -c -o $@ $(<:%.o=%)
 
 # ====== Check: Null ======
 
