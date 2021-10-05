@@ -470,8 +470,8 @@ $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_PALM)/$(STAMPFILE) $(MKRE
 grc_palm: $(OBJDIR_PALM)/$(DSEKAI)
 	cd $(OBJDIR_PALM) && $(OBJRES) $(DSEKAI)
 
-$(OBJDIR_PALM)/$(DSEKAI): $(DSEKAI_O_FILES_PALM) $(GENDIR_PALM)/mulipalm.o
-	$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@
+$(OBJDIR_PALM)/$(DSEKAI): $(DSEKAI_O_FILES_PALM) $(OBJDIR_PALM)/mulipalm.o
+	$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@ $(GENDIR_PALM)/mulipalm.ld
 	
 $(OBJDIR_PALM)/bin$(STAMPFILE): src/palms.rcp $(GENDIR_PALM)/palmd.rcp
 	$(PILRC) $< $(OBJDIR_PALM)
@@ -481,11 +481,11 @@ $(OBJDIR_PALM)/mulipalm.o: $(GENDIR_PALM)/mulipalm.s
 	$(MD) $(dir $@)
 	$(AS_PALM) -o $@ $<
 
-$(GENDIR_PALM)/mulipalm.s %(GENDIR_PALM)/mulipalm.ld: $(DEF_PALM) | $(GENDIR_PALM)
+$(GENDIR_PALM)/mulipalm.ld $(GENDIR_PALM)/mulipalm.s: $(DEF_PALM) | $(GENDIR_PALM)
 	$(MULTIGEN) -b $(GENDIR_PALM)/mulipalm $<
 
-$(BIN_PALM): grc_palm $(GENDIR_PALM)/mulipalm.ld $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
-	$(BUILDPRC) $(DEF_PALM) $@ $(OBJDIR_PALM)/*.bin
+$(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
+	$(BUILDPRC) $(DEF_PALM) $(OBJDIR_PALM)/$(DSEKAI) $(OBJDIR_PALM)/*.bin
 
 $(OBJDIR_PALM)/%.o: %.c $(GENDIR_PALM)/palmd.rcp $(GENDIR_PALM)/resext.h
 	$(MD) $(dir $@)
