@@ -7,6 +7,7 @@ typedef void (*CONTROL_CB_SZ)(
 
 /* Drawing Callbacks */
 
+CODE_SECTION( "controlfns" )
 static int16_t control_draw_label( struct WINDOW* w, struct CONTROL* c ) {
    char* str = NULL;
    int16_t str_len = 0;
@@ -38,6 +39,7 @@ static int16_t control_draw_label( struct WINDOW* w, struct CONTROL* c ) {
    return 1;
 }
 
+CODE_SECTION( "controlfns" )
 static int16_t control_draw_sprite( struct WINDOW* w, struct CONTROL* c ) {
 
    assert( NULL != c );
@@ -56,6 +58,7 @@ static int16_t control_draw_sprite( struct WINDOW* w, struct CONTROL* c ) {
    return 1;
 }
 
+CODE_SECTION( "controlfns" )
 const CONTROL_CB gc_control_draw_callbacks[] = {
    control_draw_label,
    NULL,
@@ -65,6 +68,7 @@ const CONTROL_CB gc_control_draw_callbacks[] = {
 
 /* Sizing Callbacks */
 
+CODE_SECTION( "controlfns" )
 static void control_sz_label(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz
 ) {
@@ -80,6 +84,7 @@ static void control_sz_label(
    str = (char*)memory_unlock( c->data.handle );
 }
 
+CODE_SECTION( "controlfns" )
 static void control_sz_sprite(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz
 ) {
@@ -87,6 +92,7 @@ static void control_sz_sprite(
    sz->h = SPRITE_W + 4; /* For border. */
 }
 
+CODE_SECTION( "controlfns" )
 const CONTROL_CB_SZ gc_control_sz_callbacks[] = {
    control_sz_label,
    NULL,
@@ -96,6 +102,7 @@ const CONTROL_CB_SZ gc_control_sz_callbacks[] = {
 
 /* General Functions */
 
+CODE_SECTION( "controlfns" )
 int16_t control_push(
    uint32_t control_id, uint16_t type, uint16_t status,
    int16_t x, int16_t y, int16_t w, int16_t h,
@@ -212,6 +219,7 @@ cleanup:
    return retval;
 }
 
+CODE_SECTION( "controlfns" )
 void control_pop(
    uint32_t window_id, uint32_t control_id, struct DSEKAI_STATE* state
 ) {
@@ -288,6 +296,7 @@ cleanup:
    }
 }
 
+CODE_SECTION( "controlfns" )
 void control_draw_all( struct WINDOW* window ) {
    struct CONTROL* controls = NULL;
    int16_t i = 0;
