@@ -1,3 +1,6 @@
 [submodule "unilayer"]
 	path = unilayer
 	url = https://github.com/indigoparadox/unilayer
+[submodule "mvm"]
+	path = mvm
+	url = https://github.com/indigoparadox/mvm.git

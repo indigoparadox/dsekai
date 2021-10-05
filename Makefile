@@ -6,6 +6,7 @@ DSEKAI_C_FILES := \
    unilayer/graphics.c \
    unilayer/resource/header.c \
    unilayer/resource/file.c \
+   mvm/src/mvm.c \
    src/mobile.c \
    src/item.c \
    src/window.c \
@@ -103,6 +104,7 @@ BIN_NDS := $(BINDIR)/$(DSEKAI).nds
 BIN_WEB := $(BINDIR)/$(DSEKAI).js
 BIN_CURSES := $(BINDIR)/$(DSEKAI)t
 BIN_SDL_ARM := $(BINDIR)/$(DSEKAI)r
+BIN_EFI := $(BINDIR)/$(DSEKAI).efi
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
