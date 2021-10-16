@@ -30,6 +30,12 @@ In general, these restrictions are relaxed for items in the tools/ and check/ su
 
 Items in the tools/ and check/ subdirectories may depend on the src/ directory freely.
 
+## Documentation
+
+Some attempt has been made at documentation with [doxygen](https://www.doxygen.nl/index.html). Simply run doxygen in the project root in order to generate HTML documentation under doc/.
+
+This is a work in progress.
+
 ## Resources
 
 This engine uses OS-level resources where it can to store assets. On platforms without this facility, assets are converted into headers during compile time and referenced via the same resource-loading mechanisms.
