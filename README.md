@@ -20,7 +20,7 @@ There are also some rough examples of CGA graphics programming in unilayer/graph
 
 ## Rules
 
-Ideally, this engine will compile with legacy compilers as a general rule. For this reason, the following rules/limitation should be observed within the codebase:
+Ideally, this engine will compile with legacy compilers as a general rule. For this reason, the following rules/limitations should be observed within the codebase:
 
 * C should be limited to C89/ANSI C in general. No C99 features should be used. In some cases, not all ANSI features should be used.
 * Except within platform-specific modules that can definitely handle it, dynamic allocation should also be avoided.
@@ -39,12 +39,12 @@ This engine uses OS-level resources where it can to store assets. On platforms w
 The following platforms are currently supported:
 
 * **MS-DOS w/ CGA Graphics** (Maybe VGA graphics in the future...)
-* **PalmOS >= 3.5**
 * **GNU/Linux with SDL** (May work with other POSIX platforms.)
 * **Windows (16-bit/32-bit)**
 
 The following platforms are planned to be supported but not yet functional:
 
+* **PalmOS >= 3.5**
 * **Mac-OS 6/7**
 * **GNU/Linux with Xlib** (May work with other POSIX platforms.)
 * **GNU/Linux with NCurses** (May work with other POSIX platforms.)
@@ -68,7 +68,7 @@ The following targets may be built:
 | MS-DOS   | bin/dsekai.exe   | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | SDL      | bin/dsekai       | SDL2
 | Xlib     | bin/dsekaix      | Xlib
-| PalmOS   | bin/dsekai.prc   | [PRCTools](https://github.com/jichu4n/prc-tools-remix)
+| *PalmOS  | bin/dsekai.prc   | [PRCTools](https://github.com/jichu4n/prc-tools-remix)
 | Win16    | bin/dsekai16.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | Win32    | bin/dsekai32.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | *MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
