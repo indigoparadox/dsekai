@@ -2,6 +2,10 @@
 #ifndef TILEMAP_H
 #define TILEMAP_H
 
+/*! \file tilemap.h
+ *  \brief Functions and macros pertaining to tilemaps.
+ */
+
 #ifndef PACKED
 #error "no packed"
 #endif
@@ -19,6 +23,7 @@
 #define SCREEN_TW (SCREEN_MAP_W / TILE_W)
 #define SCREEN_TH (SCREEN_MAP_H / TILE_H)
 
+/*! TILEMAP::tiles_flags bit flag indicating tile will block movement. */
 #define TILEMAP_TILESET_FLAG_BLOCK  0x01
 
 #define TILEMAP_TILE_FLAG_DIRTY     0x01
@@ -51,19 +56,32 @@ struct PACKED TILEMAP_SPAWN {
 };
 
 struct PACKED TILEMAP {
+   /*! Tilemap name. */
    char name[TILEMAP_NAME_MAX];
+   /*! Array of prototype tiles all map tiles are based on. */
    struct TILESET_TILE tileset[TILEMAP_TILESETS_MAX];
+   /*! Array of tiles composing the map. */
    uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];
+   /*! Special flag bitfields indicating each tile's behavior. */
    uint8_t tiles_flags[TILEMAP_TH * TILEMAP_TW];
+   /*! Mobile spawns on this map. */
    struct TILEMAP_SPAWN spawns[20];
    char strings[TILEMAP_STRINGS_MAX][TILEMAP_STRINGS_SZ];
    uint8_t strings_count;
+   /*! Number of spawns active on this map. */
    uint16_t spawns_count;
 };
 
 int16_t tilemap_parse(
    struct TILEMAP*, char*, uint16_t, struct jsmntok*, uint16_t );
-int16_t tilemap_load( RESOURCE_ID, struct TILEMAP* );
+
+/**
+ * \brief Load tilemap specified by id into TILEMAP struct t.
+ * \param id A RESOURCE_ID indicating the tilemap to load from disk.
+ * \param t MEMORY_PTR to an empty TILEMAP struct to be loaded into.
+ * \return
+ */
+int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t );
 void tilemap_refresh_tiles( struct TILEMAP* );
 void tilemap_draw( struct TILEMAP*, struct DSEKAI_STATE* );
 uint8_t tilemap_collide( const struct TILEMAP*, uint8_t, uint8_t );
