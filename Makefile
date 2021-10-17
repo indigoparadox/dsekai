@@ -436,15 +436,19 @@ DSEKAI_O_FILES_PALM := \
 
 CC_PALM := m68k-palmos-gcc
 LD_PALM := m68k-palmos-gcc
+AS_PALM := m68k-palmos-as
 PILRC := pilrc
 OBJRES := m68k-palmos-obj-res
 BUILDPRC := build-prc
+MULTIGEN := m68k-palmos-multigen
 
 # 4. Arguments
 
 CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC) -DUSE_JSON_MAPS $(CFLAGS_OPT) -Iunilayer -I$(GENDIR_PALM) $(DSEKAI_DEFINES)
 
-LDFLAGS_PALM = -g $(CFLAGS_PALM)
+LDFLAGS_PALM := -g $(CFLAGS_PALM)
+
+DEF_PALM := src/mulipalm.def
 
 APPID := DSEK
 
@@ -465,15 +469,22 @@ $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_PALM)/$(STAMPFILE) $(MKRE
 grc_palm: $(OBJDIR_PALM)/$(DSEKAI)
 	cd $(OBJDIR_PALM) && $(OBJRES) $(DSEKAI)
 
-$(OBJDIR_PALM)/$(DSEKAI): $(DSEKAI_O_FILES_PALM)
-	$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@
+$(OBJDIR_PALM)/$(DSEKAI): $(DSEKAI_O_FILES_PALM) $(OBJDIR_PALM)/mulipalm.o
+	$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@ $(GENDIR_PALM)/mulipalm.ld
 	
 $(OBJDIR_PALM)/bin$(STAMPFILE): src/palms.rcp $(GENDIR_PALM)/palmd.rcp
 	$(PILRC) $< $(OBJDIR_PALM)
 	touch $@
 
+$(OBJDIR_PALM)/mulipalm.o: $(GENDIR_PALM)/mulipalm.s
+	$(MD) $(dir $@)
+	$(AS_PALM) -o $@ $<
+
+$(GENDIR_PALM)/mulipalm.ld $(GENDIR_PALM)/mulipalm.s: $(DEF_PALM) | $(GENDIR_PALM)
+	$(MULTIGEN) -b $(GENDIR_PALM)/mulipalm $<
+
 $(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
-	$(BUILDPRC) $@ $(DSEKAI) $(APPID) $(OBJDIR_PALM)/*.grc $(OBJDIR_PALM)/*.bin
+	$(BUILDPRC) -o $@ $(DEF_PALM) $(OBJDIR_PALM)/$(DSEKAI) $(OBJDIR_PALM)/*.bin
 
 $(OBJDIR_PALM)/%.o: %.c $(GENDIR_PALM)/palmd.rcp $(GENDIR_PALM)/resext.h
 	$(MD) $(dir $@)
