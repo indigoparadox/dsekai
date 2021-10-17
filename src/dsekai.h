@@ -19,6 +19,12 @@ struct DSEKAI_STATE;
 
 #define MOBILE_SCRIPT_STEPS_MAX 16
 
+/*! \brief X/Y coordinates of a tile on the current map. */
+struct PACKED TILEMAP_COORDS {
+   int32_t x;
+   int32_t y;
+};
+
 #include "engines.h"
 #ifdef USE_JSON_MAPS
 #include "json.h"
@@ -32,6 +38,7 @@ struct DSEKAI_STATE;
 
 struct WINDOW;
 
+/*! \brief General/shared state of the running engine in memory. */
 struct PACKED DSEKAI_STATE {
    MEMORY_HANDLE items;
    uint16_t items_count;

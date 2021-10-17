@@ -34,6 +34,8 @@ struct CONTROL {
    union CONTROL_DATA data;
 };
 
+typedef int16_t (*CONTROL_CB)( struct WINDOW*, struct CONTROL* );
+
 int16_t control_push(
    uint32_t, uint16_t, uint16_t, int16_t, int16_t, int16_t, int16_t,
    GRAPHICS_COLOR, GRAPHICS_COLOR, int8_t,

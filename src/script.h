@@ -2,10 +2,66 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
+/*! \file script.h
+ *  \brief Structs, functions, and macros for executing in-world behavior.
+ */
+
+struct MOBILE;
+
+/**
+ * \brief Callback to execute a behavior action. Step in a script.
+ * \param actor MEMORY_PTR to MOBILE executing the action.
+ * \param actee MEMORY_PTR to MOBILE being acted upon.
+ * \param tile MEMORY_PTR to tilemap tile being acted upon.
+ * \return New position for script execution counter.
+ */
+typedef uint16_t (*SCRIPT_CB)(
+   uint16_t pc,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile );
+
 struct PACKED SCRIPT_STEP {
    uint16_t action;
    uint16_t arg;
 };
+
+/**
+ * \brief Define the script action callback table.
+ * \param f Macro to execute on the function callback definition.
+ */
+#define SCRIPT_CB_TABLE( f ) f( 0, INTERACT, 'i' ) f( 1, WALK, 'w' )
+
+/*! \brief Define prototypes for the script action callbacks. */
+#define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS* );
+
+SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
+
+#ifdef SCRIPT_C
+
+/* === If we're being called inside script.c === */
+
+#define SCRIPT_CB_TABLE_LIST( idx, name, c ) script_handle_ ## name,
+
+const SCRIPT_CB gc_script_handlers[] = {
+   SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_LIST )
+};
+
+#define SCRIPT_CB_TABLE_CONSTS( idx, name, c ) const uint16_t SCRIPT_ACTION_ ## name = idx;
+
+SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS );
+
+#else
+
+/* === If we're being called inside anything BUT script.c === */
+
+/**
+ * \brief Define extern constants that can be used e.g. in spawners.
+ */
+#define SCRIPT_CB_TABLE_CONSTS( idx, name, c ) extern const uint16_t SCRIPT_ACTION_ ## name;
+
+SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS );
+
+extern const SCRIPT_CB gc_script_handlers[];
+#endif /* !SCRIPT_C */
 
 #endif /* SCRIPT_H */
 
