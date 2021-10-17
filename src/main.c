@@ -68,7 +68,7 @@ unilayer_main() {
 
 /* === Main Loop === */
 
-   loop_set( topdown_loop, g_state_handle );
+   loop_set( topdown_loop, g_state_handle, &graphics_args );
 
    while( g_running ) {
       unilayer_loop_iter();
@@ -107,7 +107,7 @@ unilayer_main() {
    memory_free( g_state_handle );
 
    window_shutdown( NULL );
-   graphics_shutdown();
+   graphics_shutdown( &graphics_args );
 
    logging_shutdown();
  

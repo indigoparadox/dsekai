@@ -104,7 +104,7 @@ struct PACKED TILEMAP {
 
 /**
  * \brief Parse tokenized JSON into a tileset array.
- * \param t MEMORY_PTR to a TILEMAP load the tileset into.
+ * \param t ::MEMORY_PTR to a TILEMAP load the tileset into.
  * \param tokens JSON tokens to parse.
  * \param tokens_sz Number of tokens to parse.
  * \param json_buffer String buffer containing JSON referred to by tokens.
@@ -119,7 +119,7 @@ int16_t tilemap_parse_tileset(
 
 /**
  * \brief Parse TILEMAP::tileset index from JSON map data.
- * \param t MEMORY_PTR to a TILEMAP to load the tileset into.
+ * \param t ::MEMORY_PTR to a TILEMAP to load the tileset into.
  * \param tile_idx TILEMAP::tiles index of desired tile in JSON map data.
  * \param tokens JSON tokens to parse.
  * \param tokens_sz Number of tokens to parse.
@@ -139,21 +139,21 @@ int16_t tilemap_parse(
 /**
  * \brief Load tilemap specified by id into TILEMAP struct t.
  * \param id A RESOURCE_ID indicating the tilemap to load from disk.
- * \param t MEMORY_PTR to an empty TILEMAP struct to be loaded into.
+ * \param t ::MEMORY_PTR to an empty TILEMAP struct to be loaded into.
  * \return
  */
 int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t );
 
 /**
  * \brief Force a redraw of all tiles on a TILEMAP by marking them dirty.
- * \param t MEMORY_PTR to a TILEMAP to redraw.
+ * \param t ::MEMORY_PTR to a TILEMAP to redraw.
  */
 void tilemap_refresh_tiles( struct TILEMAP* t );
 
 /**
  * \brief Draw currently on-screen portion of a TILEMAP.
- * \param t MEMORY_PTR to a TILEMAP to draw.
- * \param state MEMORY_PTR to the current engine state, used to determine
+ * \param t ::MEMORY_PTR to a TILEMAP to draw.
+ * \param state ::MEMORY_PTR to the current engine state, used to determine
  *              what is currently on-screen.
  */
 void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state );

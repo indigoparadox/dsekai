@@ -22,7 +22,7 @@ struct PACKED MOBILE {
    /*! \brief Number of steps remaining on Y axis in current walk animation. */
    uint8_t steps_y;
    struct ITEM* inventory;
-   /*! \brief MEMORY_PTR to currently executing behavior script. */
+   /*! \brief ::MEMORY_PTR to currently executing behavior script. */
    struct SCRIPT_STEP* script;
    /*! \brief Position in currently executing behavior script. */
    uint16_t script_pc;
@@ -41,7 +41,7 @@ struct PACKED MOBILE {
 
 /**
  * \brief Have the given MOBILE attempt to begin walking movement/animation.
- * \param m MEMORY_PTR to MOBILE that should attempt moving.
+ * \param m ::MEMORY_PTR to MOBILE that should attempt moving.
  * \param x Tile offset to attempt moving horizontally.
  * \param y Tile offset to attempt moving vertically.
  *
@@ -56,15 +56,15 @@ void mobile_state_animate( struct DSEKAI_STATE* );
 
 /**
  * \brief Perform animation frame for the given MOBILE.
- * \param m MEMORY_PTR to MOBILE to animate.
- * \param t MEMORY_PTR to TILEMAP on which MOBILE is located.
+ * \param m ::MEMORY_PTR to MOBILE to animate.
+ * \param t ::MEMORY_PTR to TILEMAP on which MOBILE is located.
  */
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t );
 
 /**
  * \brief Draw the given MOBILE in its current animation frame.
- * \param m MEMORY_PTR to MOBILE to draw on screen.
- * \param state MEMORY_PTR to engine state to use for animation.
+ * \param m ::MEMORY_PTR to MOBILE to draw on screen.
+ * \param state ::MEMORY_PTR to engine state to use for animation.
  * \param screen_x Horizontal screen pixel offset to draw mobile at.
  * \param screen_y Vertical screen pixel offset to draw mobile at.
  */

@@ -22,7 +22,8 @@
 #define TOPDOWN_STATE_WELCOME 1
 
 int topdown_draw(
-   struct DSEKAI_STATE* state, struct TILEMAP* map, struct MOBILE* mobiles
+   struct DSEKAI_STATE* state, struct TILEMAP* map, struct MOBILE* mobiles,
+   struct GRAPHICS_ARGS* args
 ) {
    int in_char = 0,
       i = 0,
@@ -65,7 +66,7 @@ int topdown_draw(
       /* Drain input. */
       in_char = input_poll();
       if( INPUT_KEY_QUIT == in_char ) {
-         graphics_flip();
+         graphics_flip( args );
          return 0;
       }
 
@@ -83,7 +84,7 @@ int topdown_draw(
       }
 
       /* Keep running. */
-      graphics_flip();
+      graphics_flip( args );
       return 1;
    }
 
@@ -103,12 +104,19 @@ int topdown_draw(
       /* Figure out direction to offset steps in. */
       if( mobiles[i].coords_prev.x > mobiles[i].coords.x ) {
          x_offset = SPRITE_W - mobiles[i].steps_x;
+         y_offset = 0;
       } else if( mobiles[i].coords_prev.x < mobiles[i].coords.x ) {
          x_offset = (SPRITE_W - mobiles[i].steps_x) * -1;
+         y_offset = 0;
       } else if( mobiles[i].coords_prev.y > mobiles[i].coords.y ) {
+         x_offset = 0;
          y_offset = SPRITE_H - mobiles[i].steps_y;
       } else if( mobiles[i].coords_prev.y < mobiles[i].coords.y ) {
+         x_offset = 0;
          y_offset = (SPRITE_H - mobiles[i].steps_y) * -1;
+      } else {
+         x_offset = 0;
+         y_offset = 0;
       }
 
       assert( SPRITE_W > x_offset );
@@ -125,11 +133,11 @@ int topdown_draw(
    }
 
    /* Keep running. */
-   graphics_flip();
+   graphics_flip( args );
    return 1;
 }
 
-int topdown_loop( MEMORY_HANDLE state_handle ) {
+int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    int i = 0;
    uint8_t in_char = 0;
    static int initialized = 0;
@@ -272,7 +280,7 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
    assert( NULL != mobiles );
 
    if( 0 >= window_modal( state ) ) {
-      topdown_draw( state, map, mobiles );
+      topdown_draw( state, map, mobiles, args );
    }
 
    window_draw_all( state );
@@ -391,7 +399,7 @@ cleanup:
       topdown_deinit( state_handle );
    }
 
-   graphics_flip();
+   graphics_flip( args );
    return retval;
 }
 

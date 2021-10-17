@@ -11,9 +11,9 @@ struct MOBILE;
 /**
  * \brief Callback to execute a behavior action. Step in a script.
  * \param pc Current program counter for this mobile.
- * \param actor MEMORY_PTR to MOBILE executing the action.
- * \param actee MEMORY_PTR to MOBILE being acted upon.
- * \param tile MEMORY_PTR to tilemap tile being acted upon.
+ * \param actor ::MEMORY_PTR to MOBILE executing the action.
+ * \param actee ::MEMORY_PTR to MOBILE being acted upon.
+ * \param tile ::MEMORY_PTR to tilemap tile being acted upon.
  * \param arg Argument passed from script.
  * \return New position for script execution counter.
  */

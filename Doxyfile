@@ -791,11 +791,15 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = \
-   src \
-   unilayer/resource.h \
-   unilayer/resource/nullr.h \
    unilayer/memory.h \
    unilayer/memory/fakem.h \
+   unilayer/unilayer.h \
+   unilayer/platform.h \
+   unilayer/graphics.h \
+   unilayer/graphics/nullg.h \
+   unilayer/resource.h \
+   unilayer/resource/nullr.h \
+   src \
    README.md
 
 # This tag can be used to specify the character encoding of the source files
