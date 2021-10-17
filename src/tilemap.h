@@ -10,6 +10,8 @@
 #error "no packed"
 #endif
 
+/*! \brief Maximum number of SCRIPT structs attached to a tilemap. */
+#define TILEMAP_SCRIPTS_MAX 8
 /*! \brief TILESET_TILE width in pixels. */
 #define TILE_W 16
 /*! \brief TILESET_TILE height in pixels. */
@@ -39,6 +41,8 @@
 /*! \brief TILEMAP::tiles_flags bit flag indicating tile must be redrawn. */
 #define TILEMAP_TILE_FLAG_DIRTY     0x01
 
+/*! \brief JSON path to script definition. */
+#define TILEMAP_JPATH_SCRIPT "/properties/[name=script_%d]/value"
 /*! \brief JSON path to tileset source in map data. */
 #define TILEMAP_JPATH_TS_SRC     "/tilesets/0/source"
 /*! \brief JSON path to terrain tile TILEMAP::tileset index in map data. */
@@ -51,6 +55,8 @@
 #define TILEMAP_JPATH_MOB_Y      "/layers/[name=mobiles]/objects/%d/y"
 /*! \brief JSON path to mobile name. */
 #define TILEMAP_JPATH_MOB_NAME   "/layers/[name=mobiles]/objects/%d/name"
+/*! \brief JSON path to mobile script index. */
+#define TILEMAP_JPATH_MOB_SCRIPT "/layers/[name=mobiles]/objects/%d/properties/[name=script]/value"
 
 /**
  * \brief Get the TILEMAP::tileset index for the tile at the given coords.
@@ -64,25 +70,31 @@ struct jsmntok;
 
 /*! \brief Tile prototype stored in TILEMAP::tileset. */
 struct PACKED TILESET_TILE {
-   /* \brief Indentifier for graphical asset representing this tile. */
+   /*! \brief Indentifier for graphical asset representing this tile. */
    RESOURCE_ID image;
-   /* \brief Flags indicating behavior for this tile. */
+   /*! \brief Flags indicating behavior for this tile. */
    uint32_t flags;
 };
 
-/*! \brief Defines a spawner to create mobiles in the world. */
+/*! \brief Defines a spawner to create mobiles in the world.
+ *
+ *  Modifications to this struct should also be reflected in tools/map2h.c.
+ */
 struct PACKED TILEMAP_SPAWN {
    /* TODO: Allow a range of coordinates in which to spawn. */
    /* TODO: Allow multiple spawns from single spawner. */
-   /* \brief Tile-based coordinates at which to spawn. */
+   /*! \brief Tile-based coordinates at which to spawn. */
    struct TILEMAP_COORDS coords;
-   /* \brief Mobile type to spawn. */
+   /*! \brief Mobile type to spawn. */
    int16_t type;
-   /* \brief Script to attach to spawned mobiles. */
-   struct SCRIPT_STEP script[MOBILE_SCRIPT_STEPS_MAX];
+   /*! \brief Index of TILEMAP::scripts attached to mobiles spawned. */
+   int16_t script_id;
 };
 
-/*! \brief Information pertaining to in-game world currently loaded. */
+/*! \brief Information pertaining to in-game world currently loaded.
+ *
+ *  Modifications to this struct should also be reflected in tools/map2h.c.
+ */
 struct PACKED TILEMAP {
    /*! \brief Tilemap name. */
    char name[TILEMAP_NAME_MAX];
@@ -100,6 +112,10 @@ struct PACKED TILEMAP {
    uint8_t strings_count;
    /*! \brief Number of TILEMAP::spawns active on this map. */
    uint16_t spawns_count;
+   /* \brief Scripts available to attach to any MOBILE. */
+   struct SCRIPT scripts[TILEMAP_SCRIPTS_MAX];
+   /* \brief Number of TILEMAP::scripts currently available. */
+   uint16_t scripts_count;
 };
 
 /**

@@ -227,6 +227,10 @@ int16_t json_str_from_path(
       return 0;
    }
    memory_copy_ptr( buffer, &(buf[tokens[id].start]), excerpt_sz );
+
+   /* Enforce NULL termination. */
+   buffer[excerpt_sz] = '\0';
+
    return excerpt_sz;
 }
 

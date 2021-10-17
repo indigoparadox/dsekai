@@ -83,12 +83,13 @@ int main( int argc, char* argv[] ) {
       fprintf( header_file, "         %d,\n", t.spawns[i].type );
 
       /* script */
-      fprintf( header_file, "         {\n" );
+      /*fprintf( header_file, "         {\n" );
       for( j = 0 ; MOBILE_SCRIPT_STEPS_MAX > j ; j++ ) {
          fprintf( header_file, "            { %d, %d },\n",
             t.spawns[i].script[j].action, t.spawns[i].script[j].arg );
       }
-      fprintf( header_file, "         },\n" );
+      fprintf( header_file, "         },\n" ); */
+      fprintf( header_file, "         %d\n", t.spawns[i].script_id );
 
       fprintf( header_file, "      },\n" );
    }

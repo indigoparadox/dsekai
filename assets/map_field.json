@@ -42,6 +42,12 @@
                  "height":0,
                  "id":6,
                  "name":"princess",
+                 "properties":[
+                        {
+                         "name":"script",
+                         "type":"int",
+                         "value":0
+                        }],
                  "rotation":0,
                  "type":"princess",
                  "visible":true,
@@ -74,9 +80,14 @@
          "name":"name",
          "type":"string",
          "value":"field"
+        }, 
+        {
+         "name":"script_0",
+         "type":"string",
+         "value":"r1r1w3l1l1"
         }],
  "renderorder":"right-down",
- "tiledversion":"1.7.1",
+ "tiledversion":"1.7.2",
  "tileheight":16,
  "tilesets":[
         {

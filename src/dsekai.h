@@ -17,8 +17,6 @@
 
 struct DSEKAI_STATE;
 
-#define MOBILE_SCRIPT_STEPS_MAX 16
-
 /*! \brief X/Y coordinates of a tile on the current map. */
 struct PACKED TILEMAP_COORDS {
    int32_t x;

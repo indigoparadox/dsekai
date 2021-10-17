@@ -8,6 +8,9 @@
 
 struct MOBILE;
 
+/*! \brief Maximum number of steps in an individual script. */
+#define SCRIPT_STEPS_MAX 16
+
 /**
  * \brief Callback to execute a behavior action. Step in a script.
  * \param pc Current program counter for this mobile.
@@ -25,6 +28,11 @@ typedef uint16_t (*SCRIPT_CB)(
 struct PACKED SCRIPT_STEP {
    uint16_t action;
    int16_t arg;
+};
+
+struct PACKED SCRIPT {
+   struct SCRIPT_STEP steps[SCRIPT_STEPS_MAX];
+   uint16_t steps_count;
 };
 
 /**

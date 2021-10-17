@@ -3,6 +3,12 @@
 
 #ifdef USE_JSON_MAPS
 
+int16_t tilemap_parse_script(
+   char* script_txt, int16_t script_txt_sz, struct SCRIPT* script
+) {
+   return 0;
+}
+
 int16_t tilemap_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
    jsmntok_t* tokens, uint16_t tokens_sz, char* json_buffer,
@@ -38,54 +44,36 @@ int16_t tilemap_parse_spawn(
 
    /* Parse Y */
    dio_snprintf(
-      iter_path, iter_path_sz,
       iter_path, iter_path_sz, TILEMAP_JPATH_MOB_Y, spawn_idx );
    spawn->coords.y = json_int_from_path(
       iter_path, iter_path_sz, &(tokens[0]), tokens_sz, json_buffer );
    spawn->coords.y /= TILE_H;
 
-#if 0
-   /* Parse Interaction */
+   /* Parse Script */
+   spawn->script_id = -1;
    dio_snprintf(
-      iter_path, iter_path_sz,
-      "/layers/[name=mobiles]/objects/%d/properties/[name=interaction]/value",
-      spawn_idx );
-   spawn_buffer_sz = json_str_from_path(
-      iter_path, iter_path_sz,
-      spawn_buffer, TILEMAP_SPAWN_T_MAX, &(tokens[0]), tokens_sz, json_buffer );
-   if( 0 == memory_strncmp_ptr( "talk", spawn_buffer, 4 ) ) {
-      spawn->interaction = MOBILE_IACT_TALK;
-      debug_printf( 1, "mobile interaction: talk" );
-   }
+      iter_path, iter_path_sz, TILEMAP_JPATH_MOB_SCRIPT, spawn_idx );
+   spawn->script_id = json_int_from_path(
+      iter_path, iter_path_sz, &(tokens[0]), tokens_sz, json_buffer );
 
-   /* Parse Interaction Data */
-   switch( spawns->interaction ) {
-   case MOBILE_IACT_TALK:
+   if( spawn->script_id  >= TILEMAP_SCRIPTS_MAX ) {
+      error_printf( "mobile uses script ID beyond maximum available!" );
+
+   } else if( spawn->script_id >= t->scripts_count ) {
+      /* Attempt to load the script, since it was referenced. */
       dio_snprintf(
-         iter_path, iter_path_sz,
-         "/layers/[name=mobiles]/objects/%d/properties/[name=data]/value",
-         spawn_idx );
+         iter_path, iter_path_sz, TILEMAP_JPATH_SCRIPT, spawn->script_id );
+      spawn_buffer[0] = '\0';
       spawn_buffer_sz = json_str_from_path(
          iter_path, iter_path_sz,
-         spawn_buffer, TILEMAP_SPAWN_T_MAX, &(tokens[0]), tokens_sz, json_buffer );
-      if( TILEMAP_STRINGS_MAX <= t->strings_count + 1 ) {
-         error_printf( "tilemap string table full" );
-         break;
-      }
-      memory_strncpy_ptr(
-         &(t->strings[t->strings_count][0]),
-         spawn_buffer,
-         spawn_buffer_sz );
-      debug_printf( 2, "added string \"%s\" at index %d",
-         spawn_buffer, t->strings_count );
-      t->strings_count++;
-
-      break;
+         spawn_buffer, TILEMAP_SPAWN_T_MAX,
+         &(tokens[0]), tokens_sz, json_buffer );
+      tilemap_parse_script( spawn_buffer, spawn_buffer_sz,
+         &(t->scripts[spawn->script_id]) );
    }
-#endif
 
-   debug_printf( 2, "%d spawn at %d, %d",
-      spawn->type, spawn->coords.x, spawn->coords.y );
+   debug_printf( 2, "%d spawn at %d, %d (script %d)",
+      spawn->type, spawn->coords.x, spawn->coords.y, spawn->script_id );
 
    return 1;
 }
