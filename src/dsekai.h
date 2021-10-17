@@ -2,6 +2,16 @@
 #ifndef DSEKAI_H
 #define DSEKAI_H
 
+/*! \file dsekai.h
+ *  \brief Engine state data and main header, used in every engine file.
+ *
+ *  This file should be used to call all other engine headers, to ensure
+ *  dependencies are kept and in order.
+ *
+ *  Data types and constants that are used in multiple engine headers should
+ *  be placed in this file.
+ */
+
 #include "config.h"
 #include <unilayer.h>
 
@@ -28,9 +38,12 @@ struct PACKED DSEKAI_STATE {
 
    MEMORY_HANDLE map;
 
+   /*! \brief Array of currently loaded MOBILE objects on this map. */
    MEMORY_HANDLE mobiles;
+   /*! \brief Number of active MOBILE objects in DSEKAI_STATE::mobiles. */
    uint16_t mobiles_count; 
 
+   /*! \brief Index of the player MOBILE in DSEKAI_STATE::mobiles. */
    uint16_t player_idx;
 
    uint8_t input_blocked_countdown;
