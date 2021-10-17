@@ -130,7 +130,7 @@ int16_t tilemap_parse_tileset(
  */
 int8_t tilemap_parse_tile(
    struct TILEMAP* t, int16_t tile_idx,
-   jsmntok_t* tokens, uint16_t tokens_sz, char* json_buffer,
+   struct jsmntok* tokens, uint16_t tokens_sz, char* json_buffer,
    char* iter_path, uint16_t iter_path_sz );
 
 int16_t tilemap_parse(
