@@ -34,6 +34,8 @@ Items in the tools/ and check/ subdirectories may depend on the src/ directory f
 
 Some attempt has been made at documentation with [doxygen](https://www.doxygen.nl/index.html). Simply run doxygen in the project root in order to generate HTML documentation under doc/.
 
+This documentation is also available at [https://indigoparadox.github.io/dsekai/](https://indigoparadox.github.io/dsekai/).
+
 This is a work in progress.
 
 ## Resources
