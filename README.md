@@ -30,6 +30,14 @@ In general, these restrictions are relaxed for items in the tools/ and check/ su
 
 Items in the tools/ and check/ subdirectories may depend on the src/ directory freely.
 
+## Documentation
+
+Some attempt has been made at documentation with [doxygen](https://www.doxygen.nl/index.html). Simply run doxygen in the project root in order to generate HTML documentation under doc/.
+
+This documentation is also available at [https://indigoparadox.github.io/dsekai/](https://indigoparadox.github.io/dsekai/).
+
+This is a work in progress.
+
 ## Resources
 
 This engine uses OS-level resources where it can to store assets. On platforms without this facility, assets are converted into headers during compile time and referenced via the same resource-loading mechanisms.
@@ -68,7 +76,7 @@ The following targets may be built:
 | MS-DOS   | bin/dsekai.exe   | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | SDL      | bin/dsekai       | SDL2
 | Xlib     | bin/dsekaix      | Xlib
-| *PalmOS   | bin/dsekai.prc   | [PRCTools](https://github.com/jichu4n/prc-tools-remix)
+| *PalmOS  | bin/dsekai.prc   | [PRCTools](https://github.com/jichu4n/prc-tools-remix)
 | Win16    | bin/dsekai16.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | Win32    | bin/dsekai32.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | *MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
