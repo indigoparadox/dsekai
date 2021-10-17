@@ -1,12 +1,6 @@
 
+#define MOBILE_C
 #include "dsekai.h"
-
-const int8_t gc_mobile_step_table_normal_pos[16] = {
-   0, 0, 0, 0,       /*  0,  1,  2,  3 */
-   3, 3, 3, 3,       /*  4,  5,  6,  7 */
-   7, 7, 7, 7,       /*  8,  9, 10, 11 */
-   11, 11, 11, 11    /* 12, 13, 14, 15 */
-};
 
 uint16_t mobile_parse_script( 
    struct MOBILE_SCRIPT_STEP* steps, uint16_t steps_sz
@@ -100,29 +94,11 @@ void mobile_draw(
       return;
    }
 
-   assert( SPRITE_W > m->steps_x );
-   assert( SPRITE_H > m->steps_y );
-
-   /* Figure out direction to offset steps in. */
-   if( m->coords_prev.x > m->coords.x ) {
-      x_offset = SPRITE_W - m->steps_x;
-   } else if( m->coords_prev.x < m->coords.x ) {
-      x_offset = (SPRITE_W - m->steps_x) * -1;
-   } else if( m->coords_prev.y > m->coords.y ) {
-      y_offset = SPRITE_H - m->steps_y;
-   } else if( m->coords_prev.y < m->coords.y ) {
-      y_offset = (SPRITE_H - m->steps_y) * -1;
-   }
-
-   assert( SPRITE_W > x_offset );
-   assert( SPRITE_H > y_offset );
-
    graphics_blit_at(
       m->sprite,
       state->ani_sprite_x,
       m->facing * SPRITE_H,
-      ((m->coords.x * SPRITE_W) + x_offset) - screen_x,
-      (((m->coords.y * SPRITE_H) + y_offset ) - screen_y),
+      screen_x, screen_y,
       SPRITE_W, SPRITE_H );
 }
 

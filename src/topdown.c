@@ -25,7 +25,9 @@ int topdown_draw(
    struct DSEKAI_STATE* state, struct TILEMAP* map, struct MOBILE* mobiles
 ) {
    int in_char = 0,
-      i = 0;
+      i = 0,
+      x_offset = 0,
+      y_offset = 0;
 
    /*
    If the screen is scrolling, prioritize that before accepting more
@@ -97,8 +99,28 @@ int topdown_draw(
          /* Mobile is off-screen. */
          continue;
       }
+
+      /* Figure out direction to offset steps in. */
+      if( mobiles[i].coords_prev.x > mobiles[i].coords.x ) {
+         x_offset = SPRITE_W - mobiles[i].steps_x;
+      } else if( mobiles[i].coords_prev.x < mobiles[i].coords.x ) {
+         x_offset = (SPRITE_W - mobiles[i].steps_x) * -1;
+      } else if( mobiles[i].coords_prev.y > mobiles[i].coords.y ) {
+         y_offset = SPRITE_H - mobiles[i].steps_y;
+      } else if( mobiles[i].coords_prev.y < mobiles[i].coords.y ) {
+         y_offset = (SPRITE_H - mobiles[i].steps_y) * -1;
+      }
+
+      assert( SPRITE_W > x_offset );
+      assert( SPRITE_H > y_offset );
+
       mobile_draw(
-         &(mobiles[i]), state, state->screen_scroll_x, state->screen_scroll_y );
+         &(mobiles[i]), state,
+         ((mobiles[i].coords.x * SPRITE_W) + x_offset)
+            - state->screen_scroll_x,
+         ((mobiles[i].coords.y * SPRITE_H) + y_offset)
+            - state->screen_scroll_y );
+      
       assert( NULL != &(mobiles[state->player_idx]) );
    }
 

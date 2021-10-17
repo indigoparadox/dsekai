@@ -10,28 +10,31 @@ struct MOBILE;
 
 /**
  * \brief Callback to execute a behavior action. Step in a script.
+ * \param pc Current program counter for this mobile.
  * \param actor MEMORY_PTR to MOBILE executing the action.
  * \param actee MEMORY_PTR to MOBILE being acted upon.
  * \param tile MEMORY_PTR to tilemap tile being acted upon.
+ * \param arg Argument passed from script.
  * \return New position for script execution counter.
  */
 typedef uint16_t (*SCRIPT_CB)(
    uint16_t pc,
-   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile );
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   int16_t arg );
 
 struct PACKED SCRIPT_STEP {
    uint16_t action;
-   uint16_t arg;
+   int16_t arg;
 };
 
 /**
  * \brief Define the script action callback table.
  * \param f Macro to execute on the function callback definition.
  */
-#define SCRIPT_CB_TABLE( f ) f( 0, INTERACT, 'i' ) f( 1, WALK, 'w' )
+#define SCRIPT_CB_TABLE( f ) f( 0, INTERACT, 'i' ) f( 1, WALK_NORTH, 'u' ) f( 2, WALK_SOUTH, 'd' ) f( 3, WALK_EAST, 'r' ) f( 4, WALK_WEST, 'l' ) f( 5, SLEEP, 's' ) f( 6, START, 't' )
 
 /*! \brief Define prototypes for the script action callbacks. */
-#define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS* );
+#define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, int16_t );
 
 SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
 
