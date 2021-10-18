@@ -223,6 +223,8 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          mobiles[i].steps_x = 0;
          mobiles[i].steps_y = 0;
          mobiles[i].inventory = NULL;
+         mobiles[i].script_id = map->spawns[i].script_id;
+         mobiles[i].script_pc = 0;
          state->mobiles_count++;
          switch( map->spawns[i].type ) {
          case MOBILE_TYPE_PLAYER:
@@ -345,6 +347,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 
    mobile_state_animate( state );
    for( i = 0 ; state->mobiles_count > i ; i++ ) {
+      mobile_execute( &(mobiles[i]), map );
       mobile_animate( &(mobiles[i]), map );
    }
 

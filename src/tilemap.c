@@ -3,12 +3,6 @@
 
 #ifdef USE_JSON_MAPS
 
-int16_t tilemap_parse_script(
-   char* script_txt, int16_t script_txt_sz, struct SCRIPT* script
-) {
-   return 0;
-}
-
 int16_t tilemap_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
    jsmntok_t* tokens, uint16_t tokens_sz, char* json_buffer,
@@ -68,8 +62,9 @@ int16_t tilemap_parse_spawn(
          iter_path, iter_path_sz,
          spawn_buffer, TILEMAP_SPAWN_T_MAX,
          &(tokens[0]), tokens_sz, json_buffer );
-      tilemap_parse_script( spawn_buffer, spawn_buffer_sz,
+      script_parse_str( spawn_buffer, spawn_buffer_sz,
          &(t->scripts[spawn->script_id]) );
+      t->scripts_count++;
    }
 
    debug_printf( 2, "%d spawn at %d, %d (script %d)",

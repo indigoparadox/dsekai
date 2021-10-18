@@ -22,10 +22,10 @@ struct PACKED MOBILE {
    /*! \brief Number of steps remaining on Y axis in current walk animation. */
    uint8_t steps_y;
    struct ITEM* inventory;
-   /*! \brief ::MEMORY_PTR to currently executing behavior script. */
-   struct SCRIPT_STEP* script;
+   /*! \brief Index currently executing behavior script in TILEMAP::scripts. */
+   int16_t script_id;
    /*! \brief Position in currently executing behavior script. */
-   uint16_t script_pc;
+   int16_t script_pc;
 };
 
 /* TODO: Condense these into flags. */
@@ -72,6 +72,7 @@ void mobile_draw(
    const struct MOBILE* m, const struct DSEKAI_STATE* state,
    int16_t screen_x, int16_t screen_y );
 void mobile_deinit( struct MOBILE* );
+void mobile_execute( struct MOBILE* m, struct TILEMAP* t );
 
 #ifdef MOBILE_C
 /*! \brief Lookup table for next walking offset based on current offset. */

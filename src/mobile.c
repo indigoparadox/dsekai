@@ -2,12 +2,6 @@
 #define MOBILE_C
 #include "dsekai.h"
 
-uint16_t mobile_parse_script( 
-   struct MOBILE_SCRIPT_STEP* steps, uint16_t steps_sz
-) {
-   return 0;
-}
-
 uint8_t mobile_walk_start( struct MOBILE* m, int8_t x_mod, int8_t y_mod ) {
 
    if(
@@ -51,6 +45,27 @@ void mobile_state_animate( struct DSEKAI_STATE* state ) {
    } else {
       state->ani_sprite_x = 0;
    }
+}
+
+void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
+   struct SCRIPT* script = NULL;
+   struct SCRIPT_STEP* step = NULL;
+
+   if(
+      0 > m->script_id ||
+      m->script_id >= t->scripts_count
+   ) {
+      return;
+   }
+
+   script = &(t->scripts[m->script_id]);
+   step = &(script->steps[m->script_pc]);
+
+   debug_printf( 3, "script_exec: script %d, step %d (%d)",
+      m->script_id, m->script_pc, step->action );
+
+   m->script_pc = gc_script_handlers[step->action](
+      m->script_pc, m, NULL, &(m->coords), step->arg );
 }
 
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {

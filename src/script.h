@@ -39,12 +39,21 @@ struct PACKED SCRIPT {
  * \brief Define the script action callback table.
  * \param f Macro to execute on the function callback definition.
  */
-#define SCRIPT_CB_TABLE( f ) f( 0, INTERACT, 'i' ) f( 1, WALK_NORTH, 'u' ) f( 2, WALK_SOUTH, 'd' ) f( 3, WALK_EAST, 'r' ) f( 4, WALK_WEST, 'l' ) f( 5, SLEEP, 's' ) f( 6, START, 't' )
+#define SCRIPT_CB_TABLE( f ) f( 0, INTERACT, 'i' ) f( 1, WALK_NORTH, 'u' ) f( 2, WALK_SOUTH, 'd' ) f( 3, WALK_EAST, 'r' ) f( 4, WALK_WEST, 'l' ) f( 5, SLEEP, 's' ) f( 6, START, 't' ) f( 7, GOTO, 'g' )
 
 /*! \brief Define prototypes for the script action callbacks. */
 #define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, int16_t );
 
 SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
+
+/**
+ * \brief Parse the given script string into an in-memory script.
+ * \param script_txt The script string.
+ * \param script_txt_sz The length of the script string.
+ * \param script ::MEMORY_PTR to the SCRIPT struct to populate.
+ */
+uint16_t script_parse_str(
+   char* script_txt, int16_t script_txt_sz, struct SCRIPT* script );
 
 #ifdef SCRIPT_C
 
