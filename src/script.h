@@ -18,20 +18,32 @@ struct MOBILE;
  * \param actee ::MEMORY_PTR to MOBILE being acted upon.
  * \param tile ::MEMORY_PTR to tilemap tile being acted upon.
  * \param arg Argument passed from script.
- * \return New position for script execution counter.
+ * \return New value for this script's program counter (e.g. MOBILE::script_pc).
  */
 typedef uint16_t (*SCRIPT_CB)(
    uint16_t pc,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg );
 
+/**
+ * \brief Contains a single instruction in a script, in SCRIPT::steps.
+ *
+ *  Modifications to this struct should also be reflected in tools/map2h.c.
+ */
 struct PACKED SCRIPT_STEP {
    uint16_t action;
    int16_t arg;
 };
 
+/**
+ * \brief Contains immutable state for scripts attached to a TILEMAP.
+ *
+ *  Modifications to this struct should also be reflected in tools/map2h.c.
+ */
 struct PACKED SCRIPT {
+   /*! \brief Indexed list of script steps in order. */
    struct SCRIPT_STEP steps[SCRIPT_STEPS_MAX];
+   /*! \brief Number of SCRIPT::steps attached to this script. */
    uint16_t steps_count;
 };
 
