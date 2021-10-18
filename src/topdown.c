@@ -6,8 +6,8 @@
 #include "../gen/win16/map_field.h"
 #elif defined( PLATFORM_WIN32 )
 #include "../gen/win32/map_field.h"
-#elif defined( PLATFORM_MAC7 )
-#include "../gen/mac7/map_field.h"
+#elif defined( PLATFORM_MAC6 )
+#include "../gen/mac6/map_field.h"
 #elif defined( PLATFORM_NDS )
 #include "../gen/nds/map_field.h"
 #elif defined( PLATFORM_DOS )
