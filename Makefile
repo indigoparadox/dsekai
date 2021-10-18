@@ -173,7 +173,7 @@ DSEKAI_O_FILES_CHECK_NULL := \
 
 .PHONY: clean grc_palm
 
-all: $(BIN_DOS) $(BIN_SDL) $(BIN_PALM) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
+all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
 
 STAMPFILE := .stamp
 
