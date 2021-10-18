@@ -60,7 +60,8 @@ void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
    }
 
    if( graphics_get_ms() < m->script_next_ms ) {
-      debug_printf( 0, "mobile sleeping: %d waiting for %d", graphics_get_ms(),
+      debug_printf( 0,
+         "mobile sleeping: %lu waiting for %lu", graphics_get_ms(),
          m->script_next_ms );
       /* Mobile still sleeping. */
       return;
