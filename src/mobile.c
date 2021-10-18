@@ -69,7 +69,7 @@ void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
    script = &(t->scripts[m->script_id]);
    step = &(script->steps[m->script_pc]);
 
-   debug_printf( 3, "%lu ms: script_exec: script %d, step %d (%d)",
+   debug_printf( 0, "%lu ms: script_exec: script %d, step %d (%d)",
       graphics_get_ms(), m->script_id, m->script_pc, step->action );
 
    m->script_pc = gc_script_handlers[step->action](
