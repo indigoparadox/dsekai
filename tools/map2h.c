@@ -48,9 +48,11 @@ int main( int argc, char* argv[] ) {
    fprintf( header_file, "   \"%s\",\n", t.name );
 
    /* tileset */
+   fprintf( header_file, "   /* tileset */\n" );
    fprintf( header_file, "   { 0 },\n" );
 
    /* tiles */
+   fprintf( header_file, "   /* tiles */\n" );
    fprintf( header_file, "   {\n      " );
    for( i = 0 ; ((TILEMAP_TH * TILEMAP_TW) / 2) > i ; i++ ) {
       fprintf( header_file, "0x%02x, ", t.tiles[i] );
@@ -61,6 +63,7 @@ int main( int argc, char* argv[] ) {
    fprintf( header_file, "   },\n" );
 
    /* tiles_flags */ 
+   fprintf( header_file, "   /* tiles_flags */\n" );
    fprintf( header_file, "   {\n      " );
    for( i = 0 ; (TILEMAP_TH * TILEMAP_TW) > i ; i++ ) {
       fprintf( header_file, "0x%02x, ", t.tiles_flags[i] );
@@ -71,15 +74,18 @@ int main( int argc, char* argv[] ) {
    fprintf( header_file, "   },\n" );
 
    /* spawns */
+   fprintf( header_file, "   /* spawns */\n" );
    fprintf( header_file, "   {\n" );
    for( i = 0 ; t.spawns_count > i ; i++ ) {
       fprintf( header_file, "      {\n" );
 
       /* coords */
+      fprintf( header_file, "         /* coords */\n" );
       fprintf( header_file, "         { %d, %d },\n",
          t.spawns[i].coords.x, t.spawns[i].coords.y );
 
       /* type */
+      fprintf( header_file, "         /* type */\n" );
       fprintf( header_file, "         %d,\n", t.spawns[i].type );
 
       /* script */
@@ -89,6 +95,7 @@ int main( int argc, char* argv[] ) {
             t.spawns[i].script[j].action, t.spawns[i].script[j].arg );
       }
       fprintf( header_file, "         },\n" ); */
+      fprintf( header_file, "         /* script_id */\n" );
       fprintf( header_file, "         %d\n", t.spawns[i].script_id );
 
       fprintf( header_file, "      },\n" );
@@ -96,6 +103,7 @@ int main( int argc, char* argv[] ) {
    fprintf( header_file, "   },\n" );
 
    /* strings */
+   fprintf( header_file, "   /* strings */\n" );
    fprintf( header_file, "   {\n" );
    for( i = 0 ; t.strings_count > i ; i++ ) {
       fprintf( header_file, "      \"%s\",\n", t.strings[i] );
@@ -104,10 +112,44 @@ int main( int argc, char* argv[] ) {
    fprintf( header_file, "   },\n" );
 
    /* strings_count */
+   fprintf( header_file, "   /* strings_count */\n" );
    fprintf( header_file, "   %d,\n", t.strings_count );
 
    /* spawns_count */
-   fprintf( header_file, "   %d\n", t.spawns_count );
+   fprintf( header_file, "   /* spawns_count */\n" );
+   fprintf( header_file, "   %d,\n", t.spawns_count );
+
+   /* scripts */
+   fprintf( header_file, "   /* scripts */\n" );
+   fprintf( header_file, "   {\n" );
+   for( i = 0 ; t.scripts_count > i ; i++ ) {
+      fprintf( header_file, "      {\n" );
+      /* steps */
+      fprintf( header_file, "         /* steps */\n" );
+      fprintf( header_file, "         {\n" );
+      for( j = 0 ; t.scripts[i].steps_count > j ; j++ ) {
+         fprintf( header_file, "            {\n" );
+         fprintf( header_file, "               /* action */\n" );
+         fprintf( header_file, "               %d,\n",
+            t.scripts[i].steps[j].action );
+         fprintf( header_file, "               /* arg */\n" );
+         fprintf( header_file, "               %d,\n",
+            t.scripts[i].steps[j].arg );
+         fprintf( header_file, "            },\n" );
+      }
+      fprintf( header_file, "         },\n" );
+
+      /* steps_count */
+      fprintf( header_file, "         /* steps_count */\n" );
+      fprintf( header_file, "         %d\n", t.scripts[i].steps_count );
+
+      fprintf( header_file, "      },\n" );
+   }
+   fprintf( header_file, "   },\n" );
+
+   /* scripts_count */
+   fprintf( header_file, "   /* scripts_count */\n" );
+   fprintf( header_file, "   %d\n", t.scripts_count );
 
    fprintf( header_file, "};\n" );
 

@@ -26,6 +26,8 @@ struct PACKED MOBILE {
    int16_t script_id;
    /*! \brief Position in currently executing behavior script. */
    int16_t script_pc;
+   /*! \brief Delay script until this result from graphics_get_ms(). */
+   uint32_t script_next_ms;
 };
 
 /* TODO: Condense these into flags. */

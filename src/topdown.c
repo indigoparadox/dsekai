@@ -225,6 +225,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          mobiles[i].inventory = NULL;
          mobiles[i].script_id = map->spawns[i].script_id;
          mobiles[i].script_pc = 0;
+         mobiles[i].script_next_ms = graphics_get_ms();
          state->mobiles_count++;
          switch( map->spawns[i].type ) {
          case MOBILE_TYPE_PLAYER:

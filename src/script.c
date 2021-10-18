@@ -77,7 +77,7 @@ uint16_t script_handle_SLEEP(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg
 ) {
-   /* TODO: Base current time on ticks? */
+   actor->script_next_ms = graphics_get_ms() + (arg * 1000);
    return pc + 1;
 }
 
@@ -99,16 +99,16 @@ uint16_t script_handle_GOTO(
    return arg;
 }
 
-#define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[step_idx].action = idx; c_idx++; break;
+#define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;
 
 uint16_t script_parse_str(
    char* script_txt, int16_t script_txt_sz, struct SCRIPT* script
 ) {
-   int c_idx = 0,
-      step_idx = 0;
+   int c_idx = 0;
 
    for( ; script_txt_sz > c_idx ; ) {
-      debug_printf( 2, "step %d char: %c", step_idx, script_txt[c_idx] );
+      debug_printf( 2, "step %d char: %c",
+         script->steps_count, script_txt[c_idx] );
       switch( script_txt[c_idx] ) {
          SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PARSE )
          default:
@@ -120,24 +120,26 @@ uint16_t script_parse_str(
       }
 
       /* TODO: Skip missing args. */
-      script->steps[step_idx].arg = dio_atoi( &(script_txt[c_idx]), 10 );
+      script->steps[script->steps_count].arg =
+         dio_atoi( &(script_txt[c_idx]), 10 );
       debug_printf(
-         3, "step %d arg: %d", step_idx, script->steps[step_idx].arg );
-      if( 10000 <= script->steps[step_idx].arg ) {
+         3, "step %d arg: %d",
+         script->steps_count, script->steps[script->steps_count].arg );
+      if( 10000 <= script->steps[script->steps_count].arg ) {
          c_idx += 5;
-      } else if( 1000 <= script->steps[step_idx].arg ) {
+      } else if( 1000 <= script->steps[script->steps_count].arg ) {
          c_idx += 4;
-      } else if( 100 <= script->steps[step_idx].arg ) {
+      } else if( 100 <= script->steps[script->steps_count].arg ) {
          c_idx += 3;
-      } else if( 10 <= script->steps[step_idx].arg ) {
+      } else if( 10 <= script->steps[script->steps_count].arg ) {
          c_idx += 2;
       } else {
          c_idx++;
       }
 
-      step_idx++;
+      script->steps_count++;
    }
 
-   return step_idx;
+   return script->steps_count;
 }
 

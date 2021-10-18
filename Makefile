@@ -70,6 +70,7 @@ MAP2H_C_FILES := \
    tools/map2h.c \
    src/tilemap.c \
    src/mobile.c \
+   src/script.c \
    unilayer/memory/fakem.c \
    unilayer/dio.c \
    src/json.c \

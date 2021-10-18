@@ -55,6 +55,14 @@ void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
       0 > m->script_id ||
       m->script_id >= t->scripts_count
    ) {
+      /* Invalid script. */
+      return;
+   }
+
+   if( graphics_get_ms() < m->script_next_ms ) {
+      debug_printf( 3, "mobile sleeping: %d waiting for %d", graphics_get_ms(),
+         m->script_next_ms );
+      /* Mobile still sleeping. */
       return;
    }
 
