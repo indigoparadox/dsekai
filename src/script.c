@@ -2,17 +2,42 @@
 #define SCRIPT_C
 #include "dsekai.h"
 
+uint16_t script_goto_label(
+   uint16_t pc, struct SCRIPT* script, uint16_t label_type, uint16_t label_id
+) {
+   uint16_t i = 0;
+
+   for( i = 0 ; script->steps_count > i ; i++ ) {
+      if(
+         label_type == script->steps[i].action &&
+         label_id == script->steps[i].arg
+      ) {
+         /* Jump to this START instruction's position. */
+         debug_printf( 0, "jump to type %d, #%d, pc %d",
+            label_type, label_id, i );
+         return i;
+      }
+   }
+
+   /* Freeze. */
+   error_printf( "invalid goto label type %d, #%d", label_type, label_id );
+   return pc;
+}
+
 uint16_t script_handle_INTERACT(
-   uint16_t pc,
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg
 ) {
+   /* NOOP */
    return pc + 1;
 }
 
 static uint16_t script_handle_WALK_generic(
    uint16_t pc, struct MOBILE* actor, int16_t mod_x, int16_t mod_y
 ) {
+   /* TODO: Handle blockage. */
+
    if(
       /* Actor is currently walking. */
       (actor->coords.y != actor->coords_prev.y ||
@@ -39,7 +64,7 @@ static uint16_t script_handle_WALK_generic(
 }
 
 uint16_t script_handle_WALK_NORTH(
-   uint16_t pc,
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg
 ) {
@@ -47,7 +72,7 @@ uint16_t script_handle_WALK_NORTH(
 }
 
 uint16_t script_handle_WALK_SOUTH(
-   uint16_t pc,
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg
 ) {
@@ -55,7 +80,7 @@ uint16_t script_handle_WALK_SOUTH(
 }
 
 uint16_t script_handle_WALK_EAST(
-   uint16_t pc,
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg
 ) {
@@ -64,7 +89,7 @@ uint16_t script_handle_WALK_EAST(
 }
 
 uint16_t script_handle_WALK_WEST(
-   uint16_t pc,
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg
 ) {
@@ -73,7 +98,7 @@ uint16_t script_handle_WALK_WEST(
 }
 
 uint16_t script_handle_SLEEP(
-   uint16_t pc,
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg
 ) {
@@ -82,7 +107,7 @@ uint16_t script_handle_SLEEP(
 }
 
 uint16_t script_handle_START(
-   uint16_t pc,
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg
 ) {
@@ -91,12 +116,11 @@ uint16_t script_handle_START(
 }
 
 uint16_t script_handle_GOTO(
-   uint16_t pc,
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg
 ) {
-   /* NOOP */
-   return arg;
+   return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
 }
 
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;

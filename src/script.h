@@ -7,6 +7,8 @@
  */
 
 struct MOBILE;
+struct SCRIPT;
+struct TILEMAP;
 
 /*! \brief Maximum number of steps in an individual script. */
 #define SCRIPT_STEPS_MAX 16
@@ -14,6 +16,8 @@ struct MOBILE;
 /**
  * \brief Callback to execute a behavior action. Step in a script.
  * \param pc Current program counter for this mobile.
+ * \param script Currently executing script.
+ * \param t ::MEMORY_PTR to currently loaded TILEMAP.
  * \param actor ::MEMORY_PTR to MOBILE executing the action.
  * \param actee ::MEMORY_PTR to MOBILE being acted upon.
  * \param tile ::MEMORY_PTR to tilemap tile being acted upon.
@@ -21,7 +25,7 @@ struct MOBILE;
  * \return New value for this script's program counter (e.g. MOBILE::script_pc).
  */
 typedef uint16_t (*SCRIPT_CB)(
-   uint16_t pc,
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    int16_t arg );
 
@@ -54,7 +58,7 @@ struct PACKED SCRIPT {
 #define SCRIPT_CB_TABLE( f ) f( 0, INTERACT, 'i' ) f( 1, WALK_NORTH, 'u' ) f( 2, WALK_SOUTH, 'd' ) f( 3, WALK_EAST, 'r' ) f( 4, WALK_WEST, 'l' ) f( 5, SLEEP, 's' ) f( 6, START, 't' ) f( 7, GOTO, 'g' )
 
 /*! \brief Define prototypes for the script action callbacks. */
-#define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, int16_t );
+#define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct SCRIPT*, struct TILEMAP*, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, int16_t );
 
 SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
 
@@ -66,6 +70,9 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
  */
 uint16_t script_parse_str(
    char* script_txt, int16_t script_txt_sz, struct SCRIPT* script );
+
+uint16_t script_goto_label(
+   uint16_t pc, struct SCRIPT* script, uint16_t label_type, uint16_t label_id );
 
 #ifdef SCRIPT_C
 

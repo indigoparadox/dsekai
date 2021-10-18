@@ -60,7 +60,7 @@ void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
    }
 
    if( graphics_get_ms() < m->script_next_ms ) {
-      debug_printf( 3, "mobile sleeping: %d waiting for %d", graphics_get_ms(),
+      debug_printf( 0, "mobile sleeping: %d waiting for %d", graphics_get_ms(),
          m->script_next_ms );
       /* Mobile still sleeping. */
       return;
@@ -69,11 +69,11 @@ void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
    script = &(t->scripts[m->script_id]);
    step = &(script->steps[m->script_pc]);
 
-   debug_printf( 3, "script_exec: script %d, step %d (%d)",
+   debug_printf( 0, "script_exec: script %d, step %d (%d)",
       m->script_id, m->script_pc, step->action );
 
    m->script_pc = gc_script_handlers[step->action](
-      m->script_pc, m, NULL, &(m->coords), step->arg );
+      m->script_pc, script, t, m, NULL, &(m->coords), step->arg );
 }
 
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {

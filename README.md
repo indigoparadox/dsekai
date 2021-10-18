@@ -88,3 +88,19 @@ Platforms marked with * are currently broken.
 
 Just doing "make" will attempt to build all currently working targets.
 
+## Scripting
+
+Below is a brief overview of the mobile scripting language. All statements take
+a single numerical (may be multiple digits) argument.
+
+| Statement  | Char | Argument  | Explanation
+|------------|------|-----------|-------------
+| INTERACT   | i    |           | Jump to this step on player interaction.
+| WALK_NORTH | u    | Steps     | Walk Steps north (up).
+| WALK_SOUTH | d    | Steps     | Walk Steps south (down).
+| WALK_EAST  | r    | Steps     | Walk Steps east (right).
+| WALK_WEST  | l    | Steps     | Walk Steps west (left).
+| SLEEP      | s    | Seconds   | Don't do anything for Seconds.
+| START      | t    | Label_Num | Define a label index to jump to.
+| GOTO       | g    | Label_Num | Jump to a defined label index.
+
