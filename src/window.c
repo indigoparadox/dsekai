@@ -1,6 +1,39 @@
 
 #include "dsekai.h"
 
+#ifdef PLATFORM_PALM
+
+int16_t window_modal( struct DSEKAI_STATE* state ) {
+   return 0;
+}
+
+int window_draw_all(
+   struct DSEKAI_STATE* state,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
+   return 0;
+}
+
+int16_t window_push(
+   uint32_t id, uint8_t status,
+   int16_t x, int16_t y, int16_t w, int16_t h, uint8_t frame_idx,
+   struct DSEKAI_STATE* state
+) {
+   return 0;
+}
+
+void window_pop( uint32_t id, struct DSEKAI_STATE* state ) {
+}
+
+void window_init() {
+}
+
+void window_shutdown() {
+}
+
+#else
+
 static MEMORY_HANDLE g_frames_handle = NULL;
 
 void window_init() {
@@ -301,4 +334,6 @@ int16_t window_modal( struct DSEKAI_STATE* state ) {
 
    return modal;
 }
+
+#endif /* PLATFORM */
 

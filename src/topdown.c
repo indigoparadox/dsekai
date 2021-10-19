@@ -247,9 +247,11 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          0, (SCREEN_TH * 16), STATUS_WINDOW_W, STATUS_WINDOW_H, 0, state );
 
 #ifndef HIDE_WELCOME_DIALOG
+#ifndef PLATFORM_PALM
       state->engine_state = TOPDOWN_STATE_WELCOME;
       window_prefab_dialog(
          WINDOW_ID_WELCOME, 1, sprite_princess, state, map );
+#endif /* PLATFORM_PALM */
 #endif /* !HIDE_WELCOME_DIALOG */
 
       mobiles = memory_unlock( state->mobiles );

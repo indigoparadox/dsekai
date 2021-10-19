@@ -1,6 +1,22 @@
 
 #include "dsekai.h"
 
+#ifdef PLATFORM_PALM
+
+int16_t control_push(
+   uint32_t control_id, uint16_t type, uint16_t status,
+   int16_t x, int16_t y, int16_t w, int16_t h,
+   GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
+   int32_t data_scalar, RESOURCE_ID data_res_id,
+   uint32_t window_id, struct DSEKAI_STATE* state,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
+   return 0;
+}
+
+#else
+
 /* Drawing Callbacks */
 
 int16_t control_draw_label(
@@ -307,4 +323,6 @@ void control_draw_all(
       controls = (struct CONTROL*)memory_unlock( w->controls_handle );
    }
 }
+
+#endif /* PLATFORM */
 
