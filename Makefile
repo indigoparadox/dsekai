@@ -1,6 +1,8 @@
 
 DSEKAI := dsekai
 
+ENTRY_MAP := field
+
 DSEKAI_C_FILES := \
    src/tilemap.c \
    unilayer/graphics.c \
@@ -78,7 +80,7 @@ MAP2H_C_FILES := \
    unilayer/graphics.c \
    unilayer/graphics/nullg.c
 
-PLATFORMS := sdl sdl-nj sdl-file xlib dos win16 win32 palm mac6 nds curses check_null
+PLATFORMS := sdl sdl-nj xlib dos win16 win32 palm mac6 nds curses check_null
 
 ASSETDIR := assets
 OBJDIR := obj

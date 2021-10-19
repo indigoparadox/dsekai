@@ -1,6 +1,18 @@
 
 # dsekai
 
+* [dsekai](#deskai)
+  * [Roadmap](#roadmap)
+  * [Documentation](#documentation)
+* [Building](#building)
+  * [Options](#options)
+  * [Datafiles](#datafiles)
+  * [Platforms](#platforms)
+* [Modding](#modding)
+  * [Mapping](#mapping)
+  * [Skinning](#skinning)
+  * [Scripting](#scripting)
+
 ![Overworld Screenshot](screens/overwrld.png)
 
 dsekai is an extremely minimal world engine, intended to run on very old hardware. It is originally targeted to the 8086/8088 CPU with the intention to make it more portable later. See below for a list of supported platforms.
@@ -9,16 +21,15 @@ This project is being built around/in tandem with the unilayer project, in order
 
 There are also some rough examples of CGA graphics programming in unilayer/graphics/dosg.c, if that's what you're into.
 
-## Planned Features
+## Roadmap
+
+Features that are planned include:
 
 * 256-Color graphics on some platforms while keeping 4-color/2-color support.
 * Simple and consistent data structures for binary save dumps.
 * Housing system based on in-game map editing.
 * Item usage and crafting.
-* Mobile scripting language w/ wait for interaction instruction.
-* Minimal resource use (shooting for <64k RAM).
-
-## Rules
+* Minimal resource use (shooting for <500k RAM).
 
 Ideally, this engine will compile with legacy compilers as a general rule. For this reason, the following rules/limitations should be observed within the codebase:
 
@@ -38,9 +49,24 @@ This documentation is also available at [https://indigoparadox.github.io/dsekai/
 
 This is a work in progress.
 
-## Resources
+# Building
 
-This engine uses OS-level resources where it can to store assets. On platforms without this facility, assets are converted into headers during compile time and referenced via the same resource-loading mechanisms.
+Currently, this project uses GNU make to (cross-)build on a GNU/Linux system. Compilers and tools required depend on the desired [platforms](#platforms) to build for.
+
+For MS-DOS, the INCLUDE environment variable must be set to the location of the OpenWatcom header files (e.g. /opt/watcom/h).
+
+## Options
+
+The following options may be specified to make in order control the final output:
+
+| Variable | Options | Explanation
+|----------|---------|-------------
+| RESOURCE | FILE    | Store assets as files in the filesystem.
+|          | HEADER  | Store assets embedded in the binary.
+
+## Datafiles
+
+This engine should be capable of retrieving assets (levels, graphics, etc) from different locations, depending on how it was [built](#options). Aside from loading directly from the filesystem, it should be able to use OS-level resources embedded in the binary. On platforms without this facility, a rough approximation of this is emulated using [object embedding](headpack).
 
 ## Platforms
 
@@ -59,36 +85,46 @@ The following platforms are planned to be supported but not yet functional:
 * **Nintendo DS**
 * **WebASM/WebGL**
 
-## Compiling
-
-Compiling dsekai for MS-DOS is best achieved with the OpenWatcom compiler (this is what the Makefile uses). Other platforms use their own compilers as outlined in the table below.
-
-Some platforms formerly required Python in order to translate resources from the CGA header format. Tools written in C are now available in the tools/ subdirectory in order to convert resources from more standard (e.g. Windows bitmap) formats into the more efficient formats used by the engine. Please see the Makefile for details.
-
-For MS-DOS, the INCLUDE environment variable must be set to the location of the OpenWatcom header files (e.g. /opt/watcom/h).
-
-## Platforms
-
-The following targets may be built:
-
 | Platform | Make Target         | Requirements |
 |----------|---------------------|--------------
 | MS-DOS   | bin/dsekai.exe   | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | SDL      | bin/dsekai       | SDL2
 | Xlib     | bin/dsekaix      | Xlib
-| *PalmOS  | bin/dsekai.prc   | [PRCTools](https://github.com/jichu4n/prc-tools-remix)
+| \*PalmOS  | bin/dsekai.prc   | [PRCTools](https://github.com/jichu4n/prc-tools-remix)
 | Win16    | bin/dsekai16.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | Win32    | bin/dsekai32.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
-| *MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
-| *NDS     | bin/dsekai.nds   | [DevKitPro](https://devkitpro.org/)
-| *WebASM  | bin/dsekai.js    | emscripten
-| *Curses  | bin/dsekait      | NCurses
+| \*MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
+| \*NDS     | bin/dsekai.nds   | [DevKitPro](https://devkitpro.org/)
+| \*WebASM  | bin/dsekai.js    | emscripten
+| \*Curses  | bin/dsekait      | NCurses
 
 Platforms marked with * are currently broken.
 
 Just doing "make" will attempt to build all currently working targets.
 
+# Modding
+
+## Mapping
+
+Maps are stored as JSON files in the format used by the [Tiled](https://github.com/mapeditor/tiled) map editor.
+
+Please see map_field.json in the assets directory for an example.
+
+The following special considerations should be observed for the dsekai engine:
+
+ * [Scripts](#scripting) are loaded from the map file according to the rules in that section.
+ * NPC (or "mobile") spawns are stored in an objects layer called "objects". The engine selects the NPC sprite based on its name and its script based on a custom property called "script".
+ * The static layer of the map is loaded from a layer called "terrain".
+
+## Skinning
+
+TBA
+
 ## Scripting
+
+Scripts are stored in the [map](#mapping) files, under custom properties for the whole map labelled as "script_n", where n represents the index of the script as referred to by a mobile's script property.
+
+Scripts are stored as sequences of a single character (shorthand for a statement) followed by a number (an argument).
 
 Below is a brief overview of the mobile scripting language. All statements take
 a single numerical (may be multiple digits) argument.
