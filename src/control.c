@@ -1,23 +1,16 @@
 
 #include "dsekai.h"
 
-typedef void (*CONTROL_CB_SZ)(
-   struct WINDOW*, struct CONTROL*, struct GRAPHICS_RECT* );
-
 /* Drawing Callbacks */
 
-static int16_t control_draw_label( struct WINDOW* w, struct CONTROL* c ) {
-   char* str = NULL;
-   int16_t str_len = 0;
+int16_t control_draw_label(
+   struct WINDOW* w, struct CONTROL* c,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
 
    assert( NULL != c );
-   assert( (MEMORY_HANDLE)NULL != c->data.handle );
-
-   str = (char*)memory_lock( c->data.handle );
-
-   str_len = memory_sz( c->data.handle );
-
-   assert( 0 <= str_len );
+   assert( 0 <= c->data.scalar && c->data.scalar < strings_sz );
    assert( w->x < SCREEN_W );
    assert( w->y < SCREEN_H );
    assert( c->x < SCREEN_W );
@@ -26,18 +19,21 @@ static int16_t control_draw_label( struct WINDOW* w, struct CONTROL* c ) {
    assert( w->y + c->y < SCREEN_H );
    assert( w->x >= 0 );
    assert( w->y >= 0 );
-   assert( c->x >= 0 );
+   /*assert( c->x >= 0 ); */
    assert( c->y >= 0 );
 
    graphics_string_at( 
-      str, str_len, w->x + c->x, w->y + c->y, c->fg, c->scale );
-
-   str = (char*)memory_unlock( c->data.handle );
+      strings[c->data.scalar], string_szs[c->data.scalar],
+      w->x + c->x, w->y + c->y, c->fg, c->scale );
 
    return 1;
 }
 
-static int16_t control_draw_sprite( struct WINDOW* w, struct CONTROL* c ) {
+int16_t control_draw_sprite(
+   struct WINDOW* w, struct CONTROL* c,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
 
    assert( NULL != c );
 
@@ -64,23 +60,23 @@ const CONTROL_CB gc_control_draw_callbacks[] = {
 
 /* Sizing Callbacks */
 
-static void control_sz_label(
-   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz
+void control_sz_label(
+   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
 ) {
-   char* str = NULL;
-
    assert( NULL != c );
-   assert( (MEMORY_HANDLE)NULL != c->data.handle );
+   assert( 0 <= c->data.scalar && c->data.scalar < strings_sz );
 
-   str = (char*)memory_lock( c->data.handle );
-
-   graphics_string_sz( str, memory_sz( c->data.handle ), c->scale, sz );
-
-   str = (char*)memory_unlock( c->data.handle );
+   graphics_string_sz(
+      strings[c->data.scalar], string_szs[c->data.scalar],
+      c->scale, sz );
 }
 
-static void control_sz_sprite(
-   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz
+void control_sz_sprite(
+   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
 ) {
    sz->w = SPRITE_W + 4; /* For border. */
    sz->h = SPRITE_W + 4; /* For border. */
@@ -99,8 +95,10 @@ int16_t control_push(
    uint32_t control_id, uint16_t type, uint16_t status,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
-   MEMORY_HANDLE data_handle, uint32_t data_scalar, RESOURCE_ID data_res_id,
-   uint32_t window_id, struct DSEKAI_STATE* state
+   int32_t data_scalar, RESOURCE_ID data_res_id,
+   uint32_t window_id, struct DSEKAI_STATE* state,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
 ) {
    int i = 0;
    struct WINDOW* windows = NULL;
@@ -155,8 +153,6 @@ int16_t control_push(
    controls[0].type = type;
    if( 0 != data_scalar ) {
       controls[0].data.scalar = data_scalar;
-   } else if( (MEMORY_HANDLE)NULL != data_handle ) {
-      controls[0].data.handle = data_handle;
    } else if( 0 != (int)data_res_id ) {
       resource_assign_id( controls[0].data.res_id, data_res_id );
    }
@@ -165,7 +161,8 @@ int16_t control_push(
    controls[0].id = control_id;
 
    gc_control_sz_callbacks[type](
-      &(windows[window_idx]), &(controls[0]), &control_sz );
+      &(windows[window_idx]), &(controls[0]), &control_sz,
+      strings, strings_sz, string_szs );
 
    if( WINDOW_CENTERED == w ) {
       controls[0].w = control_sz.w;
@@ -287,22 +284,27 @@ cleanup:
    }
 }
 
-void control_draw_all( struct WINDOW* window ) {
+void control_draw_all(
+   struct WINDOW* w,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
    struct CONTROL* controls = NULL;
    int16_t i = 0;
 
-   if( (MEMORY_HANDLE)NULL == window->controls_handle ) {
+   if( (MEMORY_HANDLE)NULL == w->controls_handle ) {
       return;
    }
 
-   controls = (struct CONTROL*)memory_lock( window->controls_handle );
+   controls = (struct CONTROL*)memory_lock( w->controls_handle );
 
-   for( i = window->controls_count - 1 ; 0 <= i ; i-- ) {
-      gc_control_draw_callbacks[controls[i].type]( window, &(controls[i]) );
+   for( i = w->controls_count - 1 ; 0 <= i ; i-- ) {
+      gc_control_draw_callbacks[controls[i].type](
+         w, &(controls[i]), strings, strings_sz, string_szs );
    }
 
    if( NULL != controls ) {
-      controls = (struct CONTROL*)memory_unlock( window->controls_handle );
+      controls = (struct CONTROL*)memory_unlock( w->controls_handle );
    }
 }
 

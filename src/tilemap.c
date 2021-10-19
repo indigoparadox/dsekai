@@ -170,6 +170,26 @@ int16_t tilemap_parse(
    }
    debug_printf( 2, "tilemap name is %s (%d)", t->name, name_len ); 
 
+   /* Load strings.*/
+   debug_printf( 1, "loading strings" ); 
+   for(
+      t->strings_count = 0 ;
+      TILEMAP_STRINGS_MAX > t->strings_count ;
+      t->strings_count++
+   ) {
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ, TILEMAP_JPATH_STRING, t->strings_count );
+      t->string_szs[t->strings_count] = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         t->strings[t->strings_count], TILEMAP_STRINGS_SZ,
+         tokens, tok_parsed, json_buffer );
+      debug_printf( 3, "loaded string: %s", t->strings[t->strings_count] );
+      if( 0 >= t->string_szs[t->strings_count] ) {
+         /* Last string index was not parsed, so we're done. */
+         break;
+      }
+   }
+
    debug_printf( 1, "loading spawns" ); 
    while( tilemap_parse_spawn(
       t, t->spawns_count, tokens, tok_parsed, json_buffer,

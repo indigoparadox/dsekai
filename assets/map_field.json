@@ -84,7 +84,17 @@
         {
          "name":"script_0",
          "type":"string",
-         "value":"t0r1s1r1s3l1s1l1s3g0i0p0g0"
+         "value":"t0r1s1r1s3l1s1l1s3g0i0p0x0"
+        }, 
+        {
+         "name":"string_0",
+         "type":"string",
+         "value":"Have you seen it?"
+        }, 
+        {
+         "name":"string_1",
+         "type":"string",
+         "value":"Welcome!"
         }],
  "renderorder":"right-down",
  "tiledversion":"1.7.2",

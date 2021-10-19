@@ -47,7 +47,83 @@ void mobile_state_animate( struct DSEKAI_STATE* state ) {
    }
 }
 
-void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
+struct MOBILE* mobile_get_facing(
+   struct MOBILE* m, struct MOBILE mobiles[], int mobiles_sz
+) {
+   int i = 0;
+
+   for( i = 0 ; mobiles_sz > i ; i++ ) {
+      if( &(mobiles[i]) == m ) {
+         /* Don't compare to self. */
+         continue;
+      }
+
+      switch( m->facing ) {
+      case MOBILE_FACING_NORTH:
+         if( 
+            m->coords.x == mobiles[i].coords.x &&
+            m->coords.y - 1 == mobiles[i].coords.y
+         ) {
+            return &(mobiles[i]);
+         }
+         break;
+
+      case MOBILE_FACING_SOUTH:
+         if( 
+            m->coords.x == mobiles[i].coords.x &&
+            m->coords.y + 1 == mobiles[i].coords.y
+         ) {
+            return &(mobiles[i]);
+         }
+         break;
+
+      case MOBILE_FACING_EAST:
+         if( 
+            m->coords.x + 1 == mobiles[i].coords.x &&
+            m->coords.y == mobiles[i].coords.y
+         ) {
+            return &(mobiles[i]);
+         }
+         break;
+
+      case MOBILE_FACING_WEST:
+         if( 
+            m->coords.x - 1 == mobiles[i].coords.x &&
+            m->coords.y == mobiles[i].coords.y
+         ) {
+            return &(mobiles[i]);
+         }
+         break;
+      }
+   }
+   
+   return NULL;
+}
+
+struct MOBILE* mobile_interact(
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t
+) {
+
+   if( NULL == actee ) {
+      return NULL;
+   }
+
+   /* TODO: Workshop this. */
+
+   /* TODO: Store mobile previous PC? */
+
+   actee->script_pc_prev = actee->script_pc;
+   actee->script_pc = script_goto_label(
+      actee->script_pc, &(t->scripts[actee->script_id]),
+      SCRIPT_ACTION_INTERACT, 0 );
+   actee->script_next_ms = graphics_get_ms();
+
+   return actee;
+}
+
+void mobile_execute(
+   struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state
+) {
    struct SCRIPT* script = NULL;
    struct SCRIPT_STEP* step = NULL;
 
@@ -61,7 +137,7 @@ void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
 
    if( graphics_get_ms() < m->script_next_ms ) {
       debug_printf( 0,
-         "mobile sleeping: %lu waiting for %lu", graphics_get_ms(),
+         "mobile sleeping: %u waiting for %u", graphics_get_ms(),
          m->script_next_ms );
       /* Mobile still sleeping. */
       return;
@@ -70,11 +146,11 @@ void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
    script = &(t->scripts[m->script_id]);
    step = &(script->steps[m->script_pc]);
 
-   debug_printf( 0, "%lu ms: script_exec: script %d, step %d (%d)",
+   debug_printf( 0, "%u ms: script_exec: script %d, step %d (%d)",
       graphics_get_ms(), m->script_id, m->script_pc, step->action );
 
    m->script_pc = gc_script_handlers[step->action](
-      m->script_pc, script, t, m, NULL, &(m->coords), step->arg );
+      m->script_pc, script, t, m, NULL, &(m->coords), state, step->arg );
 }
 
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
@@ -111,9 +187,6 @@ void mobile_draw(
    const struct MOBILE* m, const struct DSEKAI_STATE* state,
    int16_t screen_x, int16_t screen_y
 ) {
-   int16_t x_offset = 0,
-      y_offset = 0;
-
    if( !m->active ) {
       return;
    }

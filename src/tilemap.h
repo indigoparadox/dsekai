@@ -43,6 +43,8 @@
 
 /*! \brief JSON path to script definition. */
 #define TILEMAP_JPATH_SCRIPT "/properties/[name=script_%d]/value"
+/*! \brief JSON path to string definition. */
+#define TILEMAP_JPATH_STRING "/properties/[name=string_%d]/value"
 /*! \brief JSON path to tileset source in map data. */
 #define TILEMAP_JPATH_TS_SRC     "/tilesets/0/source"
 /*! \brief JSON path to terrain tile TILEMAP::tileset index in map data. */
@@ -108,6 +110,8 @@ struct PACKED TILEMAP {
    struct TILEMAP_SPAWN spawns[20];
    /*! \brief Strings used in dialog/signs on this map. */
    char strings[TILEMAP_STRINGS_MAX][TILEMAP_STRINGS_SZ];
+   /*! \brief Size of each loaded string. */
+   uint8_t string_szs[TILEMAP_STRINGS_MAX];
    /*! \brief Number of TILEMAP::strings active on this map. */
    uint8_t strings_count;
    /*! \brief Number of TILEMAP::spawns active on this map. */

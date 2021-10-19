@@ -10,6 +10,10 @@
 
 #define WINDOW_COUNT_MAX 10
 
+#define WINDOW_ID_WELCOME 0x1212
+#define WINDOW_ID_STATUS 0x111
+#define WINDOW_ID_SCRIPT_SPEAK 0x897
+
 /*! \brief WINDOW::status indicating window is hidden/inactive. */
 #define WINDOW_STATUS_EMPTY    0
 /*! \brief WINDOW::status indicating window is being animated open. */
@@ -66,9 +70,14 @@ struct WINDOW {
    int16_t h;
 };
 
+#define window_prefab_dialog( id, dialog, sprite, state, t ) window_push( id, WINDOW_STATUS_MODAL, WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state ); control_push( 0x2323, CONTROL_TYPE_LABEL, CONTROL_STATE_ENABLED, -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1, dialog, 0, id, state, t->strings, t->strings_count, t->string_szs ); control_push( 0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED, -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1, 0, sprite, id, state, t->strings, t->strings_count, t->string_szs ); 
+
 void window_init();
 void window_shutdown();
-int window_draw_all( struct DSEKAI_STATE* state );
+int window_draw_all(
+   struct DSEKAI_STATE* state,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs );
 
 /**
  * \brief Push a new window onto the global window stack.
@@ -84,7 +93,7 @@ int window_draw_all( struct DSEKAI_STATE* state );
 int16_t window_push(
    uint32_t id, uint8_t status,
    int16_t x, int16_t y, int16_t w, int16_t h, uint8_t frame_idx,
-   struct DSEKAI_STATE* state
+   struct DSEKAI_STATE* state );
 void window_pop( uint32_t, struct DSEKAI_STATE* );
 int16_t window_modal( struct DSEKAI_STATE* );
 

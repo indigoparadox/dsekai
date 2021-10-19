@@ -142,8 +142,6 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    uint8_t in_char = 0;
    static int initialized = 0;
    struct DSEKAI_STATE* state = NULL;
-   MEMORY_HANDLE welcome_string_handle = (MEMORY_HANDLE)NULL;
-   char* welcome_string = NULL;
    struct TILEMAP* map = NULL;
    struct MOBILE* mobiles = NULL;
    struct ITEM* items = NULL;
@@ -244,31 +242,18 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          }
       }
 
-      mobiles = memory_unlock( state->mobiles );
-      map = memory_unlock( state->map );
-
       window_push(
-         0x111, WINDOW_STATUS_VISIBLE,
+         WINDOW_ID_STATUS, WINDOW_STATUS_VISIBLE,
          0, (SCREEN_TH * 16), STATUS_WINDOW_W, STATUS_WINDOW_H, 0, state );
 
 #ifndef HIDE_WELCOME_DIALOG
       state->engine_state = TOPDOWN_STATE_WELCOME;
-      window_push(
-         0x1212, WINDOW_STATUS_MODAL,
-         WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state );
-      welcome_string_handle = memory_alloc( 9, 1 );
-      welcome_string = (char*)memory_lock( welcome_string_handle );
-      memory_copy_ptr( welcome_string, "Welcome!", 8 );
-      welcome_string = (char*)memory_unlock( welcome_string_handle );
-      control_push(
-         0x2323, CONTROL_TYPE_LABEL, CONTROL_STATE_ENABLED,
-         -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
-         welcome_string_handle, 0, 0, 0x1212, state );
-      control_push(
-         0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED,
-         -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1,
-         (MEMORY_HANDLE)NULL, 0, sprite_princess, 0x1212, state );
+      window_prefab_dialog(
+         WINDOW_ID_WELCOME, 1, sprite_princess, state, map );
 #endif /* !HIDE_WELCOME_DIALOG */
+
+      mobiles = memory_unlock( state->mobiles );
+      map = memory_unlock( state->map );
 
       initialized = 1;
    }
@@ -286,7 +271,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       topdown_draw( state, map, mobiles, args );
    }
 
-   window_draw_all( state );
+   window_draw_all( state, map->strings, map->strings_count, map->string_szs );
 
    if( state->input_blocked_countdown ) {
       state->input_blocked_countdown--;
@@ -336,19 +321,33 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       break;
 
    case INPUT_KEY_OK:
-      window_pop( 0x1212, state );
+      if( 0 >= window_modal( state ) ) {
+         /* Try to interact with facing mobile. */
+         mobile_interact(
+            &(mobiles[state->player_idx]),
+            mobile_get_facing(
+               &(mobiles[state->player_idx]), mobiles, state->mobiles_count ),
+            map );
+      } else {
+         /* Try to close any windows that are open. */
+         window_pop( WINDOW_ID_WELCOME, state );
+         window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
+      }
       tilemap_refresh_tiles( map );
       break;
 
    case INPUT_KEY_QUIT:
-      window_pop( 0x111, state );
+      window_pop( WINDOW_ID_STATUS, state );
       retval = 0;
       goto cleanup;
    }
 
    mobile_state_animate( state );
    for( i = 0 ; state->mobiles_count > i ; i++ ) {
-      mobile_execute( &(mobiles[i]), map );
+      if( 0 >= window_modal( state ) ) {
+         /* Pause scripts if modal window is pending. */
+         mobile_execute( &(mobiles[i]), map, state );
+      }
       mobile_animate( &(mobiles[i]), map );
    }
 

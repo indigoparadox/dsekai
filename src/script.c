@@ -2,6 +2,11 @@
 #define SCRIPT_C
 #include "dsekai.h"
 
+#if defined( SCREEN_W ) && defined( SCREEN_H )
+/* We're running in the engine and not an external tool. */
+#define SCRIPT_HAS_GFX
+#endif /* SCREEN_W && SCREEN_H */
+
 uint16_t script_goto_label(
    uint16_t pc, struct SCRIPT* script, uint16_t label_type, uint16_t label_id
 ) {
@@ -27,9 +32,9 @@ uint16_t script_goto_label(
 uint16_t script_handle_INTERACT(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   int16_t arg
+   struct DSEKAI_STATE* state, int16_t arg
 ) {
-   /* NOOP */
+   /* NOOP: This is just a label to jump to with fancy GOTO mechanism. */
    return pc + 1;
 }
 
@@ -66,7 +71,7 @@ static uint16_t script_handle_WALK_generic(
 uint16_t script_handle_WALK_NORTH(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   int16_t arg
+   struct DSEKAI_STATE* state, int16_t arg
 ) {
    return script_handle_WALK_generic( pc, actor, 0, -1 );
 }
@@ -74,7 +79,7 @@ uint16_t script_handle_WALK_NORTH(
 uint16_t script_handle_WALK_SOUTH(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   int16_t arg
+   struct DSEKAI_STATE* state, int16_t arg
 ) {
    return script_handle_WALK_generic( pc, actor, 0, 1 );
 }
@@ -82,7 +87,7 @@ uint16_t script_handle_WALK_SOUTH(
 uint16_t script_handle_WALK_EAST(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   int16_t arg
+   struct DSEKAI_STATE* state, int16_t arg
 ) {
    debug_printf( 0, "script: walk east" );
    return script_handle_WALK_generic( pc, actor, 1, 0 );
@@ -91,7 +96,7 @@ uint16_t script_handle_WALK_EAST(
 uint16_t script_handle_WALK_WEST(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   int16_t arg
+   struct DSEKAI_STATE* state, int16_t arg
 ) {
    debug_printf( 0, "script: walk west" );
    return script_handle_WALK_generic( pc, actor, -1, 0 );
@@ -100,7 +105,7 @@ uint16_t script_handle_WALK_WEST(
 uint16_t script_handle_SLEEP(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   int16_t arg
+   struct DSEKAI_STATE* state, int16_t arg
 ) {
    actor->script_next_ms = graphics_get_ms() + (arg * 1000);
    return pc + 1;
@@ -109,18 +114,39 @@ uint16_t script_handle_SLEEP(
 uint16_t script_handle_START(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   int16_t arg
+   struct DSEKAI_STATE* state, int16_t arg
 ) {
-   /* NOOP */
+   /* NOOP: This is just a label to jump to with GOTO mechanism. */
    return pc + 1;
 }
 
 uint16_t script_handle_GOTO(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   int16_t arg
+   struct DSEKAI_STATE* state, int16_t arg
 ) {
+   actor->script_pc_prev = actor->script_pc;
    return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
+}
+
+uint16_t script_handle_RETURN(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   return actor->script_pc_prev;
+}
+
+uint16_t script_handle_SPEAK(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+#ifdef SCRIPT_HAS_GFX
+   window_prefab_dialog(
+      WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state, t );
+#endif /* SCRIPT_HAS_GFX */
+   return pc + 1;
 }
 
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;

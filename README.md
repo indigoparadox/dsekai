@@ -81,7 +81,7 @@ The following targets may be built:
 | Win32    | bin/dsekai32.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | *MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
 | *NDS     | bin/dsekai.nds   | [DevKitPro](https://devkitpro.org/)
-| *WebASM  \ bin/dsekai.js    | emscripten
+| *WebASM  | bin/dsekai.js    | emscripten
 | *Curses  | bin/dsekait      | NCurses
 
 Platforms marked with * are currently broken.
@@ -103,4 +103,6 @@ a single numerical (may be multiple digits) argument.
 | SLEEP      | s    | Seconds   | Don't do anything for Seconds.
 | START      | t    | Label_Num | Define a label index to jump to.
 | GOTO       | g    | Label_Num | Jump to a defined label index.
+| SPEAK      | p    | Text_Id   | Display Text_Id from the tilemap string table.
+| RETURN     | x    |           | Return to PC previous to GOTO or interaction.
 
