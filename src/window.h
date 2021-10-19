@@ -70,6 +70,8 @@ void window_init();
 void window_shutdown();
 int window_draw_all( struct DSEKAI_STATE* state );
 
+#define window_prefab_dialog( id, dialog, dialog_sz, sprite, state ) window_push( id, WINDOW_STATUS_MODAL, WINDOW_CENTERED, WINDOW_CENTERED, 80, 64, 0, state ); control_push( 0x2323, CONTROL_TYPE_LABEL, CONTROL_STATE_ENABLED, -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1, dialog, dialog_sz, 0, 0, id, state ); control_push( 0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED, -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1, NULL, 0, 0, sprite, id, state ); 
+
 /**
  * \brief Push a new window onto the global window stack.
  * \param id A unique identifier for the window being pushed.
@@ -84,7 +86,7 @@ int window_draw_all( struct DSEKAI_STATE* state );
 int16_t window_push(
    uint32_t id, uint8_t status,
    int16_t x, int16_t y, int16_t w, int16_t h, uint8_t frame_idx,
-   struct DSEKAI_STATE* state
+   struct DSEKAI_STATE* state );
 void window_pop( uint32_t, struct DSEKAI_STATE* );
 int16_t window_modal( struct DSEKAI_STATE* );
 

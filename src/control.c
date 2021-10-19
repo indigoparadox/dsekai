@@ -7,17 +7,11 @@ typedef void (*CONTROL_CB_SZ)(
 /* Drawing Callbacks */
 
 static int16_t control_draw_label( struct WINDOW* w, struct CONTROL* c ) {
-   char* str = NULL;
-   int16_t str_len = 0;
 
    assert( NULL != c );
-   assert( (MEMORY_HANDLE)NULL != c->data.handle );
+   assert( NULL != c->data.ptr );
 
-   str = (char*)memory_lock( c->data.handle );
-
-   str_len = memory_sz( c->data.handle );
-
-   assert( 0 <= str_len );
+   assert( 0 <= c->data_sz );
    assert( w->x < SCREEN_W );
    assert( w->y < SCREEN_H );
    assert( c->x < SCREEN_W );
@@ -30,9 +24,8 @@ static int16_t control_draw_label( struct WINDOW* w, struct CONTROL* c ) {
    assert( c->y >= 0 );
 
    graphics_string_at( 
-      str, str_len, w->x + c->x, w->y + c->y, c->fg, c->scale );
-
-   str = (char*)memory_unlock( c->data.handle );
+      (char*)(c->data.ptr), c->data_sz,
+      w->x + c->x, w->y + c->y, c->fg, c->scale );
 
    return 1;
 }
@@ -67,16 +60,10 @@ const CONTROL_CB gc_control_draw_callbacks[] = {
 static void control_sz_label(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz
 ) {
-   char* str = NULL;
-
    assert( NULL != c );
-   assert( (MEMORY_HANDLE)NULL != c->data.handle );
+   assert( NULL != c->data.ptr );
 
-   str = (char*)memory_lock( c->data.handle );
-
-   graphics_string_sz( str, memory_sz( c->data.handle ), c->scale, sz );
-
-   str = (char*)memory_unlock( c->data.handle );
+   graphics_string_sz( (char*)(c->data.ptr), c->data_sz, c->scale, sz );
 }
 
 static void control_sz_sprite(
@@ -99,7 +86,9 @@ int16_t control_push(
    uint32_t control_id, uint16_t type, uint16_t status,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
-   MEMORY_HANDLE data_handle, uint32_t data_scalar, RESOURCE_ID data_res_id,
+   MEMORY_PTR data_ptr, uint16_t data_ptr_sz,
+   uint32_t data_scalar,
+   RESOURCE_ID data_res_id,
    uint32_t window_id, struct DSEKAI_STATE* state
 ) {
    int i = 0;
@@ -155,10 +144,13 @@ int16_t control_push(
    controls[0].type = type;
    if( 0 != data_scalar ) {
       controls[0].data.scalar = data_scalar;
-   } else if( (MEMORY_HANDLE)NULL != data_handle ) {
-      controls[0].data.handle = data_handle;
+      controls[0].data_sz = sizeof( data_scalar );
+   } else if( NULL != data_ptr ) {
+      controls[0].data.ptr = data_ptr;
+      controls[0].data_sz = data_ptr_sz;
    } else if( 0 != (int)data_res_id ) {
       resource_assign_id( controls[0].data.res_id, data_res_id );
+      controls[0].data_sz = sizeof( RESOURCE_ID );
    }
    controls[0].scale = scale;
    controls[0].status = status;
