@@ -20,3 +20,5 @@ assets/pattern_*.bmp
 assets/tile_*.bmp
 assets/sprite_*.bmp
 assets/dsekai.tiled-session
+build_*
+build
