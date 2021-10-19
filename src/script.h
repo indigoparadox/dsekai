@@ -27,7 +27,7 @@ struct TILEMAP;
 typedef uint16_t (*SCRIPT_CB)(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   int16_t arg );
+   struct DSEKAI_STATE* state, int16_t arg );
 
 /**
  * \brief Contains a single instruction in a script, in SCRIPT::steps.
@@ -55,10 +55,10 @@ struct PACKED SCRIPT {
  * \brief Define the script action callback table.
  * \param f Macro to execute on the function callback definition.
  */
-#define SCRIPT_CB_TABLE( f ) f( 0, INTERACT, 'i' ) f( 1, WALK_NORTH, 'u' ) f( 2, WALK_SOUTH, 'd' ) f( 3, WALK_EAST, 'r' ) f( 4, WALK_WEST, 'l' ) f( 5, SLEEP, 's' ) f( 6, START, 't' ) f( 7, GOTO, 'g' )
+#define SCRIPT_CB_TABLE( f ) f( 0, INTERACT, 'i' ) f( 1, WALK_NORTH, 'u' ) f( 2, WALK_SOUTH, 'd' ) f( 3, WALK_EAST, 'r' ) f( 4, WALK_WEST, 'l' ) f( 5, SLEEP, 's' ) f( 6, START, 't' ) f( 7, GOTO, 'g' ) f( 8, SPEAK, 'p' )
 
 /*! \brief Define prototypes for the script action callbacks. */
-#define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct SCRIPT*, struct TILEMAP*, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, int16_t );
+#define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct SCRIPT*, struct TILEMAP*, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, struct DSEKAI_STATE*, int16_t );
 
 SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
 

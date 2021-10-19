@@ -21,9 +21,6 @@
 
 #define TOPDOWN_STATE_WELCOME 1
 
-#define WINDOW_ID_WELCOME 0x1212
-#define WINDOW_ID_STATUS 0x111
-
 int topdown_draw(
    struct DSEKAI_STATE* state, struct TILEMAP* map, struct MOBILE* mobiles,
    struct GRAPHICS_ARGS* args
@@ -245,9 +242,6 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          }
       }
 
-      mobiles = memory_unlock( state->mobiles );
-      map = memory_unlock( state->map );
-
       window_push(
          WINDOW_ID_STATUS, WINDOW_STATUS_VISIBLE,
          0, (SCREEN_TH * 16), STATUS_WINDOW_W, STATUS_WINDOW_H, 0, state );
@@ -255,8 +249,11 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 #ifndef HIDE_WELCOME_DIALOG
       state->engine_state = TOPDOWN_STATE_WELCOME;
       window_prefab_dialog(
-         WINDOW_ID_WELCOME, "Welcome!", 8, sprite_princess, state );
+         WINDOW_ID_WELCOME, 1, sprite_princess, state, map );
 #endif /* !HIDE_WELCOME_DIALOG */
+
+      mobiles = memory_unlock( state->mobiles );
+      map = memory_unlock( state->map );
 
       initialized = 1;
    }
@@ -274,7 +271,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       topdown_draw( state, map, mobiles, args );
    }
 
-   window_draw_all( state );
+   window_draw_all( state, map->strings, map->strings_count, map->string_szs );
 
    if( state->input_blocked_countdown ) {
       state->input_blocked_countdown--;
@@ -338,7 +335,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    for( i = 0 ; state->mobiles_count > i ; i++ ) {
       if( 0 >= window_modal( state ) ) {
          /* Pause scripts if modal window is pending. */
-         mobile_execute( &(mobiles[i]), map );
+         mobile_execute( &(mobiles[i]), map, state );
       }
       mobile_animate( &(mobiles[i]), map );
    }

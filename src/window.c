@@ -30,7 +30,11 @@ void window_shutdown() {
    memory_free( g_frames_handle );
 }
 
-int window_draw_all( struct DSEKAI_STATE* state ) {
+int window_draw_all(
+   struct DSEKAI_STATE* state,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
    struct WINDOW_FRAME* frames = NULL;
    struct WINDOW* windows = NULL;
    int i = 0,
@@ -131,7 +135,7 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
          }
       }
 
-      control_draw_all( &(windows[i]) );
+      control_draw_all( &(windows[i]), strings, strings_sz, string_szs );
       windows[i].dirty -= 1;
    }
 

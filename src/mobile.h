@@ -74,7 +74,7 @@ void mobile_draw(
    const struct MOBILE* m, const struct DSEKAI_STATE* state,
    int16_t screen_x, int16_t screen_y );
 void mobile_deinit( struct MOBILE* );
-void mobile_execute( struct MOBILE* m, struct TILEMAP* t );
+void mobile_execute( struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state );
 
 #ifdef MOBILE_C
 /*! \brief Lookup table for next walking offset based on current offset. */

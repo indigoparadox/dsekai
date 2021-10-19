@@ -11,8 +11,7 @@
 /**
  * \brief CONTROL::type used to display static text.
  *
- * Requires a ::MEMORY_PTR containing the string to display to be attached to
- * the accompanying CONTROL::data member.
+ * Requires an integer index used to specify the string in TILEMAP::strings.
  */
 #define CONTROL_TYPE_LABEL          0
 /*! \brief CONTROL::type used to indicate a potential action. */
@@ -38,9 +37,7 @@
 
 /*! \brief A piece of data attached to CONTROL::data. */
 union CONTROL_DATA {
-   uint32_t scalar;
-   MEMORY_HANDLE handle;
-   MEMORY_PTR ptr;
+   int32_t scalar;
    /*! \brief Identifier for an asset (e.g. for CONTROL_TYPE_SPRITE). */
    RESOURCE_ID res_id;
 };
@@ -74,21 +71,31 @@ struct CONTROL {
    GRAPHICS_COLOR bg;
    /*! \brief Data used to draw a control (e.g. text or sprite to display). */
    union CONTROL_DATA data;
-   uint16_t data_sz;
 };
 
-typedef int16_t (*CONTROL_CB)( struct WINDOW*, struct CONTROL* );
+typedef int16_t (*CONTROL_CB)(
+   struct WINDOW* w, struct CONTROL* c,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs );
+
+typedef void (*CONTROL_CB_SZ)(
+   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* r,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs );
 
 int16_t control_push(
    uint32_t control_id, uint16_t type, uint16_t status,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
-   MEMORY_PTR data_ptr, uint16_t data_ptr_sz,
-   uint32_t data_scalar,
-   RESOURCE_ID data_res_id,
-   uint32_t window_id, struct DSEKAI_STATE* state );
+   int32_t data_scalar, RESOURCE_ID data_res_id,
+   uint32_t window_id, struct DSEKAI_STATE* state,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs );
 void control_pop( uint32_t, uint32_t, struct DSEKAI_STATE* );
-void control_draw_all( struct WINDOW* );
+void control_draw_all(
+   struct WINDOW* w,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs );
 
 #endif /* CONTROL_H */
 

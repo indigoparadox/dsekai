@@ -47,7 +47,9 @@ void mobile_state_animate( struct DSEKAI_STATE* state ) {
    }
 }
 
-void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
+void mobile_execute(
+   struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state
+) {
    struct SCRIPT* script = NULL;
    struct SCRIPT_STEP* step = NULL;
 
@@ -74,7 +76,7 @@ void mobile_execute( struct MOBILE* m, struct TILEMAP* t ) {
       graphics_get_ms(), m->script_id, m->script_pc, step->action );
 
    m->script_pc = gc_script_handlers[step->action](
-      m->script_pc, script, t, m, NULL, &(m->coords), step->arg );
+      m->script_pc, script, t, m, NULL, &(m->coords), state, step->arg );
 }
 
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
