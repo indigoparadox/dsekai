@@ -1,4 +1,5 @@
 
+#define CONTROL_C
 #include "dsekai.h"
 
 #ifdef PLATFORM_PALM
@@ -19,14 +20,29 @@ int16_t control_push(
 
 /* Drawing Callbacks */
 
-int16_t control_draw_label(
+int16_t control_draw_BUTTON(
    struct WINDOW* w, struct CONTROL* c,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs
 ) {
+   /* TODO */
+   return 1;
+}
+
+int16_t control_draw_CHECK(
+   struct WINDOW* w, struct CONTROL* c,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
+   /* TODO */
+   return 1;
+}
+
+static void control_draw_text(
+   struct WINDOW* w, struct CONTROL* c, const char* str, uint8_t str_sz
+) {
 
    assert( NULL != c );
-   assert( 0 <= c->data.scalar && c->data.scalar < strings_sz );
    assert( w->x < SCREEN_W );
    assert( w->y < SCREEN_H );
    assert( c->x < SCREEN_W );
@@ -39,13 +55,35 @@ int16_t control_draw_label(
    assert( c->y >= 0 );
 
    graphics_string_at( 
-      strings[c->data.scalar], string_szs[c->data.scalar],
+      str, str_sz,
       w->x + c->x, w->y + c->y, c->fg, c->scale );
+}
+
+int16_t control_draw_LABEL_T(
+   struct WINDOW* w, struct CONTROL* c,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
+
+   assert( NULL != c );
+   assert( 0 <= c->data.scalar && c->data.scalar < strings_sz );
+
+   control_draw_text( w, c, 
+      strings[c->data.scalar], string_szs[c->data.scalar] );
 
    return 1;
 }
 
-int16_t control_draw_sprite(
+int16_t control_draw_LABEL_G(
+   struct WINDOW* w, struct CONTROL* c,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
+   /* TODO */
+   return 1;
+}
+
+int16_t control_draw_SPRITE(
    struct WINDOW* w, struct CONTROL* c,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs
@@ -67,16 +105,25 @@ int16_t control_draw_sprite(
    return 1;
 }
 
-const CONTROL_CB gc_control_draw_callbacks[] = {
-   control_draw_label,
-   NULL,
-   NULL,
-   control_draw_sprite
-};
-
 /* Sizing Callbacks */
 
-void control_sz_label(
+void control_sz_BUTTON(
+   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
+   /* TODO */
+}
+
+void control_sz_CHECK(
+   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
+   /* TODO */
+}
+
+void control_sz_LABEL_T(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs
@@ -89,7 +136,15 @@ void control_sz_label(
       c->scale, sz );
 }
 
-void control_sz_sprite(
+void control_sz_LABEL_G(
+   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
+   const char strings[][TILEMAP_STRINGS_SZ],
+   uint8_t strings_sz, uint8_t* string_szs
+) {
+   /* TODO */
+}
+
+void control_sz_SPRITE(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs
@@ -97,13 +152,6 @@ void control_sz_sprite(
    sz->w = SPRITE_W + 4; /* For border. */
    sz->h = SPRITE_W + 4; /* For border. */
 }
-
-const CONTROL_CB_SZ gc_control_sz_callbacks[] = {
-   control_sz_label,
-   NULL,
-   NULL,
-   control_sz_sprite
-};
 
 /* General Functions */
 

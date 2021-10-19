@@ -4,27 +4,18 @@
 
 /*! \file control.h
  *  \brief Tools for drawing and interacting with graphical UI elements.
+ *
+ *  | Type                | Description                                 | data_scalar                          | data_res_id                       |
+ *  |---------------------|---------------------------------------------|--------------------------------------|-----------------------------------|
+ *  | CONTROL_TYPE_BUTTON | Selectable control to perform an action.    |                                      |                                   |
+ *  | CONTROL_TYPE_LABEL_T| Static text display field.                  | Index of string in TILEMAP::strings. |                                   |
+ *  | CONTROL_TYPE_LABEL_G| Static text display field.                  | Index of string in ::gc_static_strings. |                                   |
+ *  | CONTROL_TYPE_CHECK  | Selectable control to indicate an option.   |                                      |                                   |
+ *  | CONTROL_TYPE_SPRITE | Static image display field.                 |                                      | ::RESOURCE_ID of image to display.|
+ *
  */
 
 #define CONTROL_COUNT_MAX           20
-
-/**
- * \brief CONTROL::type used to display static text.
- *
- * Requires an integer index used to specify the string in TILEMAP::strings.
- */
-#define CONTROL_TYPE_LABEL          0
-/*! \brief CONTROL::type used to indicate a potential action. */
-#define CONTROL_TYPE_BUTTON         1
-/*! \brief CONTROL::type used to indicate a selectable option. */
-#define CONTROL_TYPE_CHECK          2
-/**
- * \brief CONTROL::type used to display a sprite asset.
- *
- * Requires a ::RESOURCE_ID identifying the sprite to display to be attached to
- * the accompanying CONTROL::data member.
- */
-#define CONTROL_TYPE_SPRITE         3
 
 /*! \brief CONTROL::status indicating control is hidden/inactive. */
 #define CONTROL_STATE_NONE          0
@@ -73,7 +64,9 @@ struct CONTROL {
    union CONTROL_DATA data;
 };
 
-typedef int16_t (*CONTROL_CB)(
+#define CONTROL_CB_TABLE( f ) f( 0, LABEL_T ) f( 1, BUTTON ) f( 2, CHECK ) f( 3, SPRITE ) f( 4, LABEL_G )
+
+typedef int16_t (*CONTROL_CB_DRAW)(
    struct WINDOW* w, struct CONTROL* c,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs );
@@ -96,6 +89,47 @@ void control_draw_all(
    struct WINDOW* w,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs );
+
+#ifdef CONTROL_C
+
+/* === If we're being called inside control.c === */
+
+#define CONTROL_CB_DRAW_TABLE_PROTOTYPES( idx, name ) static int16_t control_draw_ ## name( struct WINDOW*, struct CONTROL*, const char[][TILEMAP_STRINGS_SZ], uint8_t, uint8_t* );
+
+CONTROL_CB_TABLE( CONTROL_CB_DRAW_TABLE_PROTOTYPES );
+
+#define CONTROL_CB_SZ_TABLE_PROTOTYPES( idx, name ) static void control_sz_ ## name( struct WINDOW*, struct CONTROL*, struct GRAPHICS_RECT*, const char[][TILEMAP_STRINGS_SZ], uint8_t, uint8_t* );
+
+CONTROL_CB_TABLE( CONTROL_CB_SZ_TABLE_PROTOTYPES );
+
+#define CONTROL_CB_DRAW_TABLE_LIST( idx, name ) control_draw_ ## name,
+
+static const CONTROL_CB_DRAW gc_control_draw_callbacks[] = {
+   CONTROL_CB_TABLE( CONTROL_CB_DRAW_TABLE_LIST )
+};
+
+#define CONTROL_CB_SZ_TABLE_LIST( idx, name ) control_sz_ ## name,
+
+static const CONTROL_CB_SZ gc_control_sz_callbacks[] = {
+   CONTROL_CB_TABLE( CONTROL_CB_SZ_TABLE_LIST )
+};
+
+#define CONTROL_CB_TABLE_CONSTS( idx, name ) const uint16_t CONTROL_TYPE_ ## name = idx;
+
+CONTROL_CB_TABLE( CONTROL_CB_TABLE_CONSTS );
+
+#else
+
+/* === If we're being called inside anything BUT control.c === */
+
+/**
+ * \brief Define extern constants that can be used e.g. in spawners.
+ */
+#define CONTROL_CB_TABLE_CONSTS( idx, name ) extern const uint16_t CONTROL_TYPE_ ## name;
+
+CONTROL_CB_TABLE( CONTROL_CB_TABLE_CONSTS );
+
+#endif /* CONTROL_C */
 
 #endif /* CONTROL_H */
 
