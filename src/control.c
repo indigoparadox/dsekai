@@ -19,7 +19,7 @@ int16_t control_draw_label(
    assert( w->y + c->y < SCREEN_H );
    assert( w->x >= 0 );
    assert( w->y >= 0 );
-   assert( c->x >= 0 );
+   /*assert( c->x >= 0 ); */
    assert( c->y >= 0 );
 
    graphics_string_at( 

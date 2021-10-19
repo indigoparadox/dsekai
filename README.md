@@ -104,4 +104,5 @@ a single numerical (may be multiple digits) argument.
 | START      | t    | Label_Num | Define a label index to jump to.
 | GOTO       | g    | Label_Num | Jump to a defined label index.
 | SPEAK      | p    | Text_Id   | Display Text_Id from the tilemap string table.
+| RETURN     | x    |           | Return to PC previous to GOTO or interaction.
 

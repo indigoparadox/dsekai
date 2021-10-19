@@ -321,7 +321,18 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       break;
 
    case INPUT_KEY_OK:
-      window_pop( WINDOW_ID_WELCOME, state );
+      if( 0 >= window_modal( state ) ) {
+         /* Try to interact with facing mobile. */
+         mobile_interact(
+            &(mobiles[state->player_idx]),
+            mobile_get_facing(
+               &(mobiles[state->player_idx]), mobiles, state->mobiles_count ),
+            map );
+      } else {
+         /* Try to close any windows that are open. */
+         window_pop( WINDOW_ID_WELCOME, state );
+         window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
+      }
       tilemap_refresh_tiles( map );
       break;
 

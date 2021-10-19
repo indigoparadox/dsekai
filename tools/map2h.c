@@ -108,7 +108,14 @@ int main( int argc, char* argv[] ) {
    for( i = 0 ; t.strings_count > i ; i++ ) {
       fprintf( header_file, "      \"%s\",\n", t.strings[i] );
    }
-   fprintf( header_file, "      \"\"\n" );
+   fprintf( header_file, "   },\n" );
+
+   /* string_szs */
+   fprintf( header_file, "   /* string_szs */\n" );
+   fprintf( header_file, "   {\n" );
+   for( i = 0 ; t.strings_count > i ; i++ ) {
+      fprintf( header_file, "      %d,\n", t.string_szs[i] );
+   }
    fprintf( header_file, "   },\n" );
 
    /* strings_count */

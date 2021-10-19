@@ -2,6 +2,11 @@
 #define SCRIPT_C
 #include "dsekai.h"
 
+#if defined( SCREEN_W ) && defined( SCREEN_H )
+/* We're running in the engine and not an external tool. */
+#define SCRIPT_HAS_GFX
+#endif /* SCREEN_W && SCREEN_H */
+
 uint16_t script_goto_label(
    uint16_t pc, struct SCRIPT* script, uint16_t label_type, uint16_t label_id
 ) {
@@ -29,7 +34,7 @@ uint16_t script_handle_INTERACT(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   /* NOOP */
+   /* NOOP: This is just a label to jump to with fancy GOTO mechanism. */
    return pc + 1;
 }
 
@@ -111,7 +116,7 @@ uint16_t script_handle_START(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   /* NOOP */
+   /* NOOP: This is just a label to jump to with GOTO mechanism. */
    return pc + 1;
 }
 
@@ -120,7 +125,16 @@ uint16_t script_handle_GOTO(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
+   actor->script_pc_prev = actor->script_pc;
    return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
+}
+
+uint16_t script_handle_RETURN(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   return actor->script_pc_prev;
 }
 
 uint16_t script_handle_SPEAK(
@@ -128,10 +142,10 @@ uint16_t script_handle_SPEAK(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   
+#ifdef SCRIPT_HAS_GFX
    window_prefab_dialog(
       WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state, t );
-
+#endif /* SCRIPT_HAS_GFX */
    return pc + 1;
 }
 

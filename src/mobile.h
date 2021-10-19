@@ -26,6 +26,8 @@ struct PACKED MOBILE {
    int16_t script_id;
    /*! \brief Position in currently executing behavior script. */
    int16_t script_pc;
+   /*! \brief Position to return to after a jump. */
+   int16_t script_pc_prev;
    /*! \brief Delay script until this result from graphics_get_ms(). */
    uint32_t script_next_ms;
 };
@@ -52,7 +54,8 @@ struct PACKED MOBILE {
  */
 uint8_t mobile_walk_start( struct MOBILE* m, int8_t x, int8_t y );
 
-void mobile_interact( struct MOBILE*, struct MOBILE* );
+struct MOBILE* mobile_interact(
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t );
 void mobile_interact_txy( struct MOBILE*, struct MOBILE*, uint16_t, uint16_t );
 void mobile_state_animate( struct DSEKAI_STATE* );
 
@@ -74,6 +77,8 @@ void mobile_draw(
    const struct MOBILE* m, const struct DSEKAI_STATE* state,
    int16_t screen_x, int16_t screen_y );
 void mobile_deinit( struct MOBILE* );
+struct MOBILE* mobile_get_facing(
+   struct MOBILE* m, struct MOBILE mobiles[], int mobiles_sz );
 void mobile_execute( struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state );
 
 #ifdef MOBILE_C

@@ -55,7 +55,7 @@ struct PACKED SCRIPT {
  * \brief Define the script action callback table.
  * \param f Macro to execute on the function callback definition.
  */
-#define SCRIPT_CB_TABLE( f ) f( 0, INTERACT, 'i' ) f( 1, WALK_NORTH, 'u' ) f( 2, WALK_SOUTH, 'd' ) f( 3, WALK_EAST, 'r' ) f( 4, WALK_WEST, 'l' ) f( 5, SLEEP, 's' ) f( 6, START, 't' ) f( 7, GOTO, 'g' ) f( 8, SPEAK, 'p' )
+#define SCRIPT_CB_TABLE( f ) f( 0, INTERACT, 'i' ) f( 1, WALK_NORTH, 'u' ) f( 2, WALK_SOUTH, 'd' ) f( 3, WALK_EAST, 'r' ) f( 4, WALK_WEST, 'l' ) f( 5, SLEEP, 's' ) f( 6, START, 't' ) f( 7, GOTO, 'g' ) f( 8, SPEAK, 'p' ) f( 9, RETURN, 'x' )
 
 /*! \brief Define prototypes for the script action callbacks. */
 #define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct SCRIPT*, struct TILEMAP*, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, struct DSEKAI_STATE*, int16_t );
