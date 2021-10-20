@@ -125,7 +125,7 @@ struct PACKED TILEMAP {
 
 int16_t tilemap_json_load(
    char* json_buffer, uint16_t json_buffer_sz,
-   struct jsmntok_t* tokens, uint16_t tokens_sz );
+   struct jsmntok* tokens, uint16_t tokens_sz );
 
 /**
  * \brief Parse tokenized JSON into a tileset array.
