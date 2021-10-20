@@ -5,7 +5,7 @@
 
 int16_t tilemap_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
-   jsmntok_t* tokens, uint16_t tokens_sz, char* json_buffer,
+   struct jsmntok* tokens, uint16_t tokens_sz, char* json_buffer,
    char* iter_path, uint16_t iter_path_sz
 ) {
    struct TILEMAP_SPAWN* spawn = (struct TILEMAP_SPAWN*)&(t->spawns[spawn_idx]);
@@ -75,7 +75,7 @@ int16_t tilemap_parse_spawn(
 
 int16_t tilemap_parse_tileset(
    struct TILEMAP* t, char* ts_name, uint16_t ts_name_sz,
-   jsmntok_t* tokens, uint16_t tokens_sz,
+   struct jsmntok* tokens, uint16_t tokens_sz,
    char* json_buffer, uint16_t json_buffer_sz
 ) {
    int16_t i = 0,
@@ -105,7 +105,7 @@ int16_t tilemap_parse_tileset(
 
 int8_t tilemap_json_tile(
    char* tile_path, int16_t tile_idx,
-   jsmntok_t* tokens, uint16_t tokens_sz,
+   struct jsmntok* tokens, uint16_t tokens_sz,
    char* json_buffer, uint16_t json_buffer_sz
 ) {
    int8_t tile_id_in = 0;
@@ -133,7 +133,7 @@ int8_t tilemap_json_tile(
 
 int16_t tilemap_parse(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
-   jsmntok_t* tokens, uint16_t tokens_sz
+   struct jsmntok* tokens, uint16_t tokens_sz
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t tok_parsed = 0;
@@ -182,7 +182,7 @@ int16_t tilemap_parse(
 
 int16_t tilemap_json_load(
    char* json_buffer, uint16_t json_buffer_sz,
-   jsmntok_t* tokens, uint16_t tokens_sz
+   struct jsmntok* tokens, uint16_t tokens_sz
 ) {
    int16_t tok_parsed = 0;
    jsmn_parser parser;
@@ -206,7 +206,7 @@ int16_t tilemap_json_load(
 int16_t tilemap_json_tilegrid(
    struct TILEMAP* t, char* tilegrid_path,
    char* json_buffer, uint16_t json_buffer_sz,
-   jsmntok_t* tokens, uint16_t tokens_sz
+   struct jsmntok* tokens, uint16_t tokens_sz
 ) {
    int16_t tiles_count = 0,
       tok_parsed = 0,
@@ -234,7 +234,7 @@ uint16_t tilemap_json_string(
    char* str_buffer, uint16_t str_buffer_sz,
    char* json_path, uint16_t json_path_sz,
    char* json_buffer, uint16_t json_buffer_sz,
-   jsmntok_t* tokens, uint16_t tokens_sz
+   struct jsmntok* tokens, uint16_t tokens_sz
 ) {
    int16_t tok_parsed = 0;
    uint16_t str_sz = 0;
@@ -269,7 +269,7 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    uint16_t ts_name_sz = 0,
       tok_parsed = 0;
    char ts_name[JSON_PATH_SZ];
-   jsmntok_t* tokens = NULL;
+   struct jsmntok* tokens = NULL;
 
    /* Allocate buffers for parsing JSON. */
    json_handle = resource_get_json_handle( id );
@@ -279,7 +279,7 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
       goto cleanup;
    }
 
-   tokens_handle = memory_alloc( JSON_TOKENS_MAX, sizeof( jsmntok_t ) );
+   tokens_handle = memory_alloc( JSON_TOKENS_MAX, sizeof( struct jsmntok ) );
    if( NULL == tokens_handle ) {
       error_printf( "could not allocate space for JSON tokens" );
       retval = 0;
@@ -287,7 +287,7 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    }
 
    debug_printf( 2, "JSON token buffer allocated: %lu bytes",
-      sizeof( jsmntok_t ) * JSON_TOKENS_MAX );
+      sizeof( struct jsmntok ) * JSON_TOKENS_MAX );
 
    json_buffer_sz = memory_sz( json_handle );
    json_buffer = resource_lock_handle( json_handle );
