@@ -2,6 +2,29 @@
 #define JSON_C
 #include "dsekai.h"
 
+int16_t json_load(
+   char* json_buffer, uint16_t json_buffer_sz,
+   struct jsmntok* tokens, uint16_t tokens_sz
+) {
+   int16_t tok_parsed = 0;
+   jsmn_parser parser;
+
+   /* TODO: Move this over to json.c and dissolve this function. */
+   if( '{' != json_buffer[0] ) {
+      error_printf( "invalid json (must start with '{') found: %s",
+         json_buffer );
+      return 0;
+   }
+
+   jsmn_init( &parser );
+   tok_parsed = jsmn_parse(
+      &parser, json_buffer, json_buffer_sz, tokens, tokens_sz );
+
+   /* TODO: Move this over to json.c and dissolve this function. */
+   debug_printf( 2, "%d tokens parsed", tok_parsed );
+   return tok_parsed;
+}
+
 int16_t json_get_token_idx(
    const char* path, uint16_t path_sz,
    struct jsmntok* tokens, uint16_t tokens_sz,

@@ -156,8 +156,10 @@ uint16_t script_parse_str(
 ) {
    int c_idx = 0;
 
+   debug_printf( 2, "parsing script: %s", script_txt );
+
    for( ; script_txt_sz > c_idx ; ) {
-      debug_printf( 2, "step %d char: %c",
+      debug_printf( 1, "step %d char: %c",
          script->steps_count, script_txt[c_idx] );
       switch( script_txt[c_idx] ) {
          SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PARSE )
@@ -173,7 +175,7 @@ uint16_t script_parse_str(
       script->steps[script->steps_count].arg =
          dio_atoi( &(script_txt[c_idx]), 10 );
       debug_printf(
-         3, "step %d arg: %d",
+         1, "step %d arg: %d",
          script->steps_count, script->steps[script->steps_count].arg );
       if( 10000 <= script->steps[script->steps_count].arg ) {
          c_idx += 5;

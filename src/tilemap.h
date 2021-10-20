@@ -48,6 +48,9 @@ struct jsmntok;
 
 #include "tmstruct.h"
 
+uint16_t tilemap_fix_asset_path(
+   char* path_in, uint16_t path_in_sz, const char* map_path );
+
 int16_t tilemap_json_load(
    char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, uint16_t tokens_sz );
@@ -65,7 +68,8 @@ int16_t tilemap_json_load(
 int16_t tilemap_parse_tileset(
    struct TILEMAP* t, char* ts_name, uint16_t ts_name_sz,
    struct jsmntok* tokens, uint16_t tokens_sz,
-   char* json_buffer, uint16_t json_buffer_sz );
+   char* json_buffer, uint16_t json_buffer_sz,
+   RESOURCE_ID map_path );
 
 /**
  * \brief Parse individual TILEMAP::tileset index from JSON map data.

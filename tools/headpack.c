@@ -105,7 +105,8 @@ int main( int argc, char* argv[] ) {
       define_offset = 0,
       path_iter_fname_idx = 0,
       path_iter_sz = 0,
-      map_idx = 0;
+      map_idx = 0,
+      retval = 0;
    FILE* header = NULL;
    struct TILEMAP t;
    unsigned char byte_buffer = 0;
@@ -148,7 +149,15 @@ int main( int argc, char* argv[] ) {
       ) {
          /* This is a map JSON file, so preload it. */
 
-         tilemap_load( &(argv[i][path_iter_fname_idx]), &t );
+         retval = tilemap_load( argv[i], &t );
+         if( !retval ) {
+            error_printf( "unable to load tilemap: %s",
+               &(argv[i][path_iter_fname_idx]) );
+            printf( "unable to load tilemap: %s",
+               &(argv[i][path_iter_fname_idx]) );
+            retval = 1;
+            goto cleanup;
+         }
       
          /* Trim first two args (prog/header) off reslist. */
          map2h( &t, header, map_idx, &(argv[2]), argc - 2 );
@@ -181,8 +190,10 @@ int main( int argc, char* argv[] ) {
    /* Output header include guard end. */
    fprintf( header, "#endif /* !RESEXT_H */\n\n" );
 
+cleanup:
+
    fclose( header );
    
-   return 0;
+   return retval;
 }
 
