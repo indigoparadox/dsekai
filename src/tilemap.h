@@ -122,6 +122,11 @@ struct PACKED TILEMAP {
    uint16_t scripts_count;
 };
 
+int16_t tilemap_json_load(
+   struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz );
+
+#if 0
 /**
  * \brief Parse tokenized JSON into a tileset array.
  * \param t ::MEMORY_PTR to a TILEMAP load the tileset into.
@@ -136,6 +141,7 @@ int16_t tilemap_parse_tileset(
    struct TILEMAP* t,
    struct jsmntok* tokens, uint16_t tokens_sz, char* json_buffer,
    char* iter_path, uint16_t iter_path_sz );
+#endif
 
 /**
  * \brief Parse TILEMAP::tileset index from JSON map data.
@@ -144,17 +150,25 @@ int16_t tilemap_parse_tileset(
  * \param tokens JSON tokens to parse.
  * \param tokens_sz Number of tokens to parse.
  * \param json_buffer String buffer containing JSON referred to by tokens.
- * \param iter_path Empty string buffer used to contain JSON path to iterate.
- * \param iter_path_sz Memory size of iter_path.
  * \return Index that can be looked up in TILEMAP::tileset for image and flags.
  */
-int8_t tilemap_parse_tile(
-   struct TILEMAP* t, int16_t tile_idx,
-   struct jsmntok* tokens, uint16_t tokens_sz, char* json_buffer,
-   char* iter_path, uint16_t iter_path_sz );
+int8_t tilemap_json_tile(
+   struct TILEMAP* t, char* tilegrid_path, int16_t tile_idx,
+   struct jsmntok* tokens, uint16_t tokens_sz,
+   char* json_buffer, uint16_t json_buffer_sz );
+
+/**
+ * \brief Load the tiles into TILEMAP::tiles in one go.
+ * \return Number of tiles loaded.
+ */
+int16_t tilemap_json_tilegrid(
+   struct TILEMAP* t, char* tilegrid_path,
+   char* json_buffer, uint16_t json_buffer_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz );
 
 int16_t tilemap_parse(
-   struct TILEMAP*, char*, uint16_t, struct jsmntok*, uint16_t );
+   struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz );
 
 /**
  * \brief Load tilemap specified by id into TILEMAP struct t.

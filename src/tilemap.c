@@ -73,9 +73,11 @@ int16_t tilemap_parse_spawn(
    return 1;
 }
 
+#if 0
 int16_t tilemap_parse_tileset(
-   struct TILEMAP* t,
-   jsmntok_t* tokens, uint16_t tokens_sz, char* json_buffer,
+   struct TILEMAP* t, char* ts_name, uint16_t ts_name_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz,
+   char* json_buffer, uint16_t json_buffer_sz,
    char* iter_path, uint16_t iter_path_sz
 ) {
    char tileset_name[DRC_FILENAME_SZ];
@@ -95,19 +97,27 @@ int16_t tilemap_parse_tileset(
 
    return 1;
 }
+#endif
 
-int8_t tilemap_parse_tile(
-   struct TILEMAP* t, int16_t tile_idx,
-   jsmntok_t* tokens, uint16_t tokens_sz, char* json_buffer,
-   char* iter_path, uint16_t iter_path_sz
+/**
+ * \brief Load an invidual tile into TILEMAP::tiles.
+ * \param tile_path JSON path to layer containing tiles.
+ * \param iter_path Buffer to parse layer path into. Must be large enough to
+ *                  hold path with conversion specifiers replaced.
+ */
+int8_t tilemap_json_tile(
+   struct TILEMAP* t, char* tile_path, int16_t tile_idx,
+   jsmntok_t* tokens, uint16_t tokens_sz,
+   char* json_buffer, uint16_t json_buffer_sz
 ) {
    int8_t tile_id_in = 0;
+   char iter_path[JSON_PATH_SZ];
 
    /* Load tile data into the grid. */
-   dio_snprintf( iter_path, iter_path_sz, TILEMAP_JPATH_TILE, tile_idx );
+   dio_snprintf( iter_path, JSON_PATH_SZ, tile_path, tile_idx );
    tile_id_in = 
       json_int_from_path(
-         iter_path, iter_path_sz, tokens, tokens_sz, json_buffer );
+         iter_path, JSON_PATH_SZ, tokens, tokens_sz, json_buffer );
    if( 0 > tile_id_in ) {
       error_printf( "invalid tile ID received" );
       return tile_id_in;
@@ -128,37 +138,18 @@ int16_t tilemap_parse(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
    jsmntok_t* tokens, uint16_t tokens_sz
 ) {
-   int16_t tok_parsed = 0,
-      tiles_count = 0,
-      name_len = 0,
-      i = 0;
-   jsmn_parser parser;
+   int16_t name_len = 0;
    char iter_path[JSON_PATH_SZ];
+   int16_t tok_parsed = 0;
+   
+   tok_parsed = tilemap_json_load(
+      t, json_buffer, json_buffer_sz, tokens, tokens_sz );
 
-   if( '{' != json_buffer[0] ) {
-      error_printf( "invalid tilemap json (must start with '{') found: %s",
-         json_buffer );
-      return 0;
-   }
-
-   jsmn_init( &parser );
-   tok_parsed = jsmn_parse(
-      &parser, json_buffer, json_buffer_sz, tokens, tokens_sz );
-
-   debug_printf( 2, "%d tokens parsed", tok_parsed );
    if( 0 >= tok_parsed ) {
       return 0;
    }
 
-   /* TODO: tilemap_parse_tileset */
-  
-   /* Load map properties. */
-   tiles_count = (TILEMAP_TW * TILEMAP_TH);
-   for( i = 0 ; tiles_count > i ; i++ ) {
-      tilemap_parse_tile(
-         t, i, tokens, tok_parsed, json_buffer,
-         iter_path, JSON_PATH_SZ );
-   }
+   /* TODO: Split this up. */
 
    /* Parse Name */
    name_len = json_str_from_path(
@@ -203,14 +194,83 @@ int16_t tilemap_parse(
    return 1;
 }
 
+int16_t tilemap_json_load(
+   struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz
+) {
+   int16_t tok_parsed = 0;
+   jsmn_parser parser;
+
+   if( '{' != json_buffer[0] ) {
+      error_printf( "invalid tilemap json (must start with '{') found: %s",
+         json_buffer );
+      return 0;
+   }
+
+   jsmn_init( &parser );
+   tok_parsed = jsmn_parse(
+      &parser, json_buffer, json_buffer_sz, tokens, tokens_sz );
+
+   debug_printf( 2, "%d tokens parsed", tok_parsed );
+   return tok_parsed;
+}
+
+int16_t tilemap_json_tilegrid(
+   struct TILEMAP* t, char* tilegrid_path,
+   char* json_buffer, uint16_t json_buffer_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz
+) {
+   int16_t tiles_count = 0,
+      tok_parsed = 0,
+      i = 0;
+   
+   tok_parsed = tilemap_json_load(
+      t, json_buffer, json_buffer_sz, tokens, tokens_sz );
+
+   if( 0 >= tok_parsed ) {
+      return 0;
+   }
+
+   /* Load map properties. */
+   tiles_count = (TILEMAP_TW * TILEMAP_TH);
+   for( i = 0 ; tiles_count > i ; i++ ) {
+      tilemap_json_tile(
+         t, tilegrid_path, i,
+         tokens, tok_parsed, json_buffer, json_buffer_sz );
+   }
+
+   return i;
+}
+
+int16_t tilemap_json_string(
+   struct TILEMAP* t,
+   char* json_buffer, uint16_t json_buffer_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz
+) {
+   int16_t tok_parsed = 0,
+      str_sz = 0;
+   
+   tok_parsed = tilemap_json_load(
+      t, json_buffer, json_buffer_sz, tokens, tokens_sz );
+
+   if( 0 >= tok_parsed ) {
+      return 0;
+   }
+
+   return str_sz;
+}
+
 int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    char* json_buffer = NULL;
    int16_t retval = 1;
    RESOURCE_JSON_HANDLE json_handle = NULL;
    MEMORY_HANDLE tokens_handle = NULL;
    uint32_t json_buffer_sz = 0;
+   uint16_t ts_name_sz = 0;
+   char ts_name[JSON_PATH_SZ];
    jsmntok_t* tokens = NULL;
 
+   /* Allocate buffers for parsing JSON. */
    json_handle = resource_get_json_handle( id );
    if( NULL == json_handle ) {
       error_printf( "could not get tilemap resource handle" );
@@ -232,9 +292,21 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    json_buffer = resource_lock_handle( json_handle );
    tokens = memory_lock( tokens_handle );
 
+   /* Load map tileset. */
+   #if 0
+   ts_name_sz = json_str_from_path(
+      TILEMAP_JPATH_TS_SRC, sizeof( TILEMAP_JPATH_TS_SRC ),
+      ts_name, JSON_PATH_SZ, tokens, JSON_TOKENS_MAX, json_buffer );
+   tilemap_parse_tileset( t, ts_name, ts_name_sz,
+      json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
+   #endif
 
    retval = tilemap_parse(
       t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
+
+   retval = tilemap_json_tilegrid(
+      t, TILEMAP_JPATH_TILE, json_buffer, json_buffer_sz,
+      tokens, JSON_TOKENS_MAX );
 
 cleanup:
 
