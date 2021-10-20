@@ -123,7 +123,7 @@ struct PACKED TILEMAP {
 };
 
 int16_t tilemap_json_load(
-   struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
+   char* json_buffer, uint16_t json_buffer_sz,
    jsmntok_t* tokens, uint16_t tokens_sz );
 
 #if 0
@@ -145,15 +145,16 @@ int16_t tilemap_parse_tileset(
 
 /**
  * \brief Parse TILEMAP::tileset index from JSON map data.
- * \param t ::MEMORY_PTR to a TILEMAP to load the tileset into.
+ * \param tilegrid_path JSON path to tile data to load with %d for tile index.
  * \param tile_idx TILEMAP::tiles index of desired tile in JSON map data.
  * \param tokens JSON tokens to parse.
  * \param tokens_sz Number of tokens to parse.
  * \param json_buffer String buffer containing JSON referred to by tokens.
+ * \param json_buffer_sz
  * \return Index that can be looked up in TILEMAP::tileset for image and flags.
  */
 int8_t tilemap_json_tile(
-   struct TILEMAP* t, char* tilegrid_path, int16_t tile_idx,
+   char* tilegrid_path, int16_t tile_idx,
    struct jsmntok* tokens, uint16_t tokens_sz,
    char* json_buffer, uint16_t json_buffer_sz );
 

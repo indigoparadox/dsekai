@@ -106,7 +106,7 @@ int16_t tilemap_parse_tileset(
  *                  hold path with conversion specifiers replaced.
  */
 int8_t tilemap_json_tile(
-   struct TILEMAP* t, char* tile_path, int16_t tile_idx,
+   char* tile_path, int16_t tile_idx,
    jsmntok_t* tokens, uint16_t tokens_sz,
    char* json_buffer, uint16_t json_buffer_sz
 ) {
@@ -129,7 +129,7 @@ int8_t tilemap_json_tile(
    } else {
       tile_id_in &= 0x0f;
    }
-   t->tiles[tile_idx / 2] |= tile_id_in;
+   /* t->tiles[tile_idx / 2] |= tile_id_in; */
 
    return tile_id_in;
 }
@@ -143,7 +143,7 @@ int16_t tilemap_parse(
    int16_t tok_parsed = 0;
    
    tok_parsed = tilemap_json_load(
-      t, json_buffer, json_buffer_sz, tokens, tokens_sz );
+      json_buffer, json_buffer_sz, tokens, tokens_sz );
 
    if( 0 >= tok_parsed ) {
       return 0;
@@ -195,14 +195,14 @@ int16_t tilemap_parse(
 }
 
 int16_t tilemap_json_load(
-   struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
+   char* json_buffer, uint16_t json_buffer_sz,
    jsmntok_t* tokens, uint16_t tokens_sz
 ) {
    int16_t tok_parsed = 0;
    jsmn_parser parser;
 
    if( '{' != json_buffer[0] ) {
-      error_printf( "invalid tilemap json (must start with '{') found: %s",
+      error_printf( "invalid json (must start with '{') found: %s",
          json_buffer );
       return 0;
    }
@@ -225,7 +225,7 @@ int16_t tilemap_json_tilegrid(
       i = 0;
    
    tok_parsed = tilemap_json_load(
-      t, json_buffer, json_buffer_sz, tokens, tokens_sz );
+      json_buffer, json_buffer_sz, tokens, tokens_sz );
 
    if( 0 >= tok_parsed ) {
       return 0;
@@ -234,8 +234,8 @@ int16_t tilemap_json_tilegrid(
    /* Load map properties. */
    tiles_count = (TILEMAP_TW * TILEMAP_TH);
    for( i = 0 ; tiles_count > i ; i++ ) {
-      tilemap_json_tile(
-         t, tilegrid_path, i,
+      t->tiles[i / 2] |= tilemap_json_tile(
+         tilegrid_path, i,
          tokens, tok_parsed, json_buffer, json_buffer_sz );
    }
 
@@ -251,7 +251,7 @@ int16_t tilemap_json_string(
       str_sz = 0;
    
    tok_parsed = tilemap_json_load(
-      t, json_buffer, json_buffer_sz, tokens, tokens_sz );
+      json_buffer, json_buffer_sz, tokens, tokens_sz );
 
    if( 0 >= tok_parsed ) {
       return 0;
