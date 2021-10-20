@@ -149,23 +149,27 @@ int main( int argc, char* argv[] ) {
       header_file = fopen( namebuf_header, "w" );
       assert( NULL!= header_file );
 
+      /* Output header include guards. */
       fprintf( header_file, "\n#ifndef RESEXT_H\n#define RESEXT_H\n\n" );
 
       for( i = 0 ; file_list_len > i ; i++ ) {
          switch( fmt ) {
          case FMT_FILE:
-            /* TODO: Get this from BIN_ASSETS in the Makefile? */
-            fprintf( header_file, "#define %s \"../%s\"\n",
+            /* Hardcode the file path into the output header. */
+            fprintf( header_file, "#define %s \"%s\"\n",
                file_basename_list[i], file_list[i] );
             break;
 
          default:
+            /* Hardcode an arbitrary index/resource ID into the output header.
+             */
             fprintf( header_file, "#define %s %d\n",
                file_basename_list[i], id_start + i );
             break;
          }
       }
 
+      /* Output header include guard terminator. */
       fprintf( header_file, "\n#endif /* RESEXT_H */\n" );
 
       fclose( header_file );

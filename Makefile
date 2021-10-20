@@ -6,8 +6,6 @@ ENTRY_MAP := field
 DSEKAI_C_FILES := \
    src/tilemap.c \
    unilayer/graphics.c \
-   unilayer/resource/header.c \
-   unilayer/resource/file.c \
    src/mobile.c \
    src/item.c \
    src/window.c \
@@ -43,6 +41,26 @@ DSEKAI_C_FILES_CHECK_NULL_ONLY := \
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
+   unilayer/resource/file.c \
+   unilayer/memory/fakem.c \
+   unilayer/dio.c
+
+HEADPACK_C_FILES := \
+   tools/headpack.c \
+   tools/map2h.c \
+   src/tilemap.c \
+   src/mobile.c \
+   src/script.c \
+   src/json.c \
+   unilayer/resource/file.c \
+   unilayer/graphics.c \
+   unilayer/graphics/nullg.c \
+   unilayer/memory/fakem.c \
+   unilayer/dio.c
+
+DRCPACK_C_FILES := \
+   tools/drcpack.c \
+   tools/data/drcwrite.c \
    unilayer/memory/fakem.c \
    unilayer/drc.c \
    unilayer/dio.c
@@ -68,25 +86,13 @@ CONVERT_C_FILES := \
 LOOKUPS_C_FILES := \
    tools/lookups.c
 
-MAP2H_C_FILES := \
-   tools/map2h.c \
-   src/tilemap.c \
-   src/mobile.c \
-   src/script.c \
-   unilayer/memory/fakem.c \
-   unilayer/dio.c \
-   src/json.c \
-   unilayer/resource/nullr.c \
-   unilayer/graphics.c \
-   unilayer/graphics/nullg.c
-
 PLATFORMS := sdl sdl-nj xlib dos win16 win32 palm mac6 nds curses check_null
 
 ASSETDIR := assets
 OBJDIR := obj
 DEPDIR := dep
 GENDIR := gen
-BIN_ASSETS := ../$(ASSETDIR)
+BIN_ASSETS := 
 DTHRESHOLD := 3
 
 OBJDIR_CHECK_NULL := $(OBJDIR)/check_null
@@ -117,21 +123,23 @@ CFLAGS_OPT :=
 ifeq ($(RESOURCE),FILE)
 CFLAGS_OPT += -DRESOURCE_FILE
 CFLAGS_OPT += -DASSETS_PATH="\"$(BIN_ASSETS)\""
+DSEKAI_C_FILES += unilayer/resource/file.c src/json.c
 else
 RESOURCE := HEADER
 CFLAGS_OPT += -DRESOURCE_HEADER
+DSEKAI_C_FILES += unilayer/resource/header.c
 endif
 
 define BITMAPS_RULE
 DSEKAI_ASSETS_SPRITES_$(DEPTH) := \
    $(wildcard $(ASSETDIR)/$(DEPTH)/sprite_*.bmp)
 DSEKAI_ASSETS_TILES_$(DEPTH) := \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/tile_*.bmp)
+   $(wildcard $(ASSETDIR)/$(DEPTH)/t_*.bmp)
 DSEKAI_ASSETS_PATTERNS_$(DEPTH) := \
    $(wildcard $(ASSETDIR)/$(DEPTH)/pattern_*.bmp)
 DSEKAI_ASSETS_BITMAPS_$(DEPTH) := \
    $(wildcard $(ASSETDIR)/$(DEPTH)/sprite_*.bmp) \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/tile_*.bmp) \
+   $(wildcard $(ASSETDIR)/$(DEPTH)/t_*.bmp) \
    $(wildcard $(ASSETDIR)/$(DEPTH)/pattern_*.bmp)
 endef
 
@@ -140,7 +148,7 @@ DEPTHS := 16x16x4
 $(foreach DEPTH,$(DEPTHS), $(eval $(BITMAPS_RULE)))
 
 DSEKAI_ASSETS_MAPS := \
-   $(ASSETDIR)/m_field.json
+   $(ASSETDIR)/m_field.jsn
 
 HOST_CC := gcc
 MD := mkdir -p
@@ -155,14 +163,12 @@ DRCPACK := bin/drcpack
 CONVERT := bin/convert
 LOOKUPS := bin/lookups
 HEADPACK := bin/headpack
-MAP2H := bin/map2h
 
-CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DUSE_JSON_MAPS -DRESOURCE_DRC -Iunilayer
+CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DUSE_JSON_MAPS -DRESOURCE_FILE -Iunilayer -DASSETS_PATH="\"$(BIN_ASSETS)\""
 CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DUSE_JSON_MAPS -DRESOURCE_DRC -Iunilayer
-CFLAGS_CONVERT := -DNO_RESEXT -g -DUSE_JSON_MAPS -DRESOURCE_DRC -Iunilayer
+CFLAGS_CONVERT := -DNO_RESEXT -g -DUSE_JSON_MAPS -DRESOURCE_FILE -Iunilayer
 CFLAGS_LOOKUPS := -g -Iunilayer
-CFLAGS_HEADPACK := -g -Iunilayer
-CFLAGS_MAP2H := -g -DUSE_JSON_MAPS -Iunilayer
+CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DUSE_JSON_MAPS -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETDIR)\""
 
 CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=$(DTHRESHOLD)
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -fsanitize=undefined -pg
@@ -218,14 +224,6 @@ endef
 
 $(foreach platform,$(PLATFORMS), $(eval $(ICO_RULE)))
 
-define MAPS_H_RULE
-$(GENDIR)/$(platform)/m_%.h: $(ASSETDIR)/m_%.json | \
-$(GENDIR)/$(platform)/$(STAMPFILE) $(MAP2H)
-	$(MAP2H) $$< $$@
-endef
-
-$(foreach platform,$(PLATFORMS), $(eval $(MAPS_H_RULE)))
-
 # ====== Utilities ======
 
 $(MKRESH): $(MKRESH_C_FILES) | $(BINDIR)/$(STAMPFILE)
@@ -240,11 +238,8 @@ $(CONVERT): $(CONVERT_C_FILES) | $(BINDIR)/$(STAMPFILE)
 $(LOOKUPS): $(LOOKUPS_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_LOOKUPS) -o $@ $^
 
-$(HEADPACK): tools/headpack.c | $(BINDIR)/$(STAMPFILE)
-	$(HOST_CC) $(CFLAGS_HEADPACK) -o $@ tools/headpack.c
-
-$(MAP2H): $(MAP2H_C_FILES) | $(BINDIR)/$(STAMPFILE) $(GENDIR)/check_null/resext.h
-	$(HOST_CC) $(CFLAGS_MAP2H) -o $@ $^
+$(HEADPACK): $(HEADPACK_C_FILES) | $(BINDIR)/$(STAMPFILE)
+	$(HOST_CC) $(CFLAGS_HEADPACK) -o $@ $^
 
 # ====== Main: SDL ======
 
@@ -258,7 +253,6 @@ GENDIR_SDL := $(GENDIR)/sdl
 
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
-   src/json.c \
    unilayer/input/sdli.c \
    unilayer/graphics/sdlg.c \
    unilayer/memory/fakem.c
@@ -315,7 +309,7 @@ DSEKAI_C_FILES_XLIB_ONLY := \
    unilayer/memory/fakem.c
 
 DSEKAI_ASSETS_MAPS_XLIB := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_XLIB)/,$(DSEKAI_ASSETS_MAPS)))
+   $(subst .jsn,.h,$(subst $(ASSETDIR)/,$(GENDIR_XLIB)/,$(DSEKAI_ASSETS_MAPS)))
 
 # 3. Programs
 
@@ -368,8 +362,8 @@ DSEKAI_C_FILES_DOS_ONLY := \
    unilayer/graphics/dosg.c \
    unilayer/memory/fakem.c
 
-DSEKAI_ASSETS_MAPS_DOS := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
+#DSEKAI_ASSETS_MAPS_DOS := \
+#   $(subst .jsn,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
 
 DSEKAI_ASSETS_DOS_CGA := \
    $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
@@ -406,10 +400,10 @@ $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
-$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR) $(DSEKAI_ASSETS_MAPS_DOS)
+$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)
 	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
 
-$(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h $(DSEKAI_ASSETS_MAPS_DOS)
+$(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h
 	$(MD) $(dir $@)
 	$(CC_DOS) $(CFLAGS_DOS) -fo=$@ $(<:%.c=%)
 
@@ -425,7 +419,6 @@ GENDIR_PALM := $(GENDIR)/palm
 
 DSEKAI_C_FILES_PALM_ONLY := \
    src/main.c \
-   src/json.c \
    unilayer/input/palmi.c \
    unilayer/memory/palmm.c \
    unilayer/resource/palmr.c \
@@ -516,7 +509,7 @@ DSEKAI_C_FILES_WIN16_ONLY := \
    unilayer/graphics/wing.c
 
 DSEKAI_ASSETS_MAPS_WIN16 := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN16)/,$(DSEKAI_ASSETS_MAPS)))
+   $(subst .jsn,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN16)/,$(DSEKAI_ASSETS_MAPS)))
 
 DSEKAI_O_FILES_WIN16 := \
    $(addprefix $(OBJDIR_WIN16)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -590,7 +583,7 @@ DSEKAI_C_FILES_WIN32_ONLY := \
    unilayer/graphics/wing.c
 
 DSEKAI_ASSETS_MAPS_WIN32 := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN32)/,$(DSEKAI_ASSETS_MAPS)))
+   $(subst .jsn,.h,$(subst $(ASSETDIR)/,$(GENDIR_WIN32)/,$(DSEKAI_ASSETS_MAPS)))
 
 DSEKAI_O_FILES_WIN32 := \
    $(addprefix $(OBJDIR_WIN32)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -667,7 +660,7 @@ DSEKAI_ASSETS_RSRC := \
    $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
 
 DSEKAI_ASSETS_MAPS_MAC6 := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_MAPS)))
+   $(subst .jsn,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_MAPS)))
 
 DSEKAI_O_FILES_MAC6 := \
    $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -743,7 +736,7 @@ DSEKAI_C_FILES_NDS_ONLY := \
    unilayer/memory/fakem.c
 
 DSEKAI_ASSETS_MAPS_NDS := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS)))
+   $(subst .jsn,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS)))
 
 DSEKAI_O_FILES_NDS := \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -808,8 +801,7 @@ DSEKAI_C_FILES_WEB_ONLY := \
    src/main.c \
    unilayer/input/gli.c \
    unilayer/graphics/glg.c \
-   unilayer/memory/fakem.c \
-   src/json.c
+   unilayer/memory/fakem.c
 
 DSEKAI_O_FILES_WEB := \
    $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \

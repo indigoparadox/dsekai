@@ -74,7 +74,7 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t );
  * \param screen_y Vertical screen pixel offset to draw mobile at.
  */
 void mobile_draw(
-   const struct MOBILE* m, const struct DSEKAI_STATE* state,
+   struct MOBILE* m, const struct DSEKAI_STATE* state,
    int16_t screen_x, int16_t screen_y );
 void mobile_deinit( struct MOBILE* );
 struct MOBILE* mobile_get_facing(

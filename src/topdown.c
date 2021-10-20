@@ -1,23 +1,7 @@
 
 #include "dsekai.h"
 
-#ifndef USE_JSON_MAPS
-#if defined( PLATFORM_WIN16 ) || defined( PLATFORM_WINCE )
-#include "../gen/win16/map_field.h"
-#elif defined( PLATFORM_WIN32 )
-#include "../gen/win32/map_field.h"
-#elif defined( PLATFORM_MAC6 )
-#include "../gen/mac6/map_field.h"
-#elif defined( PLATFORM_NDS )
-#include "../gen/nds/map_field.h"
-#elif defined( PLATFORM_DOS )
-#include "../gen/dos/map_field.h"
-#elif defined( PLATFORM_SDL )
-#include "../gen/sdl-nj/map_field.h"
-#elif defined( PLATFORM_XLIB )
-#include "../gen/xlib/map_field.h"
-#endif
-#endif /* USE_JSON_MAPS */
+extern const struct TILEMAP gc_map_field;
 
 #define TOPDOWN_STATE_WELCOME 1
 
@@ -181,12 +165,12 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       items = (struct ITEM*)memory_lock( state->items );
       assert( NULL != items );
 
-#ifdef USE_JSON_MAPS
-      tilemap_load( "m_field.json", map );
+#ifdef RESOURCE_FILE
+      tilemap_load( m_field, map );
 #else
       memory_copy_ptr( (MEMORY_PTR)map, (MEMORY_PTR)&gc_map_field,
          sizeof( struct TILEMAP ) );
-#endif /* USE_JSON_MAPS */
+#endif /* RESOURCE_FILE */
       /* memory_copy_ptr( (MEMORY_PTR)&(map->tileset[0]),
          (MEMORY_PTR)&(gc_tiles_field[0]),
          TILEMAP_TILESETS_MAX * sizeof( struct TILESET_TILE ) ); */

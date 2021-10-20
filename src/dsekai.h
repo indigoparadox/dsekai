@@ -17,16 +17,12 @@
 
 struct DSEKAI_STATE;
 
-/*! \brief X/Y coordinates of a tile on the current map. */
-struct PACKED TILEMAP_COORDS {
-   int32_t x;
-   int32_t y;
-};
+#include "tmstruct.h"
 
 #include "engines.h"
-#ifdef USE_JSON_MAPS
+#ifdef RESOURCE_FILE
 #include "json.h"
-#endif /* USE_JSON_MAPS */
+#endif /* RESOURCE_FILE */
 #include "script.h"
 #include "item.h"
 #include "tilemap.h"

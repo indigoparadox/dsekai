@@ -1,7 +1,7 @@
 
 #include "dsekai.h"
 
-#ifdef USE_JSON_MAPS
+#ifdef RESOURCE_FILE
 
 int16_t tilemap_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
@@ -136,7 +136,8 @@ int16_t tilemap_parse(
    struct jsmntok* tokens, uint16_t tokens_sz
 ) {
    char iter_path[JSON_PATH_SZ];
-   int16_t tok_parsed = 0;
+   int16_t tok_parsed = 0,
+      string_sz_tmp = 0;
    
    tok_parsed = tilemap_json_load(
       json_buffer, json_buffer_sz, tokens, tokens_sz );
@@ -156,14 +157,17 @@ int16_t tilemap_parse(
    ) {
       dio_snprintf(
          iter_path, JSON_PATH_SZ, TILEMAP_JPATH_STRING, t->strings_count );
-      t->string_szs[t->strings_count] = json_str_from_path(
+      json_str_from_path(
          iter_path, JSON_PATH_SZ,
          t->strings[t->strings_count], TILEMAP_STRINGS_SZ,
          tokens, tok_parsed, json_buffer );
-      debug_printf( 3, "loaded string: %s", t->strings[t->strings_count] );
-      if( 0 >= t->string_szs[t->strings_count] ) {
+      debug_printf( 3, "loaded string: %s (%d)",
+         t->strings[t->strings_count], string_sz_tmp );
+      if( 0 >= string_sz_tmp ) {
          /* Last string index was not parsed, so we're done. */
          break;
+      } else {
+         t->string_szs[t->strings_count] = string_sz_tmp;
       }
    }
 
@@ -361,7 +365,7 @@ cleanup:
    return retval;
 }
 
-#endif /* USE_JSON_MAPS */
+#endif /* RESOURCE_FILE */
 
 void tilemap_refresh_tiles( struct TILEMAP* t ) {
    int x = 0, y = 0;

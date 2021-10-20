@@ -2,11 +2,9 @@
 #define JSON_C
 #include "dsekai.h"
 
-#ifdef USE_JSON_MAPS
-
 int16_t json_get_token_idx(
    const char* path, uint16_t path_sz,
-   jsmntok_t* tokens, uint16_t tokens_sz,
+   struct jsmntok* tokens, uint16_t tokens_sz,
    const char* buf, uint16_t tree_depth_id
 ) {
    int i = 0;
@@ -15,7 +13,7 @@ int16_t json_get_token_idx(
       child_idx = 0,
       path_cmp_len = 0,
       path_cmp_start = 0;
-   jsmntok_t* parent = &(tokens[tree_depth_id]);
+   struct jsmntok* parent = &(tokens[tree_depth_id]);
 
    debug_printf( 0, "(%u) parent type is: %d", tree_depth_id, parent->type );
 
@@ -140,7 +138,7 @@ int16_t json_get_token_idx(
 
 int16_t json_token_id_from_path(
    const char* path, uint16_t path_sz,
-   jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
+   struct jsmntok* tokens, uint16_t tokens_sz, const char* buf
 ) {
    int16_t i = 0,
       path_cur_tok_start = 0,
@@ -184,7 +182,7 @@ int16_t json_token_id_from_path(
 
 int16_t json_int_from_path(
    const char* path, uint16_t path_sz,
-   jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
+   struct jsmntok* tokens, uint16_t tokens_sz, const char* buf
 ) {
    int16_t out = 0,
       id = 0;
@@ -206,7 +204,7 @@ int16_t json_int_from_path(
 int16_t json_str_from_path(
    const char* path, uint16_t path_sz,
    char* buffer, uint16_t buffer_sz,
-   jsmntok_t* tokens, uint16_t tokens_sz, const char* buf
+   struct jsmntok* tokens, uint16_t tokens_sz, const char* buf
 ) {
    int16_t id = 0,
       excerpt_sz = 0;
@@ -233,6 +231,4 @@ int16_t json_str_from_path(
 
    return excerpt_sz;
 }
-
-#endif /* USE_JSON_MAPS */
 

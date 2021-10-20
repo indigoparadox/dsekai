@@ -799,6 +799,7 @@ INPUT                  = \
    unilayer/graphics/nullg.h \
    unilayer/resource.h \
    unilayer/resource/nullr.h \
+   tools/map2h.h \
    src \
    README.md
 
