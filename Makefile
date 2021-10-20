@@ -86,7 +86,7 @@ CONVERT_C_FILES := \
 LOOKUPS_C_FILES := \
    tools/lookups.c
 
-PLATFORMS := sdl sdl-nj xlib dos win16 win32 palm mac6 nds curses check_null
+PLATFORMS := sdl xlib dos win16 win32 palm mac6 nds curses check_null
 
 ASSETDIR := assets
 OBJDIR := obj
@@ -164,11 +164,11 @@ CONVERT := bin/convert
 LOOKUPS := bin/lookups
 HEADPACK := bin/headpack
 
-CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DUSE_JSON_MAPS -DRESOURCE_FILE -Iunilayer -DASSETS_PATH="\"$(ASSETPATH)\""
-CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DUSE_JSON_MAPS -DRESOURCE_DRC -Iunilayer
-CFLAGS_CONVERT := -DNO_RESEXT -g -DUSE_JSON_MAPS -DRESOURCE_FILE -Iunilayer
+CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer -DASSETS_PATH="\"$(ASSETPATH)\""
+CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DRESOURCE_DRC -Iunilayer
+CFLAGS_CONVERT := -DNO_RESEXT -g -DRESOURCE_FILE -Iunilayer
 CFLAGS_LOOKUPS := -g -Iunilayer
-CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DUSE_JSON_MAPS -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
+CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
 
 CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=$(DTHRESHOLD)
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -fsanitize=undefined -pg
@@ -283,11 +283,11 @@ $(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE)
 
 $(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS)
 	$(MD) $(dir $@)
-	$(CC_SDL) $(CFLAGS_SDL) -DUSE_JSON_MAPS -c -o $@ $(<:%.o=%)
+	$(CC_SDL) $(CFLAGS_SDL) -c -o $@ $(<:%.o=%)
 
 $(DEPDIR_SDL)/%.d: %.c $(GENDIR_SDL)/resext.h
 	$(MD) $(dir $@)
-	$(CC_SDL) $(CFLAGS_SDL) -DUSE_JSON_MAPS -MM $< \
+	$(CC_SDL) $(CFLAGS_SDL) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL)/,$<)) -MF $@
 
 #include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
@@ -443,7 +443,7 @@ MULTIGEN := m68k-palmos-multigen
 
 # 4. Arguments
 
-CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC) -DUSE_JSON_MAPS $(CFLAGS_OPT) -Iunilayer -I$(GENDIR_PALM) $(DSEKAI_DEFINES)
+CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC) $(CFLAGS_OPT) -Iunilayer -I$(GENDIR_PALM) $(DSEKAI_DEFINES)
 
 LDFLAGS_PALM := -g $(CFLAGS_PALM)
 
@@ -814,7 +814,7 @@ LD_WEB := emcc
 
 # 4. Arguments
 
-CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_JSON_MAPS -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -DRESOURCE_HEADER -Iunilayer $(DSEKAI_DEFINES)
+CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -DRESOURCE_HEADER -Iunilayer $(DSEKAI_DEFINES)
 
 LDFLAGS_WEB :=
 
@@ -867,7 +867,7 @@ LD_CURSES := gcc
 
 # 4. Arguments
 
-CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_DEBUG_GCC) -DUSE_JSON_MAPS $(CFLAGS_OPT) -Iunilayer $(DSEKAI_DEFINES)
+CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_DEBUG_GCC) $(CFLAGS_OPT) -Iunilayer $(DSEKAI_DEFINES)
 
 LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) -g $(CFLAGS_DEBUG_GCC)
 
@@ -910,7 +910,7 @@ LD_SDL_ARM := arm-linux-gnueabihf-gcc
 
 # 4. Arguments
 
-CFLAGS_SDL_ARM := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer $(DSEKAI_DEFINES) -DUSE_JSON_MAPS
+CFLAGS_SDL_ARM := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -Iunilayer $(DSEKAI_DEFINES)
 
 LDFLAGS_SDL_ARM := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
 
