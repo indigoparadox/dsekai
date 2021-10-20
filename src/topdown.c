@@ -182,7 +182,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       assert( NULL != items );
 
 #ifdef USE_JSON_MAPS
-      tilemap_load( map_field, map );
+      tilemap_load( "map_field.json", map );
 #else
       memory_copy_ptr( (MEMORY_PTR)map, (MEMORY_PTR)&gc_map_field,
          sizeof( struct TILEMAP ) );
@@ -191,6 +191,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          (MEMORY_PTR)&(gc_tiles_field[0]),
          TILEMAP_TILESETS_MAX * sizeof( struct TILESET_TILE ) ); */
 
+      #if 0
       /* TODO: Load this dynamically. */
       resource_assign_id( map->tileset[0].image, tile_field_grass );
       map->tileset[0].flags = 0x00;
@@ -202,6 +203,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       map->tileset[3].flags = 0x01;
       resource_assign_id( map->tileset[4].image, tile_pool );
       map->tileset[4].flags = 0x01;
+      #endif
 
       tilemap_refresh_tiles( map );
 

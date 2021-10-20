@@ -59,6 +59,7 @@
 #define TILEMAP_JPATH_MOB_NAME   "/layers/[name=mobiles]/objects/%d/name"
 /*! \brief JSON path to mobile script index. */
 #define TILEMAP_JPATH_MOB_SCRIPT "/layers/[name=mobiles]/objects/%d/properties/[name=script]/value"
+#define TILEMAP_JPATH_TS_TILE "/tiles/%d/image"
 
 /**
  * \brief Get the TILEMAP::tileset index for the tile at the given coords.
@@ -126,7 +127,6 @@ int16_t tilemap_json_load(
    char* json_buffer, uint16_t json_buffer_sz,
    jsmntok_t* tokens, uint16_t tokens_sz );
 
-#if 0
 /**
  * \brief Parse tokenized JSON into a tileset array.
  * \param t ::MEMORY_PTR to a TILEMAP load the tileset into.
@@ -138,13 +138,12 @@ int16_t tilemap_json_load(
  * \return 1 if successful, or 0 otherwise.
  */
 int16_t tilemap_parse_tileset(
-   struct TILEMAP* t,
-   struct jsmntok* tokens, uint16_t tokens_sz, char* json_buffer,
-   char* iter_path, uint16_t iter_path_sz );
-#endif
+   struct TILEMAP* t, char* ts_name, uint16_t ts_name_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz,
+   char* json_buffer, uint16_t json_buffer_sz );
 
 /**
- * \brief Parse TILEMAP::tileset index from JSON map data.
+ * \brief Parse individual TILEMAP::tileset index from JSON map data.
  * \param tilegrid_path JSON path to tile data to load with %d for tile index.
  * \param tile_idx TILEMAP::tiles index of desired tile in JSON map data.
  * \param tokens JSON tokens to parse.
@@ -164,6 +163,12 @@ int8_t tilemap_json_tile(
  */
 int16_t tilemap_json_tilegrid(
    struct TILEMAP* t, char* tilegrid_path,
+   char* json_buffer, uint16_t json_buffer_sz,
+   jsmntok_t* tokens, uint16_t tokens_sz );
+
+uint16_t tilemap_json_string(
+   char* str_buffer, uint16_t str_buffer_sz,
+   char* json_path, uint16_t json_path_sz,
    char* json_buffer, uint16_t json_buffer_sz,
    jsmntok_t* tokens, uint16_t tokens_sz );
 

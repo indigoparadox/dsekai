@@ -154,6 +154,7 @@ int main( int argc, char* argv[] ) {
       for( i = 0 ; file_list_len > i ; i++ ) {
          switch( fmt ) {
          case FMT_FILE:
+            /* TODO: Get this from BIN_ASSETS in the Makefile? */
             fprintf( header_file, "#define %s \"../%s\"\n",
                file_basename_list[i], file_list[i] );
             break;

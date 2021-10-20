@@ -59,10 +59,11 @@ For MS-DOS, the INCLUDE environment variable must be set to the location of the 
 
 The following options may be specified to make in order control the final output:
 
-| Variable | Options | Explanation
-|----------|---------|-------------
-| RESOURCE | FILE    | Store assets as files in the filesystem.
-|          | HEADER  | Store assets embedded in the binary.
+| Variable   | Options | Explanation
+|------------|---------|-------------
+| RESOURCE   | FILE    | Store assets as files in the filesystem.
+|            | HEADER  | Store assets embedded in the binary.
+| BIN_ASSETS |         | Specify path to load assets at runtime. Defaults to ../assets
 
 ## Datafiles
 
