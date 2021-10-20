@@ -14,33 +14,33 @@
  "tiles":[
         {
          "id":0,
-         "image":"tile_field_grass.bmp",
+         "image":"16x16x4/t_grass.bmp",
          "imageheight":16,
          "imagewidth":16
         }, 
         {
          "id":1,
-         "image":"tile_field_brick_wall.bmp",
+         "image":"16x16x4/t_brick.bmp",
          "imageheight":16,
          "imagewidth":16
         }, 
         {
          "id":2,
-         "image":"tile_field_tree.bmp",
+         "image":"16x16x4/t_tree.bmp",
          "imageheight":16,
          "imagewidth":16,
          "probability":0.0500000007450581
         }, 
         {
          "id":3,
-         "image":"tile_pillar.bmp",
+         "image":"16x16x4/t_pillar.bmp",
          "imageheight":16,
          "imagewidth":16,
          "probability":0.00100000004749745
         }, 
         {
          "id":4,
-         "image":"tile_pool.bmp",
+         "image":"16x16x4/t_pool.bmp",
          "imageheight":16,
          "imagewidth":16,
          "probability":0.00999999977648258

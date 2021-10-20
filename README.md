@@ -64,6 +64,7 @@ The following options may be specified to make in order control the final output
 | RESOURCE   | FILE    | Store assets as files in the filesystem.
 |            | HEADER  | Store assets embedded in the binary.
 | BIN_ASSETS |         | Specify path to load assets at runtime. Defaults to ../assets
+| DTHRESHOLD |         | Specify the log level from 0-3.
 
 ## Datafiles
 

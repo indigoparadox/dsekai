@@ -102,7 +102,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"field_tiles.json"
+         "source":"t2_field.json"
         }],
  "tilewidth":16,
  "type":"map",

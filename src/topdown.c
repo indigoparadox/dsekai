@@ -182,7 +182,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       assert( NULL != items );
 
 #ifdef USE_JSON_MAPS
-      tilemap_load( "map_field.json", map );
+      tilemap_load( "m_field.json", map );
 #else
       memory_copy_ptr( (MEMORY_PTR)map, (MEMORY_PTR)&gc_map_field,
          sizeof( struct TILEMAP ) );

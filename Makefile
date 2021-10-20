@@ -87,6 +87,7 @@ OBJDIR := obj
 DEPDIR := dep
 GENDIR := gen
 BIN_ASSETS := ../$(ASSETDIR)
+DTHRESHOLD := 3
 
 OBJDIR_CHECK_NULL := $(OBJDIR)/check_null
 
@@ -139,7 +140,7 @@ DEPTHS := 16x16x4
 $(foreach DEPTH,$(DEPTHS), $(eval $(BITMAPS_RULE)))
 
 DSEKAI_ASSETS_MAPS := \
-   $(ASSETDIR)/map_field.json
+   $(ASSETDIR)/m_field.json
 
 HOST_CC := gcc
 MD := mkdir -p
@@ -163,7 +164,7 @@ CFLAGS_LOOKUPS := -g -Iunilayer
 CFLAGS_HEADPACK := -g -Iunilayer
 CFLAGS_MAP2H := -g -DUSE_JSON_MAPS -Iunilayer
 
-CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=3
+CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=$(DTHRESHOLD)
 CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -fsanitize=undefined -pg
 
 CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DRESOURCE_DRC -Iunilayer
@@ -218,7 +219,7 @@ endef
 $(foreach platform,$(PLATFORMS), $(eval $(ICO_RULE)))
 
 define MAPS_H_RULE
-$(GENDIR)/$(platform)/map_%.h: $(ASSETDIR)/map_%.json | \
+$(GENDIR)/$(platform)/m_%.h: $(ASSETDIR)/m_%.json | \
 $(GENDIR)/$(platform)/$(STAMPFILE) $(MAP2H)
 	$(MAP2H) $$< $$@
 endef
