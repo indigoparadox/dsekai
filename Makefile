@@ -1029,5 +1029,5 @@ $(OBJDIR_CHECK_NULL)/%.o: %.c check/testdata.h $(GENDIR_CHECK_NULL)/resext.h
 # ====== Clean ======
 
 clean:
-	rm -rf data obj bin gen *.err .rsrc .finf
+	rm -rf data obj bin gen *.err .rsrc .finf gmon.out log*.txt
 
