@@ -31,41 +31,229 @@ const char gc_palm_res_bitmap[] = "BITMAP";
 const char gc_palm_res_data_json[] = "DATA \"json\"";
 const char gc_palm_res_data_misc[] = "DATA \"misc\"";
 
+/**
+ * \brief Given a list of filenames, trim them into their basenames.
+ */
+void mkresh_basename_list(
+   char* const file_list[], char* file_basename_list[], int file_list_len
+) {
+   int i = 0,
+      filename_len = 0,
+      extension_idx = 0,
+      basename_start = 0;
+
+   for( i = 0 ; file_list_len > i ; i++ ) {
+      filename_len = strlen( file_list[i] );
+      file_basename_list[i] = calloc( filename_len + 1, 1 );
+      assert( NULL != file_basename_list[i] );
+
+      /* Remove the path of the basename during copy. */
+      basename_start = dio_basename( file_list[i], filename_len );
+      strncpy( file_basename_list[i], &(file_list[i][basename_start]),
+         filename_len - basename_start );
+      filename_len = strlen( file_basename_list[i] );
+
+      /* Remove the extension of the basename. */
+      extension_idx = dio_char_idx_r(
+         file_basename_list[i], filename_len, '.' );
+      if( 0 < extension_idx ) {
+         /* Turn the . into a NULL to chop off the extension. */
+         file_basename_list[i][extension_idx] = '\0';
+      }
+   }
+}
+
+/**
+ * \brief Create a header index of resources.
+ */
+void mkresh_header(
+   const char* namebuf_header, int id_start, int fmt,
+   char* const file_list[], char* const file_basename_list[], int file_list_len,
+   char* const stypes_list[], int stypes_list_len
+) {
+   FILE* header_file = NULL;
+   int i = 0;
+
+   header_file = fopen( namebuf_header, "w" );
+   assert( NULL!= header_file );
+
+   /* TODO: Encode files that aren't in (s)parsetypes, like in headpack. */
+
+   /* Output header include guards. */
+   fprintf( header_file, "\n#ifndef RESIDX_H\n#define RESIDX_H\n\n" );
+
+   for( i = 0 ; file_list_len > i ; i++ ) {
+      switch( fmt ) {
+      case FMT_FILE:
+         /* Hardcode the file path into the output header. */
+         fprintf( header_file, "#define %s \"%s\"\n",
+            file_basename_list[i], file_list[i] );
+         break;
+
+      default:
+         /* Hardcode an arbitrary index/resource ID into the output header.
+            */
+         fprintf( header_file, "#define %s %d\n",
+            file_basename_list[i], id_start + i );
+         break;
+      }
+   }
+
+   /* Output header include guard terminator. */
+   fprintf( header_file, "\n#endif /* RESIDX_H */\n" );
+
+cleanup:
+
+   if( NULL != header_file ) {
+      fclose( header_file );
+   }
+   header_file = NULL;
+
+}
+
+void mkresh_res(
+   const char* namebuf_res, int id_start, int fmt, const char* res_type,
+   char* const file_list[], char* const file_basename_list[], int file_list_len
+) {
+   int i = 0,
+      j = 0,
+      rtype = RTYPE_MISC,
+      string_list_sz = 0,
+      string_file_sz = 0,
+      extension_idx = 0,
+      filename_len = 0,
+      read = 0;
+   char* string_list[FILE_LIST_MAX],
+      * string_name_list[FILE_LIST_MAX];
+   char last_c = '\0';
+   FILE
+      * res_file = NULL,
+      * string_file = NULL;
+
+   memset( string_list, '\0', sizeof( char* ) * FILE_LIST_MAX );
+   memset( string_name_list, '\0', sizeof( char* ) * FILE_LIST_MAX );
+
+   res_file = fopen( namebuf_res, "w" );
+   assert( NULL!= res_file );
+
+   for( i = 0 ; file_list_len > i ; i++ ) {
+      /* TODO: Safety checks. */
+      filename_len = strlen( file_list[i] );
+      extension_idx = dio_char_idx_r( file_list[i], filename_len, '.' ) + 1;
+
+      if( 0 == strncmp( &(file_list[i][extension_idx]), "bmp", 3 ) ) {
+         rtype = RTYPE_BITMAP;
+      } else if( 0 == strncmp( &(file_list[i][extension_idx]), "js", 2 ) ) {
+         rtype = RTYPE_JSON;
+      }
+
+      if( RTYPE_BITMAP == rtype ) {
+         switch( fmt ) {
+         case FMT_PALM:
+            res_type = gc_palm_res_bitmap;
+            break;
+         case FMT_WIN16:
+            res_type = gc_win_res_bitmap;
+            break;
+         }
+      } else if( RTYPE_JSON == rtype ) {
+         switch( fmt ) {
+         case FMT_PALM:
+            res_type = gc_palm_res_data_json;
+            break;
+         }
+      } else {
+         switch( fmt ) {
+         case FMT_PALM:
+            res_type = gc_palm_res_data_misc;
+            break;
+         }
+      }
+
+      if( FMT_WIN16 == fmt && RTYPE_JSON == rtype ) {
+
+         assert( NULL == string_list[string_list_sz] );
+         string_file = fopen( file_list[i], "r" );
+         assert( NULL != string_file );
+         fseek( string_file, 0, SEEK_END );
+         string_file_sz = ftell( string_file ) + 1;
+         fseek( string_file, 0, SEEK_SET );
+         string_list[string_list_sz] = calloc( string_file_sz, 1 );
+         string_name_list[string_list_sz] =
+            calloc( strlen( file_basename_list[i] ) + 1, 1 );
+         strcpy( string_name_list[string_list_sz], file_basename_list[i] );
+         read = fread(
+            string_list[string_list_sz], 1, string_file_sz, string_file );
+         assert( read == string_file_sz - 1 );
+         fclose( string_file );
+         string_list_sz++;
+         
+      } else {
+         switch( fmt ) {
+         case FMT_PALM:
+            fprintf( res_file, "%s ID %s \"%s\"\n",
+               res_type, file_basename_list[i], file_list[i] );
+            break;
+
+         case FMT_WIN16:
+            fprintf( res_file, "%s %s \"%s\"\n",
+               file_basename_list[i], res_type, file_list[i] );
+            break;
+         }
+      }
+   }
+
+   if( 0 < string_list_sz ) {
+      fprintf( res_file, "STRINGTABLE\n{\n" );
+      for( i = 0 ; string_list_sz > i ; i++ ) {
+         fprintf( res_file, "   %s, \"", string_name_list[i] );
+         for( j = 0 ; strlen( string_list[i] ) > j ; j++ ) {
+            if( '"' == string_list[i][j] || '\\' == string_list[i][j] ) {
+               fputc( '\\', res_file );
+            }
+            if(
+               '\n' != string_list[i][j] && '\r' != string_list[i][j] &&
+               !(last_c == ' ' && string_list[i][j] == ' ')
+            ) {
+               fputc( string_list[i][j], res_file );
+            }
+            last_c = string_list[i][j];
+         }
+         fprintf( res_file, "\"\n" );
+      }
+      fprintf( res_file, "}\n" );
+   }
+
+cleanup:
+
+   if( NULL != res_file ) {
+      fclose( res_file );
+   }
+   res_file = NULL;
+
+}
+
 int main( int argc, char* argv[] ) {
    int retval = 0;
    int i = 0,
       j = 0,
       state = 0,
       fmt = 0,
-      rtype = RTYPE_MISC,
-      basename_start = 0,
       id_start = 0,
-      string_list_sz = 0,
-      string_file_sz = 0,
-      read = 0,
-      filename_len = 0,
-      extension_idx = 0;
+      filename_len = 0;
    char* header_name = NULL,
       * file_list[FILE_LIST_MAX],
       * stypes_list[FILE_LIST_MAX],
-      * file_basename_list[FILE_LIST_MAX],
-      * string_name_list[FILE_LIST_MAX],
-      * string_list[FILE_LIST_MAX],
-      last_c = '\0';
+      * file_basename_list[FILE_LIST_MAX];
    const char* res_type = NULL;
    char namebuf_header[NAMEBUF_MAX + 1],
       namebuf_res[NAMEBUF_MAX + 1];
    size_t file_list_len = 0,
       stypes_list_len = 0;
-   FILE * header_file = NULL,
-      * res_file = NULL,
-      * string_file = NULL;
 
    memset( namebuf_header, '\0', NAMEBUF_MAX + 1 );
    memset( namebuf_res, '\0', NAMEBUF_MAX + 1 );
    memset( file_list, '\0', sizeof( char* ) * FILE_LIST_MAX );
-   memset( string_list, '\0', sizeof( char* ) * FILE_LIST_MAX );
-   memset( string_name_list, '\0', sizeof( char* ) * FILE_LIST_MAX );
 
    for( i = 1 ; argc > i ; i++ ) {
       switch( state ) {
@@ -145,166 +333,20 @@ int main( int argc, char* argv[] ) {
 
    assert( 0 != fmt );
 
-   /* TODO: Encode files that aren't in (s)parsetypes, like in headpack. */
-
-   for( i = 0 ; file_list_len > i ; i++ ) {
-      filename_len = strlen( file_list[i] );
-      file_basename_list[i] = calloc( filename_len + 1, 1 );
-      assert( NULL != file_basename_list[i] );
-
-      /* Remove the path of the basename during copy. */
-      basename_start = dio_basename( file_list[i], filename_len );
-      strncpy( file_basename_list[i], &(file_list[i][basename_start]),
-         filename_len - basename_start );
-      filename_len = strlen( file_basename_list[i] );
-
-      /* Remove the extension of the basename. */
-      extension_idx = dio_char_idx_r(
-         file_basename_list[i], filename_len, '.' );
-      if( 0 < extension_idx ) {
-         /* Turn the . into a NULL to chop off the extension. */
-         file_basename_list[i][extension_idx] = '\0';
-      }
-   }
+   mkresh_basename_list( file_list, file_basename_list, file_list_len );
 
    if( 0 < strlen( namebuf_header ) ) {
-      header_file = fopen( namebuf_header, "w" );
-      assert( NULL!= header_file );
-
-      /* Output header include guards. */
-      fprintf( header_file, "\n#ifndef RESEXT_H\n#define RESEXT_H\n\n" );
-
-      for( i = 0 ; file_list_len > i ; i++ ) {
-         switch( fmt ) {
-         case FMT_FILE:
-            /* Hardcode the file path into the output header. */
-            fprintf( header_file, "#define %s \"%s\"\n",
-               file_basename_list[i], file_list[i] );
-            break;
-
-         default:
-            /* Hardcode an arbitrary index/resource ID into the output header.
-             */
-            fprintf( header_file, "#define %s %d\n",
-               file_basename_list[i], id_start + i );
-            break;
-         }
-      }
-
-      /* Output header include guard terminator. */
-      fprintf( header_file, "\n#endif /* RESEXT_H */\n" );
-
-      fclose( header_file );
-      header_file = NULL;
+      mkresh_header( namebuf_header, id_start, fmt, file_list,
+         file_basename_list, file_list_len,
+         stypes_list, stypes_list_len );
    }
 
    if( 0 < strlen( namebuf_res ) ) {
-      res_file = fopen( namebuf_res, "w" );
-      assert( NULL!= res_file );
-
-      for( i = 0 ; file_list_len > i ; i++ ) {
-         /* TODO: Safety checks. */
-         filename_len = strlen( file_list[i] );
-         extension_idx = dio_char_idx_r( file_list[i], filename_len, '.' ) + 1;
-
-         if( 0 == strncmp( &(file_list[i][extension_idx]), "bmp", 3 ) ) {
-            rtype = RTYPE_BITMAP;
-         } else if( 0 == strncmp( &(file_list[i][extension_idx]), "js", 2 ) ) {
-            rtype = RTYPE_JSON;
-         }
-
-         if( RTYPE_BITMAP == rtype ) {
-            switch( fmt ) {
-            case FMT_PALM:
-               res_type = gc_palm_res_bitmap;
-               break;
-            case FMT_WIN16:
-               res_type = gc_win_res_bitmap;
-               break;
-            }
-         } else if( RTYPE_JSON == rtype ) {
-            switch( fmt ) {
-            case FMT_PALM:
-               res_type = gc_palm_res_data_json;
-               break;
-            }
-         } else {
-            switch( fmt ) {
-            case FMT_PALM:
-               res_type = gc_palm_res_data_misc;
-               break;
-            }
-         }
-
-         if( FMT_WIN16 == fmt && RTYPE_JSON == rtype ) {
-
-            assert( NULL == string_list[string_list_sz] );
-            string_file = fopen( file_list[i], "r" );
-            assert( NULL != string_file );
-            fseek( string_file, 0, SEEK_END );
-            string_file_sz = ftell( string_file ) + 1;
-            fseek( string_file, 0, SEEK_SET );
-            string_list[string_list_sz] = calloc( string_file_sz, 1 );
-            string_name_list[string_list_sz] =
-               calloc( strlen( file_basename_list[i] ) + 1, 1 );
-            strcpy( string_name_list[string_list_sz], file_basename_list[i] );
-            read = fread(
-               string_list[string_list_sz], 1, string_file_sz, string_file );
-            assert( read == string_file_sz - 1 );
-            fclose( string_file );
-            string_list_sz++;
-            
-         } else {
-            switch( fmt ) {
-            case FMT_PALM:
-               fprintf( res_file, "%s ID %s \"%s\"\n",
-                  res_type, file_basename_list[i], file_list[i] );
-               break;
-
-            case FMT_WIN16:
-               fprintf( res_file, "%s %s \"%s\"\n",
-                  file_basename_list[i], res_type, file_list[i] );
-               break;
-            }
-         }
-      }
-
-      if( 0 < string_list_sz ) {
-         fprintf( res_file, "STRINGTABLE\n{\n" );
-         for( i = 0 ; string_list_sz > i ; i++ ) {
-            fprintf( res_file, "   %s, \"", string_name_list[i] );
-            for( j = 0 ; strlen( string_list[i] ) > j ; j++ ) {
-               if( '"' == string_list[i][j] || '\\' == string_list[i][j] ) {
-                  fputc( '\\', res_file );
-               }
-               if(
-                  '\n' != string_list[i][j] && '\r' != string_list[i][j] &&
-                  !(last_c == ' ' && string_list[i][j] == ' ')
-               ) {
-                  fputc( string_list[i][j], res_file );
-               }
-               last_c = string_list[i][j];
-            }
-            fprintf( res_file, "\"\n" );
-         }
-         fprintf( res_file, "}\n" );
-      }
-
-      fclose( res_file );
-      res_file = NULL;
+      mkresh_res( namebuf_res, id_start, fmt, res_type, file_list,
+         file_basename_list, file_list_len );
    }
 
 cleanup:
-
-   if( NULL != header_file ) {
-      fclose( header_file );
-   }
-   header_file = NULL;
-
-   if( NULL != res_file ) {
-      fclose( res_file );
-   }
-   header_file = NULL;
 
    return retval;
 }

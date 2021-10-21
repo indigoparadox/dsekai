@@ -1,13 +1,15 @@
 
 #include <windows.h>
 
+#ifdef RESOURCE_WIN
 #ifdef PLATFORM_WIN32
-#include "../gen/win32/resext.h"
+#include "../gen/win32/residx.h"
 #include "../gen/win32/win.rc"
 #elif defined( PLATFORM_WIN16 )
-#include "../gen/win16/resext.h"
+#include "../gen/win16/residx.h"
 #include "../gen/win16/win.rc"
 #endif /* PLATFORM_WIN16, PLATFORM_WIN32 */
+#endif /* RESOURCE_WIN */
 
 #include "winstat.h"
 

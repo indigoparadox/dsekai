@@ -209,7 +209,7 @@ int16_t json_int_from_path(
 ) {
    int16_t out = 0,
       id = 0;
-   char* offset_buf = NULL;
+   const char* offset_buf = NULL;
 
    id = json_token_id_from_path( path, path_sz, tokens, tokens_sz, buf );
    if( 0 > id ) {

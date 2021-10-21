@@ -46,15 +46,13 @@ int main( int argc, char* argv[] ) {
 #endif
 
 int map2h(
-   struct TILEMAP* t, FILE* header_file, int map_idx, char* res_list[],
-   int res_list_sz
+   struct TILEMAP* t, FILE* header_file, int map_idx
 ) {
    int16_t
       i = 0,
       j = 0,
       res_basename_idx = 0,
-      ts_basename_idx = 0,
-      res_idx = 0;
+      ts_basename_idx = 0;
 
    /* TODO: strtolower? */
    fprintf( header_file, "const struct TILEMAP gc_map_%s = {\n",
@@ -75,34 +73,37 @@ int map2h(
 
       /* Get resource ID for tile image. */
       /* This assumes map2h was compiled with RESOURCE_FILE. */
+      #if 0
       res_idx = -1;
       for( j = res_list_sz - 1 ; 0 <= j ; j-- ) {
-         res_basename_idx = dio_basename( res_list[j], strlen( res_list[j] ) );
+         res_basename_idx = dio_basename(
+            res_list_names[j], strlen( res_list_names[j] ) );
          printf( "%d out of %d: %s vs %s\n",
             j,
             res_list_sz,
-            &(res_list[j][res_basename_idx]),
+            &(res_list_names[j][res_basename_idx]),
             &(t->tileset[i].image[ts_basename_idx]) );
          if( 0 == strncmp(
             &(res_list[j][res_basename_idx]),
             &(t->tileset[i].image[ts_basename_idx]),
-            strlen( res_list[j] ) - res_basename_idx - 4 /* Extension */
+            strlen( res_list_names[j] ) - res_basename_idx - 4 /* Extension */
          ) ) {
             res_idx = j;
             printf( "found: %d (%s)\n", res_idx,
-               &(res_list[res_idx][res_basename_idx]) );
+               &(res_list_names[res_idx][res_basename_idx]) );
             break;
          }
       }
+      #endif
 
       fprintf( header_file, "      {\n" );
 
-      if( 0 <= res_idx ) {
+      if( 0 < strlen( t->tileset[i].image ) ) {
          /* tileset[i].image */
          fprintf( header_file, "         /* image */\n" );
-         fprintf( header_file, "         /* %s */\n",
-            &(res_list[res_idx][res_basename_idx]) );
-         fprintf( header_file, "         %d,\n", res_idx );
+         /* Let the preprocessor figure it out. */
+         fprintf( header_file, "         %s,\n",
+            &(t->tileset[i].image[ts_basename_idx]) );
 
          /* tileset[i].flags */
          fprintf( header_file, "         /* flags */\n" );

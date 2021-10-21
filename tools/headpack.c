@@ -1,5 +1,6 @@
 
-#include <stdio.h>
+#include "headpack.h"
+
 #include <assert.h>
 #include <string.h>
 
@@ -98,6 +99,8 @@ cleanup:
    return;
 }
 
+#ifndef HEADPACK_NOMAIN
+
 int main( int argc, char* argv[] ) {
    int res_id = 0,
       i = 0,
@@ -120,7 +123,7 @@ int main( int argc, char* argv[] ) {
    assert( NULL != header );
 
    /* Output header include guard start. */
-   fprintf( header, "#ifndef RESEXT_H\n#define RESEXT_H\n\n" );
+   fprintf( header, "#ifndef RESEMB_H\n#define RESEMB_H\n\n" );
 
    fprintf( header, "#include \"../../src/tmstruct.h\"\n\n" );
 
@@ -164,7 +167,7 @@ int main( int argc, char* argv[] ) {
       
          /* Trim first arg (prog) off reslist. */
          /* Second arg (header) will be ignored since 1-indexing. */
-         map2h( &t, header, map_idx, &(argv[1]), argc - 2 );
+         map2h( &t, header, map_idx );
       } else {
          encode_generic_file( &(argv[i][0]), i, header );
       }
@@ -173,7 +176,7 @@ int main( int argc, char* argv[] ) {
    /* Resource Index */
 
    fprintf( header, "static const " RES_TYPE "* gsc_resources[] = {\n" );
-   fprintf( header, "   NULL\n," );
+   fprintf( header, "   NULL,\n" );
    for( i = 2 ; argc > i ; i++ ) {
       if(
          'm' == argv[i][path_iter_fname_idx] &&
@@ -193,7 +196,7 @@ int main( int argc, char* argv[] ) {
    fprintf( header, "#endif /* " RES_C_DEF " */\n\n" );
 
    /* Output header include guard end. */
-   fprintf( header, "#endif /* !RESEXT_H */\n\n" );
+   fprintf( header, "#endif /* !RESEMB_H */\n\n" );
 
 cleanup:
 
@@ -201,4 +204,6 @@ cleanup:
    
    return retval;
 }
+
+#endif /* !HEADPACK_NOMAIN */
 

@@ -3,6 +3,9 @@
 
 #ifdef RESOURCE_FILE
 
+/* For strlen() */
+#include <string.h>
+
 int16_t tilemap_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
    struct jsmntok* tokens, uint16_t tokens_sz, char* json_buffer,
@@ -23,6 +26,7 @@ int16_t tilemap_parse_spawn(
    }
 
    /* Parse Type */
+   /* XXX */
    if( 0 == memory_strncmp_ptr( "player", spawn_buffer, 6 ) ) {
       spawn->type = MOBILE_TYPE_PLAYER;
    } else if( 0 == memory_strncmp_ptr( "princess", spawn_buffer, 8 ) ) {
@@ -251,7 +255,7 @@ static int16_t tilemap_load_file(
    }
    debug_printf( 1, "opening tilemap resource: %s", filename );
    *json_handle_p = resource_get_json_handle( filename );
-   if( NULL == *json_handle_p ) {
+   if( (RESOURCE_JSON_HANDLE)0 == *json_handle_p ) {
       error_printf( "could not get handle for %s", filename );
       return 0;
    }
@@ -270,8 +274,8 @@ static int16_t tilemap_load_file(
 int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    char* json_buffer = NULL;
    int16_t retval = 1;
-   RESOURCE_JSON_HANDLE json_handle = NULL;
-   MEMORY_HANDLE tokens_handle = NULL;
+   RESOURCE_JSON_HANDLE json_handle = (RESOURCE_JSON_HANDLE)0;
+   MEMORY_HANDLE tokens_handle = (MEMORY_HANDLE)0;
    uint32_t json_buffer_sz = 0;
    uint16_t ts_name_sz = 0,
       tok_parsed = 0;
@@ -282,14 +286,14 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
 
    /* Allocate buffers for parsing JSON. */
    json_handle = resource_get_json_handle( id );
-   if( NULL == json_handle ) {
+   if( (RESOURCE_JSON_HANDLE)0 == json_handle ) {
       error_printf( "could not get tilemap resource handle" );
       retval = 0;
       goto cleanup;
    }
 
    tokens_handle = memory_alloc( JSON_TOKENS_MAX, sizeof( struct jsmntok ) );
-   if( NULL == tokens_handle ) {
+   if( (MEMORY_HANDLE)0 == tokens_handle ) {
       error_printf( "could not allocate space for JSON tokens" );
       retval = 0;
       goto cleanup;
@@ -365,7 +369,7 @@ cleanup:
       tokens = memory_unlock( tokens_handle );
    }
 
-   if( NULL != tokens_handle ) {
+   if( (MEMORY_HANDLE)0 != tokens_handle ) {
       memory_free( tokens_handle );
    }
 
@@ -373,7 +377,7 @@ cleanup:
       json_buffer = resource_unlock_handle( json_handle );
    }
 
-   if( NULL != json_handle ) {
+   if( (RESOURCE_JSON_HANDLE)0 != json_handle ) {
       resource_free_handle( json_handle );
    }
 
