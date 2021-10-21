@@ -132,15 +132,15 @@ endif
 
 define BITMAPS_RULE
 DSEKAI_ASSETS_SPRITES_$(DEPTH) := \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/sprite_*.bmp)
+   $(wildcard $(ASSETDIR)/$(DEPTH)/s_*.bmp)
 DSEKAI_ASSETS_TILES_$(DEPTH) := \
    $(wildcard $(ASSETDIR)/$(DEPTH)/t_*.bmp)
 DSEKAI_ASSETS_PATTERNS_$(DEPTH) := \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/pattern_*.bmp)
+   $(wildcard $(ASSETDIR)/$(DEPTH)/p_*.bmp)
 DSEKAI_ASSETS_BITMAPS_$(DEPTH) := \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/sprite_*.bmp) \
+   $(wildcard $(ASSETDIR)/$(DEPTH)/s_*.bmp) \
    $(wildcard $(ASSETDIR)/$(DEPTH)/t_*.bmp) \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/pattern_*.bmp)
+   $(wildcard $(ASSETDIR)/$(DEPTH)/p_*.bmp)
 endef
 
 DEPTHS := 16x16x4

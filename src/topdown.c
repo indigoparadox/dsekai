@@ -215,12 +215,12 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          case MOBILE_TYPE_PLAYER:
             mobiles[i].active = 1;
             state->player_idx = i;
-            resource_assign_id( mobiles[i].sprite, sprite_robe );
+            resource_assign_id( mobiles[i].sprite, s_robe );
             break;
 
          case MOBILE_TYPE_PRINCESS:
             mobiles[i].active = 1;
-            resource_assign_id( mobiles[i].sprite, sprite_princess );
+            resource_assign_id( mobiles[i].sprite, s_pncess );
             break;
 
          default:
@@ -236,7 +236,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 #ifndef PLATFORM_PALM
       state->engine_state = TOPDOWN_STATE_WELCOME;
       window_prefab_dialog(
-         WINDOW_ID_WELCOME, 1, sprite_princess, state, map );
+         WINDOW_ID_WELCOME, 1, s_pncess, state, map );
 #endif /* PLATFORM_PALM */
 #endif /* !HIDE_WELCOME_DIALOG */
 

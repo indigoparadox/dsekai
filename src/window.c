@@ -46,15 +46,15 @@ void window_init() {
       (MEMORY_PTR)frames, (MEMORY_PTR)&gc_frame_cm_checker,
       sizeof( struct WINDOW_FRAME ) ); */
 
-   resource_assign_id( frames[0].tr , pattern_cm_checker_tr );
-   resource_assign_id( frames[0].tl , pattern_cm_checker_tl );
-   resource_assign_id( frames[0].br , pattern_cm_checker_br );
-   resource_assign_id( frames[0].bl , pattern_cm_checker_bl );
-   resource_assign_id( frames[0].t , pattern_cm_checker_t );
-   resource_assign_id( frames[0].b , pattern_cm_checker_b );
-   resource_assign_id( frames[0].r , pattern_cm_checker_r );
-   resource_assign_id( frames[0].l , pattern_cm_checker_l );
-   resource_assign_id( frames[0].c , pattern_cm_checker_c );
+   resource_assign_id( frames[0].tr , p_chk_tr );
+   resource_assign_id( frames[0].tl , p_chk_tl );
+   resource_assign_id( frames[0].br , p_chk_br );
+   resource_assign_id( frames[0].bl , p_chk_bl );
+   resource_assign_id( frames[0].t , p_chk_t );
+   resource_assign_id( frames[0].b , p_chk_b );
+   resource_assign_id( frames[0].r , p_chk_r );
+   resource_assign_id( frames[0].l , p_chk_l );
+   resource_assign_id( frames[0].c , p_chk_c );
 
    frames = (struct WINDOW_FRAME*)memory_unlock( g_frames_handle );
 }
