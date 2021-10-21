@@ -215,11 +215,13 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          case MOBILE_TYPE_PLAYER:
             mobiles[i].active = 1;
             state->player_idx = i;
+            debug_printf( 3, "spawning: %d", s_robe );
             resource_assign_id( mobiles[i].sprite, s_robe );
             break;
 
          case MOBILE_TYPE_PRINCESS:
             mobiles[i].active = 1;
+            debug_printf( 3, "spawning: %d", s_pncess );
             resource_assign_id( mobiles[i].sprite, s_pncess );
             break;
 

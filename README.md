@@ -30,6 +30,7 @@ Features that are planned include:
 * Housing system based on in-game map editing.
 * Item usage and crafting.
 * Minimal resource use (shooting for <500k RAM).
+* Loading JSON files on DOS (currently seems to be broken? Too much RAM?)
 
 Ideally, this engine will compile with legacy compilers as a general rule. For this reason, the following rules/limitations should be observed within the codebase:
 

@@ -245,18 +245,24 @@ static int16_t tilemap_load_file(
    uint32_t* json_buffer_sz_p, uint16_t* tok_parsed_p, struct jsmntok* tokens
 ) {
    if( NULL != *json_buffer_p ) {
+      debug_printf( 1, "closing tilemap resource" );
       *json_buffer_p = resource_unlock_handle( *json_handle_p );
       resource_free_handle( *json_handle_p );
    }
+   debug_printf( 1, "opening tilemap resource: %s", filename );
    *json_handle_p = resource_get_json_handle( filename );
    if( NULL == *json_handle_p ) {
       error_printf( "could not get handle for %s", filename );
       return 0;
    }
+   debug_printf( 1, "setting up tokens and parsing..." );
    *json_buffer_sz_p = memory_sz( *json_handle_p );
    *json_buffer_p = resource_lock_handle( *json_handle_p );
+   memory_zero_ptr( tokens, JSON_TOKENS_MAX * sizeof( struct jsmntok ) );
    *tok_parsed_p = json_load(
       *json_buffer_p, *json_buffer_sz_p, tokens, JSON_TOKENS_MAX );
+
+   debug_printf( 1, "parsed %d tokens", *tok_parsed_p );
 
    return 1;
 }
@@ -271,6 +277,8 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
       tok_parsed = 0;
    char ts_name[JSON_PATH_SZ];
    struct jsmntok* tokens = NULL;
+
+   memory_zero_ptr( t, sizeof( struct TILEMAP ) );
 
    /* Allocate buffers for parsing JSON. */
    json_handle = resource_get_json_handle( id );
@@ -289,7 +297,7 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
 
    tokens = memory_lock( tokens_handle );
 
-   debug_printf( 2, "JSON token buffer allocated: %lu bytes",
+   debug_printf( 1, "JSON token buffer allocated: %lu bytes",
       sizeof( struct jsmntok ) * JSON_TOKENS_MAX );
 
    /* Load the tilemap JSON and parse it. */
@@ -297,10 +305,13 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    retval = tilemap_load_file(
       id, &json_buffer, &json_handle, &json_buffer_sz, &tok_parsed, tokens );
    if( 0 == retval ) {
+      error_printf( "unable to open tilemap" );
       goto cleanup;
    }
 
    /* Parse properties, first pass. */
+
+   debug_printf( 1, "getting tilemap name and tileset path" );
 
    json_str_from_path(
       TILEMAP_JPATH_PROP_NAME, sizeof( TILEMAP_JPATH_PROP_NAME ),
@@ -314,6 +325,13 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
    ts_name_sz += json_str_from_path(
       TILEMAP_JPATH_TS_SRC, sizeof( TILEMAP_JPATH_TS_SRC ),
       &(ts_name[ts_name_sz]), JSON_PATH_SZ, tokens, tok_parsed, json_buffer );
+   if( 0 == retval || 0 == ts_name_sz ) {
+      error_printf( "could not find tileset name" );
+      retval = 0;
+      goto cleanup;
+   }
+
+   debug_printf( 1, "tileset path is: %s", ts_name );
 
    /* Unload the map, load the tileset. */
 

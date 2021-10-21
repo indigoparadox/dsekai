@@ -31,6 +31,12 @@
                  "height":10,
                  "id":5,
                  "name":"player",
+                 "properties":[
+                        {
+                         "name":"sprite",
+                         "type":"string",
+                         "value":"s_robe"
+                        }],
                  "rotation":0,
                  "type":"player",
                  "visible":true,
@@ -47,6 +53,11 @@
                          "name":"script",
                          "type":"int",
                          "value":0
+                        },
+                        {
+                         "name":"sprite",
+                         "type":"string",
+                         "value":"s_pncess"
                         }],
                  "rotation":0,
                  "type":"princess",
@@ -59,6 +70,17 @@
                  "height":0,
                  "id":7,
                  "name":"fountain",
+                 "properties":[
+                        {
+                         "name":"script",
+                         "type":"int",
+                         "value":1
+                        },
+                        {
+                         "name":"sprite",
+                         "type":"string",
+                         "value":"s_fount"
+                        }],
                  "rotation":0,
                  "type":"fountain",
                  "visible":true,
@@ -87,6 +109,11 @@
          "value":"t0r1s1r1s3l1s1l1s3g0i0p0x0"
         }, 
         {
+         "name":"script_1",
+         "type":"string",
+         "value":"t0s5g0i0p2x0"
+        }, 
+        {
          "name":"string_0",
          "type":"string",
          "value":"Have you seen it?"
@@ -95,6 +122,11 @@
          "name":"string_1",
          "type":"string",
          "value":"Welcome!"
+        },
+        {
+         "name":"string_2",
+         "type":"string",
+         "value":"It's a fountain."
         }],
  "renderorder":"right-down",
  "tiledversion":"1.7.2",

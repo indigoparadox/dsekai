@@ -31,6 +31,8 @@ unilayer_main() {
       "dsekai compiled " __DATE__ __TIME__ ", state size is %lu bytes",
       sizeof( struct DSEKAI_STATE ) );
 
+   error_printf( "error test" );
+
    debug_printf( 3, "map size is %lu bytes", sizeof( struct TILEMAP ) );
 
    debug_printf( 3, "mobiles size is %lu bytes",

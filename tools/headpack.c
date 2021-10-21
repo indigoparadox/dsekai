@@ -71,8 +71,9 @@ void encode_generic_file( char* path, int id, FILE* header ) {
 
    /* Create a static const in the output header to hold this blob. */
    fprintf( header, "static const " RES_TYPE " gsc_resource_%d[] = {\n   ",
-      /* Subtract 2 since this is argv (program name and output header args). */
-      id - 2 );
+      /* Subtract 1 since this is argv (program name and output header args),
+       * but we index from 1. */
+      id - 1 );
    
    /* Translate each byte into a hex number in the output header. */
    while( 0 < (read = fread( bin_buffer, 1, BIN_BUFFER_SZ, bin )) ) {
@@ -126,7 +127,7 @@ int main( int argc, char* argv[] ) {
    for( i = 2 ; argc > i ; i++ ) {
       fprintf( header, "#define " );
       path_to_define( argv[i], header );
-      fprintf( header, " %d\n", i - 2 );
+      fprintf( header, " %d\n", i - 1 );
    }
 
    /* Resource Data */
@@ -157,10 +158,13 @@ int main( int argc, char* argv[] ) {
                &(argv[i][path_iter_fname_idx]) );
             retval = 1;
             goto cleanup;
+         } else {
+            retval = 0;
          }
       
-         /* Trim first two args (prog/header) off reslist. */
-         map2h( &t, header, map_idx, &(argv[2]), argc - 2 );
+         /* Trim first arg (prog) off reslist. */
+         /* Second arg (header) will be ignored since 1-indexing. */
+         map2h( &t, header, map_idx, &(argv[1]), argc - 2 );
       } else {
          encode_generic_file( &(argv[i][0]), i, header );
       }
@@ -169,6 +173,7 @@ int main( int argc, char* argv[] ) {
    /* Resource Index */
 
    fprintf( header, "static const " RES_TYPE "* gsc_resources[] = {\n" );
+   fprintf( header, "   NULL\n," );
    for( i = 2 ; argc > i ; i++ ) {
       if(
          'm' == argv[i][path_iter_fname_idx] &&
@@ -177,7 +182,7 @@ int main( int argc, char* argv[] ) {
          /* This is a map JSON file, so use its name. */
       } else {
          /* Use a generic resource ID. */
-         fprintf( header, "   gsc_resource_%d,\n", i - 2 );
+         fprintf( header, "   gsc_resource_%d,\n", i - 1 );
       }
    }
    fprintf( header, "};\n\n" );
