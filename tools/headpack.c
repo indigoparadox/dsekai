@@ -115,6 +115,8 @@ int main( int argc, char* argv[] ) {
    struct TILEMAP t;
    unsigned char byte_buffer = 0;
 
+   /* TODO: Implement separate map index that can be searched by name. */
+
    assert( 2 < argc );
 
    memset( &t, '\0', sizeof( struct TILEMAP ) );

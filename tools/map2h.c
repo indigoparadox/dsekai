@@ -7,44 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if 0
-int main( int argc, char* argv[] ) {
-   FILE* json_file = NULL,
-      * header_file = NULL;
-   int16_t json_file_sz = 0,
-      i = 0,
-      j = 0;
-   char* json_buffer = 0;
-   struct TILEMAP t;
-   jsmntok_t tokens[2048];
-
-   assert( argc == 3 );
-
-   memset( &t, '\0', sizeof( struct TILEMAP ) );
-   memset( tokens, '\0', 2048 * sizeof( jsmntok_t ) );
-
-   /* Parse tilemap in. */
-   json_file = fopen( argv[1], "r" );
-   assert( NULL != json_file );
-
-   fseek( json_file, 0, SEEK_END );
-   json_file_sz = ftell( json_file );
-   fseek( json_file, 0, SEEK_SET );
-
-   json_buffer = calloc( json_file_sz + 1, 1 );
-   assert( NULL != json_buffer );
-   fread( json_buffer, json_file_sz, 1, json_file );
-
-   tilemap_parse( &t, json_buffer, json_file_sz, &(tokens[0]), 2048 );
-
-   fclose( json_file );
-
-   /* Write tilemap header out. */
-   header_file = fopen( argv[2], "w" );
-   assert( NULL != header_file );
-
-#endif
-
 int map2h(
    struct TILEMAP* t, FILE* header_file, int map_idx
 ) {
@@ -70,31 +32,6 @@ int map2h(
 
       /* Blank out the filename extension. */
       t->tileset[i].image[strlen( t->tileset[i].image ) - 4] = '\0';
-
-      /* Get resource ID for tile image. */
-      /* This assumes map2h was compiled with RESOURCE_FILE. */
-      #if 0
-      res_idx = -1;
-      for( j = res_list_sz - 1 ; 0 <= j ; j-- ) {
-         res_basename_idx = dio_basename(
-            res_list_names[j], strlen( res_list_names[j] ) );
-         printf( "%d out of %d: %s vs %s\n",
-            j,
-            res_list_sz,
-            &(res_list_names[j][res_basename_idx]),
-            &(t->tileset[i].image[ts_basename_idx]) );
-         if( 0 == strncmp(
-            &(res_list[j][res_basename_idx]),
-            &(t->tileset[i].image[ts_basename_idx]),
-            strlen( res_list_names[j] ) - res_basename_idx - 4 /* Extension */
-         ) ) {
-            res_idx = j;
-            printf( "found: %d (%s)\n", res_idx,
-               &(res_list_names[res_idx][res_basename_idx]) );
-            break;
-         }
-      }
-      #endif
 
       fprintf( header_file, "      {\n" );
 
@@ -154,12 +91,6 @@ int map2h(
       fprintf( header_file, "         %d,\n", t->spawns[i].type );
 
       /* script */
-      /*fprintf( header_file, "         {\n" );
-      for( j = 0 ; MOBILE_SCRIPT_STEPS_MAX > j ; j++ ) {
-         fprintf( header_file, "            { %d, %d },\n",
-            t->spawns[i].script[j].action, t->spawns[i].script[j].arg );
-      }
-      fprintf( header_file, "         },\n" ); */
       fprintf( header_file, "         /* script_id */\n" );
       fprintf( header_file, "         %d\n", t->spawns[i].script_id );
 

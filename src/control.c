@@ -43,16 +43,6 @@ static void control_draw_text(
 ) {
 
    assert( NULL != c );
-   assert( w->x < SCREEN_W );
-   assert( w->y < SCREEN_H );
-   assert( c->x < SCREEN_W );
-   assert( c->y < SCREEN_H );
-   assert( w->x + c->x < SCREEN_W );
-   assert( w->y + c->y < SCREEN_H );
-   assert( w->x >= 0 );
-   assert( w->y >= 0 );
-   /*assert( c->x >= 0 ); */
-   assert( c->y >= 0 );
 
    graphics_string_at( 
       str, str_sz,
