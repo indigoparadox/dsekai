@@ -3,10 +3,10 @@
 
 #ifdef PLATFORM_WIN32
 #include "../gen/win32/resext.h"
-#include "../gen/win32/win32.rc"
+#include "../gen/win32/win.rc"
 #elif defined( PLATFORM_WIN16 )
 #include "../gen/win16/resext.h"
-#include "../gen/win16/win16.rc"
+#include "../gen/win16/win.rc"
 #endif /* PLATFORM_WIN16, PLATFORM_WIN32 */
 
 #include "winstat.h"

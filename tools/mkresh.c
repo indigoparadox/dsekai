@@ -11,6 +11,7 @@
 #define STATE_OUTRES    3
 #define STATE_FMT       4
 #define STATE_ID        5
+#define STATE_STYPES    6
 
 #define FMT_PALM        1
 #define FMT_WIN16       2
@@ -46,6 +47,7 @@ int main( int argc, char* argv[] ) {
       extension_idx = 0;
    char* header_name = NULL,
       * file_list[FILE_LIST_MAX],
+      * stypes_list[FILE_LIST_MAX],
       * file_basename_list[FILE_LIST_MAX],
       * string_name_list[FILE_LIST_MAX],
       * string_list[FILE_LIST_MAX],
@@ -53,7 +55,8 @@ int main( int argc, char* argv[] ) {
    const char* res_type = NULL;
    char namebuf_header[NAMEBUF_MAX + 1],
       namebuf_res[NAMEBUF_MAX + 1];
-   size_t file_list_len = 0;
+   size_t file_list_len = 0,
+      stypes_list_len = 0;
    FILE * header_file = NULL,
       * res_file = NULL,
       * string_file = NULL;
@@ -79,6 +82,21 @@ int main( int argc, char* argv[] ) {
          assert( NULL != file_list[file_list_len] );
          strncpy( file_list[file_list_len], argv[i], filename_len );
          file_list_len++;
+         break;
+
+      case STATE_STYPES:
+         if( '-' == argv[i][0] ) {
+            /* Ignoretypes don't start with -. */
+            state = 0;
+            break;
+         }
+         assert( NULL == stypes_list[stypes_list_len] );
+         assert( stypes_list_len < FILE_LIST_MAX );
+         filename_len = strlen( argv[i] );
+         stypes_list[stypes_list_len] = calloc( filename_len + 1, 1 );
+         assert( NULL != stypes_list[stypes_list_len] );
+         strncpy( stypes_list[stypes_list_len], argv[i], filename_len );
+         stypes_list_len++;
          break;
 
       case STATE_OUTHEADER:
@@ -119,11 +137,15 @@ int main( int argc, char* argv[] ) {
             state = STATE_FMT;
          } else if( 0 == strncmp( argv[i], "-i", 2 ) ) {
             state = STATE_ID;
+         } else if( 0 == strncmp( argv[i], "-s", 2 ) ) {
+            state = STATE_STYPES;
          }
       }
    }
 
    assert( 0 != fmt );
+
+   /* TODO: Encode files that aren't in (s)parsetypes, like in headpack. */
 
    for( i = 0 ; file_list_len > i ; i++ ) {
       filename_len = strlen( file_list[i] );
@@ -187,7 +209,7 @@ int main( int argc, char* argv[] ) {
 
          if( 0 == strncmp( &(file_list[i][extension_idx]), "bmp", 3 ) ) {
             rtype = RTYPE_BITMAP;
-         } else if( 0 == strncmp( &(file_list[i][extension_idx]), "jso", 3 ) ) {
+         } else if( 0 == strncmp( &(file_list[i][extension_idx]), "js", 2 ) ) {
             rtype = RTYPE_JSON;
          }
 

@@ -123,11 +123,11 @@ CFLAGS_OPT :=
 ifeq ($(RESOURCE),FILE)
 CFLAGS_OPT += -DRESOURCE_FILE
 CFLAGS_OPT += -DASSETS_PATH="\"$(ASSETPATH)\""
-DSEKAI_C_FILES += unilayer/resource/file.c src/json.c
+DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c
 else
-RESOURCE := HEADER
+RESOURCE := DEFAULT
 CFLAGS_OPT += -DRESOURCE_HEADER
-DSEKAI_C_FILES += unilayer/resource/header.c
+DSEKAI_C_FILES_RES := unilayer/resource/header.c
 endif
 
 define BITMAPS_RULE
@@ -204,15 +204,42 @@ $(GENDIR)/%/$(STAMPFILE):
 
 define RESEXT_H_RULE
 
-ifeq ($$(RESOURCE),HEADER)
-$(GENDIR)/$(platform)/resext.h: $(resources) | \
-$(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
-	$(HEADPACK) $$@ $$^
-else ifeq ($(RESOURCE),FILE)
-$(GENDIR)/$(platform)/resext.h: $(resources) | \
-$(GENDIR)/$(platform)/$(STAMPFILE) $(MKRESH)
-	$(MKRESH) -f file -if $$^ -oh $$@
-endif
+   ifeq ($$(RESOURCE),HEADER)
+
+      # Header was specified explicitly.
+
+      $(GENDIR)/$(platform)/resext.h: $(resources) | \
+      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
+			$(HEADPACK) $$@ $$^
+
+   else ifeq ($(RESOURCE),FILE)
+
+      # File was specified explicitly.
+
+      $(GENDIR)/$(platform)/resext.h: $(resources) | \
+      $(GENDIR)/$(platform)/$(STAMPFILE) $(MKRESH)
+			$(MKRESH) -f file -s bmp jsn cga -if $$^ -oh $$@
+
+   else ifeq ($(RESOURCE)$(findstring win,$(platform)),DEFAULTwin)
+
+      # For windows, default to Windows resources.
+
+      $(GENDIR)/$(platform)/win.rc \
+      $(GENDIR)/$(platform)/resext.h: $(resources) | \
+      $(MKRESH) $(GENDIR)/$(platform)/$(STAMPFILE)
+			$(MKRESH) -f win16 -i 5001 -s bmp cga \
+            -if $$^ \
+            -oh $(GENDIR)/$(platform)/resext.h \
+            -or $(GENDIR)/$(platform)/win.rc
+   else
+
+      # For all other platforms, default to header.
+
+      $(GENDIR)/$(platform)/resext.h: $(resources) | \
+      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
+			$(HEADPACK) $$@ $$^
+
+   endif
 
 endef
 
@@ -259,7 +286,8 @@ DSEKAI_C_FILES_SDL_ONLY := \
 
 DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY)))
+   $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY))) \
+   $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
 # 3. Programs
 
@@ -324,7 +352,8 @@ LDFLAGS_XLIB := -g -lX11 $(CFLAGS_DEBUG_GCC)
 
 DSEKAI_O_FILES_XLIB := \
    $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES_XLIB_ONLY)))
+   $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES_XLIB_ONLY))) \
+   $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
 # 5. Targets
 
@@ -370,7 +399,8 @@ DSEKAI_ASSETS_DOS_CGA := \
 
 DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY)))
+   $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY))) \
+   $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
 # 3. Programs
 
@@ -531,37 +561,33 @@ RCFLAGS_WIN16 := -r -DPLATFORM_WIN16 -i $(INCLUDE)win
 
 # 5. Targets
 
+platform := win16
+resources := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS)
+$(eval $(RESEXT_H_RULE))
+
 $(BINDIR)/$(DSEKAI)16.img: $(BIN_WIN16)
 	$(DD) if=/dev/zero bs=512 count=2880 of="$@"
 	$(MKFSVFAT) "$@"
 	$(MCOPY) -i "$@" $< ::$(DSEKAI)16.exe
 
 $(BIN_WIN16): \
-$(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win16.res | \
-$(BINDIR)/$(STAMPFILE) $(DSEKAI_ASSETS_MAPS_WIN16)
+$(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win.res | \
+$(BINDIR)/$(STAMPFILE)
 	$(LD_WIN16) $(LDFLAGS_WIN16) -fe=$@ $^
 
-$(OBJDIR_WIN16)/win16.res: \
-src/winstat.rc $(GENDIR_WIN16)/win16.rc $(ASSETDIR)/$(DSEKAI).ico | \
+$(OBJDIR_WIN16)/win.res: \
+src/winstat.rc $(GENDIR_WIN16)/win.rc $(ASSETDIR)/$(DSEKAI).ico | \
 $(OBJDIR_WIN16)/$(STAMPFILE)
 	$(RC_WIN16) $(RCFLAGS_WIN16) $< -o $@
 
-$(GENDIR_WIN16)/win16.rc \
-$(GENDIR_WIN16)/resext.h: $(DSEKAI_ASSETS_BITMAPS_16x16x4) | \
-$(MKRESH) $(GENDIR_WIN16)/$(STAMPFILE)
-	$(MKRESH) -f win16 -i 5001 \
-      -if $^ \
-      -oh $(GENDIR_WIN16)/resext.h -or $(GENDIR_WIN16)/win16.rc
-
-$(OBJDIR_WIN16)/%.o: \
-%.c $(OBJDIR_WIN16)/win16.res $(GENDIR_WIN16)/resext.h $(DSEKAI_ASSETS_MAPS_WIN16)
+$(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win.res $(GENDIR_WIN16)/resext.h
 	$(MD) $(dir $@)
 	$(CC_WIN16) $(CFLAGS_WIN16) -fo=$@ $(<:%.c=%)
 
-$(DEPDIR_WIN16)/%.d: %.c $(GENDIR_WIN16)/resext.h $(DSEKAI_ASSETS_MAPS_WIN16)
-	$(MD) $(dir $@)
-	$(HOST_CC) -DPLATFORM_WIN16 -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN16)/,$<)) -MF $@ || touch $@
+#$(DEPDIR_WIN16)/%.d: %.c $(GENDIR_WIN16)/resext.h $(DSEKAI_ASSETS_MAPS_WIN16)
+#	$(MD) $(dir $@)
+#	$(HOST_CC) -DPLATFORM_WIN16 -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN16)/,$<)) -MF $@ || touch $@
 
 #include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN16:.o=.d))
 
@@ -606,25 +632,25 @@ RCFLAGS_WIN32 := -r -DPLATFORM_WIN32 -i $(INCLUDE)win
 # 5. Targets
 
 $(BIN_WIN32): \
-$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win32.res | \
+$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | \
 $(BINDIR)/$(STAMPFILE) $(DSEKAI_ASSETS_MAPS_WIN32)
 	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
 
-$(OBJDIR_WIN32)/win32.res: \
-src/winstat.rc $(GENDIR_WIN32)/win32.rc $(ASSETDIR)/$(DSEKAI).ico | \
+$(OBJDIR_WIN32)/win.res: \
+src/winstat.rc $(GENDIR_WIN32)/win.rc $(ASSETDIR)/$(DSEKAI).ico | \
 $(OBJDIR_WIN32)/$(STAMPFILE)
 	$(RC_WIN32) $(RCFLAGS_WIN32) $< -o $@
 
-$(GENDIR_WIN32)/win32.rc \
+$(GENDIR_WIN32)/win.rc \
 $(GENDIR_WIN32)/resext.h: \
 $(DSEKAI_ASSETS_BITMAPS_16x16x4) | \
 $(MKRESH) $(GENDIR_WIN32)/$(STAMPFILE)
-	$(MKRESH) -f win16 -i 5001 \
+	$(MKRESH) -f win16 -i 5001 -s bmp \
       -if $^ \
-      -oh $(GENDIR_WIN32)/resext.h -or $(GENDIR_WIN32)/win32.rc
+      -oh $(GENDIR_WIN32)/resext.h -or $(GENDIR_WIN32)/win.rc
 
 $(OBJDIR_WIN32)/%.o: \
-%.c $(OBJDIR_WIN32)/win32.res $(GENDIR_WIN32)/resext.h $(DSEKAI_ASSETS_MAPS_WIN32)
+%.c $(OBJDIR_WIN32)/win.res $(GENDIR_WIN32)/resext.h $(DSEKAI_ASSETS_MAPS_WIN32)
 	$(MD) $(dir $@)
 	$(CC_WIN32) $(CFLAGS_WIN32) -fo=$@ $(<:%.c=%)
 
@@ -664,7 +690,8 @@ DSEKAI_ASSETS_MAPS_MAC6 := \
 
 DSEKAI_O_FILES_MAC6 := \
    $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC6_ONLY)))
+   $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC6_ONLY))) \
+   $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
 # 3. Programs
 
@@ -740,7 +767,8 @@ DSEKAI_ASSETS_MAPS_NDS := \
 
 DSEKAI_O_FILES_NDS := \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY)))
+   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY))) \
+   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
 # 3. Programs
 
@@ -805,7 +833,8 @@ DSEKAI_C_FILES_WEB_ONLY := \
 
 DSEKAI_O_FILES_WEB := \
    $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES_WEB_ONLY)))
+   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES_WEB_ONLY))) \
+   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
 # 3. Programs
 
@@ -858,7 +887,8 @@ DSEKAI_C_FILES_CURSES_ONLY := \
 
 DSEKAI_O_FILES_CURSES := \
    $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES_CURSES_ONLY)))
+   $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES_CURSES_ONLY))) \
+   $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
 # 3. Programs
 
@@ -901,7 +931,8 @@ GENDIR_SDL_ARM := $(GENDIR)/sdlarm
 
 DSEKAI_O_FILES_SDL_ARM := \
    $(addprefix $(OBJDIR_SDL_ARM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_SDL_ARM)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY)))
+   $(addprefix $(OBJDIR_SDL_ARM)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY))) \
+   $(addprefix $(OBJDIR_SDL_ARM)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
 # 3. Programs
 
