@@ -513,7 +513,7 @@ AS_PALM := m68k-palmos-as
 PILRC := pilrc
 OBJRES := m68k-palmos-obj-res
 BUILDPRC := build-prc
-MULTIGEN := m68k-palmos-multigen
+#MULTIGEN := m68k-palmos-multigen
 
 # 4. Arguments
 
@@ -521,7 +521,7 @@ CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include
 
 LDFLAGS_PALM := -g $(CFLAGS_PALM)
 
-DEF_PALM := src/mulipalm.def
+#DEF_PALM := src/mulipalm.def
 
 APPID := DSEK
 
@@ -539,7 +539,7 @@ $(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_PALM)/$(STAMPFILE)
 grc_palm: $(OBJDIR_PALM)/$(DSEKAI)
 	cd $(OBJDIR_PALM) && $(OBJRES) $(DSEKAI)
 
-$(OBJDIR_PALM)/$(DSEKAI): $(DSEKAI_O_FILES_PALM) $(OBJDIR_PALM)/mulipalm.o
+$(OBJDIR_PALM)/$(DSEKAI): $(DSEKAI_O_FILES_PALM)
 	#$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@ $(GENDIR_PALM)/mulipalm.ld
 	$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@
 	
@@ -547,12 +547,12 @@ $(OBJDIR_PALM)/bin$(STAMPFILE): src/palms.rcp $(GENDIR_PALM)/palmd.rcp
 	$(PILRC) $< $(OBJDIR_PALM)
 	touch $@
 
-$(OBJDIR_PALM)/mulipalm.o: $(GENDIR_PALM)/mulipalm.s
-	$(MD) $(dir $@)
-	$(AS_PALM) -o $@ $<
+#$(OBJDIR_PALM)/mulipalm.o: $(GENDIR_PALM)/mulipalm.s
+#	$(MD) $(dir $@)
+#	$(AS_PALM) -o $@ $<
 
-$(GENDIR_PALM)/mulipalm.ld $(GENDIR_PALM)/mulipalm.s: $(DEF_PALM) | $(GENDIR_PALM)
-	$(MULTIGEN) -b $(GENDIR_PALM)/mulipalm $<
+#$(GENDIR_PALM)/mulipalm.ld $(GENDIR_PALM)/mulipalm.s: $(DEF_PALM) | $(GENDIR_PALM)
+#	$(MULTIGEN) -b $(GENDIR_PALM)/mulipalm $<
 
 $(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
 	#$(BUILDPRC) -o $@ $(DEF_PALM) $(OBJDIR_PALM)/$(DSEKAI) $(OBJDIR_PALM)/*.bin

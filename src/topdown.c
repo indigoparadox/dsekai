@@ -132,6 +132,11 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    int retval = 1;
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
+   if( NULL == state ) {
+      error_printf( "unable to lock state" );
+      retval = 0;
+      goto cleanup;
+   }
 
    if( !initialized ) {
 
@@ -143,7 +148,11 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          goto cleanup;
       }
       map = memory_lock( state->map );
-      assert( NULL != map );
+      if( NULL == map ) {
+         error_printf( "unable to lock map" );
+         retval = 0;
+         goto cleanup;
+      }
 
       assert( (MEMORY_HANDLE)NULL == state->mobiles );
       state->mobiles = memory_alloc( sizeof( struct MOBILE ), MOBILES_MAX );
@@ -153,7 +162,11 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          goto cleanup;
       }
       mobiles = memory_lock( state->mobiles );
-      assert( NULL != mobiles );
+      if( NULL == mobiles ) {
+         error_printf( "unable to lock mobiles" );
+         retval = 0;
+         goto cleanup;
+      }
 
       assert( (MEMORY_HANDLE)NULL == state->items );
       state->items = memory_alloc( sizeof( struct ITEM ), ITEMS_MAX );
@@ -163,13 +176,19 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          goto cleanup;
       }
       items = (struct ITEM*)memory_lock( state->items );
-      assert( NULL != items );
+      if( NULL == items ) {
+         error_printf( "unable to lock items" );
+         retval = 0;
+         goto cleanup;
+      }
 
 #ifdef RESOURCE_FILE
       tilemap_load( m_field, map );
 #else
+      debug_printf( 3, "gc_map_field: %s", gc_map_field.name );
       memory_copy_ptr( (MEMORY_PTR)map, (MEMORY_PTR)&gc_map_field,
          sizeof( struct TILEMAP ) );
+
 #endif /* RESOURCE_FILE */
 
       tilemap_refresh_tiles( map );

@@ -16,9 +16,22 @@ int map2h(
       res_basename_idx = 0,
       ts_basename_idx = 0;
 
+   /* For some reason, declaring this as const crashes Palm with unallocated
+    * error? */
+
+   fprintf( header_file, "#ifdef PLATFORM_PALM\n" );
+
+   /* TODO: strtolower? */
+   fprintf( header_file, "struct TILEMAP gc_map_%s = {\n",
+      t->name );
+
+   fprintf( header_file, "#else\n" );
+   
    /* TODO: strtolower? */
    fprintf( header_file, "const struct TILEMAP gc_map_%s = {\n",
       t->name );
+
+   fprintf( header_file, "#endif\n" );
    
    /* name */
    fprintf( header_file, "   \"%s\",\n", t->name );

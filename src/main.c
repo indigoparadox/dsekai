@@ -102,10 +102,12 @@ unilayer_main() {
       return 1;
 #endif /* DISABLE_MAIN_PARMS */
    }
+#ifndef PLATFORM_PALM
    while( state->windows_count > 0 ) {
       window_pop( 0, state );
    }
    memory_free( state->windows_handle );
+#endif /* !PLATFORM_PALM */
    state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
 
    memory_free( g_state_handle );
