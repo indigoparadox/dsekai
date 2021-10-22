@@ -42,11 +42,6 @@ struct PACKED MOBILE {
 /*! \brief MOBILE::dir indicating left direction for movement/animation. */
 #define MOBILE_DIR_WEST    3
 
-#define MOBILE_TYPE_PLAYER    1
-#define MOBILE_TYPE_PRINCESS  2
-#define MOBILE_TYPE_FOUNTAIN  3
-#define MOBILE_TYPE_RASPTOR   4
-
 /**
  * \brief Have the given MOBILE attempt to begin walking movement/animation.
  * \param m ::MEMORY_PTR to MOBILE that should attempt moving.
