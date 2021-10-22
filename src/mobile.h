@@ -62,10 +62,21 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
 struct MOBILE* mobile_get_facing(
    struct MOBILE* m, struct MOBILE ms[], int ms_sz );
 
+/**
+ * \brief Force a ::MOBILE to jump to the SCRIPT_ACTION_INTERACT in its
+ *        ::SCRIPT.
+ * \param actor ::MEMORY_PTR to the MOBILE sending the interact call.
+ * \param actee ::MEMORY_PTR to the MOBILE which should jump the interaction.
+ * \param t ::MEMORY_PTR to the currently loaded TILEMAP.
+ */
 struct MOBILE* mobile_interact(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t );
-void mobile_interact_txy( struct MOBILE*, struct MOBILE*, uint16_t, uint16_t );
-void mobile_state_animate( struct DSEKAI_STATE* );
+
+/**
+ * \brief Map ::MOBILE animation frames to a number of real frames elapsed.
+ * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
+ */
+void mobile_state_animate( struct DSEKAI_STATE* state );
 
 /**
  * \brief Perform animation frame for the given MOBILE.
@@ -84,10 +95,32 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t );
 void mobile_draw(
    struct MOBILE* m, const struct DSEKAI_STATE* state,
    int16_t screen_x, int16_t screen_y );
+
+/**
+ * \brief Prepare a ::MOBILE for deallocation.
+ * \param t ::MEMORY_PTR to a ::MOBILE to deinitialize.
+ */
 void mobile_deinit( struct MOBILE* );
+
+/**
+ * \brief Get the MOBILE being faced by a given MOBILE if there is one.
+ * \param m ::MEMORY_PTR to a MOBILE on which to center the search.
+ * \param mobiles Array of MOBILE objects currently loaded.
+ * \param mobiles_sz Size of mobiles array.
+ * \return ::MEMORY_PTR to MOBILE being faced if one found, or NULL otherwise.
+ */
 struct MOBILE* mobile_get_dir(
    struct MOBILE* m, struct MOBILE mobiles[], int mobiles_sz );
-void mobile_execute( struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state );
+
+/**
+ * \brief Execute the next available ::SCRIPT_STEP in the currently running
+ *        ::SCRIPT on a MOBILE.
+ * \param m ::MEMORY_PTR to the MOBILE running the desired ::SCRIPT.
+ * \param t Currently loaded ::TILEMAP.
+ * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
+ */
+void mobile_execute(
+   struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state );
 
 #ifdef MOBILE_C
 const int8_t gc_mobile_step_table_normal_pos[16] = {

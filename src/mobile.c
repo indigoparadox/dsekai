@@ -84,8 +84,7 @@ struct MOBILE* mobile_interact(
 
    /* TODO: Workshop this. */
 
-   /* TODO: Store mobile previous PC? */
-
+   /* Store mobile previous PC for return. */
    actee->script_pc_prev = actee->script_pc;
    actee->script_pc = script_goto_label(
       actee->script_pc, &(t->scripts[actee->script_id]),

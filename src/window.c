@@ -310,9 +310,6 @@ cleanup:
    windows = (struct WINDOW*)memory_unlock( state->windows_handle );
 }
 
-/**
- * \return 0 if no modal windows showing, 1+ otherwise.
- */
 int16_t window_modal( struct DSEKAI_STATE* state ) {
    int i = 0;
    struct WINDOW* windows = NULL;

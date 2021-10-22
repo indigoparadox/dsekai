@@ -6,12 +6,19 @@
  *  \brief Tools for drawing and interacting with graphical windows on-screen.
  */
 
+/*! \brief WINDOW::x or WINDOW::y value indicating the system should do its
+ *         best to center the WINDOW onscreen.
+ */
 #define WINDOW_CENTERED -1
 
+/*! \brief Maximum number of windows that can be onscreen at one time. */
 #define WINDOW_COUNT_MAX 10
 
+/*! \brief Recommended WINDOW::id for the welcome window. */
 #define WINDOW_ID_WELCOME 0x1212
+/*! \brief Recommended WINDOW::id for the status window. */
 #define WINDOW_ID_STATUS 0x111
+/*! \brief Recommended WINDOW::id for a script speech window. */
 #define WINDOW_ID_SCRIPT_SPEAK 0x897
 
 /*! \brief WINDOW::status indicating window is hidden/inactive. */
@@ -48,6 +55,7 @@ struct WINDOW_FRAME {
    RESOURCE_ID c;
 };
 
+/*! \brief Struct representing an on-screen graphical window. */
 struct WINDOW {
    /*! \brief Unique identifier used to find this window in the global stack. */
    uint32_t id;
@@ -76,6 +84,16 @@ struct WINDOW {
 
 #else
 
+/**
+ * \brief Convenience macro for creating a dialog ::WINDOW with a sprite and
+ *        text string specified from TILEMAP::strings.
+ * \image html windowsp.png
+ * \param id WINDOW::id for this window.
+ * \param dialog Index of the string to display from TILEMAP::strings.
+ * \param sprite RESOURCE_ID of the GRAPHICS_BITMAP to display in this window.
+ * \param state Current global ::DSEKAI_STATE.
+ * \param state ::MEMORY_PTR to the global engine ::DSEKAI_STATE.
+ */
 #define window_prefab_dialog( id, dialog, sprite, state, t ) window_push( id, WINDOW_STATUS_MODAL, WINDOW_CENTERED, WINDOW_CENTERED, 160, 64, 0, state ); control_push( 0x2323, CONTROL_TYPE_LABEL_T, CONTROL_STATE_ENABLED, -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1, dialog, 0, id, state, t->strings, t->strings_count, t->string_szs ); control_push( 0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED, -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1, 0, sprite, id, state, t->strings, t->strings_count, t->string_szs ); 
 
 #endif /* PLATFORM_PALM */
@@ -89,20 +107,32 @@ int window_draw_all(
 
 /**
  * \brief Push a new window onto the global window stack.
- * \param id A unique identifier for the window being pushed.
- * \param status
+ * \param id WINDOW::id for the window being pushed.
+ * \param status Initial WINDOW::status for the window being pushed.
  * \param x The left horizontal offset of the window in pixels.
  * \param y The top vertical offset of the window in pixels.
  * \param w The width of the window in pixels.
  * \param h The height of the window in pixels.
  * \param frame_idx The index of the window frame to use.
- * \param state ::MEMORY_PTR to the global engine state.
+ * \param state ::MEMORY_PTR to the global engine ::DSEKAI_STATE.
  */
 int16_t window_push(
    uint32_t id, uint8_t status,
    int16_t x, int16_t y, int16_t w, int16_t h, uint8_t frame_idx,
    struct DSEKAI_STATE* state );
-void window_pop( uint32_t, struct DSEKAI_STATE* );
+
+/**
+ * \brief Destroy the top-most onscreen WINDOW with the given WINDOW::id.
+ * \param id WINDOW::id to search for and eliminate.
+ * \param state ::MEMORY_PTR to the global engine ::DSEKAI_STATE.
+ */
+void window_pop( uint32_t id, struct DSEKAI_STATE* state );
+
+/**
+ * \brief Determine if there is a WINDOW_STATUS_MODAL WINDOW on-screen.
+ * \param state ::MEMORY_PTR to the global engine ::DSEKAI_STATE.
+ * \return 0 if no modal windows showing, 1+ otherwise.
+ */
 int16_t window_modal( struct DSEKAI_STATE* );
 
 #endif /* WINDOW_H */

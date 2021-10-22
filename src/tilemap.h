@@ -142,7 +142,7 @@ uint8_t tilemap_collide(
 
 /**
  * \brief Prepare a TILEMAP for deallocation.
- * \param t TILEMAP to deinitialize.
+ * \param t ::MEMORY_PTR to a TILEMAP to deinitialize.
  */
 void tilemap_deinit( struct TILEMAP* );
 
