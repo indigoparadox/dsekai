@@ -14,36 +14,66 @@
  "tiles":[
         {
          "id":0,
-         "image":"16x16x4/t_grass.bmp",
+         "image":"16x16x4\/t_grass.bmp",
          "imageheight":16,
-         "imagewidth":16
+         "imagewidth":16,
+         "properties":[
+                {
+                 "name":"flags",
+                 "type":"int",
+                 "value":0
+                }]
         }, 
         {
          "id":1,
-         "image":"16x16x4/t_brick.bmp",
+         "image":"16x16x4\/t_brick.bmp",
          "imageheight":16,
-         "imagewidth":16
+         "imagewidth":16,
+         "properties":[
+                {
+                 "name":"flags",
+                 "type":"int",
+                 "value":1
+                }]
         }, 
         {
          "id":2,
-         "image":"16x16x4/t_tree.bmp",
+         "image":"16x16x4\/t_tree.bmp",
          "imageheight":16,
          "imagewidth":16,
-         "probability":0.0500000007450581
+         "probability":0.0500000007450581,
+         "properties":[
+                {
+                 "name":"flags",
+                 "type":"int",
+                 "value":1
+                }]
         }, 
         {
          "id":3,
-         "image":"16x16x4/t_pillar.bmp",
+         "image":"16x16x4\/t_pillar.bmp",
          "imageheight":16,
          "imagewidth":16,
-         "probability":0.00100000004749745
+         "probability":0.00100000004749745,
+         "properties":[
+                {
+                 "name":"flags",
+                 "type":"int",
+                 "value":1
+                }]
         }, 
         {
          "id":4,
-         "image":"16x16x4/t_pool.bmp",
+         "image":"16x16x4\/t_pool.bmp",
          "imageheight":16,
          "imagewidth":16,
-         "probability":0.00999999977648258
+         "probability":0.00999999977648258,
+         "properties":[
+                {
+                 "name":"flags",
+                 "type":"int",
+                 "value":1
+                }]
         }],
  "tilewidth":16,
  "type":"tileset",
