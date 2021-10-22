@@ -193,23 +193,11 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          mobiles[i].script_id = map->spawns[i].script_id;
          mobiles[i].script_pc = 0;
          mobiles[i].script_next_ms = graphics_get_ms();
+         mobiles[i].active = 1;
+         resource_assign_id( mobiles[i].sprite, map->spawns[i].type );
          state->mobiles_count++;
-         switch( map->spawns[i].type ) {
-         case MOBILE_TYPE_PLAYER:
-            mobiles[i].active = 1;
+         if( 0 == strncmp( "player", map->spawns[i].name, 6 ) ) {
             state->player_idx = i;
-            debug_printf( 3, "spawning: %d", s_robe );
-            resource_assign_id( mobiles[i].sprite, s_robe );
-            break;
-
-         case MOBILE_TYPE_PRINCESS:
-            mobiles[i].active = 1;
-            debug_printf( 3, "spawning: %d", s_pncess );
-            resource_assign_id( mobiles[i].sprite, s_pncess );
-            break;
-
-         default:
-            break;
          }
       }
 

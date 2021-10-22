@@ -8,51 +8,65 @@
 
 int16_t tilemap_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
-   struct jsmntok* tokens, uint16_t tokens_sz, char* json_buffer,
-   char* iter_path, uint16_t iter_path_sz
+   struct jsmntok* tokens, uint16_t tokens_sz,
+   char* json_buffer, uint16_t json_buffer_sz,
+   RESOURCE_ID map_path
 ) {
    struct TILEMAP_SPAWN* spawn = (struct TILEMAP_SPAWN*)&(t->spawns[spawn_idx]);
-   char spawn_buffer[TILEMAP_SPAWN_T_MAX];
-   int16_t spawn_buffer_sz = 0;
+   char spawn_buffer[RESOURCE_PATH_MAX];
+   char iter_path[JSON_PATH_SZ];
+   int16_t spawn_buffer_sz = 0,
+      str_sz = 0;
 
-   dio_snprintf( iter_path, iter_path_sz, TILEMAP_JPATH_MOB_NAME, spawn_idx );
-   spawn_buffer_sz = json_str_from_path(
+   /* Prepend asset path. */
+
+   spawn_buffer_sz = tilemap_fix_asset_path(
+      spawn_buffer, RESOURCE_PATH_MAX, map_path );
+
+   /* Parse Sprite */
+
+   dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_TYPE, spawn_idx );
+   str_sz = json_str_from_path(
       iter_path, JSON_PATH_SZ,
-      spawn_buffer, TILEMAP_SPAWN_T_MAX, tokens, tokens_sz, json_buffer );
+      &(spawn_buffer[spawn_buffer_sz]),
+      RESOURCE_PATH_MAX - spawn_buffer_sz,
+      tokens, tokens_sz, json_buffer );
+   spawn_buffer_sz += str_sz;
 
-   if( 0 > spawn_buffer_sz ) {
-      error_printf( "unable to parse mobile name" );
+   if( 0 >= str_sz ) {
+      error_printf( "could not parse mobile: %d", spawn_idx );
       return 0;
    }
 
-   /* Parse Type */
-   /* XXX */
-   if( 0 == memory_strncmp_ptr( "player", spawn_buffer, 6 ) ) {
-      spawn->type = MOBILE_TYPE_PLAYER;
-   } else if( 0 == memory_strncmp_ptr( "princess", spawn_buffer, 8 ) ) {
-      spawn->type = MOBILE_TYPE_PRINCESS;
-   }
+   resource_assign_id( spawn->type, spawn_buffer );
+
+   /* Parse Name */
+   dio_snprintf(
+      iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_NAME, spawn_idx );
+   json_str_from_path(
+      iter_path, JSON_PATH_SZ,
+      spawn->name, TILEMAP_SPAWN_N_MAX, tokens, tokens_sz, json_buffer );
 
    /* Parse X */
    dio_snprintf(
-      iter_path, iter_path_sz, TILEMAP_JPATH_MOB_X, spawn_idx );
+      iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_X, spawn_idx );
    spawn->coords.x = json_int_from_path(
-      iter_path, iter_path_sz, &(tokens[0]), tokens_sz, json_buffer );
+      iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
    spawn->coords.x /= TILE_W;
 
    /* Parse Y */
    dio_snprintf(
-      iter_path, iter_path_sz, TILEMAP_JPATH_MOB_Y, spawn_idx );
+      iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_Y, spawn_idx );
    spawn->coords.y = json_int_from_path(
-      iter_path, iter_path_sz, &(tokens[0]), tokens_sz, json_buffer );
+      iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
    spawn->coords.y /= TILE_H;
 
    /* Parse Script */
    spawn->script_id = -1;
    dio_snprintf(
-      iter_path, iter_path_sz, TILEMAP_JPATH_MOB_SCRIPT, spawn_idx );
+      iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_SCRIPT, spawn_idx );
    spawn->script_id = json_int_from_path(
-      iter_path, iter_path_sz, &(tokens[0]), tokens_sz, json_buffer );
+      iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
 
    if( spawn->script_id  >= TILEMAP_SCRIPTS_MAX ) {
       error_printf( "mobile uses script ID beyond maximum available!" );
@@ -60,10 +74,10 @@ int16_t tilemap_parse_spawn(
    } else if( spawn->script_id >= t->scripts_count ) {
       /* Attempt to load the script, since it was referenced. */
       dio_snprintf(
-         iter_path, iter_path_sz, TILEMAP_JPATH_SCRIPT, spawn->script_id );
+         iter_path, JSON_PATH_SZ, TILEMAP_JPATH_SCRIPT, spawn->script_id );
       spawn_buffer[0] = '\0';
       spawn_buffer_sz = json_str_from_path(
-         iter_path, iter_path_sz,
+         iter_path, JSON_PATH_SZ,
          spawn_buffer, TILEMAP_SPAWN_T_MAX,
          &(tokens[0]), tokens_sz, json_buffer );
       script_parse_str( spawn_buffer, spawn_buffer_sz,
@@ -182,16 +196,6 @@ int16_t tilemap_parse(
             t->strings[t->strings_count], string_sz_tmp );
          t->string_szs[t->strings_count] = string_sz_tmp;
       }
-   }
-
-   debug_printf( 2, "loading spawns" ); 
-   while( tilemap_parse_spawn(
-      t, t->spawns_count, tokens, tokens_sz, json_buffer,
-      iter_path, JSON_PATH_SZ
-   ) ) {
-      
-      /* Iterate to the next spawn. */
-      t->spawns_count++;
    }
 
    return 1;
@@ -367,9 +371,19 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
       goto cleanup;
    }
 
+   debug_printf( 2, "loading tilegrid" ); 
    retval = tilemap_json_tilegrid(
       t, TILEMAP_JPATH_TILE, json_buffer, json_buffer_sz,
       tokens, tok_parsed );
+
+   debug_printf( 2, "loading spawns" ); 
+   while( tilemap_parse_spawn(
+      t, t->spawns_count, tokens, tok_parsed, json_buffer, json_buffer_sz, id
+   ) ) {
+      
+      /* Iterate to the next spawn. */
+      t->spawns_count++;
+   }
 
 cleanup:
 

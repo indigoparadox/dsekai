@@ -32,8 +32,10 @@
 #define TILEMAP_JPATH_MOB_Y      "/layers/[name=mobiles]/objects/%d/y"
 /*! \brief JSON path to mobile name. */
 #define TILEMAP_JPATH_MOB_NAME   "/layers/[name=mobiles]/objects/%d/name"
+#define TILEMAP_JPATH_MOB_TYPE   "/layers/[name=mobiles]/objects/%d/type"
 /*! \brief JSON path to mobile script index. */
 #define TILEMAP_JPATH_MOB_SCRIPT "/layers/[name=mobiles]/objects/%d/properties/[name=script]/value"
+/* #define TILEMAP_JPATH_MOB_SPRITE "/layers/[name=mobiles]/objects/%d/properties/[name=sprite]/value" */
 #define TILEMAP_JPATH_TS_TILE "/tiles/%d/image"
 #define TILEMAP_JPATH_TS_FLAGS "/tiles/%d/properties/[name=flags]/value"
 

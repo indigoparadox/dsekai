@@ -230,7 +230,9 @@ int16_t json_str_from_path(
    struct jsmntok* tokens, uint16_t tokens_sz, const char* buf
 ) {
    int16_t id = 0,
-      excerpt_sz = 0;
+      excerpt_sz = 0,
+      i_src = 0,
+      i_dest = 0;
 
    debug_printf( 1, "fetching JSON path %s...", path );
 
@@ -247,11 +249,18 @@ int16_t json_str_from_path(
       error_printf( "insufficient buffer length (need %d)", excerpt_sz );
       return 0;
    }
-   memory_copy_ptr( buffer, &(buf[tokens[id].start]), excerpt_sz );
+   /* memory_copy_ptr( buffer, &(buf[tokens[id].start]), excerpt_sz ); */
+   while( i_src < excerpt_sz && buf[tokens[id].start + i_src] != '\0' ) {
+      if( '\\' == buf[tokens[id].start + i_src] ) {
+         i_src++;
+         continue;
+      }
+      buffer[i_dest++] = buf[tokens[id].start + i_src++];
+   }
 
    /* Enforce NULL termination. */
-   buffer[excerpt_sz] = '\0';
+   buffer[i_dest] = '\0';
 
-   return excerpt_sz;
+   return i_dest;
 }
 

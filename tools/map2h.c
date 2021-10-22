@@ -79,7 +79,18 @@ int map2h(
    fprintf( header_file, "   /* spawns */\n" );
    fprintf( header_file, "   {\n" );
    for( i = 0 ; t->spawns_count > i ; i++ ) {
+      printf( "%s\n", t->spawns[i].type );
+      ts_basename_idx = dio_basename(
+         t->spawns[i].type, strlen( t->spawns[i].type ) );
+
+      /* Blank out the filename extension. */
+      t->spawns[i].type[strlen( t->spawns[i].type ) - 4] = '\0';
+
       fprintf( header_file, "      {\n" );
+
+      /* name */
+      fprintf( header_file, "         /* name */\n" );
+      fprintf( header_file, "         \"%s\",\n", t->spawns[i].name );
 
       /* coords */
       fprintf( header_file, "         /* coords */\n" );
@@ -87,8 +98,14 @@ int map2h(
          t->spawns[i].coords.x, t->spawns[i].coords.y );
 
       /* type */
-      fprintf( header_file, "         /* type */\n" );
-      fprintf( header_file, "         %d,\n", t->spawns[i].type );
+      if( 0 < strlen( t->spawns[i].type ) ) {
+         fprintf( header_file, "         /* type */\n" );
+         /* Let the preprocessor figure it out. */
+         fprintf( header_file, "         %s,\n",
+            &(t->spawns[i].type[ts_basename_idx]) );
+      } else {
+         fprintf( header_file, "         0, /* not found */\n" );
+      }
 
       /* script */
       fprintf( header_file, "         /* script_id */\n" );

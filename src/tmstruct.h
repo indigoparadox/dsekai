@@ -24,6 +24,7 @@
 #define TILEMAP_STRINGS_SZ 128
 /*! \brief Maximum number of TILEMAP::spawns. */
 #define TILEMAP_SPAWN_T_MAX 32
+#define TILEMAP_SPAWN_N_MAX 12
 /*! \brief Screen width in tiles. */
 #define SCREEN_TW (SCREEN_MAP_W / TILE_W)
 /*! \brief Screen height in tiles. */
@@ -48,12 +49,13 @@ struct PACKED TILESET_TILE {
  *  Modifications to this struct should also be reflected in tools/map2h.c.
  */
 struct PACKED TILEMAP_SPAWN {
+   char name[TILEMAP_SPAWN_N_MAX];
    /* TODO: Allow a range of coordinates in which to spawn. */
    /* TODO: Allow multiple spawns from single spawner. */
    /*! \brief Tile-based coordinates at which to spawn. */
    struct TILEMAP_COORDS coords;
    /*! \brief Mobile type to spawn. */
-   int16_t type;
+   RESOURCE_ID type;
    /*! \brief Index of TILEMAP::scripts attached to mobiles spawned. */
    int16_t script_id;
 };

@@ -75,6 +75,8 @@ void encode_generic_file( char* path, int id, FILE* header ) {
       /* Subtract 1 since this is argv (program name and output header args),
        * but we index from 1. */
       id - 1 );
+
+   fprintf( header, "   /* %s */\n", path );
    
    /* Translate each byte into a hex number in the output header. */
    while( 0 < (read = fread( bin_buffer, 1, BIN_BUFFER_SZ, bin )) ) {
@@ -174,6 +176,25 @@ int main( int argc, char* argv[] ) {
          encode_generic_file( &(argv[i][0]), i, header );
       }
    }
+
+   /* Filename Index */
+
+   #if 0
+   fprintf( header, "static const char* gsc_resource_names[] = {\n" );
+   fprintf( header, "   NULL,\n" );
+   for( i = 2 ; argc > i ; i++ ) {
+      if(
+         'm' == argv[i][path_iter_fname_idx] &&
+         '_' == argv[i][path_iter_fname_idx + 1]
+      ) {
+         /* This is a map JSON file. */
+      } else {
+         /* Use a generic resource ID. */
+         fprintf( header, "   \"%s\",\n", argv[i] );
+      }
+   }
+   fprintf( header, "};\n\n" );
+   #endif
 
    /* Resource Index */
 
