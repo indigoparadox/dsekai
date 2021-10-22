@@ -228,7 +228,7 @@ define RESEXT_H_RULE
 
    else ifeq ($(RESOURCE)$(findstring win,$(platform)),DEFAULTwin)
 
-      # For windows, default to Windows resources for images.
+      # For Windows, default to Windows resources for images.
 
       $(GENDIR)/$(platform)/win.rc \
       $(GENDIR)/$(platform)/residx.h: $(res_gfx) | \
@@ -244,7 +244,31 @@ define RESEXT_H_RULE
       $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
 			$(HEADPACK) $$@ $$^
 
-      $(GENDIR)/$(platform)/resext.h: $(GENDIR)/$(platform)/resemb.h $(GENDIR)/$(platform)/residx.h
+      $(GENDIR)/$(platform)/resext.h: \
+      $(GENDIR)/$(platform)/resemb.h $(GENDIR)/$(platform)/residx.h
+			echo '#include "$(GENDIR)/$(platform)/residx.h"' > $$@
+			echo '#include "resemb.h"' >> $$@
+ 
+   else ifeq ($(RESOURCE)$(findstring palm,$(platform)),DEFAULTpalm)
+
+      # For Palm, default to Windows resources for images.
+
+      $(GENDIR)/$(platform)/residx.h \
+      $(GENDIR)/$(platform)/palmd.rcp: $(res_gfx) | \
+      $(MKRESH) $(GENDIR)/$(platform)/$(STAMPFILE)
+			$(MKRESH) -f palm -i 5001 \
+            -if $$^ \
+            -oh $(GENDIR)/$(platform)/residx.h \
+            -or $(GENDIR)/$(platform)/palmd.rcp
+
+      # Embed maps in preparsed structs.
+
+      $(GENDIR)/$(platform)/resemb.h: $(res_maps) | \
+      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
+			$(HEADPACK) $$@ $$^
+
+      $(GENDIR)/$(platform)/resext.h: \
+      $(GENDIR)/$(platform)/resemb.h $(GENDIR)/$(platform)/residx.h
 			echo '#include "residx.h"' > $$@
 			echo '#include "resemb.h"' >> $$@
 
@@ -474,7 +498,7 @@ DSEKAI_C_FILES_PALM_ONLY := \
    unilayer/resource/palmr.c \
    unilayer/graphics/palmg.c
 
-DSEKAI_ASSETS_PALM := \
+DSEKAI_ASSETS_BITMAPS_PALM := \
    $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4))
 
 DSEKAI_O_FILES_PALM := \
@@ -503,17 +527,14 @@ APPID := DSEK
 
 # 5. Targets
 
+platform := palm
+res_gfx := $(DSEKAI_ASSETS_BITMAPS_PALM)
+res_maps := $(DSEKAI_ASSETS_MAPS)
+$(eval $(RESEXT_H_RULE))
+
 $(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_PALM)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc bitmap
-
-$(GENDIR_PALM)/resext.h \
-$(GENDIR_PALM)/palmd.rcp: \
-$(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) | $(GENDIR_PALM)/$(STAMPFILE) $(MKRESH)
-	$(MKRESH) -f palm -i 5001 \
-      -if $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) \
-      -oh $(GENDIR_PALM)/resext.h \
-      -or $(GENDIR_PALM)/palmd.rcp
 
 grc_palm: $(OBJDIR_PALM)/$(DSEKAI)
 	cd $(OBJDIR_PALM) && $(OBJRES) $(DSEKAI)

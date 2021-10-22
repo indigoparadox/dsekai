@@ -90,6 +90,8 @@ void control_draw_all(
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs );
 
+#ifndef PLATFORM_PALM
+
 #ifdef CONTROL_C
 
 /* === If we're being called inside control.c === */
@@ -130,6 +132,8 @@ CONTROL_CB_TABLE( CONTROL_CB_TABLE_CONSTS );
 CONTROL_CB_TABLE( CONTROL_CB_TABLE_CONSTS );
 
 #endif /* CONTROL_C */
+
+#endif /* !PLATFORM_PALM */
 
 #endif /* CONTROL_H */
 

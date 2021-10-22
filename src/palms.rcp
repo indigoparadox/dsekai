@@ -1,6 +1,6 @@
 
 #include "src/palmrsc.h"
-#include "gen/palm/resext.h"
+#include "gen/palm/residx.h"
 
 VERSION 1 "1.0"
 
