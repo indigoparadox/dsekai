@@ -8,7 +8,8 @@
 
 /*! \brief A moving/interactive object in the world. */
 struct PACKED MOBILE {
-   uint8_t facing;
+   /*! \brief The direction the mobile is currently facing. */
+   uint8_t dir;
    uint8_t active;
    uint8_t hp;
    uint8_t mp;
@@ -32,11 +33,14 @@ struct PACKED MOBILE {
    uint32_t script_next_ms;
 };
 
-/* TODO: Condense these into flags. */
-#define MOBILE_FACING_SOUTH   0
-#define MOBILE_FACING_NORTH   1
-#define MOBILE_FACING_EAST    2
-#define MOBILE_FACING_WEST    3
+/*! \brief MOBILE::dir indicating down direction for movement/animation. */
+#define MOBILE_DIR_SOUTH   0
+/*! \brief MOBILE::dir indicating up direction for movement/animation. */
+#define MOBILE_DIR_NORTH   1
+/*! \brief MOBILE::dir indicating right direction for movement/animation. */
+#define MOBILE_DIR_EAST    2
+/*! \brief MOBILE::dir indicating left direction for movement/animation. */
+#define MOBILE_DIR_WEST    3
 
 #define MOBILE_TYPE_PLAYER    1
 #define MOBILE_TYPE_PRINCESS  2
@@ -54,10 +58,14 @@ struct PACKED MOBILE {
 uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
 
 /**
- * \return The index of the colliding mobile in ms.
+ * \brief Get a ::MEMORY_PTR to the mobile m is currently facing.
+ * \param m MOBILE to center the check around.
+ * \param ms Array of MOBILE structs currently on the map.
+ * \param ms_sz Size of array ms.
+ * \return ::MEMORY_PTR to the colliding mobile in ms.
  */
-int16_t mobile_collide(
-   struct MOBILE* m, uint8_t dir, struct MOBILE ms[], int ms_sz );
+struct MOBILE* mobile_get_facing(
+   struct MOBILE* m, struct MOBILE ms[], int ms_sz );
 
 struct MOBILE* mobile_interact(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t );
@@ -82,12 +90,11 @@ void mobile_draw(
    struct MOBILE* m, const struct DSEKAI_STATE* state,
    int16_t screen_x, int16_t screen_y );
 void mobile_deinit( struct MOBILE* );
-struct MOBILE* mobile_get_facing(
+struct MOBILE* mobile_get_dir(
    struct MOBILE* m, struct MOBILE mobiles[], int mobiles_sz );
 void mobile_execute( struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state );
 
 #ifdef MOBILE_C
-/*! \brief Lookup table for next walking offset based on current offset. */
 const int8_t gc_mobile_step_table_normal_pos[16] = {
    0, 0, 0, 0,       /*  0,  1,  2,  3 */
    3, 3, 3, 3,       /*  4,  5,  6,  7 */
@@ -102,10 +109,12 @@ const int8_t gc_mobile_y_offsets[4] = {
 const int8_t gc_mobile_x_offsets[4] = {
    0, 0, 1, -1
 };
-
 #else
+/*! \brief Lookup table for next walking offset based on current offset. */
 extern const int8_t gc_mobile_step_table_normal_pos[16];
+/*! \brief Lookup table for vertical offset based on MOBILE::dir. */
 extern const int8_t gc_mobile_y_offsets[4];
+/*! \brief Lookup table for horizontal offset based on MOBILE::dir. */
 extern const int8_t gc_mobile_x_offsets[4];
 #endif /* MOBILE_C */
 

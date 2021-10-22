@@ -69,13 +69,13 @@ static uint16_t script_handle_WALK_generic(
       /* ||
       mobile_collide(
          &(mobiles[state->player_idx]),
-         MOBILE_FACING_EAST, mobiles, state->mobiles_count ) */
+         MOBILE_DIR_EAST, mobiles, state->mobiles_count ) */
    ) {
       /* Actor would collide. */
 
    } else {
       debug_printf( 1, "scripted mobile starting walking" );
-      actor->facing = dir;
+      actor->dir = dir;
       mobile_walk_start( actor, dir );
    }
 
@@ -87,7 +87,7 @@ uint16_t script_handle_WALK_NORTH(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   return script_handle_WALK_generic( pc, actor, t, MOBILE_FACING_NORTH );
+   return script_handle_WALK_generic( pc, actor, t, MOBILE_DIR_NORTH );
 }
 
 uint16_t script_handle_WALK_SOUTH(
@@ -95,7 +95,7 @@ uint16_t script_handle_WALK_SOUTH(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   return script_handle_WALK_generic( pc, actor, t, MOBILE_FACING_SOUTH );
+   return script_handle_WALK_generic( pc, actor, t, MOBILE_DIR_SOUTH );
 }
 
 uint16_t script_handle_WALK_EAST(
@@ -104,7 +104,7 @@ uint16_t script_handle_WALK_EAST(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    debug_printf( 0, "script: walk east" );
-   return script_handle_WALK_generic( pc, actor, t, MOBILE_FACING_EAST );
+   return script_handle_WALK_generic( pc, actor, t, MOBILE_DIR_EAST );
 }
 
 uint16_t script_handle_WALK_WEST(
@@ -113,7 +113,7 @@ uint16_t script_handle_WALK_WEST(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    debug_printf( 0, "script: walk west" );
-   return script_handle_WALK_generic( pc, actor, t, MOBILE_FACING_WEST );
+   return script_handle_WALK_generic( pc, actor, t, MOBILE_DIR_WEST );
 }
 
 uint16_t script_handle_SLEEP(

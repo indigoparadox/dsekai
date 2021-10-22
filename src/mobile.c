@@ -25,12 +25,13 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
    return 1;
 }
 
-int16_t mobile_collide(
-   struct MOBILE* m, uint8_t dir, struct MOBILE ms[], int ms_sz
+struct MOBILE* mobile_get_facing(
+   struct MOBILE* m, struct MOBILE ms[], int ms_sz
 ) {
-   int16_t i = 0;
+   int i = 0;
 
-   /* TODO: If mobile is player, send a collide event. */
+   assert( 0 <= m->dir );
+   assert( 4 > m->dir );
 
    for( i = 0 ; ms_sz > i ; i++ ) {
       if( &(ms[i]) == m ) {
@@ -40,15 +41,15 @@ int16_t mobile_collide(
 
       if(
          ms[i].active && (
-            ms[i].coords.x == m->coords.x + gc_mobile_x_offsets[dir] &&
-            ms[i].coords.y == m->coords.y + gc_mobile_y_offsets[dir]
+            ms[i].coords.x == m->coords.x + gc_mobile_x_offsets[m->dir] &&
+            ms[i].coords.y == m->coords.y + gc_mobile_y_offsets[m->dir]
          )
       ) {
-         return i;
+         return &(ms[i]);
       }
    }
 
-   return -1;
+   return NULL;
 }
 
 void mobile_state_animate( struct DSEKAI_STATE* state ) {
@@ -63,59 +64,6 @@ void mobile_state_animate( struct DSEKAI_STATE* state ) {
    } else {
       state->ani_sprite_x = 0;
    }
-}
-
-struct MOBILE* mobile_get_facing(
-   struct MOBILE* m, struct MOBILE mobiles[], int mobiles_sz
-) {
-   int i = 0;
-
-   for( i = 0 ; mobiles_sz > i ; i++ ) {
-      if( &(mobiles[i]) == m ) {
-         /* Don't compare to self. */
-         continue;
-      }
-
-      switch( m->facing ) {
-      case MOBILE_FACING_NORTH:
-         if( 
-            m->coords.x == mobiles[i].coords.x &&
-            m->coords.y - 1 == mobiles[i].coords.y
-         ) {
-            return &(mobiles[i]);
-         }
-         break;
-
-      case MOBILE_FACING_SOUTH:
-         if( 
-            m->coords.x == mobiles[i].coords.x &&
-            m->coords.y + 1 == mobiles[i].coords.y
-         ) {
-            return &(mobiles[i]);
-         }
-         break;
-
-      case MOBILE_FACING_EAST:
-         if( 
-            m->coords.x + 1 == mobiles[i].coords.x &&
-            m->coords.y == mobiles[i].coords.y
-         ) {
-            return &(mobiles[i]);
-         }
-         break;
-
-      case MOBILE_FACING_WEST:
-         if( 
-            m->coords.x - 1 == mobiles[i].coords.x &&
-            m->coords.y == mobiles[i].coords.y
-         ) {
-            return &(mobiles[i]);
-         }
-         break;
-      }
-   }
-   
-   return NULL;
 }
 
 struct MOBILE* mobile_interact(
@@ -220,7 +168,7 @@ void mobile_draw(
    graphics_blit_at(
       m->sprite,
       state->ani_sprite_x,
-      m->facing * SPRITE_H,
+      m->dir * SPRITE_H,
       screen_x, screen_y,
       SPRITE_W, SPRITE_H );
 }
