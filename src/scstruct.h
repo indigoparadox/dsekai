@@ -2,6 +2,10 @@
 #ifndef SCSTRUCT_H
 #define SCSTRUCT_H
 
+/*! \file scstruct.h
+ *  \brief Structs representing behavior scripts.
+ */
+
 /*! \brief Maximum number of steps in an individual script. */
 #define SCRIPT_STEPS_MAX 16
 

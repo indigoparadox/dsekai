@@ -45,7 +45,7 @@ int16_t tilemap_parse_spawn(
       iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_NAME, spawn_idx );
    json_str_from_path(
       iter_path, JSON_PATH_SZ,
-      spawn->name, TILEMAP_SPAWN_N_MAX, tokens, tokens_sz, json_buffer );
+      spawn->name, TILEMAP_SPAWN_NAME_SZ, tokens, tokens_sz, json_buffer );
 
    /* Parse X */
    dio_snprintf(
@@ -78,7 +78,7 @@ int16_t tilemap_parse_spawn(
       spawn_buffer[0] = '\0';
       spawn_buffer_sz = json_str_from_path(
          iter_path, JSON_PATH_SZ,
-         spawn_buffer, TILEMAP_SPAWN_T_MAX,
+         spawn_buffer, RESOURCE_PATH_MAX,
          &(tokens[0]), tokens_sz, json_buffer );
       script_parse_str( spawn_buffer, spawn_buffer_sz,
          &(t->scripts[spawn->script_id]) );
@@ -92,7 +92,7 @@ int16_t tilemap_parse_spawn(
 }
 
 int16_t tilemap_parse_tileset(
-   struct TILEMAP* t, char* ts_name, uint16_t ts_name_sz,
+   struct TILEMAP* t,
    struct jsmntok* tokens, uint16_t tokens_sz,
    char* json_buffer, uint16_t json_buffer_sz,
    RESOURCE_ID map_path
@@ -229,7 +229,7 @@ uint16_t tilemap_fix_asset_path(
    uint16_t path_sz_out = 0,
       map_path_sz = 0;
 
-   map_path_sz = strlen( map_path );
+   map_path_sz = memory_strnlen_ptr( map_path, RESOURCE_PATH_MAX );
    path_sz_out = dio_char_idx_r( map_path, map_path_sz, PLATFORM_DIR_SEP );
    if(
       /* Found a map path. */
@@ -360,7 +360,7 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
 
    /* Parse the map tileset. */
 
-   tilemap_parse_tileset( t, ts_name, ts_name_sz,
+   tilemap_parse_tileset( t,
       tokens, tok_parsed, json_buffer, json_buffer_sz, id );
 
    /* Unload the tileset, load the map and finish parsing. */
@@ -377,9 +377,12 @@ int16_t tilemap_load( RESOURCE_ID id, struct TILEMAP* t ) {
       tokens, tok_parsed );
 
    debug_printf( 2, "loading spawns" ); 
-   while( tilemap_parse_spawn(
-      t, t->spawns_count, tokens, tok_parsed, json_buffer, json_buffer_sz, id
-   ) ) {
+   while(
+      TILEMAP_SPAWNS_MAX > t->spawns_count &&
+      tilemap_parse_spawn(
+         t, t->spawns_count, tokens, tok_parsed, json_buffer, json_buffer_sz, id
+      )
+   ) {
       
       /* Iterate to the next spawn. */
       t->spawns_count++;

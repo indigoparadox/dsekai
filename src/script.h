@@ -3,7 +3,7 @@
 #define SCRIPT_H
 
 /*! \file script.h
- *  \brief Structs, functions, and macros for executing in-world behavior.
+ *  \brief Functions and macros for executing in-world behavior.
  */
 
 struct MOBILE;

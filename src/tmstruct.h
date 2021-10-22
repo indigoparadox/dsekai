@@ -2,6 +2,10 @@
 #ifndef TMSTRUCTS_H
 #define TMSTRUCTS_H
 
+/*! \file tmstruct.h
+ *  \brief Structs representing tilemaps and related objects.
+ */
+
 #include "scstruct.h"
 
 /*! \brief Maximum number of SCRIPT structs attached to a tilemap. */
@@ -23,8 +27,8 @@
 /*! \brief Maximum length of each string in TILEMAP::strings. */
 #define TILEMAP_STRINGS_SZ 128
 /*! \brief Maximum number of TILEMAP::spawns. */
-#define TILEMAP_SPAWN_T_MAX 32
-#define TILEMAP_SPAWN_N_MAX 12
+#define TILEMAP_SPAWNS_MAX 20
+#define TILEMAP_SPAWN_NAME_SZ 12
 /*! \brief Screen width in tiles. */
 #define SCREEN_TW (SCREEN_MAP_W / TILE_W)
 /*! \brief Screen height in tiles. */
@@ -32,7 +36,9 @@
 
 /*! \brief X/Y coordinates of a tile on the current map. */
 struct PACKED TILEMAP_COORDS {
+   /*! \brief Horizontal coordinate in tiles. */
    int32_t x;
+   /*! \brief Vertical coordinate in tiles. */
    int32_t y;
 };
 
@@ -49,12 +55,13 @@ struct PACKED TILESET_TILE {
  *  Modifications to this struct should also be reflected in tools/map2h.c.
  */
 struct PACKED TILEMAP_SPAWN {
-   char name[TILEMAP_SPAWN_N_MAX];
+   /*! \brief Internal name of a spawned MOBILE. */
+   char name[TILEMAP_SPAWN_NAME_SZ];
    /* TODO: Allow a range of coordinates in which to spawn. */
    /* TODO: Allow multiple spawns from single spawner. */
    /*! \brief Tile-based coordinates at which to spawn. */
    struct TILEMAP_COORDS coords;
-   /*! \brief Mobile type to spawn. */
+   /*! \brief RESOURCE_ID for the MOBILE::sprite on a spawned MOBILE. */
    RESOURCE_ID type;
    /*! \brief Index of TILEMAP::scripts attached to mobiles spawned. */
    int16_t script_id;
@@ -74,7 +81,7 @@ struct PACKED TILEMAP {
    /*! \brief Special flag bitfields indicating each tile's behavior. */
    uint8_t tiles_flags[TILEMAP_TH * TILEMAP_TW];
    /*! \brief Mobile spawns on this map. */
-   struct TILEMAP_SPAWN spawns[20];
+   struct TILEMAP_SPAWN spawns[TILEMAP_SPAWNS_MAX];
    /*! \brief Strings used in dialog/signs on this map. */
    char strings[TILEMAP_STRINGS_MAX][TILEMAP_STRINGS_SZ];
    /*! \brief Size of each loaded string. */

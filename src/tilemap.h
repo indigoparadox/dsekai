@@ -3,7 +3,7 @@
 #define TILEMAP_H
 
 /*! \file tilemap.h
- *  \brief Structs, functions, and macros pertaining to tilemaps.
+ *  \brief Functions and macros pertaining to tilemaps.
  */
 
 #ifndef PACKED
@@ -32,11 +32,13 @@
 #define TILEMAP_JPATH_MOB_Y      "/layers/[name=mobiles]/objects/%d/y"
 /*! \brief JSON path to mobile name. */
 #define TILEMAP_JPATH_MOB_NAME   "/layers/[name=mobiles]/objects/%d/name"
+/*! \brief JSON path to TILEMAP_SPAWN::type. */
 #define TILEMAP_JPATH_MOB_TYPE   "/layers/[name=mobiles]/objects/%d/type"
 /*! \brief JSON path to mobile script index. */
 #define TILEMAP_JPATH_MOB_SCRIPT "/layers/[name=mobiles]/objects/%d/properties/[name=script]/value"
-/* #define TILEMAP_JPATH_MOB_SPRITE "/layers/[name=mobiles]/objects/%d/properties/[name=sprite]/value" */
+/*! \brief JSON path to TILESET_TILE::image. */
 #define TILEMAP_JPATH_TS_TILE "/tiles/%d/image"
+/*! \brief JSON path to TILESET_TILE::flags. */
 #define TILEMAP_JPATH_TS_FLAGS "/tiles/%d/properties/[name=flags]/value"
 
 /**
@@ -51,12 +53,15 @@ struct jsmntok;
 
 #include "tmstruct.h"
 
+/**
+ * \brief Prepare a buffer with the relative path of the TILEMAP so that asset
+ *        paths can be appended to it.
+ * \param path_in Empty buffer to prepare.
+ * \param path_in_sz Maximum size of path_in.
+ * \param map_path RESOURCE_ID from which TILEMAP was loaded.
+ */
 uint16_t tilemap_fix_asset_path(
    char* path_in, uint16_t path_in_sz, const char* map_path );
-
-int16_t tilemap_json_load(
-   char* json_buffer, uint16_t json_buffer_sz,
-   struct jsmntok* tokens, uint16_t tokens_sz );
 
 /**
  * \brief Parse tokenized JSON into a tileset array.
@@ -64,12 +69,12 @@ int16_t tilemap_json_load(
  * \param tokens JSON tokens to parse.
  * \param tokens_sz Number of tokens to parse.
  * \param json_buffer String buffer containing JSON referred to by tokens.
- * \param iter_path Empty string buffer used to contain JSON path to iterate.
- * \param iter_path_sz Memory size of iter_path.
+ * \param json_buffer_sz Size of json_buffer.
+ * \param map_path TILEMAP RESOURCE_ID used as search base for assets.
  * \return 1 if successful, or 0 otherwise.
  */
 int16_t tilemap_parse_tileset(
-   struct TILEMAP* t, char* ts_name, uint16_t ts_name_sz,
+   struct TILEMAP* t,
    struct jsmntok* tokens, uint16_t tokens_sz,
    char* json_buffer, uint16_t json_buffer_sz,
    RESOURCE_ID map_path );
@@ -98,12 +103,6 @@ int16_t tilemap_json_tilegrid(
    char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, uint16_t tokens_sz );
 
-uint16_t tilemap_json_string(
-   char* str_buffer, uint16_t str_buffer_sz,
-   char* json_path, uint16_t json_path_sz,
-   char* json_buffer, uint16_t json_buffer_sz,
-   struct jsmntok* tokens, uint16_t tokens_sz );
-
 int16_t tilemap_parse(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, uint16_t tokens_sz );
@@ -129,8 +128,22 @@ void tilemap_refresh_tiles( struct TILEMAP* t );
  *              what is currently on-screen.
  */
 void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state );
+
+/**
+ * \brief Detect potential collision between a MOBILE and TILEMAP tile with
+ *        blocking flags.
+ * \param m ::MEMORY_PTR to the MOBILE that is moving.
+ * \param dir MOBILE::dir in which the MOBILE is moving.
+ * \param t ::MEMORY_PTR to the TILEMAP on which the MOBILE is moving.
+ * \return 1 if a collision will occur and 0 otherwise.
+ */
 uint8_t tilemap_collide( 
    struct MOBILE* m, uint8_t dir, struct TILEMAP* t );
+
+/**
+ * \brief Prepare a TILEMAP for deallocation.
+ * \param t TILEMAP to deinitialize.
+ */
 void tilemap_deinit( struct TILEMAP* );
 
 #endif /* TILEMAP_H */
