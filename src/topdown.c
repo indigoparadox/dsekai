@@ -272,41 +272,64 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    switch( in_char ) {
    case INPUT_KEY_UP:
       if( 0 < window_modal( state ) ) { break; }
-      if( !tilemap_collide(
-         map, mobiles[state->player_idx].coords.x,
-         mobiles[state->player_idx].coords.y - 1 )
+      mobiles[state->player_idx].facing = MOBILE_FACING_NORTH;
+      if( 
+         !tilemap_collide(
+            &(mobiles[state->player_idx]),
+            MOBILE_FACING_NORTH, map ) &&
+         0 > mobile_collide(
+            &(mobiles[state->player_idx]),
+            MOBILE_FACING_NORTH, mobiles, state->mobiles_count )
       ) {
-         mobile_walk_start( &(mobiles[state->player_idx]), 0, -1 );
+         mobile_walk_start(
+            &(mobiles[state->player_idx]), MOBILE_FACING_NORTH );
       }
       break;
 
    case INPUT_KEY_LEFT:
       if( 0 < window_modal( state ) ) { break; }
-      if( !tilemap_collide(
-         map, mobiles[state->player_idx].coords.x - 1,
-         mobiles[state->player_idx].coords.y )
+      mobiles[state->player_idx].facing = MOBILE_FACING_WEST;
+      if(
+         !tilemap_collide(
+            &(mobiles[state->player_idx]),
+            MOBILE_FACING_WEST, map ) &&
+         0 > mobile_collide(
+            &(mobiles[state->player_idx]),
+            MOBILE_FACING_WEST, mobiles, state->mobiles_count )
       ) {
-         mobile_walk_start( &(mobiles[state->player_idx]), -1, 0 );
+         mobile_walk_start(
+            &(mobiles[state->player_idx]), MOBILE_FACING_WEST );
       }
       break;
 
    case INPUT_KEY_DOWN:
       if( 0 < window_modal( state ) ) { break; }
-      if( !tilemap_collide(
-         map, mobiles[state->player_idx].coords.x,
-         mobiles[state->player_idx].coords.y + 1 )
+      mobiles[state->player_idx].facing = MOBILE_FACING_SOUTH;
+      if(
+         !tilemap_collide(
+            &(mobiles[state->player_idx]),
+            MOBILE_FACING_SOUTH, map ) &&
+         0 > mobile_collide(
+            &(mobiles[state->player_idx]),
+            MOBILE_FACING_SOUTH, mobiles, state->mobiles_count )
       ) {
-         mobile_walk_start( &(mobiles[state->player_idx]), 0, 1 );
+         mobile_walk_start(
+            &(mobiles[state->player_idx]), MOBILE_FACING_SOUTH );
       }
       break;
 
    case INPUT_KEY_RIGHT:
       if( 0 < window_modal( state ) ) { break; }
-      if( !tilemap_collide(
-         map, mobiles[state->player_idx].coords.x + 1,
-         mobiles[state->player_idx].coords.y )
+      mobiles[state->player_idx].facing = MOBILE_FACING_EAST;
+      if( 
+         !tilemap_collide(
+            &(mobiles[state->player_idx]),
+            MOBILE_FACING_EAST, map ) &&
+         0 > mobile_collide(
+            &(mobiles[state->player_idx]),
+            MOBILE_FACING_EAST, mobiles, state->mobiles_count )
       ) {
-         mobile_walk_start( &(mobiles[state->player_idx]), 1, 0 );
+         mobile_walk_start( &(mobiles[state->player_idx]), MOBILE_FACING_EAST );
       }
       break;
 

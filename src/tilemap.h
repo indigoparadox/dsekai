@@ -35,6 +35,7 @@
 /*! \brief JSON path to mobile script index. */
 #define TILEMAP_JPATH_MOB_SCRIPT "/layers/[name=mobiles]/objects/%d/properties/[name=script]/value"
 #define TILEMAP_JPATH_TS_TILE "/tiles/%d/image"
+#define TILEMAP_JPATH_TS_FLAGS "/tiles/%d/properties/[name=flags]/value"
 
 /**
  * \brief Get the TILEMAP::tileset index for the tile at the given coords.
@@ -126,7 +127,8 @@ void tilemap_refresh_tiles( struct TILEMAP* t );
  *              what is currently on-screen.
  */
 void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state );
-uint8_t tilemap_collide( const struct TILEMAP*, uint8_t, uint8_t );
+uint8_t tilemap_collide( 
+   struct MOBILE* m, uint8_t dir, struct TILEMAP* t );
 void tilemap_deinit( struct TILEMAP* );
 
 #endif /* TILEMAP_H */

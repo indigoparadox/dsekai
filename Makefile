@@ -148,7 +148,7 @@ DEPTHS := 16x16x4
 $(foreach DEPTH,$(DEPTHS), $(eval $(BITMAPS_RULE)))
 
 DSEKAI_ASSETS_MAPS := \
-   $(ASSETDIR)/m_field.jsn
+   $(ASSETDIR)/m_field.json
 
 HOST_CC := gcc
 MD := mkdir -p
@@ -221,7 +221,7 @@ define RESEXT_H_RULE
 
       $(GENDIR)/$(platform)/residx.h: $(res_gfx) $(res_maps) | \
       $(GENDIR)/$(platform)/$(STAMPFILE) $(MKRESH)
-			$(MKRESH) -f file -s bmp jsn cga -if $$^ -oh $$@
+			$(MKRESH) -f file -s bmp jsn json cga -if $$^ -oh $$@
 
       $(GENDIR)/$(platform)/resext.h: $(GENDIR)/$(platform)/residx.h
 			echo '#include "residx.h"' > $$@
@@ -411,7 +411,7 @@ DSEKAI_C_FILES_DOS_ONLY := \
    unilayer/memory/fakem.c
 
 #DSEKAI_ASSETS_MAPS_DOS := \
-#   $(subst .jsn,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
+#   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
 
 DSEKAI_ASSETS_DOS_CGA := \
    $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
@@ -729,7 +729,7 @@ DSEKAI_ASSETS_RSRC := \
    $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
 
 DSEKAI_ASSETS_MAPS_MAC6 := \
-   $(subst .jsn,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_MAPS)))
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_MAPS)))
 
 DSEKAI_O_FILES_MAC6 := \
    $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -807,7 +807,7 @@ DSEKAI_C_FILES_NDS_ONLY := \
    unilayer/memory/fakem.c
 
 DSEKAI_ASSETS_MAPS_NDS := \
-   $(subst .jsn,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS)))
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS)))
 
 DSEKAI_O_FILES_NDS := \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \

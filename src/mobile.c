@@ -4,7 +4,7 @@
 
 /* TODO: Facing/x_mod/y_mod lookup tables for DIR constants. */
 
-uint8_t mobile_walk_start( struct MOBILE* m, int8_t x_mod, int8_t y_mod ) {
+uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
 
    if(
       m->coords.y != m->coords_prev.y ||
@@ -14,25 +14,41 @@ uint8_t mobile_walk_start( struct MOBILE* m, int8_t x_mod, int8_t y_mod ) {
       return 0;
    }
 
-   m->coords.x += x_mod;
-   m->coords.y += y_mod;
+   m->coords.x += gc_mobile_x_offsets[dir];
+   m->coords.y += gc_mobile_y_offsets[dir];
    m->steps_x = gc_mobile_step_table_normal_pos[SPRITE_W - 1];
    m->steps_y = gc_mobile_step_table_normal_pos[SPRITE_H - 1];
-
-   if( 1 == x_mod ) {
-      m->facing = MOBILE_FACING_EAST;
-   } else if( 1 == y_mod ) {
-      m->facing = MOBILE_FACING_SOUTH;
-   } else if( -1 == x_mod ) {
-      m->facing = MOBILE_FACING_WEST;
-   } else if( -1 == y_mod ) {
-      m->facing = MOBILE_FACING_NORTH;
-   }
 
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
 
    return 1;
+}
+
+int16_t mobile_collide(
+   struct MOBILE* m, uint8_t dir, struct MOBILE ms[], int ms_sz
+) {
+   int16_t i = 0;
+
+   /* TODO: If mobile is player, send a collide event. */
+
+   for( i = 0 ; ms_sz > i ; i++ ) {
+      if( &(ms[i]) == m ) {
+         /* Don't compare to self. */
+         continue;
+      }
+
+      if(
+         ms[i].active && (
+            ms[i].coords.x == m->coords.x + gc_mobile_x_offsets[dir] &&
+            ms[i].coords.y == m->coords.y + gc_mobile_y_offsets[dir]
+         )
+      ) {
+         return i;
+      }
+   }
+
+   return -1;
 }
 
 void mobile_state_animate( struct DSEKAI_STATE* state ) {
@@ -108,6 +124,14 @@ struct MOBILE* mobile_interact(
 
    if( NULL == actee ) {
       return NULL;
+   }
+
+   if(
+      actor->coords.y != actor->coords_prev.y ||
+      actor->coords.x != actor->coords_prev.x
+   ) {
+      /* Reject interactions while walking so we don't break script sync. */
+      return 0;
    }
 
    /* TODO: Workshop this. */

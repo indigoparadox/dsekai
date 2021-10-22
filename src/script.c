@@ -39,7 +39,7 @@ uint16_t script_handle_INTERACT(
 }
 
 static uint16_t script_handle_WALK_generic(
-   uint16_t pc, struct MOBILE* actor, int16_t mod_x, int16_t mod_y
+   uint16_t pc, struct MOBILE* actor, struct TILEMAP* t, uint8_t dir
 ) {
    /* TODO: Handle blockage. */
 
@@ -52,6 +52,9 @@ static uint16_t script_handle_WALK_generic(
          0 == gc_mobile_step_table_normal_pos[actor->steps_y])
    ) {
       debug_printf( 1, "scripted mobile done walking" );
+      /* PC only incremends when walk is complete, so that this check
+       * continues until next step.
+       */
       return pc + 1;
 
    } else if(
@@ -60,9 +63,20 @@ static uint16_t script_handle_WALK_generic(
    ) {
       /* Actor is already walking, don't start or advance PC. */   
 
+   } else if(
+      tilemap_collide( actor, dir, t )
+      /* TODO: Need access to mobiles list. */
+      /* ||
+      mobile_collide(
+         &(mobiles[state->player_idx]),
+         MOBILE_FACING_EAST, mobiles, state->mobiles_count ) */
+   ) {
+      /* Actor would collide. */
+
    } else {
       debug_printf( 1, "scripted mobile starting walking" );
-      mobile_walk_start( actor, mod_x, mod_y );
+      actor->facing = dir;
+      mobile_walk_start( actor, dir );
    }
 
    return pc;
@@ -73,7 +87,7 @@ uint16_t script_handle_WALK_NORTH(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   return script_handle_WALK_generic( pc, actor, 0, -1 );
+   return script_handle_WALK_generic( pc, actor, t, MOBILE_FACING_NORTH );
 }
 
 uint16_t script_handle_WALK_SOUTH(
@@ -81,7 +95,7 @@ uint16_t script_handle_WALK_SOUTH(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   return script_handle_WALK_generic( pc, actor, 0, 1 );
+   return script_handle_WALK_generic( pc, actor, t, MOBILE_FACING_SOUTH );
 }
 
 uint16_t script_handle_WALK_EAST(
@@ -90,7 +104,7 @@ uint16_t script_handle_WALK_EAST(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    debug_printf( 0, "script: walk east" );
-   return script_handle_WALK_generic( pc, actor, 1, 0 );
+   return script_handle_WALK_generic( pc, actor, t, MOBILE_FACING_EAST );
 }
 
 uint16_t script_handle_WALK_WEST(
@@ -99,7 +113,7 @@ uint16_t script_handle_WALK_WEST(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    debug_printf( 0, "script: walk west" );
-   return script_handle_WALK_generic( pc, actor, -1, 0 );
+   return script_handle_WALK_generic( pc, actor, t, MOBILE_FACING_WEST );
 }
 
 uint16_t script_handle_SLEEP(

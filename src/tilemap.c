@@ -107,7 +107,15 @@ int16_t tilemap_parse_tileset(
          debug_printf(
             2, "assigning tile path: %s, %s\n", tile_json_path, tile_filename );
          resource_assign_id( t->tileset[i].image, tile_filename );
-         t->tileset[i].flags = 0x00;
+
+         /* Load tile flags. */
+         dio_snprintf(
+            tile_json_path, JSON_PATH_SZ, TILEMAP_JPATH_TS_FLAGS, i );
+         t->tileset[i].flags = json_int_from_path(
+            tile_json_path, JSON_PATH_SZ, tokens, tokens_sz, json_buffer );
+         debug_printf(
+            2, "tile flags: %s, %d\n", tile_json_path, t->tileset[i].flags );
+            resource_assign_id( t->tileset[i].image, tile_filename );
       }
 
       i++;
@@ -449,8 +457,14 @@ void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
 
 #endif /* SCREEN_W && SCREEN_H */
 
-uint8_t tilemap_collide( const struct TILEMAP* t, uint8_t x, uint8_t y ) {
+uint8_t tilemap_collide(
+   struct MOBILE* m, uint8_t dir, struct TILEMAP* t
+) {
    uint8_t tile_id = 0;
+   int16_t x = 0, y = 0;
+
+   x = m->coords.x + gc_mobile_x_offsets[dir];
+   y = m->coords.y + gc_mobile_y_offsets[dir];
 
    tile_id = tilemap_get_tile_id( t, x, y );
    if( t->tileset[tile_id].flags & (uint8_t)TILEMAP_TILESET_FLAG_BLOCK ) {

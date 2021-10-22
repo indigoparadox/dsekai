@@ -46,13 +46,18 @@ struct PACKED MOBILE {
 /**
  * \brief Have the given MOBILE attempt to begin walking movement/animation.
  * \param m ::MEMORY_PTR to MOBILE that should attempt moving.
- * \param x Tile offset to attempt moving horizontally.
- * \param y Tile offset to attempt moving vertically.
+ * \param dir Index of direction offsets in ::gc_mobile_x_offsets.
  *
  * This may fail if the mobile is already walking, or is blocked from moving
  * in that direction by a map obstacle or other mobile.
  */
-uint8_t mobile_walk_start( struct MOBILE* m, int8_t x, int8_t y );
+uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
+
+/**
+ * \return The index of the colliding mobile in ms.
+ */
+int16_t mobile_collide(
+   struct MOBILE* m, uint8_t dir, struct MOBILE ms[], int ms_sz );
 
 struct MOBILE* mobile_interact(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t );
@@ -89,8 +94,19 @@ const int8_t gc_mobile_step_table_normal_pos[16] = {
    7, 7, 7, 7,       /*  8,  9, 10, 11 */
    11, 11, 11, 11    /* 12, 13, 14, 15 */
 };
+
+const int8_t gc_mobile_y_offsets[4] = {
+   1, -1, 0, 0
+};
+
+const int8_t gc_mobile_x_offsets[4] = {
+   0, 0, 1, -1
+};
+
 #else
 extern const int8_t gc_mobile_step_table_normal_pos[16];
+extern const int8_t gc_mobile_y_offsets[4];
+extern const int8_t gc_mobile_x_offsets[4];
 #endif /* MOBILE_C */
 
 #endif /* MOBILE_H */
