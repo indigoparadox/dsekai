@@ -128,13 +128,11 @@ BIN_SDL_ARM := $(BINDIR)/$(DSEKAI)r
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
-DSEKAI_DEFINES := -DUNILAYER_PROJECT_NAME=\"dsekai\"
-
-CFLAGS_OPT :=
+DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\"
 
 ifeq ($(RESOURCE),FILE)
 
-   CFLAGS_RES := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
+   DEFINES_RESOURCE := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
    DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c
 
 all: $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN32)
@@ -142,11 +140,35 @@ all: $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN32)
 else
 
    RESOURCE := DEFAULT
-   CFLAGS_RES := -DRESOURCE_HEADER
+   DEFINES_RESOURCE := -DRESOURCE_HEADER
    DSEKAI_C_FILES_RES := unilayer/resource/header.c
 
 all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
 
+endif
+
+ifeq ($(BUILD),RELEASE)
+
+   CFLAGS_GCC_GENERIC :=
+   CFLAGS_OWC_GENERIC :=
+   DEFINES_DSEKAI :=
+   LDFLAGS_OWC_GENERIC :=
+
+else
+
+   # Assume debug build.
+
+   CFLAGS_GCC_GENERIC := -Wall -Wno-missing-braces -Wno-char-subscripts -pg -g -Os
+   CFLAGS_OWC_GENERIC :=
+   DEFINES_DSEKAI += -DDEBUG_LOG -DDEBUG_THRESHOLD=$(DTHRESHOLD)
+   LDFLAGS_GCC_GENERIC := -g -pg -Os
+
+endif
+
+ifeq ($(SANITIZE),NO)
+   FLAGS_GCC_SANITIZE := 
+else
+   FLAGS_GCC_SANITIZE := -fsanitize=address -fsanitize=leak -fsanitize=undefined
 endif
 
 define BITMAPS_RULE
@@ -189,12 +211,9 @@ CFLAGS_CONVERT := -DNO_RESEXT -g -DRESOURCE_FILE -Iunilayer
 CFLAGS_LOOKUPS := -g -Iunilayer
 CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
 
-CFLAGS_DEBUG_GENERIC := -DDEBUG_LOG -DDEBUG_THRESHOLD=$(DTHRESHOLD)
-CFLAGS_DEBUG_GCC := $(CFLAGS_DEBUG_GENERIC) -Wall -Wno-missing-braces -Wno-char-subscripts -fsanitize=address -fsanitize=leak -fsanitize=undefined -pg
+CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_GCC_GENERIC) -DRESOURCE_DRC -Iunilayer
 
-CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_DEBUG_GCC) -DRESOURCE_DRC -Iunilayer
-
-$(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(CFLAGS_DEBUG_GCC)
+$(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(LDFLAGS_GCC_GENERIC)
 
 DSEKAI_C_FILES_CHECK_NULL := $(DSEKAI_C_FILES) $(DSEKAI_C_FILES_CHECK_NULL_ONLY)
 
@@ -357,9 +376,9 @@ LD_SDL := gcc
 
 # 4. Arguments
 
-CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) $(CFLAGS_RES) -Iunilayer $(DSEKAI_DEFINES)
+CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
-LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
+LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
 # 5. Targets
 
@@ -405,9 +424,9 @@ LD_XLIB := gcc
 
 # 4. Arguments
 
-CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_DEBUG_GCC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) $(CFLAGS_RES) -Iunilayer $(DSEKAI_DEFINES)
+CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_GCC_GENERIC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE)
 
-LDFLAGS_XLIB := -g -lX11 $(CFLAGS_DEBUG_GCC)
+LDFLAGS_XLIB := -lX11 $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
 DSEKAI_O_FILES_XLIB := \
    $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -470,9 +489,9 @@ LD_DOS := wcl
 
 # 4. Arguments
 
-CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) $(CFLAGS_RES) -i=unilayer $(DSEKAI_DEFINES) $(CFLAGS_DEBUG_GENERIC)
+CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -i=unilayer $(DEFINES_DSEKAI) $(CFLAGS_OWC_GENERIC)
 
-LDFLAGS_DOS := $(CFLAGS_DOS)
+LDFLAGS_DOS := $(LDFLAGS_OWC_GENERIC)
 
 # 5. Targets
 
@@ -535,9 +554,9 @@ BUILDPRC := build-prc
 
 # 4. Arguments
 
-CFLAGS_PALM := -Os -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_DEBUG_GENERIC) $(CFLAGS_OPT) -Iunilayer -I$(GENDIR_PALM) $(DSEKAI_DEFINES)
+CFLAGS_PALM := -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_GCC_GENERIC) -Iunilayer -I$(GENDIR_PALM) $(DEFINES_DSEKAI)
 
-LDFLAGS_PALM := -g $(CFLAGS_PALM)
+LDFLAGS_PALM := $(LDFLAGS_GCC_GENERIC)
 
 #DEF_PALM := src/mulipalm.def
 
@@ -620,13 +639,13 @@ RC_WIN16 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -i=unilayer $(DSEKAI_DEFINES) -I$(GENDIR_WIN16)
+CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_OWC_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT -i=unilayer $(DEFINES_DSEKAI) -I$(GENDIR_WIN16)
 
 ifneq ($(RESOURCE),DEFAULT)
-   CFLAGS_WIN16 += $(CFLAGS_RES)
+   CFLAGS_WIN16 += $(DEFINES_RESOURCE)
 endif
 
-LDFLAGS_WIN16 := -l=windows -zp=1
+LDFLAGS_WIN16 := -l=windows -zp=1 $(LDFLAGS_OWC_GENERIC)
 
 RCFLAGS_WIN16 := -r -DPLATFORM_WIN16 -i $(INCLUDE)win
 
@@ -704,13 +723,13 @@ RC_WIN32 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_DEBUG_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) -i=unilayer $(DSEKAI_DEFINES) -I$(GENDIR_WIN32)
+CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_OWC_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT -i=unilayer $(DEFINES_DSEKAI) -I$(GENDIR_WIN32)
 
 ifneq ($(RESOURCE),DEFAULT)
-   CFLAGS_WIN32 += $(CFLAGS_RES)
+   CFLAGS_WIN32 += $(DEFINES_RESOURCE)
 endif
 
-LDFLAGS_WIN32 := -bcl=nt_win -zp=1
+LDFLAGS_WIN32 := -bcl=nt_win -zp=1 $(LDFLAGS_OWC_GENERIC)
 
 RCFLAGS_WIN32 := -r -DPLATFORM_WIN32 -i $(INCLUDE)win
 
@@ -779,12 +798,13 @@ DSEKAI_O_FILES_MAC6 := \
 
 CC_MAC6 := m68k-apple-macos-gcc
 CXX_MAC6 := m68k-apple-macos-g++
-LDFLAGS_MAC6 := -lRetroConsole
 REZ_MAC6 := Rez
 
 # 4. Arguments
 
-CFLAGS_MAC6 := -DPLATFORM_MAC6 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_DEBUG_GENERIC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) $(CFLAGS_RES) -Iunilayer $(DSEKAI_DEFINES) -I$(GENDIR_MAC6) -DSCREEN_W=640 -DSCREEN_H=480
+CFLAGS_MAC6 := -DPLATFORM_MAC6 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_GCC_GENERIC) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) -I$(GENDIR_MAC6) -DSCREEN_W=640 -DSCREEN_H=480
+
+LDFLAGS_MAC6 := -lRetroConsole $(LDFLAGS_GCC_GENERIC)
 
 # 5. Targets
 
@@ -863,11 +883,11 @@ NDSTOOL := ndstool
 
 ARCH_NDS := -mthumb -mthumb-interwork
 
-CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) $(CFLAGS_RES) -Iunilayer $(DSEKAI_DEFINES)
+CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC)
 
 LIBS_NDS := -L$(DEVKITPRO)/libnds/lib -lnds9
 
-LDFLAGS_NDS := -specs=ds_arm9.specs -g $(ARCH_NDS) -Wl,-Map,$(OBJDIR_NDS)/$(DSEKAI).map
+LDFLAGS_NDS := -specs=ds_arm9.specs -g $(ARCH_NDS) -Wl,-Map,$(OBJDIR_NDS)/$(DSEKAI).map $(LDFLAGS_GCC_GENERIC)
 
 $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 
@@ -927,9 +947,9 @@ LD_WEB := emcc
 
 # 4. Arguments
 
-CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) $(CFLAGS_RES) -Iunilayer $(DSEKAI_DEFINES)
+CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC)
 
-LDFLAGS_WEB :=
+LDFLAGS_WEB := $(LDFLAGS_GCC_GENERIC)
 
 # 5. Targets
 
@@ -981,9 +1001,9 @@ LD_CURSES := gcc
 
 # 4. Arguments
 
-CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_DEBUG_GCC) $(CFLAGS_OPT) $(CFLAGS_RES) -Iunilayer $(DSEKAI_DEFINES)
+CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_GCC_GENERIC) $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI)
 
-LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) -g $(CFLAGS_DEBUG_GCC)
+LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) $(LDFLAGS_GCC_GENERIC)
 
 # 5. Targets
 
@@ -1026,9 +1046,9 @@ LD_SDL_ARM := arm-linux-gnueabihf-gcc
 
 # 4. Arguments
 
-CFLAGS_SDL_ARM := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_DEBUG_GCC) -DUSE_SOFTWARE_TEXT $(CFLAGS_OPT) $(CFLAGS_RES) -Iunilayer $(DSEKAI_DEFINES)
+CFLAGS_SDL_ARM := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_GCC_GENERIC) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE)
 
-LDFLAGS_SDL_ARM := $(shell pkg-config sdl2 --libs) -g $(CFLAGS_DEBUG_GCC)
+LDFLAGS_SDL_ARM := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
 # 5. Targets
 

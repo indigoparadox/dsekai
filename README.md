@@ -64,8 +64,10 @@ The following options may be specified to make in order control the final output
 |------------|---------|-------------
 | RESOURCE   | FILE    | Store assets as files in the filesystem.
 |            | HEADER  | Store assets embedded in the binary.
+| BUILD      | DEBUG   | Build a debug binary, with symbols and profiling.
+|            | RELEASE | Build an optimized release binary.
 | ASSETPATH  |         | Specify path to load assets at runtime. Defaults to ./assets
-| DTHRESHOLD |         | Specify the log level from 0-3.
+| DTHRESHOLD |         | Specify the log level from 0-3 (0 being most verbose).
 
 ## Datafiles
 
