@@ -2,9 +2,13 @@
 *.exe
 *.err
 bin
+bin-file
 obj
+obj-file
 gen
+gen-file
 dep
+dep-file
 resext.h
 QC.INI
 .finf

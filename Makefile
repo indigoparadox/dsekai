@@ -89,19 +89,30 @@ LOOKUPS_C_FILES := \
 PLATFORMS := sdl xlib dos win16 win32 palm mac6 nds curses check_null
 
 ASSETDIR := assets
-OBJDIR := obj
-DEPDIR := dep
-GENDIR := gen
 ASSETPATH :=
 DTHRESHOLD := 3
+
+ifeq ($(RESOURCE),FILE)
+
+   OBJDIR := obj-file
+   DEPDIR := dep-file
+   GENDIR := gen-file
+   BINDIR := bin-file
+
+else
+
+   OBJDIR := obj
+   DEPDIR := dep
+   GENDIR := gen
+   BINDIR := bin
+
+endif
 
 OBJDIR_CHECK_NULL := $(OBJDIR)/check_null
 
 DEPDIR_CHECK_NULL := $(DEPDIR)/check_null
 
 GENDIR_CHECK_NULL := $(GENDIR)/check_null
-
-BINDIR := bin
 
 BIN_SDL := $(BINDIR)/$(DSEKAI)
 BIN_DOS := $(BINDIR)/$(DSEKAI).exe
@@ -122,12 +133,20 @@ DSEKAI_DEFINES := -DUNILAYER_PROJECT_NAME=\"dsekai\"
 CFLAGS_OPT :=
 
 ifeq ($(RESOURCE),FILE)
-CFLAGS_RES := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
-DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c
+
+   CFLAGS_RES := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
+   DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c
+
+all: $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN32)
+
 else
-RESOURCE := DEFAULT
-CFLAGS_RES := -DRESOURCE_HEADER
-DSEKAI_C_FILES_RES := unilayer/resource/header.c
+
+   RESOURCE := DEFAULT
+   CFLAGS_RES := -DRESOURCE_HEADER
+   DSEKAI_C_FILES_RES := unilayer/resource/header.c
+
+all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
+
 endif
 
 define BITMAPS_RULE
@@ -158,11 +177,11 @@ MKFSVFAT := /sbin/mkfs.vfat
 IMAGEMAGICK := convert
 PYTHON := python3
 
-MKRESH := bin/mkresh
-DRCPACK := bin/drcpack
-CONVERT := bin/convert
-LOOKUPS := bin/lookups
-HEADPACK := bin/headpack
+MKRESH := $(BINDIR)/mkresh
+DRCPACK := $(BINDIR)/drcpack
+CONVERT := $(BINDIR)/convert
+LOOKUPS := $(BINDIR)/lookups
+HEADPACK := $(BINDIR)/headpack
 
 CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer -DASSETS_PATH="\"$(ASSETPATH)\""
 CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DRESOURCE_DRC -Iunilayer
@@ -183,8 +202,6 @@ DSEKAI_O_FILES_CHECK_NULL := \
    $(addprefix $(OBJDIR_CHECK_NULL)/,$(subst .c,.o,$(DSEKAI_C_FILES_CHECK_NULL)))
 
 .PHONY: clean grc_palm
-
-all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
 
 STAMPFILE := .stamp
 
@@ -408,13 +425,14 @@ $(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(GENDIR_XLIB)/resext.h
 	$(LD_XLIB) -o $@ $^ $(LDFLAGS_XLIB)
 
 $(OBJDIR_XLIB)/%.o: %.c $(GENDIR_XLIB)/resext.h | $(DSEKAI_ASSETS_MAPS_XLIB)
+	echo "RESOURCE: $(RESOURCE)\nOBJDIR: $(OBJDIR_XLIB)\nGENDIR: $(GENDIR_XLIB)"
 	$(MD) $(dir $@)
 	$(CC_XLIB) $(CFLAGS_XLIB) -c -o $@ $(<:%.o=%)
 
-$(DEPDIR_XLIB)/%.d: %.c $(GENDIR_XLIB)/resext.h | $(DSEKAI_ASSETS_MAPS_XLIB)
-	$(MD) $(dir $@)
-	$(CC_XLIB) $(CFLAGS_XLIB) -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(DEPDIR_XLIB)/,$<)) -MF $@
+#$(DEPDIR_XLIB)/%.d: %.c $(GENDIR_XLIB)/resext.h | $(DSEKAI_ASSETS_MAPS_XLIB)
+#	$(MD) $(dir $@)
+#	$(CC_XLIB) $(CFLAGS_XLIB) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_XLIB)/,$<)) -MF $@
 
 #include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_XLIB:.o=.d))
 
@@ -874,10 +892,10 @@ $(OBJDIR_NDS)/%.o: \
 	$(MD) $(dir $@)
 	$(CC_NDS) $(CFLAGS_NDS) -c -o $@ $(<:%.o=%)
 
-$(DEPDIR_NDS)/%.d: %.c $(GENDIR_NDS)/resext.h $(DSEKAI_ASSETS_MAPS_NDS)
-	$(MD) $(dir $@)
-	$(CC_NDS) $(CFLAGS_NDS) -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(DEPDIR_NDS)/,$<)) -MF $@ || touch $@
+#$(DEPDIR_NDS)/%.d: %.c $(GENDIR_NDS)/resext.h $(DSEKAI_ASSETS_MAPS_NDS)
+#	$(MD) $(dir $@)
+#	$(CC_NDS) $(CFLAGS_NDS) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_NDS)/,$<)) -MF $@ || touch $@
 
 #include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_NDS:.o=.d))
 
@@ -927,10 +945,10 @@ $(OBJDIR_WEB)/%.o: %.c $(GENDIR_WEB)/resext.h | $(DSEKAI_ASSETS_MAPS)
 	$(MD) $(dir $@)
 	$(CC_WEB) $(CFLAGS_WEB) -c -o $@ $(<:%.o=%)
 
-$(DEPDIR_WEB)/%.d: %.c $(GENDIR_WEB)/resext.h
-	$(MD) $(dir $@)
-	$(CC_WEB) $(CFLAGS_WEB) -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WEB)/,$<)) -MF $@
+#$(DEPDIR_WEB)/%.d: %.c $(GENDIR_WEB)/resext.h
+#	$(MD) $(dir $@)
+#	$(CC_WEB) $(CFLAGS_WEB) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WEB)/,$<)) -MF $@
 
 #include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WEB:.o=.d))
 
@@ -981,10 +999,10 @@ $(OBJDIR_CURSES)/%.o: %.c $(GENDIR_CURSES)/resext.h | $(DSEKAI_ASSETS_MAPS)
 	$(MD) $(dir $@)
 	$(CC_CURSES) $(CFLAGS_CURSES) -c -o $@ $(<:%.o=%)
 
-$(DEPDIR_CURSES)/%.d: %.c $(GENDIR_CURSES)/resext.h
-	$(MD) $(dir $@)
-	$(CC_CURSES) $(CFLAGS_CURSES) -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(DEPDIR_CURSES)/,$<)) -MF $@
+#$(DEPDIR_CURSES)/%.d: %.c $(GENDIR_CURSES)/resext.h
+#	$(MD) $(dir $@)
+#	$(CC_CURSES) $(CFLAGS_CURSES) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_CURSES)/,$<)) -MF $@
 
 #include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CURSES:.o=.d))
 
@@ -1036,10 +1054,10 @@ $(GENDIR_CHECK_NULL)/resext.h: $(GENDIR_CHECK_NULL)/$(STAMPFILE) $(MKRESH)
 $(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)/$(STAMPFILE)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(DEPDIR_CHECK_NULL)/%.d: %.c $(GENDIR_CHECK_NULL)/resext.h
-	$(MD) $(dir $@)
-	$(CC) $(CFLAGS_CHECK_NULL) -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(DEPDIR_CHECK_NULL)/,$<)) -MF $@
+#$(DEPDIR_CHECK_NULL)/%.d: %.c $(GENDIR_CHECK_NULL)/resext.h
+#	$(MD) $(dir $@)
+#	$(CC) $(CFLAGS_CHECK_NULL) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_CHECK_NULL)/,$<)) -MF $@
 
 #include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CHECK_NULL:.o=.d))
 	
@@ -1050,5 +1068,5 @@ $(OBJDIR_CHECK_NULL)/%.o: %.c check/testdata.h $(GENDIR_CHECK_NULL)/resext.h
 # ====== Clean ======
 
 clean:
-	rm -rf data obj bin gen *.err .rsrc .finf gmon.out log*.txt
+	rm -rf data obj obj-file bin bin-file gen gen-file *.err .rsrc .finf gmon.out log*.txt
 
