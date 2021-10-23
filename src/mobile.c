@@ -70,7 +70,12 @@ struct MOBILE* mobile_interact(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t
 ) {
 
-   if( NULL == actee ) {
+   if( 
+      NULL == actee ||
+      0 > actee->script_id ||
+      actee->script_id >= t->scripts_count
+   ) {
+      /* Invalid script. */
       return NULL;
    }
 
