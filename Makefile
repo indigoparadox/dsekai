@@ -151,7 +151,6 @@ ifeq ($(BUILD),RELEASE)
 
    CFLAGS_GCC_GENERIC :=
    CFLAGS_OWC_GENERIC :=
-   DEFINES_DSEKAI :=
    LDFLAGS_OWC_GENERIC :=
 
 else
@@ -554,9 +553,13 @@ BUILDPRC := build-prc
 
 # 4. Arguments
 
-CFLAGS_PALM := -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -g $(CFLAGS_GCC_GENERIC) -Iunilayer -I$(GENDIR_PALM) $(DEFINES_DSEKAI)
+CFLAGS_PALM := -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -Iunilayer -I$(GENDIR_PALM) $(DEFINES_DSEKAI) -Os
 
-LDFLAGS_PALM := $(LDFLAGS_GCC_GENERIC)
+ifneq ($(BUILD),RELEASE)
+   CFLAGS_PALM += -g
+endif
+
+LDFLAGS_PALM := $(CFLAGS_PALM)
 
 #DEF_PALM := src/mulipalm.def
 
