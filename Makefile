@@ -86,7 +86,11 @@ CONVERT_C_FILES := \
 LOOKUPS_C_FILES := \
    tools/lookups.c
 
+# ALL platforms.
 PLATFORMS := sdl xlib dos win16 win32 palm mac6 nds curses check_null
+
+# Platforms on which RESOURCE=FILE is working.
+PLATFORMS_FILE := sdl xlib win32
 
 ASSETDIR := assets
 ASSETPATH :=
@@ -128,6 +132,9 @@ BIN_SDL_ARM := $(BINDIR)/$(DSEKAI)r
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
+PKGDIR := packages
+PKGOS := $(shell uname -s -m | sed 's/ /./g' | tr '[:upper:]' '[:lower:]'])
+
 DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\"
 
 ifeq ($(RESOURCE),FILE)
@@ -152,6 +159,7 @@ ifeq ($(BUILD),RELEASE)
    CFLAGS_GCC_GENERIC :=
    CFLAGS_OWC_GENERIC :=
    LDFLAGS_OWC_GENERIC :=
+   SANITIZE := NO
 
 else
 
@@ -197,6 +205,8 @@ MCOPY := mcopy
 MKFSVFAT := /sbin/mkfs.vfat
 IMAGEMAGICK := convert
 PYTHON := python3
+TAR := tar
+GZIP := gzip
 
 MKRESH := $(BINDIR)/mkresh
 DRCPACK := $(BINDIR)/drcpack
@@ -224,6 +234,10 @@ DSEKAI_O_FILES_CHECK_NULL := \
 STAMPFILE := .stamp
 
 # ====== Generic Rules ======
+
+$(PKGDIR)/$(STAMPFILE):
+	$(MD) $(dir $@)
+	touch $@
 
 $(BINDIR)/$(STAMPFILE):
 	$(MD) $(BINDIR)
@@ -330,6 +344,23 @@ endef
 
 $(foreach platform,$(PLATFORMS), $(eval $(ICO_RULE)))
 
+define PKG_RULE
+$(PKGDIR)/f$(pkg_name): $(pkg_reqs) README.md | bin-file/$(notdir $(pkg_bin)) $(PKGDIR)/$(STAMPFILE)
+	cp bin-file/$(notdir $(pkg_bin)) .
+	$(pkg_strip) $(notdir $(pkg_bin))
+	$(TAR) -cvf - $(notdir $(pkg_bin)) $$^ | $(GZIP) > $$@
+	rm $(notdir $(pkg_bin))
+
+$(PKGDIR)/$(pkg_name): README.md | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
+	cp $(pkg_bin) .
+	$(pkg_strip) $(notdir $(pkg_bin))
+	$(TAR) -cvf - $(notdir $(pkg_bin)) $$^ | $(GZIP) > $$@
+	rm $(notdir $(pkg_bin))
+
+pkg_$(platform)_file: $(PKGDIR)/f$(pkg_name)
+pkg_$(platform): $(PKGDIR)/$(pkg_name)
+endef
+
 # ====== Utilities ======
 
 $(MKRESH): $(MKRESH_C_FILES) | $(BINDIR)/$(STAMPFILE)
@@ -386,6 +417,12 @@ res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
 res_maps := $(DSEKAI_ASSETS_MAPS)
 $(eval $(RESEXT_H_RULE))
 
+pkg_bin := $(BIN_SDL)
+pkg_strip := strip
+pkg_name := $(DSEKAI)-$(platform).$(PKGOS).tar.gz
+pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
+$(eval $(PKG_RULE))
+
 $(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE)
 	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL)
 
@@ -438,6 +475,12 @@ platform := xlib
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
 res_maps := $(DSEKAI_ASSETS_MAPS)
 $(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_XLIB)
+pkg_strip := strip
+pkg_name := $(DSEKAI)-$(platform).$(PKGOS).tar.gz
+pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
+$(eval $(PKG_RULE))
 
 $(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(GENDIR_XLIB)/resext.h
 	$(LD_XLIB) -o $@ $^ $(LDFLAGS_XLIB)
@@ -498,6 +541,12 @@ platform := dos
 res_gfx := $(DSEKAI_ASSETS_DOS_CGA)
 res_maps := $(DSEKAI_ASSETS_MAPS)
 $(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_DOS)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform).tar.gz
+pkg_reqs :=
+$(eval $(PKG_RULE))
 
 #$(BINDIR)/doscga.drc: res_doscga_drc
 
@@ -571,6 +620,12 @@ platform := palm
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_PALM)
 res_maps := $(DSEKAI_ASSETS_MAPS)
 $(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_PALM)
+pkg_strip := m68k-palmos-strip
+pkg_name := $(DSEKAI)-$(platform).tar.gz
+pkg_reqs :=
+$(eval $(PKG_RULE))
 
 $(GENDIR_PALM)/%.bmp: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_PALM)/$(STAMPFILE)
 	$(MD) $(dir $@)
@@ -663,6 +718,12 @@ res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
 res_maps := $(DSEKAI_ASSETS_MAPS)
 $(eval $(RESEXT_H_RULE))
 
+pkg_bin := $(BIN_WIN16)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform).tar.gz
+pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
+$(eval $(PKG_RULE))
+
 $(BINDIR)/$(DSEKAI)16.img: $(BIN_WIN16)
 	$(DD) if=/dev/zero bs=512 count=2880 of="$@"
 	$(MKFSVFAT) "$@"
@@ -746,6 +807,12 @@ platform := win32
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
 res_maps := $(DSEKAI_ASSETS_MAPS)
 $(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_WIN32)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform).tar.gz
+pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
+$(eval $(PKG_RULE))
 
 $(BIN_WIN32): \
 $(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE)
@@ -1091,5 +1158,5 @@ $(OBJDIR_CHECK_NULL)/%.o: %.c check/testdata.h $(GENDIR_CHECK_NULL)/resext.h
 # ====== Clean ======
 
 clean:
-	rm -rf data obj obj-file bin bin-file gen gen-file *.err .rsrc .finf gmon.out log*.txt
+	rm -rf data obj obj-file bin bin-file gen gen-file *.err .rsrc .finf gmon.out log*.txt packages fpackages
 
