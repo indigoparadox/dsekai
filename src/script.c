@@ -7,6 +7,14 @@
 #define SCRIPT_HAS_GFX
 #endif /* SCREEN_W && SCREEN_H */
 
+uint16_t script_handle_NOOP(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   return pc;
+}
+
 uint16_t script_goto_label(
    uint16_t pc, struct SCRIPT* script, uint16_t label_type, uint16_t label_id
 ) {

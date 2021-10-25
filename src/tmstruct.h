@@ -33,13 +33,14 @@
 #define SCREEN_TW (SCREEN_MAP_W / TILE_W)
 /*! \brief Screen height in tiles. */
 #define SCREEN_TH (SCREEN_MAP_H / TILE_H)
+#define TILEMAP_TS ((TILEMAP_TH * TILEMAP_TW) / 2)
 
 /*! \brief X/Y coordinates of a tile on the current map. */
 struct PACKED TILEMAP_COORDS {
    /*! \brief Horizontal coordinate in tiles. */
-   int32_t x;
+   uint8_t x;
    /*! \brief Vertical coordinate in tiles. */
-   int32_t y;
+   uint8_t y;
 };
 
 /*! \brief Tile prototype stored in TILEMAP::tileset. */
@@ -47,7 +48,7 @@ struct PACKED TILESET_TILE {
    /*! \brief Indentifier for graphical asset representing this tile. */
    RESOURCE_ID image;
    /*! \brief Flags indicating behavior for this tile. */
-   uint32_t flags;
+   uint8_t flags;
 };
 
 /*! \brief Defines a spawner to create mobiles in the world.
@@ -84,14 +85,18 @@ struct PACKED TILEMAP {
    struct TILEMAP_SPAWN spawns[TILEMAP_SPAWNS_MAX];
    /*! \brief Strings used in dialog/signs on this map. */
    char strings[TILEMAP_STRINGS_MAX][TILEMAP_STRINGS_SZ];
+   /* TODO: Scrap string sizes and enforce NULL term in loaders. */
    /*! \brief Size of each loaded string. */
    uint8_t string_szs[TILEMAP_STRINGS_MAX];
+   /* TODO: Scrap this. */
    /*! \brief Number of TILEMAP::strings active on this map. */
    uint8_t strings_count;
+   /* TODO: Scrap this. */
    /*! \brief Number of TILEMAP::spawns active on this map. */
    uint16_t spawns_count;
    /* \brief Scripts available to attach to any MOBILE. */
    struct SCRIPT scripts[TILEMAP_SCRIPTS_MAX];
+   /* TODO: Scrap this. */
    /* \brief Number of TILEMAP::scripts currently available. */
    uint16_t scripts_count;
 };

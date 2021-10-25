@@ -93,6 +93,20 @@ MAP2ASN_C_FILES := \
    src/mobile.c \
    src/script.c \
    src/json.c \
+   src/tmjson.c \
+   unilayer/resource/file.c \
+   unilayer/graphics.c \
+   unilayer/graphics/nullg.c \
+   unilayer/memory/fakem.c \
+   unilayer/dio.c
+
+MAP2BIN_C_FILES := \
+   tools/map2bin.c \
+   src/tilemap.c \
+   src/mobile.c \
+   src/script.c \
+   src/json.c \
+   src/tmjson.c \
    unilayer/resource/file.c \
    unilayer/graphics.c \
    unilayer/graphics/nullg.c \
@@ -153,7 +167,7 @@ DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\"
 ifeq ($(RESOURCE),FILE)
 
    DEFINES_RESOURCE := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
-   DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c src/tmjson.c
+   DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c
 
 all: $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN32)
 
@@ -189,6 +203,36 @@ ifeq ($(SANITIZE),NO)
    FLAGS_GCC_SANITIZE := 
 else
    FLAGS_GCC_SANITIZE := -fsanitize=address -fsanitize=leak -fsanitize=undefined
+endif
+
+TILEMAP_FMTS :=
+
+ifeq ($(RESOURCE),FILE)
+
+   ifeq ($(FMT_BIN),TRUE)
+      DEFINES_DSEKAI += -DTILEMAP_FMT_BIN
+      TILEMAP_FMTS += BIN
+      DSEKAI_C_FILES_RES += src/tmbin.c
+   endif
+
+   ifeq ($(FMT_ASN),TRUE)
+      DEFINES_DSEKAI += -DTILEMAP_FMT_ASN
+      TILEMAP_FMTS += BIN
+      DSEKAI_C_FILES_RES += src/tmasn.c
+   endif
+
+   ifeq ($(FMT_JSON),TRUE)
+      DEFINES_DSEKAI += -DTILEMAP_FMT_JSON
+      DSEKAI_C_FILES_RES += src/tmjson.c
+      TILEMAP_FMTS += JSON
+   endif
+
+   #ifeq ($(TILEMAP_FMTS),)
+   #   DEFINES_DSEKAI += -DTILEMAP_FMT_JSON
+   #   DSEKAI_C_FILES += src/tmjson.c
+   #   TILEMAP_FMTS += JSON
+   #endif
+
 endif
 
 define BITMAPS_RULE
@@ -227,6 +271,7 @@ CONVERT := $(BINDIR)/convert
 LOOKUPS := $(BINDIR)/lookups
 HEADPACK := $(BINDIR)/headpack
 MAP2ASN := $(BINDIR)/map2asn
+MAP2BIN := $(BINDIR)/map2bin
 
 CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer -DASSETS_PATH="\"$(ASSETPATH)\""
 CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DRESOURCE_DRC -Iunilayer
@@ -234,6 +279,7 @@ CFLAGS_CONVERT := -DNO_RESEXT -g -DRESOURCE_FILE -Iunilayer
 CFLAGS_LOOKUPS := -g -Iunilayer
 CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
 CFLAGS_MAP2ASN := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
+CFLAGS_MAP2BIN := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
 
 CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_GCC_GENERIC) -DRESOURCE_DRC -Iunilayer
 
@@ -395,6 +441,9 @@ $(HEADPACK): $(HEADPACK_C_FILES) | $(BINDIR)/$(STAMPFILE)
 
 $(MAP2ASN): $(MAP2ASN_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_MAP2ASN) -o $@ $^
+
+$(MAP2BIN): $(MAP2BIN_C_FILES) | $(BINDIR)/$(STAMPFILE)
+	$(HOST_CC) $(CFLAGS_MAP2BIN) -o $@ $^
 
 # ====== Main: SDL ======
 

@@ -189,7 +189,13 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       }
 
 #ifdef RESOURCE_FILE
+#ifdef TILEMAP_FMT_JSON
       tilemap_json_load( m_field, map );
+#elif defined TILEMAP_FMT_ASN
+      tilemap_asn_load( "assets/m_field.asn", map );
+#else
+#error "No loader defined!"
+#endif
 #else
       debug_printf( 3, "gc_map_field: %s", gc_map_field.name );
       memory_copy_ptr( (MEMORY_PTR)map, (MEMORY_PTR)&gc_map_field,
