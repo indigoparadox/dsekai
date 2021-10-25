@@ -48,6 +48,7 @@ MKRESH_C_FILES := \
 HEADPACK_C_FILES := \
    tools/headpack.c \
    tools/map2h.c \
+   src/tmjson.c \
    src/tilemap.c \
    src/mobile.c \
    src/script.c \
@@ -85,6 +86,18 @@ CONVERT_C_FILES := \
 
 LOOKUPS_C_FILES := \
    tools/lookups.c
+
+MAP2ASN_C_FILES := \
+   tools/map2asn.c \
+   src/tilemap.c \
+   src/mobile.c \
+   src/script.c \
+   src/json.c \
+   unilayer/resource/file.c \
+   unilayer/graphics.c \
+   unilayer/graphics/nullg.c \
+   unilayer/memory/fakem.c \
+   unilayer/dio.c
 
 # ALL platforms.
 PLATFORMS := sdl xlib dos win16 win32 palm mac6 nds curses check_null
@@ -140,7 +153,7 @@ DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\"
 ifeq ($(RESOURCE),FILE)
 
    DEFINES_RESOURCE := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
-   DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c
+   DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c src/tmjson.c
 
 all: $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN32)
 
@@ -213,12 +226,14 @@ DRCPACK := $(BINDIR)/drcpack
 CONVERT := $(BINDIR)/convert
 LOOKUPS := $(BINDIR)/lookups
 HEADPACK := $(BINDIR)/headpack
+MAP2ASN := $(BINDIR)/map2asn
 
 CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer -DASSETS_PATH="\"$(ASSETPATH)\""
 CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DRESOURCE_DRC -Iunilayer
 CFLAGS_CONVERT := -DNO_RESEXT -g -DRESOURCE_FILE -Iunilayer
 CFLAGS_LOOKUPS := -g -Iunilayer
 CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
+CFLAGS_MAP2ASN := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
 
 CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_GCC_GENERIC) -DRESOURCE_DRC -Iunilayer
 
@@ -377,6 +392,9 @@ $(LOOKUPS): $(LOOKUPS_C_FILES) | $(BINDIR)/$(STAMPFILE)
 
 $(HEADPACK): $(HEADPACK_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_HEADPACK) -o $@ $^
+
+$(MAP2ASN): $(MAP2ASN_C_FILES) | $(BINDIR)/$(STAMPFILE)
+	$(HOST_CC) $(CFLAGS_MAP2ASN) -o $@ $^
 
 # ====== Main: SDL ======
 

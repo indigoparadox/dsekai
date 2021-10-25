@@ -1,6 +1,12 @@
 
 #include "dsekai.h"
 
+#ifdef RESOURCE_FILE
+
+#include "tmjson.h"
+
+#endif /* RESOURCE_FILE */
+
 extern const struct TILEMAP gc_map_field;
 
 #define TOPDOWN_STATE_WELCOME 1
@@ -183,7 +189,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       }
 
 #ifdef RESOURCE_FILE
-      tilemap_load( m_field, map );
+      tilemap_json_load( m_field, map );
 #else
       debug_printf( 3, "gc_map_field: %s", gc_map_field.name );
       memory_copy_ptr( (MEMORY_PTR)map, (MEMORY_PTR)&gc_map_field,

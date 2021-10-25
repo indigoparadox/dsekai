@@ -6,6 +6,8 @@
 
 #include "../src/dsekai.h"
 
+#include "../src/tmjson.h"
+
 #include "map2h.h"
 
 #define BIN_BUFFER_SZ 1024
@@ -157,7 +159,7 @@ int main( int argc, char* argv[] ) {
       ) {
          /* This is a map JSON file, so preload it. */
 
-         retval = tilemap_load( argv[i], &t );
+         retval = tilemap_json_load( argv[i], &t );
          if( !retval ) {
             error_printf( "unable to load tilemap: %s",
                &(argv[i][path_iter_fname_idx]) );
