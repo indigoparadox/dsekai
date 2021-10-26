@@ -210,7 +210,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
        */
       tilemap_draw( map, state );
 
-      /* TODO: Generate this dynamically. */
+      /* Spawn mobiles. */
       for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
          if( 0 == memory_strnlen_ptr(
             map->spawns[i].name, TILEMAP_SPAWN_NAME_SZ )

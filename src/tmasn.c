@@ -1,11 +1,55 @@
 
 #include "dsekai.h"
 
-int16_t tilemap_asn_parse_short( const uint8_t* asn_buffer ) {
+int16_t tilemap_asn_read_short( const uint8_t* asn_buffer ) {
    int16_t n_out = 0;
    n_out |= (asn_buffer[0] << 8);
    n_out |= asn_buffer[1];
    return n_out;
+}
+
+int16_t tilemap_asn_parse_int(
+   uint8_t* buffer, uint8_t buffer_sz, uint8_t sign, const uint8_t* asn_buffer
+) {
+   int16_t field_sz = 0;
+   int16_t* int16_buffer = (int16_t*)buffer;
+   uint16_t* uint16_buffer = (uint16_t*)buffer;
+   int8_t* int8_buffer = (int8_t*)buffer;
+
+   if( 0x02 != asn_buffer[0] ) {
+      error_printf( "invalid int type byte: 0x%02x", asn_buffer[0] );
+      goto cleanup;
+   }
+
+   if( 2 < buffer_sz ) {
+      error_printf( "integer buffer too large" );
+      goto cleanup;
+   }
+
+   if( asn_buffer[1] == 1 ) {
+      if( sign ) {
+         *int8_buffer = asn_buffer[2];
+      } else {
+         *buffer = asn_buffer[2];
+      }
+      field_sz += 1;
+   } else if( asn_buffer[2] == 2 ) {
+      if( sign ) {
+         *int16_buffer = tilemap_asn_read_short( &(asn_buffer[2]) );
+      } else {
+         *uint16_buffer = tilemap_asn_read_short( &(asn_buffer[2]) );
+      }
+      field_sz += 2;
+   } else {
+      error_printf( "unable to process integer" );
+      goto cleanup;
+   }
+
+   field_sz += 2; /* type and size bytes */
+
+cleanup:
+
+   return field_sz;
 }
 
 static int16_t tilemap_asn_parse_string(
@@ -48,7 +92,7 @@ static int16_t tilemap_asn_parse_tileset(
             asn_buffer[0], asn_buffer[1] );
       goto cleanup;
    }
-   ts_seq_sz = tilemap_asn_parse_short( &(asn_buffer[2]) );
+   ts_seq_sz = tilemap_asn_read_short( &(asn_buffer[2]) );
    debug_printf( 2, "tileset sequence size: %d bytes", ts_seq_sz );
 
    total_read_sz += 4; /* sequence type, length fields */
@@ -63,9 +107,8 @@ static int16_t tilemap_asn_parse_tileset(
       total_read_sz += 2; /* tile sequence type, size */
       
       /* image */
-      read_sz =
-         tilemap_asn_parse_string( t->tileset[tile_idx].image,
-            RESOURCE_PATH_MAX, &(asn_buffer[total_read_sz]) );
+      read_sz = tilemap_asn_parse_string( t->tileset[tile_idx].image,
+         RESOURCE_PATH_MAX, &(asn_buffer[total_read_sz]) );
       if( 0 == read_sz ) {
          goto cleanup;
       }
@@ -74,14 +117,14 @@ static int16_t tilemap_asn_parse_tileset(
       total_read_sz += read_sz; /* tile image and header */
 
       /* flags */
-      if( 0x02 != asn_buffer[total_read_sz] ) {
-         error_printf( "invalid int type byte: 0x%02x",
-            asn_buffer[total_read_sz] );
+      read_sz = tilemap_asn_parse_int(
+         &(t->tileset[tile_idx].flags), 1, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 == read_sz ) {
          goto cleanup;
       }
-      total_read_sz += 2; /* tile flags header */
-      t->tileset[tile_idx].flags = asn_buffer[total_read_sz];
-      total_read_sz++;
+      debug_printf( 2, "tile flags: %d", t->tileset[tile_idx].flags );
+      total_read_sz += read_sz;
+
       tile_idx++;
    }
 
@@ -103,7 +146,7 @@ static int16_t tilemap_asn_parse_tiles(
          "invalid tile blob type byte: 0x%02x", asn_buffer[0] );
       goto cleanup;
    }
-   t_seq_sz = tilemap_asn_parse_short( &(asn_buffer[2]) );
+   t_seq_sz = tilemap_asn_read_short( &(asn_buffer[2]) );
    if( t_seq_sz != TILEMAP_TS ) {
       error_printf( "invalid tile sequence size: %d", t_seq_sz );
       goto cleanup;
@@ -162,7 +205,7 @@ static int16_t tilemap_asn_parse_spawns(
          "invalid spawn sequence type byte: 0x%02x", asn_buffer[0] );
       goto cleanup;
    }
-   ts_seq_sz = tilemap_asn_parse_short( &(asn_buffer[2]) );
+   ts_seq_sz = tilemap_asn_read_short( &(asn_buffer[2]) );
    debug_printf( 2, "spawn sequence size: %d bytes", ts_seq_sz );
 
    total_read_sz += 4; /* sequence type, length fields */
@@ -197,26 +240,22 @@ static int16_t tilemap_asn_parse_spawns(
       total_read_sz += 2; /* spawn coords type and size */
 
       /* coords.x */
-      if( 0x02 != asn_buffer[total_read_sz] ) {
-         error_printf( "invalid int type byte: 0x%02x",
-            asn_buffer[total_read_sz] );
+      read_sz = tilemap_asn_parse_int(
+         &(t->spawns[spawn_idx].coords.x), 1, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 == read_sz ) {
          goto cleanup;
       }
-      total_read_sz += 2; /* coords.x header */
-      t->spawns[spawn_idx].coords.x = asn_buffer[total_read_sz];
       debug_printf( 2, "spawn X: %d", t->spawns[spawn_idx].coords.x );
-      total_read_sz++;
+      total_read_sz += read_sz;
 
       /* coords.y */
-      if( 0x02 != asn_buffer[total_read_sz] ) {
-         error_printf( "invalid int type byte: 0x%02x",
-            asn_buffer[total_read_sz] );
+      read_sz = tilemap_asn_parse_int(
+         &(t->spawns[spawn_idx].coords.y), 1, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 == read_sz ) {
          goto cleanup;
       }
-      total_read_sz += 2; /* coords.y header */
-      t->spawns[spawn_idx].coords.y = asn_buffer[total_read_sz];
       debug_printf( 2, "spawn Y: %d", t->spawns[spawn_idx].coords.y );
-      total_read_sz++;
+      total_read_sz += read_sz;
 
       /* type */
       read_sz =
@@ -256,8 +295,8 @@ static int16_t tilemap_asn_parse_scripts(
    script_seq_sz = 0,
    script_seq_start = 0,
    step_idx = 0,
-   script_idx = 0,
-   script_read_sz = 0;
+   read_sz = 0,
+   script_idx = 0;
 
    if( 0x30 != asn_buffer[0] ) {
       error_printf(
@@ -271,7 +310,6 @@ static int16_t tilemap_asn_parse_scripts(
       debug_printf( 2, "script idx: %d", script_idx );
 
       step_idx = 0;
-      script_read_sz = 0;
       script_seq_start = total_read_sz;
       if( 0x30 != asn_buffer[total_read_sz] ) {
          error_printf(
@@ -304,46 +342,26 @@ static int16_t tilemap_asn_parse_scripts(
          total_read_sz += 2; /* step type, size */
       
          /* step.action */
-         if( 0x02 != asn_buffer[total_read_sz] ) {
-            error_printf( "invalid int type byte: 0x%02x",
-               asn_buffer[total_read_sz] );
+         read_sz = tilemap_asn_parse_int(
+            (uint8_t*)&(t->scripts[script_idx].steps[step_idx].action),
+            2, 0, &(asn_buffer[total_read_sz]) );
+         if( 0 == read_sz ) {
             goto cleanup;
          }
-         if( 2 == asn_buffer[total_read_sz + 1] ) {
-            total_read_sz += 2; /* step.action header */
-            /* TODO: Read short. */
-         } else if( 1 == asn_buffer[total_read_sz + 1] ) {
-            total_read_sz += 2; /* step.action header */
-            t->scripts[script_idx].steps[step_idx].action = 
-               asn_buffer[total_read_sz];
-            debug_printf( 2, "script step action: %d",
-               t->scripts[script_idx].steps[step_idx].action );
-            total_read_sz++;
-         } else {
-            error_printf(
-               "invalid int size: %d", asn_buffer[total_read_sz + 1] );
-         }
-         
+         debug_printf( 2, "script step action: %d",
+            t->scripts[script_idx].steps[step_idx].action );
+         total_read_sz += read_sz;
+
          /* step.arg */
-         if( 0x02 != asn_buffer[total_read_sz] ) {
-            error_printf( "invalid int type byte: 0x%02x",
-               asn_buffer[total_read_sz] );
+         read_sz = tilemap_asn_parse_int(
+            (uint8_t*)&(t->scripts[script_idx].steps[step_idx].arg),
+            2, 1, &(asn_buffer[total_read_sz]) );
+         if( 0 == read_sz ) {
             goto cleanup;
          }
-         if( 2 == asn_buffer[total_read_sz + 1] ) {
-            total_read_sz += 2; /* step.action header */
-            /* TODO: Read short. */
-         } else if( 1 == asn_buffer[total_read_sz + 1] ) {
-            total_read_sz += 2; /* step.action header */
-            t->scripts[script_idx].steps[step_idx].arg = 
-               asn_buffer[total_read_sz];
-            debug_printf( 2, "script step arg: %d",
-               t->scripts[script_idx].steps[step_idx].arg );
-            total_read_sz++;
-         } else {
-            error_printf(
-               "invalid int size: %d", asn_buffer[total_read_sz + 1] );
-         }
+         debug_printf( 2, "script step arg: %d",
+            t->scripts[script_idx].steps[step_idx].arg );
+         total_read_sz += read_sz;
 
          step_idx++;
       }
