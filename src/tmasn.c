@@ -1,13 +1,20 @@
 
 #include "dsekai.h"
 
+int16_t tilemap_asn_parse_short( const char* asn_buffer ) {
+   int16_t n_out = 0;
+   n_out |= (asn_buffer[0] << 8);
+   n_out |= asn_buffer[1];
+   return n_out;
+}
+
 static int16_t tilemap_asn_parse_string(
    char* buffer, int16_t buffer_sz, const char* asn_buffer
 ) {
    int16_t field_sz = 0;
 
    if( 0x16 != asn_buffer[0] ) {
-      error_printf( "invalid string type byte: %d", asn_buffer[0] );
+      error_printf( "invalid string type byte: 0x%02x", asn_buffer[0] );
       goto cleanup;
    }
    
@@ -20,9 +27,65 @@ static int16_t tilemap_asn_parse_string(
    memory_copy_ptr( buffer, &(asn_buffer[2]), field_sz );
    debug_printf( 1, "parsed string: %s (%d)", buffer, field_sz );
 
+   field_sz += 2; /* type and length bytes */
+
 cleanup:
 
    return field_sz;
+}
+
+static int16_t tilemap_asn_parse_tilesets(
+   struct TILEMAP* t, const char* asn_buffer
+) {
+   int16_t total_read_sz = 0,
+      read_sz = 0,
+      ts_seq_sz = 0,
+      tile_idx = 0;
+
+   if( 0x30 != asn_buffer[0] ) {
+      error_printf(
+         "invalid tilset sequence type byte: 0x%02x", asn_buffer[0] );
+      goto cleanup;
+   }
+   ts_seq_sz = tilemap_asn_parse_short( &(asn_buffer[2]) );
+   debug_printf( 2, "tileset sequence size: %d bytes", ts_seq_sz );
+
+   total_read_sz += 4; /* sequence type, length fields */
+
+   while( total_read_sz - 4 < ts_seq_sz ) {
+      if( 0x30 != asn_buffer[total_read_sz] ) {
+         error_printf(
+            "invalid tile sequence type byte: 0x%02x",
+            asn_buffer[total_read_sz] );
+         goto cleanup;
+      }
+      total_read_sz += 2; /* tile sequence type, size */
+      
+      /* image */
+      read_sz =
+         tilemap_asn_parse_string( t->tileset[tile_idx].image,
+            RESOURCE_PATH_MAX, &(asn_buffer[total_read_sz]) );
+      if( 0 == read_sz ) {
+         goto cleanup;
+      }
+      debug_printf( 3, "tile resource: %s (%d)",
+         t->tileset[tile_idx].image, read_sz );
+      total_read_sz += read_sz; /* tile image and header */
+
+      if( 0x02 != asn_buffer[total_read_sz] ) {
+         error_printf( "invalid int type byte: 0x%02x",
+            asn_buffer[total_read_sz] );
+         goto cleanup;
+      }
+      total_read_sz += 2; /* tile flags header */
+      t->tileset[tile_idx].flags = asn_buffer[total_read_sz];
+      total_read_sz++;
+      tile_idx++;
+   }
+
+cleanup:
+
+   return total_read_sz;
 }
 
 int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
@@ -73,6 +136,13 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
       goto cleanup;
    }
    debug_printf( 3, "tilemap name: %s (%d)", t->name, read_sz );
+   idx += read_sz;
+
+   read_sz = tilemap_asn_parse_tilesets( t, &(asn_buffer[idx]) );
+   if( 0 == read_sz ) {
+      goto cleanup;
+   }
+   idx += read_sz;
 
 cleanup:
 

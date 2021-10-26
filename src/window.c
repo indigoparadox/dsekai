@@ -46,6 +46,17 @@ void window_init() {
       (MEMORY_PTR)frames, (MEMORY_PTR)&gc_frame_cm_checker,
       sizeof( struct WINDOW_FRAME ) ); */
 
+#ifdef RESOURCE_FILE
+   resource_assign_id( frames[0].tr, "assets/16x16x4/p_chk_tr.bmp" );
+   resource_assign_id( frames[0].tl, "assets/16x16x4/p_chk_tl.bmp" );
+   resource_assign_id( frames[0].br, "assets/16x16x4/p_chk_br.bmp" );
+   resource_assign_id( frames[0].bl, "assets/16x16x4/p_chk_bl.bmp" );
+   resource_assign_id( frames[0].t , "assets/16x16x4/p_chk_t.bmp" );
+   resource_assign_id( frames[0].b , "assets/16x16x4/p_chk_b.bmp" );
+   resource_assign_id( frames[0].r , "assets/16x16x4/p_chk_r.bmp" );
+   resource_assign_id( frames[0].l , "assets/16x16x4/p_chk_l.bmp" );
+   resource_assign_id( frames[0].c , "assets/16x16x4/p_chk_c.bmp" );
+#else
    resource_assign_id( frames[0].tr , p_chk_tr );
    resource_assign_id( frames[0].tl , p_chk_tl );
    resource_assign_id( frames[0].br , p_chk_br );
@@ -55,6 +66,7 @@ void window_init() {
    resource_assign_id( frames[0].r , p_chk_r );
    resource_assign_id( frames[0].l , p_chk_l );
    resource_assign_id( frames[0].c , p_chk_c );
+#endif
 
    frames = (struct WINDOW_FRAME*)memory_unlock( g_frames_handle );
 }

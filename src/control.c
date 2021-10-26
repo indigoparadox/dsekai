@@ -97,50 +97,61 @@ int16_t control_draw_SPRITE(
 
 /* Sizing Callbacks */
 
-void control_sz_BUTTON(
+uint8_t control_sz_BUTTON(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs
 ) {
    /* TODO */
+   return 0;
 }
 
-void control_sz_CHECK(
+uint8_t control_sz_CHECK(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs
 ) {
    /* TODO */
+   return 0;
 }
 
-void control_sz_LABEL_T(
+uint8_t control_sz_LABEL_T(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs
 ) {
    assert( NULL != c );
-   assert( 0 <= c->data.scalar && c->data.scalar < strings_sz );
+
+   if( 0 >= c->data.scalar || c->data.scalar >= strings_sz ) {
+      error_printf( "invalid string specified to control" );
+      return 0;
+   }
 
    graphics_string_sz(
       strings[c->data.scalar], string_szs[c->data.scalar],
       c->scale, sz );
+
+   return 1;
 }
 
-void control_sz_LABEL_G(
+uint8_t control_sz_LABEL_G(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs
 ) {
    /* TODO */
+   return 0;
 }
 
-void control_sz_SPRITE(
+uint8_t control_sz_SPRITE(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
    const char strings[][TILEMAP_STRINGS_SZ],
    uint8_t strings_sz, uint8_t* string_szs
 ) {
+   /* TODO: Verify sprite exists. */
    sz->w = SPRITE_W + 4; /* For border. */
    sz->h = SPRITE_W + 4; /* For border. */
+   return 1;
 }
 
 /* General Functions */
@@ -214,9 +225,14 @@ int16_t control_push(
    controls[0].status = status;
    controls[0].id = control_id;
 
-   gc_control_sz_callbacks[type](
-      &(windows[window_idx]), &(controls[0]), &control_sz,
-      strings, strings_sz, string_szs );
+   if(
+      !gc_control_sz_callbacks[type](
+         &(windows[window_idx]), &(controls[0]), &control_sz,
+         strings, strings_sz, string_szs )
+   ) {
+      error_printf( "unable to create control" );
+      goto cleanup;
+   }
 
    if( WINDOW_CENTERED == w ) {
       controls[0].w = control_sz.w;

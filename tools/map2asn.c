@@ -50,7 +50,8 @@ int main( int argc, char* argv[] ) {
       j = 0,
       buffer_sz = 32,
       idx = 0,
-      scripts_count = 0;
+      scripts_count = 0,
+      sz_idx = 0;
 
    assert( 1 < argc );
 
@@ -74,13 +75,25 @@ int main( int argc, char* argv[] ) {
    buffer = buffer_copy_bytes(
       &idx, buffer, &buffer_sz, t.name, strlen( t.name ) );
 
+   /* tileset */
+   buffer[idx++] = MAPBUF_ASN_SEQUENCE;
+   /* TODO: This will fail if there are only 1 or 2 tiles. */
+   buffer[idx++] = 0x82;
+   sz_idx = idx;
+   idx += 2;
    for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
       if( 0 == strlen( t.tileset[i].image ) ) {
          continue;
       }
 
       buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-      buffer[idx++] = 0x80;
+      buffer[idx++] = 
+         1 + /* MAPBUF_ASN_STRING */
+         1 + /* string length */
+         strlen( t.tileset[i].image ) + /* string */
+         1 + /* MAPBUF_ASN_INT */
+         1 + /* int length */
+         1; /* flags */
 
       /* image */
       buffer[idx++] = MAPBUF_ASN_STRING;
@@ -93,10 +106,9 @@ int main( int argc, char* argv[] ) {
       buffer[idx++] = MAPBUF_ASN_INT;
       buffer[idx++] = 1;
       buffer[idx++] = t.tileset[i].flags;
-
-      buffer[idx++] = 0;
-      buffer[idx++] = 0;
    }
+   printf( "tileset seq: %d bytes\n", idx - sz_idx );
+   buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
 
    /* tiles */
    buffer[idx++] = MAPBUF_ASN_BLOB;
@@ -126,13 +138,28 @@ int main( int argc, char* argv[] ) {
    }
 
    /* spawns */
+   buffer[idx++] = MAPBUF_ASN_SEQUENCE;
+   /* TODO: This will fail if there are only 1 or 2 spawners. */
+   buffer[idx++] = 0x82;
+   sz_idx = idx;
+   idx += 2;
    for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
       if( 0 == strlen( t.spawns[i].name ) ) {
          continue;
       }
 
       buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-      buffer[idx++] = 0x80;
+      buffer[idx++] = 
+         1 + /* MAPBUF_ASN_STRING */
+         1 + /* name size */
+         strlen( t.spawns[i].name ) + /* name */
+         2 + /* coords header */
+         3 + /* coords.x */
+         3 + /* coords.y */
+         1 + /* MAPBUF_ASN_STRING */
+         1 + /* type size */
+         strlen( t.spawns[i].type ) + /* type */
+         3; /* script_id */
 
       /* name */
       buffer[idx++] = MAPBUF_ASN_STRING;
@@ -174,10 +201,9 @@ int main( int argc, char* argv[] ) {
          buffer[idx++] = 1;
          buffer[idx++] = t.spawns[i].script_id;
       }
-
-      buffer[idx++] = 0;
-      buffer[idx++] = 0;
    }
+   printf( "spawners seq: %d bytes\n", idx - sz_idx );
+   buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
 
    /* scripts */
    for(
