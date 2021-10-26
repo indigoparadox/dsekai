@@ -51,6 +51,8 @@ int main( int argc, char* argv[] ) {
       buffer_sz = 32,
       idx = 0,
       scripts_count = 0,
+      script_sz_idx = 0,
+      step_sz_idx = 0,
       sz_idx = 0;
 
    assert( 1 < argc );
@@ -221,7 +223,8 @@ int main( int argc, char* argv[] ) {
    idx += 2; */
    for( i = 0 ; scripts_count > i ; i++ ) {
       buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-      buffer[idx++] = 0x80;
+      script_sz_idx = idx;
+      buffer[idx++] = 0;
 
       /* steps */
       for( j = 0 ; SCRIPT_STEPS_MAX > j ; j++ ) {
@@ -230,7 +233,8 @@ int main( int argc, char* argv[] ) {
          }
 
          buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-         buffer[idx++] = 0x80;
+         step_sz_idx = idx;
+         buffer[idx++] = 0;
 
          /* action */
          buffer[idx++] = MAPBUF_ASN_INT;
@@ -256,11 +260,9 @@ int main( int argc, char* argv[] ) {
             buffer[idx++] = t.scripts[i].steps[j].arg;
          }
 
-         buffer[idx++] = 0;
-         buffer[idx++] = 0;
+         buffer[step_sz_idx] = idx - step_sz_idx - 1;
       }
-      buffer[idx++] = 0;
-      buffer[idx++] = 0;
+      buffer[script_sz_idx] = idx - script_sz_idx - 1;
    }
    buffer[idx++] = 0;
    buffer[idx++] = 0;

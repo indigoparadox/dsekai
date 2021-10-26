@@ -122,7 +122,7 @@ uint8_t control_sz_LABEL_T(
 ) {
    assert( NULL != c );
 
-   if( 0 >= c->data.scalar || c->data.scalar >= strings_sz ) {
+   if( 0 > c->data.scalar || c->data.scalar >= strings_sz ) {
       error_printf( "invalid string specified to control" );
       return 0;
    }

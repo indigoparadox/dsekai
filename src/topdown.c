@@ -190,7 +190,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 
 #ifdef RESOURCE_FILE
 #ifdef TILEMAP_FMT_JSON
-      tilemap_json_load( m_field, map );
+      tilemap_json_load( "assets/m_field.json", map );
 #elif defined TILEMAP_FMT_ASN
       tilemap_asn_load( "assets/m_field.asn", map );
 #else
@@ -211,7 +211,12 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       tilemap_draw( map, state );
 
       /* TODO: Generate this dynamically. */
-      for( i = 0 ; map->spawns_count > i ; i++ ) {
+      for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
+         if( 0 == memory_strnlen_ptr(
+            map->spawns[i].name, TILEMAP_SPAWN_NAME_SZ )
+         ) {
+            break;
+         }
          mobiles[i].hp = 100;
          mobiles[i].mp = 100;
          mobiles[i].coords.x = map->spawns[i].coords.x;
@@ -228,6 +233,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          resource_assign_id( mobiles[i].sprite, map->spawns[i].type );
          state->mobiles_count++;
          if( 0 == strncmp( "player", map->spawns[i].name, 6 ) ) {
+            debug_printf( 2, "player is mobile #%d", i );
             state->player_idx = i;
          }
       }
@@ -239,8 +245,13 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 #ifndef HIDE_WELCOME_DIALOG
 #ifndef PLATFORM_PALM
       state->engine_state = TOPDOWN_STATE_WELCOME;
+#ifdef RESOURCE_FILE
+      window_prefab_dialog(
+         WINDOW_ID_WELCOME, 1, "assets/16x16x4/s_pncess.bmp", state, map );
+#else
       window_prefab_dialog(
          WINDOW_ID_WELCOME, 1, s_pncess, state, map );
+#endif /* RESOURCE_FILE */
 #endif /* PLATFORM_PALM */
 #endif /* !HIDE_WELCOME_DIALOG */
 
@@ -381,6 +392,7 @@ void topdown_deinit( MEMORY_HANDLE state_handle ) {
    struct DSEKAI_STATE* state = NULL;
    struct TILEMAP* map = NULL;
    struct MOBILE* mobiles = NULL;
+   struct ITEM* items = NULL;
 
    if( (MEMORY_HANDLE)NULL == state_handle ) {
       return;
@@ -399,6 +411,8 @@ void topdown_deinit( MEMORY_HANDLE state_handle ) {
          }
          mobiles = memory_unlock( state->mobiles );
       }
+      memory_free( state->mobiles );
+      state->mobiles = NULL;
    }
 
    if( (MEMORY_HANDLE)NULL != state->map ) {
@@ -407,7 +421,21 @@ void topdown_deinit( MEMORY_HANDLE state_handle ) {
          tilemap_deinit( map );
          map = memory_unlock( state->map );
       }
+      memory_free( state->map );
+      state->map = NULL;
    }
+
+   #if 0
+   if( (MEMORY_HANDLE)NULL != state->items ) {
+      items = memory_lock( state->items );
+      if( NULL != items ) {
+         /* items_deinit( items ); */
+         items = memory_unlock( state->items );
+      }
+      memory_free( state->items );
+      state->items = NULL;
+   }
+   #endif
 
    state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
 }

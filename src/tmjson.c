@@ -11,7 +11,9 @@ static int16_t tilemap_json_parse_spawn(
    char spawn_buffer[RESOURCE_PATH_MAX];
    char iter_path[JSON_PATH_SZ];
    int16_t spawn_buffer_sz = 0,
-      str_sz = 0;
+      str_sz = 0,
+      x_px_in = 0,
+      y_px_in = 0;
 
    /* Prepend asset path. */
 
@@ -45,16 +47,16 @@ static int16_t tilemap_json_parse_spawn(
    /* Parse X */
    dio_snprintf(
       iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_X, spawn_idx );
-   spawn->coords.x = json_int_from_path(
+   x_px_in = json_int_from_path(
       iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
-   spawn->coords.x /= TILE_W;
+   spawn->coords.x = x_px_in / TILE_W;
 
    /* Parse Y */
    dio_snprintf(
       iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_Y, spawn_idx );
-   spawn->coords.y = json_int_from_path(
+   y_px_in = json_int_from_path(
       iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
-   spawn->coords.y /= TILE_H;
+   spawn->coords.y = y_px_in / TILE_H;
 
    /* Parse Script */
    spawn->script_id = -1;

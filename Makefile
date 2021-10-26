@@ -329,12 +329,13 @@ define RESEXT_H_RULE
 
       # File was specified explicitly.
 
-      $(GENDIR)/$(platform)/residx.h: $(res_gfx) $(res_maps) | \
-      $(GENDIR)/$(platform)/$(STAMPFILE) $(MKRESH)
-			$(MKRESH) -f file -s bmp jsn json cga -if $$^ -oh $$@
+      #$(GENDIR)/$(platform)/residx.h: $(res_gfx) $(res_maps) | \
+      #$(GENDIR)/$(platform)/$(STAMPFILE) $(MKRESH)
+		#	$(MKRESH) -f file -s bmp jsn json cga -if $$^ -oh $$@
 
-      $(GENDIR)/$(platform)/resext.h: $(GENDIR)/$(platform)/residx.h
-			echo '#include "residx.h"' > $$@
+      $(GENDIR)/$(platform)/resext.h: $(GENDIR)/$(platform)/$(STAMPFILE) $(res_gfx) $(res_maps)
+			#echo '#include "residx.h"' > $$@
+			touch $$@
 
    else ifeq ($(RESOURCE)$(findstring win,$(platform)),DEFAULTwin)
 
@@ -598,9 +599,13 @@ LD_DOS := wcl
 
 # 4. Arguments
 
-CFLAGS_DOS := -hw -d3 -0 -ms -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -i=unilayer $(DEFINES_DSEKAI) $(CFLAGS_OWC_GENERIC)
+CFLAGS_DOS := -hw -d3 -0 -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -i=unilayer $(DEFINES_DSEKAI) $(CFLAGS_OWC_GENERIC)
 
 LDFLAGS_DOS := $(LDFLAGS_OWC_GENERIC)
+
+ifeq ($(FMT_JSON),TRUE)
+   CFLAGS_DOS += -mh
+endif
 
 # 5. Targets
 
@@ -626,7 +631,7 @@ $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
-$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)
+$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE)
 	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
 
 $(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h
