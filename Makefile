@@ -255,6 +255,9 @@ $(foreach DEPTH,$(DEPTHS), $(eval $(BITMAPS_RULE)))
 DSEKAI_ASSETS_MAPS := \
    $(ASSETDIR)/m_field.json
 
+DSEKAI_ASSETS_MAPS_ASN := \
+   $(addprefix bin-file/,$(subst .json,.asn,$(DSEKAI_ASSETS_MAPS)))
+
 HOST_CC := gcc
 MD := mkdir -p
 DD := /bin/dd
@@ -295,6 +298,13 @@ DSEKAI_O_FILES_CHECK_NULL := \
 STAMPFILE := .stamp
 
 # ====== Generic Rules ======
+
+bin-file/assets/$(STAMPFILE):
+	$(MD) $(dir $@)
+	touch $@
+
+bin-file/assets/%.asn: assets/%.json | bin-file/assets/$(STAMPFILE) $(MAP2ASN)
+	$(MAP2ASN) $< $@
 
 $(PKGDIR)/$(STAMPFILE):
 	$(MD) $(dir $@)
@@ -592,6 +602,13 @@ DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY))) \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
+DSEKAI_ASSETS_DOS_BINFILE_CGA := \
+   $(addprefix bin-file/,$(subst .bmp,.cga,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
+
+ifeq ($(FMT_ASN),TRUE)
+   BIN_DOS_ASSETS := $(DSEKAI_ASSETS_MAPS_ASN) $(DSEKAI_ASSETS_DOS_BINFILE_CGA)
+endif
+
 # 3. Programs
 
 CC_DOS := wcc
@@ -627,11 +644,16 @@ $(eval $(PKG_RULE))
 #	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -i 5001 \
 #      -if $(GENDIR_DOS)/*.cga $(DSEKAI_ASSETS_MAPS) -lh $(GENDIR_DOS)/resext.h
 
+bin-file/assets/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | \
+bin-file/assets/$(STAMPFILE)
+	$(MD) $(dir $@)
+	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
+
 $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
-$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE)
+$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE) $(BIN_DOS_ASSETS)
 	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
 
 $(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h

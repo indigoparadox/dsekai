@@ -61,6 +61,11 @@ int main( int argc, char* argv[] ) {
    assert( NULL != buffer );
 
    retval = tilemap_json_load( argv[1], &t );
+   if( !retval ) {
+      retval = 1;
+      goto cleanup;
+   }
+   retval = 0;
 
    buffer[idx++] = MAPBUF_ASN_SEQUENCE;
    buffer[idx++] = 0x82;
@@ -283,6 +288,8 @@ int main( int argc, char* argv[] ) {
       printf( "0x%02x ", buffer[i] );
    }
    */
+
+cleanup:
 
    if( NULL != buffer ) {
       free( buffer );
