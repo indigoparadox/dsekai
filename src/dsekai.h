@@ -50,13 +50,17 @@ struct DSEKAI_STATE;
 #define DSEKAI_MOBILES_MAX 20
 #endif /* !MOBILES_MAX */
 
+#ifndef DSEKAI_ITEMS_MAX
+#define DSEKAI_ITEMS_MAX 40
+#endif /* !DSEKAI_ITEMS_MAX */
+
 /* === Structs === */
 
 struct WINDOW;
 
 /*! \brief General/shared state of the running engine in memory. */
 struct PACKED DSEKAI_STATE {
-   MEMORY_HANDLE items;
+   struct ITEM items[DSEKAI_ITEMS_MAX];
    uint16_t items_count;
 
    struct TILEMAP map;

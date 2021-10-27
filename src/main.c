@@ -43,7 +43,7 @@ unilayer_main() {
       sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
 
    debug_printf( 3, "items size is %lu bytes",
-      sizeof( struct ITEM ) * ITEMS_MAX );
+      sizeof( struct ITEM ) * DSEKAI_ITEMS_MAX );
 
    if( !graphics_init( &graphics_args ) ) {
       error_printf( "unable to initialize graphics" );

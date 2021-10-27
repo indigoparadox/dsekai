@@ -7,10 +7,6 @@
 #define PATTERN_W 16
 #define PATTERN_H 16
 
-#ifndef ITEMS_MAX
-#define ITEMS_MAX 200
-#endif /* !ITEMS_MAX */
-
 #ifndef ITEM_INVENTORY_MAX
 #define ITEM_INVENTORY_MAX 20
 #endif /* !ITEM_INVENTORY_MAX */

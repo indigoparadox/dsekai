@@ -175,7 +175,6 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    uint8_t in_char = 0;
    static int initialized = 0;
    struct DSEKAI_STATE* state = NULL;
-   struct ITEM* items = NULL;
    int retval = 1;
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
@@ -186,20 +185,6 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    }
 
    if( !initialized ) {
-
-      assert( (MEMORY_HANDLE)NULL == state->items );
-      state->items = memory_alloc( sizeof( struct ITEM ), ITEMS_MAX );
-      if( (MEMORY_HANDLE)NULL == state->items ) {
-         error_printf( "unable to allocate items" );
-         retval = 0;
-         goto cleanup;
-      }
-      items = (struct ITEM*)memory_lock( state->items );
-      if( NULL == items ) {
-         error_printf( "unable to lock items" );
-         retval = 0;
-         goto cleanup;
-      }
 
 #ifdef RESOURCE_FILE
 #ifdef TILEMAP_FMT_JSON
@@ -366,7 +351,6 @@ cleanup:
 void topdown_deinit( MEMORY_HANDLE state_handle ) {
    int i = 0;
    struct DSEKAI_STATE* state = NULL;
-   struct ITEM* items = NULL;
 
    if( (MEMORY_HANDLE)NULL == state_handle ) {
       return;
