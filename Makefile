@@ -155,6 +155,7 @@ BIN_NDS := $(BINDIR)/$(DSEKAI).nds
 BIN_WEB := $(BINDIR)/$(DSEKAI).js
 BIN_CURSES := $(BINDIR)/$(DSEKAI)t
 BIN_SDL_ARM := $(BINDIR)/$(DSEKAI)r
+BIN_MEGAD := $(BINDIR)/$(DSEKAI).smd
 
 BIN_CHECK_NULL := $(BINDIR)/check
 
@@ -193,10 +194,11 @@ all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
 
 endif
 
+CFLAGS_GCC_GENERIC := -Iunilayer
+CFLAGS_OWC_GENERIC :=
+
 ifeq ($(BUILD),RELEASE)
 
-   CFLAGS_GCC_GENERIC :=
-   CFLAGS_OWC_GENERIC :=
    LDFLAGS_OWC_GENERIC :=
    SANITIZE := NO
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-release
@@ -205,8 +207,7 @@ else
 
    # Assume debug build.
 
-   CFLAGS_GCC_GENERIC := -Wall -Wno-missing-braces -Wno-char-subscripts -pg -g -Os
-   CFLAGS_OWC_GENERIC :=
+   CFLAGS_GCC_GENERIC += -Wall -Wno-missing-braces -Wno-char-subscripts -pg -g -Os
    DEFINES_DSEKAI += -DDEBUG_LOG -DDEBUG_THRESHOLD=$(DTHRESHOLD)
    LDFLAGS_GCC_GENERIC := -g -pg -Os
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-debug
@@ -297,7 +298,7 @@ CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE
 CFLAGS_MAP2ASN := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
 CFLAGS_MAP2BIN := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
 
-CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_GCC_GENERIC) -DRESOURCE_DRC -Iunilayer
+CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_GCC_GENERIC) -DRESOURCE_DRC
 
 $(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(LDFLAGS_GCC_GENERIC)
 
@@ -528,7 +529,7 @@ LD_SDL := gcc
 
 # 4. Arguments
 
-CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
+CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
 LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
@@ -598,7 +599,7 @@ LD_XLIB := gcc
 
 # 4. Arguments
 
-CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_GCC_GENERIC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE)
+CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_GCC_GENERIC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE)
 
 LDFLAGS_XLIB := -lX11 $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
@@ -1063,7 +1064,7 @@ REZ_MAC6 := Rez
 
 # 4. Arguments
 
-CFLAGS_MAC6 := -DPLATFORM_MAC6 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_GCC_GENERIC) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) -I$(GENDIR_MAC6) -DSCREEN_W=640 -DSCREEN_H=480
+CFLAGS_MAC6 := -DPLATFORM_MAC6 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_GCC_GENERIC) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) -I$(GENDIR_MAC6) -DSCREEN_W=640 -DSCREEN_H=480
 
 LDFLAGS_MAC6 := -lRetroConsole $(LDFLAGS_GCC_GENERIC)
 
@@ -1144,7 +1145,7 @@ NDSTOOL := ndstool
 
 ARCH_NDS := -mthumb -mthumb-interwork
 
-CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC)
+CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC)
 
 LIBS_NDS := -L$(DEVKITPRO)/libnds/lib -lnds9
 
@@ -1208,7 +1209,7 @@ LD_WEB := emcc
 
 # 4. Arguments
 
-CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC)
+CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC)
 
 LDFLAGS_WEB := $(LDFLAGS_GCC_GENERIC)
 
@@ -1262,7 +1263,7 @@ LD_CURSES := gcc
 
 # 4. Arguments
 
-CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_GCC_GENERIC) $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI)
+CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_GCC_GENERIC) $(DEFINES_RESOURCE) $(DEFINES_DSEKAI)
 
 LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) $(LDFLAGS_GCC_GENERIC)
 
@@ -1307,7 +1308,7 @@ LD_SDL_ARM := arm-linux-gnueabihf-gcc
 
 # 4. Arguments
 
-CFLAGS_SDL_ARM := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_GCC_GENERIC) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -Iunilayer $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE)
+CFLAGS_SDL_ARM := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_GCC_GENERIC) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE)
 
 LDFLAGS_SDL_ARM := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
@@ -1324,6 +1325,58 @@ $(BIN_SDL_ARM): $(DSEKAI_O_FILES_SDL_ARM) | $(BINDIR)/$(STAMPFILE)
 $(OBJDIR_SDL_ARM)/%.o: %.c $(GENDIR_SDL_ARM)/resext.h | $(DSEKAI_ASSETS_MAPS_JSON)
 	$(MD) $(dir $@)
 	$(CC_SDL_ARM) $(CFLAGS_SDL_ARM) -c -o $@ $(<:%.o=%)
+
+# ====== Main: Sega Genesis/MegaDrive ======
+
+# 1. Directories
+
+OBJDIR_MEGAD := $(OBJDIR)/megad
+DEPDIR_MEGAD := $(DEPDIR)/megad
+GENDIR_MEGAD := $(GENDIR)/megad
+
+# 2. Files
+
+DSEKAI_C_FILES_MEGAD_ONLY := \
+   src/main.c \
+   unilayer/input/megadi.c \
+   unilayer/memory/fakem.c \
+   unilayer/resource/megadr.c \
+   unilayer/graphics/megadg.c
+
+DSEKAI_O_FILES_MEGAD := \
+   $(addprefix $(OBJDIR_MEGAD)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_MEGAD)/,$(subst .c,.o,$(DSEKAI_C_FILES_MEGAD_ONLY)))
+
+# 3. Programs
+
+CC_MEGAD := m68k-elf-gcc
+LD_MEGAD := m68k-elf-gcc
+
+# 4. Arguments
+
+CFLAGS_MEGAD := -m68000 -fno-builtin -I/opt/gendev/sgdk/inc -I/opt/gendev/sgdk/res -B/opt/gendev/sgdk/bin $(CFLAGS_GCC_GENERIC) -I$(GENDIR_MEGAD) -DPLATFORM_MEGADRIVE -DSCREEN_W=320 -DSCREEN_H=224 -Os
+
+LDFLAGS_MEGAD := $(CFLAGS_PALM)
+
+# 5. Targets
+
+platform := megad
+res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
+$(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_MEGAD)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs :=
+$(eval $(PKG_RULE))
+
+$(BIN_MEGAD): $(DSEKAI_O_FILES_MEGAD) | $(BINDIR)/$(STAMPFILE)
+	$(LD_MEGAD) -o $@ $^ $(LDFLAGS_MEGAD)
+
+$(OBJDIR_MEGAD)/%.o: %.c $(GENDIR_MEGAD)/resext.h
+	$(MD) $(dir $@)
+	$(CC_MEGAD) $(CFLAGS_MEGAD) -c -o $@ $(<:%.o=%)
 
 # ====== Check: Null ======
 
