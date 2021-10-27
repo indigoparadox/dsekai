@@ -40,7 +40,7 @@ unilayer_main() {
    debug_printf( 3, "map size is %lu bytes", sizeof( struct TILEMAP ) );
 
    debug_printf( 3, "mobiles size is %lu bytes",
-      sizeof( struct MOBILE ) * MOBILES_MAX );
+      sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
 
    debug_printf( 3, "items size is %lu bytes",
       sizeof( struct ITEM ) * ITEMS_MAX );

@@ -26,26 +26,28 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
 }
 
 struct MOBILE* mobile_get_facing(
-   struct MOBILE* m, struct MOBILE ms[], int ms_sz
+   struct MOBILE* m, struct DSEKAI_STATE* state
 ) {
    int i = 0;
 
    assert( 0 <= m->dir );
    assert( 4 > m->dir );
 
-   for( i = 0 ; ms_sz > i ; i++ ) {
-      if( &(ms[i]) == m ) {
+   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+      if( &(state->mobiles[i]) == m ) {
          /* Don't compare to self. */
          continue;
       }
 
       if(
-         ms[i].active && (
-            ms[i].coords.x == m->coords.x + gc_mobile_x_offsets[m->dir] &&
-            ms[i].coords.y == m->coords.y + gc_mobile_y_offsets[m->dir]
+         state->mobiles[i].active && (
+            state->mobiles[i].coords.x ==
+               m->coords.x + gc_mobile_x_offsets[m->dir] &&
+            state->mobiles[i].coords.y ==
+               m->coords.y + gc_mobile_y_offsets[m->dir]
          )
       ) {
-         return &(ms[i]);
+         return &(state->mobiles[i]);
       }
    }
 

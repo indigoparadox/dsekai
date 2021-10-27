@@ -55,12 +55,11 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
 /**
  * \brief Get a ::MEMORY_PTR to the mobile m is currently facing.
  * \param m MOBILE to center the check around.
- * \param ms Array of MOBILE structs currently on the map.
- * \param ms_sz Size of array ms.
+ * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  * \return ::MEMORY_PTR to the colliding mobile in ms.
  */
 struct MOBILE* mobile_get_facing(
-   struct MOBILE* m, struct MOBILE ms[], int ms_sz );
+   struct MOBILE* m, struct DSEKAI_STATE* state );
 
 /**
  * \brief Force a ::MOBILE to jump to the SCRIPT_ACTION_INTERACT in its
@@ -105,12 +104,10 @@ void mobile_deinit( struct MOBILE* );
 /**
  * \brief Get the MOBILE being faced by a given MOBILE if there is one.
  * \param m ::MEMORY_PTR to a MOBILE on which to center the search.
- * \param mobiles Array of MOBILE objects currently loaded.
- * \param mobiles_sz Size of mobiles array.
+ * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  * \return ::MEMORY_PTR to MOBILE being faced if one found, or NULL otherwise.
  */
-struct MOBILE* mobile_get_dir(
-   struct MOBILE* m, struct MOBILE mobiles[], int mobiles_sz );
+struct MOBILE* mobile_get_dir( struct MOBILE* m, struct DSEKAI_STATE* state );
 
 /**
  * \brief Execute the next available ::SCRIPT_STEP in the currently running

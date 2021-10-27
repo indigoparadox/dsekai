@@ -7,10 +7,6 @@
 #define PATTERN_W 16
 #define PATTERN_H 16
 
-#ifndef MOBILES_MAX
-#define MOBILES_MAX 20
-#endif /* !MOBILES_MAX */
-
 #ifndef ITEMS_MAX
 #define ITEMS_MAX 200
 #endif /* !ITEMS_MAX */

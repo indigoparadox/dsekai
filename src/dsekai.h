@@ -12,6 +12,8 @@
  *  be placed in this file.
  */
 
+ /* === Includes === */
+
 #include "config.h"
 #include <unilayer.h>
 
@@ -42,6 +44,14 @@ struct DSEKAI_STATE;
 #include "tmbin.h"
 #endif /* TILEMAP_FMT_BIN */
 
+/* === Limits === */
+
+#ifndef DSEKAI_MOBILES_MAX
+#define DSEKAI_MOBILES_MAX 20
+#endif /* !MOBILES_MAX */
+
+/* === Structs === */
+
 struct WINDOW;
 
 /*! \brief General/shared state of the running engine in memory. */
@@ -52,9 +62,7 @@ struct PACKED DSEKAI_STATE {
    MEMORY_HANDLE map;
 
    /*! \brief Array of currently loaded MOBILE objects on this map. */
-   MEMORY_HANDLE mobiles;
-   /*! \brief Number of active MOBILE objects in DSEKAI_STATE::mobiles. */
-   uint16_t mobiles_count; 
+   struct MOBILE mobiles[DSEKAI_MOBILES_MAX];
 
    /*! \brief Index of the player MOBILE in DSEKAI_STATE::mobiles. */
    uint16_t player_idx;
