@@ -163,6 +163,8 @@ PKGOS := $(shell uname -s -m | sed 's/ /./g' | tr '[:upper:]' '[:lower:]'])
 
 DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\"
 
+GIT_HASH := $(shell git log -1 --pretty=format:"%h")
+
 ifeq ($(RESOURCE),FILE)
 
    DEFINES_RESOURCE := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
@@ -259,14 +261,10 @@ DEPTHS := 16x16x4
 
 $(foreach DEPTH,$(DEPTHS), $(eval $(BITMAPS_RULE)))
 
-DSEKAI_ASSETS_BINFILE_BMP := \
-   $(addprefix bin-file/,$(DSEKAI_ASSETS_BITMAPS_16x16x4))
-
 DSEKAI_ASSETS_MAPS := \
    $(ASSETDIR)/m_field.json
 
-DSEKAI_ASSETS_MAPS_BINFILE_ASN := \
-   $(addprefix bin-file/,$(subst .json,.asn,$(DSEKAI_ASSETS_MAPS)))
+DSEKAI_ASSETS_MAPS_ASN := $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS))
 
 HOST_CC := gcc
 MD := mkdir -p
@@ -277,6 +275,7 @@ IMAGEMAGICK := convert
 PYTHON := python3
 TAR := tar
 GZIP := gzip
+ZIP := zip
 
 MKRESH := $(BINDIR)/mkresh
 DRCPACK := $(BINDIR)/drcpack
@@ -308,6 +307,9 @@ DSEKAI_O_FILES_CHECK_NULL := \
 STAMPFILE := .stamp
 
 # ====== Generic Rules ======
+
+$(ASSETDIR)/%.asn: $(ASSETDIR)/%.json | $(MAP2ASN)
+	$(MAP2ASN) $< $@
 
 bin-file/assets/%.bmp: $(ASSETDIR)/%.bmp | bin-file/assets/$(STAMPFILE)
 	$(MD) $(dir $@)
@@ -431,20 +433,37 @@ endef
 $(foreach platform,$(PLATFORMS), $(eval $(ICO_RULE)))
 
 define PKG_RULE
-$(PKGDIR)/f$(pkg_name): $(pkg_reqs) README.md | bin-file/$(notdir $(pkg_bin)) $(PKGDIR)/$(STAMPFILE)
+$(PKGDIR)/$(pkg_name)-file.tar.gz: $(pkg_reqs) README.md | bin-file/$(notdir $(pkg_bin)) $(PKGDIR)/$(STAMPFILE)
 	cp bin-file/$(notdir $(pkg_bin)) .
 	$(pkg_strip) $(notdir $(pkg_bin))
 	$(TAR) -cvf - $(notdir $(pkg_bin)) $$^ | $(GZIP) > $$@
 	rm $(notdir $(pkg_bin))
 
-$(PKGDIR)/$(pkg_name): README.md | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
+$(PKGDIR)/$(pkg_name)-file.zip: $(pkg_reqs) README.md | bin-file/$(notdir $(pkg_bin)) $(PKGDIR)/$(STAMPFILE)
+	cp bin-file/$(notdir $(pkg_bin)) .
+	$(pkg_strip) $(notdir $(pkg_bin))
+	$(ZIP) -r $$@ $(notdir $(pkg_bin)) $$^
+	rm $(notdir $(pkg_bin))
+
+$(PKGDIR)/$(pkg_name).tar.gz: README.md | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
 	cp $(pkg_bin) .
 	$(pkg_strip) $(notdir $(pkg_bin))
 	$(TAR) -cvf - $(notdir $(pkg_bin)) $$^ | $(GZIP) > $$@
 	rm $(notdir $(pkg_bin))
 
-pkg_$(platform)_file: $(PKGDIR)/f$(pkg_name)
-pkg_$(platform): $(PKGDIR)/$(pkg_name)
+$(PKGDIR)/$(pkg_name).zip: README.md | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
+	cp $(pkg_bin) .
+	$(pkg_strip) $(notdir $(pkg_bin))
+	$(ZIP) -r $$@ $(notdir $(pkg_bin)) $$^
+	rm $(notdir $(pkg_bin))
+
+ifeq ($(ARCFMT),ZIP)
+pkg_$(platform)_file: $(PKGDIR)/$(pkg_name)-file.zip
+pkg_$(platform): $(PKGDIR)/$(pkg_name).zip
+else
+pkg_$(platform)_file: $(PKGDIR)/$(pkg_name)-file.tar.gz
+pkg_$(platform): $(PKGDIR)/$(pkg_name).tar.gz
+endif
 endef
 
 # ====== Utilities ======
@@ -494,11 +513,18 @@ DSEKAI_O_FILES_SDL := \
 BIN_SDL_ASSETS :=
 
 ifeq ($(RESOURCE),FILE)
-   BIN_SDL_ASSETS += $(DSEKAI_ASSETS_BINFILE_BMP)
+   SDL_ASSETS += $(DSEKAI_ASSETS_BITMAPS_16x16x4)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   BIN_SDL_ASSETS += $(DSEKAI_ASSETS_MAPS_BINFILE_ASN) 
+   SDL_ASSETS += $(DSEKAI_ASSETS_MAPS_ASN) 
+endif
+
+ifeq ($(FMT_JSON),TRUE)
+   SDL_ASSETS += \
+      $(DSEKAI_ASSETS_BITMAPS_16x16x4) \
+      $(DSEKAI_ASSETS_MAPS_JSON) \
+      $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
 
 # 3. Programs
@@ -521,11 +547,11 @@ $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_SDL)
 pkg_strip := strip
-pkg_name := $(DSEKAI)-$(platform).$(PKGOS).tar.gz
-pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
+pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
+pkg_reqs :=  $(SDL_ASSETS)
 $(eval $(PKG_RULE))
 
-$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE) $(BIN_SDL_ASSETS)
+$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE) $(addprefix bin-file/,$(SDL_ASSETS))
 	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL)
 
 $(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS)
@@ -555,14 +581,21 @@ DSEKAI_C_FILES_XLIB_ONLY := \
    unilayer/graphics/xg.c \
    unilayer/memory/fakem.c
 
-BIN_XLIB_ASSETS :=
+XLIB_ASSETS :=
 
 ifeq ($(RESOURCE),FILE)
-   BIN_XLIB_ASSETS += $(DSEKAI_ASSETS_BINFILE_BMP)
+   XLIB_ASSETS += $(DSEKAI_ASSETS_BITMAPS_16x16x4)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   BIN_XLIB_ASSETS += $(DSEKAI_ASSETS_MAPS_BINFILE_ASN) 
+   XLIB_ASSETS += $(DSEKAI_ASSETS_MAPS_ASN)
+endif
+
+ifeq ($(FMT_JSON),TRUE)
+   XLIB_ASSETS += \
+      $(DSEKAI_ASSETS_BITMAPS_16x16x4) \
+      $(DSEKAI_ASSETS_MAPS_JSON) \
+      $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
 
 # 3. Programs
@@ -590,8 +623,8 @@ $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_XLIB)
 pkg_strip := strip
-pkg_name := $(DSEKAI)-$(platform).$(PKGOS).tar.gz
-pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
+pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
+pkg_reqs := $(XLIB_ASSETS)
 $(eval $(PKG_RULE))
 
 $(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BIN_XLIB_ASSETS) $(BINDIR) $(GENDIR_XLIB)/resext.h
@@ -636,11 +669,14 @@ DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY))) \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
-DSEKAI_ASSETS_BINFILE_CGA := \
-   $(addprefix bin-file/,$(subst .bmp,.cga,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
+DOS_ASSETS :=
+
+ifeq ($(RESOURCE),FILE)
+   DOS_ASSETS += $(subst .bmp,.cga,$(DSEKAI_ASSETS_BITMAPS_16x16x4))
+endif
 
 ifeq ($(FMT_ASN),TRUE)
-   BIN_DOS_ASSETS := $(DSEKAI_ASSETS_MAPS_BINFILE_ASN) $(DSEKAI_ASSETS_BINFILE_CGA)
+   DOS_ASSETS += $(DSEKAI_ASSETS_MAPS_ASN)
 endif
 
 # 3. Programs
@@ -667,8 +703,8 @@ $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_DOS)
 pkg_strip := echo
-pkg_name := $(DSEKAI)-$(platform).tar.gz
-pkg_reqs :=
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs := $(DOS_ASSETS)
 $(eval $(PKG_RULE))
 
 #$(BINDIR)/doscga.drc: res_doscga_drc
@@ -677,6 +713,9 @@ $(eval $(PKG_RULE))
 #	rm $(BINDIR)/doscga.drc || true
 #	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -i 5001 \
 #      -if $(GENDIR_DOS)/*.cga $(DSEKAI_ASSETS_MAPS) -lh $(GENDIR_DOS)/resext.h
+
+$(ASSETDIR)/%.cga: $(ASSETDIR)/%.bmp | $(CONVERT)
+	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
 bin-file/assets/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | \
 bin-file/assets/$(STAMPFILE)
@@ -687,7 +726,7 @@ $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
-$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE) $(BIN_DOS_ASSETS)
+$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE) $(addprefix bin-file/,$(DOS_ASSETS))
 	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
 
 $(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h
@@ -751,7 +790,7 @@ $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_PALM)
 pkg_strip := m68k-palmos-strip
-pkg_name := $(DSEKAI)-$(platform).tar.gz
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
 pkg_reqs :=
 $(eval $(PKG_RULE))
 
@@ -817,14 +856,14 @@ ifeq ($(RESOURCE),DEFAULT)
 endif
 WIN16_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 
-BIN_WIN16_ASSETS :=
+WIN16_ASSETS :=
 
 ifeq ($(RESOURCE),FILE)
-   BIN_WIN16_ASSETS += $(DSEKAI_ASSETS_BINFILE_BMP)
+   WIN16_ASSETS += $(DSEKAI_ASSETS_BITMAPS_16x16x4)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   BIN_WIN16_ASSETS += $(DSEKAI_ASSETS_MAPS_BINFILE_ASN) 
+   WIN16_ASSETS += $(DSEKAI_ASSETS_MAPS_ASN) 
 endif
 
 # 3. Programs
@@ -858,7 +897,7 @@ $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_WIN16)
 pkg_strip := echo
-pkg_name := $(DSEKAI)-$(platform).tar.gz
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
 pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
 $(eval $(PKG_RULE))
 
@@ -917,14 +956,21 @@ ifeq ($(RESOURCE),DEFAULT)
 endif
 WIN32_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 
-BIN_WIN32_ASSETS :=
+WIN32_ASSETS :=
 
 ifeq ($(RESOURCE),FILE)
-   BIN_WIN32_ASSETS += $(DSEKAI_ASSETS_BINFILE_BMP)
+   WIN32_ASSETS += $(DSEKAI_ASSETS_BITMAPS_16x16x4)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   BIN_WIN32_ASSETS += $(DSEKAI_ASSETS_MAPS_BINFILE_ASN) 
+   WIN32_ASSETS += $(DSEKAI_ASSETS_MAPS_ASN) 
+endif
+
+ifeq ($(FMT_JSON),TRUE)
+   WIN32_ASSETS += \
+      $(DSEKAI_ASSETS_BITMAPS_16x16x4) \
+      $(DSEKAI_ASSETS_MAPS_JSON) \
+      $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
 
 # 3. Programs
@@ -958,12 +1004,12 @@ $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_WIN32)
 pkg_strip := echo
-pkg_name := $(DSEKAI)-$(platform).tar.gz
-pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs := $(WIN32_ASSETS)
 $(eval $(PKG_RULE))
 
 $(BIN_WIN32): \
-$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE) $(BIN_WIN32_ASSETS)
+$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE) $(addprefix bin-file/,$(WIN32_ASSETS))
 	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
 
 $(OBJDIR_WIN32)/win.res: $(WIN32_RES_FILES) | $(OBJDIR_WIN32)/$(STAMPFILE)
@@ -1306,5 +1352,5 @@ $(OBJDIR_CHECK_NULL)/%.o: %.c check/testdata.h $(GENDIR_CHECK_NULL)/resext.h
 # ====== Clean ======
 
 clean:
-	rm -rf data obj obj-file bin bin-file gen gen-file *.err .rsrc .finf gmon.out log*.txt packages fpackages
+	rm -rf data obj obj-file bin bin-file gen gen-file *.err .rsrc .finf gmon.out log*.txt packages fpackages assets/*/*.cga assets/*.asn
 

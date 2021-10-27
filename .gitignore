@@ -23,6 +23,8 @@ gmon.out
 assets/pattern_*.bmp
 assets/tile_*.bmp
 assets/sprite_*.bmp
+assets/*/*.cga
+assets/*.asn
 assets/dsekai.tiled-session
 build
 build_*
