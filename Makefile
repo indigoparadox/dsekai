@@ -265,7 +265,10 @@ $(foreach DEPTH,$(DEPTHS), $(eval $(BITMAPS_RULE)))
 DSEKAI_ASSETS_MAPS_JSON := \
    $(ASSETDIR)/m_field.json
 
-DSEKAI_ASSETS_MAPS_ASN := $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS))
+DSEKAI_ASSETS_TILESETS_JSON := \
+   $(ASSETDIR)/t2_field.json
+
+DSEKAI_ASSETS_MAPS_ASN := $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON))
 
 HOST_CC := gcc
 MD := mkdir -p
@@ -539,7 +542,7 @@ $(eval $(RESEXT_H_RULE))
 pkg_bin := $(BIN_SDL)
 pkg_strip := strip
 pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
-pkg_reqs :=  $(SDL_ASSETS)
+pkg_reqs := $(SDL_ASSETS)
 $(eval $(PKG_RULE))
 
 $(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE) $(addprefix $(BINDIR)/,$(SDL_ASSETS))
