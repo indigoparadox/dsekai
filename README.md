@@ -172,19 +172,19 @@ Converts between various image formats common to resource-limited platforms.
 
 ### Options:
 
--ic \[In format extension from Input Formats table.\]
--oc \[Out format extension from Output Formats table.\]
+ * -ic \[In format extension from Input Formats table.\]
+ * -oc \[Out format extension from Output Formats table.\]
 
 ### CGA options:
 
 These options only apply to raw CGA files:
 
--ib \[in bpp\] \(defaults to 2\)
--ob \[out bpp\] \(defaults to input bpp\)
--iw \[in width\] \(requried for CGA in\)
--ih \[in height\] \(required for CGA in\)
--il \[in line padding\] (full-screen uses 192\)
--ol \[out line padding\]
+ * -ib \[in bpp\] \(defaults to 2\)
+ * -ob \[out bpp\] \(defaults to input bpp\)
+ * -iw \[in width\] \(requried for CGA in\)
+ * -ih \[in height\] \(required for CGA in\)
+ * -il \[in line padding\] (full-screen uses 192\)
+ * -ol \[out line padding\]
 
 ### Input Formats
 
@@ -205,10 +205,6 @@ These options only apply to raw CGA files:
 ## map2asn
 
 Converts maps from JSON to a more compact ASN.1 representation for use with resource-limited platforms.
-
-### Usage:
-
-./bin/map2asn \<Input JSON tilemap file.\> \<Output ASN.1 tilemap file.\>
 
 ## headpack
 
