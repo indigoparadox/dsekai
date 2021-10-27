@@ -80,7 +80,7 @@ struct WINDOW {
 
 #ifdef PLATFORM_PALM
 
-#define window_prefab_dialog( id, dialog, sprite, state, t )
+#define window_prefab_dialog( id, dialog, sprite, state )
 
 #else
 
