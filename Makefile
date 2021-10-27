@@ -262,7 +262,7 @@ DEPTHS := 16x16x4
 
 $(foreach DEPTH,$(DEPTHS), $(eval $(BITMAPS_RULE)))
 
-DSEKAI_ASSETS_MAPS := \
+DSEKAI_ASSETS_MAPS_JSON := \
    $(ASSETDIR)/m_field.json
 
 DSEKAI_ASSETS_MAPS_ASN := $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS))
@@ -318,6 +318,11 @@ $(BINDIR)/$(ASSETDIR)/$(STAMPFILE):
 
 $(BINDIR)/$(ASSETDIR)/%.bmp: \
 $(ASSETDIR)/%.bmp | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
+	$(MD) $(dir $@)
+	cp $^ $@
+
+$(BINDIR)/$(ASSETDIR)/%.json: \
+$(ASSETDIR)/%.json | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	cp $^ $@
 
@@ -528,7 +533,7 @@ LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GC
 
 platform := sdl
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
-res_maps := $(DSEKAI_ASSETS_MAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_SDL)
@@ -537,10 +542,10 @@ pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
 pkg_reqs :=  $(SDL_ASSETS)
 $(eval $(PKG_RULE))
 
-$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE) $(addprefix bin-file/,$(SDL_ASSETS))
+$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE) $(addprefix $(BINDIR)/,$(SDL_ASSETS))
 	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL)
 
-$(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS)
+$(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS_JSON)
 	$(MD) $(dir $@)
 	$(CC_SDL) $(CFLAGS_SDL) -c -o $@ $(<:%.o=%)
 
@@ -603,7 +608,7 @@ DSEKAI_O_FILES_XLIB := \
 
 platform := xlib
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
-res_maps := $(DSEKAI_ASSETS_MAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_XLIB)
@@ -615,12 +620,11 @@ $(eval $(PKG_RULE))
 $(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BIN_XLIB_ASSETS) $(BINDIR) $(GENDIR_XLIB)/resext.h
 	$(LD_XLIB) -o $@ $^ $(LDFLAGS_XLIB)
 
-$(OBJDIR_XLIB)/%.o: %.c $(GENDIR_XLIB)/resext.h | $(DSEKAI_ASSETS_MAPS_XLIB)
-	echo "RESOURCE: $(RESOURCE)\nOBJDIR: $(OBJDIR_XLIB)\nGENDIR: $(GENDIR_XLIB)"
+$(OBJDIR_XLIB)/%.o: %.c $(GENDIR_XLIB)/resext.h
 	$(MD) $(dir $@)
 	$(CC_XLIB) $(CFLAGS_XLIB) -c -o $@ $(<:%.o=%)
 
-#$(DEPDIR_XLIB)/%.d: %.c $(GENDIR_XLIB)/resext.h | $(DSEKAI_ASSETS_MAPS_XLIB)
+#$(DEPDIR_XLIB)/%.d: %.c $(GENDIR_XLIB)/resext.h
 #	$(MD) $(dir $@)
 #	$(CC_XLIB) $(CFLAGS_XLIB) -MM $< \
 #      -MT $(subst .c,.o,$(addprefix $(DEPDIR_XLIB)/,$<)) -MF $@
@@ -683,7 +687,7 @@ endif
 
 platform := dos
 res_gfx := $(DSEKAI_ASSETS_DOS_CGA)
-res_maps := $(DSEKAI_ASSETS_MAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_DOS)
@@ -702,8 +706,8 @@ $(eval $(PKG_RULE))
 $(ASSETDIR)/%.cga: $(ASSETDIR)/%.bmp | $(CONVERT)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
-bin-file/assets/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | \
-bin-file/assets/$(STAMPFILE)
+$(BINDIR)/assets/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | \
+$(BINDIR)/assets/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
@@ -711,7 +715,7 @@ $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
-$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE) $(addprefix bin-file/,$(DOS_ASSETS))
+$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE) $(addprefix $(BINDIR)/,$(DOS_ASSETS))
 	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
 
 $(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h
@@ -770,7 +774,7 @@ APPID := DSEK
 
 platform := palm
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_PALM)
-res_maps := $(DSEKAI_ASSETS_MAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_PALM)
@@ -883,7 +887,7 @@ endif
 
 platform := win16
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
-res_maps := $(DSEKAI_ASSETS_MAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_WIN16)
@@ -989,7 +993,7 @@ endif
 
 platform := win32
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
-res_maps := $(DSEKAI_ASSETS_MAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_WIN32)
@@ -999,7 +1003,7 @@ pkg_reqs := $(WIN32_ASSETS)
 $(eval $(PKG_RULE))
 
 $(BIN_WIN32): \
-$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE) $(addprefix bin-file/,$(WIN32_ASSETS))
+$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE) $(addprefix $(BINDIR)/,$(WIN32_ASSETS))
 	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
 
 $(OBJDIR_WIN32)/win.res: $(WIN32_RES_FILES) | $(OBJDIR_WIN32)/$(STAMPFILE)
@@ -1041,7 +1045,7 @@ DSEKAI_ASSETS_RSRC := \
    $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
 
 DSEKAI_ASSETS_MAPS_MAC6 := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_MAPS)))
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_MAPS_JSON)))
 
 DSEKAI_O_FILES_MAC6 := \
    $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -1071,7 +1075,7 @@ LDFLAGS_MAC6 := -lRetroConsole $(LDFLAGS_GCC_GENERIC)
 
 platform := mac6
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
-res_maps := $(DSEKAI_ASSETS_MAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 #$(GENDIR_MAC6)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC6)/$(STAMPFILE)
@@ -1120,7 +1124,7 @@ DSEKAI_C_FILES_NDS_ONLY := \
    unilayer/memory/fakem.c
 
 DSEKAI_ASSETS_MAPS_NDS := \
-   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS)))
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS_JSON)))
 
 DSEKAI_O_FILES_NDS := \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -1208,14 +1212,14 @@ LDFLAGS_WEB := $(LDFLAGS_GCC_GENERIC)
 # 5. Targets
 
 $(GENDIR_WEB)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) | \
+$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS_JSON) | \
 $(GENDIR_WEB)/$(STAMPFILE) $(HEADPACK)
 	$(HEADPACK) $@ $^
 
 $(BIN_WEB): $(DSEKAI_O_FILES_WEB) | $(BINDIR)/$(STAMPFILE)
 	$(LD_WEB) -o $@ $^ $(LDFLAGS_WEB)
 
-$(OBJDIR_WEB)/%.o: %.c $(GENDIR_WEB)/resext.h | $(DSEKAI_ASSETS_MAPS)
+$(OBJDIR_WEB)/%.o: %.c $(GENDIR_WEB)/resext.h | $(DSEKAI_ASSETS_MAPS_JSON)
 	$(MD) $(dir $@)
 	$(CC_WEB) $(CFLAGS_WEB) -c -o $@ $(<:%.o=%)
 
@@ -1263,13 +1267,13 @@ LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) $(LDFLAGS_GCC_GENERIC)
 
 platform := curses
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
-res_maps := $(DSEKAI_ASSETS_MAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 $(BIN_CURSES): $(DSEKAI_O_FILES_CURSES) | $(BINDIR)/$(STAMPFILE)
 	$(LD_CURSES) -o $@ $^ $(LDFLAGS_CURSES)
 
-$(OBJDIR_CURSES)/%.o: %.c $(GENDIR_CURSES)/resext.h | $(DSEKAI_ASSETS_MAPS)
+$(OBJDIR_CURSES)/%.o: %.c $(GENDIR_CURSES)/resext.h | $(DSEKAI_ASSETS_MAPS_JSON)
 	$(MD) $(dir $@)
 	$(CC_CURSES) $(CFLAGS_CURSES) -c -o $@ $(<:%.o=%)
 
@@ -1308,13 +1312,13 @@ LDFLAGS_SDL_ARM := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAG
 
 platform := sdlarm
 res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
-res_maps := $(DSEKAI_ASSETS_MAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 $(BIN_SDL_ARM): $(DSEKAI_O_FILES_SDL_ARM) | $(BINDIR)/$(STAMPFILE)
 	$(LD_SDL_ARM) -o $@ $^ $(LDFLAGS_SDL_ARM)
 
-$(OBJDIR_SDL_ARM)/%.o: %.c $(GENDIR_SDL_ARM)/resext.h | $(DSEKAI_ASSETS_MAPS)
+$(OBJDIR_SDL_ARM)/%.o: %.c $(GENDIR_SDL_ARM)/resext.h | $(DSEKAI_ASSETS_MAPS_JSON)
 	$(MD) $(dir $@)
 	$(CC_SDL_ARM) $(CFLAGS_SDL_ARM) -c -o $@ $(<:%.o=%)
 
@@ -1322,7 +1326,7 @@ $(OBJDIR_SDL_ARM)/%.o: %.c $(GENDIR_SDL_ARM)/resext.h | $(DSEKAI_ASSETS_MAPS)
 
 $(GENDIR_CHECK_NULL)/resext.h: $(GENDIR_CHECK_NULL)/$(STAMPFILE) $(MKRESH)
 	$(MKRESH) -f palm -i 5001 \
-      -if $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS) \
+      -if $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS_JSON) \
       -oh $(GENDIR_CHECK_NULL)/resext.h
 
 $(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)/$(STAMPFILE)
