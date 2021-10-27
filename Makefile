@@ -80,7 +80,6 @@ CONVERT_C_FILES := \
    unilayer/drc.c \
    tools/data/cga.c \
    unilayer/dio.c \
-   tools/data/header.c \
    tools/data/icns.c \
    src/json.c
 

@@ -12,6 +12,11 @@
   * [Mapping](#mapping)
   * [Skinning](#skinning)
   * [Scripting](#scripting)
+* [Tools](#tools)
+  * [mkresh](#mkresh)
+  * [convert](#convert)
+  * [map2asn](#map2asn)
+  * [headpack](#headpack)
 
 ![Overworld Screenshot](screens/overwrld.png)
 
@@ -26,11 +31,10 @@ There are also some rough examples of CGA graphics programming in unilayer/graph
 Features that are planned include:
 
 * 256-Color graphics on some platforms while keeping 4-color/2-color support.
-* Simple and consistent data structures for binary save dumps.
+* ASN.1 save dumps.
 * Housing system based on in-game map editing.
 * Item usage and crafting.
 * Minimal resource use (shooting for <500k RAM).
-* Loading JSON files on DOS (currently seems to be broken? Too much RAM?)
 
 Ideally, this engine will compile with legacy compilers as a general rule. For this reason, the following rules/limitations should be observed within the codebase:
 
@@ -68,6 +72,8 @@ The following options may be specified to make in order control the final output
 |            | RELEASE | Build an optimized release binary.
 | ASSETPATH  |         | Specify path to load assets at runtime. Defaults to ./assets
 | DTHRESHOLD |         | Specify the log level from 0-3 (0 being most verbose).
+| SANITIZE   | NO      | Disable leak and UB sanitizers for gcc targets.
+| FMT_ASN    | TRUE    | Use ASN.1 format for maps. Required for low-memory targets.
 
 ## Datafiles
 
@@ -92,20 +98,21 @@ The following platforms are planned to be supported but not yet functional:
 
 | Platform | Make Target         | Requirements |
 |----------|---------------------|--------------
-| MS-DOS   | bin/dsekai.exe   | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
+| +MS-DOS  | bin/dsekai.exe   | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | SDL      | bin/dsekai       | SDL2
 | Xlib     | bin/dsekaix      | Xlib
 | \*PalmOS  | bin/dsekai.prc   | [PRCTools](https://github.com/jichu4n/prc-tools-remix)
-| Win16    | bin/dsekai16.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
+| +Win16   | bin/dsekai16.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | Win32    | bin/dsekai32.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | \*MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
 | \*NDS     | bin/dsekai.nds   | [DevKitPro](https://devkitpro.org/)
 | \*WebASM  | bin/dsekai.js    | emscripten
 | \*Curses  | bin/dsekait      | NCurses
 
-Platforms marked with * are currently broken.
+ * + Platforms marked with + [**require** FMT_ASN if RESOURCE=FILE](#options).
+ * \* Platforms marked with \* are currently broken.
 
-Just doing "make" will attempt to build all currently working targets.
+Just using "make" will attempt to build all currently working targets with OS-level resources and statically compiled maps.
 
 # Modding
 
@@ -146,4 +153,64 @@ a single numerical (may be multiple digits) argument.
 | GOTO       | g    | Label_Num | Jump to a defined label index.
 | SPEAK      | p    | Text_Id   | Display Text_Id from the tilemap string table.
 | RETURN     | x    |           | Return to PC previous to GOTO or interaction.
+
+# Tools
+
+Included in the tools/ subdirectory are a few tools required for preprocessing and compiling. These include tools for preprocessing resources from easier-to-edit formats to more compact formats for resource-limited platforms, as well as tools for packing up resources as part of compilation.
+
+## mkresh
+
+Creates header files with resource listings to be included as OS-level resources.
+
+## convert
+
+Converts between various image formats common to resource-limited platforms.
+
+### Usage
+
+./bin/convert [options] -ic \<in_fmt\> -oc \<out_fmt\> -if \<in_file\> -of \<out_file\>
+
+### Options:
+
+-ic \[In format extension from Input Formats table.\]
+-oc \[Out format extension from Output Formats table.\]
+
+### CGA options:
+
+These options only apply to raw CGA files:
+
+-ib \[in bpp\] \(defaults to 2\)
+-ob \[out bpp\] \(defaults to input bpp\)
+-iw \[in width\] \(requried for CGA in\)
+-ih \[in height\] \(required for CGA in\)
+-il \[in line padding\] (full-screen uses 192\)
+-ol \[out line padding\]
+
+### Input Formats
+
+| Type            | Extension |
+|-----------------|-----------|
+| Windows Bitmap  | bmp       |
+| Mac Icon        | icns      |
+| CGA Memory Dump | cga       |
+
+### Output Formats
+
+| Type            | Extension |
+|-----------------|-----------|
+| Windows Bitmap  | bmp       |
+| Mac Icon        | icns      |
+| CGA Memory Dump | cga       |
+
+## map2asn
+
+Converts maps from JSON to a more compact ASN.1 representation for use with resource-limited platforms.
+
+### Usage:
+
+./bin/map2asn \<Input JSON tilemap file.\> \<Output ASN.1 tilemap file.\>
+
+## headpack
+
+Packs resources into #include-able header files to be inserted directly into the final binary.
 

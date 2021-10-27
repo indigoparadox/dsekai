@@ -5,7 +5,6 @@
 #include "data/bmp.h"
 #include "data/cga.h"
 #include "data/icns.h"
-#include "data/header.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,12 +12,6 @@
 
 #define FMT_BITMAP      1
 #define FMT_CGA         2
-#define FMT_HEADER      3
-#define FMT_HEADER_IMG  4
-#define FMT_HEADER_MAP  5
-#define FMT_HEADER_WIN  6
-#define FMT_JSON_MAP    7
-#define FMT_JSON_WIN    8
 #define FMT_ICNS        9
 
 #define ENDIAN_LITTLE   'l'
@@ -102,12 +95,6 @@ int main( int argc, char* argv[] ) {
             fmt_in = FMT_CGA;
          } else if( 0 == strncmp( argv[i], "icns", 4 ) ) {
             fmt_in = FMT_ICNS;
-         } else if( 0 == strncmp( argv[i], "jwin", 4 ) ) {
-            fmt_in = FMT_JSON_WIN;
-#if 0
-         } else if( 0 == strncmp( argv[i], "header", 6 ) ) {
-            fmt_in = FMT_HEADER;
-#endif
          }
          state = 0;
          break;
@@ -117,8 +104,6 @@ int main( int argc, char* argv[] ) {
             fmt_out = FMT_BITMAP;
          } else if( 0 == strncmp( argv[i], "cga", 3 ) ) {
             fmt_out = FMT_CGA;
-         } else if( 0 == strncmp( argv[i], "header", 6 ) ) {
-            fmt_out = FMT_HEADER;
          } else if( 0 == strncmp( argv[i], "icns", 4 ) ) {
             fmt_out = FMT_ICNS;
          }
@@ -187,31 +172,6 @@ int main( int argc, char* argv[] ) {
 
    printf( "%s (fmt %d) to %s (fmt %d)\n", namebuf_in, fmt_in,
       namebuf_out, fmt_out );
-
-   assert( 0 != strlen( namebuf_in ) );
-   assert( 0 != strlen( namebuf_out ) );
-   assert( 0 != fmt_in );
-   assert( 0 != fmt_out );
-   //assert( FMT_CGA != fmt_in || 0 != options_in.w );
-   //assert( FMT_CGA != fmt_in || 0 != options_in.h );
-
-#if 0
-   if( FMT_HEADER == fmt_out ) {
-      switch( fmt_in ) {
-      case FMT_JSON_MAP:
-         fmt_out = FMT_HEADER_MAP;
-         break;
-
-      case FMT_JSON_WIN:
-         fmt_out = FMT_HEADER_WIN;
-         break;
-
-      default:
-         fmt_out = FMT_HEADER_IMG;
-         break;
-      }
-   }
-#endif
 
    if(
       0 == strlen( namebuf_in ) ||
@@ -284,10 +244,6 @@ int main( int argc, char* argv[] ) {
 
    case FMT_ICNS:
       retval = 0 > icns_write_file( namebuf_out, grid, &options_out ) ? 1 : 0;
-      break;
-
-   case FMT_HEADER_IMG:
-      retval = 0 > header_img_write_file( namebuf_out, grid, &options_out ) ? 1 : 0;
       break;
    }
 
