@@ -190,6 +190,8 @@ all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
 
 endif
 
+PKG_OUT_RES := $(shell echo $(RESOURCE) | tr '[:upper:]' '[:lower:]'])
+
 ifeq ($(BUILD),RELEASE)
 
    CFLAGS_GCC_GENERIC :=
@@ -242,6 +244,12 @@ ifeq ($(RESOURCE),FILE)
    #   TILEMAP_FMTS += JSON
    #endif
 
+endif
+
+ifeq ($(ARCFMT),ZIP)
+   ARC_EXT := .zip
+else
+   ARC_EXT := .tar.gz
 endif
 
 define BITMAPS_RULE
@@ -311,15 +319,17 @@ STAMPFILE := .stamp
 $(ASSETDIR)/%.asn: $(ASSETDIR)/%.json | $(MAP2ASN)
 	$(MAP2ASN) $< $@
 
-bin-file/assets/%.bmp: $(ASSETDIR)/%.bmp | bin-file/assets/$(STAMPFILE)
-	$(MD) $(dir $@)
-	cp $^ $@
-
-bin-file/assets/$(STAMPFILE):
+$(BINDIR)/$(ASSETDIR)/$(STAMPFILE):
 	$(MD) $(dir $@)
 	touch $@
 
-bin-file/assets/%.asn: assets/%.json | bin-file/assets/$(STAMPFILE) $(MAP2ASN)
+$(BINDIR)/$(ASSETDIR)/%.bmp: \
+$(ASSETDIR)/%.bmp | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
+	$(MD) $(dir $@)
+	cp $^ $@
+
+$(BINDIR)/$(ASSETDIR)/%.asn: \
+$(ASSETDIR)/%.json | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE) $(MAP2ASN)
 	$(MAP2ASN) $< $@
 
 $(PKGDIR)/$(STAMPFILE):
@@ -433,37 +443,21 @@ endef
 $(foreach platform,$(PLATFORMS), $(eval $(ICO_RULE)))
 
 define PKG_RULE
-$(PKGDIR)/$(pkg_name)-file.tar.gz: $(pkg_reqs) README.md | bin-file/$(notdir $(pkg_bin)) $(PKGDIR)/$(STAMPFILE)
-	cp bin-file/$(notdir $(pkg_bin)) .
-	$(pkg_strip) $(notdir $(pkg_bin))
-	$(TAR) -cvf - $(notdir $(pkg_bin)) $$^ | $(GZIP) > $$@
-	rm $(notdir $(pkg_bin))
-
-$(PKGDIR)/$(pkg_name)-file.zip: $(pkg_reqs) README.md | bin-file/$(notdir $(pkg_bin)) $(PKGDIR)/$(STAMPFILE)
-	cp bin-file/$(notdir $(pkg_bin)) .
-	$(pkg_strip) $(notdir $(pkg_bin))
-	$(ZIP) -r $$@ $(notdir $(pkg_bin)) $$^
-	rm $(notdir $(pkg_bin))
-
-$(PKGDIR)/$(pkg_name).tar.gz: README.md | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
+$(PKGDIR)/$(pkg_name)-$(PKG_OUT_RES).tar.gz: \
+README.md $(pkg_reqs) | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
 	cp $(pkg_bin) .
 	$(pkg_strip) $(notdir $(pkg_bin))
 	$(TAR) -cvf - $(notdir $(pkg_bin)) $$^ | $(GZIP) > $$@
 	rm $(notdir $(pkg_bin))
 
-$(PKGDIR)/$(pkg_name).zip: README.md | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
+$(PKGDIR)/$(pkg_name)-$(PKG_OUT_RES).zip: \
+README.md $(pkg_reqs) | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
 	cp $(pkg_bin) .
 	$(pkg_strip) $(notdir $(pkg_bin))
 	$(ZIP) -r $$@ $(notdir $(pkg_bin)) $$^
 	rm $(notdir $(pkg_bin))
 
-ifeq ($(ARCFMT),ZIP)
-pkg_$(platform)_file: $(PKGDIR)/$(pkg_name)-file.zip
-pkg_$(platform): $(PKGDIR)/$(pkg_name).zip
-else
-pkg_$(platform)_file: $(PKGDIR)/$(pkg_name)-file.tar.gz
-pkg_$(platform): $(PKGDIR)/$(pkg_name).tar.gz
-endif
+pkg_$(platform): $(PKGDIR)/$(pkg_name)-$(PKG_OUT_RES)$(ARC_EXT)
 endef
 
 # ====== Utilities ======
@@ -522,7 +516,6 @@ endif
 
 ifeq ($(FMT_JSON),TRUE)
    SDL_ASSETS += \
-      $(DSEKAI_ASSETS_BITMAPS_16x16x4) \
       $(DSEKAI_ASSETS_MAPS_JSON) \
       $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
@@ -593,7 +586,6 @@ endif
 
 ifeq ($(FMT_JSON),TRUE)
    XLIB_ASSETS += \
-      $(DSEKAI_ASSETS_BITMAPS_16x16x4) \
       $(DSEKAI_ASSETS_MAPS_JSON) \
       $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
@@ -898,7 +890,7 @@ $(eval $(RESEXT_H_RULE))
 pkg_bin := $(BIN_WIN16)
 pkg_strip := echo
 pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
-pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
+pkg_reqs := $(WIN16_ASSETS)
 $(eval $(PKG_RULE))
 
 $(BINDIR)/$(DSEKAI)16.img: $(BIN_WIN16)
@@ -968,7 +960,6 @@ endif
 
 ifeq ($(FMT_JSON),TRUE)
    WIN32_ASSETS += \
-      $(DSEKAI_ASSETS_BITMAPS_16x16x4) \
       $(DSEKAI_ASSETS_MAPS_JSON) \
       $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
