@@ -159,9 +159,11 @@ BIN_SDL_ARM := $(BINDIR)/$(DSEKAI)r
 BIN_CHECK_NULL := $(BINDIR)/check
 
 PKGDIR := packages
-PKGOS := $(shell uname -s -m | sed 's/ /./g' | tr '[:upper:]' '[:lower:]'])
+PKGOS := $(shell uname -s -m | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]'])
 
 GIT_HASH := $(shell git log -1 --pretty=format:"%h")
+
+PKG_OUT_FLAGS :=
 
 DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\" -DDSEKAI_GIT_HASH=\"$(GIT_HASH)\"
 
@@ -169,6 +171,7 @@ ifeq ($(RESOURCE),FILE)
 
    DEFINES_RESOURCE := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
    DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c
+   PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-file
 
    ifeq ($(FMT_ASN),TRUE)
 
@@ -190,14 +193,13 @@ all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
 
 endif
 
-PKG_OUT_RES := $(shell echo $(RESOURCE) | tr '[:upper:]' '[:lower:]'])
-
 ifeq ($(BUILD),RELEASE)
 
    CFLAGS_GCC_GENERIC :=
    CFLAGS_OWC_GENERIC :=
    LDFLAGS_OWC_GENERIC :=
    SANITIZE := NO
+   PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-release
 
 else
 
@@ -207,6 +209,7 @@ else
    CFLAGS_OWC_GENERIC :=
    DEFINES_DSEKAI += -DDEBUG_LOG -DDEBUG_THRESHOLD=$(DTHRESHOLD)
    LDFLAGS_GCC_GENERIC := -g -pg -Os
+   PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-debug
 
 endif
 
@@ -220,36 +223,26 @@ TILEMAP_FMTS :=
 
 ifeq ($(RESOURCE),FILE)
 
-   ifeq ($(FMT_BIN),TRUE)
-      DEFINES_DSEKAI += -DTILEMAP_FMT_BIN
-      TILEMAP_FMTS += BIN
-      DSEKAI_C_FILES_RES += src/tmbin.c
-   endif
-
    ifeq ($(FMT_ASN),TRUE)
       DEFINES_DSEKAI += -DTILEMAP_FMT_ASN
       TILEMAP_FMTS += BIN
       DSEKAI_C_FILES_RES += src/tmasn.c
+      PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-asn
    endif
 
    ifeq ($(FMT_JSON),TRUE)
       DEFINES_DSEKAI += -DTILEMAP_FMT_JSON
       DSEKAI_C_FILES_RES += src/tmjson.c
       TILEMAP_FMTS += JSON
+      PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-json
    endif
-
-   #ifeq ($(TILEMAP_FMTS),)
-   #   DEFINES_DSEKAI += -DTILEMAP_FMT_JSON
-   #   DSEKAI_C_FILES += src/tmjson.c
-   #   TILEMAP_FMTS += JSON
-   #endif
 
 endif
 
 ifeq ($(ARCFMT),ZIP)
-   ARC_EXT := .zip
+   PKG_OUT_EXT := .zip
 else
-   ARC_EXT := .tar.gz
+   PKG_OUT_EXT := .tar.gz
 endif
 
 define BITMAPS_RULE
@@ -443,21 +436,21 @@ endef
 $(foreach platform,$(PLATFORMS), $(eval $(ICO_RULE)))
 
 define PKG_RULE
-$(PKGDIR)/$(pkg_name)-$(PKG_OUT_RES).tar.gz: \
+$(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS).tar.gz: \
 README.md $(pkg_reqs) | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
 	cp $(pkg_bin) .
 	$(pkg_strip) $(notdir $(pkg_bin))
 	$(TAR) -cvf - $(notdir $(pkg_bin)) $$^ | $(GZIP) > $$@
 	rm $(notdir $(pkg_bin))
 
-$(PKGDIR)/$(pkg_name)-$(PKG_OUT_RES).zip: \
+$(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS).zip: \
 README.md $(pkg_reqs) | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
 	cp $(pkg_bin) .
 	$(pkg_strip) $(notdir $(pkg_bin))
 	$(ZIP) -r $$@ $(notdir $(pkg_bin)) $$^
 	rm $(notdir $(pkg_bin))
 
-pkg_$(platform): $(PKGDIR)/$(pkg_name)-$(PKG_OUT_RES)$(ARC_EXT)
+pkg_$(platform): $(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS)$(PKG_OUT_EXT)
 endef
 
 # ====== Utilities ======
@@ -781,7 +774,7 @@ res_maps := $(DSEKAI_ASSETS_MAPS)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_PALM)
-pkg_strip := m68k-palmos-strip
+pkg_strip := echo
 pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
 pkg_reqs :=
 $(eval $(PKG_RULE))
@@ -808,9 +801,15 @@ $(OBJDIR_PALM)/bin$(STAMPFILE): src/palms.rcp $(GENDIR_PALM)/palmd.rcp
 #$(GENDIR_PALM)/mulipalm.ld $(GENDIR_PALM)/mulipalm.s: $(DEF_PALM) | $(GENDIR_PALM)
 #	$(MULTIGEN) -b $(GENDIR_PALM)/mulipalm $<
 
+ifeq ($(BUILD),RELEASE)
+$(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
+	m68k-palmos-strip $(OBJDIR_PALM)/$(DSEKAI)
+	$(BUILDPRC) $@ $(DSEKAI) $(APPID) $(OBJDIR_PALM)/*.grc $(OBJDIR_PALM)/*.bin
+else
 $(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
 	#$(BUILDPRC) -o $@ $(DEF_PALM) $(OBJDIR_PALM)/$(DSEKAI) $(OBJDIR_PALM)/*.bin
 	$(BUILDPRC) $@ $(DSEKAI) $(APPID) $(OBJDIR_PALM)/*.grc $(OBJDIR_PALM)/*.bin
+endif
 
 $(OBJDIR_PALM)/%.o: %.c $(GENDIR_PALM)/palmd.rcp $(GENDIR_PALM)/resext.h
 	$(MD) $(dir $@)
