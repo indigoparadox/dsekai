@@ -169,7 +169,15 @@ ifeq ($(RESOURCE),FILE)
    DEFINES_RESOURCE := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
    DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c
 
+   ifeq ($(FMT_ASN),TRUE)
+
+all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN32) $(BIN_WIN16)
+
+   else
+
 all: $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN32)
+
+   endif
 
 else
 
@@ -252,10 +260,13 @@ DEPTHS := 16x16x4
 
 $(foreach DEPTH,$(DEPTHS), $(eval $(BITMAPS_RULE)))
 
+DSEKAI_ASSETS_BINFILE_BMP := \
+   $(addprefix bin-file/,$(DSEKAI_ASSETS_BITMAPS_16x16x4))
+
 DSEKAI_ASSETS_MAPS := \
    $(ASSETDIR)/m_field.json
 
-DSEKAI_ASSETS_MAPS_ASN := \
+DSEKAI_ASSETS_MAPS_BINFILE_ASN := \
    $(addprefix bin-file/,$(subst .json,.asn,$(DSEKAI_ASSETS_MAPS)))
 
 HOST_CC := gcc
@@ -298,6 +309,10 @@ DSEKAI_O_FILES_CHECK_NULL := \
 STAMPFILE := .stamp
 
 # ====== Generic Rules ======
+
+bin-file/assets/%.bmp: $(ASSETDIR)/%.bmp | bin-file/assets/$(STAMPFILE)
+	$(MD) $(dir $@)
+	cp $^ $@
 
 bin-file/assets/$(STAMPFILE):
 	$(MD) $(dir $@)
@@ -477,6 +492,16 @@ DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY))) \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
+BIN_SDL_ASSETS :=
+
+ifeq ($(RESOURCE),FILE)
+   BIN_SDL_ASSETS += $(DSEKAI_ASSETS_BINFILE_BMP)
+endif
+
+ifeq ($(FMT_ASN),TRUE)
+   BIN_SDL_ASSETS += $(DSEKAI_ASSETS_MAPS_BINFILE_ASN) 
+endif
+
 # 3. Programs
 
 CC_SDL := gcc
@@ -501,7 +526,7 @@ pkg_name := $(DSEKAI)-$(platform).$(PKGOS).tar.gz
 pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
 $(eval $(PKG_RULE))
 
-$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE)
+$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE) $(BIN_SDL_ASSETS)
 	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL)
 
 $(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS)
@@ -530,6 +555,16 @@ DSEKAI_C_FILES_XLIB_ONLY := \
    unilayer/input/xi.c \
    unilayer/graphics/xg.c \
    unilayer/memory/fakem.c
+
+BIN_XLIB_ASSETS :=
+
+ifeq ($(RESOURCE),FILE)
+   BIN_XLIB_ASSETS += $(DSEKAI_ASSETS_BINFILE_BMP)
+endif
+
+ifeq ($(FMT_ASN),TRUE)
+   BIN_XLIB_ASSETS += $(DSEKAI_ASSETS_MAPS_BINFILE_ASN) 
+endif
 
 # 3. Programs
 
@@ -560,7 +595,7 @@ pkg_name := $(DSEKAI)-$(platform).$(PKGOS).tar.gz
 pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t2_field.json
 $(eval $(PKG_RULE))
 
-$(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(GENDIR_XLIB)/resext.h
+$(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BIN_XLIB_ASSETS) $(BINDIR) $(GENDIR_XLIB)/resext.h
 	$(LD_XLIB) -o $@ $^ $(LDFLAGS_XLIB)
 
 $(OBJDIR_XLIB)/%.o: %.c $(GENDIR_XLIB)/resext.h | $(DSEKAI_ASSETS_MAPS_XLIB)
@@ -602,11 +637,11 @@ DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY))) \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
-DSEKAI_ASSETS_DOS_BINFILE_CGA := \
+DSEKAI_ASSETS_BINFILE_CGA := \
    $(addprefix bin-file/,$(subst .bmp,.cga,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
 
 ifeq ($(FMT_ASN),TRUE)
-   BIN_DOS_ASSETS := $(DSEKAI_ASSETS_MAPS_ASN) $(DSEKAI_ASSETS_DOS_BINFILE_CGA)
+   BIN_DOS_ASSETS := $(DSEKAI_ASSETS_MAPS_BINFILE_ASN) $(DSEKAI_ASSETS_BINFILE_CGA)
 endif
 
 # 3. Programs
@@ -783,6 +818,16 @@ ifeq ($(RESOURCE),DEFAULT)
 endif
 WIN16_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 
+BIN_WIN16_ASSETS :=
+
+ifeq ($(RESOURCE),FILE)
+   BIN_WIN16_ASSETS += $(DSEKAI_ASSETS_BINFILE_BMP)
+endif
+
+ifeq ($(FMT_ASN),TRUE)
+   BIN_WIN16_ASSETS += $(DSEKAI_ASSETS_MAPS_BINFILE_ASN) 
+endif
+
 # 3. Programs
 
 CC_WIN16 := wcc
@@ -824,7 +869,7 @@ $(BINDIR)/$(DSEKAI)16.img: $(BIN_WIN16)
 	$(MCOPY) -i "$@" $< ::$(DSEKAI)16.exe
 
 $(BIN_WIN16): \
-$(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win.res | $(BINDIR)/$(STAMPFILE)
+$(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win.res | $(BINDIR)/$(STAMPFILE) $(BIN_WIN16_ASSETS)
 	$(LD_WIN16) $(LDFLAGS_WIN16) -fe=$@ $^
 
 $(OBJDIR_WIN16)/win.res: $(WIN16_RES_FILES) | $(OBJDIR_WIN16)/$(STAMPFILE)
@@ -873,6 +918,16 @@ ifeq ($(RESOURCE),DEFAULT)
 endif
 WIN32_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 
+BIN_WIN32_ASSETS :=
+
+ifeq ($(RESOURCE),FILE)
+   BIN_WIN32_ASSETS += $(DSEKAI_ASSETS_BINFILE_BMP)
+endif
+
+ifeq ($(FMT_ASN),TRUE)
+   BIN_WIN32_ASSETS += $(DSEKAI_ASSETS_MAPS_BINFILE_ASN) 
+endif
+
 # 3. Programs
 
 CC_WIN32 := wcc386
@@ -909,7 +964,7 @@ pkg_reqs := $(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS) $(ASSETDIR)/t
 $(eval $(PKG_RULE))
 
 $(BIN_WIN32): \
-$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE)
+$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE) $(BIN_WIN32_ASSETS)
 	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
 
 $(OBJDIR_WIN32)/win.res: $(WIN32_RES_FILES) | $(OBJDIR_WIN32)/$(STAMPFILE)
