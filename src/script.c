@@ -165,8 +165,7 @@ uint16_t script_handle_SPEAK(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
 #ifdef SCRIPT_HAS_GFX
-   window_prefab_dialog(
-      WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state, t );
+   window_prefab_dialog( WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state );
 #endif /* SCRIPT_HAS_GFX */
    return pc + 1;
 }

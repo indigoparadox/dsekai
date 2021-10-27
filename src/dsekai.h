@@ -59,7 +59,7 @@ struct PACKED DSEKAI_STATE {
    MEMORY_HANDLE items;
    uint16_t items_count;
 
-   MEMORY_HANDLE map;
+   struct TILEMAP map;
 
    /*! \brief Array of currently loaded MOBILE objects on this map. */
    struct MOBILE mobiles[DSEKAI_MOBILES_MAX];

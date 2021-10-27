@@ -101,15 +101,13 @@ struct MOBILE* mobile_interact(
    return actee;
 }
 
-void mobile_execute(
-   struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state
-) {
+void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    struct SCRIPT* script = NULL;
    struct SCRIPT_STEP* step = NULL;
 
    if(
       0 > m->script_id ||
-      m->script_id >= t->scripts_count
+      m->script_id >= state->map.scripts_count
    ) {
       /* Invalid script. */
       return;
@@ -123,14 +121,14 @@ void mobile_execute(
       return;
    }
 
-   script = &(t->scripts[m->script_id]);
+   script = &(state->map.scripts[m->script_id]);
    step = &(script->steps[m->script_pc]);
 
    debug_printf( 0, "%u ms: script_exec: script %d, step %d (%d)",
       graphics_get_ms(), m->script_id, m->script_pc, step->action );
 
    m->script_pc = gc_script_handlers[step->action](
-      m->script_pc, script, t, m, NULL, &(m->coords), state, step->arg );
+      m->script_pc, script, &(state->map), m, NULL, &(m->coords), state, step->arg );
 }
 
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {

@@ -8,9 +8,7 @@ int16_t window_modal( struct DSEKAI_STATE* state ) {
 }
 
 int window_draw_all(
-   struct DSEKAI_STATE* state,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   struct DSEKAI_STATE* state
 ) {
    return 0;
 }
@@ -75,11 +73,7 @@ void window_shutdown() {
    memory_free( g_frames_handle );
 }
 
-int window_draw_all(
-   struct DSEKAI_STATE* state,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
-) {
+int window_draw_all( struct DSEKAI_STATE* state ) {
    struct WINDOW_FRAME* frames = NULL;
    struct WINDOW* windows = NULL;
    int i = 0,
@@ -180,7 +174,8 @@ int window_draw_all(
          }
       }
 
-      control_draw_all( &(windows[i]), strings, strings_sz, string_szs );
+      control_draw_all( &(windows[i]),
+         state->map.strings, state->map.strings_count, state->map.string_szs );
       windows[i].dirty -= 1;
    }
 

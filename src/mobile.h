@@ -113,11 +113,9 @@ struct MOBILE* mobile_get_dir( struct MOBILE* m, struct DSEKAI_STATE* state );
  * \brief Execute the next available ::SCRIPT_STEP in the currently running
  *        ::SCRIPT on a MOBILE.
  * \param m ::MEMORY_PTR to the MOBILE running the desired ::SCRIPT.
- * \param t Currently loaded ::TILEMAP.
  * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  */
-void mobile_execute(
-   struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state );
+void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state );
 
 #ifdef MOBILE_C
 const int8_t gc_mobile_step_table_normal_pos[16] = {

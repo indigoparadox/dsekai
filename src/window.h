@@ -94,16 +94,13 @@ struct WINDOW {
  * \param state Current global ::DSEKAI_STATE.
  * \param state ::MEMORY_PTR to the global engine ::DSEKAI_STATE.
  */
-#define window_prefab_dialog( id, dialog, sprite, state, t ) window_push( id, WINDOW_STATUS_MODAL, WINDOW_CENTERED, WINDOW_CENTERED, 160, 64, 0, state ); control_push( 0x2323, CONTROL_TYPE_LABEL_T, CONTROL_STATE_ENABLED, -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1, dialog, 0, id, state, t->strings, t->strings_count, t->string_szs ); control_push( 0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED, -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1, 0, sprite, id, state, t->strings, t->strings_count, t->string_szs ); 
+#define window_prefab_dialog( id, dialog, sprite, state ) window_push( id, WINDOW_STATUS_MODAL, WINDOW_CENTERED, WINDOW_CENTERED, 160, 64, 0, state ); control_push( 0x2323, CONTROL_TYPE_LABEL_T, CONTROL_STATE_ENABLED, -1, -1, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1, dialog, 0, id, state, state->map.strings, state->map.strings_count, state->map.string_szs ); control_push( 0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED, -1, 6, -1, -1, GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA, 1, 0, sprite, id, state, state->map.strings, state->map.strings_count, state->map.string_szs ); 
 
 #endif /* PLATFORM_PALM */
 
 void window_init();
 void window_shutdown();
-int window_draw_all(
-   struct DSEKAI_STATE* state,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs );
+int window_draw_all( struct DSEKAI_STATE* state );
 
 /**
  * \brief Push a new window onto the global window stack.
