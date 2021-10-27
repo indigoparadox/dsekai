@@ -161,9 +161,9 @@ BIN_CHECK_NULL := $(BINDIR)/check
 PKGDIR := packages
 PKGOS := $(shell uname -s -m | sed 's/ /./g' | tr '[:upper:]' '[:lower:]'])
 
-DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\"
-
 GIT_HASH := $(shell git log -1 --pretty=format:"%h")
+
+DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\" -DDSEKAI_GIT_HASH=\"$(GIT_HASH)\"
 
 ifeq ($(RESOURCE),FILE)
 
