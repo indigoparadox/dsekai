@@ -5,9 +5,6 @@
 
 #include "tmjson.h"
 
-/* For strlen() */
-#include <string.h>
-
 /* Get the real path to the tileset (it's JSON so assume file paths). */
 /* Resource IDs would be using pre-parsed maps. */
 
