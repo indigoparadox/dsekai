@@ -68,16 +68,14 @@ struct CONTROL {
 
 typedef int16_t (*CONTROL_CB_DRAW)(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs );
+   const char strings[][TILEMAP_STRINGS_SZ] );
 
 /**
  * \return 1 if successful and 0 otherwise.
  */
 typedef uint8_t (*CONTROL_CB_SZ)(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* r,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs );
+   const char strings[][TILEMAP_STRINGS_SZ] );
 
 int16_t control_push(
    uint32_t control_id, uint16_t type, uint16_t status,
@@ -85,13 +83,11 @@ int16_t control_push(
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
    int32_t data_scalar, RESOURCE_ID data_res_id,
    uint32_t window_id, struct DSEKAI_STATE* state,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs );
+   const char strings[][TILEMAP_STRINGS_SZ] );
 void control_pop( uint32_t, uint32_t, struct DSEKAI_STATE* );
 void control_draw_all(
    struct WINDOW* w,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs );
+   const char strings[][TILEMAP_STRINGS_SZ] );
 
 #ifndef PLATFORM_PALM
 
@@ -99,11 +95,11 @@ void control_draw_all(
 
 /* === If we're being called inside control.c === */
 
-#define CONTROL_CB_DRAW_TABLE_PROTOTYPES( idx, name ) static int16_t control_draw_ ## name( struct WINDOW*, struct CONTROL*, const char[][TILEMAP_STRINGS_SZ], uint8_t, uint8_t* );
+#define CONTROL_CB_DRAW_TABLE_PROTOTYPES( idx, name ) static int16_t control_draw_ ## name( struct WINDOW*, struct CONTROL*, const char[][TILEMAP_STRINGS_SZ] );
 
 CONTROL_CB_TABLE( CONTROL_CB_DRAW_TABLE_PROTOTYPES );
 
-#define CONTROL_CB_SZ_TABLE_PROTOTYPES( idx, name ) static uint8_t control_sz_ ## name( struct WINDOW*, struct CONTROL*, struct GRAPHICS_RECT*, const char[][TILEMAP_STRINGS_SZ], uint8_t, uint8_t* );
+#define CONTROL_CB_SZ_TABLE_PROTOTYPES( idx, name ) static uint8_t control_sz_ ## name( struct WINDOW*, struct CONTROL*, struct GRAPHICS_RECT*, const char[][TILEMAP_STRINGS_SZ] );
 
 CONTROL_CB_TABLE( CONTROL_CB_SZ_TABLE_PROTOTYPES );
 

@@ -86,14 +86,6 @@ struct PACKED TILEMAP {
    /*! \brief Strings used in dialog/signs on this map. */
    char strings[TILEMAP_STRINGS_MAX][TILEMAP_STRINGS_SZ];
    /* TODO: Scrap string sizes and enforce NULL term in loaders. */
-   /*! \brief Size of each loaded string. */
-   uint8_t string_szs[TILEMAP_STRINGS_MAX];
-   /* TODO: Scrap this. */
-   /*! \brief Number of TILEMAP::strings active on this map. */
-   uint8_t strings_count;
-   /* TODO: Scrap this. */
-   /*! \brief Number of TILEMAP::spawns active on this map. */
-   uint16_t spawns_count;
    /* \brief Scripts available to attach to any MOBILE. */
    struct SCRIPT scripts[TILEMAP_SCRIPTS_MAX];
    /* TODO: Scrap this. */

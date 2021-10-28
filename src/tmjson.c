@@ -169,27 +169,23 @@ static int16_t tilemap_json_parse_strings(
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t string_sz_tmp = 0;
+   int i = 0;
    
    /* Load strings.*/
    debug_printf( 2, "loading strings" ); 
-   for(
-      t->strings_count = 0 ;
-      TILEMAP_STRINGS_MAX > t->strings_count ;
-      t->strings_count++
-   ) {
+   for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
       dio_snprintf(
-         iter_path, JSON_PATH_SZ, TILEMAP_JPATH_STRING, t->strings_count );
+         iter_path, JSON_PATH_SZ, TILEMAP_JPATH_STRING, i );
       string_sz_tmp = json_str_from_path(
          iter_path, JSON_PATH_SZ,
-         t->strings[t->strings_count], TILEMAP_STRINGS_SZ,
+         t->strings[i], TILEMAP_STRINGS_SZ,
          tokens, tokens_sz, json_buffer );
       if( 0 >= string_sz_tmp ) {
          /* Last string index was not parsed, so we're done. */
          break;
       } else {
          debug_printf( 1, "loaded string: %s (%d)",
-            t->strings[t->strings_count], string_sz_tmp );
-         t->string_szs[t->strings_count] = string_sz_tmp;
+            t->strings[i], string_sz_tmp );
       }
    }
 
@@ -252,6 +248,7 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
       tok_parsed = 0;
    char ts_name[JSON_PATH_SZ];
    struct jsmntok* tokens = NULL;
+   int i = 0;
 
    memory_zero_ptr( t, sizeof( struct TILEMAP ) );
 
@@ -334,14 +331,14 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
 
    debug_printf( 2, "loading spawns" ); 
    while(
-      TILEMAP_SPAWNS_MAX > t->spawns_count &&
+      TILEMAP_SPAWNS_MAX > i &&
       tilemap_json_parse_spawn(
-         t, t->spawns_count, tokens, tok_parsed, json_buffer, json_buffer_sz, id
+         t, i, tokens, tok_parsed, json_buffer, json_buffer_sz, id
       )
    ) {
       
       /* Iterate to the next spawn. */
-      t->spawns_count++;
+      i++;
    }
 
    retval = tilemap_json_parse_strings(

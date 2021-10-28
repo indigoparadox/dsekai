@@ -187,8 +187,6 @@ static int16_t tilemap_asn_parse_strings(
       debug_printf( 2, "found string: %s", t->strings[str_idx - 1] );
    }
 
-   t->strings_count = str_idx;
-
    return total_read_sz;
 }
 

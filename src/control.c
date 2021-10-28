@@ -10,8 +10,7 @@ int16_t control_push(
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
    int32_t data_scalar, RESOURCE_ID data_res_id,
    uint32_t window_id, struct DSEKAI_STATE* state,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
    return 0;
 }
@@ -22,8 +21,7 @@ int16_t control_push(
 
 int16_t control_draw_BUTTON(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
    /* TODO */
    return 1;
@@ -31,8 +29,7 @@ int16_t control_draw_BUTTON(
 
 int16_t control_draw_CHECK(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
    /* TODO */
    return 1;
@@ -51,23 +48,22 @@ static void control_draw_text(
 
 int16_t control_draw_LABEL_T(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
 
    assert( NULL != c );
-   assert( 0 <= c->data.scalar && c->data.scalar < strings_sz );
+   assert( 0 <= c->data.scalar && c->data.scalar < TILEMAP_STRINGS_MAX );
 
    control_draw_text( w, c, 
-      strings[c->data.scalar], string_szs[c->data.scalar] );
+      strings[c->data.scalar],
+      memory_strnlen_ptr( strings[c->data.scalar], TILEMAP_STRINGS_SZ ) );
 
    return 1;
 }
 
 int16_t control_draw_LABEL_G(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
    /* TODO */
    return 1;
@@ -75,8 +71,7 @@ int16_t control_draw_LABEL_G(
 
 int16_t control_draw_SPRITE(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
 
    assert( NULL != c );
@@ -99,8 +94,7 @@ int16_t control_draw_SPRITE(
 
 uint8_t control_sz_BUTTON(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
    /* TODO */
    return 0;
@@ -108,8 +102,7 @@ uint8_t control_sz_BUTTON(
 
 uint8_t control_sz_CHECK(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
    /* TODO */
    return 0;
@@ -117,27 +110,35 @@ uint8_t control_sz_CHECK(
 
 uint8_t control_sz_LABEL_T(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
+   int str_sz = 0;
+
    assert( NULL != c );
 
-   if( 0 > c->data.scalar || c->data.scalar >= strings_sz ) {
+   if(
+      0 > c->data.scalar ||
+      c->data.scalar >= TILEMAP_STRINGS_MAX ||
+      0 == memory_strnlen_ptr( strings[c->data.scalar], TILEMAP_STRINGS_SZ )
+   ) {
       error_printf( "invalid string specified to control" );
       return 0;
    }
 
-   graphics_string_sz(
-      strings[c->data.scalar], string_szs[c->data.scalar],
-      c->scale, sz );
+   str_sz = memory_strnlen_ptr( strings[c->data.scalar], TILEMAP_STRINGS_SZ );
+   if( 0 >= str_sz ) {
+      error_printf( "invalid string size returned: %d", str_sz );
+      return 0;
+   }
+
+   graphics_string_sz( strings[c->data.scalar], str_sz, c->scale, sz );
 
    return 1;
 }
 
 uint8_t control_sz_LABEL_G(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
    /* TODO */
    return 0;
@@ -145,8 +146,7 @@ uint8_t control_sz_LABEL_G(
 
 uint8_t control_sz_SPRITE(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
    /* TODO: Verify sprite exists. */
    sz->w = SPRITE_W + 4; /* For border. */
@@ -162,8 +162,7 @@ int16_t control_push(
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
    int32_t data_scalar, RESOURCE_ID data_res_id,
    uint32_t window_id, struct DSEKAI_STATE* state,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
    int i = 0;
    struct WINDOW* windows = NULL;
@@ -227,8 +226,7 @@ int16_t control_push(
 
    if(
       !gc_control_sz_callbacks[type](
-         &(windows[window_idx]), &(controls[0]), &control_sz,
-         strings, strings_sz, string_szs )
+         &(windows[window_idx]), &(controls[0]), &control_sz, strings )
    ) {
       error_printf( "unable to create control" );
       goto cleanup;
@@ -356,8 +354,7 @@ cleanup:
 
 void control_draw_all(
    struct WINDOW* w,
-   const char strings[][TILEMAP_STRINGS_SZ],
-   uint8_t strings_sz, uint8_t* string_szs
+   const char strings[][TILEMAP_STRINGS_SZ]
 ) {
    struct CONTROL* controls = NULL;
    int16_t i = 0;
@@ -370,7 +367,7 @@ void control_draw_all(
 
    for( i = w->controls_count - 1 ; 0 <= i ; i-- ) {
       gc_control_draw_callbacks[controls[i].type](
-         w, &(controls[i]), strings, strings_sz, string_szs );
+         w, &(controls[i]), strings );
    }
 
    if( NULL != controls ) {

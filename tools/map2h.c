@@ -91,7 +91,7 @@ int map2h(
    /* spawns */
    fprintf( header_file, "   /* spawns */\n" );
    fprintf( header_file, "   {\n" );
-   for( i = 0 ; t->spawns_count > i ; i++ ) {
+   for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
       printf( "%s\n", t->spawns[i].type );
       ts_basename_idx = dio_basename(
          t->spawns[i].type, strlen( t->spawns[i].type ) );
@@ -131,26 +131,10 @@ int map2h(
    /* strings */
    fprintf( header_file, "   /* strings */\n" );
    fprintf( header_file, "   {\n" );
-   for( i = 0 ; t->strings_count > i ; i++ ) {
+   for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
       fprintf( header_file, "      \"%s\",\n", t->strings[i] );
    }
    fprintf( header_file, "   },\n" );
-
-   /* string_szs */
-   fprintf( header_file, "   /* string_szs */\n" );
-   fprintf( header_file, "   {\n" );
-   for( i = 0 ; t->strings_count > i ; i++ ) {
-      fprintf( header_file, "      %d,\n", t->string_szs[i] );
-   }
-   fprintf( header_file, "   },\n" );
-
-   /* strings_count */
-   fprintf( header_file, "   /* strings_count */\n" );
-   fprintf( header_file, "   %d,\n", t->strings_count );
-
-   /* spawns_count */
-   fprintf( header_file, "   /* spawns_count */\n" );
-   fprintf( header_file, "   %d,\n", t->spawns_count );
 
    /* scripts */
    fprintf( header_file, "   /* scripts */\n" );
