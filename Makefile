@@ -1338,6 +1338,7 @@ GENDIR_MEGAD := $(GENDIR)/megad
 
 DSEKAI_C_FILES_MEGAD_ONLY := \
    src/main.c \
+   src/megahead.c \
    unilayer/input/megadi.c \
    unilayer/memory/fakem.c \
    unilayer/resource/megadr.c \
@@ -1356,7 +1357,7 @@ LD_MEGAD := m68k-elf-gcc
 
 CFLAGS_MEGAD := -m68000 -fno-builtin -I/opt/gendev/sgdk/inc -I/opt/gendev/sgdk/res -B/opt/gendev/sgdk/bin $(CFLAGS_GCC_GENERIC) -I$(GENDIR_MEGAD) -DPLATFORM_MEGADRIVE -DSCREEN_W=320 -DSCREEN_H=224 -Os
 
-LDFLAGS_MEGAD := $(CFLAGS_PALM)
+LDFLAGS_MEGAD := -B/opt/gendev/sgdk/bin -n -T /opt/gendev/sgdk/md.ld -nostdlib @out/cmd_ /opt/gendev/sgdk/lib/libmd.a /opt/gendev/sgdk/lib/libgcc.a
 
 # 5. Targets
 
@@ -1373,6 +1374,9 @@ $(eval $(PKG_RULE))
 
 $(BIN_MEGAD): $(DSEKAI_O_FILES_MEGAD) | $(BINDIR)/$(STAMPFILE)
 	$(LD_MEGAD) -o $@ $^ $(LDFLAGS_MEGAD)
+
+#$(OBJDIR_MEGAD)/sega.o: src/sega.s
+#	
 
 $(OBJDIR_MEGAD)/%.o: %.c $(GENDIR_MEGAD)/resext.h
 	$(MD) $(dir $@)
