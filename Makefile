@@ -246,22 +246,23 @@ else
    PKG_OUT_EXT := .tar.gz
 endif
 
-define BITMAPS_RULE
-DSEKAI_ASSETS_SPRITES_$(DEPTH) := \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/s_*.bmp)
-DSEKAI_ASSETS_TILES_$(DEPTH) := \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/t_*.bmp)
-DSEKAI_ASSETS_PATTERNS_$(DEPTH) := \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/p_*.bmp)
-DSEKAI_ASSETS_BITMAPS_$(DEPTH) := \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/s_*.bmp) \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/t_*.bmp) \
-   $(wildcard $(ASSETDIR)/$(DEPTH)/p_*.bmp)
-endef
+ifeq ($(DEPTH),VGA)
+   DEPTH_SPEC := 16x16x16
+else
+   DEPTH := CGA
+   DEPTH_SPEC := 16x16x4
+endif
 
-DEPTHS := 16x16x4
-
-$(foreach DEPTH,$(DEPTHS), $(eval $(BITMAPS_RULE)))
+DSEKAI_ASSETS_SPRITES := \
+   $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/s_*.bmp)
+DSEKAI_ASSETS_TILES := \
+   $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/t_*.bmp)
+DSEKAI_ASSETS_PATTERNS := \
+   $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/p_*.bmp)
+DSEKAI_ASSETS_BITMAPS := \
+   $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/s_*.bmp) \
+   $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/t_*.bmp) \
+   $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/p_*.bmp)
 
 DSEKAI_ASSETS_MAPS_JSON := \
    $(ASSETDIR)/m_field.json
@@ -369,7 +370,7 @@ define RESEXT_H_RULE
 
       #$(GENDIR)/$(platform)/residx.h: $(res_gfx) $(res_maps) | \
       #$(GENDIR)/$(platform)/$(STAMPFILE) $(MKRESH)
-		#	$(MKRESH) -f file -s bmp jsn json cga -if $$^ -oh $$@
+		#	$(MKRESH) -f file -s bmp jsn json cga vga -if $$^ -oh $$@
 
       $(GENDIR)/$(platform)/resext.h: $(GENDIR)/$(platform)/$(STAMPFILE) $(res_gfx) $(res_maps)
 			#echo '#include "residx.h"' > $$@
@@ -382,7 +383,7 @@ define RESEXT_H_RULE
       $(GENDIR)/$(platform)/win.rc \
       $(GENDIR)/$(platform)/residx.h: $(res_gfx) | \
       $(MKRESH) $(GENDIR)/$(platform)/$(STAMPFILE)
-			$(MKRESH) -f win16 -i 5001 -s bmp cga \
+			$(MKRESH) -f win16 -i 5001 -s bmp cga vga \
             -if $$^ \
             -oh $(GENDIR)/$(platform)/residx.h \
             -or $(GENDIR)/$(platform)/win.rc
@@ -509,7 +510,7 @@ DSEKAI_O_FILES_SDL := \
 BIN_SDL_ASSETS :=
 
 ifeq ($(RESOURCE),FILE)
-   SDL_ASSETS += $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+   SDL_ASSETS += $(DSEKAI_ASSETS_BITMAPS)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
@@ -536,7 +537,7 @@ LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GC
 # 5. Targets
 
 platform := sdl
-res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
@@ -579,7 +580,7 @@ DSEKAI_C_FILES_XLIB_ONLY := \
 XLIB_ASSETS :=
 
 ifeq ($(RESOURCE),FILE)
-   XLIB_ASSETS += $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+   XLIB_ASSETS += $(DSEKAI_ASSETS_BITMAPS)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
@@ -611,7 +612,7 @@ DSEKAI_O_FILES_XLIB := \
 # 5. Targets
 
 platform := xlib
-res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
@@ -654,9 +655,6 @@ DSEKAI_C_FILES_DOS_ONLY := \
 #DSEKAI_ASSETS_MAPS_DOS := \
 #   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_MAPS)))
 
-DSEKAI_ASSETS_DOS_CGA := \
-   $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
-
 DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY))) \
@@ -665,7 +663,12 @@ DSEKAI_O_FILES_DOS := \
 DOS_ASSETS :=
 
 ifeq ($(RESOURCE),FILE)
-   DOS_ASSETS += $(subst .bmp,.cga,$(DSEKAI_ASSETS_BITMAPS_16x16x4))
+   ifeq ($(DEPTH),VGA)
+      DOS_ASSETS += $(subst .bmp,.vga,$(DSEKAI_ASSETS_BITMAPS))
+   else
+      # Assume CGA by default.
+      DOS_ASSETS += $(subst .bmp,.cga,$(DSEKAI_ASSETS_BITMAPS))
+   endif
 endif
 
 ifeq ($(FMT_ASN),TRUE)
@@ -690,7 +693,12 @@ endif
 # 5. Targets
 
 platform := dos
-res_gfx := $(DSEKAI_ASSETS_DOS_CGA)
+ifeq ($(DEPTH),VGA)
+   res_gfx := $(subst .bmp,.vga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
+else
+   # Assume CGA by default.
+   res_gfx := $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
+endif
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
@@ -710,14 +718,26 @@ $(eval $(PKG_RULE))
 $(ASSETDIR)/%.cga: $(ASSETDIR)/%.bmp | $(CONVERT)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
+$(ASSETDIR)/%.vga: $(ASSETDIR)/%.bmp | $(CONVERT)
+	$(CONVERT) -ic bitmap -oc cga -ob 4 -if $< -of $@ -og
+
 $(BINDIR)/assets/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | \
 $(BINDIR)/assets/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
 
+$(BINDIR)/assets/%.vga: $(ASSETDIR)/%.bmp $(CONVERT) | \
+$(BINDIR)/assets/$(STAMPFILE)
+	$(MD) $(dir $@)
+	$(CONVERT) -ic bitmap -oc cga -ob 4 -if $< -of $@ -og
+
 $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
+
+$(GENDIR_DOS)/%.vga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
+	$(MD) $(dir $@)
+	$(CONVERT) -ic bitmap -oc cga -ob 4 -if $< -of $@ -og
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE) $(addprefix $(BINDIR)/,$(DOS_ASSETS))
 	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
@@ -744,7 +764,7 @@ DSEKAI_C_FILES_PALM_ONLY := \
    unilayer/graphics/palmg.c
 
 DSEKAI_ASSETS_BITMAPS_PALM := \
-   $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4))
+   $(subst $(ASSETDIR)/,$(GENDIR_PALM)/,$(DSEKAI_ASSETS_BITMAPS))
 
 DSEKAI_O_FILES_PALM := \
    $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -858,7 +878,7 @@ WIN16_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 WIN16_ASSETS :=
 
 ifeq ($(RESOURCE),FILE)
-   WIN16_ASSETS += $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+   WIN16_ASSETS += $(DSEKAI_ASSETS_BITMAPS)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
@@ -890,7 +910,7 @@ endif
 # 5. Targets
 
 platform := win16
-res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
@@ -958,7 +978,7 @@ WIN32_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 WIN32_ASSETS :=
 
 ifeq ($(RESOURCE),FILE)
-   WIN32_ASSETS += $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+   WIN32_ASSETS += $(DSEKAI_ASSETS_BITMAPS)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
@@ -996,7 +1016,7 @@ endif
 # 5. Targets
 
 platform := win32
-res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
@@ -1043,10 +1063,10 @@ DSEKAI_C_FILES_MAC6_ONLY := \
    unilayer/memory/mac6m.c
 
 DSEKAI_ASSETS_ICNS := \
-   $(subst .bmp,.icns,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
+   $(subst .bmp,.icns,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS)))
 
 DSEKAI_ASSETS_RSRC := \
-   $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS_16x16x4)))
+   $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS)))
 
 DSEKAI_ASSETS_MAPS_MAC6 := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_MAPS_JSON)))
@@ -1078,7 +1098,7 @@ LDFLAGS_MAC6 := -lRetroConsole $(LDFLAGS_GCC_GENERIC)
 #      -lh $(GENDIR_MAC6)/resext.h
 
 platform := mac6
-res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
@@ -1156,7 +1176,7 @@ $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 # 5. Targets
 
 platform := nds
-res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS)
 $(eval $(RESEXT_H_RULE))
 
@@ -1216,7 +1236,7 @@ LDFLAGS_WEB := $(LDFLAGS_GCC_GENERIC)
 # 5. Targets
 
 $(GENDIR_WEB)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS_16x16x4) $(DSEKAI_ASSETS_MAPS_JSON) | \
+$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS_JSON) | \
 $(GENDIR_WEB)/$(STAMPFILE) $(HEADPACK)
 	$(HEADPACK) $@ $^
 
@@ -1270,7 +1290,7 @@ LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) $(LDFLAGS_GCC_GENERIC)
 # 5. Targets
 
 platform := curses
-res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
@@ -1315,7 +1335,7 @@ LDFLAGS_SDL_ARM := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAG
 # 5. Targets
 
 platform := sdlarm
-res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
@@ -1362,7 +1382,7 @@ LDFLAGS_MEGAD := -B/opt/gendev/sgdk/bin -n -T /opt/gendev/sgdk/md.ld -nostdlib @
 # 5. Targets
 
 platform := megad
-res_gfx := $(DSEKAI_ASSETS_BITMAPS_16x16x4)
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
@@ -1406,5 +1426,5 @@ $(OBJDIR_CHECK_NULL)/%.o: %.c check/testdata.h $(GENDIR_CHECK_NULL)/resext.h
 # ====== Clean ======
 
 clean:
-	rm -rf data obj obj-file bin bin-file gen gen-file *.err .rsrc .finf gmon.out log*.txt packages fpackages assets/*/*.cga assets/*.asn
+	rm -rf data obj obj-file bin bin-file gen gen-file *.err .rsrc .finf gmon.out log*.txt packages fpackages assets/*/*.cga assets/*/*.vga assets/*.asn
 
