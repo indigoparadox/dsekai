@@ -3,6 +3,8 @@ DSEKAI := dsekai
 
 ENTRY_MAP := field
 
+ROOT := $(shell pwd)
+
 DSEKAI_C_FILES := \
    src/tilemap.c \
    unilayer/graphics.c \
@@ -138,6 +140,21 @@ else
 
 endif
 
+ifeq ($(DEPTH),VGA)
+   DEPTH_SPEC := 16x16x16
+   PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-vga
+   BINDIR := $(BINDIR)-vga
+   GENDIR := $(GENDIR)-vga
+   DEPDIR := $(DEPDIR)-vga
+   OBJDIR := $(OBJDIR)-vga
+   DEFINES_DEPTH := -DDEPTH_VGA
+else
+   DEPTH := CGA
+   DEPTH_SPEC := 16x16x4
+   PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-cga
+   DEFINES_DEPTH := -DDEPTH_CGA
+endif
+
 OBJDIR_CHECK_NULL := $(OBJDIR)/check_null
 
 DEPDIR_CHECK_NULL := $(DEPDIR)/check_null
@@ -246,13 +263,6 @@ else
    PKG_OUT_EXT := .tar.gz
 endif
 
-ifeq ($(DEPTH),VGA)
-   DEPTH_SPEC := 16x16x16
-else
-   DEPTH := CGA
-   DEPTH_SPEC := 16x16x4
-endif
-
 DSEKAI_ASSETS_SPRITES := \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/s_*.bmp)
 DSEKAI_ASSETS_TILES := \
@@ -269,8 +279,6 @@ DSEKAI_ASSETS_MAPS_JSON := \
 
 DSEKAI_ASSETS_TILESETS_JSON := \
    $(ASSETDIR)/t2_field.json
-
-DSEKAI_ASSETS_MAPS_ASN := $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON))
 
 HOST_CC := gcc
 MD := mkdir -p
@@ -314,8 +322,9 @@ STAMPFILE := .stamp
 
 # ====== Generic Rules ======
 
-$(ASSETDIR)/%.asn: $(ASSETDIR)/%.json | $(MAP2ASN)
-	$(MAP2ASN) $< $@
+pkgbuild/$(STAMPFILE):
+	$(MD) $(dir $@)
+	touch $@
 
 $(BINDIR)/$(ASSETDIR)/$(STAMPFILE):
 	$(MD) $(dir $@)
@@ -353,11 +362,23 @@ $(GENDIR)/%/$(STAMPFILE):
 
 define RESEXT_H_RULE
 
+   # Preprocess JSON maps/tilesets for depth path.
+   $(GENDIR)/$(platform)/%.json: %.json | \
+   $(GENDIR)/$(platform)/$(STAMPFILE)
+		$(MD) $$(dir $$@)
+		cat $$< | sed -e 's/16x16x4/$(DEPTH_SPEC)/g' > $$@
+
+   # Generate ASN from JSON.
+   $(GENDIR)/$(platform)/%.asn: $(GENDIR)/$(platform)/%.json | $(MAP2ASN)
+		$(MAP2ASN) $< $@
+
+   res_maps := $(addprefix $(GENDIR)/$(platform)/,$(DSEKAI_ASSETS_MAPS_JSON))
+
    ifeq ($$(RESOURCE),HEADER)
 
       # Header was specified explicitly.
 
-      $(GENDIR)/$(platform)/resemb.h: $(res_gfx) $(res_maps) | \
+      $(GENDIR)/$(platform)/resemb.h: $(res_gfx) $$(res_maps) | \
       $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
 			$(HEADPACK) $$@ $$^
 
@@ -368,11 +389,12 @@ define RESEXT_H_RULE
 
       # File was specified explicitly.
 
-      #$(GENDIR)/$(platform)/residx.h: $(res_gfx) $(res_maps) | \
+      #$(GENDIR)/$(platform)/residx.h: $(res_gfx) $$(res_maps) | \
       #$(GENDIR)/$(platform)/$(STAMPFILE) $(MKRESH)
 		#	$(MKRESH) -f file -s bmp jsn json cga vga -if $$^ -oh $$@
 
-      $(GENDIR)/$(platform)/resext.h: $(GENDIR)/$(platform)/$(STAMPFILE) $(res_gfx) $(res_maps)
+      $(GENDIR)/$(platform)/resext.h: \
+      $(GENDIR)/$(platform)/$(STAMPFILE) $(res_gfx) $$(res_maps)
 			#echo '#include "residx.h"' > $$@
 			touch $$@
 
@@ -390,7 +412,7 @@ define RESEXT_H_RULE
 
       # Embed maps in preparsed structs.
 
-      $(GENDIR)/$(platform)/resemb.h: $(res_maps) | \
+      $(GENDIR)/$(platform)/resemb.h: $$(res_maps) | \
       $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
 			$(HEADPACK) $$@ $$^
 
@@ -413,7 +435,7 @@ define RESEXT_H_RULE
 
       # Embed maps in preparsed structs.
 
-      $(GENDIR)/$(platform)/resemb.h: $(res_maps) | \
+      $(GENDIR)/$(platform)/resemb.h: $$(res_maps) | \
       $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
 			$(HEADPACK) $$@ $$^
 
@@ -426,7 +448,7 @@ define RESEXT_H_RULE
 
       # For all other platforms, default to header.
 
-      $(GENDIR)/$(platform)/resemb.h: $(res_gfx) $(res_maps) | \
+      $(GENDIR)/$(platform)/resemb.h: $(res_gfx) $$(res_maps) | \
       $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
 			$(HEADPACK) $$@ $$^
 
@@ -446,21 +468,32 @@ endef
 $(foreach platform,$(PLATFORMS), $(eval $(ICO_RULE)))
 
 define PKG_RULE
-$(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS).tar.gz: \
-README.md $(pkg_reqs) | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
-	cp $(pkg_bin) .
-	$(pkg_strip) $(notdir $(pkg_bin))
-	$(TAR) -cvf - $(notdir $(pkg_bin)) $$^ | $(GZIP) > $$@
-	rm $(notdir $(pkg_bin))
+PKGBUILD := pkgbuild/$(pkg_name)$(PKG_OUT_FLAGS)
 
-$(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS).zip: \
-README.md $(pkg_reqs) | $(pkg_bin) $(PKGDIR)/$(STAMPFILE)
-	cp $(pkg_bin) .
-	$(pkg_strip) $(notdir $(pkg_bin))
-	$(ZIP) -r $$@ $(notdir $(pkg_bin)) $$^
-	rm $(notdir $(pkg_bin))
+$$(PKGBUILD)/%: %
+	$(MD) $$(dir $$@)
+	cp $$< $$@
 
-pkg_$(platform): $(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS)$(PKG_OUT_EXT)
+$$(PKGBUILD)/$(notdir $(pkg_bin)): $(pkg_bin)
+	$(MD) $$(dir $$@)
+	cp $$^ $$@
+	$(pkg_strip) $$@
+
+$(ROOT)/$(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS).tar.gz: \
+$(subst $(GENDIR)/$(platform)/,$$(PKGBUILD)/,$(pkg_reqs)) \
+$$(PKGBUILD)/$(notdir $(pkg_bin)) \
+$$(PKGBUILD)/README.md \
+| $(PKGDIR)/$(STAMPFILE)
+	cd pkgbuild && $(TAR) -cvf - $(pkg_name)$(PKG_OUT_FLAGS) | $(GZIP) > $$@
+
+$(ROOT)/$(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS).zip: \
+$(subst $(GENDIR)/$(platform)/,$$(PKGBUILD)/,$(pkg_reqs)) \
+$$(PKGBUILD)/$(notdir $(pkg_bin)) \
+$$(PKGBUILD)/README.md \
+| $(PKGDIR)/$(STAMPFILE)
+	cd pkgbuild && $(ZIP) -r $$@ $(pkg_name)$(PKG_OUT_FLAGS)
+
+pkg_$(platform): $(ROOT)/$(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS)$(PKG_OUT_EXT)
 endef
 
 # ====== Utilities ======
@@ -507,20 +540,22 @@ DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY))) \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
-BIN_SDL_ASSETS :=
+# 1a. Packaging Manifest
+
+SDL_MANIFEST :=
 
 ifeq ($(RESOURCE),FILE)
-   SDL_ASSETS += $(DSEKAI_ASSETS_BITMAPS)
+   SDL_MANIFEST += $(addprefix $(GENDIR_SDL)/,$(DSEKAI_ASSETS_BITMAPS))
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   SDL_ASSETS += $(DSEKAI_ASSETS_MAPS_ASN) 
+   SDL_MANIFEST += $(addprefix $(GENDIR_SDL)/,$(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON)))
 endif
 
 ifeq ($(FMT_JSON),TRUE)
-   SDL_ASSETS += \
-      $(DSEKAI_ASSETS_MAPS_JSON) \
-      $(DSEKAI_ASSETS_TILESETS_JSON)
+   SDL_MANIFEST += \
+      $(addprefix $(GENDIR_SDL)/,$(DSEKAI_ASSETS_MAPS_JSON)) \
+      $(addprefix $(GENDIR_SDL)/,$(DSEKAI_ASSETS_TILESETS_JSON))
 endif
 
 # 3. Programs
@@ -530,7 +565,7 @@ LD_SDL := gcc
 
 # 4. Arguments
 
-CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
+CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_DEPTH)
 
 LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
@@ -544,10 +579,10 @@ $(eval $(RESEXT_H_RULE))
 pkg_bin := $(BIN_SDL)
 pkg_strip := strip
 pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
-pkg_reqs := $(SDL_ASSETS)
+pkg_reqs := $(SDL_MANIFEST)
 $(eval $(PKG_RULE))
 
-$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE) $(addprefix $(BINDIR)/,$(SDL_ASSETS))
+$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE)
 	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL)
 
 $(OBJDIR_SDL)/%.o: %.c $(GENDIR_SDL)/resext.h | $(DSEKAI_ASSETS_MAPS_JSON)
@@ -577,18 +612,18 @@ DSEKAI_C_FILES_XLIB_ONLY := \
    unilayer/graphics/xg.c \
    unilayer/memory/fakem.c
 
-XLIB_ASSETS :=
+XLIB_MANIFEST :=
 
 ifeq ($(RESOURCE),FILE)
-   XLIB_ASSETS += $(DSEKAI_ASSETS_BITMAPS)
+   XLIB_MANIFEST += $(DSEKAI_ASSETS_BITMAPS)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   XLIB_ASSETS += $(DSEKAI_ASSETS_MAPS_ASN)
+   XLIB_MANIFEST += $(addprefix $(GENDIR_XLIB)/,$(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON)))
 endif
 
 ifeq ($(FMT_JSON),TRUE)
-   XLIB_ASSETS += \
+   XLIB_MANIFEST += \
       $(DSEKAI_ASSETS_MAPS_JSON) \
       $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
@@ -600,7 +635,7 @@ LD_XLIB := gcc
 
 # 4. Arguments
 
-CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_GCC_GENERIC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE)
+CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_GCC_GENERIC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE) $(DEFINES_DEPTH)
 
 LDFLAGS_XLIB := -lX11 $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
@@ -619,10 +654,10 @@ $(eval $(RESEXT_H_RULE))
 pkg_bin := $(BIN_XLIB)
 pkg_strip := strip
 pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
-pkg_reqs := $(XLIB_ASSETS)
+pkg_reqs := $(XLIB_MANIFEST)
 $(eval $(PKG_RULE))
 
-$(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BIN_XLIB_ASSETS) $(BINDIR) $(GENDIR_XLIB)/resext.h
+$(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(GENDIR_XLIB)/resext.h
 	$(LD_XLIB) -o $@ $^ $(LDFLAGS_XLIB)
 
 $(OBJDIR_XLIB)/%.o: %.c $(GENDIR_XLIB)/resext.h
@@ -660,19 +695,19 @@ DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY))) \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
-DOS_ASSETS :=
+DOS_MANIFEST :=
 
 ifeq ($(RESOURCE),FILE)
    ifeq ($(DEPTH),VGA)
-      DOS_ASSETS += $(subst .bmp,.vga,$(DSEKAI_ASSETS_BITMAPS))
+      DOS_MANIFEST += $(subst .bmp,.vga,$(DSEKAI_ASSETS_BITMAPS))
    else
       # Assume CGA by default.
-      DOS_ASSETS += $(subst .bmp,.cga,$(DSEKAI_ASSETS_BITMAPS))
+      DOS_MANIFEST += $(subst .bmp,.cga,$(DSEKAI_ASSETS_BITMAPS))
    endif
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   DOS_ASSETS += $(DSEKAI_ASSETS_MAPS_ASN)
+   DOS_MANIFEST += $(DSEKAI_ASSETS_MAPS_ASN)
 endif
 
 # 3. Programs
@@ -682,7 +717,7 @@ LD_DOS := wcl
 
 # 4. Arguments
 
-CFLAGS_DOS := -hw -d3 -0 -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -i=unilayer $(DEFINES_DSEKAI) $(CFLAGS_OWC_GENERIC)
+CFLAGS_DOS := -hw -d3 -0 -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -i=unilayer $(DEFINES_DSEKAI) $(CFLAGS_OWC_GENERIC) $(DEFINES_DEPTH)
 
 LDFLAGS_DOS := $(LDFLAGS_OWC_GENERIC)
 
@@ -705,7 +740,7 @@ $(eval $(RESEXT_H_RULE))
 pkg_bin := $(BIN_DOS)
 pkg_strip := echo
 pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
-pkg_reqs := $(DOS_ASSETS)
+pkg_reqs := $(DOS_MANIFEST)
 $(eval $(PKG_RULE))
 
 #$(BINDIR)/doscga.drc: res_doscga_drc
@@ -739,7 +774,7 @@ $(GENDIR_DOS)/%.vga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bitmap -oc cga -ob 4 -if $< -of $@ -og
 
-$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE) $(addprefix $(BINDIR)/,$(DOS_ASSETS))
+$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE)
 	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
 
 $(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h
@@ -782,7 +817,7 @@ BUILDPRC := build-prc
 
 # 4. Arguments
 
-CFLAGS_PALM := -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -Iunilayer -I$(GENDIR_PALM) $(DEFINES_DSEKAI) -Os
+CFLAGS_PALM := -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -Iunilayer -I$(GENDIR_PALM) $(DEFINES_DSEKAI) -Os $(DEFINES_DEPTH)
 
 ifneq ($(BUILD),RELEASE)
    CFLAGS_PALM += -g
@@ -875,14 +910,14 @@ ifeq ($(RESOURCE),DEFAULT)
 endif
 WIN16_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 
-WIN16_ASSETS :=
+WIN16_MANIFEST :=
 
 ifeq ($(RESOURCE),FILE)
-   WIN16_ASSETS += $(DSEKAI_ASSETS_BITMAPS)
+   WIN16_MANIFEST += $(DSEKAI_ASSETS_BITMAPS)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   WIN16_ASSETS += $(DSEKAI_ASSETS_MAPS_ASN) 
+   WIN16_MANIFEST += $(DSEKAI_ASSETS_MAPS_ASN) 
 endif
 
 # 3. Programs
@@ -893,7 +928,7 @@ RC_WIN16 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_OWC_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT -i=unilayer $(DEFINES_DSEKAI) -I$(GENDIR_WIN16)
+CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_OWC_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT -i=unilayer $(DEFINES_DSEKAI) -I$(GENDIR_WIN16) $(DEFINES_DEPTH)
 
 ifneq ($(RESOURCE),DEFAULT)
    CFLAGS_WIN16 += $(DEFINES_RESOURCE)
@@ -917,7 +952,7 @@ $(eval $(RESEXT_H_RULE))
 pkg_bin := $(BIN_WIN16)
 pkg_strip := echo
 pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
-pkg_reqs := $(WIN16_ASSETS)
+pkg_reqs := $(WIN16_MANIFEST)
 $(eval $(PKG_RULE))
 
 $(BINDIR)/$(DSEKAI)16.img: $(BIN_WIN16)
@@ -926,7 +961,7 @@ $(BINDIR)/$(DSEKAI)16.img: $(BIN_WIN16)
 	$(MCOPY) -i "$@" $< ::$(DSEKAI)16.exe
 
 $(BIN_WIN16): \
-$(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win.res | $(BINDIR)/$(STAMPFILE) $(BIN_WIN16_ASSETS)
+$(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win.res | $(BINDIR)/$(STAMPFILE)
 	$(LD_WIN16) $(LDFLAGS_WIN16) -fe=$@ $^
 
 $(OBJDIR_WIN16)/win.res: $(WIN16_RES_FILES) | $(OBJDIR_WIN16)/$(STAMPFILE)
@@ -975,18 +1010,18 @@ ifeq ($(RESOURCE),DEFAULT)
 endif
 WIN32_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 
-WIN32_ASSETS :=
+WIN32_MANIFEST :=
 
 ifeq ($(RESOURCE),FILE)
-   WIN32_ASSETS += $(DSEKAI_ASSETS_BITMAPS)
+   WIN32_MANIFEST += $(DSEKAI_ASSETS_BITMAPS)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   WIN32_ASSETS += $(DSEKAI_ASSETS_MAPS_ASN) 
+   WIN32_MANIFEST += $(DSEKAI_ASSETS_MAPS_ASN) 
 endif
 
 ifeq ($(FMT_JSON),TRUE)
-   WIN32_ASSETS += \
+   WIN32_MANIFEST += \
       $(DSEKAI_ASSETS_MAPS_JSON) \
       $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
@@ -999,7 +1034,7 @@ RC_WIN32 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_OWC_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT -i=unilayer $(DEFINES_DSEKAI) -I$(GENDIR_WIN32)
+CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_OWC_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT -i=unilayer $(DEFINES_DSEKAI) -I$(GENDIR_WIN32) $(DEFINES_DEPTH)
 
 ifneq ($(RESOURCE),DEFAULT)
    CFLAGS_WIN32 += $(DEFINES_RESOURCE)
@@ -1023,11 +1058,11 @@ $(eval $(RESEXT_H_RULE))
 pkg_bin := $(BIN_WIN32)
 pkg_strip := echo
 pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
-pkg_reqs := $(WIN32_ASSETS)
+pkg_reqs := $(WIN32_MANIFEST)
 $(eval $(PKG_RULE))
 
 $(BIN_WIN32): \
-$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE) $(addprefix $(BINDIR)/,$(WIN32_ASSETS))
+$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE)
 	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
 
 $(OBJDIR_WIN32)/win.res: $(WIN32_RES_FILES) | $(OBJDIR_WIN32)/$(STAMPFILE)
@@ -1084,7 +1119,7 @@ REZ_MAC6 := Rez
 
 # 4. Arguments
 
-CFLAGS_MAC6 := -DPLATFORM_MAC6 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_GCC_GENERIC) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) -I$(GENDIR_MAC6) -DSCREEN_W=640 -DSCREEN_H=480
+CFLAGS_MAC6 := -DPLATFORM_MAC6 -I$(RETRO68_PREFIX)/multiversal/CIncludes $(CFLAGS_GCC_GENERIC) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) -I$(GENDIR_MAC6) -DSCREEN_W=640 -DSCREEN_H=480 $(DEFINES_DEPTH)
 
 LDFLAGS_MAC6 := -lRetroConsole $(LDFLAGS_GCC_GENERIC)
 
@@ -1165,7 +1200,7 @@ NDSTOOL := ndstool
 
 ARCH_NDS := -mthumb -mthumb-interwork
 
-CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC)
+CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(DEFINES_DEPTH)
 
 LIBS_NDS := -L$(DEVKITPRO)/libnds/lib -lnds9
 
@@ -1177,7 +1212,6 @@ $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 
 platform := nds
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-res_maps := $(DSEKAI_ASSETS_MAPS)
 $(eval $(RESEXT_H_RULE))
 
 $(BIN_NDS): $(OBJDIR_NDS)/$(DSEKAI).elf $(GENDIR_NDS)/$(DSEKAI)-1.bmp
@@ -1229,7 +1263,7 @@ LD_WEB := emcc
 
 # 4. Arguments
 
-CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC)
+CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(DEFINES_DEPTH)
 
 LDFLAGS_WEB := $(LDFLAGS_GCC_GENERIC)
 
@@ -1283,7 +1317,7 @@ LD_CURSES := gcc
 
 # 4. Arguments
 
-CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_GCC_GENERIC) $(DEFINES_RESOURCE) $(DEFINES_DSEKAI)
+CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_GCC_GENERIC) $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(DEFINES_DEPTH)
 
 LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) $(LDFLAGS_GCC_GENERIC)
 
@@ -1328,7 +1362,7 @@ LD_SDL_ARM := arm-linux-gnueabihf-gcc
 
 # 4. Arguments
 
-CFLAGS_SDL_ARM := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_GCC_GENERIC) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE)
+CFLAGS_SDL_ARM := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL $(CFLAGS_GCC_GENERIC) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE) $(DEFINES_DEPTH)
 
 LDFLAGS_SDL_ARM := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
@@ -1336,7 +1370,6 @@ LDFLAGS_SDL_ARM := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAG
 
 platform := sdlarm
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 $(BIN_SDL_ARM): $(DSEKAI_O_FILES_SDL_ARM) | $(BINDIR)/$(STAMPFILE)
@@ -1375,7 +1408,7 @@ LD_MEGAD := m68k-elf-gcc
 
 # 4. Arguments
 
-CFLAGS_MEGAD := -m68000 -fno-builtin -I/opt/gendev/sgdk/inc -I/opt/gendev/sgdk/res -B/opt/gendev/sgdk/bin $(CFLAGS_GCC_GENERIC) -I$(GENDIR_MEGAD) -DPLATFORM_MEGADRIVE -DSCREEN_W=320 -DSCREEN_H=224 -Os
+CFLAGS_MEGAD := -m68000 -fno-builtin -I/opt/gendev/sgdk/inc -I/opt/gendev/sgdk/res -B/opt/gendev/sgdk/bin $(CFLAGS_GCC_GENERIC) -I$(GENDIR_MEGAD) -DPLATFORM_MEGADRIVE -DSCREEN_W=320 -DSCREEN_H=224 -Os $(DEFINES_DEPTH)
 
 LDFLAGS_MEGAD := -B/opt/gendev/sgdk/bin -n -T /opt/gendev/sgdk/md.ld -nostdlib @out/cmd_ /opt/gendev/sgdk/lib/libmd.a /opt/gendev/sgdk/lib/libgcc.a
 
@@ -1383,7 +1416,6 @@ LDFLAGS_MEGAD := -B/opt/gendev/sgdk/bin -n -T /opt/gendev/sgdk/md.ld -nostdlib @
 
 platform := megad
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_MEGAD)
@@ -1426,5 +1458,5 @@ $(OBJDIR_CHECK_NULL)/%.o: %.c check/testdata.h $(GENDIR_CHECK_NULL)/resext.h
 # ====== Clean ======
 
 clean:
-	rm -rf data obj obj-file bin bin-file gen gen-file *.err .rsrc .finf gmon.out log*.txt packages fpackages assets/*/*.cga assets/*/*.vga assets/*.asn
+	rm -rf data obj obj-* bin bin-* gen gen-* *.err .rsrc .finf gmon.out log*.txt packages fpackages assets/*/*.cga assets/*/*.vga assets/*.asn pkgbuild
 
