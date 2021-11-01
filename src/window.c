@@ -45,6 +45,17 @@ void window_init() {
       sizeof( struct WINDOW_FRAME ) ); */
 
 #ifdef RESOURCE_FILE
+#ifdef DEPTH_VGA
+   resource_assign_id( frames[0].tr, "assets/16x16x16/p_chk_tr.bmp" );
+   resource_assign_id( frames[0].tl, "assets/16x16x16/p_chk_tl.bmp" );
+   resource_assign_id( frames[0].br, "assets/16x16x16/p_chk_br.bmp" );
+   resource_assign_id( frames[0].bl, "assets/16x16x16/p_chk_bl.bmp" );
+   resource_assign_id( frames[0].t , "assets/16x16x16/p_chk_t.bmp" );
+   resource_assign_id( frames[0].b , "assets/16x16x16/p_chk_b.bmp" );
+   resource_assign_id( frames[0].r , "assets/16x16x16/p_chk_r.bmp" );
+   resource_assign_id( frames[0].l , "assets/16x16x16/p_chk_l.bmp" );
+   resource_assign_id( frames[0].c , "assets/16x16x16/p_chk_c.bmp" );
+#else
    resource_assign_id( frames[0].tr, "assets/16x16x4/p_chk_tr.bmp" );
    resource_assign_id( frames[0].tl, "assets/16x16x4/p_chk_tl.bmp" );
    resource_assign_id( frames[0].br, "assets/16x16x4/p_chk_br.bmp" );
@@ -54,6 +65,7 @@ void window_init() {
    resource_assign_id( frames[0].r , "assets/16x16x4/p_chk_r.bmp" );
    resource_assign_id( frames[0].l , "assets/16x16x4/p_chk_l.bmp" );
    resource_assign_id( frames[0].c , "assets/16x16x4/p_chk_c.bmp" );
+#endif
 #else
    resource_assign_id( frames[0].tr , p_chk_tr );
    resource_assign_id( frames[0].tl , p_chk_tl );

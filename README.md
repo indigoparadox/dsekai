@@ -67,13 +67,17 @@ The following options may be specified to make in order control the final output
 | Variable   | Options | Explanation
 |------------|---------|-------------
 | RESOURCE   | FILE    | Store assets as files in the filesystem.
-|            | HEADER  | Store assets embedded in the binary.
-| BUILD      | DEBUG   | Build a debug binary, with symbols and profiling.
+|            | **HEADER**  | Store assets embedded in the binary.
+| BUILD      | **DEBUG**   | Build a debug binary, with symbols and profiling.
 |            | RELEASE | Build an optimized release binary.
 | ASSETPATH  |         | Specify path to load assets at runtime. Defaults to ./assets
 | DTHRESHOLD |         | Specify the log level from 0-3 (0 being most verbose).
 | SANITIZE   | NO      | Disable leak and UB sanitizers for gcc targets.
+| FMT_JSON   | **TRUE**    | Use JSON format for maps.
 | FMT_ASN    | TRUE    | Use ASN.1 format for maps. Required for low-memory targets.
+| DEPTH      | **CGA** |
+| DEPTH      | VGA     |
+| DEPTH      | MONO    |
 
 ## Datafiles
 

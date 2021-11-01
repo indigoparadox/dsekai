@@ -133,6 +133,8 @@ int main( int argc, char* argv[] ) {
 
    fprintf( header, "#include \"../../src/tmstruct.h\"\n\n" );
 
+   /* fprintf( header, "#include \"residx.h\"\n\n" ); */
+
    for( i = 2 ; argc > i ; i++ ) {
       fprintf( header, "#define " );
       path_to_define( argv[i], header );
@@ -163,7 +165,7 @@ int main( int argc, char* argv[] ) {
          if( !retval ) {
             error_printf( "unable to load tilemap: %s",
                &(argv[i][path_iter_fname_idx]) );
-            printf( "unable to load tilemap: %s",
+            printf( "unable to load tilemap: %s\n",
                &(argv[i][path_iter_fname_idx]) );
             retval = 1;
             goto cleanup;

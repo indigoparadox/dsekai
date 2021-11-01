@@ -1,0 +1,83 @@
+
+# vi:syntax=make
+
+include Makefile
+
+# 1. Directories
+
+OBJDIR_SDL := $(OBJDIR)/sdl
+DEPDIR_SDL := $(DEPDIR)/sdl
+GENDIR_SDL := $(GENDIR)/sdl
+
+# 2. Files
+
+DSEKAI_C_FILES_SDL_ONLY := \
+   src/main.c \
+   unilayer/input/sdli.c \
+   unilayer/graphics/sdlg.c \
+   unilayer/memory/fakem.c
+
+DSEKAI_O_FILES_SDL := \
+   $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY))) \
+   $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+
+# 1a. Packaging Manifest
+
+SDL_MANIFEST :=
+
+ifeq ($(RESOURCE),FILE)
+   SDL_MANIFEST += $(DSEKAI_ASSETS_BITMAPS)
+endif
+
+ifeq ($(FMT_ASN),TRUE)
+   SDL_MANIFEST += $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON))
+endif
+
+ifeq ($(FMT_JSON),TRUE)
+   SDL_MANIFEST += \
+      $(DSEKAI_ASSETS_MAPS_JSON) \
+      $(DSEKAI_ASSETS_TILESETS_JSON)
+endif
+
+RESEXT_H := $(GENDIR_SDL)/resext.h
+
+# 3. Programs
+
+CC_SDL := gcc
+LD_SDL := gcc
+
+# 4. Arguments
+
+CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_DEPTH) -DGEN_RESEXT_H=\<$(RESEXT_H)\> -I.
+
+LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
+
+# 5. Targets
+
+platform := sdl
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
+$(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_SDL)
+pkg_strip := strip
+pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
+pkg_reqs := $(SDL_MANIFEST)
+$(eval $(PKG_RULE))
+
+$(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE)
+	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL)
+
+$(OBJDIR_SDL)/%.o: %.c $(RESEXT_H) | $(DSEKAI_ASSETS_MAPS_JSON)
+	$(MD) $(dir $@)
+	$(CC_SDL) $(CFLAGS_SDL) -c -o $@ $(<:%.o=%)
+
+$(DEPDIR_SDL)/%.d: %.c $(RESEXT_H)
+	$(MD) $(dir $@)
+	$(CC_SDL) $(CFLAGS_SDL) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL)/,$<)) -MF $@
+
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
+
+

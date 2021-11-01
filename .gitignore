@@ -2,13 +2,13 @@
 *.exe
 *.err
 bin
-bin-file
+bin-*
 obj
-obj-file
+obj-*
 gen
-gen-file
+gen-*
 dep
-dep-file
+dep-*
 resext.h
 QC.INI
 .finf
@@ -30,3 +30,4 @@ build
 build_*
 log*.txt
 packages
+pkgbuild

@@ -1,0 +1,79 @@
+
+# vi:syntax=make
+
+include Makefile
+
+# 1. Directories
+
+OBJDIR_XLIB := $(OBJDIR)/xlib
+DEPDIR_XLIB := $(DEPDIR)/xlib
+GENDIR_XLIB := $(GENDIR)/xlib
+
+# 2. Files
+
+DSEKAI_C_FILES_XLIB_ONLY := \
+   src/main.c \
+   unilayer/input/xi.c \
+   unilayer/graphics/xg.c \
+   unilayer/memory/fakem.c
+
+DSEKAI_O_FILES_XLIB := \
+   $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES_XLIB_ONLY))) \
+   $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+
+XLIB_MANIFEST :=
+
+ifeq ($(RESOURCE),FILE)
+   XLIB_MANIFEST += $(DSEKAI_ASSETS_BITMAPS)
+endif
+
+ifeq ($(FMT_ASN),TRUE)
+   XLIB_MANIFEST += $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON))
+endif
+
+ifeq ($(FMT_JSON),TRUE)
+   XLIB_MANIFEST += \
+      $(DSEKAI_ASSETS_MAPS_JSON) \
+      $(DSEKAI_ASSETS_TILESETS_JSON)
+endif
+
+# 3. Programs
+
+CC_XLIB := gcc
+LD_XLIB := gcc
+
+# 4. Arguments
+
+CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_GCC_GENERIC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE) $(DEFINES_DEPTH)
+
+LDFLAGS_XLIB := -lX11 $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
+
+# 5. Targets
+
+platform := xlib
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
+$(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_XLIB)
+pkg_strip := strip
+pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
+pkg_reqs := $(XLIB_MANIFEST)
+$(eval $(PKG_RULE))
+
+$(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(GENDIR_XLIB)/resext.h
+	$(LD_XLIB) -o $@ $^ $(LDFLAGS_XLIB)
+
+$(OBJDIR_XLIB)/%.o: %.c $(GENDIR_XLIB)/resext.h
+	$(MD) $(dir $@)
+	$(CC_XLIB) $(CFLAGS_XLIB) -c -o $@ $(<:%.o=%)
+
+#$(DEPDIR_XLIB)/%.d: %.c $(GENDIR_XLIB)/resext.h
+#	$(MD) $(dir $@)
+#	$(CC_XLIB) $(CFLAGS_XLIB) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_XLIB)/,$<)) -MF $@
+
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_XLIB:.o=.d))
+
+

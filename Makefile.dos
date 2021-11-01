@@ -1,0 +1,111 @@
+
+# vi:syntax=make
+
+include Makefile
+
+# 1. Directories
+
+OBJDIR_DOS := $(OBJDIR)/dos
+DEPDIR_DOS := $(DEPDIR)/dos
+GENDIR_DOS := $(GENDIR)/dos
+
+# 2. Files
+
+DSEKAI_C_FILES_DOS_ONLY := \
+   src/main.c \
+   unilayer/input/dosi.c \
+   unilayer/graphics/dosg.c \
+   unilayer/memory/fakem.c
+
+DSEKAI_O_FILES_DOS := \
+   $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY))) \
+   $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+
+DOS_MANIFEST :=
+
+ifeq ($(RESOURCE),FILE)
+   ifeq ($(DEPTH),VGA)
+      DOS_MANIFEST += $(subst .bmp,.vga,$(DSEKAI_ASSETS_BITMAPS))
+   else
+      # Assume CGA by default.
+      DOS_MANIFEST += $(subst .bmp,.cga,$(DSEKAI_ASSETS_BITMAPS))
+   endif
+endif
+
+ifeq ($(FMT_ASN),TRUE)
+   DOS_MANIFEST += $(DSEKAI_ASSETS_MAPS_ASN)
+endif
+
+# 3. Programs
+
+CC_DOS := wcc
+LD_DOS := wcl
+
+# 4. Arguments
+
+CFLAGS_DOS := -hw -d3 -0 -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -i=unilayer $(DEFINES_DSEKAI) $(CFLAGS_OWC_GENERIC) $(DEFINES_DEPTH)
+
+LDFLAGS_DOS := $(LDFLAGS_OWC_GENERIC)
+
+ifeq ($(FMT_JSON),TRUE)
+   CFLAGS_DOS += -mh
+endif
+
+# 5. Targets
+
+platform := dos
+ifeq ($(DEPTH),VGA)
+   res_gfx := $(subst .bmp,.vga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
+else
+   # Assume CGA by default.
+   res_gfx := $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
+endif
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
+$(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_DOS)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs := $(DOS_MANIFEST)
+$(eval $(PKG_RULE))
+
+#$(BINDIR)/doscga.drc: res_doscga_drc
+
+#res_doscga_drc: $(DRCPACK) $(DSEKAI_ASSETS_DOS_CGA)
+#	rm $(BINDIR)/doscga.drc || true
+#	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -i 5001 \
+#      -if $(GENDIR_DOS)/*.cga $(DSEKAI_ASSETS_MAPS) -lh $(GENDIR_DOS)/resext.h
+
+$(ASSETDIR)/%.cga: $(ASSETDIR)/%.bmp | $(CONVERT)
+	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
+
+$(ASSETDIR)/%.vga: $(ASSETDIR)/%.bmp | $(CONVERT)
+	$(CONVERT) -ic bitmap -oc cga -ob 4 -if $< -of $@ -og
+
+$(BINDIR)/assets/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | \
+$(BINDIR)/assets/$(STAMPFILE)
+	$(MD) $(dir $@)
+	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
+
+$(BINDIR)/assets/%.vga: $(ASSETDIR)/%.bmp $(CONVERT) | \
+$(BINDIR)/assets/$(STAMPFILE)
+	$(MD) $(dir $@)
+	$(CONVERT) -ic bitmap -oc cga -ob 4 -if $< -of $@ -og
+
+$(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
+	$(MD) $(dir $@)
+	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
+
+$(GENDIR_DOS)/%.vga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
+	$(MD) $(dir $@)
+	$(CONVERT) -ic bitmap -oc cga -ob 4 -if $< -of $@ -og
+
+$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE)
+	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
+
+$(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h
+	$(MD) $(dir $@)
+	$(CC_DOS) $(CFLAGS_DOS) -fo=$@ $(<:%.c=%)
+
+

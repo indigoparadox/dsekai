@@ -1,0 +1,105 @@
+
+# vi:syntax=make
+
+include Makefile
+
+ifneq ($(DEPTH),MONO)
+$(error palm target must be built with MONO DEPTH)
+endif
+
+# 1. Directories
+
+OBJDIR_PALM := $(OBJDIR)/palm
+DEPDIR_PALM := $(DEPDIR)/palm
+GENDIR_PALM := $(GENDIR)/palm
+
+# 2. Files
+
+DSEKAI_C_FILES_PALM_ONLY := \
+   src/main.c \
+   unilayer/input/palmi.c \
+   unilayer/memory/palmm.c \
+   unilayer/resource/palmr.c \
+   unilayer/graphics/palmg.c
+
+DSEKAI_O_FILES_PALM := \
+   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_PALM_ONLY)))
+
+RESEXT_H := $(GENDIR_PALM)/resext.h
+RESIDX_H := $(GENDIR_PALM)/residx.h
+RESEMB_H := $(GENDIR_PALM)/resemb.h
+
+# 3. Programs
+
+CC_PALM := m68k-palmos-gcc
+LD_PALM := m68k-palmos-gcc
+AS_PALM := m68k-palmos-as
+PILRC := pilrc
+OBJRES := m68k-palmos-obj-res
+BUILDPRC := build-prc
+#MULTIGEN := m68k-palmos-multigen
+
+# 4. Arguments
+
+CFLAGS_PALM := -DSCREEN_W=160 -DSCREEN_H=160 -I /opt/palmdev/sdk-3.5/include -I /opt/palmdev/sdk-3.5/include/Core/UI/ -I /opt/palmdev/sdk-3.5/include/Core/System/ -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ -I /opt/palmdev/sdk-3.5/include/Core/International/ -DPLATFORM_PALM -Iunilayer -I$(GENDIR_PALM) $(DEFINES_DSEKAI) -Os $(DEFINES_DEPTH) -I. -DGEN_RESIDX_H=\<$(RESIDX_H)\> -DGEN_RESEMB_H=\<$(RESEMB_H)\>
+
+ifneq ($(BUILD),RELEASE)
+   CFLAGS_PALM += -g
+endif
+
+LDFLAGS_PALM := $(CFLAGS_PALM)
+
+#DEF_PALM := src/mulipalm.def
+
+APPID := DSEK
+
+# 5. Targets
+
+platform := palm
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
+$(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_PALM)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs :=
+$(eval $(PKG_RULE))
+
+grc_palm: $(OBJDIR_PALM)/$(DSEKAI)
+	cd $(OBJDIR_PALM) && $(OBJRES) $(DSEKAI)
+
+$(OBJDIR_PALM)/$(DSEKAI): $(DSEKAI_O_FILES_PALM)
+	#$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@ $(GENDIR_PALM)/mulipalm.ld
+	$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@
+
+$(GENDIR_PALM)/palms.rcp: src/palms.rcp
+	cat $< | sed -e 's/gen\//$(GENDIR)\//g' > $@
+	
+$(OBJDIR_PALM)/bin$(STAMPFILE): $(GENDIR_PALM)/palms.rcp $(GENDIR_PALM)/palmd.rcp
+	$(PILRC) -D GEN_RESIDX_H=$(RESIDX_H) $< $(OBJDIR_PALM)
+	touch $@
+
+#$(OBJDIR_PALM)/mulipalm.o: $(GENDIR_PALM)/mulipalm.s
+#	$(MD) $(dir $@)
+#	$(AS_PALM) -o $@ $<
+
+#$(GENDIR_PALM)/mulipalm.ld $(GENDIR_PALM)/mulipalm.s: $(DEF_PALM) | $(GENDIR_PALM)
+#	$(MULTIGEN) -b $(GENDIR_PALM)/mulipalm $<
+
+ifeq ($(BUILD),RELEASE)
+$(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
+	m68k-palmos-strip $(OBJDIR_PALM)/$(DSEKAI)
+	$(BUILDPRC) $@ $(DSEKAI) $(APPID) $(OBJDIR_PALM)/*.grc $(OBJDIR_PALM)/*.bin
+else
+$(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
+	#$(BUILDPRC) -o $@ $(DEF_PALM) $(OBJDIR_PALM)/$(DSEKAI) $(OBJDIR_PALM)/*.bin
+	$(BUILDPRC) $@ $(DSEKAI) $(APPID) $(OBJDIR_PALM)/*.grc $(OBJDIR_PALM)/*.bin
+endif
+
+$(OBJDIR_PALM)/%.o: %.c $(GENDIR_PALM)/palmd.rcp $(RESEXT_H)
+	$(MD) $(dir $@)
+	$(CC_PALM) $(CFLAGS_PALM) -c -o $@ $(<:%.o=%)
+
+

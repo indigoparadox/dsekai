@@ -1,0 +1,105 @@
+
+# vi:syntax=make
+
+include Makefile
+
+# 1. Directories
+
+OBJDIR_WIN32 := $(OBJDIR)/win32
+DEPDIR_WIN32 := $(DEPDIR)/win32
+GENDIR_WIN32 := $(GENDIR)/win32
+
+# 2. Files
+
+DSEKAI_C_FILES_WIN32_ONLY := \
+   src/main.c \
+   unilayer/input/wini.c \
+   unilayer/memory/winm.c \
+   unilayer/graphics/wing.c
+
+ifeq ($(RESOURCE),DEFAULT)
+   DSEKAI_C_FILES_WIN32_ONLY += unilayer/resource/winr.c
+else
+   DSEKAI_C_FILES_WIN32_ONLY += $(DSEKAI_C_FILES_RES)
+endif
+
+DSEKAI_O_FILES_WIN32 := \
+   $(addprefix $(OBJDIR_WIN32)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_WIN32)/,$(subst .c,.o,$(DSEKAI_C_FILES_WIN32_ONLY)))
+
+WIN32_RES_FILES := src/winstat.rc
+ifeq ($(RESOURCE),DEFAULT)
+   WIN32_RES_FILES += $(GENDIR_WIN32)/win.rc
+endif
+WIN32_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
+
+WIN32_MANIFEST :=
+
+ifeq ($(RESOURCE),FILE)
+   WIN32_MANIFEST += $(DSEKAI_ASSETS_BITMAPS)
+endif
+
+ifeq ($(FMT_ASN),TRUE)
+   WIN32_MANIFEST += $(DSEKAI_ASSETS_MAPS_ASN) 
+endif
+
+ifeq ($(FMT_JSON),TRUE)
+   WIN32_MANIFEST += \
+      $(DSEKAI_ASSETS_MAPS_JSON) \
+      $(DSEKAI_ASSETS_TILESETS_JSON)
+endif
+
+# 3. Programs
+
+CC_WIN32 := wcc386
+LD_WIN32 := wcl386
+RC_WIN32 := wrc
+
+# 4. Arguments
+
+CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_OWC_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT -i=unilayer $(DEFINES_DSEKAI) -I$(GENDIR_WIN32) $(DEFINES_DEPTH)
+
+ifneq ($(RESOURCE),DEFAULT)
+   CFLAGS_WIN32 += $(DEFINES_RESOURCE)
+endif
+
+LDFLAGS_WIN32 := -bcl=nt_win -zp=1 $(LDFLAGS_OWC_GENERIC)
+
+RCFLAGS_WIN32 := -r -DPLATFORM_WIN32 -i $(INCLUDE)win
+
+ifeq ($(RESOURCE),DEFAULT)
+   RCFLAGS_WIN32 += -DRESOURCE_WIN
+endif
+
+# 5. Targets
+
+platform := win32
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
+$(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_WIN32)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs := $(WIN32_MANIFEST)
+$(eval $(PKG_RULE))
+
+$(BIN_WIN32): \
+$(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE)
+	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
+
+$(OBJDIR_WIN32)/win.res: $(WIN32_RES_FILES) | $(OBJDIR_WIN32)/$(STAMPFILE)
+	$(RC_WIN32) $(RCFLAGS_WIN32) $< -o $@
+
+$(OBJDIR_WIN32)/%.o: %.c $(OBJDIR_WIN32)/win.res $(GENDIR_WIN32)/resext.h
+	$(MD) $(dir $@)
+	$(CC_WIN32) $(CFLAGS_WIN32) -fo=$@ $(<:%.c=%)
+
+#$(DEPDIR_WIN32)/%.d: %.c $(GENDIR_WIN32)/resext.h
+#	$(MD) $(dir $@)
+#	$(HOST_CC) -DPLATFORM_WIN32 -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN32)/,$<)) -MF $@ || touch $@
+
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN32:.o=.d))
+
+

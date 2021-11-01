@@ -11,6 +11,12 @@ extern const struct TILEMAP gc_map_field;
 
 #define TOPDOWN_STATE_WELCOME 1
 
+#define gc_stringize( map ) #map
+
+#define engine_mapize_internal( map ) gc_map_ ## map
+
+#define engine_mapize( map ) engine_mapize_internal( map )
+
 int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
    int in_char = 0,
       i = 0,
@@ -188,15 +194,17 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 
 #ifdef RESOURCE_FILE
 #  ifdef TILEMAP_FMT_JSON
-      tilemap_json_load( "assets/m_field.json", &(state->map) );
+      tilemap_json_load( "assets/m_" gc_stringize( ENTRY_MAP ) ".json", &(state->map) );
 #  elif defined TILEMAP_FMT_ASN
-      tilemap_asn_load( "assets/m_field.asn", &(state->map) );
+      tilemap_asn_load( "assets/m_" gc_stringize( ENTRY_MAP ) ".asn", &(state->map) );
 #  else
 #     error "No loader defined!"
 #  endif
 #else
-      debug_printf( 3, "gc_map_field: %s", gc_map_field.name );
-      memory_copy_ptr( (MEMORY_PTR)&(state->map), (MEMORY_PTR)&gc_map_field,
+      debug_printf( 3, "gc_map_" gc_stringize( ENTRY_MAP ) ": %s",
+         engine_mapize( ENTRY_MAP ).name );
+      memory_copy_ptr( (MEMORY_PTR)&(state->map),
+         (MEMORY_PTR)&engine_mapize( ENTRY_MAP ),
          sizeof( struct TILEMAP ) );
 
 #endif /* RESOURCE_FILE */
