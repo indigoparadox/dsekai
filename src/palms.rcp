@@ -1,6 +1,6 @@
 
 #include "src/palmrsc.h"
-#include "gen/palm/residx.h"
+#include "residx.h"
 
 VERSION 1 "1.0"
 
@@ -20,5 +20,5 @@ BEGIN
    BUTTONS "OK"
 END
 
-#include "gen/palm/palmd.rcp"
+#include "palmd.rcp"
 

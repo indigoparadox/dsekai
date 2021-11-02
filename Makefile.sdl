@@ -49,7 +49,21 @@ LD_SDL := gcc
 
 # 4. Arguments
 
-CFLAGS_SDL := -I $(GENDIR_SDL) -DSCREEN_SCALE=3 $(shell pkg-config sdl2 --cflags) -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_SDL -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_DEPTH) -DGEN_RESEXT_H=\<$(RESEXT_H)\> -I.
+DEFINES_SDL := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   $(DEFINES_RESOURCE) \
+   -DPLATFORM_SDL \
+   -DUSE_SOFTWARE_TEXT \
+   -DSCREEN_W=160 \
+   -DSCREEN_H=160 \
+   -DSCREEN_SCALE=$(SCREEN_SCALE)
+
+INCLUDES_SDL := \
+   -I unilayer \
+   -I $(GENDIR_SDL) 
+
+CFLAGS_SDL := $(shell pkg-config sdl2 --cflags) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_SDL) $(INCLUDES_SDL)
 
 LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
@@ -78,6 +92,5 @@ $(DEPDIR_SDL)/%.d: %.c $(RESEXT_H)
 	$(CC_SDL) $(CFLAGS_SDL) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL)/,$<)) -MF $@
 
-#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
-
+include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
 

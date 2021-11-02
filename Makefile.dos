@@ -22,6 +22,8 @@ DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY))) \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
+# 1a. Packaging Manifest
+
 DOS_MANIFEST :=
 
 ifeq ($(RESOURCE),FILE)
@@ -34,8 +36,14 @@ ifeq ($(RESOURCE),FILE)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   DOS_MANIFEST += $(DSEKAI_ASSETS_MAPS_ASN)
+   DOS_MANIFEST += $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON))
 endif
+
+ifeq ($(FMT_JSON),TRUE)
+   DOS_MANIFEST += $(DSEKAI_ASSETS_MAPS_JSON)
+endif
+
+RESEXT_H := $(GENDIR_DOS)/resext.h
 
 # 3. Programs
 
@@ -44,7 +52,21 @@ LD_DOS := wcl
 
 # 4. Arguments
 
-CFLAGS_DOS := -hw -d3 -0 -DPLATFORM_DOS -DUSE_LOOKUPS -zp=1 -DSCREEN_W=320 -DSCREEN_H=200 -i=$(GENDIR_DOS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) -i=unilayer $(DEFINES_DSEKAI) $(CFLAGS_OWC_GENERIC) $(DEFINES_DEPTH)
+DEFINES_DOS := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   $(DEFINES_RESOURCE) \
+   -DPLATFORM_DOS \
+   -DUSE_SOFTWARE_TEXT \
+   -DSCREEN_W=320 \
+   -DSCREEN_H=200 \
+   -DUSE_LOOKUPS
+
+INCLUDES_DOS := \
+   -i=unilayer \
+   -i=$(GENDIR_DOS) 
+
+CFLAGS_DOS := -hw -d3 -0 -zp=1 $(CFLAGS_OWC_GENERIC) $(DEFINES_DOS) $(INCLUDES_DOS)
 
 LDFLAGS_DOS := $(LDFLAGS_OWC_GENERIC)
 
@@ -104,8 +126,14 @@ $(GENDIR_DOS)/%.vga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE)
 	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
 
-$(OBJDIR_DOS)/%.o: %.c $(GENDIR_DOS)/resext.h
+$(OBJDIR_DOS)/%.o: %.c $(RESEXT_H)
 	$(MD) $(dir $@)
 	$(CC_DOS) $(CFLAGS_DOS) -fo=$@ $(<:%.c=%)
 
+$(DEPDIR_DOS)/%.d: %.c $(RESEXT_H)
+	$(MD) $(dir $@)
+	$(HOST_CC) $(subst -i=,-I ,$(INCLUDES_DOS)) $(DEFINES_DOS) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_DOS)/,$<)) -MF $@
+
+include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_DOS:.o=.d))
 

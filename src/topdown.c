@@ -11,7 +11,9 @@ extern const struct TILEMAP gc_map_field;
 
 #define TOPDOWN_STATE_WELCOME 1
 
-#define gc_stringize( map ) #map
+#define gc_stringize_internal( map ) #map
+
+#define gc_stringize( map ) gc_stringize_internal( map )
 
 #define engine_mapize_internal( map ) gc_map_ ## map
 

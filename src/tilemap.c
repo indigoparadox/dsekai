@@ -4,6 +4,7 @@
 #ifdef RESOURCE_FILE
 
 #include "tmjson.h"
+#include "tmasn.h"
 
 /* Get the real path to the tileset (it's JSON so assume file paths). */
 /* Resource IDs would be using pre-parsed maps. */

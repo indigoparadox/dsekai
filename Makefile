@@ -151,19 +151,20 @@ ifeq ($(DEPTH),VGA)
    GENDIR := $(GENDIR)-vga
    DEPDIR := $(DEPDIR)-vga
    OBJDIR := $(OBJDIR)-vga
-   DEFINES_DEPTH := -DDEPTH_VGA
+   DEFINES_DEPTH := -DDEPTH_VGA -DDEPTH_SPEC=\"16x16x16\"
 else ifeq ($(DEPTH),MONO)
    DEPTH_SPEC := 16x16x2
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-mono
    BINDIR := $(BINDIR)-mono
    GENDIR := $(GENDIR)-mono
    DEPDIR := $(DEPDIR)-mono
-   DEFINES_DEPTH := -DDEPTH_MONO
+   OBJDIR := $(OBJDIR)-mono
+   DEFINES_DEPTH := -DDEPTH_MONO -DDEPTH_SPEC=\"16x16x2\"
 else
    DEPTH := CGA
    DEPTH_SPEC := 16x16x4
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-cga
-   DEFINES_DEPTH := -DDEPTH_CGA
+   DEFINES_DEPTH := -DDEPTH_CGA -DDEPTH_SPEC=\"16x16x4\"
 endif
 
 OBJDIR_CHECK_NULL := $(OBJDIR)/check_null
@@ -220,7 +221,7 @@ all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
 
 endif
 
-CFLAGS_GCC_GENERIC := -Iunilayer
+CFLAGS_GCC_GENERIC := --std=c89
 CFLAGS_OWC_GENERIC :=
 
 ifeq ($(BUILD),RELEASE)
@@ -244,6 +245,10 @@ ifeq ($(SANITIZE),NO)
    FLAGS_GCC_SANITIZE := 
 else
    FLAGS_GCC_SANITIZE := -fsanitize=address -fsanitize=leak -fsanitize=undefined
+endif
+
+ifeq ($(SCREEN_SCALE),)
+   SCREEN_SCALE := 3
 endif
 
 TILEMAP_FMTS :=
@@ -306,15 +311,13 @@ CONVERT := $(BINDIR)/convert
 LOOKUPS := $(BINDIR)/lookups
 HEADPACK := $(BINDIR)/headpack
 MAP2ASN := $(BINDIR)/map2asn
-MAP2BIN := $(BINDIR)/map2bin
 
 CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer -DASSETS_PATH="\"$(ASSETPATH)\""
 CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DRESOURCE_DRC -Iunilayer
 CFLAGS_CONVERT := -DNO_RESEXT -g -DRESOURCE_FILE -Iunilayer
 CFLAGS_LOOKUPS := -g -Iunilayer
-CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
-CFLAGS_MAP2ASN := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
-CFLAGS_MAP2BIN := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
+CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG
+CFLAGS_MAP2ASN := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG
 
 CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_GCC_GENERIC) -DRESOURCE_DRC
 
@@ -344,14 +347,20 @@ $(ASSETDIR)/%.bmp | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	cp $^ $@
 
+$(BINDIR)/$(ASSETDIR)/%.cga: \
+$(ASSETDIR)/%.cga | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
+	$(MD) $(dir $@)
+	cp $^ $@
+
+$(BINDIR)/$(ASSETDIR)/%.vga: \
+$(ASSETDIR)/%.vga | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
+	$(MD) $(dir $@)
+	cp $^ $@
+
 $(BINDIR)/$(ASSETDIR)/%.json: \
 $(ASSETDIR)/%.json | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	cp $^ $@
-
-$(BINDIR)/$(ASSETDIR)/%.asn: \
-$(ASSETDIR)/%.json | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE) $(MAP2ASN)
-	$(MAP2ASN) $< $@
 
 $(PKGDIR)/$(STAMPFILE):
 	$(MD) $(dir $@)
@@ -377,6 +386,16 @@ define RESEXT_H_RULE
 		$(MD) $$(dir $$@)
 		cp $$< $$@
 
+   $(GENDIR)/$(platform)/%.cga: %.cga | \
+   $(GENDIR)/$(platform)/$(STAMPFILE)
+		$(MD) $$(dir $$@)
+		cp $$< $$@
+
+   $(GENDIR)/$(platform)/%.vga: %.vga | \
+   $(GENDIR)/$(platform)/$(STAMPFILE)
+		$(MD) $$(dir $$@)
+		cp $$< $$@
+
    $(GENDIR)/$(platform)/%.md: %.md | \
    $(GENDIR)/$(platform)/$(STAMPFILE)
 		$(MD) $$(dir $$@)
@@ -389,14 +408,19 @@ define RESEXT_H_RULE
 		cat $$< | sed -e 's/16x16x4/$(DEPTH_SPEC)/g' > $$@
 
    # Require tileset for map.
-   $(GENDIR)/$(platform)/$(ASSETDIR)/m_%.json: $(ASSETDIR)/m_%.json $(GENDIR)/$(platform)/$(ASSETDIR)/t2_%.json \
+   $(GENDIR)/$(platform)/$(ASSETDIR)/m_%.json: \
+   $(ASSETDIR)/m_%.json $(GENDIR)/$(platform)/$(ASSETDIR)/t2_%.json \
    | $(GENDIR)/$(platform)/$(STAMPFILE)
 		$(MD) $$(dir $$@)
 		cat $$< | sed -e 's/16x16x4/$(DEPTH_SPEC)/g' > $$@
 
    # Generate ASN from JSON.
-   $(GENDIR)/$(platform)/%.asn: $(GENDIR)/$(platform)/%.json | $(MAP2ASN)
-		$(MAP2ASN) $< $@
+   $(GENDIR)/$(platform)/$(ASSETDIR)/m_%.asn: \
+   $(GENDIR)/$(platform)/$(ASSETDIR)/m_%.json \
+   $(GENDIR)/$(platform)/$(ASSETDIR)/t2_%.json \
+   | $(MAP2ASN)
+		cd $(GENDIR)/$(platform) && ../../$(MAP2ASN) \
+         $$(subst $(GENDIR)/$(platform)/,,$$<) ../../$$@
 
    res_maps := $(addprefix $(GENDIR)/$(platform)/,$(DSEKAI_ASSETS_MAPS_JSON))
 
@@ -541,9 +565,6 @@ $(HEADPACK): $(HEADPACK_C_FILES) | $(BINDIR)/$(STAMPFILE)
 
 $(MAP2ASN): $(MAP2ASN_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_MAP2ASN) -o $@ $^
-
-$(MAP2BIN): $(MAP2BIN_C_FILES) | $(BINDIR)/$(STAMPFILE)
-	$(HOST_CC) $(CFLAGS_MAP2BIN) -o $@ $^
 
 # ====== Check: Null ======
 

@@ -22,6 +22,8 @@ DSEKAI_O_FILES_XLIB := \
    $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES_XLIB_ONLY))) \
    $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
+# 1a. Packaging Manifest
+
 XLIB_MANIFEST :=
 
 ifeq ($(RESOURCE),FILE)
@@ -38,6 +40,8 @@ ifeq ($(FMT_JSON),TRUE)
       $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
 
+RESEXT_H := $(GENDIR_XLIB)/resext.h
+
 # 3. Programs
 
 CC_XLIB := gcc
@@ -45,7 +49,21 @@ LD_XLIB := gcc
 
 # 4. Arguments
 
-CFLAGS_XLIB := -DSCREEN_SCALE=3 -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_XLIB $(CFLAGS_GCC_GENERIC) -I$(GENDIR_XLIB) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(FLAGS_GCC_SANITIZE) $(DEFINES_DEPTH)
+DEFINES_XLIB := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   $(DEFINES_RESOURCE) \
+   -DPLATFORM_XLIB \
+   -DUSE_SOFTWARE_TEXT \
+   -DSCREEN_W=160 \
+   -DSCREEN_H=160 \
+   -DSCREEN_SCALE=$(SCREEN_SCALE)
+
+INCLUDES_XLIB := \
+   -I unilayer \
+   -I $(GENDIR_XLIB)
+
+CFLAGS_XLIB := $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_XLIB) $(INCLUDES_XLIB)
 
 LDFLAGS_XLIB := -lX11 $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
@@ -62,18 +80,17 @@ pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
 pkg_reqs := $(XLIB_MANIFEST)
 $(eval $(PKG_RULE))
 
-$(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(GENDIR_XLIB)/resext.h
+$(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(RESEXT_H)
 	$(LD_XLIB) -o $@ $^ $(LDFLAGS_XLIB)
 
-$(OBJDIR_XLIB)/%.o: %.c $(GENDIR_XLIB)/resext.h
+$(OBJDIR_XLIB)/%.o: %.c $(RESEXT_H)
 	$(MD) $(dir $@)
 	$(CC_XLIB) $(CFLAGS_XLIB) -c -o $@ $(<:%.o=%)
 
-#$(DEPDIR_XLIB)/%.d: %.c $(GENDIR_XLIB)/resext.h
-#	$(MD) $(dir $@)
-#	$(CC_XLIB) $(CFLAGS_XLIB) -MM $< \
-#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_XLIB)/,$<)) -MF $@
+$(DEPDIR_XLIB)/%.d: %.c $(RESEXT_H)
+	$(MD) $(dir $@)
+	$(CC_XLIB) $(CFLAGS_XLIB) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_XLIB)/,$<)) -MF $@
 
-#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_XLIB:.o=.d))
-
+include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_XLIB:.o=.d))
 

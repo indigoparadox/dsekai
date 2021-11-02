@@ -6,10 +6,6 @@
  *  \brief Functions and macros pertaining to tilemaps.
  */
 
-#ifndef PACKED
-#error "no packed"
-#endif
-
 /*! \brief TILESET_TILE::flags bit flag indicating tile will block movement. */
 #define TILEMAP_TILESET_FLAG_BLOCK  0x01
 

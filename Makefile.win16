@@ -33,6 +33,8 @@ ifeq ($(RESOURCE),DEFAULT)
 endif
 WIN16_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 
+# 1a. Packaging Manifest
+
 WIN16_MANIFEST :=
 
 ifeq ($(RESOURCE),FILE)
@@ -40,8 +42,14 @@ ifeq ($(RESOURCE),FILE)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   WIN16_MANIFEST += $(DSEKAI_ASSETS_MAPS_ASN) 
+   WIN16_MANIFEST += $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON))
 endif
+
+ifeq ($(FMT_JSON),TRUE)
+   WIN16_MANIFEST += $(DSEKAI_ASSETS_MAPS_JSON)
+endif
+
+RESEXT_H := $(GENDIR_WIN16)/resext.h
 
 # 3. Programs
 
@@ -51,15 +59,30 @@ RC_WIN16 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN16 := -bt=windows -i=$(INCLUDE)/win -bw -DSCREEN_SCALE=2 -DPLATFORM_WIN16 $(CFLAGS_OWC_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT -i=unilayer $(DEFINES_DSEKAI) -I$(GENDIR_WIN16) $(DEFINES_DEPTH)
+DEFINES_WIN16 := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   -DPLATFORM_WIN16 \
+   -DPLATFORM_WIN \
+   -DUSE_SOFTWARE_TEXT \
+   -DSCREEN_W=160 \
+   -DSCREEN_H=160 \
+   -DSCREEN_SCALE=2
+
+INCLUDES_WIN16 := \
+   -i=unilayer \
+   -i=$(GENDIR_WIN16) \
+   -i=$(INCLUDE)/win
+
+CFLAGS_WIN16 := -bt=windows -bw $(CFLAGS_OWC_GENERIC) -zp=1 $(DEFINES_WIN16) $(INCLUDES_WIN16)
 
 ifneq ($(RESOURCE),DEFAULT)
-   CFLAGS_WIN16 += $(DEFINES_RESOURCE)
+   CFLAGS_WIN16 += $(subst -I ,-I=,$(DEFINES_RESOURCE))
 endif
 
 LDFLAGS_WIN16 := -l=windows -zp=1 $(LDFLAGS_OWC_GENERIC)
 
-RCFLAGS_WIN16 := -r -DPLATFORM_WIN16 -i $(INCLUDE)win
+RCFLAGS_WIN16 := -r $(DEFINES_WIN16) -i $(INCLUDE)win
 
 ifeq ($(RESOURCE),DEFAULT)
    RCFLAGS_WIN16 += -DRESOURCE_WIN
@@ -90,15 +113,14 @@ $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win.res | $(BINDIR)/$(STAMPFILE)
 $(OBJDIR_WIN16)/win.res: $(WIN16_RES_FILES) | $(OBJDIR_WIN16)/$(STAMPFILE)
 	$(RC_WIN16) $(RCFLAGS_WIN16) $< -o $@
 
-$(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win.res $(GENDIR_WIN16)/resext.h
+$(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win.res $(RESEXT_H)
 	$(MD) $(dir $@)
 	$(CC_WIN16) $(CFLAGS_WIN16) -fo=$@ $(<:%.c=%)
 
-#$(DEPDIR_WIN16)/%.d: %.c $(GENDIR_WIN16)/resext.h
-#	$(MD) $(dir $@)
-#	$(HOST_CC) -DPLATFORM_WIN16 -MM $< \
-#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN16)/,$<)) -MF $@ || touch $@
+$(DEPDIR_WIN16)/%.d: %.c $(RESEXT_H)
+	$(MD) $(dir $@)
+	$(HOST_CC) $(subst -i=,-I ,$(INCLUDES_WIN16)) $(DEFINES_WIN16) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN16)/,$<)) -MF $@
 
-#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN16:.o=.d))
-
+include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN16:.o=.d))
 

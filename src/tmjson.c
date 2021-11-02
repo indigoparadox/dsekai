@@ -17,8 +17,10 @@ static int16_t tilemap_json_parse_spawn(
 
    /* Prepend asset path. */
 
+#ifndef NO_FIX_ASSET_PATH
    spawn_buffer_sz = tilemap_fix_asset_path(
       spawn_buffer, RESOURCE_PATH_MAX, map_path );
+#endif /* NO_FIX_ASSET_PATH */
 
    /* Parse Sprite */
 
@@ -101,9 +103,11 @@ static int16_t tilemap_json_parse_tileset(
       tile_json_path[JSON_PATH_SZ];
 
    do {
+#ifndef NO_FIX_ASSET_PATH
       /* Prepend asset path. */
       tile_filename_sz = tilemap_fix_asset_path(
          tile_filename, RESOURCE_PATH_MAX, map_path );
+#endif /* NO_FIX_ASSET_PATH */
 
       /* Load each tile bitmap. */
       dio_snprintf( tile_json_path, JSON_PATH_SZ, TILEMAP_JPATH_TS_TILE, i );
@@ -278,6 +282,7 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
       id, &json_buffer, &json_handle, &json_buffer_sz, &tok_parsed, tokens );
    if( 0 == retval ) {
       error_printf( "unable to open tilemap" );
+      retval = 0;
       goto cleanup;
    }
 
