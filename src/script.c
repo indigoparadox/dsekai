@@ -175,7 +175,8 @@ uint16_t script_handle_FACE(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   return actor->dir = arg;
+   actor->dir = arg;
+   return pc + 1;
 }
 
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;
@@ -204,8 +205,10 @@ uint16_t script_parse_str(
       script->steps[script->steps_count].arg =
          dio_atoi( &(script_txt[c_idx]), 10 );
       debug_printf(
-         1, "step %d arg: %d",
-         script->steps_count, script->steps[script->steps_count].arg );
+         3, "step: %d, action: %d, arg: %d",
+         script->steps_count,
+         script->steps[script->steps_count].action,
+         script->steps[script->steps_count].arg );
       if( 10000 <= script->steps[script->steps_count].arg ) {
          c_idx += 5;
       } else if( 1000 <= script->steps[script->steps_count].arg ) {

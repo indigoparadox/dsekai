@@ -7,7 +7,7 @@
  */
 
 /*! \brief Maximum number of steps in an individual script. */
-#define SCRIPT_STEPS_MAX 16
+#define SCRIPT_STEPS_MAX 24
 
 /**
  * \brief Contains a single instruction in a script, in SCRIPT::steps.
