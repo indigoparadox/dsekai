@@ -33,6 +33,8 @@ ifeq ($(RESOURCE),DEFAULT)
 endif
 WIN32_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 
+# 1a. Packaging Manifest
+
 WIN32_MANIFEST :=
 
 ifeq ($(RESOURCE),FILE)
@@ -40,7 +42,7 @@ ifeq ($(RESOURCE),FILE)
 endif
 
 ifeq ($(FMT_ASN),TRUE)
-   WIN32_MANIFEST += $(DSEKAI_ASSETS_MAPS_ASN) 
+   WIN32_MANIFEST += $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON))
 endif
 
 ifeq ($(FMT_JSON),TRUE)
@@ -48,6 +50,8 @@ ifeq ($(FMT_JSON),TRUE)
       $(DSEKAI_ASSETS_MAPS_JSON) \
       $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
+
+RESEXT_H := $(GENDIR_WIN32)/resext.h
 
 # 3. Programs
 
@@ -57,15 +61,30 @@ RC_WIN32 := wrc
 
 # 4. Arguments
 
-CFLAGS_WIN32 := -bt=nt -3 -i=$(INCLUDE) -i=$(INCLUDE)/nt -DSCREEN_SCALE=2 -DPLATFORM_WIN32 $(CFLAGS_OWC_GENERIC) -zp=1 -DSCREEN_W=160 -DSCREEN_H=160 -DUSE_SOFTWARE_TEXT -i=unilayer $(DEFINES_DSEKAI) -I$(GENDIR_WIN32) $(DEFINES_DEPTH)
+DEFINES_WIN32 := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   -DPLATFORM_WIN32 \
+   -DPLATFORM_WIN \
+   -DUSE_SOFTWARE_TEXT \
+   -DSCREEN_W=160 \
+   -DSCREEN_H=160 \
+   -DSCREEN_SCALE=2
+
+INCLUDES_WIN32 := \
+   -i=unilayer \
+   -i=$(GENDIR_WIN32) \
+   -i=$(INCLUDE)/nt
+
+CFLAGS_WIN32 := -bt=nt -3 $(CFLAGS_OWC_GENERIC) -zp=1 $(DEFINES_WIN32) $(INCLUDES_WIN32)
 
 ifneq ($(RESOURCE),DEFAULT)
-   CFLAGS_WIN32 += $(DEFINES_RESOURCE)
+   CFLAGS_WIN32 += $(subst -I ,-I=,$(DEFINES_RESOURCE))
 endif
 
 LDFLAGS_WIN32 := -bcl=nt_win -zp=1 $(LDFLAGS_OWC_GENERIC)
 
-RCFLAGS_WIN32 := -r -DPLATFORM_WIN32 -i $(INCLUDE)win
+RCFLAGS_WIN32 := -r $(DEFINES_WIN32) -i $(INCLUDE)win
 
 ifeq ($(RESOURCE),DEFAULT)
    RCFLAGS_WIN32 += -DRESOURCE_WIN
@@ -91,15 +110,15 @@ $(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE)
 $(OBJDIR_WIN32)/win.res: $(WIN32_RES_FILES) | $(OBJDIR_WIN32)/$(STAMPFILE)
 	$(RC_WIN32) $(RCFLAGS_WIN32) $< -o $@
 
-$(OBJDIR_WIN32)/%.o: %.c $(OBJDIR_WIN32)/win.res $(GENDIR_WIN32)/resext.h
+$(OBJDIR_WIN32)/%.o: %.c $(OBJDIR_WIN32)/win.res $(RESEXT_H)
 	$(MD) $(dir $@)
 	$(CC_WIN32) $(CFLAGS_WIN32) -fo=$@ $(<:%.c=%)
 
-#$(DEPDIR_WIN32)/%.d: %.c $(GENDIR_WIN32)/resext.h
-#	$(MD) $(dir $@)
-#	$(HOST_CC) -DPLATFORM_WIN32 -MM $< \
-#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN32)/,$<)) -MF $@ || touch $@
+$(DEPDIR_WIN32)/%.d: %.c $(RESEXT_H)
+	$(MD) $(dir $@)
+	$(HOST_CC) $(subst -i=,-I ,$(INCLUDES_WIN32)) $(DEFINES_WIN32) -MM $< \
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN32)/,$<)) -MF $@
 
-#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN32:.o=.d))
+include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN32:.o=.d))
 
 

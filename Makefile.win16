@@ -46,7 +46,9 @@ ifeq ($(FMT_ASN),TRUE)
 endif
 
 ifeq ($(FMT_JSON),TRUE)
-   WIN16_MANIFEST += $(DSEKAI_ASSETS_MAPS_JSON)
+   WIN16_MANIFEST += \
+      $(DSEKAI_ASSETS_MAPS_JSON) \
+      $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
 
 RESEXT_H := $(GENDIR_WIN16)/resext.h
@@ -120,7 +122,7 @@ $(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win.res $(RESEXT_H)
 $(DEPDIR_WIN16)/%.d: %.c $(RESEXT_H)
 	$(MD) $(dir $@)
 	$(HOST_CC) $(subst -i=,-I ,$(INCLUDES_WIN16)) $(DEFINES_WIN16) -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN16)/,$<)) -MF $@
+      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN32)/,$<)) -MF $@
 
 include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN16:.o=.d))
 
