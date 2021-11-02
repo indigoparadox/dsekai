@@ -18,7 +18,7 @@ uint8_t* buffer_copy_bytes(
 
    while( *p_idx + TILEMAP_NAME_MAX > *p_buffer_sz ) {
       *p_buffer_sz *= 2;
-      printf( "resizing buffer to %d\n", *p_buffer_sz );
+      debug_printf( 2, "resizing buffer to %d", *p_buffer_sz );
       buffer = realloc( buffer, *p_buffer_sz );
       assert( NULL != buffer );
    }
@@ -114,7 +114,7 @@ int main( int argc, char* argv[] ) {
       buffer[idx++] = 1;
       buffer[idx++] = t.tileset[i].flags;
    }
-   printf( "tileset seq: %d bytes\n", idx - sz_idx );
+   debug_printf( 3, "tileset seq: %d bytes", idx - sz_idx );
    buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
 
    /* tiles */
@@ -209,7 +209,7 @@ int main( int argc, char* argv[] ) {
          buffer[idx++] = t.spawns[i].script_id;
       }
    }
-   printf( "spawners seq: %d bytes\n", idx - sz_idx );
+   debug_printf( 3, "spawners seq: %d bytes", idx - sz_idx );
    buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
 
    /* scripts */
@@ -274,7 +274,7 @@ int main( int argc, char* argv[] ) {
 
    /* Go back and write size to header. */
    buffer_assign_short( &(buffer[2]), idx - 4 ); /* -4 for seq header. */
-   printf( "%d bytes encoded (0x%02x 0x%02x)\n", idx,
+   debug_printf( 3, "%d bytes encoded (0x%02x 0x%02x)", idx,
       ((idx & 0xff00) >> 8), idx & 0x00ff );
 
    /* Write the ASN map file to disk. */
