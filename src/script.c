@@ -83,7 +83,7 @@ static uint16_t script_handle_WALK_generic(
 
    } else {
       debug_printf( 1, "scripted mobile starting walking" );
-      actor->dir = dir;
+      /* actor->dir = dir; */
       mobile_walk_start( actor, dir );
    }
 
@@ -168,6 +168,14 @@ uint16_t script_handle_SPEAK(
    window_prefab_dialog( WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state );
 #endif /* SCRIPT_HAS_GFX */
    return pc + 1;
+}
+
+uint16_t script_handle_FACE(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   return actor->dir = arg;
 }
 
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;
