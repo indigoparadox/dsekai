@@ -1,0 +1,109 @@
+
+# vi:syntax=make
+
+include Makefile
+
+ifneq ($(DEPTH),MONO)
+$(error mac6 target must be built with MONO DEPTH)
+endif
+
+# 1. Directories
+
+OBJDIR_MAC6 := $(OBJDIR)/mac6
+DEPDIR_MAC6 := $(DEPDIR)/mac6
+GENDIR_MAC6 := $(GENDIR)/mac6
+
+RETRO68_PREFIX := /opt/Retro68-build/toolchain
+
+# 2. Files
+
+DSEKAI_C_FILES_MAC6_ONLY := \
+   src/main.c \
+   unilayer/input/mac6i.c \
+   unilayer/graphics/mac6g.c \
+   unilayer/memory/mac6m.c
+
+# 1a. Packaging Manifest
+
+DSEKAI_ASSETS_ICNS := \
+   $(subst .bmp,.icns,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS)))
+
+DSEKAI_ASSETS_RSRC := \
+   $(subst .bmp,.rsrc,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_BITMAPS)))
+
+DSEKAI_ASSETS_MAPS_MAC6 := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_MAC6)/,$(DSEKAI_ASSETS_MAPS_JSON)))
+
+DSEKAI_O_FILES_MAC6 := \
+   $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC6_ONLY))) \
+   $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+
+RESEXT_H := $(GENDIR_MAC6)/resext.h
+
+# 3. Programs
+
+CC_MAC6 := m68k-apple-macos-gcc
+CXX_MAC6 := m68k-apple-macos-g++
+REZ_MAC6 := Rez
+
+# 4. Arguments
+
+DEFINES_MAC6 := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   $(DEFINES_RESOURCE) \
+   -DPLATFORM_MAC6 \
+   -DUSE_SOFTWARE_TEXT \
+   -DSCREEN_W=640 \
+   -DSCREEN_H=480
+
+INCLUDES_MAC6 := \
+   -I unilayer \
+   -I$(GENDIR_MAC6) \
+   -I$(RETRO68_PREFIX)/multiversal/CIncludes
+
+CFLAGS_MAC6 := $(shell echo $(CFLAGS_GCC_GENERIC) | tr -d '\-\-std=c89') $(DEFINES_MAC6) $(INCLUDES_MAC6)
+
+LDFLAGS_MAC6 := -lRetroConsole $(LDFLAGS_GCC_GENERIC)
+
+# 5. Targets
+
+#$(BINDIR)/mac6.drc \
+#$(GENDIR_MAC6)/resext.h: $(DSEKAI_ASSETS_PICTS) $(DRCPACK) | \
+#$(GENDIR_MAC6)/$(STAMPFILE)
+#	$(DRCPACK) -c -a -af $(BINDIR)/mac6.drc -t PICT -i 5001 \
+#      -if $(DSEKAI_ASSETS_PICTS) $(DSEKAI_ASSETS_MAPS) \
+#      -lh $(GENDIR_MAC6)/resext.h
+
+platform := mac6
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
+$(eval $(RESEXT_H_RULE))
+
+#$(GENDIR_MAC6)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC6)/$(STAMPFILE)
+#	$(IMAGEMAGICK) $< $@
+
+#$(GENDIR_MAC6)/%.rsrc: $(GENDIR_MAC6)/%.icns
+#	echo "read 'icns' (-16455) \"$<\";" > $@
+
+$(GENDIR_MAC6)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC6)/$(STAMPFILE)
+	$(MD) $(dir $@)
+	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
+
+$(OBJDIR_MAC6)/$(DSEKAI).code.bin: $(DSEKAI_O_FILES_MAC6) | $(OBJDIR_MAC6)
+	$(CXX_MAC6) $(LDFLAGS_MAC6) -o $@ $^ # Use CXX to link for RetroConsole.
+
+$(BIN_MAC6): $(OBJDIR_MAC6)/$(DSEKAI).code.bin $(BINDIR)/$(STAMPFILE)
+	$(REZ_MAC6) -I$(RETRO68_PREFIX)/RIncludes \
+      --copy $^ \
+      "$(RETRO68_PREFIX)/RIncludes/Retro68APPL.r" \
+      -t "APPL" -c "DSEK" \
+      -o $(BINDIR)/$(DSEKAI).bin \
+      --cc $(BINDIR)/$(DSEKAI).APPL \
+      --cc $(BINDIR)/$(DSEKAI).dsk
+
+$(OBJDIR_MAC6)/%.o: %.c $(RESEXT_H)
+	$(MD) $(dir $@)
+	$(CC_MAC6) $(CFLAGS_MAC6) -c -o $@ $(<:%.o=%)
+
