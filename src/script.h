@@ -48,12 +48,18 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
 uint16_t script_parse_str(
    char* script_txt, int16_t script_txt_sz, struct SCRIPT* script );
 
+uint8_t script_init();
+
+void script_shutdown();
+
 uint16_t script_goto_label(
    uint16_t pc, struct SCRIPT* script, uint16_t label_type, uint16_t label_id );
 
 #ifdef SCRIPT_C
 
 /* === If we're being called inside script.c === */
+
+uint8_t g_script_globals[SCRIPT_GLOBALS_MAX];
 
 #define SCRIPT_CB_TABLE_LIST( idx, name, c ) script_handle_ ## name,
 
@@ -68,6 +74,8 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS );
 #else
 
 /* === If we're being called inside anything BUT script.c === */
+
+extern uint8_t g_script_globals[SCRIPT_GLOBALS_MAX];
 
 /**
  * \brief Define extern constants that can be used e.g. in spawners.

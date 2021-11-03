@@ -19,6 +19,7 @@ unilayer_main() {
 
    struct DSEKAI_STATE* state = NULL;
    struct GRAPHICS_ARGS graphics_args;
+   int retval = 0;
 
    platform_init( graphics_args, icon_dsekai );
 
@@ -47,27 +48,27 @@ unilayer_main() {
 
    if( !graphics_init( &graphics_args ) ) {
       error_printf( "unable to initialize graphics" );
-#ifdef DISABLE_MAIN_PARMS
-      return;
-#else
-      return 1;
-#endif /* DISABLE_MAIN_PARMS */
+      retval = 1;
+      goto exit;
    }
 
    if( !input_init() ) {
+      retval = 1;
       error_printf( "unable to initialize input" );
+      goto exit;
    }
 
    window_init();
+   if( !script_init() ) {
+      retval = 1;
+      goto exit;
+   }
 
    g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
    if( (MEMORY_HANDLE)NULL == g_state_handle ) {
       error_printf( "unable to allocate state" );
-#ifdef DISABLE_MAIN_PARMS
-      return;
-#else
-      return 1;
-#endif /* DISABLE_MAIN_PARMS */
+      retval = 1;
+      goto exit;
    }
 
 
@@ -98,11 +99,8 @@ unilayer_main() {
    state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    if( NULL == state ) {
       error_printf( "unable to lock state" );
-#ifdef DISABLE_MAIN_PARMS
-      return;
-#else
-      return 1;
-#endif /* DISABLE_MAIN_PARMS */
+      retval = 1;
+      goto exit;
    }
 #ifndef PLATFORM_PALM
    while( state->windows_count > 0 ) {
@@ -115,14 +113,19 @@ unilayer_main() {
    memory_free( g_state_handle );
 
    window_shutdown( NULL );
+   script_shutdown();
    graphics_shutdown( &graphics_args );
 
    logging_shutdown();
  
    platform_shutdown();
 
-#ifndef DISABLE_MAIN_PARMS
-   return 0;
+exit:
+
+#ifdef DISABLE_MAIN_PARMS
+   return;
+#else
+   return retval;
 #endif /* !DISABLE_MAIN_PARMS */
 }
 

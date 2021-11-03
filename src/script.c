@@ -227,3 +227,11 @@ uint16_t script_parse_str(
    return script->steps_count;
 }
 
+uint8_t script_init() {
+
+}
+
+void script_shutdown() {
+
+}
+
