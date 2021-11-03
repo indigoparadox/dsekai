@@ -1,53 +1,73 @@
 
+# vi:syntax=make
+
+include Makefile
+
 # 1. Directories
 
-OBJDIR_WEB := $(OBJDIR)/web
-DEPDIR_WEB := $(DEPDIR)/web
-GENDIR_WEB := $(GENDIR)/web
+OBJDIR_WASM := $(OBJDIR)/wasm
+DEPDIR_WASM := $(DEPDIR)/wasm
+GENDIR_WASM := $(GENDIR)/wasm
 
 # 2. Files
 
-DSEKAI_C_FILES_WEB_ONLY := \
+DSEKAI_C_FILES_WASM_ONLY := \
    src/main.c \
-   unilayer/input/gli.c \
-   unilayer/graphics/glg.c \
+   unilayer/input/sdli.c \
+   unilayer/graphics/sdlg.c \
    unilayer/memory/fakem.c
 
-DSEKAI_O_FILES_WEB := \
-   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES_WEB_ONLY))) \
-   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+DSEKAI_O_FILES_WASM := \
+   $(addprefix $(OBJDIR_WASM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_WASM)/,$(subst .c,.o,$(DSEKAI_C_FILES_WASM_ONLY))) \
+   $(addprefix $(OBJDIR_WASM)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+
+RESEXT_H := $(GENDIR_WASM)/resext.h
 
 # 3. Programs
 
-CC_WEB := emcc
-LD_WEB := emcc
+CC_WASM := emcc
+LD_WASM := emcc
 
 # 4. Arguments
 
-CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(DEFINES_DEPTH)
+DEFINES_WASM := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   $(DEFINES_RESOURCE) \
+   -DPLATFORM_SDL \
+   -DUSE_SOFTWARE_TEXT \
+   -DSCREEN_W=160 \
+   -DSCREEN_H=160 \
+   -DSCREEN_SCALE=$(SCREEN_SCALE)
 
-LDFLAGS_WEB := $(LDFLAGS_GCC_GENERIC)
+INCLUDES_WASM := \
+   -I unilayer \
+   -I $(GENDIR_WASM)
+
+CFLAGS_WASM := $(CFLAGS_GCC_GENERIC) $(DEFINES_WASM) $(INCLUDES_WASM)
+
+LDFLAGS_WASM := $(LDFLAGS_GCC_GENERIC)
 
 # 5. Targets
 
-$(GENDIR_WEB)/resext.h: \
-$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS_JSON) | \
-$(GENDIR_WEB)/$(STAMPFILE) $(HEADPACK)
-	$(HEADPACK) $@ $^
+platform := wasm
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
+$(eval $(RESEXT_H_RULE))
 
-$(BIN_WEB): $(DSEKAI_O_FILES_WEB) | $(BINDIR)/$(STAMPFILE)
-	$(LD_WEB) -o $@ $^ $(LDFLAGS_WEB)
+#$(BIN_WASM): $(DSEKAI_O_FILES_WASM) | $(BINDIR)/$(STAMPFILE)
+bin/dsekai.js: $(DSEKAI_O_FILES_WASM) | $(BINDIR)/$(STAMPFILE)
+	$(LD_WASM) -o $@ $^ $(LDFLAGS_WASM)
 
-$(OBJDIR_WEB)/%.o: %.c $(GENDIR_WEB)/resext.h | $(DSEKAI_ASSETS_MAPS_JSON)
+$(OBJDIR_WASM)/%.o: %.c $(RESEXT_H) | $(DSEKAI_ASSETS_MAPS_JSON)
 	$(MD) $(dir $@)
-	$(CC_WEB) $(CFLAGS_WEB) -c -o $@ $(<:%.o=%)
+	$(CC_WASM) $(CFLAGS_WASM) -c -o $@ $(<:%.o=%)
 
-#$(DEPDIR_WEB)/%.d: %.c $(GENDIR_WEB)/resext.h
+#$(DEPDIR_WASM)/%.d: %.c $(RESEXT_H)
 #	$(MD) $(dir $@)
-#	$(CC_WEB) $(CFLAGS_WEB) -MM $< \
-#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WEB)/,$<)) -MF $@
-
-#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WEB:.o=.d))
-
+#	$(CC_WASM) $(CFLAGS_WASM) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WASM)/,$<)) -MF $@
+#
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WASM:.o=.d))
 
