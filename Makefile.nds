@@ -1,0 +1,71 @@
+
+# 1. Directories
+
+OBJDIR_NDS := $(OBJDIR)/nds
+DEPDIR_NDS := $(DEPDIR)/nds
+GENDIR_NDS := $(GENDIR)/nds
+
+DEVKITPATH := $(shell echo "$(DEVKITPRO)" | sed -e 's/^\([a-zA-Z]\):/\/\1/')
+
+# 2. Files
+
+DSEKAI_C_FILES_NDS_ONLY := \
+   src/main.c \
+   unilayer/input/ndsi.c \
+   unilayer/graphics/ndsg.c \
+   unilayer/memory/fakem.c
+
+DSEKAI_ASSETS_MAPS_NDS := \
+   $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS_JSON)))
+
+DSEKAI_O_FILES_NDS := \
+   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY))) \
+   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+
+# 3. Programs
+
+CC_NDS := arm-none-eabi-gcc
+LD_NDS := arm-none-eabi-gcc
+NDSTOOL := ndstool
+
+# 4. Arguments
+
+ARCH_NDS := -mthumb -mthumb-interwork
+
+CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(DEFINES_DEPTH)
+
+LIBS_NDS := -L$(DEVKITPRO)/libnds/lib -lnds9
+
+LDFLAGS_NDS := -specs=ds_arm9.specs -g $(ARCH_NDS) -Wl,-Map,$(OBJDIR_NDS)/$(DSEKAI).map $(LDFLAGS_GCC_GENERIC)
+
+$(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
+
+# 5. Targets
+
+platform := nds
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+$(eval $(RESEXT_H_RULE))
+
+$(BIN_NDS): $(OBJDIR_NDS)/$(DSEKAI).elf $(GENDIR_NDS)/$(DSEKAI)-1.bmp
+	$(NDSTOOL) -c $@ -9 $< -b $(GENDIR_NDS)/$(DSEKAI)-1.bmp "$(DSEKAI);$(DSEKAI);$(DSEKAI)"
+
+$(GENDIR_NDS)/$(DSEKAI)-1.bmp: $(ASSETDIR)/$(DSEKAI).ico
+	$(IMAGEMAGICK) $< -compress none -colors 16 $(GENDIR_NDS)/$(DSEKAI).bmp
+
+$(OBJDIR_NDS)/$(DSEKAI).elf: $(DSEKAI_O_FILES_NDS)
+	$(LD_NDS) $(LDFLAGS_NDS) $^ $(LIBS_NDS) -o $@
+
+$(OBJDIR_NDS)/%.o: \
+%.c $(DSEKAI_ASSETS_MAPS_NDS) $(GENDIR_NDS)/resext.h
+	$(MD) $(dir $@)
+	$(CC_NDS) $(CFLAGS_NDS) -c -o $@ $(<:%.o=%)
+
+#$(DEPDIR_NDS)/%.d: %.c $(GENDIR_NDS)/resext.h $(DSEKAI_ASSETS_MAPS_NDS)
+#	$(MD) $(dir $@)
+#	$(CC_NDS) $(CFLAGS_NDS) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_NDS)/,$<)) -MF $@ || touch $@
+
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_NDS:.o=.d))
+
+

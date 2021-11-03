@@ -1,0 +1,55 @@
+
+# 1. Directories
+
+OBJDIR_MEGAD := $(OBJDIR)/megad
+DEPDIR_MEGAD := $(DEPDIR)/megad
+GENDIR_MEGAD := $(GENDIR)/megad
+
+# 2. Files
+
+DSEKAI_C_FILES_MEGAD_ONLY := \
+   src/main.c \
+   src/megahead.c \
+   unilayer/input/megadi.c \
+   unilayer/memory/fakem.c \
+   unilayer/resource/megadr.c \
+   unilayer/graphics/megadg.c
+
+DSEKAI_O_FILES_MEGAD := \
+   $(addprefix $(OBJDIR_MEGAD)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_MEGAD)/,$(subst .c,.o,$(DSEKAI_C_FILES_MEGAD_ONLY)))
+
+# 3. Programs
+
+CC_MEGAD := m68k-elf-gcc
+LD_MEGAD := m68k-elf-gcc
+
+# 4. Arguments
+
+CFLAGS_MEGAD := -m68000 -fno-builtin -I/opt/gendev/sgdk/inc -I/opt/gendev/sgdk/res -B/opt/gendev/sgdk/bin $(CFLAGS_GCC_GENERIC) -I$(GENDIR_MEGAD) -DPLATFORM_MEGADRIVE -DSCREEN_W=320 -DSCREEN_H=224 -Os $(DEFINES_DEPTH)
+
+LDFLAGS_MEGAD := -B/opt/gendev/sgdk/bin -n -T /opt/gendev/sgdk/md.ld -nostdlib @out/cmd_ /opt/gendev/sgdk/lib/libmd.a /opt/gendev/sgdk/lib/libgcc.a
+
+# 5. Targets
+
+platform := megad
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+$(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_MEGAD)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs :=
+$(eval $(PKG_RULE))
+
+$(BIN_MEGAD): $(DSEKAI_O_FILES_MEGAD) | $(BINDIR)/$(STAMPFILE)
+	$(LD_MEGAD) -o $@ $^ $(LDFLAGS_MEGAD)
+
+#$(OBJDIR_MEGAD)/sega.o: src/sega.s
+#	
+
+$(OBJDIR_MEGAD)/%.o: %.c $(GENDIR_MEGAD)/resext.h
+	$(MD) $(dir $@)
+	$(CC_MEGAD) $(CFLAGS_MEGAD) -c -o $@ $(<:%.o=%)
+
+

@@ -1,0 +1,53 @@
+
+# 1. Directories
+
+OBJDIR_WEB := $(OBJDIR)/web
+DEPDIR_WEB := $(DEPDIR)/web
+GENDIR_WEB := $(GENDIR)/web
+
+# 2. Files
+
+DSEKAI_C_FILES_WEB_ONLY := \
+   src/main.c \
+   unilayer/input/gli.c \
+   unilayer/graphics/glg.c \
+   unilayer/memory/fakem.c
+
+DSEKAI_O_FILES_WEB := \
+   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES_WEB_ONLY))) \
+   $(addprefix $(OBJDIR_WEB)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+
+# 3. Programs
+
+CC_WEB := emcc
+LD_WEB := emcc
+
+# 4. Arguments
+
+CFLAGS_WEB := -DSCREEN_SCALE=3 -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_WEB -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(DEFINES_DEPTH)
+
+LDFLAGS_WEB := $(LDFLAGS_GCC_GENERIC)
+
+# 5. Targets
+
+$(GENDIR_WEB)/resext.h: \
+$(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS_JSON) | \
+$(GENDIR_WEB)/$(STAMPFILE) $(HEADPACK)
+	$(HEADPACK) $@ $^
+
+$(BIN_WEB): $(DSEKAI_O_FILES_WEB) | $(BINDIR)/$(STAMPFILE)
+	$(LD_WEB) -o $@ $^ $(LDFLAGS_WEB)
+
+$(OBJDIR_WEB)/%.o: %.c $(GENDIR_WEB)/resext.h | $(DSEKAI_ASSETS_MAPS_JSON)
+	$(MD) $(dir $@)
+	$(CC_WEB) $(CFLAGS_WEB) -c -o $@ $(<:%.o=%)
+
+#$(DEPDIR_WEB)/%.d: %.c $(GENDIR_WEB)/resext.h
+#	$(MD) $(dir $@)
+#	$(CC_WEB) $(CFLAGS_WEB) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WEB)/,$<)) -MF $@
+
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WEB:.o=.d))
+
+

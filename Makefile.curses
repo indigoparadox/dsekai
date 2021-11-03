@@ -1,0 +1,54 @@
+
+# 1. Directories
+
+OBJDIR_CURSES := $(OBJDIR)/curses
+DEPDIR_CURSES := $(DEPDIR)/curses
+GENDIR_CURSES := $(GENDIR)/curses
+
+# 2. Files
+
+DSEKAI_C_FILES_CURSES_ONLY := \
+   src/main.c \
+   unilayer/input/cursesi.c \
+   unilayer/graphics/cursesg.c \
+   unilayer/memory/fakem.c \
+   src/json.o
+
+DSEKAI_O_FILES_CURSES := \
+   $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES_CURSES_ONLY))) \
+   $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+
+# 3. Programs
+
+CC_CURSES := gcc
+LD_CURSES := gcc
+
+# 4. Arguments
+
+CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_GCC_GENERIC) $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(DEFINES_DEPTH)
+
+LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) $(LDFLAGS_GCC_GENERIC)
+
+# 5. Targets
+
+platform := curses
+res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
+$(eval $(RESEXT_H_RULE))
+
+$(BIN_CURSES): $(DSEKAI_O_FILES_CURSES) | $(BINDIR)/$(STAMPFILE)
+	$(LD_CURSES) -o $@ $^ $(LDFLAGS_CURSES)
+
+$(OBJDIR_CURSES)/%.o: %.c $(GENDIR_CURSES)/resext.h | $(DSEKAI_ASSETS_MAPS_JSON)
+	$(MD) $(dir $@)
+	$(CC_CURSES) $(CFLAGS_CURSES) -c -o $@ $(<:%.o=%)
+
+#$(DEPDIR_CURSES)/%.d: %.c $(GENDIR_CURSES)/resext.h
+#	$(MD) $(dir $@)
+#	$(CC_CURSES) $(CFLAGS_CURSES) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_CURSES)/,$<)) -MF $@
+
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CURSES:.o=.d))
+
+
