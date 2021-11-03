@@ -31,3 +31,4 @@ build_*
 log*.txt
 packages
 pkgbuild
+rez.output.rsrc
