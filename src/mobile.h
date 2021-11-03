@@ -6,6 +6,10 @@
  *  \brief Structs, functions and macros pertaining to interactive objects.
  */
 
+/* TODO: Give mobiles unique IDs. */
+
+/* TODO: Log when spawned, with name of spawner and unique ID spawned. */
+
 /*! \brief A moving/interactive object in the world. */
 struct PACKED MOBILE {
    /*! \brief The direction the mobile is currently facing. */

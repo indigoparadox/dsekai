@@ -153,6 +153,7 @@ struct MOBILE* mobile_interact(
 void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    struct SCRIPT* script = NULL;
    struct SCRIPT_STEP* step = NULL;
+   int16_t arg = 0;
 
    if(
       0 > m->script_id ||
@@ -173,11 +174,17 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    script = &(state->map.scripts[m->script_id]);
    step = &(script->steps[m->script_pc]);
 
+   if( SCRIPT_ARG_STACK == step->arg ) {
+      arg = mobile_stack_pop( m );
+   } else {
+      arg = step->arg;
+   }
+
    debug_printf( 0, "%u ms: script_exec: script %d, step %d (%d)",
       graphics_get_ms(), m->script_id, m->script_pc, step->action );
 
    m->script_pc = gc_script_handlers[step->action](
-      m->script_pc, script, &(state->map), m, NULL, &(m->coords), state, step->arg );
+      m->script_pc, script, &(state->map), m, NULL, &(m->coords), state, arg );
 }
 
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {

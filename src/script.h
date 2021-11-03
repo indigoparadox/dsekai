@@ -13,7 +13,7 @@ struct TILEMAP;
 #define SCRIPT_GLOBALS_MAX 20
 #define SCRIPT_STACK_DEPTH 5
 
-#define SCRIPT_ARG_GOTO_STACK 0
+#define SCRIPT_ARG_STACK 32767
 
 /* TODO: This is a valid stack value. */
 #define SCRIPT_ERROR_OVERFLOW -1

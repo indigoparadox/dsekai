@@ -156,12 +156,11 @@ uint16_t script_handle_RETURN(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   uint16_t ret_pc = 0;
-   ret_pc = mobile_stack_pop( actor );
-   if( 0 <= ret_pc && SCRIPT_STEPS_MAX > ret_pc ) {
-      return ret_pc;
+   if( 0 <= arg && SCRIPT_STEPS_MAX > arg ) {
+      return arg;
    }
    /* Freeze. */
+   error_printf( "script frozen due to invalid return pc" );
    return pc;
 }
 
