@@ -27,8 +27,8 @@ struct PACKED MOBILE {
    int16_t script_id;
    /*! \brief Position in currently executing behavior script. */
    int16_t script_pc;
-   /*! \brief Position to return to after a jump. */
-   int16_t script_pc_prev;
+   int8_t script_stack[SCRIPT_STACK_DEPTH];
+   uint8_t script_stack_pos;
    /*! \brief Delay script until this result from graphics_get_ms(). */
    uint32_t script_next_ms;
 };
@@ -108,6 +108,10 @@ void mobile_deinit( struct MOBILE* );
  * \return ::MEMORY_PTR to MOBILE being faced if one found, or NULL otherwise.
  */
 struct MOBILE* mobile_get_dir( struct MOBILE* m, struct DSEKAI_STATE* state );
+
+int8_t mobile_stack_push( struct MOBILE* m, int8_t v );
+
+int8_t mobile_stack_pop( struct MOBILE* m );
 
 /**
  * \brief Execute the next available ::SCRIPT_STEP in the currently running

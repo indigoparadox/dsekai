@@ -68,6 +68,53 @@ void mobile_state_animate( struct DSEKAI_STATE* state ) {
    }
 }
 
+int8_t mobile_stack_push( struct MOBILE* m, int8_t v ) {
+   uint8_t i = 0;
+
+#if 0
+   /* Overflow check. */
+   if( m->script_stack_pos + 1 >= SCRIPT_STACK_DEPTH ) {
+      error_printf( "mobile stack exceeded!" );
+      return SCRIPT_ERROR_OVERFLOW;
+   }
+#endif
+
+   /* Shift the stack values out of the way for a new one. */
+   for( i = SCRIPT_STACK_DEPTH - 1 ; 0 < i ; i-- ) {
+      m->script_stack[i] = m->script_stack[i - 1];
+   }
+
+   /* Push the value. */
+#if 0
+   if( SCRIPT_STACK_DEPTH > m->script_stack_pos + 1 ) {
+      m->script_stack_pos++;
+   }
+#endif
+   m->script_stack[0] = v;
+
+   debug_printf( 0, "mobile pushed: %d", v );
+
+   return v;
+}
+
+int8_t mobile_stack_pop( struct MOBILE* m ) {
+   uint8_t i = 0;
+   int8_t retval = 0;
+
+   retval = m->script_stack[0];
+
+   /* Pull the stack values down on top of the one we popped. */
+   for( i = 0 ; SCRIPT_STACK_DEPTH - 1 > i ; i++ ) {
+      m->script_stack[i] = m->script_stack[i + 1];
+   }
+   /* Zero out the former deepest stack slot. */
+   m->script_stack[SCRIPT_STACK_DEPTH - 1] = 0;
+
+   debug_printf( 0, "mobile popped: %d", retval );
+
+   return retval;
+}
+
 struct MOBILE* mobile_interact(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t
 ) {
@@ -89,10 +136,12 @@ struct MOBILE* mobile_interact(
       return 0;
    }
 
-   /* TODO: Workshop this. */
+   /* Push actee previous PC for return. */
+   if( SCRIPT_ERROR_OVERFLOW == mobile_stack_push( actee, actee->script_pc ) ) {
+      return actee;
+   }
 
-   /* Store mobile previous PC for return. */
-   actee->script_pc_prev = actee->script_pc;
+   /* Set actee's pc to the GOTO for interaction and make actee active NOW. */
    actee->script_pc = script_goto_label(
       actee->script_pc, &(t->scripts[actee->script_id]),
       SCRIPT_ACTION_INTERACT, 0 );

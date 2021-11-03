@@ -147,7 +147,7 @@ uint16_t script_handle_GOTO(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   actor->script_pc_prev = actor->script_pc;
+   mobile_stack_push( actor, pc );
    return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
 }
 
@@ -156,7 +156,35 @@ uint16_t script_handle_RETURN(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   return actor->script_pc_prev;
+   uint16_t ret_pc = 0;
+   ret_pc = mobile_stack_pop( actor );
+   if( 0 <= ret_pc && SCRIPT_STEPS_MAX > ret_pc ) {
+      return ret_pc;
+   }
+   /* Freeze. */
+   return pc;
+}
+
+uint16_t script_handle_GLOBAL_GET(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   if( arg >= 0 && SCRIPT_GLOBALS_MAX > arg ) {
+      mobile_stack_push( actor, g_script_globals[arg] );
+   }
+   return pc + 1;
+}
+
+uint16_t script_handle_GLOBAL_SET(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   if( arg >= 0 && SCRIPT_GLOBALS_MAX > arg ) {
+      g_script_globals[arg] = mobile_stack_pop( actor );
+   }
+   return pc + 1;
 }
 
 uint16_t script_handle_SPEAK(
@@ -228,7 +256,8 @@ uint16_t script_parse_str(
 }
 
 uint8_t script_init() {
-
+   memory_zero_ptr( &g_script_globals, sizeof( g_script_globals ) );
+   return 1;
 }
 
 void script_shutdown() {

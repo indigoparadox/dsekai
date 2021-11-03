@@ -9,6 +9,9 @@ MEMORY_HANDLE g_state_handle = (MEMORY_HANDLE)NULL;
 #include "winstat.h"
 #endif /* PLATFORM_WIN */
 
+#include "tmjson.h"
+#include "tmasn.h"
+
 
 
 /* === Main Class Definition === */
@@ -60,6 +63,7 @@ unilayer_main() {
 
    window_init();
    if( !script_init() ) {
+      error_printf( "unable to initialize scripts" );
       retval = 1;
       goto exit;
    }

@@ -10,6 +10,14 @@ struct MOBILE;
 struct SCRIPT;
 struct TILEMAP;
 
+#define SCRIPT_GLOBALS_MAX 20
+#define SCRIPT_STACK_DEPTH 5
+
+#define SCRIPT_ARG_GOTO_STACK 0
+
+/* TODO: This is a valid stack value. */
+#define SCRIPT_ERROR_OVERFLOW -1
+
 /**
  * \brief Callback to execute a behavior action. Step in a script.
  * \param pc Current program counter for this mobile.
@@ -32,7 +40,7 @@ typedef uint16_t (*SCRIPT_CB)(
  * \brief Define the script action callback table.
  * \param f Macro to execute on the function callback definition.
  */
-#define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) f( 1, INTERACT, 'i' ) f( 2, WALK_NORTH, 'u' ) f( 3, WALK_SOUTH, 'd' ) f( 4, WALK_EAST, 'r' ) f( 5, WALK_WEST, 'l' ) f( 6, SLEEP, 's' ) f( 7, START, 't' ) f( 8, GOTO, 'g' ) f( 9, SPEAK, 'p' ) f( 10, RETURN, 'x' ) f( 11, FACE, 'f' )
+#define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) f( 1, INTERACT, 'i' ) f( 2, WALK_NORTH, 'u' ) f( 3, WALK_SOUTH, 'd' ) f( 4, WALK_EAST, 'r' ) f( 5, WALK_WEST, 'l' ) f( 6, SLEEP, 's' ) f( 7, START, 't' ) f( 8, GOTO, 'g' ) f( 9, SPEAK, 'p' ) f( 10, RETURN, 'x' ) f( 11, FACE, 'f' ) f( 12, GLOBAL_SET, 'b' ) f( 13, GLOBAL_GET, 'a' )
 
 /*! \brief Define prototypes for the script action callbacks. */
 #define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct SCRIPT*, struct TILEMAP*, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, struct DSEKAI_STATE*, int16_t );
@@ -59,7 +67,7 @@ uint16_t script_goto_label(
 
 /* === If we're being called inside script.c === */
 
-uint8_t g_script_globals[SCRIPT_GLOBALS_MAX];
+int8_t g_script_globals[SCRIPT_GLOBALS_MAX];
 
 #define SCRIPT_CB_TABLE_LIST( idx, name, c ) script_handle_ ## name,
 
@@ -75,7 +83,7 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS );
 
 /* === If we're being called inside anything BUT script.c === */
 
-extern uint8_t g_script_globals[SCRIPT_GLOBALS_MAX];
+extern int8_t g_script_globals[SCRIPT_GLOBALS_MAX];
 
 /**
  * \brief Define extern constants that can be used e.g. in spawners.
