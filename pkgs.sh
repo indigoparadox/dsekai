@@ -2,7 +2,7 @@
 BUILD=DEBUG
 
 if [ "$1" = "sdl" ] || [ -z "$1" ]; then
-   make -f Makefile.sdl RESOURCE=FILE FMT_JSON=TRUE BUILD=$BUILD pkg_sdl || exit
+   make -f Makefile.sdl BUILD=$BUILD pkg_sdl || exit
    make -f Makefile.sdl DEPTH=VGA RESOURCE=FILE FMT_JSON=TRUE BUILD=$BUILD pkg_sdl || exit
 fi
 

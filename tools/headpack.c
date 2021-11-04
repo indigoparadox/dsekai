@@ -113,11 +113,12 @@ int main( int argc, char* argv[] ) {
       define_offset = 0,
       path_iter_fname_idx = 0,
       path_iter_sz = 0,
-      map_idx = 0,
+      map_count = 0,
       retval = 0;
    FILE* header = NULL;
    struct TILEMAP t;
    unsigned char byte_buffer = 0;
+   char name_buffer[TILEMAP_NAME_MAX];
 
    /* TODO: Implement separate map index that can be searched by name. */
 
@@ -175,7 +176,7 @@ int main( int argc, char* argv[] ) {
       
          /* Trim first arg (prog) off reslist. */
          /* Second arg (header) will be ignored since 1-indexing. */
-         map2h( &t, header, map_idx );
+         map2h( &t, header );
       } else {
          encode_generic_file( &(argv[i][0]), i, header );
       }
@@ -209,13 +210,59 @@ int main( int argc, char* argv[] ) {
          'm' == argv[i][path_iter_fname_idx] &&
          '_' == argv[i][path_iter_fname_idx + 1]
       ) {
-         /* This is a map JSON file, so use its name. */
+         /* Map structs are handled in the map index table below. */
       } else {
          /* Use a generic resource ID. */
          fprintf( header, "   gsc_resource_%d,\n", i - 1 );
       }
    }
    fprintf( header, "};\n\n" );
+
+   /* Map Index */
+
+   fprintf( header, "const char gc_map_names[][TILEMAP_NAME_MAX] = {\n" );
+   for( i = 2 ; argc > i ; i++ ) {
+      if(
+         'm' == argv[i][path_iter_fname_idx] &&
+         '_' == argv[i][path_iter_fname_idx + 1]
+      ) {
+         /* This is a map struct, so use its name. */
+
+         map_count++;
+
+         /* Create a copy without the file extension. */
+         memory_zero_ptr( name_buffer, TILEMAP_NAME_MAX );
+         strncpy(
+            name_buffer,
+            &(argv[i][path_iter_fname_idx + 2]),
+            strlen( &(argv[i][path_iter_fname_idx + 2]) ) - 5 );
+
+         fprintf( header, "   \"%s\",\n", name_buffer );
+      }
+   }
+   fprintf( header, "};\n\n" );
+
+   fprintf( header, "const struct TILEMAP* gc_map_structs[] = {\n" );
+   for( i = 2 ; argc > i ; i++ ) {
+      if(
+         'm' == argv[i][path_iter_fname_idx] &&
+         '_' == argv[i][path_iter_fname_idx + 1]
+      ) {
+         /* This is a map struct, so use its name. */
+
+         /* Create a copy without the file extension. */
+         memory_zero_ptr( name_buffer, TILEMAP_NAME_MAX );
+         strncpy(
+            name_buffer,
+            &(argv[i][path_iter_fname_idx + 2]),
+            strlen( &(argv[i][path_iter_fname_idx + 2]) ) - 5 );
+
+         fprintf( header, "   &gc_map_%s,\n", name_buffer );
+      }
+   }
+   fprintf( header, "};\n\n" );
+
+   fprintf( header, "const uint8_t gc_map_count = %d;\n\n", map_count );
 
    /* Header Footer */
 

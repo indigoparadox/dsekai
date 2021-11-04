@@ -7,9 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int map2h(
-   struct TILEMAP* t, FILE* header_file, int map_idx
-) {
+int map2h( struct TILEMAP* t, FILE* header_file ) {
    int16_t
       i = 0,
       j = 0,
