@@ -800,6 +800,7 @@ INPUT                  = \
    unilayer/resource.h \
    unilayer/resource/nullr.h \
    tools/map2h.h \
+   tools/headpack.h \
    src \
    README.md
 
