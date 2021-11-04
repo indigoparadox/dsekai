@@ -220,7 +220,7 @@ int16_t control_push(
    controls[0].type = type;
    if( 0 != data_scalar ) {
       controls[0].data.scalar = data_scalar;
-   } else if( 0 != (int)data_res_id ) {
+   } else if( !resource_compare_id( 0, data_res_id ) ) {
       resource_assign_id( controls[0].data.res_id, data_res_id );
    }
    controls[0].scale = scale;
