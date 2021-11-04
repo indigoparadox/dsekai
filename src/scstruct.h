@@ -12,17 +12,21 @@
 /**
  * \brief Contains a single instruction in a script, in SCRIPT::steps.
  *
- *  Modifications to this struct should also be reflected in tools/map2h.c.
+ *  Modifications to this struct should also be reflected in
+ *  tools/map2h.c (map2h.h).
  */
 struct PACKED SCRIPT_STEP {
+   /*! \brief Opcode of the action as defined by ::SCRIPT_CB_TABLE. */
    uint16_t action;
+   /*! \brief Argument that will be passed to this action on execution. */
    int16_t arg;
 };
 
 /**
  * \brief Contains immutable state for scripts attached to a TILEMAP.
  *
- *  Modifications to this struct should also be reflected in tools/map2h.c.
+ *  Modifications to this struct should also be reflected in
+ *  tools/map2h.c (map2h.h).
  */
 struct PACKED SCRIPT {
    /*! \brief Indexed list of script steps in order. */

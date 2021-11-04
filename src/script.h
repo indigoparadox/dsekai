@@ -10,9 +10,12 @@ struct MOBILE;
 struct SCRIPT;
 struct TILEMAP;
 
+/*! \brief Maximum number of global script flags available. */
 #define SCRIPT_GLOBALS_MAX 20
+/*! \brief Maximum depth of available local stack for each ::SCRIPT. */
 #define SCRIPT_STACK_DEPTH 5
-
+/*! \brief Value of script arg to indicate real arg should be popped from stack.
+ */
 #define SCRIPT_ARG_STACK 32767
 
 /* TODO: This is a valid stack value. */
@@ -56,10 +59,26 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
 uint16_t script_parse_str(
    char* script_txt, int16_t script_txt_sz, struct SCRIPT* script );
 
+/**
+ * \brief Script subsystem init function that should be called in main().
+ * \return 1 if successful or 0 otherwise.
+ */
 uint8_t script_init();
 
+/**
+ * \brief Script subsystem cleanup function that should be called in main().
+ */
 void script_shutdown();
 
+/**
+ * \brief Find a label of the given type and return the program counter
+ *        (e.g. MOBILE::script_pc) at which it exists.
+ * \param pc Current program counter value.
+ * \param script ::SCRIPT to search for label.
+ * \param label_type SCRIPT_STEP::action to consider as the label type.
+ * \param label_id SCRIPT_STEP::arg to consider as the label ID.
+ * \return Index of the found label, or pc if it was not found.
+ */
 uint16_t script_goto_label(
    uint16_t pc, struct SCRIPT* script, uint16_t label_type, uint16_t label_id );
 
@@ -83,6 +102,7 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS );
 
 /* === If we're being called inside anything BUT script.c === */
 
+/*! \brief Global flag storage for all scripts. */
 extern int8_t g_script_globals[SCRIPT_GLOBALS_MAX];
 
 /**
