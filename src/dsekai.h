@@ -84,6 +84,8 @@ struct PACKED DSEKAI_STATE {
    MEMORY_HANDLE windows_handle;
    uint16_t windows_count;
 
+   char warp_to[TILEMAP_NAME_MAX];
+
    uint16_t engine_state;
 
 };
