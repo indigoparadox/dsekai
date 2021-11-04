@@ -206,14 +206,33 @@ uint16_t script_handle_FACE(
    return pc + 1;
 }
 
+uint16_t script_handle_WARP(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   if( arg < 0 || TILEMAP_STRINGS_MAX <= arg ) {
+      error_printf( "invalid warp map string index: %d", arg );
+      return pc;
+   }
+
+   debug_printf( 3, "warp requested to: %s", t->strings[arg] );
+   memory_zero_ptr( state->warp_to, TILEMAP_NAME_MAX );
+   memory_strncpy_ptr( state->warp_to, t->strings[arg], TILEMAP_NAME_MAX );
+
+   /* Freeze */
+   return pc;
+}
+
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;
 
 uint16_t script_parse_str(
+   int script_idx,
    char* script_txt, int16_t script_txt_sz, struct SCRIPT* script
 ) {
    int c_idx = 0;
 
-   debug_printf( 2, "parsing script: %s", script_txt );
+   debug_printf( 2, "parsing script %d: %s", script_idx, script_txt );
 
    for( ; script_txt_sz > c_idx ; ) {
       debug_printf( 1, "step %d char: %c",
@@ -232,7 +251,8 @@ uint16_t script_parse_str(
       script->steps[script->steps_count].arg =
          dio_atoi( &(script_txt[c_idx]), 10 );
       debug_printf(
-         3, "step: %d, action: %d, arg: %d",
+         3, "script: %d, step: %d, action: %d, arg: %d",
+         script_idx,
          script->steps_count,
          script->steps[script->steps_count].action,
          script->steps[script->steps_count].arg );

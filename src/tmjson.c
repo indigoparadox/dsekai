@@ -79,7 +79,7 @@ static int16_t tilemap_json_parse_spawn(
          iter_path, JSON_PATH_SZ,
          spawn_buffer, RESOURCE_PATH_MAX,
          &(tokens[0]), tokens_sz, json_buffer );
-      script_parse_str( spawn_buffer, spawn_buffer_sz,
+      script_parse_str( t->scripts_count, spawn_buffer, spawn_buffer_sz,
          &(t->scripts[spawn->script_id]) );
       t->scripts_count++;
    }

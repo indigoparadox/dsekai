@@ -43,7 +43,7 @@ typedef uint16_t (*SCRIPT_CB)(
  * \brief Define the script action callback table.
  * \param f Macro to execute on the function callback definition.
  */
-#define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) f( 1, INTERACT, 'i' ) f( 2, WALK_NORTH, 'u' ) f( 3, WALK_SOUTH, 'd' ) f( 4, WALK_EAST, 'r' ) f( 5, WALK_WEST, 'l' ) f( 6, SLEEP, 's' ) f( 7, START, 't' ) f( 8, GOTO, 'g' ) f( 9, SPEAK, 'p' ) f( 10, RETURN, 'x' ) f( 11, FACE, 'f' ) f( 12, GLOBAL_SET, 'b' ) f( 13, GLOBAL_GET, 'a' )
+#define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) f( 1, INTERACT, 'i' ) f( 2, WALK_NORTH, 'u' ) f( 3, WALK_SOUTH, 'd' ) f( 4, WALK_EAST, 'r' ) f( 5, WALK_WEST, 'l' ) f( 6, SLEEP, 's' ) f( 7, START, 't' ) f( 8, GOTO, 'g' ) f( 9, SPEAK, 'p' ) f( 10, RETURN, 'x' ) f( 11, FACE, 'f' ) f( 12, GLOBAL_SET, 'b' ) f( 13, GLOBAL_GET, 'a' ) f( 14, WARP, 'w' )
 
 /*! \brief Define prototypes for the script action callbacks. */
 #define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct SCRIPT*, struct TILEMAP*, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, struct DSEKAI_STATE*, int16_t );
@@ -52,11 +52,13 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
 
 /**
  * \brief Parse the given script string into an in-memory script.
+ * \param script_idx Index of the script, used for debug messages.
  * \param script_txt The script string.
  * \param script_txt_sz The length of the script string.
  * \param script ::MEMORY_PTR to the SCRIPT struct to populate.
  */
 uint16_t script_parse_str(
+   int script_idx,
    char* script_txt, int16_t script_txt_sz, struct SCRIPT* script );
 
 /**
