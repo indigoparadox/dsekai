@@ -262,6 +262,25 @@ static int16_t tilemap_json_load_file(
    return 1;
 }
 
+void tilemap_json_parse_engine(
+   struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
+   struct jsmntok* tokens, uint16_t tokens_sz
+) {
+   char engine_type[TILEMAP_NAME_MAX];
+
+   json_str_from_path(
+      TILEMAP_JPATH_PROP_ENGINE, sizeof( TILEMAP_JPATH_PROP_ENGINE ),
+      engine_type, TILEMAP_NAME_MAX, tokens, tokens_sz, json_buffer );
+
+   if( 0 == memory_strncmp_ptr( engine_type, "topdown", 7 ) ) {
+      t->engine_type = TILEMAP_ENGINE_TOPDOWN;
+   } else if( 0 == memory_strncmp_ptr( engine_type, "pov", 3 ) ) {
+      t->engine_type = TILEMAP_ENGINE_POV;
+   } else {
+      t->engine_type = TILEMAP_ENGINE_NONE;
+   }
+}
+
 int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
    char* json_buffer = NULL;
    int16_t retval = 1;
@@ -313,6 +332,9 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
    json_str_from_path(
       TILEMAP_JPATH_PROP_NAME, sizeof( TILEMAP_JPATH_PROP_NAME ),
       t->name, TILEMAP_NAME_MAX, tokens, tok_parsed, json_buffer );
+
+   tilemap_json_parse_engine(
+      t, json_buffer, json_buffer_sz, tokens, tok_parsed );
 
    ts_name_sz = tilemap_fix_asset_path(
       ts_name, RESOURCE_PATH_MAX, id );

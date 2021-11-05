@@ -6,6 +6,10 @@
  *  \brief Functions and macros pertaining to tilemaps.
  */
 
+#define TILEMAP_ENGINE_NONE 0
+#define TILEMAP_ENGINE_TOPDOWN 1
+#define TILEMAP_ENGINE_POV 2
+
 /*! \brief TILESET_TILE::flags bit flag indicating tile will block movement. */
 #define TILEMAP_TILESET_FLAG_BLOCK  0x01
 

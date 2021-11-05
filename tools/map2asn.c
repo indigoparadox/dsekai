@@ -82,6 +82,11 @@ int main( int argc, char* argv[] ) {
    buffer = buffer_copy_bytes(
       &idx, buffer, &buffer_sz, t.name, strlen( t.name ) );
 
+   /* engine_type */
+   buffer[idx++] = MAPBUF_ASN_INT;
+   buffer[idx++] = 1;
+   buffer[idx++] = t.engine_type;
+
    /* tileset */
    buffer[idx++] = MAPBUF_ASN_SEQUENCE;
    /* TODO: This will fail if there are only 1 or 2 tiles. */

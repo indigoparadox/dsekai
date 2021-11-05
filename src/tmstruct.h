@@ -75,6 +75,8 @@ struct PACKED TILEMAP_SPAWN {
 struct PACKED TILEMAP {
    /*! \brief Tilemap name. */
    char name[TILEMAP_NAME_MAX];
+   /*! \brief Engine type tilemap is supposed to be used with. */
+   uint8_t engine_type;
    /*! \brief Array of prototype tiles all map tiles are based on. */
    struct TILESET_TILE tileset[TILEMAP_TILESETS_MAX];
    /*! \brief Array of tiles composing the map. */

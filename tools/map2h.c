@@ -34,6 +34,9 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
    /* name */
    fprintf( header_file, "   \"%s\",\n", t->name );
 
+   /* engine_type */
+   fprintf( header_file, "   %d,\n", t->engine_type );
+
    /* tileset */
    fprintf( header_file, "   /* tileset */\n" );
    fprintf( header_file, "   {\n" );

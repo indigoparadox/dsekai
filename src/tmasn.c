@@ -424,6 +424,13 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    debug_printf( 3, "tilemap name: %s (%d)", t->name, read_sz );
    idx += read_sz;
 
+   /* engine_type */
+   read_sz = tilemap_asn_parse_int( &t->engine_type, 1, 0, &(asn_buffer[idx]) );
+   if( 0 == read_sz ) {
+      goto cleanup;
+   }
+   idx += read_sz;
+
    /* tileset */
    read_sz = tilemap_asn_parse_tileset( t, &(asn_buffer[idx]) );
    if( 0 == read_sz ) {

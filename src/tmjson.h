@@ -18,6 +18,7 @@
 #define TILEMAP_JPATH_TILE       "/layers/[name=terrain]/data/%d"
 /*! \brief JSON path to map name. */
 #define TILEMAP_JPATH_PROP_NAME  "/properties/[name=name]/value"
+#define TILEMAP_JPATH_PROP_ENGINE "/properties/[name=engine]/value"
 /*! \brief JSON path to mobile tile X. */
 #define TILEMAP_JPATH_MOB_X      "/layers/[name=mobiles]/objects/%d/x"
 /*! \brief JSON path to mobile tile Y. */

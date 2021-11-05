@@ -105,8 +105,6 @@ unilayer_main() {
 
 /* === Main Loop === */
 
-   loop_set( topdown_loop, g_state_handle, &graphics_args );
-
    while( g_running ) {
       state = memory_lock( g_state_handle );
       if( '\0' != state->warp_to[0] ) {
@@ -164,6 +162,15 @@ unilayer_main() {
             sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
          mobile_spawns( state );
 
+         /* Setup engine. */
+         if( TILEMAP_ENGINE_TOPDOWN == state->map.engine_type ) {
+            loop_set( topdown_loop, g_state_handle, &graphics_args );
+         } else {
+            error_printf( "invalid engine requested: %d",
+               state->map.engine_type );
+            goto shutdown;
+         }
+
          state->engine_state = ENGINE_STATE_OPENING;
       }
       state = memory_unlock( g_state_handle );
@@ -185,6 +192,8 @@ unilayer_main() {
 
 
 /* === Shutdown === */
+
+shutdown:
 
    state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    if( NULL == state ) {
