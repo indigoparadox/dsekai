@@ -12,6 +12,7 @@
 
 /*! \brief A moving/interactive object in the world. */
 struct PACKED MOBILE {
+   char* name;
    /*! \brief The direction the mobile is currently facing. */
    uint8_t dir;
    uint8_t active;
@@ -124,6 +125,8 @@ int8_t mobile_stack_pop( struct MOBILE* m );
  * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  */
 void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state );
+
+void mobile_spawns( struct DSEKAI_STATE* state );
 
 #ifdef MOBILE_C
 const int8_t gc_mobile_step_table_normal_pos[16] = {

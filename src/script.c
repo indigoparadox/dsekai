@@ -216,7 +216,7 @@ uint16_t script_handle_WARP(
       return pc;
    }
 
-   debug_printf( 3, "warp requested to: %s", t->strings[arg] );
+   debug_printf( 2, "warp requested to: %s", t->strings[arg] );
    memory_zero_ptr( state->warp_to, TILEMAP_NAME_MAX );
    memory_strncpy_ptr( state->warp_to, t->strings[arg], TILEMAP_NAME_MAX );
 
@@ -251,7 +251,7 @@ uint16_t script_parse_str(
       script->steps[script->steps_count].arg =
          dio_atoi( &(script_txt[c_idx]), 10 );
       debug_printf(
-         3, "script: %d, step: %d, action: %d, arg: %d",
+         2, "script: %d, step: %d, action: %d, arg: %d",
          script_idx,
          script->steps_count,
          script->steps[script->steps_count].action,

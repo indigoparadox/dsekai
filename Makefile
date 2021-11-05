@@ -124,7 +124,7 @@ PLATFORMS_FILE := sdl xlib win32
 
 ASSETDIR := assets
 ASSETPATH :=
-DTHRESHOLD := 3
+DTHRESHOLD := 2
 
 PKG_OUT_FLAGS :=
 
@@ -289,10 +289,12 @@ DSEKAI_ASSETS_BITMAPS := \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/p_*.bmp)
 
 DSEKAI_ASSETS_MAPS_JSON := \
-   $(ASSETDIR)/m_field.json
+   $(ASSETDIR)/m_field.json \
+   $(ASSETDIR)/m_templ.json
 
 DSEKAI_ASSETS_TILESETS_JSON := \
-   $(ASSETDIR)/t2_field.json
+   $(ASSETDIR)/t2_field.json \
+   $(ASSETDIR)/t2_templ.json
 
 HOST_CC := gcc
 MD := mkdir -p

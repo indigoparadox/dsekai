@@ -33,7 +33,7 @@ int16_t tilemap_asn_parse_int(
          *buffer = asn_buffer[2];
       }
       field_sz += 1;
-   } else if( asn_buffer[2] == 2 ) {
+   } else if( asn_buffer[1] == 2 ) {
       if( sign ) {
          *int16_buffer = tilemap_asn_read_short( &(asn_buffer[2]) );
       } else {
@@ -41,7 +41,8 @@ int16_t tilemap_asn_parse_int(
       }
       field_sz += 2;
    } else {
-      error_printf( "unable to process integer" );
+      error_printf( "unable to process integer: size 0x%02x",
+         asn_buffer[1] );
       goto cleanup;
    }
 
@@ -323,7 +324,6 @@ static int16_t tilemap_asn_parse_scripts(
       total_read_sz += 2; /* sequence type and size */
 
       while( total_read_sz - script_seq_start < script_seq_sz ) {
-         debug_printf( 2, "step idx: %d", step_idx );
 
          if( 0x30 != asn_buffer[total_read_sz] ) {
             error_printf(
@@ -332,11 +332,13 @@ static int16_t tilemap_asn_parse_scripts(
             goto cleanup;
          }
       
+         /*
          if( 0x6 != asn_buffer[total_read_sz + 1] ) {
             error_printf(
                "invalid step size: %d", asn_buffer[total_read_sz + 1] );
             goto cleanup;
          }
+         */
          total_read_sz += 2; /* step type, size */
       
          /* step.action */
@@ -346,8 +348,6 @@ static int16_t tilemap_asn_parse_scripts(
          if( 0 == read_sz ) {
             goto cleanup;
          }
-         debug_printf( 2, "script step action: %d",
-            t->scripts[script_idx].steps[step_idx].action );
          total_read_sz += read_sz;
 
          /* step.arg */
@@ -357,9 +357,12 @@ static int16_t tilemap_asn_parse_scripts(
          if( 0 == read_sz ) {
             goto cleanup;
          }
-         debug_printf( 2, "script step arg: %d",
-            t->scripts[script_idx].steps[step_idx].arg );
          total_read_sz += read_sz;
+
+         debug_printf( 3, "step idx: %d, action: %d, arg: %d",
+            step_idx,
+            t->scripts[script_idx].steps[step_idx].action,
+            t->scripts[script_idx].steps[step_idx].arg );
 
          step_idx++;
       }

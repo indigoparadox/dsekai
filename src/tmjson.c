@@ -67,21 +67,9 @@ static int16_t tilemap_json_parse_spawn(
    spawn->script_id = json_int_from_path(
       iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
 
-   if( spawn->script_id  >= TILEMAP_SCRIPTS_MAX ) {
-      error_printf( "mobile uses script ID beyond maximum available!" );
-
-   } else if( spawn->script_id >= t->scripts_count ) {
-      /* Attempt to load the script, since it was referenced. */
-      dio_snprintf(
-         iter_path, JSON_PATH_SZ, TILEMAP_JPATH_SCRIPT, spawn->script_id );
-      spawn_buffer[0] = '\0';
-      spawn_buffer_sz = json_str_from_path(
-         iter_path, JSON_PATH_SZ,
-         spawn_buffer, RESOURCE_PATH_MAX,
-         &(tokens[0]), tokens_sz, json_buffer );
-      script_parse_str( t->scripts_count, spawn_buffer, spawn_buffer_sz,
-         &(t->scripts[spawn->script_id]) );
-      t->scripts_count++;
+   if( 0 > spawn->script_id || spawn->script_id  >= TILEMAP_SCRIPTS_MAX ) {
+      error_printf( "spawn \"%s\" uses invalid script ID: %d",
+         spawn->name, spawn->script_id );
    }
 
    debug_printf( 2, "%s spawn at %d, %d (script %d)",
@@ -165,6 +153,38 @@ static int8_t tilemap_json_tile(
    }
 
    return tile_id_in;
+}
+
+static int16_t tilemap_json_parse_scripts(
+   struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
+   struct jsmntok* tokens, uint16_t tokens_sz
+) {
+   char iter_path[JSON_PATH_SZ];
+   int i = 0,
+      script_buffer_sz = 0;
+   char script_buffer[SCRIPT_STR_MAX];
+   
+   /* Load strings.*/
+   debug_printf( 2, "loading strings" ); 
+   for( i = 0 ; TILEMAP_SCRIPTS_MAX > i ; i++ ) {
+      memory_zero_ptr( script_buffer, SCRIPT_STR_MAX );
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ, TILEMAP_JPATH_SCRIPT, i );
+      script_buffer[0] = '\0';
+      script_buffer_sz = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         script_buffer, SCRIPT_STR_MAX,
+         &(tokens[0]), tokens_sz, json_buffer );
+      if( 0 >= script_buffer_sz ) {
+         error_printf( "invalid script returned; maximum script ID is: %d",
+            t->scripts_count - 1 );
+         break;
+      }
+      script_parse_str( i, script_buffer, script_buffer_sz, &(t->scripts[i]) );
+      t->scripts_count++;
+   }
+
+   return 1;
 }
 
 static int16_t tilemap_json_parse_strings(
@@ -348,6 +368,11 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
 
    retval = tilemap_json_parse_strings(
       t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
+   /* TODO: Error checking? */
+
+   retval = tilemap_json_parse_scripts(
+      t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
+   /* TODO: Error checking? */
 
 cleanup:
 

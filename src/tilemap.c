@@ -95,6 +95,11 @@ void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
          /* Grab the left byte if even or the right if odd. */
          tile_id = tilemap_get_tile_id( t, x, y );
 
+         if( tile_id >= TILEMAP_TILESETS_MAX ) {
+            error_printf( "invalid tile id: %d", tile_id );
+            continue;
+         }
+
          /* Blit the tile. */
          graphics_blit_at(
             t->tileset[tile_id].image,

@@ -162,6 +162,7 @@ Args can range from 0-32766. If a command is given with an arg of 32767, it will
 | FACE       | f    | Direction | Face in direction indicated by index.
 | GLOBAL_GET | a    | Index     | Push global table at Index onto stack.
 | GLOBAL_SET | b    | Index     | Pop stack topmost into global table at Index.
+| WARP       | w    | Text_Id   | Warp to a map identified by string at Text_Id.
 
 | Direction | Index |
 |-----------|-------|

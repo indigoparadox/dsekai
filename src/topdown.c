@@ -9,12 +9,6 @@
 
 extern const struct TILEMAP gc_map_field;
 
-#define TOPDOWN_STATE_WELCOME 1
-
-#define gc_stringize_internal( map ) #map
-
-#define gc_stringize( map ) gc_stringize_internal( map )
-
 #define engine_mapize_internal( map ) gc_map_ ## map
 
 #define engine_mapize( map ) engine_mapize_internal( map )
@@ -140,48 +134,32 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
    return 1;
 }
 
-void topdown_spawns( struct DSEKAI_STATE* state ) {
-   int8_t i = 0;
-  
-   /* TODO: Generalize this for all engines, move to engines.c. */
-   /* TODO: Allow spawners to spawn multiples. */
-   /* TODO: Separate mobiles[i] from spawns[i]. */
+void topdown_focus_player( struct DSEKAI_STATE* state ) {
+   int player_x_px = 0,
+      player_y_px = 0;
 
-   assert( DSEKAI_MOBILES_MAX == TILEMAP_SPAWNS_MAX );
+   player_x_px = state->mobiles[state->player_idx].coords.x * TILE_W;
+   player_y_px = state->mobiles[state->player_idx].coords.y * TILE_H;
 
-   for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
-      if( 0 == memory_strnlen_ptr(
-         state->map.spawns[i].name, TILEMAP_SPAWN_NAME_SZ )
-      ) {
-         break;
-      }
-      state->mobiles[i].hp = 100;
-      state->mobiles[i].mp = 100;
-      state->mobiles[i].coords.x = state->map.spawns[i].coords.x;
-      state->mobiles[i].coords.y = state->map.spawns[i].coords.y;
-      state->mobiles[i].coords_prev.x = state->map.spawns[i].coords.x;
-      state->mobiles[i].coords_prev.y = state->map.spawns[i].coords.y;
-      state->mobiles[i].steps_x = 0;
-      state->mobiles[i].steps_y = 0;
-      state->mobiles[i].inventory = NULL;
-      state->mobiles[i].script_id = state->map.spawns[i].script_id;
-      state->mobiles[i].script_pc = 0;
-      state->mobiles[i].script_next_ms = graphics_get_ms();
-      state->mobiles[i].active = 1;
-      resource_assign_id(
-         state->mobiles[i].sprite, state->map.spawns[i].type );
-      if( 0 == memory_strncmp_ptr( "player", state->map.spawns[i].name, 6 ) ) {
-         debug_printf( 2, "player is mobile #%d", i );
-         state->player_idx = i;
-      }
-   }
+   state->screen_scroll_x_tgt = (player_x_px / SCREEN_MAP_W) * SCREEN_MAP_W;
+   state->screen_scroll_x = (player_x_px / SCREEN_MAP_W) * SCREEN_MAP_W;
+   state->screen_scroll_tx = state->screen_scroll_x / TILE_W;
+
+   state->screen_scroll_y_tgt = (player_y_px / SCREEN_MAP_H) * SCREEN_MAP_H;
+   state->screen_scroll_y = (player_y_px / SCREEN_MAP_H) * SCREEN_MAP_H;
+   state->screen_scroll_ty = state->screen_scroll_y / TILE_H;
+
+   debug_printf( 2, "player x, y: %d, %d (%d, %d)", 
+      state->mobiles[state->player_idx].coords.x,
+      state->mobiles[state->player_idx].coords.y,
+      player_x_px, player_y_px );
 
 }
 
 int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    int i = 0;
    uint8_t in_char = 0;
-   static int initialized = 0;
+   /* static int initialized = 0; */
    struct DSEKAI_STATE* state = NULL;
    int retval = 1;
 
@@ -192,39 +170,21 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       goto cleanup;
    }
 
-   if( !initialized ) {
-
-#ifdef RESOURCE_FILE
-#  ifdef TILEMAP_FMT_JSON
-      tilemap_json_load( "assets/m_" gc_stringize( ENTRY_MAP ) ".json", &(state->map) );
-#  elif defined TILEMAP_FMT_ASN
-      tilemap_asn_load( "assets/m_" gc_stringize( ENTRY_MAP ) ".asn", &(state->map) );
-#  else
-#     error "No loader defined!"
-#  endif
-#else
-      debug_printf( 3, "gc_map_" gc_stringize( ENTRY_MAP ) ": %s",
-         engine_mapize( ENTRY_MAP ).name );
-      memory_copy_ptr( (MEMORY_PTR)&(state->map),
-         (MEMORY_PTR)&engine_mapize( ENTRY_MAP ),
-         sizeof( struct TILEMAP ) );
-
-#endif /* RESOURCE_FILE */
-
-      tilemap_refresh_tiles( &(state->map) );
+   if( ENGINE_STATE_OPENING == state->engine_state ) {
 
       /* Make sure the tilemap is drawn at least once behind any initial
        * windows.
        */
       tilemap_draw( &(state->map), state );
 
-      /* Spawn mobiles. */
-      topdown_spawns( state );
+      topdown_focus_player( state );
+      tilemap_refresh_tiles( &(state->map) );
 
       window_push(
          WINDOW_ID_STATUS, WINDOW_STATUS_VISIBLE,
          0, (SCREEN_TH * 16), STATUS_WINDOW_W, STATUS_WINDOW_H, 0, state );
 
+#if 0
 #ifndef HIDE_WELCOME_DIALOG
 #ifndef PLATFORM_PALM
       state->engine_state = TOPDOWN_STATE_WELCOME;
@@ -237,8 +197,10 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 #endif /* RESOURCE_FILE */
 #endif /* PLATFORM_PALM */
 #endif /* !HIDE_WELCOME_DIALOG */
+#endif
 
-      initialized = 1;
+      /* initialized = 1; */
+      state->engine_state = ENGINE_STATE_RUNNING;
    }
 
    graphics_loop_start();
@@ -315,7 +277,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          state->screen_scroll_tx + SCREEN_TW
    ) {
       state->screen_scroll_x_tgt = state->screen_scroll_x + SCREEN_MAP_W;
-      debug_printf( 1, "scrolling screen right to %d, %d...",
+      debug_printf( 2, "scrolling screen right to %d, %d...",
          state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
 
    } else if(
@@ -323,72 +285,33 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          state->screen_scroll_y + SCREEN_TH
    ) {
       state->screen_scroll_y_tgt = state->screen_scroll_y + SCREEN_MAP_H;
-      debug_printf( 1, "scrolling screen down to %d, %d...",
+      debug_printf( 2, "scrolling screen down to %d, %d...",
          state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
 
    } else if(
       state->mobiles[state->player_idx].coords.x < state->screen_scroll_tx
    ) {
       state->screen_scroll_x_tgt = state->screen_scroll_x - SCREEN_MAP_W;
-      debug_printf( 1, "scrolling screen left to %d, %d...",
+      debug_printf( 2, "scrolling screen left to %d, %d...",
          state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
 
    } else if(
       state->mobiles[state->player_idx].coords.y < state->screen_scroll_ty
    ) {
       state->screen_scroll_y_tgt = state->screen_scroll_y - SCREEN_MAP_H;
-      debug_printf( 1, "scrolling screen up to %d, %d...",
+      debug_printf( 2, "scrolling screen up to %d, %d...",
          state->screen_scroll_x_tgt, state->screen_scroll_y_tgt );
    }
-   state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
 
    graphics_loop_end();
 
 cleanup:
 
-   if( 0 == retval ) {
-      /* We're closing, so deinit. */
-      if( NULL != state ) {
-         state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
-      }
-      topdown_deinit( state_handle );
+   if( NULL != state ) {
+      state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
    }
 
    graphics_flip( args );
    return retval;
-}
-
-void topdown_deinit( MEMORY_HANDLE state_handle ) {
-   int i = 0;
-   struct DSEKAI_STATE* state = NULL;
-
-   if( (MEMORY_HANDLE)NULL == state_handle ) {
-      return;
-   }
-
-   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
-   if( NULL == state ) {
-      return;
-   }
-
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      mobile_deinit( &(state->mobiles[i]) );
-   }
-
-   tilemap_deinit( &(state->map) );
-
-   #if 0
-   if( (MEMORY_HANDLE)NULL != state->items ) {
-      items = memory_lock( state->items );
-      if( NULL != items ) {
-         /* items_deinit( items ); */
-         items = memory_unlock( state->items );
-      }
-      memory_free( state->items );
-      state->items = NULL;
-   }
-   #endif
-
-   state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
 }
 

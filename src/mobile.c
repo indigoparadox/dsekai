@@ -165,8 +165,8 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
    if( graphics_get_ms() < m->script_next_ms ) {
       debug_printf( 0,
-         "mobile sleeping: %u waiting for %u", graphics_get_ms(),
-         m->script_next_ms );
+         "mobile \"%s\" sleeping: %u waiting for %u", m->name,
+         graphics_get_ms(), m->script_next_ms );
       /* Mobile still sleeping. */
       return;
    }
@@ -237,5 +237,43 @@ void mobile_deinit( struct MOBILE* m ) {
    if( NULL != m ) {
       return;
    }
+}
+
+void mobile_spawns( struct DSEKAI_STATE* state ) {
+   int8_t i = 0;
+  
+   /* TODO: Allow spawners to spawn multiples. */
+   /* TODO: Separate mobiles[i] from spawns[i]. */
+
+   assert( DSEKAI_MOBILES_MAX == TILEMAP_SPAWNS_MAX );
+
+   for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
+      if( 0 == memory_strnlen_ptr(
+         state->map.spawns[i].name, TILEMAP_SPAWN_NAME_SZ )
+      ) {
+         break;
+      }
+      state->mobiles[i].name = state->map.spawns[i].name;
+      state->mobiles[i].hp = 100;
+      state->mobiles[i].mp = 100;
+      state->mobiles[i].coords.x = state->map.spawns[i].coords.x;
+      state->mobiles[i].coords.y = state->map.spawns[i].coords.y;
+      state->mobiles[i].coords_prev.x = state->map.spawns[i].coords.x;
+      state->mobiles[i].coords_prev.y = state->map.spawns[i].coords.y;
+      state->mobiles[i].steps_x = 0;
+      state->mobiles[i].steps_y = 0;
+      state->mobiles[i].inventory = NULL;
+      state->mobiles[i].script_id = state->map.spawns[i].script_id;
+      state->mobiles[i].script_pc = 0;
+      state->mobiles[i].script_next_ms = graphics_get_ms();
+      state->mobiles[i].active = 1;
+      resource_assign_id(
+         state->mobiles[i].sprite, state->map.spawns[i].type );
+      if( 0 == memory_strncmp_ptr( "player", state->map.spawns[i].name, 6 ) ) {
+         debug_printf( 2, "player is mobile #%d", i );
+         state->player_idx = i;
+      }
+   }
+
 }
 

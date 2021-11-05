@@ -17,6 +17,8 @@ struct TILEMAP;
 /*! \brief Value of script arg to indicate real arg should be popped from stack.
  */
 #define SCRIPT_ARG_STACK 32767
+/*! \brief Maximum length of a script in text form. */
+#define SCRIPT_STR_MAX 1024
 
 /* TODO: This is a valid stack value. */
 #define SCRIPT_ERROR_OVERFLOW -1

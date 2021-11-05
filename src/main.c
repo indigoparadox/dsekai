@@ -11,6 +11,15 @@ MEMORY_HANDLE g_state_handle = (MEMORY_HANDLE)NULL;
 
 #include "tmjson.h"
 #include "tmasn.h"
+#ifndef RESOURCE_FILE
+extern const char gc_map_names[][TILEMAP_NAME_MAX];
+extern const struct TILEMAP* gc_map_structs[];
+extern const uint8_t gc_map_count;
+#endif /* !RESOURCE_FILE */
+
+#define stringize_internal( map ) #map
+
+#define stringize( map ) stringize_internal( map )
 
 
 
@@ -22,12 +31,18 @@ unilayer_main() {
 
    struct DSEKAI_STATE* state = NULL;
    struct GRAPHICS_ARGS graphics_args;
-   int retval = 0;
+   int retval = 0,
+      i = 0;
+#ifdef RESOURCE_FILE
+   char map_load_path[RESOURCE_PATH_MAX];
+#endif /* RESOURCE_FILE */
 
    platform_init( graphics_args, icon_dsekai );
 
    assert( 0 == TILEMAP_TW % 4 );
    assert( 0 == TILEMAP_TH % 4 );
+
+   /* Setup logging and log some debug items about this build. */
 
    logging_init();
 
@@ -49,6 +64,8 @@ unilayer_main() {
    debug_printf( 3, "items size is %lu bytes",
       sizeof( struct ITEM ) * DSEKAI_ITEMS_MAX );
 
+   /* Initialize subsystems. */
+
    if( !graphics_init( &graphics_args ) ) {
       error_printf( "unable to initialize graphics" );
       retval = 1;
@@ -68,12 +85,21 @@ unilayer_main() {
       goto exit;
    }
 
+   /* Setup the engine state. */
+
    g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
    if( (MEMORY_HANDLE)NULL == g_state_handle ) {
       error_printf( "unable to allocate state" );
       retval = 1;
       goto exit;
    }
+
+   /* Perform the initial warp-in. */
+
+   state = memory_lock( g_state_handle );
+   memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
+      memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
+   state = memory_unlock( g_state_handle );
 
 
 
@@ -82,6 +108,66 @@ unilayer_main() {
    loop_set( topdown_loop, g_state_handle, &graphics_args );
 
    while( g_running ) {
+      state = memory_lock( g_state_handle );
+      if( '\0' != state->warp_to[0] ) {
+         /* There's a warp-in map, so unload the current map and load it. */
+
+         for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+            mobile_deinit( &(state->mobiles[i]) );
+         }
+
+         tilemap_deinit( &(state->map) );
+
+         graphics_clear_cache();
+
+#ifdef RESOURCE_FILE
+#  ifdef TILEMAP_FMT_JSON
+         memory_zero_ptr( map_load_path, TILEMAP_NAME_MAX );
+         dio_snprintf(
+            map_load_path,
+            RESOURCE_PATH_MAX,
+            /* TODO: ASSETS_PATH broken? */
+            ASSETS_PATH "assets/m_%s.json", state->warp_to );
+         tilemap_json_load( map_load_path, &(state->map) );
+#  elif defined TILEMAP_FMT_ASN
+         dio_snprintf(
+            map_load_path,
+            RESOURCE_PATH_MAX,
+            /* TODO: ASSETS_PATH broken? */
+            ASSETS_PATH "assets/m_%s.asn", state->warp_to );
+         tilemap_asn_load( map_load_path, &(state->map) );
+#  else
+#     error "No loader defined!"
+#  endif
+#else
+         for( i = 0 ; gc_map_count > i ; i++ ) {
+            if( 0 == memory_strncmp_ptr(
+               gc_map_names[i], state->warp_to, TILEMAP_NAME_MAX
+            ) ) {
+               /* debug_printf( 3, "gc_map_%s: %s",
+                  gc_map_names[i], engine_mapize( ENTRY_MAP ).name ); */
+               memory_copy_ptr( (MEMORY_PTR)&(state->map),
+                  (MEMORY_PTR)gc_map_structs[i],
+                  sizeof( struct TILEMAP ) );
+               break;
+            }
+         }
+
+         /* TODO: Handle failure to find map. */
+
+#endif /* RESOURCE_FILE */
+
+         memory_zero_ptr( state->warp_to, TILEMAP_NAME_MAX );
+
+         /* Spawn mobiles. */
+         memory_zero_ptr( state->mobiles,
+            sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
+         mobile_spawns( state );
+
+         state->engine_state = ENGINE_STATE_OPENING;
+      }
+      state = memory_unlock( g_state_handle );
+
       unilayer_loop_iter();
 
 #ifdef USE_SOFT_ASSERT
