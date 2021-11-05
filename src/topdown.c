@@ -1,18 +1,6 @@
 
 #include "dsekai.h"
 
-#ifdef RESOURCE_FILE
-
-#include "tmjson.h"
-
-#endif /* RESOURCE_FILE */
-
-extern const struct TILEMAP gc_map_field;
-
-#define engine_mapize_internal( map ) gc_map_ ## map
-
-#define engine_mapize( map ) engine_mapize_internal( map )
-
 /**
  * \brief Draw currently on-screen portion of a TILEMAP.
  * \param state ::MEMORY_PTR to the current engine state, used to determine

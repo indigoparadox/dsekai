@@ -80,7 +80,7 @@ pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
 pkg_reqs := $(XLIB_MANIFEST)
 $(eval $(PKG_RULE))
 
-$(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR) $(RESEXT_H)
+$(BIN_XLIB): $(DSEKAI_O_FILES_XLIB) | $(BINDIR)/$(STAMPFILE) $(RESEXT_H)
 	$(LD_XLIB) -o $@ $^ $(LDFLAGS_XLIB)
 
 $(OBJDIR_XLIB)/%.o: %.c $(RESEXT_H)
