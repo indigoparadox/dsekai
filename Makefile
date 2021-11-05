@@ -16,7 +16,8 @@ DSEKAI_C_FILES := \
    src/script.c \
    unilayer/dio.c \
    src/control.c \
-   src/topdown.c
+   src/topdown.c \
+   src/pov.c
 
 DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    src/json.c \
@@ -526,10 +527,16 @@ define PKG_RULE
 		$(MD) $$(dir $$@)
 		cp $$< $$@
 
+ifeq ($(BUILD),RELEASE)
    $$(PKGBUILD)/$$(notdir $(pkg_bin)): $(pkg_bin)
 		$(MD) $$(dir $$@)
 		cp $$^ $$@
 		$(pkg_strip) $$@
+else
+   $$(PKGBUILD)/$$(notdir $(pkg_bin)): $(pkg_bin)
+		$(MD) $$(dir $$@)
+		cp $$^ $$@
+endif
 
    $(ROOT)/$(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS).tar.gz: \
    $$(addprefix $$(PKGBUILD)/,$(pkg_reqs)) \

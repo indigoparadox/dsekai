@@ -71,18 +71,14 @@ struct PACKED DSEKAI_STATE {
    /*! \brief Array of currently loaded MOBILE objects on this map. */
    struct MOBILE mobiles[DSEKAI_MOBILES_MAX];
 
+   MEMORY_HANDLE engine_state_handle;
+
    /*! \brief Index of the player MOBILE in DSEKAI_STATE::mobiles. */
    uint16_t player_idx;
 
    uint8_t input_blocked_countdown;
    uint8_t ani_sprite_countdown;
    uint16_t ani_sprite_x;
-   int32_t screen_scroll_x;
-   int32_t screen_scroll_y;
-   int32_t screen_scroll_tx;
-   int32_t screen_scroll_ty;
-   int32_t screen_scroll_x_tgt;
-   int32_t screen_scroll_y_tgt;
 
    MEMORY_HANDLE windows_handle;
    uint16_t windows_count;

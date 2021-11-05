@@ -116,6 +116,11 @@ unilayer_main() {
 
          tilemap_deinit( &(state->map) );
 
+         if( NULL != state->engine_state_handle ) {
+            memory_free( state->engine_state_handle );
+            state->engine_state_handle = NULL;
+         }
+
          graphics_clear_cache();
 
 #ifdef RESOURCE_FILE
