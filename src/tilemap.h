@@ -18,7 +18,7 @@
  * \param x Tile X coordinate in tiles.
  * \param y Tile Y coordinate in tiles.
  */
-#define tilemap_get_tile_id( t, x, y ) ((t->tiles[((y * TILEMAP_TW) + x) / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
+#define tilemap_get_tile_id( t, x, y ) (((t)->tiles[((y * TILEMAP_TW) + x) / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
 
 uint16_t tilemap_fix_asset_path(
    char* path_in, uint16_t path_in_sz, const char* map_path );

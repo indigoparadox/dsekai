@@ -56,60 +56,6 @@ void tilemap_refresh_tiles( struct TILEMAP* t ) {
 
 #if defined( SCREEN_W ) && defined( SCREEN_H )
 
-void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
-   int x = 0,
-      y = 0;
-   uint8_t tile_id = 0;
-   uint16_t viewport_tx1 = 0,
-      viewport_ty1 = 0,
-      viewport_tx2 = 0,
-      viewport_ty2 = 0;
-
-   viewport_tx1 = state->screen_scroll_x / TILE_W;
-   viewport_ty1 = state->screen_scroll_y / TILE_H;
-   viewport_tx2 = TILEMAP_TW > viewport_tx1 + SCREEN_TW ?
-      viewport_tx1 + SCREEN_TW : viewport_tx1 + (TILEMAP_TW - viewport_tx1);
-   viewport_ty2 = TILEMAP_TH > viewport_ty1 + SCREEN_TH ?
-      viewport_ty1 + SCREEN_TH : viewport_tx1 + (TILEMAP_TH - viewport_ty1);
-
-   assert( viewport_tx2 <= TILEMAP_TW );
-   assert( viewport_ty2 <= TILEMAP_TH );
-
-   for( y = viewport_ty1 ; viewport_ty2 > y ; y++ ) {
-      for( x = viewport_tx1 ; viewport_tx2 > x ; x++ ) {
-#ifndef IGNORE_DIRTY
-         if(
-            !(t->tiles_flags[(y * TILEMAP_TW) + x] & TILEMAP_TILE_FLAG_DIRTY)
-         ) {
-            continue;
-         }
-#endif /* !IGNORE_DIRTY */
-
-         assert( y < TILEMAP_TH );
-         assert( x < TILEMAP_TW );
-         assert( y >= 0 );
-         assert( x >= 0 );
-
-         t->tiles_flags[(y * TILEMAP_TW) + x] &= ~TILEMAP_TILE_FLAG_DIRTY;
-
-         /* Grab the left byte if even or the right if odd. */
-         tile_id = tilemap_get_tile_id( t, x, y );
-
-         if( tile_id >= TILEMAP_TILESETS_MAX ) {
-            error_printf( "invalid tile id: %d", tile_id );
-            continue;
-         }
-
-         /* Blit the tile. */
-         graphics_blit_at(
-            t->tileset[tile_id].image,
-            0, 0,
-            (x * TILE_W) - state->screen_scroll_x,
-            (y * TILE_H) - state->screen_scroll_y, TILE_W, TILE_H );
-      }
-   }
-}
-
 #endif /* SCREEN_W && SCREEN_H */
 
 uint8_t tilemap_collide(

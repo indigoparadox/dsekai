@@ -13,6 +13,57 @@ extern const struct TILEMAP gc_map_field;
 
 #define engine_mapize( map ) engine_mapize_internal( map )
 
+void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
+   int x = 0,
+      y = 0;
+   uint8_t tile_id = 0;
+   uint16_t
+      viewport_tx2 = 0,
+      viewport_ty2 = 0;
+
+      viewport_tx2 = state->screen_scroll_tx + SCREEN_TW;
+   viewport_ty2 = state->screen_scroll_ty + SCREEN_TH;
+
+   assert( viewport_tx2 <= TILEMAP_TW );
+   assert( viewport_ty2 <= TILEMAP_TH );
+
+   for( y = state->screen_scroll_ty ; viewport_ty2 > y ; y++ ) {
+      for( x = state->screen_scroll_tx ; viewport_tx2 > x ; x++ ) {
+#ifndef IGNORE_DIRTY
+         if(
+            !(state->map.tiles_flags[(y * TILEMAP_TW) + x] &
+               TILEMAP_TILE_FLAG_DIRTY)
+         ) {
+            continue;
+         }
+#endif /* !IGNORE_DIRTY */
+
+         assert( y < TILEMAP_TH );
+         assert( x < TILEMAP_TW );
+         assert( y >= 0 );
+         assert( x >= 0 );
+
+         state->map.tiles_flags[(y * TILEMAP_TW) + x] &=
+            ~TILEMAP_TILE_FLAG_DIRTY;
+
+         /* Grab the left byte if even or the right if odd. */
+         tile_id = tilemap_get_tile_id( &(state->map), x, y );
+
+         if( tile_id >= TILEMAP_TILESETS_MAX ) {
+            error_printf( "invalid tile id: %d", tile_id );
+            continue;
+         }
+
+         /* Blit the tile. */
+         graphics_blit_at(
+            state->map.tileset[tile_id].image,
+            0, 0,
+            (x * TILE_W) - state->screen_scroll_x,
+            (y * TILE_H) - state->screen_scroll_y, TILE_W, TILE_H );
+      }
+   }
+}
+
 int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
    int in_char = 0,
       i = 0,
@@ -50,7 +101,7 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
       assert( 0 <= state->screen_scroll_tx );
 
       tilemap_refresh_tiles( &(state->map) );
-      tilemap_draw( &(state->map), state );
+      topdown_draw_tilemap( state );
 
       /* Drain input. */
       in_char = input_poll();
@@ -77,7 +128,7 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
       return 1;
    }
 
-   tilemap_draw( &(state->map), state );
+   topdown_draw_tilemap( state );
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       if( !state->mobiles[i].active ) {
@@ -175,7 +226,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       /* Make sure the tilemap is drawn at least once behind any initial
        * windows.
        */
-      tilemap_draw( &(state->map), state );
+      topdown_draw_tilemap( state );
 
       topdown_focus_player( state );
       tilemap_refresh_tiles( &(state->map) );
@@ -282,7 +333,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 
    } else if(
       state->mobiles[state->player_idx].coords.y >=
-         state->screen_scroll_y + SCREEN_TH
+         state->screen_scroll_ty + SCREEN_TH
    ) {
       state->screen_scroll_y_tgt = state->screen_scroll_y + SCREEN_MAP_H;
       debug_printf( 2, "scrolling screen down to %d, %d...",
