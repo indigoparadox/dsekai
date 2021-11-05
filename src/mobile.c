@@ -200,22 +200,6 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
    }
 }
 
-void mobile_draw(
-   struct MOBILE* m, const struct DSEKAI_STATE* state,
-   int16_t screen_x, int16_t screen_y
-) {
-   if( !m->active ) {
-      return;
-   }
-
-   graphics_blit_at(
-      m->sprite,
-      state->ani_sprite_x,
-      m->dir * SPRITE_H,
-      screen_x, screen_y,
-      SPRITE_W, SPRITE_H );
-}
-
 void mobile_deinit( struct MOBILE* m ) {
    if( NULL != m ) {
       return;

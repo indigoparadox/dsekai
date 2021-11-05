@@ -178,12 +178,17 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
       assert( SPRITE_W > x_offset );
       assert( SPRITE_H > y_offset );
 
-      mobile_draw(
-         &(state->mobiles[i]), state,
-         ((state->mobiles[i].coords.x * SPRITE_W) + x_offset)
-            - state->screen_scroll_x,
-         ((state->mobiles[i].coords.y * SPRITE_H) + y_offset)
-            - state->screen_scroll_y );
+      if( state->mobiles[i].active ) {
+         graphics_blit_at(
+            state->mobiles[i].sprite,
+            state->ani_sprite_x,
+            state->mobiles[i].dir * SPRITE_H,
+            ((state->mobiles[i].coords.x * SPRITE_W) + x_offset)
+               - state->screen_scroll_x,
+            ((state->mobiles[i].coords.y * SPRITE_H) + y_offset)
+               - state->screen_scroll_y,
+            SPRITE_W, SPRITE_H );
+      }
    }
 
    /* Keep running. */

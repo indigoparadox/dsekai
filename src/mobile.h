@@ -94,17 +94,6 @@ void mobile_state_animate( struct DSEKAI_STATE* state );
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t );
 
 /**
- * \brief Draw the given MOBILE in its current animation frame.
- * \param m ::MEMORY_PTR to MOBILE to draw on screen.
- * \param state ::MEMORY_PTR to engine state to use for animation.
- * \param screen_x Horizontal screen pixel offset to draw mobile at.
- * \param screen_y Vertical screen pixel offset to draw mobile at.
- */
-void mobile_draw(
-   struct MOBILE* m, const struct DSEKAI_STATE* state,
-   int16_t screen_x, int16_t screen_y );
-
-/**
  * \brief Prepare a ::MOBILE for deallocation.
  * \param t ::MEMORY_PTR to a ::MOBILE to deinitialize.
  */
