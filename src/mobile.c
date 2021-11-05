@@ -122,9 +122,7 @@ struct MOBILE* mobile_interact(
    }
 
    /* Push actee previous PC for return. */
-   if( SCRIPT_ERROR_OVERFLOW == mobile_stack_push( actee, actee->script_pc ) ) {
-      return actee;
-   }
+   mobile_stack_push( actee, actee->script_pc );
 
    /* Set actee's pc to the GOTO for interaction and make actee active NOW. */
    actee->script_pc = script_goto_label(
