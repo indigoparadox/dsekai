@@ -14,7 +14,7 @@
 
 /**
  * \brief Get the TILEMAP::tileset index for the tile at the given coords.
- * \param t TILEMAP from which to get the tile.
+ * \param t ::MEMORY_PTR to TILEMAP from which to get the tile.
  * \param x Tile X coordinate in tiles.
  * \param y Tile Y coordinate in tiles.
  */
@@ -28,14 +28,6 @@ uint16_t tilemap_fix_asset_path(
  * \param t ::MEMORY_PTR to a TILEMAP to redraw.
  */
 void tilemap_refresh_tiles( struct TILEMAP* t );
-
-/**
- * \brief Draw currently on-screen portion of a TILEMAP.
- * \param t ::MEMORY_PTR to a TILEMAP to draw.
- * \param state ::MEMORY_PTR to the current engine state, used to determine
- *              what is currently on-screen.
- */
-void tilemap_draw( struct TILEMAP* t, struct DSEKAI_STATE* state );
 
 /**
  * \brief Detect potential collision between a MOBILE and TILEMAP tile with

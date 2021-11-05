@@ -13,6 +13,11 @@ extern const struct TILEMAP gc_map_field;
 
 #define engine_mapize( map ) engine_mapize_internal( map )
 
+/**
+ * \brief Draw currently on-screen portion of a TILEMAP.
+ * \param state ::MEMORY_PTR to the current engine state, used to determine
+ *              what is currently on-screen.
+ */
 void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
    int x = 0,
       y = 0;
@@ -21,7 +26,8 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
       viewport_tx2 = 0,
       viewport_ty2 = 0;
 
-      viewport_tx2 = state->screen_scroll_tx + SCREEN_TW;
+   /* Tile-indexed rectangle of on-screen tiles. */
+   viewport_tx2 = state->screen_scroll_tx + SCREEN_TW;
    viewport_ty2 = state->screen_scroll_ty + SCREEN_TH;
 
    assert( viewport_tx2 <= TILEMAP_TW );
@@ -210,7 +216,6 @@ void topdown_focus_player( struct DSEKAI_STATE* state ) {
 int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    int i = 0;
    uint8_t in_char = 0;
-   /* static int initialized = 0; */
    struct DSEKAI_STATE* state = NULL;
    int retval = 1;
 
@@ -250,7 +255,6 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 #endif /* !HIDE_WELCOME_DIALOG */
 #endif
 
-      /* initialized = 1; */
       state->engine_state = ENGINE_STATE_RUNNING;
    }
 
