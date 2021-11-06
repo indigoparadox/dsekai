@@ -30,11 +30,11 @@ There are also some rough examples of CGA graphics programming in unilayer/graph
 
 Features that are planned include:
 
-* 256-Color graphics on some platforms while keeping 4-color/2-color support.
 * ASN.1 save dumps.
 * Housing system based on in-game map editing.
 * Item usage and crafting.
 * Minimal resource use (shooting for <500k RAM).
+* Multi-height raycasting POV support.
 
 Ideally, this engine will compile with legacy compilers as a general rule. For this reason, the following rules/limitations should be observed within the codebase:
 
@@ -59,6 +59,8 @@ This is a work in progress.
 Currently, this project uses GNU make to (cross-)build on a GNU/Linux system. Compilers and tools required depend on the desired [platforms](#platforms) to build for.
 
 For MS-DOS, the INCLUDE environment variable must be set to the location of the OpenWatcom header files (e.g. /opt/watcom/h).
+
+The script pkgs.sh in the root directory should build the recommended set of packages if the proper compilers are installed.
 
 ## Options
 
