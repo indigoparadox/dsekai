@@ -52,7 +52,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          }
 
          /* Blit the tile. */
-         graphics_blit_at(
+         graphics_blit_tile_at(
             state->map.tileset[tile_id].image,
             0, 0,
             (x * TILE_W) - gstate->screen_scroll_x,
@@ -178,7 +178,7 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
       assert( SPRITE_H > y_offset );
 
       if( state->mobiles[i].active ) {
-         graphics_blit_at(
+         graphics_blit_sprite_at(
             state->mobiles[i].sprite,
             state->ani_sprite_x,
             state->mobiles[i].dir * SPRITE_H,

@@ -115,54 +115,54 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
          for( x = windows[i].x ; x < x_max ; x += PATTERN_W ) {
             if( windows[i].x == x && windows[i].y == y ) {
                /* Top Left */
-               blit_retval = graphics_blit_at(
+               blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].tl, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
 
             } else if( x_max - PATTERN_W == x && windows[i].y == y ) {
                /* Top Right */
-               blit_retval = graphics_blit_at(
+               blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].tr, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
 
             } else if( windows[i].x == x && y_max - PATTERN_H == y ) {
                /* Bottom Left */
-               blit_retval = graphics_blit_at(
+               blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].bl, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_max - PATTERN_W == x && y_max - PATTERN_H == y ) {
                /* Bottom Right */
-               blit_retval = graphics_blit_at(
+               blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].br, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( x_max - PATTERN_W == x ) {
                /* Right */
-               blit_retval = graphics_blit_at(
+               blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].r, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( windows[i].x == x ) {
                /* Left */
-               blit_retval = graphics_blit_at(
+               blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].l, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( windows[i].y == y ) {
                /* Top */
-               blit_retval = graphics_blit_at(
+               blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].t, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
             
             } else if( y_max - PATTERN_H == y ) {
                /* Bottom */
-               blit_retval = graphics_blit_at(
+               blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].b, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
             
             } else {
-               blit_retval = graphics_blit_at(
+               blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].c, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
             }

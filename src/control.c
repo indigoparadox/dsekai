@@ -79,7 +79,7 @@ int16_t control_draw_SPRITE(
    /* TODO: Blit a defined mobile, rather than a sprite, so that we can adjust
     *       dir and other effects.
     */
-   graphics_blit_at(
+   graphics_blit_sprite_at(
       c->data.res_id,
       0, 0, w->x + c->x + 2, w->y + c->y + 2, SPRITE_W, SPRITE_H );
 
