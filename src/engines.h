@@ -2,6 +2,10 @@
 #ifndef ENGINES_H
 #define ENGINES_H
 
+struct TITLE_STATE {
+   uint8_t option_high;
+};
+
 struct POV_STATE {
    double plane_y;
 };
@@ -17,6 +21,7 @@ struct TOPDOWN_STATE {
 
 int topdown_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
 int pov_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
+int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args );
 
 #endif /* ENGINES_H */
 

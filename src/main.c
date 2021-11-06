@@ -17,10 +17,6 @@ extern const struct TILEMAP* gc_map_structs[];
 extern const uint8_t gc_map_count;
 #endif /* !RESOURCE_FILE */
 
-#define stringize_internal( map ) #map
-
-#define stringize( map ) stringize_internal( map )
-
 
 
 /* === Main Class Definition === */
@@ -94,11 +90,9 @@ unilayer_main() {
       goto exit;
    }
 
-   /* Perform the initial warp-in. */
-
    state = memory_lock( g_state_handle );
-   memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
-      memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
+   state->engine_state = ENGINE_STATE_OPENING;
+   loop_set( title_loop, g_state_handle, &graphics_args );
    state = memory_unlock( g_state_handle );
 
 

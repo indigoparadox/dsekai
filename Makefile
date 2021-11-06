@@ -17,7 +17,8 @@ DSEKAI_C_FILES := \
    unilayer/dio.c \
    src/control.c \
    src/topdown.c \
-   src/pov.c
+   src/pov.c \
+   src/title.c
 
 DSEKAI_C_FILES_CHECK_NULL_ONLY := \
    src/json.c \
@@ -287,7 +288,8 @@ DSEKAI_ASSETS_PATTERNS := \
 DSEKAI_ASSETS_BITMAPS := \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/s_*.bmp) \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/t_*.bmp) \
-   $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/p_*.bmp)
+   $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/p_*.bmp) \
+   $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/title.bmp)
 
 DSEKAI_ASSETS_MAPS_JSON := \
    $(ASSETDIR)/m_field.json \
