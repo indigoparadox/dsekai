@@ -6,7 +6,7 @@
  *  \brief Macros, structs, and prototypes for the various engine types.
  */
 
-/*! \brief (Invalid) Do not use an engine. */
+/*! \brief Display the title screen. */
 #define ENGINE_TYPE_NONE 0
 /*! \brief Use the topdown 2D engine. */
 #define ENGINE_TYPE_TOPDOWN 1
@@ -40,11 +40,26 @@ struct POV_STATE {
    double plane_y;
 };
 
-/* \brief Handler for ::ENGINE_TYPE_NONE */
+/**
+ * \brief Handler for ::ENGINE_TYPE_NONE.
+ * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
+ * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
+ * \return 1 if engine should continue executing or 0 if it should quit.
+ */
 int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args );
-/* \brief Handler for ::ENGINE_TYPE_TOPDOWN */
+/**
+ * \brief Handler for ::ENGINE_TYPE_TOPDOWN.
+ * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
+ * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
+ * \return 1 if engine should continue executing or 0 if it should quit.
+ */
 int topdown_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
-/* \brief Handler for ::ENGINE_TYPE_POV */
+/**
+ * \brief Handler for ::ENGINE_TYPE_POV.
+ * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
+ * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
+ * \return 1 if engine should continue executing or 0 if it should quit.
+ */
 int pov_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
 
 #endif /* ENGINES_H */

@@ -225,7 +225,11 @@ These options only apply to raw CGA files:
 
 Converts maps from JSON to a more compact ASN.1 representation for use with resource-limited platforms.
 
+Usage: map2asn \<JSON tilemap input path\> \<ASN.1 tilemap output path\>
+
 ## headpack
 
 Packs resources into #include-able header files to be inserted directly into the final binary.
+
+Usage: headpack \<header path\> \<paths to files to encode\>
 
