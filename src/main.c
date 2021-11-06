@@ -162,13 +162,18 @@ unilayer_main() {
          mobile_spawns( state );
 
          /* Setup engine. */
-         if( TILEMAP_ENGINE_TOPDOWN == state->map.engine_type ) {
+         switch( state->map.engine_type ) {
+         case ENGINE_TYPE_TOPDOWN:
             debug_printf( 2, "selecting topdown engine" );
             loop_set( topdown_loop, g_state_handle, &graphics_args );
-         } else if( TILEMAP_ENGINE_POV == state->map.engine_type ) {
+            break;
+
+         case ENGINE_TYPE_POV:
             debug_printf( 2, "selecting pov engine" );
             loop_set( pov_loop, g_state_handle, &graphics_args );
-         } else {
+            break;
+
+         default:
             error_printf( "invalid engine requested: %d",
                state->map.engine_type );
             goto shutdown;

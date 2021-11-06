@@ -273,11 +273,11 @@ void tilemap_json_parse_engine(
       engine_type, TILEMAP_NAME_MAX, tokens, tokens_sz, json_buffer );
 
    if( 0 == memory_strncmp_ptr( engine_type, "topdown", 7 ) ) {
-      t->engine_type = TILEMAP_ENGINE_TOPDOWN;
+      t->engine_type = ENGINE_TYPE_TOPDOWN;
    } else if( 0 == memory_strncmp_ptr( engine_type, "pov", 3 ) ) {
-      t->engine_type = TILEMAP_ENGINE_POV;
+      t->engine_type = ENGINE_TYPE_POV;
    } else {
-      t->engine_type = TILEMAP_ENGINE_NONE;
+      t->engine_type = ENGINE_TYPE_NONE;
    }
 }
 

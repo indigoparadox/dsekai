@@ -6,13 +6,6 @@
  *  \brief Functions and macros pertaining to tilemaps.
  */
 
-/*! \brief (Invalid) Do not use an engine. */
-#define TILEMAP_ENGINE_NONE 0
-/*! \brief Use the topdown 2D engine. */
-#define TILEMAP_ENGINE_TOPDOWN 1
-/*! \brief Use the POV 3D engine. */
-#define TILEMAP_ENGINE_POV 2
-
 /*! \brief TILESET_TILE::flags bit flag indicating tile will block movement. */
 #define TILEMAP_TILESET_FLAG_BLOCK  0x01
 
