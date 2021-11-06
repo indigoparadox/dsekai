@@ -241,7 +241,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 
    if( ENGINE_STATE_OPENING == state->engine_state ) {
 
-      assert( NULL == state->engine_state_handle );
+      assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
       state->engine_state_handle =
          memory_alloc( sizeof( struct TOPDOWN_STATE ), 1 );
 

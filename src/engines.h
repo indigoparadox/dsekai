@@ -2,6 +2,10 @@
 #ifndef ENGINES_H
 #define ENGINES_H
 
+struct POV_STATE {
+   double plane_y;
+};
+
 struct TOPDOWN_STATE {
    int16_t screen_scroll_x;
    int16_t screen_scroll_y;

@@ -116,7 +116,7 @@ unilayer_main() {
 
          tilemap_deinit( &(state->map) );
 
-         if( NULL != state->engine_state_handle ) {
+         if( (MEMORY_HANDLE)NULL != state->engine_state_handle ) {
             memory_free( state->engine_state_handle );
             state->engine_state_handle = NULL;
          }
@@ -169,7 +169,11 @@ unilayer_main() {
 
          /* Setup engine. */
          if( TILEMAP_ENGINE_TOPDOWN == state->map.engine_type ) {
+            debug_printf( 2, "selecting topdown engine" );
             loop_set( topdown_loop, g_state_handle, &graphics_args );
+         } else if( TILEMAP_ENGINE_POV == state->map.engine_type ) {
+            debug_printf( 2, "selecting pov engine" );
+            loop_set( pov_loop, g_state_handle, &graphics_args );
          } else {
             error_printf( "invalid engine requested: %d",
                state->map.engine_type );
