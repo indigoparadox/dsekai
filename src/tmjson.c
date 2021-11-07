@@ -161,11 +161,12 @@ static int16_t tilemap_json_parse_scripts(
 ) {
    char iter_path[JSON_PATH_SZ];
    int i = 0,
-      script_buffer_sz = 0;
+      script_buffer_sz = 0,
+      loaded = 0;
    char script_buffer[SCRIPT_STR_MAX];
    
-   /* Load strings.*/
-   debug_printf( 2, "loading strings" ); 
+   /* Load scripts.*/
+   debug_printf( 2, "loading scripts" ); 
    for( i = 0 ; TILEMAP_SCRIPTS_MAX > i ; i++ ) {
       memory_zero_ptr( script_buffer, SCRIPT_STR_MAX );
       dio_snprintf(
@@ -176,12 +177,11 @@ static int16_t tilemap_json_parse_scripts(
          script_buffer, SCRIPT_STR_MAX,
          &(tokens[0]), tokens_sz, json_buffer );
       if( 0 >= script_buffer_sz ) {
-         error_printf( "invalid script returned; maximum script ID is: %d",
-            t->scripts_count - 1 );
+         error_printf( "invalid script returned (loaded %d)", loaded );
          break;
       }
       script_parse_str( i, script_buffer, script_buffer_sz, &(t->scripts[i]) );
-      t->scripts_count++;
+      loaded++;
    }
 
    return 1;

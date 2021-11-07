@@ -107,7 +107,7 @@ struct MOBILE* mobile_interact(
    if( 
       NULL == actee ||
       0 > actee->script_id ||
-      actee->script_id >= t->scripts_count
+      actee->script_id >= TILEMAP_SCRIPTS_MAX
    ) {
       /* Invalid script. */
       return NULL;
@@ -140,7 +140,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
    if(
       0 > m->script_id ||
-      m->script_id >= state->map.scripts_count
+      m->script_id >= TILEMAP_SCRIPTS_MAX
    ) {
       /* Invalid script. */
       return;

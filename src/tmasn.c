@@ -280,8 +280,6 @@ static int16_t tilemap_asn_parse_spawns(
       spawn_idx++;
    }
 
-   t->scripts_count = spawn_idx;
-
 cleanup:
 
    return total_read_sz;
@@ -370,7 +368,6 @@ static int16_t tilemap_asn_parse_scripts(
       t->scripts[script_idx].steps_count = step_idx;
       script_idx++;
    }
-   t->scripts_count = script_idx;
 
 cleanup:
 

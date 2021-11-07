@@ -89,9 +89,6 @@ struct PACKED TILEMAP {
    char strings[TILEMAP_STRINGS_MAX][TILEMAP_STRINGS_SZ];
    /* \brief Scripts available to attach to any MOBILE. */
    struct SCRIPT scripts[TILEMAP_SCRIPTS_MAX];
-   /* TODO: Scrap this. */
-   /* \brief Number of TILEMAP::scripts currently available. */
-   uint16_t scripts_count;
 };
 
 #endif /* !TMSTRUCTS_H */

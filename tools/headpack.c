@@ -257,7 +257,7 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
    /* scripts */
    fprintf( header_file, "   /* scripts */\n" );
    fprintf( header_file, "   {\n" );
-   for( i = 0 ; t->scripts_count > i ; i++ ) {
+   for( i = 0 ; TILEMAP_SCRIPTS_MAX > i ; i++ ) {
       fprintf( header_file, "      {\n" );
       /* steps */
       fprintf( header_file, "         /* steps */\n" );
@@ -281,10 +281,6 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
       fprintf( header_file, "      },\n" );
    }
    fprintf( header_file, "   },\n" );
-
-   /* scripts_count */
-   fprintf( header_file, "   /* scripts_count */\n" );
-   fprintf( header_file, "   %d\n", t->scripts_count );
 
    fprintf( header_file, "};\n\n" );
 
