@@ -15,9 +15,9 @@ int pov_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       state->engine_state_handle =
          memory_alloc( sizeof( struct POV_STATE ), 1 );
 
-      gstate = memory_lock( state->engine_state_handle );
+      gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
-      gstate = memory_unlock( state->engine_state_handle );
+      gstate = (struct POV_STATE*)memory_unlock( state->engine_state_handle );
 
       state->engine_state = ENGINE_STATE_RUNNING;
    }
@@ -46,7 +46,7 @@ cleanup:
 
    if( NULL != gstate ) {
       assert( NULL != state );
-      gstate = memory_unlock( state->engine_state_handle );
+      gstate = (struct POV_STATE*)memory_unlock( state->engine_state_handle );
    }
 
    if( NULL != state ) {

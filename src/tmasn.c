@@ -69,7 +69,8 @@ static int16_t tilemap_asn_parse_string(
       goto cleanup;
    }
 
-   memory_copy_ptr( buffer, &(asn_buffer[2]), field_sz );
+   memory_copy_ptr( (MEMORY_PTR)buffer, (const MEMORY_PTR)&(asn_buffer[2]),
+      field_sz );
    debug_printf( 1, "parsed string: %s (%d)", buffer, field_sz );
 
    field_sz += 2; /* type and length bytes */
@@ -381,7 +382,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    uint16_t read_sz = 0;
    RESOURCE_JSON_HANDLE asn_handle = (RESOURCE_JSON_HANDLE)0;
 
-   memory_zero_ptr( t, sizeof( struct TILEMAP ) );
+   memory_zero_ptr( (MEMORY_PTR)t, sizeof( struct TILEMAP ) );
 
    /* Allocate buffers for parsing ASN.1. */
    asn_handle = resource_get_json_handle( id );

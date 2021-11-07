@@ -90,17 +90,17 @@ unilayer_main() {
       goto exit;
    }
 
-   state = memory_lock( g_state_handle );
+   state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    state->engine_state = ENGINE_STATE_OPENING;
    loop_set( title_loop, g_state_handle, &graphics_args );
-   state = memory_unlock( g_state_handle );
+   state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
 
 
 
 /* === Main Loop === */
 
    while( g_running ) {
-      state = memory_lock( g_state_handle );
+      state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
       if( '\0' != state->warp_to[0] ) {
          /* There's a warp-in map, so unload the current map and load it. */
 
@@ -119,7 +119,7 @@ unilayer_main() {
 
 #ifdef RESOURCE_FILE
 #  ifdef TILEMAP_FMT_JSON
-         memory_zero_ptr( map_load_path, TILEMAP_NAME_MAX );
+         memory_zero_ptr( (MEMORY_PTR)map_load_path, TILEMAP_NAME_MAX );
          dio_snprintf(
             map_load_path,
             RESOURCE_PATH_MAX,
@@ -157,7 +157,7 @@ unilayer_main() {
          memory_zero_ptr( state->warp_to, TILEMAP_NAME_MAX );
 
          /* Spawn mobiles. */
-         memory_zero_ptr( state->mobiles,
+         memory_zero_ptr( (MEMORY_PTR)(state->mobiles),
             sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
          mobile_spawns( state );
 
@@ -181,7 +181,7 @@ unilayer_main() {
 
          state->engine_state = ENGINE_STATE_OPENING;
       }
-      state = memory_unlock( g_state_handle );
+      state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
 
       unilayer_loop_iter();
 

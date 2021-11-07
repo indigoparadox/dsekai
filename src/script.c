@@ -217,7 +217,7 @@ uint16_t script_handle_WARP(
    }
 
    debug_printf( 2, "warp requested to: %s", t->strings[arg] );
-   memory_zero_ptr( state->warp_to, TILEMAP_NAME_MAX );
+   memory_zero_ptr( (MEMORY_PTR)(state->warp_to), TILEMAP_NAME_MAX );
    memory_strncpy_ptr( state->warp_to, t->strings[arg], TILEMAP_NAME_MAX );
 
    /* Freeze */
@@ -275,7 +275,7 @@ uint16_t script_parse_str(
 }
 
 uint8_t script_init() {
-   memory_zero_ptr( &g_script_globals, sizeof( g_script_globals ) );
+   memory_zero_ptr( (MEMORY_PTR)&g_script_globals, sizeof( g_script_globals ) );
    return 1;
 }
 

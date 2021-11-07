@@ -15,7 +15,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
       viewport_ty2 = 0;
    struct TOPDOWN_STATE* gstate = NULL;
 
-   gstate = memory_lock( state->engine_state_handle );
+   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
 
    /* Tile-indexed rectangle of on-screen tiles. */
    viewport_tx2 = gstate->screen_scroll_tx + SCREEN_TW;
@@ -60,7 +60,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
       }
    }
 
-   gstate = memory_unlock( state->engine_state_handle );
+   gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
 }
 
 int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
@@ -71,7 +71,7 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
       y_offset = 0,
       retval = 1;
 
-   gstate = memory_lock( state->engine_state_handle );
+   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
 
    /*
    If the screen is scrolling, prioritize that before accepting more
@@ -195,7 +195,7 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
 
 cleanup:
 
-   gstate = memory_unlock( state->engine_state_handle );
+   gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
    return retval;
 }
 
@@ -204,7 +204,7 @@ void topdown_focus_player( struct DSEKAI_STATE* state ) {
    int player_x_px = 0,
       player_y_px = 0;
 
-   gstate = memory_lock( state->engine_state_handle );
+   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
 
    player_x_px = state->mobiles[state->player_idx].coords.x * TILE_W;
    player_y_px = state->mobiles[state->player_idx].coords.y * TILE_H;
@@ -222,7 +222,7 @@ void topdown_focus_player( struct DSEKAI_STATE* state ) {
       state->mobiles[state->player_idx].coords.y,
       player_x_px, player_y_px );
 
-   gstate = memory_unlock( state->engine_state_handle );
+   gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
 }
 
 int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
@@ -242,8 +242,8 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    if( ENGINE_STATE_OPENING == state->engine_state ) {
 
       assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
-      state->engine_state_handle =
-         memory_alloc( sizeof( struct TOPDOWN_STATE ), 1 );
+      state->engine_state_handle = memory_alloc(
+            sizeof( struct TOPDOWN_STATE ), 1 );
 
       /* Make sure the tilemap is drawn at least once behind any initial
        * windows.
@@ -274,7 +274,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       state->engine_state = ENGINE_STATE_RUNNING;
    }
 
-   gstate = memory_lock( state->engine_state_handle );
+   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
 
    graphics_loop_start();
 
@@ -383,7 +383,8 @@ cleanup:
 
    if( NULL != gstate ) {
       assert( NULL != state );
-      gstate = memory_unlock( state->engine_state_handle );
+      gstate = (struct TOPDOWN_STATE*)memory_unlock(
+         state->engine_state_handle );
    }
 
    if( NULL != state ) {

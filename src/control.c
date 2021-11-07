@@ -180,7 +180,7 @@ int16_t control_push(
    assert( (MEMORY_HANDLE)NULL != state->windows_handle );
    windows = (struct WINDOW*)memory_lock( state->windows_handle );
 
-   memory_zero_ptr( &control_sz, sizeof( struct GRAPHICS_RECT ) );
+   memory_zero_ptr( (MEMORY_PTR)&control_sz, sizeof( struct GRAPHICS_RECT ) );
 
    for( i = 0 ; state->windows_count > i ; i++ ) {
       if( windows[i].id == window_id ) {
