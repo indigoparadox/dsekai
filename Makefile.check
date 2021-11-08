@@ -1,0 +1,80 @@
+
+# vi:syntax=make
+
+include Makefile
+
+# 1. Directories
+
+OBJDIR_CHECK := $(OBJDIR)/check
+DEPDIR_CHECK := $(DEPDIR)/check
+GENDIR_CHECK := $(GENDIR)/check
+
+# 2. Files
+
+DSEKAI_C_FILES_CHECK_ONLY := \
+   check/check.c \
+   check/ckmobile.c \
+   check/ckitem.c \
+   check/cktmap.c \
+   check/ckwindow.c \
+   check/ckgfx.c \
+   check/cktopdwn.c \
+   check/ckdataim.c \
+   check/ckdatajs.c \
+   check/ckdio.c \
+   check/ckmemory.c \
+   unilayer/graphics/nullg.c \
+   unilayer/input/nulli.c \
+   tools/data/cga.c \
+   tools/data/bmp.c \
+   tools/data/icns.c
+
+DSEKAI_O_FILES_CHECK_ONLY := \
+   $(addprefix $(OBJDIR_CHECK)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_CHECK)/,$(subst .c,.o,$(DSEKAI_C_FILES_CHECK_ONLY)))
+
+RESEXT_H := $(GENDIR_CHECK)/resext.h
+
+# 3. Programs
+
+CC_SDL := gcc
+LD_SDL := gcc
+
+# 4. Arguments
+
+DEFINES_CHECK := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   $(DEFINES_RESOURCE) \
+   -DPLATFORM_NULL \
+   -DSCREEN_W=160 \
+   -DSCREEN_H=160 \
+   -DSCREEN_SCALE=$(SCREEN_SCALE)
+
+INCLUDES_CHECK := \
+   -I unilayer \
+   -I $(GENDIR_CHECK) 
+
+CFLAGS_CHECK := $(shell pkg-config check --cflags) -g $(CFLAGS_GCC_GENERIC) $(DEFINES_CHECK) $(INCLUDES_CHECK)
+
+# ====== Check: Null ======
+
+$(RESEXT_H): $(GENDIR_CHECK)/$(STAMPFILE) $(MKRESH)
+	$(MKRESH) -f palm -i 5001 \
+      -if $(DSEKAI_ASSETS_BITMAPS) $(DSEKAI_ASSETS_MAPS_JSON) \
+      -oh $@
+
+$(BIN_CHECK): $(DSEKAI_O_FILES_CHECK_ONLY) | $(BINDIR)/$(STAMPFILE)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+#$(DEPDIR_CHECK)/%.d: %.c $(RESEXT_H)
+#	$(MD) $(dir $@)
+#	$(CC) $(CFLAGS_CHECK) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_CHECK)/,$<)) -MF $@
+
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CHECK:.o=.d))
+	
+$(OBJDIR_CHECK)/%.o: %.c check/testdata.h $(RESEXT_H)
+	$(MD) $(dir $@)
+	$(CC) $(CFLAGS_CHECK) -c -o $@ $(<:%.o=%)
+

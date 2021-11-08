@@ -20,31 +20,6 @@ DSEKAI_C_FILES := \
    src/pov.c \
    src/title.c
 
-DSEKAI_C_FILES_CHECK_NULL_ONLY := \
-   src/json.c \
-   check/check.c \
-   check/ckmobile.c \
-   check/ckitem.c \
-   check/cktmap.c \
-   check/ckwindow.c \
-   check/ckgfx.c \
-   check/cktopdwn.c \
-   check/ckdataim.c \
-   check/ckdatajs.c \
-   unilayer/resource/drcr.c \
-   check/ckdio.c \
-   check/ckdrc.c \
-   check/ckmemory.c \
-   unilayer/graphics/nullg.c \
-   unilayer/input/nulli.c \
-   tools/data/cga.c \
-   tools/data/bmp.c \
-   tools/data/icns.c \
-   tools/data/drcwrite.c \
-   unilayer/memory/fakem.c \
-   unilayer/drc.c \
-   unilayer/dio.c
-
 MKRESH_C_FILES := \
    tools/mkresh.c \
    unilayer/resource/file.c \
@@ -168,12 +143,6 @@ else
    DEFINES_DEPTH := -DDEPTH_CGA -DDEPTH_SPEC=\"16x16x4\"
 endif
 
-OBJDIR_CHECK_NULL := $(OBJDIR)/check_null
-
-DEPDIR_CHECK_NULL := $(DEPDIR)/check_null
-
-GENDIR_CHECK_NULL := $(GENDIR)/check_null
-
 BIN_SDL := $(BINDIR)/$(DSEKAI)
 BIN_DOS := $(BINDIR)/$(DSEKAI).exe
 BIN_XLIB := $(BINDIR)/$(DSEKAI)x
@@ -186,8 +155,7 @@ BIN_WEB := $(BINDIR)/$(DSEKAI).js
 BIN_CURSES := $(BINDIR)/$(DSEKAI)t
 BIN_SDL_ARM := $(BINDIR)/$(DSEKAI)r
 BIN_MEGAD := $(BINDIR)/$(DSEKAI).smd
-
-BIN_CHECK_NULL := $(BINDIR)/check
+BIN_CHECK := $(BINDIR)/check
 
 PKGDIR := packages
 PKGOS := $(shell uname -s -m | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]'])
@@ -323,14 +291,7 @@ CFLAGS_LOOKUPS := -g -Iunilayer
 CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG
 CFLAGS_MAP2ASN := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG
 
-CFLAGS_CHECK_NULL := -DSCREEN_SCALE=3 $(shell pkg-config check --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_NULL $(CFLAGS_GCC_GENERIC) -DRESOURCE_DRC
-
-$(BIN_CHECK_NULL): LDFLAGS := $(shell pkg-config check --libs) -g $(LDFLAGS_GCC_GENERIC)
-
-DSEKAI_C_FILES_CHECK_NULL := $(DSEKAI_C_FILES) $(DSEKAI_C_FILES_CHECK_NULL_ONLY)
-
-DSEKAI_O_FILES_CHECK_NULL := \
-   $(addprefix $(OBJDIR_CHECK_NULL)/,$(subst .c,.o,$(DSEKAI_C_FILES_CHECK_NULL)))
+$(BIN_CHECK): LDFLAGS := $(shell pkg-config check --libs) -g $(LDFLAGS_GCC_GENERIC)
 
 .PHONY: clean grc_palm
 
@@ -575,27 +536,6 @@ $(HEADPACK): $(HEADPACK_C_FILES) | $(BINDIR)/$(STAMPFILE)
 
 $(MAP2ASN): $(MAP2ASN_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_MAP2ASN) -o $@ $^
-
-# ====== Check: Null ======
-
-$(GENDIR_CHECK_NULL)/resext.h: $(GENDIR_CHECK_NULL)/$(STAMPFILE) $(MKRESH)
-	$(MKRESH) -f palm -i 5001 \
-      -if $(DSEKAI_ASSETS_PALM) $(DSEKAI_ASSETS_MAPS_JSON) \
-      -oh $(GENDIR_CHECK_NULL)/resext.h
-
-$(BIN_CHECK_NULL): $(DSEKAI_O_FILES_CHECK_NULL) | $(BINDIR)/$(STAMPFILE)
-	$(CC) -o $@ $^ $(LDFLAGS)
-
-#$(DEPDIR_CHECK_NULL)/%.d: %.c $(GENDIR_CHECK_NULL)/resext.h
-#	$(MD) $(dir $@)
-#	$(CC) $(CFLAGS_CHECK_NULL) -MM $< \
-#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_CHECK_NULL)/,$<)) -MF $@
-
-#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_CHECK_NULL:.o=.d))
-	
-$(OBJDIR_CHECK_NULL)/%.o: %.c check/testdata.h $(GENDIR_CHECK_NULL)/resext.h
-	$(MD) $(dir $@)
-	$(CC) $(CFLAGS_CHECK_NULL) -c -o $@ $(<:%.o=%)
 
 # ====== Clean ======
 
