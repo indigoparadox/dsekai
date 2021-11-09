@@ -52,13 +52,11 @@ unilayer_main() {
 
    error_printf( "error test" );
 
-   debug_printf( 3, "map size is %lu bytes", sizeof( struct TILEMAP ) );
+   debug_printf( 3, "animations cache is %lu bytes",
+      sizeof( struct ANIMATION ) * ANIMATE_ANIMATIONS_MAX );
 
-   debug_printf( 3, "mobiles size is %lu bytes",
-      sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
-
-   debug_printf( 3, "items size is %lu bytes",
-      sizeof( struct ITEM ) * DSEKAI_ITEMS_MAX );
+   debug_printf( 3, "initial graphics cache is %lu bytes",
+      sizeof( struct GRAPHICS_BITMAP ) * GRAPHICS_CACHE_INITIAL_SZ );
 
    /* Initialize subsystems. */
 
