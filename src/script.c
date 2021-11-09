@@ -2,6 +2,9 @@
 #define SCRIPT_C
 #include "dsekai.h"
 
+/* For time and rand. */
+#include <stdlib.h>
+
 #if defined( SCREEN_W ) && defined( SCREEN_H )
 /* We're running in the engine and not an external tool. */
 #define SCRIPT_HAS_GFX
@@ -222,6 +225,15 @@ uint16_t script_handle_WARP(
 
    /* Freeze */
    return pc;
+}
+
+uint16_t script_handle_ANIMATE(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   /* TODO */
+   return pc + 1;
 }
 
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;

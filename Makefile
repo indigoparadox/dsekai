@@ -10,6 +10,7 @@ ROOT := $(shell pwd)
 DSEKAI_C_FILES := \
    src/tilemap.c \
    unilayer/graphics.c \
+   unilayer/animate.c \
    src/mobile.c \
    src/item.c \
    src/window.c \

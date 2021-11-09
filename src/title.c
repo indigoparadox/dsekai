@@ -17,6 +17,8 @@ int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 
       gstate = (struct TITLE_STATE*)memory_lock( state->engine_state_handle );
 
+      animate_create_animation( /* Fire */ 2, 0, SCREEN_H - 50, SCREEN_W, 50 );
+
       gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
 
       state->engine_state = ENGINE_STATE_RUNNING;
@@ -31,6 +33,8 @@ int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       title,
 #endif
       0, 0, 0, 0, SCREEN_W, SCREEN_H );
+
+   animation_frame();
 
    if( state->input_blocked_countdown ) {
       state->input_blocked_countdown--;

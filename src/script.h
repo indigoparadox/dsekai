@@ -17,6 +17,7 @@ struct TILEMAP;
 /*! \brief Value of script arg to indicate real arg should be popped from stack.
  */
 #define SCRIPT_ARG_STACK 32767
+#define SCRIPT_ARG_RANDOM 32766
 /*! \brief Maximum length of a script in text form. */
 #define SCRIPT_STR_MAX 1024
 
@@ -45,7 +46,7 @@ typedef uint16_t (*SCRIPT_CB)(
  * \brief Define the script action callback table.
  * \param f Macro to execute on the function callback definition.
  */
-#define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) f( 1, INTERACT, 'i' ) f( 2, WALK_NORTH, 'u' ) f( 3, WALK_SOUTH, 'd' ) f( 4, WALK_EAST, 'r' ) f( 5, WALK_WEST, 'l' ) f( 6, SLEEP, 's' ) f( 7, START, 't' ) f( 8, GOTO, 'g' ) f( 9, SPEAK, 'p' ) f( 10, RETURN, 'x' ) f( 11, FACE, 'f' ) f( 12, GLOBAL_SET, 'b' ) f( 13, GLOBAL_GET, 'a' ) f( 14, WARP, 'w' )
+#define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) f( 1, INTERACT, 'i' ) f( 2, WALK_NORTH, 'u' ) f( 3, WALK_SOUTH, 'd' ) f( 4, WALK_EAST, 'r' ) f( 5, WALK_WEST, 'l' ) f( 6, SLEEP, 's' ) f( 7, START, 't' ) f( 8, GOTO, 'g' ) f( 9, SPEAK, 'p' ) f( 10, RETURN, 'x' ) f( 11, FACE, 'f' ) f( 12, GLOBAL_SET, 'b' ) f( 13, GLOBAL_GET, 'a' ) f( 14, WARP, 'w' ) f( 15, ANIMATE, 'n' )
 
 /*! \brief Define prototypes for the script action callbacks. */
 #define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct SCRIPT*, struct TILEMAP*, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, struct DSEKAI_STATE*, int16_t );
