@@ -38,12 +38,15 @@ int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       in_char = input_poll();
    }
 
+#ifndef SKIP_TITLE
    switch( in_char ) {
    case INPUT_KEY_OK:
+#endif /* !SKIP_TITLE */
       memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
          memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
       graphics_loop_end();
       goto cleanup;
+#ifndef SKIP_TITLE
 
    case INPUT_KEY_QUIT:
       window_pop( WINDOW_ID_STATUS, state );
@@ -53,6 +56,8 @@ int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    }
 
    graphics_loop_end();
+
+#endif /* !SKIP_TITLE */
 
 cleanup:
 
