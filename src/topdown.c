@@ -190,6 +190,8 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
       }
    }
 
+   animation_frame();
+
    /* Keep running. */
    graphics_flip( args );
 
@@ -285,6 +287,8 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    }
 
    window_draw_all( state );
+
+   animation_frame();
 
    if( state->input_blocked_countdown ) {
       state->input_blocked_countdown--;

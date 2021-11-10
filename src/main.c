@@ -115,6 +115,8 @@ unilayer_main() {
 
          graphics_clear_cache();
 
+         animation_stop_all();
+
 #ifdef RESOURCE_FILE
 #  ifdef TILEMAP_FMT_JSON
          memory_zero_ptr( (MEMORY_PTR)map_load_path, TILEMAP_NAME_MAX );
