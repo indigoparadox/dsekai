@@ -7,10 +7,10 @@ jobs:
   build-documentation:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.4.0
-
-    - name: Checkout submodules
-      uses: textbook/git-checkout-submodule-action@master
+    - name: Checkout dsekai and unilayer
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
 
     - name: Doxygen Action
       uses: mattnotmitt/doxygen-action@v1.1.0
