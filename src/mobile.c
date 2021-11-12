@@ -2,8 +2,6 @@
 #define MOBILE_C
 #include "dsekai.h"
 
-/* TODO: Facing/x_mod/y_mod lookup tables for DIR constants. */
-
 uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
 
    if(

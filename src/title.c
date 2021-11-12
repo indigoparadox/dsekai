@@ -17,7 +17,9 @@ int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 
       gstate = (struct TITLE_STATE*)memory_lock( state->engine_state_handle );
 
+#if 0
       animate_create_animation( /* Fire */ 2, 0, SCREEN_H - 50, SCREEN_W, 50 );
+#endif
 
       gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
 
