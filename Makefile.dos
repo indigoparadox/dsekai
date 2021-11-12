@@ -74,6 +74,8 @@ LDFLAGS_DOS := $(LDFLAGS_OWC_GENERIC)
 
 ifeq ($(FMT_JSON),TRUE)
    CFLAGS_DOS += -mh
+else
+   CFLAGS_DOS += -mm
 endif
 
 # 5. Targets
