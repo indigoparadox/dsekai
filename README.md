@@ -1,6 +1,8 @@
 
 # dsekai
 
+[![Code Grade](https://api.codiga.io/project/29729/score/svg)](https://www.codiga.io)
+
 * [dsekai](#deskai)
   * [Roadmap](#roadmap)
   * [Documentation](#documentation)
