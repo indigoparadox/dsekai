@@ -11,7 +11,6 @@ static int16_t tilemap_json_parse_spawn(
    char spawn_buffer[RESOURCE_PATH_MAX];
    char iter_path[JSON_PATH_SZ];
    int16_t spawn_buffer_sz = 0,
-      str_sz = 0,
       x_px_in = 0,
       y_px_in = 0;
 
@@ -25,14 +24,13 @@ static int16_t tilemap_json_parse_spawn(
    /* Parse Sprite */
 
    dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_TYPE, spawn_idx );
-   str_sz = json_str_from_path(
+   spawn_buffer_sz = json_str_from_path(
       iter_path, JSON_PATH_SZ,
       &(spawn_buffer[spawn_buffer_sz]),
       RESOURCE_PATH_MAX - spawn_buffer_sz,
       tokens, tokens_sz, json_buffer );
-   spawn_buffer_sz += str_sz;
 
-   if( 0 >= str_sz ) {
+   if( 0 >= spawn_buffer_sz ) {
       error_printf( "could not parse mobile: %d", spawn_idx );
       return 0;
    }
@@ -85,7 +83,6 @@ static int16_t tilemap_json_parse_tileset(
    RESOURCE_ID map_path
 ) {
    int16_t i = 0,
-      str_sz = 0,
       tile_filename_sz = 0;
    char tile_filename[RESOURCE_PATH_MAX],
       tile_json_path[JSON_PATH_SZ];
@@ -99,14 +96,13 @@ static int16_t tilemap_json_parse_tileset(
 
       /* Load each tile bitmap. */
       dio_snprintf( tile_json_path, JSON_PATH_SZ, TILEMAP_JPATH_TS_TILE, i );
-      str_sz = json_str_from_path(
+      tile_filename_sz = json_str_from_path(
          tile_json_path, JSON_PATH_SZ,
          &(tile_filename[tile_filename_sz]),
          RESOURCE_PATH_MAX - tile_filename_sz,
          tokens, tokens_sz, json_buffer );
-      tile_filename_sz += str_sz;
 
-      if( 0 < str_sz ) {
+      if( 0 < tile_filename_sz ) {
          debug_printf(
             2, "assigning tile path: %s, %s\n", tile_json_path, tile_filename );
          resource_assign_id( t->tileset[i].image, tile_filename );
@@ -122,7 +118,7 @@ static int16_t tilemap_json_parse_tileset(
       }
 
       i++;
-   } while( 0 < str_sz );
+   } while( 0 < tile_filename_sz );
 
    return 1;
 }
@@ -155,7 +151,7 @@ static int8_t tilemap_json_tile(
    return tile_id_in;
 }
 
-static int16_t tilemap_json_parse_scripts(
+static void tilemap_json_parse_scripts(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, uint16_t tokens_sz
 ) {
@@ -183,11 +179,9 @@ static int16_t tilemap_json_parse_scripts(
       script_parse_str( i, script_buffer, script_buffer_sz, &(t->scripts[i]) );
       loaded++;
    }
-
-   return 1;
 }
 
-static int16_t tilemap_json_parse_strings(
+static void tilemap_json_parse_strings(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, uint16_t tokens_sz
 ) {
@@ -212,8 +206,6 @@ static int16_t tilemap_json_parse_strings(
             t->strings[i], string_sz_tmp );
       }
    }
-
-   return 1;
 }
 
 static int16_t tilemap_json_tilegrid(
@@ -388,13 +380,11 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
       i++;
    }
 
-   retval = tilemap_json_parse_strings(
+   tilemap_json_parse_strings(
       t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
-   /* TODO: Error checking? */
 
-   retval = tilemap_json_parse_scripts(
+   tilemap_json_parse_scripts(
       t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
-   /* TODO: Error checking? */
 
 cleanup:
 

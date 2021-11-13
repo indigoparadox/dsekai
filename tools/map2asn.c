@@ -15,12 +15,17 @@ uint8_t* buffer_copy_bytes(
    int* p_idx, uint8_t* buffer, int* p_buffer_sz, uint8_t* source, int source_sz
 ) {
    int i = 0;
+   uint8_t* buffer_new = NULL;
 
    while( *p_idx + TILEMAP_NAME_MAX > *p_buffer_sz ) {
       *p_buffer_sz *= 2;
       debug_printf( 2, "resizing buffer to %d", *p_buffer_sz );
-      buffer = realloc( buffer, *p_buffer_sz );
-      assert( NULL != buffer );
+      buffer_new = realloc( buffer, *p_buffer_sz );
+      if( NULL == buffer_new ) {
+         error_printf( "unable to resize buffer!" );
+         goto cleanup;
+      }
+      buffer = buffer_new;
    }
    for( i = *p_idx ; *p_buffer_sz > i ; i++ ) {
       buffer[i] = 0;
@@ -29,6 +34,8 @@ uint8_t* buffer_copy_bytes(
       memcpy( &(buffer[*p_idx]), source, source_sz );
    }
    *p_idx += source_sz;
+
+cleanup:
 
    return buffer;
 }
@@ -43,8 +50,6 @@ int main( int argc, char* argv[] ) {
       * asn_file = NULL;
    struct TILEMAP t;
    uint8_t* buffer = NULL;
-   uint32_t* p_uint32;
-   uint16_t* p_uint16;
    int retval = 0,
       i = 0,
       j = 0,
