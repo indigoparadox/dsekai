@@ -40,20 +40,6 @@ HEADPACK_C_FILES := \
    unilayer/src/memory/fakem.c \
    unilayer/src/dio.c
 
-DRCPACK_C_FILES := \
-   tools/drcpack.c \
-   tools/data/drcwrite.c \
-   unilayer/src/memory/fakem.c \
-   unilayer/src/drc.c \
-   unilayer/src/dio.c
-
-DRCPACK_C_FILES := \
-   tools/drcpack.c \
-   tools/data/drcwrite.c \
-   unilayer/src/memory/fakem.c \
-   unilayer/src/drc.c \
-   unilayer/src/dio.c
-
 CONVERT_C_FILES := \
    unilayer/tools/convert.c \
    unilayer/tools/data/bmp.c \
@@ -278,14 +264,12 @@ GZIP := gzip
 ZIP := zip
 
 MKRESH := $(BINDIR)/mkresh
-DRCPACK := $(BINDIR)/drcpack
 CONVERT := $(BINDIR)/convert
 LOOKUPS := $(BINDIR)/lookups
 HEADPACK := $(BINDIR)/headpack
 MAP2ASN := $(BINDIR)/map2asn
 
 CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer/src -DASSETS_PATH="\"$(ASSETPATH)\""
-CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DRESOURCE_DRC -Iunilayer/src
 CFLAGS_CONVERT := -DNO_RESEXT -g -DRESOURCE_FILE -Iunilayer/src
 CFLAGS_LOOKUPS := -g -Iunilayer/src
 CFLAGS_HEADPACK := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG
@@ -521,9 +505,6 @@ endef
 
 $(MKRESH): $(MKRESH_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_MKRESH) -o $@ $^
-
-$(DRCPACK): $(DRCPACK_C_FILES) | $(BINDIR)/$(STAMPFILE)
-	$(HOST_CC) $(CFLAGS_DRCPACK) -o $@ $^
 
 $(CONVERT): $(CONVERT_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_CONVERT) -o $@ $^
