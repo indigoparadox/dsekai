@@ -13,12 +13,12 @@ GENDIR_WIN32 := $(GENDIR)/win32
 
 DSEKAI_C_FILES_WIN32_ONLY := \
    src/main.c \
-   unilayer/input/wini.c \
-   unilayer/memory/winm.c \
-   unilayer/graphics/wing.c
+   unilayer/src/input/wini.c \
+   unilayer/src/memory/winm.c \
+   unilayer/src/graphics/wing.c
 
 ifeq ($(RESOURCE),DEFAULT)
-   DSEKAI_C_FILES_WIN32_ONLY += unilayer/resource/winr.c
+   DSEKAI_C_FILES_WIN32_ONLY += unilayer/src/resource/winr.c
 else
    DSEKAI_C_FILES_WIN32_ONLY += $(DSEKAI_C_FILES_RES)
 endif
@@ -72,7 +72,7 @@ DEFINES_WIN32 := \
    -DSCREEN_SCALE=2
 
 INCLUDES_WIN32 := \
-   -i=unilayer \
+   -i=unilayer/src \
    -i=$(GENDIR_WIN32) \
    -i=$(INCLUDE)/nt
 

@@ -13,12 +13,12 @@ GENDIR_WIN16 := $(GENDIR)/win16
 
 DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
-   unilayer/input/wini.c \
-   unilayer/memory/winm.c \
-   unilayer/graphics/wing.c
+   unilayer/src/input/wini.c \
+   unilayer/src/memory/winm.c \
+   unilayer/src/graphics/wing.c
 
 ifeq ($(RESOURCE),DEFAULT)
-   DSEKAI_C_FILES_WIN16_ONLY += unilayer/resource/winr.c
+   DSEKAI_C_FILES_WIN16_ONLY += unilayer/src/resource/winr.c
 else
    DSEKAI_C_FILES_WIN16_ONLY += $(DSEKAI_C_FILES_RES)
 endif
@@ -72,7 +72,7 @@ DEFINES_WIN16 := \
    -DSCREEN_SCALE=2
 
 INCLUDES_WIN16 := \
-   -i=unilayer \
+   -i=unilayer/src \
    -i=$(GENDIR_WIN16) \
    -i=$(INCLUDE)/win
 

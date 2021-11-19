@@ -11,9 +11,9 @@ DEVKITPATH := $(shell echo "$(DEVKITPRO)" | sed -e 's/^\([a-zA-Z]\):/\/\1/')
 
 DSEKAI_C_FILES_NDS_ONLY := \
    src/main.c \
-   unilayer/input/ndsi.c \
-   unilayer/graphics/ndsg.c \
-   unilayer/memory/fakem.c
+   unilayer/src/input/ndsi.c \
+   unilayer/src/graphics/ndsg.c \
+   unilayer/src/memory/fakem.c
 
 DSEKAI_ASSETS_MAPS_NDS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS_JSON)))

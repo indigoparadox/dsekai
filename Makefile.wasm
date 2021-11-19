@@ -13,9 +13,9 @@ GENDIR_WASM := $(GENDIR)/wasm
 
 DSEKAI_C_FILES_WASM_ONLY := \
    src/main.c \
-   unilayer/input/sdli.c \
-   unilayer/graphics/sdlg.c \
-   unilayer/memory/fakem.c
+   unilayer/src/input/sdli.c \
+   unilayer/src/graphics/sdlg.c \
+   unilayer/src/memory/fakem.c
 
 DSEKAI_O_FILES_WASM := \
    $(addprefix $(OBJDIR_WASM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -42,7 +42,7 @@ DEFINES_WASM := \
    -DSCREEN_SCALE=$(SCREEN_SCALE)
 
 INCLUDES_WASM := \
-   -I unilayer \
+   -I unilayer/src \
    -I $(GENDIR_WASM)
 
 CFLAGS_WASM := $(CFLAGS_GCC_GENERIC) $(DEFINES_WASM) $(INCLUDES_WASM)

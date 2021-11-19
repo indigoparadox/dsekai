@@ -19,9 +19,9 @@ RETRO68_PREFIX := /opt/Retro68-build/toolchain
 
 DSEKAI_C_FILES_MAC6_ONLY := \
    src/main.c \
-   unilayer/input/mac6i.c \
-   unilayer/graphics/mac6g.c \
-   unilayer/memory/mac6m.c
+   unilayer/src/input/mac6i.c \
+   unilayer/src/graphics/mac6g.c \
+   unilayer/src/memory/mac6m.c
 
 # 1a. Packaging Manifest
 
@@ -59,7 +59,7 @@ DEFINES_MAC6 := \
    -DSCREEN_H=480
 
 INCLUDES_MAC6 := \
-   -I unilayer \
+   -I unilayer/src \
    -I$(GENDIR_MAC6) \
    -I$(RETRO68_PREFIX)/multiversal/CIncludes
 

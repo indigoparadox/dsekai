@@ -13,9 +13,9 @@ GENDIR_SDL := $(GENDIR)/sdl
 
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
-   unilayer/input/sdli.c \
-   unilayer/graphics/sdlg.c \
-   unilayer/memory/fakem.c
+   unilayer/src/input/sdli.c \
+   unilayer/src/graphics/sdlg.c \
+   unilayer/src/memory/fakem.c
 
 DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -60,7 +60,7 @@ DEFINES_SDL := \
    -DSCREEN_SCALE=$(SCREEN_SCALE)
 
 INCLUDES_SDL := \
-   -I unilayer \
+   -I unilayer/src \
    -I $(GENDIR_SDL) 
 
 CFLAGS_SDL := $(shell pkg-config sdl2 --cflags) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_SDL) $(INCLUDES_SDL)

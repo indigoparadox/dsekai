@@ -10,10 +10,10 @@ GENDIR_MEGAD := $(GENDIR)/megad
 DSEKAI_C_FILES_MEGAD_ONLY := \
    src/main.c \
    src/megahead.c \
-   unilayer/input/megadi.c \
-   unilayer/memory/fakem.c \
-   unilayer/resource/megadr.c \
-   unilayer/graphics/megadg.c
+   unilayer/src/input/megadi.c \
+   unilayer/src/memory/fakem.c \
+   unilayer/src/resource/megadr.c \
+   unilayer/src/graphics/megadg.c
 
 DSEKAI_O_FILES_MEGAD := \
    $(addprefix $(OBJDIR_MEGAD)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \

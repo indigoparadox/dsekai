@@ -9,13 +9,13 @@ ROOT := $(shell pwd)
 
 DSEKAI_C_FILES := \
    src/tilemap.c \
-   unilayer/graphics.c \
-   unilayer/animate.c \
+   unilayer/src/graphics.c \
+   unilayer/src/animate.c \
    src/mobile.c \
    src/item.c \
    src/window.c \
    src/script.c \
-   unilayer/dio.c \
+   unilayer/src/dio.c \
    src/control.c \
    src/topdown.c \
    src/pov.c \
@@ -23,9 +23,9 @@ DSEKAI_C_FILES := \
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
-   unilayer/resource/file.c \
-   unilayer/memory/fakem.c \
-   unilayer/dio.c
+   unilayer/src/resource/file.c \
+   unilayer/src/memory/fakem.c \
+   unilayer/src/dio.c
 
 HEADPACK_C_FILES := \
    tools/headpack.c \
@@ -34,34 +34,33 @@ HEADPACK_C_FILES := \
    src/mobile.c \
    src/script.c \
    src/json.c \
-   unilayer/resource/file.c \
-   unilayer/graphics.c \
-   unilayer/graphics/nullg.c \
-   unilayer/memory/fakem.c \
-   unilayer/dio.c
+   unilayer/src/resource/file.c \
+   unilayer/src/graphics.c \
+   unilayer/src/graphics/nullg.c \
+   unilayer/src/memory/fakem.c \
+   unilayer/src/dio.c
 
 DRCPACK_C_FILES := \
    tools/drcpack.c \
    tools/data/drcwrite.c \
-   unilayer/memory/fakem.c \
-   unilayer/drc.c \
-   unilayer/dio.c
+   unilayer/src/memory/fakem.c \
+   unilayer/src/drc.c \
+   unilayer/src/dio.c
 
 DRCPACK_C_FILES := \
    tools/drcpack.c \
    tools/data/drcwrite.c \
-   unilayer/memory/fakem.c \
-   unilayer/drc.c \
-   unilayer/dio.c
+   unilayer/src/memory/fakem.c \
+   unilayer/src/drc.c \
+   unilayer/src/dio.c
 
 CONVERT_C_FILES := \
-   tools/convert.c \
-   tools/data/bmp.c \
-   unilayer/memory/fakem.c \
-   unilayer/drc.c \
-   tools/data/cga.c \
-   unilayer/dio.c \
-   tools/data/icns.c \
+   unilayer/tools/convert.c \
+   unilayer/tools/data/bmp.c \
+   unilayer/src/memory/fakem.c \
+   unilayer/tools/data/cga.c \
+   unilayer/src/dio.c \
+   unilayer/tools/data/icns.c \
    src/json.c
 
 LOOKUPS_C_FILES := \
@@ -74,11 +73,11 @@ MAP2ASN_C_FILES := \
    src/script.c \
    src/json.c \
    src/tmjson.c \
-   unilayer/resource/file.c \
-   unilayer/graphics.c \
-   unilayer/graphics/nullg.c \
-   unilayer/memory/fakem.c \
-   unilayer/dio.c
+   unilayer/src/resource/file.c \
+   unilayer/src/graphics.c \
+   unilayer/src/graphics/nullg.c \
+   unilayer/src/memory/fakem.c \
+   unilayer/src/dio.c
 
 MAP2BIN_C_FILES := \
    tools/map2bin.c \
@@ -87,11 +86,11 @@ MAP2BIN_C_FILES := \
    src/script.c \
    src/json.c \
    src/tmjson.c \
-   unilayer/resource/file.c \
-   unilayer/graphics.c \
-   unilayer/graphics/nullg.c \
-   unilayer/memory/fakem.c \
-   unilayer/dio.c
+   unilayer/src/resource/file.c \
+   unilayer/src/graphics.c \
+   unilayer/src/graphics/nullg.c \
+   unilayer/src/memory/fakem.c \
+   unilayer/src/dio.c
 
 # ALL platforms.
 PLATFORMS := sdl xlib dos win16 win32 palm mac6 nds curses check_null
@@ -168,7 +167,7 @@ DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\" -DDSEKAI_GIT_HASH=\"$(GIT_H
 ifeq ($(RESOURCE),FILE)
 
    DEFINES_RESOURCE := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
-   DSEKAI_C_FILES_RES := unilayer/resource/file.c src/json.c
+   DSEKAI_C_FILES_RES := unilayer/src/resource/file.c src/json.c
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-file
 
    ifeq ($(FMT_ASN),TRUE)
@@ -185,7 +184,7 @@ else
 
    RESOURCE := DEFAULT
    DEFINES_RESOURCE := -DRESOURCE_HEADER
-   DSEKAI_C_FILES_RES := unilayer/resource/header.c
+   DSEKAI_C_FILES_RES := unilayer/src/resource/header.c
 
 all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
 
@@ -285,12 +284,12 @@ LOOKUPS := $(BINDIR)/lookups
 HEADPACK := $(BINDIR)/headpack
 MAP2ASN := $(BINDIR)/map2asn
 
-CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer -DASSETS_PATH="\"$(ASSETPATH)\""
-CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DRESOURCE_DRC -Iunilayer
-CFLAGS_CONVERT := -DNO_RESEXT -g -DRESOURCE_FILE -Iunilayer
-CFLAGS_LOOKUPS := -g -Iunilayer
-CFLAGS_HEADPACK := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG
-CFLAGS_MAP2ASN := -g -Iunilayer -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG
+CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer/src -DASSETS_PATH="\"$(ASSETPATH)\""
+CFLAGS_DRCPACK := -DNO_RESEXT -g -DDRC_READ_WRITE -DDEBUG_LOG -DDEBUG_THRESHOLD=3 -DRESOURCE_DRC -Iunilayer/src
+CFLAGS_CONVERT := -DNO_RESEXT -g -DRESOURCE_FILE -Iunilayer/src
+CFLAGS_LOOKUPS := -g -Iunilayer/src
+CFLAGS_HEADPACK := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG
+CFLAGS_MAP2ASN := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG
 
 $(BIN_CHECK): LDFLAGS := $(shell pkg-config check --libs) -g $(LDFLAGS_GCC_GENERIC)
 

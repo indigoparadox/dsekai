@@ -17,10 +17,10 @@ GENDIR_PALM := $(GENDIR)/palm
 
 DSEKAI_C_FILES_PALM_ONLY := \
    src/main.c \
-   unilayer/input/palmi.c \
-   unilayer/memory/palmm.c \
-   unilayer/resource/palmr.c \
-   unilayer/graphics/palmg.c
+   unilayer/src/input/palmi.c \
+   unilayer/src/memory/palmm.c \
+   unilayer/src/resource/palmr.c \
+   unilayer/src/graphics/palmg.c
 
 DSEKAI_O_FILES_PALM := \
    $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -50,7 +50,7 @@ DEFINES_PALM := \
    -DSCREEN_H=160
 
 INCLUDES_PALM := \
-   -I unilayer \
+   -I unilayer/src \
    -I $(GENDIR_PALM) \
    -I /opt/palmdev/sdk-3.5/include \
    -I /opt/palmdev/sdk-3.5/include/Core/UI/ \

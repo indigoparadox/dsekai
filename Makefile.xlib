@@ -13,9 +13,9 @@ GENDIR_XLIB := $(GENDIR)/xlib
 
 DSEKAI_C_FILES_XLIB_ONLY := \
    src/main.c \
-   unilayer/input/xi.c \
-   unilayer/graphics/xg.c \
-   unilayer/memory/fakem.c
+   unilayer/src/input/xi.c \
+   unilayer/src/graphics/xg.c \
+   unilayer/src/memory/fakem.c
 
 DSEKAI_O_FILES_XLIB := \
    $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -61,7 +61,7 @@ DEFINES_XLIB := \
    -DSCREEN_SCALE=$(SCREEN_SCALE)
 
 INCLUDES_XLIB := \
-   -I unilayer \
+   -I unilayer/src \
    -I $(GENDIR_XLIB)
 
 CFLAGS_XLIB := $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_XLIB) $(INCLUDES_XLIB)

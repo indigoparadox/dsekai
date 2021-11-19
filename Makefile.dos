@@ -13,9 +13,9 @@ GENDIR_DOS := $(GENDIR)/dos
 
 DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
-   unilayer/input/dosi.c \
-   unilayer/graphics/dosg.c \
-   unilayer/memory/fakem.c
+   unilayer/src/input/dosi.c \
+   unilayer/src/graphics/dosg.c \
+   unilayer/src/memory/fakem.c
 
 DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -65,7 +65,7 @@ DEFINES_DOS := \
    -DUSE_LOOKUPS
 
 INCLUDES_DOS := \
-   -i=unilayer \
+   -i=unilayer/src \
    -i=$(GENDIR_DOS) 
 
 CFLAGS_DOS := -hw -d3 -0 -zp=1 $(CFLAGS_OWC_GENERIC) $(DEFINES_DOS) $(INCLUDES_DOS)
