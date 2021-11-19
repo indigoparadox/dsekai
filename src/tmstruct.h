@@ -2,6 +2,12 @@
 #ifndef TMSTRUCTS_H
 #define TMSTRUCTS_H
 
+/**
+ * \addtogroup dsekai_tilemaps
+ *
+ * \{
+ */
+
 /*! \file tmstruct.h
  *  \brief Structs representing tilemaps and related objects.
  */
@@ -90,6 +96,8 @@ struct PACKED TILEMAP {
    /* \brief Scripts available to attach to any MOBILE. */
    struct SCRIPT scripts[TILEMAP_SCRIPTS_MAX];
 };
+
+/*! \} */
 
 #endif /* !TMSTRUCTS_H */
 

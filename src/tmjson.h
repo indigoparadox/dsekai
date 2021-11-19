@@ -2,11 +2,29 @@
 #ifndef TMJSON_H
 #define TMJSON_H
 
+/**
+ * \addtogroup dsekai_tilemaps
+ *
+ * \{
+ */
+
 /*! \file tmjson.h
- *  \brief Constants and functions for populating a TILEMAP from JSON.
+ *  \brief Constants and functions for populating a TILEMAP from \ref json.
  */
 
 #include "dsekai.h"
+
+/**
+ * \addtogroup dsekai_tilemaps_json_paths Tilemaps JSON Paths
+ * \brief Paths to map properties in a Tiled \ref json file.
+ *
+ * All paths here use \ref json_paths syntax.
+ *
+ * Some paths use %%d conversion specifiers as placeholders for the index of a
+ * discrete value being iterated over.
+ *
+ * \{
+ */
 
 /*! \brief JSON path to script definition. */
 #define TILEMAP_JPATH_SCRIPT "/properties/[name=script_%d]/value"
@@ -35,6 +53,8 @@
 /*! \brief JSON path to TILESET_TILE::flags. */
 #define TILEMAP_JPATH_TS_FLAGS "/tiles/%d/properties/[name=flags]/value"
 
+/*! \} */
+
 /**
  * \brief Load tilemap specified by id into TILEMAP struct t.
  * \param id A RESOURCE_ID indicating the tilemap to load from disk.
@@ -42,6 +62,8 @@
  * \return
  */
 int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t );
+
+/*! \} */
 
 #endif /* !TMJSON_H */
 

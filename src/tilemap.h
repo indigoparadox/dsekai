@@ -2,14 +2,26 @@
 #ifndef TILEMAP_H
 #define TILEMAP_H
 
+/**
+ * \addtogroup dsekai_tilemaps Tilemaps
+ *
+ * \{
+ */
+
 /*! \file tilemap.h
  *  \brief Functions and macros pertaining to tilemaps.
  */
 
-/*! \brief TILESET_TILE::flags bit flag indicating tile will block movement. */
+/**
+ * \relates ::TILESET_TILE
+ * \brief TILESET_TILE::flags bit flag indicating tile will block movement.
+ */
 #define TILEMAP_TILESET_FLAG_BLOCK  0x01
 
-/*! \brief TILEMAP::tiles_flags bit flag indicating tile must be redrawn. */
+/**
+ * \relates ::TILEMAP
+ * \brief TILEMAP::tiles_flags bit flag indicating tile must be redrawn.
+ */
 #define TILEMAP_TILE_FLAG_DIRTY     0x01
 
 /**
@@ -45,6 +57,8 @@ uint8_t tilemap_collide(
  * \param t ::MEMORY_PTR to a TILEMAP to deinitialize.
  */
 void tilemap_deinit( struct TILEMAP* );
+
+/*! \} */
 
 #endif /* TILEMAP_H */
 
