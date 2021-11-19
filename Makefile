@@ -521,5 +521,5 @@ $(MAP2ASN): $(MAP2ASN_C_FILES) | $(BINDIR)/$(STAMPFILE)
 # ====== Clean ======
 
 clean:
-	rm -rf data obj obj-* bin bin-* gen gen-* *.err .rsrc .finf gmon.out log*.txt packages fpackages assets/*/*.cga assets/*/*.vga assets/*.asn pkgbuild
+	rm -rf data obj obj-* bin bin-* gen gen-* dep dep-* *.err .rsrc .finf gmon.out log*.txt packages pkgbuild
 
