@@ -91,9 +91,16 @@ unilayer_main() {
    state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    state->engine_state = ENGINE_STATE_OPENING;
    loop_set( title_loop, g_state_handle, &graphics_args );
+
+   /*
+   state->warp_to[0] = 'f';
+   state->warp_to[1] = 'i';
+   state->warp_to[2] = 'e';
+   state->warp_to[3] = 'l';
+   state->warp_to[4] = 'd';
+   */
+
    state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
-
-
 
 /* === Main Loop === */
 
@@ -115,7 +122,7 @@ unilayer_main() {
 
          graphics_clear_cache();
 
-         animation_stop_all();
+         animate_stop_all();
 
 #ifdef RESOURCE_FILE
 #  ifdef TILEMAP_FMT_JSON

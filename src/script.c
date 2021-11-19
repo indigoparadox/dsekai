@@ -232,7 +232,41 @@ uint16_t script_handle_ANIMATE(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
+   int16_t a_x = 0,
+      a_y = 0,
+      a_w = 0,
+      a_h = 0;
+
+   a_h = mobile_stack_pop( actor ) * TILE_H;
+   a_w = mobile_stack_pop( actor ) * TILE_W;
+   a_y = mobile_stack_pop( actor ) * TILE_H;
+   a_x = mobile_stack_pop( actor ) * TILE_W;
+
+#ifdef SCRIPT_HAS_GFX
+   animate_create( arg, a_x, a_y, a_w, a_h );
+#endif /* SCRIPT_HAS_GFX */
+
    /* TODO */
+   return pc + 1;
+}
+
+uint16_t script_handle_PUSH(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   mobile_stack_push( actor, arg );
+
+   return pc + 1;
+}
+
+uint16_t script_handle_POP(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   mobile_stack_pop( actor );
+
    return pc + 1;
 }
 

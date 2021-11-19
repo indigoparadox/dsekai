@@ -2,12 +2,18 @@
 #ifndef SCSTRUCT_H
 #define SCSTRUCT_H
 
+/**
+ * \addtogroup scripting
+ *
+ * \{
+ */
+
 /*! \file scstruct.h
  *  \brief Structs representing behavior scripts.
  */
 
 /*! \brief Maximum number of steps in an individual script. */
-#define SCRIPT_STEPS_MAX 24
+#define SCRIPT_STEPS_MAX 128
 
 /**
  * \brief Contains a single instruction in a script, in SCRIPT::steps.
@@ -34,6 +40,8 @@ struct PACKED SCRIPT {
    /*! \brief Number of SCRIPT::steps attached to this script. */
    uint16_t steps_count;
 };
+
+/*! \} */
 
 #endif /* !SCSTRUCT_H */
 

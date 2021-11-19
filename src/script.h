@@ -2,6 +2,13 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
+/**
+ * \addtogroup scripting Scripting
+ * \brief Control mobile behavior and interaction.
+ *
+ * \{
+ */
+
 /*! \file script.h
  *  \brief Functions and macros for executing in-world behavior.
  */
@@ -13,7 +20,7 @@ struct TILEMAP;
 /*! \brief Maximum number of global script flags available. */
 #define SCRIPT_GLOBALS_MAX 20
 /*! \brief Maximum depth of available local stack for each ::SCRIPT. */
-#define SCRIPT_STACK_DEPTH 5
+#define SCRIPT_STACK_DEPTH 10
 /*! \brief Value of script arg to indicate real arg should be popped from stack.
  */
 #define SCRIPT_ARG_STACK 32767
@@ -43,10 +50,20 @@ typedef uint16_t (*SCRIPT_CB)(
 #include "scstruct.h"
 
 /**
+ * \addtogroup scripting_commands_sect Scripting Commands
+ * \{
+ * \page scripting_commands Scripting Commands
+ * 
+ * \section scripting_commands_i INTERACT (i)
+ *
+ * \}
+ */
+
+/**
  * \brief Define the script action callback table.
  * \param f Macro to execute on the function callback definition.
  */
-#define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) f( 1, INTERACT, 'i' ) f( 2, WALK_NORTH, 'u' ) f( 3, WALK_SOUTH, 'd' ) f( 4, WALK_EAST, 'r' ) f( 5, WALK_WEST, 'l' ) f( 6, SLEEP, 's' ) f( 7, START, 't' ) f( 8, GOTO, 'g' ) f( 9, SPEAK, 'p' ) f( 10, RETURN, 'x' ) f( 11, FACE, 'f' ) f( 12, GLOBAL_SET, 'b' ) f( 13, GLOBAL_GET, 'a' ) f( 14, WARP, 'w' ) f( 15, ANIMATE, 'n' )
+#define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) f( 1, INTERACT, 'i' ) f( 2, WALK_NORTH, 'u' ) f( 3, WALK_SOUTH, 'd' ) f( 4, WALK_EAST, 'r' ) f( 5, WALK_WEST, 'l' ) f( 6, SLEEP, 's' ) f( 7, START, 't' ) f( 8, GOTO, 'g' ) f( 9, SPEAK, 'p' ) f( 10, RETURN, 'x' ) f( 11, FACE, 'f' ) f( 12, GLOBAL_SET, 'b' ) f( 13, GLOBAL_GET, 'a' ) f( 14, WARP, 'w' ) f( 15, ANIMATE, 'n' ) f( 16, PUSH, 'h' ) f( 17, POP, 'o' )
 
 /*! \brief Define prototypes for the script action callbacks. */
 #define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct SCRIPT*, struct TILEMAP*, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, struct DSEKAI_STATE*, int16_t );
@@ -119,6 +136,8 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS );
 
 extern const SCRIPT_CB gc_script_handlers[];
 #endif /* !SCRIPT_C */
+
+/*! \} */
 
 #endif /* SCRIPT_H */
 

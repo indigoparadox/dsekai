@@ -8,9 +8,12 @@
  */
 void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
    int x = 0,
-      y = 0;
+      y = 0,
+      i = 0;
    uint8_t tile_id = 0;
    uint16_t
+      tile_px = 0, /* Tile on-screen X in pixels. */
+      tile_py = 0, /* Tile on-screen Y in pixels. */
       viewport_tx2 = 0,
       viewport_ty2 = 0;
    struct TOPDOWN_STATE* gstate = NULL;
@@ -24,8 +27,28 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
    assert( viewport_tx2 <= TILEMAP_TW );
    assert( viewport_ty2 <= TILEMAP_TH );
 
+   /* Iterate over only on-screen tiles. */
    for( y = gstate->screen_scroll_ty ; viewport_ty2 > y ; y++ ) {
       for( x = gstate->screen_scroll_tx ; viewport_tx2 > x ; x++ ) {
+
+         tile_px = (x * TILE_W) - gstate->screen_scroll_x;
+         tile_py = (y * TILE_H) - gstate->screen_scroll_y;
+
+         /* Mark as dirty any on-screen tiles under an animation. */
+         for( i = 0 ; ANIMATE_ANIMATIONS_MAX > i ; i++ ) {
+            if(
+               ANIMATE_FLAG_ACTIVE ==
+                  (g_animations[i].flags & ANIMATE_FLAG_ACTIVE) &&
+               g_animations[i].x <= tile_px &&
+               g_animations[i].x + g_animations[i].y > tile_px &&
+               g_animations[i].y <= tile_py &&
+               g_animations[i].y + g_animations[i].y > tile_py
+            ) {
+               state->map.tiles_flags[(y * TILEMAP_TW) + x] |=
+                  TILEMAP_TILE_FLAG_DIRTY;
+            }
+         }
+
 #ifndef IGNORE_DIRTY
          if(
             !(state->map.tiles_flags[(y * TILEMAP_TW) + x] &
@@ -35,6 +58,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          }
 #endif /* !IGNORE_DIRTY */
 
+         /* Sanity checks. */
          assert( y < TILEMAP_TH );
          assert( x < TILEMAP_TW );
          assert( y >= 0 );
@@ -55,8 +79,8 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          graphics_blit_tile_at(
             state->map.tileset[tile_id].image,
             0, 0,
-            (x * TILE_W) - gstate->screen_scroll_x,
-            (y * TILE_H) - gstate->screen_scroll_y, TILE_W, TILE_H );
+            tile_px, tile_py,
+            TILE_W, TILE_H );
       }
    }
 
@@ -190,7 +214,7 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
       }
    }
 
-   animation_frame();
+   animate_frame();
 
    /* Keep running. */
    graphics_flip( args );
@@ -288,7 +312,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 
    window_draw_all( state );
 
-   animation_frame();
+   animate_frame();
 
    if( state->input_blocked_countdown ) {
       state->input_blocked_countdown--;
