@@ -15,6 +15,15 @@
 #include "dsekai.h"
 
 /**
+ * \addtogroup dsekai_tilemaps_json_format_sect Tilemaps JSON Format
+ * 
+ * \{
+ * \page dsekai_tilemaps_json_format
+ *
+ * \}
+ */
+
+/**
  * \addtogroup dsekai_tilemaps_json_paths Tilemaps JSON Paths
  * \brief Paths to map properties in a Tiled \ref json file.
  *
@@ -38,6 +47,8 @@
 #define TILEMAP_JPATH_PROP_NAME  "/properties/[name=name]/value"
 /*! \brief JSON path to map engine type. */
 #define TILEMAP_JPATH_PROP_ENGINE "/properties/[name=engine]/value"
+/*! \brief JSON path to weather property. */
+#define TILEMAP_JPATH_PROP_WEATHER "/properties/[name=weather]/value"
 /*! \brief JSON path to mobile tile X. */
 #define TILEMAP_JPATH_MOB_X      "/layers/[name=mobiles]/objects/%d/x"
 /*! \brief JSON path to mobile tile Y. */

@@ -246,11 +246,13 @@ DSEKAI_ASSETS_BITMAPS := \
 
 DSEKAI_ASSETS_MAPS_JSON := \
    $(ASSETDIR)/m_field.json \
-   $(ASSETDIR)/m_templ.json
+   $(ASSETDIR)/m_templ.json \
+   $(ASSETDIR)/m_forst.json
 
 DSEKAI_ASSETS_TILESETS_JSON := \
    $(ASSETDIR)/t2_field.json \
-   $(ASSETDIR)/t2_templ.json
+   $(ASSETDIR)/t2_templ.json \
+   $(ASSETDIR)/t2_forst.json
 
 HOST_CC := gcc
 MD := mkdir -p

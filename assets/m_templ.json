@@ -76,6 +76,11 @@
          "name":"string_0",
          "type":"string",
          "value":"field"
+        }, 
+        {
+         "name":"weather",
+         "type":"string",
+         "value":"clear"
         }],
  "renderorder":"right-down",
  "tiledversion":"1.7.2",

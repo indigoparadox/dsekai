@@ -54,6 +54,27 @@ void tilemap_refresh_tiles( struct TILEMAP* t ) {
    }
 }
 
+void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) {
+
+#if defined( SCREEN_W ) && defined( SCREEN_H )
+
+   switch( weather ) {
+   case TILEMAP_WEATHER_SNOW:
+      debug_printf( 2, "current weather is snowy" );
+      animate_create(
+         ANIMATE_TYPE_SNOW, 0, 0, SCREEN_W, SCREEN_H );
+      break;
+
+   default:
+      debug_printf( 2, "current weather is clear" );
+      break;
+   }
+
+#endif /* SCREEN_W && SCREEN_H */
+
+   t->weather = weather;
+}
+
 #if defined( SCREEN_W ) && defined( SCREEN_H )
 
 #endif /* SCREEN_W && SCREEN_H */

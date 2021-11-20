@@ -36,13 +36,29 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
 
          /* Mark as dirty any on-screen tiles under an animation. */
          for( i = 0 ; ANIMATE_ANIMATIONS_MAX > i ; i++ ) {
+
+#if 0
+            if(
+               ANIMATE_FLAG_ACTIVE ==
+                  (g_animations[i].flags & ANIMATE_FLAG_ACTIVE)
+            ) {
+               debug_printf( 3, "%d %d vs %d %d %d %d",
+                  tile_px,
+                  tile_py,
+                  g_animations[i].x,
+                  g_animations[i].y,
+                  g_animations[i].w,
+                  g_animations[i].h );
+            }
+#endif
+
             if(
                ANIMATE_FLAG_ACTIVE ==
                   (g_animations[i].flags & ANIMATE_FLAG_ACTIVE) &&
                g_animations[i].x <= tile_px &&
-               g_animations[i].x + g_animations[i].y > tile_px &&
+               g_animations[i].x + g_animations[i].w > tile_px &&
                g_animations[i].y <= tile_py &&
-               g_animations[i].y + g_animations[i].y > tile_py
+               g_animations[i].y + g_animations[i].h > tile_py
             ) {
                state->map.tiles_flags[(y * TILEMAP_TW) + x] |=
                   TILEMAP_TILE_FLAG_DIRTY;
@@ -296,6 +312,9 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 #endif /* PLATFORM_PALM */
 #endif /* !HIDE_WELCOME_DIALOG */
 #endif
+
+      /* Force reset the weather to start the animation. */
+      tilemap_set_weather( &(state->map), state->map.weather );
 
       state->engine_state = ENGINE_STATE_RUNNING;
    }

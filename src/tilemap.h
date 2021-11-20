@@ -13,6 +13,17 @@
  */
 
 /**
+ * \addtogroup dsekai_tilemaps_weather Tilemap Weather
+ * 
+ * \{
+ */
+
+ #define TILEMAP_WEATHER_CLEAR 0
+ #define TILEMAP_WEATHER_SNOW 1
+
+/*! \} */
+
+/**
  * \relates ::TILESET_TILE
  * \brief TILESET_TILE::flags bit flag indicating tile will block movement.
  */
@@ -40,6 +51,15 @@ uint16_t tilemap_fix_asset_path(
  * \param t ::MEMORY_PTR to a TILEMAP to redraw.
  */
 void tilemap_refresh_tiles( struct TILEMAP* t );
+
+/**
+ * \brief Set the \ref dsekai_tilemaps_weather of the given ::TILEMAP.
+ * \param t ::MEMORY_PTR to a TILEMAP to set the weather of.
+ * \param weather \ref dsekai_tilemaps_weather definition.
+ *
+ * This will start the relevant animation if necessary.
+ */
+void tilemap_set_weather( struct TILEMAP* t, uint8_t weather );
 
 /**
  * \brief Detect potential collision between a MOBILE and TILEMAP tile with
