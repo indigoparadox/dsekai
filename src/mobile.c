@@ -49,6 +49,16 @@ struct MOBILE* mobile_get_facing(
       }
    }
 
+   if(
+      m != &(state->player) &&
+      state->player.coords.x ==
+         m->coords.x + gc_mobile_x_offsets[m->dir] &&
+      state->player.coords.y ==
+         m->coords.y + gc_mobile_y_offsets[m->dir]
+   ) {
+      return &(state->player);
+   }
+
    return NULL;
 }
 
@@ -206,6 +216,7 @@ void mobile_deinit( struct MOBILE* m ) {
 
 void mobile_spawns( struct DSEKAI_STATE* state ) {
    int8_t i = 0;
+   struct MOBILE* mobile_iter = NULL;
   
    /* TODO: Allow spawners to spawn multiples. */
    /* TODO: Separate mobiles[i] from spawns[i]. */
@@ -213,31 +224,41 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
    assert( DSEKAI_MOBILES_MAX == TILEMAP_SPAWNS_MAX );
 
    for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
+      /* If the spawner has no name, skip it. */
       if( 0 == memory_strnlen_ptr(
          state->map.spawns[i].name, TILEMAP_SPAWN_NAME_SZ )
       ) {
          break;
       }
-      state->mobiles[i].name = state->map.spawns[i].name;
-      state->mobiles[i].hp = 100;
-      state->mobiles[i].mp = 100;
-      state->mobiles[i].coords.x = state->map.spawns[i].coords.x;
-      state->mobiles[i].coords.y = state->map.spawns[i].coords.y;
-      state->mobiles[i].coords_prev.x = state->map.spawns[i].coords.x;
-      state->mobiles[i].coords_prev.y = state->map.spawns[i].coords.y;
-      state->mobiles[i].steps_x = 0;
-      state->mobiles[i].steps_y = 0;
-      state->mobiles[i].inventory = NULL;
-      state->mobiles[i].script_id = state->map.spawns[i].script_id;
-      state->mobiles[i].script_pc = 0;
-      state->mobiles[i].script_next_ms = graphics_get_ms();
-      state->mobiles[i].active = 1;
-      resource_assign_id(
-         state->mobiles[i].sprite, state->map.spawns[i].type );
+
       if( 0 == memory_strncmp_ptr( "player", state->map.spawns[i].name, 6 ) ) {
+         if( state->player.active ) {
+            debug_printf( 2, "player already active" );
+            continue;
+         }
+         /* This is the player. */
          debug_printf( 2, "player is mobile #%d", i );
-         state->player_idx = i;
+         mobile_iter = &(state->player);
+      } else {
+         /* This is an NPC. */
+         mobile_iter = &(state->mobiles[i]);
       }
+
+      mobile_iter->name = state->map.spawns[i].name;
+      mobile_iter->hp = 100;
+      mobile_iter->mp = 100;
+      mobile_iter->coords.x = state->map.spawns[i].coords.x;
+      mobile_iter->coords.y = state->map.spawns[i].coords.y;
+      mobile_iter->coords_prev.x = state->map.spawns[i].coords.x;
+      mobile_iter->coords_prev.y = state->map.spawns[i].coords.y;
+      mobile_iter->steps_x = 0;
+      mobile_iter->steps_y = 0;
+      mobile_iter->inventory = NULL;
+      mobile_iter->script_id = state->map.spawns[i].script_id;
+      mobile_iter->script_pc = 0;
+      mobile_iter->script_next_ms = graphics_get_ms();
+      mobile_iter->active = 1;
+      resource_assign_id( mobile_iter->sprite, state->map.spawns[i].type );
    }
 
 }

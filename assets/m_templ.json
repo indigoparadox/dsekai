@@ -35,17 +35,6 @@
                  "width":8.25000000000003,
                  "x":227.789835074578,
                  "y":627.199405348578
-                }, 
-                {
-                 "height":8.5,
-                 "id":2,
-                 "name":"player",
-                 "rotation":0,
-                 "type":"16x16x4\/s_robe.bmp",
-                 "visible":true,
-                 "width":8.25,
-                 "x":227.5,
-                 "y":610.5
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -70,7 +59,7 @@
         {
          "name":"script_0",
          "type":"string",
-         "value":"t0f2s5g0i0w0x32767"
+         "value":"t0f2s5g0i0v4v1w0x32767"
         }, 
         {
          "name":"string_0",

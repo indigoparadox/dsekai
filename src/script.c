@@ -223,6 +223,9 @@ uint16_t script_handle_WARP(
    memory_zero_ptr( (MEMORY_PTR)(state->warp_to), TILEMAP_NAME_MAX );
    memory_strncpy_ptr( state->warp_to, t->strings[arg], TILEMAP_NAME_MAX );
 
+   state->warp_to_y = mobile_stack_pop( actor );
+   state->warp_to_x = mobile_stack_pop( actor );
+
    /* Freeze */
    return pc;
 }

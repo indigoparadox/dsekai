@@ -70,11 +70,9 @@ struct PACKED DSEKAI_STATE {
 
    /*! \brief Array of currently loaded MOBILE objects on this map. */
    struct MOBILE mobiles[DSEKAI_MOBILES_MAX];
+   struct MOBILE player;
 
    MEMORY_HANDLE engine_state_handle;
-
-   /*! \brief Index of the player MOBILE in DSEKAI_STATE::mobiles. */
-   uint16_t player_idx;
 
    uint8_t input_blocked_countdown;
    uint8_t ani_sprite_countdown;
@@ -84,6 +82,8 @@ struct PACKED DSEKAI_STATE {
    uint16_t windows_count;
 
    char warp_to[TILEMAP_NAME_MAX];
+   uint8_t warp_to_x;
+   uint8_t warp_to_y;
 
    uint16_t engine_state;
 

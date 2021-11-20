@@ -113,6 +113,17 @@ unilayer_main() {
             mobile_deinit( &(state->mobiles[i]) );
          }
 
+         /* Set the player's new position. */
+         state->player.coords.x = state->warp_to_x;
+         state->player.coords.y = state->warp_to_y;
+         state->player.coords_prev.x = state->warp_to_x;
+         state->player.coords_prev.y = state->warp_to_y;
+
+         /* Close any open windows (e.g. player state). */
+         while( state->windows_count > 0 ) {
+            window_pop( 0, state );
+         }
+
          tilemap_deinit( &(state->map) );
 
          if( (MEMORY_HANDLE)NULL != state->engine_state_handle ) {
