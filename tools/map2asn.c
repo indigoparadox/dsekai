@@ -103,6 +103,12 @@ int main( int argc, char* argv[] ) {
          continue;
       }
 
+      if( idx + 8 >= buffer_sz ) {
+         buffer_sz *= 2;
+         buffer = realloc( buffer, buffer_sz );
+         assert( NULL != buffer );
+      }
+
       buffer[idx++] = MAPBUF_ASN_SEQUENCE;
       buffer[idx++] = 
          1 + /* MAPBUF_ASN_STRING */
@@ -128,6 +134,11 @@ int main( int argc, char* argv[] ) {
    buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
 
    /* tiles */
+   if( idx + 6 >= buffer_sz ) {
+      buffer_sz *= 2;
+      buffer = realloc( buffer, buffer_sz );
+      assert( NULL != buffer );
+   }
    buffer[idx++] = MAPBUF_ASN_BLOB;
    buffer[idx++] = 0x82; /* 2 size bytes. */
    buffer_assign_short( &(buffer[idx]), TILEMAP_TS );
@@ -247,6 +258,12 @@ int main( int argc, char* argv[] ) {
             break;
          }
 
+         if( idx + 10 >= buffer_sz ) {
+            buffer_sz *= 2;
+            buffer = realloc( buffer, buffer_sz );
+            assert( NULL != buffer );
+         }
+
          buffer[idx++] = MAPBUF_ASN_SEQUENCE;
          step_sz_idx = idx;
          buffer[idx++] = 0;
@@ -290,7 +307,7 @@ int main( int argc, char* argv[] ) {
    /* Write the ASN map file to disk. */
    asn_file = fopen( argv[2], "wb" );
    assert( NULL != asn_file );
-   fwrite( buffer, idx, 1, asn_file );
+   fwrite( buffer, 1, idx, asn_file );
    fclose( asn_file );
    
    /*

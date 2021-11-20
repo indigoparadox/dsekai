@@ -141,10 +141,18 @@ static int8_t tilemap_json_tile(
       return tile_id_in;
    }
    tile_id_in--;
+
+   /* Negative values become 0. */
+   if( 0 > tile_id_in ) {
+      tile_id_in = 0;
+   }
+
    if( 0 == tile_idx % 2 ) {
+      /* Tile is the left of the byte. */
       tile_id_in <<= 4;
       tile_id_in &= 0xf0;
    } else {
+      /* Tile is the right of the byte. */
       tile_id_in &= 0x0f;
    }
 
