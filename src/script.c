@@ -270,6 +270,86 @@ uint16_t script_handle_POP(
    return pc + 1;
 }
 
+uint16_t script_handle_EQUAL_JUMP(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   int8_t val1 = 0,
+      val2 = 0;
+
+   val2 = mobile_stack_pop( actor );
+   val1 = mobile_stack_pop( actor );
+
+   return val1 == val2 ? 
+      script_goto_label( pc, script, SCRIPT_ACTION_START, arg ) : /* TRUE */
+      pc + 1;                                                     /* FALSE */
+}
+
+uint16_t script_handle_GREATER_JUMP(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   int8_t val1 = 0,
+      val2 = 0;
+
+   val2 = mobile_stack_pop( actor );
+   val1 = mobile_stack_pop( actor );
+
+   return val1 > val2 ? 
+      script_goto_label( pc, script, SCRIPT_ACTION_START, arg ) : /* TRUE */
+      pc + 1;                                                     /* FALSE */
+}
+
+uint16_t script_handle_ADD(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   int8_t val1 = 0,
+      val2 = 0;
+
+   val2 = mobile_stack_pop( actor );
+   val1 = mobile_stack_pop( actor );
+
+   mobile_stack_push( actor, val1 + val2 );
+
+   return pc + 1;
+}
+
+uint16_t script_handle_SUBTRACT(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   int8_t val1 = 0,
+      val2 = 0;
+
+   val2 = mobile_stack_pop( actor );
+   val1 = mobile_stack_pop( actor );
+
+   mobile_stack_push( actor, val1 - val2 );
+
+   return pc + 1;
+}
+
+uint16_t script_handle_LESSER_JUMP(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   int8_t val1 = 0,
+      val2 = 0;
+
+   val2 = mobile_stack_pop( actor );
+   val1 = mobile_stack_pop( actor );
+
+   return val1 < val2 ? 
+      script_goto_label( pc, script, SCRIPT_ACTION_START, arg ) : /* TRUE */
+      pc + 1;                                                     /* FALSE */
+}
+
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;
 
 uint16_t script_parse_str(
