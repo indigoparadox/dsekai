@@ -308,22 +308,8 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
 
       window_push(
          WINDOW_ID_STATUS, WINDOW_STATUS_VISIBLE,
-         0, (SCREEN_TH * 16), STATUS_WINDOW_W, STATUS_WINDOW_H, 0, state );
-
-#if 0
-#ifndef HIDE_WELCOME_DIALOG
-#ifndef PLATFORM_PALM
-      state->engine_state = TOPDOWN_STATE_WELCOME;
-#ifdef RESOURCE_FILE
-      window_prefab_dialog(
-         WINDOW_ID_WELCOME, 1, "assets/16x16x4/s_pncess.bmp", state );
-#else
-      window_prefab_dialog(
-         WINDOW_ID_WELCOME, 1, s_pncess, state );
-#endif /* RESOURCE_FILE */
-#endif /* PLATFORM_PALM */
-#endif /* !HIDE_WELCOME_DIALOG */
-#endif
+         0, (SCREEN_TH * SPRITE_H), STATUS_WINDOW_W, STATUS_WINDOW_H, 0,
+         state );
 
       /* Force reset the weather to start the animation. */
       tilemap_set_weather( &(state->map), state->map.weather );

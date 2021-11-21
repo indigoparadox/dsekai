@@ -70,7 +70,7 @@ void mobile_state_animate( struct DSEKAI_STATE* state ) {
    state->ani_sprite_countdown = 0;
 
    if( 0 == state->ani_sprite_x ) {
-      state->ani_sprite_x = 16;
+      state->ani_sprite_x = SPRITE_W;
    } else {
       state->ani_sprite_x = 0;
    }

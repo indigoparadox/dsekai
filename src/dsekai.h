@@ -47,18 +47,6 @@ struct DSEKAI_STATE;
 #include "tmbin.h"
 #endif /* TILEMAP_FMT_BIN */
 
-/* === Limits === */
-
-#ifndef DSEKAI_MOBILES_MAX
-#define DSEKAI_MOBILES_MAX 20
-#endif /* !MOBILES_MAX */
-
-#ifndef DSEKAI_ITEMS_MAX
-#define DSEKAI_ITEMS_MAX 40
-#endif /* !DSEKAI_ITEMS_MAX */
-
-/* === Structs === */
-
 #include "engines.h"
 
 #endif /* !DSEKAI_H */

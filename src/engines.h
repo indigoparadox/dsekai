@@ -13,6 +13,17 @@
  *  \brief Macros, structs, and prototypes for the various engine types.
  */
 
+/**
+ * \addtogroup dsekai_engines_specific_struct DSekai Engine-Specific Struct
+ * \brief Structs containing information only used by certain engines.
+ *
+ * These are kept in a separate handle from the main ::DSEKAI_STATE, attached
+ * to DSEKAI_STATE::engine_state_handle. This handle is cleared and
+ * reallocated for the new engine when the engine changes.
+ *
+ * \{
+ */
+
 /*! \brief Display the title screen. */
 #define ENGINE_TYPE_NONE 0
 /*! \brief Use the topdown 2D engine. */
@@ -21,36 +32,17 @@
 #define ENGINE_TYPE_POV 2
 
 /**
- * \addtogroup dsekai_engines_title DSekai Title Engine
- * \brief Simple title screen engine.
- *
- * \{
+ * \brief State for ::ENGINE_TYPE_NONE. A simple title screen engine.
  */
-
-/*! \brief State for ::ENGINE_TYPE_NONE */
 struct TITLE_STATE {
    /*! \brief Index of the currently highlighted option. */
    uint8_t option_high;
 };
 
 /**
- * \brief Handler for ::ENGINE_TYPE_NONE.
- * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
- * \return 1 if engine should continue executing or 0 if it should quit.
+ * \brief State for ::ENGINE_TYPE_TOPDOWN. Displays a top-down 2-dimensional
+ *        view of the world.
  */
-int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args );
-
-/*! \} */
-
-/**
- * \addtogroup dsekai_engines_topdown DSekai Top-Down Engine
- * \brief Displays a top-down 2-dimensional view of the world.
- *
- * \{
- */
-
-/*! \brief State for ::ENGINE_TYPE_TOPDOWN */
 struct TOPDOWN_STATE {
    /*! \brief Left horizontal offset of the current viewport in pixels. */
    int16_t screen_scroll_x;
@@ -67,39 +59,17 @@ struct TOPDOWN_STATE {
 };
 
 /**
- * \brief Handler for ::ENGINE_TYPE_TOPDOWN.
- * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
- * \return 1 if engine should continue executing or 0 if it should quit.
+ * \brief State for ::ENGINE_TYPE_POV. Displays a first-person 3D view of the
+ *        world using raycasting.
  */
-int topdown_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
-
-/*! \} */
-
-/**
- * \addtogroup dsekai_engines_pov DSekai POV Engine
- * \brief (Indev) Displays a first-person 3D view of the world using raycasting.
- *
- * \{
- */
-
-/*! \brief State for ::ENGINE_TYPE_POV */
 struct POV_STATE {
    double plane_y;
 };
 
-/**
- * \brief Handler for ::ENGINE_TYPE_POV.
- * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
- * \return 1 if engine should continue executing or 0 if it should quit.
- */
-int pov_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
-
 /*! \} */
 
 /*! \brief General/shared state of the running engine in memory. */
-struct PACKED DSEKAI_STATE {
+struct DSEKAI_STATE {
    struct ITEM items[DSEKAI_ITEMS_MAX];
    uint16_t items_count;
 
@@ -107,24 +77,67 @@ struct PACKED DSEKAI_STATE {
 
    /*! \brief Array of currently loaded MOBILE objects on this map. */
    struct MOBILE mobiles[DSEKAI_MOBILES_MAX];
+   /*! \brief Currently active player MOBILE. Stays between maps. */
    struct MOBILE player;
 
+   /*!
+    * \brief Contains the currently loaded \ref dsekai_engines_specific_struct.
+    */
    MEMORY_HANDLE engine_state_handle;
 
    uint8_t input_blocked_countdown;
+
+   /*! \brief The number of loops until DSEKAI_STATE::ani_sprite_countdown
+    *         changes.
+    */
    uint8_t ani_sprite_countdown;
+   /*! \brief The horizontal offset of all on-screen ::MOBILE sprites in pixels.
+    */
    uint16_t ani_sprite_x;
 
+   /*! \brief Contains ::WINDOW structs currently on-screen. */
    MEMORY_HANDLE windows_handle;
+   /*! \brief Number of active ::WINDOW structs in DSEKAI_STATE::windows_handle.
+    */
    uint16_t windows_count;
 
+   /*! \brief When holding a valid string, triggers the map change process. */
    char warp_to[TILEMAP_NAME_MAX];
+   /*! \brief Sets the player MOBILE::coords horizontal on map change. */
    uint8_t warp_to_x;
+   /*! \brief Sets the player MOBILE::coords vertical on map change. */
    uint8_t warp_to_y;
 
    uint16_t engine_state;
 
 };
+
+/**
+ * \relates TITLE_STATE
+ * \brief Handler for ::ENGINE_TYPE_NONE.
+ * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
+ * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
+ * \return 1 if engine should continue executing or 0 if it should quit.
+ */
+int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args );
+
+/**
+ * \relates TOPDOWN_STATE
+ * \brief Handler for ::ENGINE_TYPE_TOPDOWN.
+ * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
+ * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
+ * \return 1 if engine should continue executing or 0 if it should quit.
+ */
+int topdown_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
+
+/**
+ * \relates POV_STATE
+ * \brief Handler for ::ENGINE_TYPE_POV.
+ * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
+ * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
+ * \return 1 if engine should continue executing or 0 if it should quit.
+ */
+int pov_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
 
 /*! \} */
 
