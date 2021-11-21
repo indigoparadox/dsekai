@@ -24,7 +24,6 @@ struct DSEKAI_STATE;
 
 #include "tmstruct.h"
 
-#include "engines.h"
 #ifdef RESOURCE_FILE
 #include "json.h"
 #include "asn.h"
@@ -60,35 +59,7 @@ struct DSEKAI_STATE;
 
 /* === Structs === */
 
-struct WINDOW;
-
-/*! \brief General/shared state of the running engine in memory. */
-struct PACKED DSEKAI_STATE {
-   struct ITEM items[DSEKAI_ITEMS_MAX];
-   uint16_t items_count;
-
-   struct TILEMAP map;
-
-   /*! \brief Array of currently loaded MOBILE objects on this map. */
-   struct MOBILE mobiles[DSEKAI_MOBILES_MAX];
-   struct MOBILE player;
-
-   MEMORY_HANDLE engine_state_handle;
-
-   uint8_t input_blocked_countdown;
-   uint8_t ani_sprite_countdown;
-   uint16_t ani_sprite_x;
-
-   MEMORY_HANDLE windows_handle;
-   uint16_t windows_count;
-
-   char warp_to[TILEMAP_NAME_MAX];
-   uint8_t warp_to_x;
-   uint8_t warp_to_y;
-
-   uint16_t engine_state;
-
-};
+#include "engines.h"
 
 #endif /* !DSEKAI_H */
 
