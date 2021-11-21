@@ -47,12 +47,18 @@ int main( int argc, char* argv[] ) {
    
    /* version */
    idx = asn_write_int( &buffer, &buffer_sz, idx, 1 );
+   assert( 0 <= idx );
 
    /* name */
    idx = asn_write_string( &buffer, &buffer_sz, idx, t.name, TILEMAP_NAME_MAX );
+   assert( 0 <= idx );
 
    /* engine_type */
    idx = asn_write_int( &buffer, &buffer_sz, idx, t.engine_type );
+   assert( 0 <= idx );
+
+   /* weather */
+   idx = asn_write_int( &buffer, &buffer_sz, idx, t.weather );
    assert( 0 <= idx );
 
    /* tileset */
@@ -84,6 +90,7 @@ int main( int argc, char* argv[] ) {
       /* image */
       idx = asn_write_string( &buffer, &buffer_sz, idx,
          t.tileset[i].image, RESOURCE_PATH_MAX );
+      assert( 0 <= idx );
 
       /* flags */
       idx = asn_write_int( &buffer, &buffer_sz, idx, t.tileset[i].flags );
@@ -119,6 +126,7 @@ int main( int argc, char* argv[] ) {
 
       idx = asn_write_string( &buffer, &buffer_sz, idx,
          t.strings[i], TILEMAP_STRINGS_SZ );
+      assert( 0 <= idx );
    }
 
    /* spawns */
@@ -149,6 +157,7 @@ int main( int argc, char* argv[] ) {
       /* name */
       idx = asn_write_string( &buffer, &buffer_sz, idx,
          t.spawns[i].name, TILEMAP_SPAWN_NAME_SZ );
+      assert( 0 <= idx );
 
       /* coords */
       buffer[idx++] = MAPBUF_ASN_SEQUENCE;
@@ -165,6 +174,7 @@ int main( int argc, char* argv[] ) {
       /* type */
       idx = asn_write_string( &buffer, &buffer_sz, idx,
          t.spawns[i].type, RESOURCE_PATH_MAX );
+      assert( 0 <= idx );
 
       /* script_id */
       idx = asn_write_int( &buffer, &buffer_sz, idx, t.spawns[i].script_id );

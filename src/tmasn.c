@@ -429,6 +429,13 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    }
    idx += read_sz;
 
+   /* weather */
+   read_sz = tilemap_asn_parse_int( &t->weather, 1, 0, &(asn_buffer[idx]) );
+   if( 0 == read_sz ) {
+      goto cleanup;
+   }
+   idx += read_sz;
+
    /* tileset */
    read_sz = tilemap_asn_parse_tileset( t, &(asn_buffer[idx]) );
    if( 0 == read_sz ) {
