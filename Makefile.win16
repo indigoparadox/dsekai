@@ -78,6 +78,12 @@ INCLUDES_WIN16 := \
 
 CFLAGS_WIN16 := -bt=windows -bw $(CFLAGS_OWC_GENERIC) -zp=1 $(DEFINES_WIN16) $(INCLUDES_WIN16)
 
+ifeq ($(FMT_JSON),TRUE)
+   CFLAGS_WIN16 += -mh
+else
+   CFLAGS_WIN16 += -mm
+endif
+
 ifneq ($(RESOURCE),DEFAULT)
    CFLAGS_WIN16 += $(subst -I ,-I=,$(DEFINES_RESOURCE))
 endif
