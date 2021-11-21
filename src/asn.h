@@ -31,6 +31,9 @@
 
 int32_t asn_write_int(
    uint8_t** p_buffer, int32_t* p_buffer_sz, int32_t idx, int32_t value );
+int32_t asn_write_string(
+   uint8_t** p_buffer, int32_t* p_buffer_sz, int32_t idx,
+   uint8_t* source, int32_t source_sz );
 
 /*! \} */
 

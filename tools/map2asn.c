@@ -6,38 +6,8 @@
 
 #include "../src/dsekai.h"
 
-#define MAPBUF_ASN_STRING     0x16
 #define MAPBUF_ASN_BLOB       0x04
 #define MAPBUF_ASN_SEQUENCE   0x30
-
-uint8_t* buffer_copy_bytes(
-   int* p_idx, uint8_t* buffer, int* p_buffer_sz, uint8_t* source, int source_sz
-) {
-   int i = 0;
-   uint8_t* buffer_new = NULL;
-
-   while( *p_idx + TILEMAP_NAME_MAX > *p_buffer_sz ) {
-      *p_buffer_sz *= 2;
-      debug_printf( 2, "resizing buffer to %d", *p_buffer_sz );
-      buffer_new = realloc( buffer, *p_buffer_sz );
-      if( NULL == buffer_new ) {
-         error_printf( "unable to resize buffer!" );
-         goto cleanup;
-      }
-      buffer = buffer_new;
-   }
-   for( i = *p_idx ; *p_buffer_sz > i ; i++ ) {
-      buffer[i] = 0;
-   }
-   if( 0 < source_sz ) {
-      memcpy( &(buffer[*p_idx]), source, source_sz );
-   }
-   *p_idx += source_sz;
-
-cleanup:
-
-   return buffer;
-}
 
 void buffer_assign_short( uint8_t* buffer, uint16_t n ) {
    buffer[0] = ((n & 0xff00) >> 8);
@@ -79,10 +49,7 @@ int main( int argc, char* argv[] ) {
    idx = asn_write_int( &buffer, &buffer_sz, idx, 1 );
 
    /* name */
-   buffer[idx++] = MAPBUF_ASN_STRING;
-   buffer[idx++] = strlen( t.name );
-   buffer = buffer_copy_bytes(
-      &idx, buffer, &buffer_sz, t.name, strlen( t.name ) );
+   idx = asn_write_string( &buffer, &buffer_sz, idx, t.name, TILEMAP_NAME_MAX );
 
    /* engine_type */
    idx = asn_write_int( &buffer, &buffer_sz, idx, t.engine_type );
@@ -115,11 +82,8 @@ int main( int argc, char* argv[] ) {
          1; /* flags */
 
       /* image */
-      buffer[idx++] = MAPBUF_ASN_STRING;
-      buffer[idx++] = strlen( t.tileset[i].image );
-      buffer = buffer_copy_bytes(
-         &idx, buffer, &buffer_sz,
-         t.tileset[i].image, strlen( t.tileset[i].image ) );
+      idx = asn_write_string( &buffer, &buffer_sz, idx,
+         t.tileset[i].image, RESOURCE_PATH_MAX );
 
       /* flags */
       idx = asn_write_int( &buffer, &buffer_sz, idx, t.tileset[i].flags );
@@ -153,11 +117,8 @@ int main( int argc, char* argv[] ) {
          continue;
       }
 
-      buffer[idx++] = MAPBUF_ASN_STRING;
-      buffer[idx++] = strlen( t.strings[i] );
-      buffer = buffer_copy_bytes(
-         &idx, buffer, &buffer_sz,
-         t.strings[i], strlen( t.strings[i] ) );
+      idx = asn_write_string( &buffer, &buffer_sz, idx,
+         t.strings[i], TILEMAP_STRINGS_SZ );
    }
 
    /* spawns */
@@ -186,11 +147,8 @@ int main( int argc, char* argv[] ) {
          3; /* script_id */
 
       /* name */
-      buffer[idx++] = MAPBUF_ASN_STRING;
-      buffer[idx++] = strlen( t.spawns[i].name );
-      buffer = buffer_copy_bytes(
-         &idx, buffer, &buffer_sz,
-         t.spawns[i].name, strlen( t.spawns[i].name ) );
+      idx = asn_write_string( &buffer, &buffer_sz, idx,
+         t.spawns[i].name, TILEMAP_SPAWN_NAME_SZ );
 
       /* coords */
       buffer[idx++] = MAPBUF_ASN_SEQUENCE;
@@ -205,11 +163,8 @@ int main( int argc, char* argv[] ) {
       assert( 0 <= idx );
 
       /* type */
-      buffer[idx++] = MAPBUF_ASN_STRING;
-      buffer[idx++] = strlen( t.spawns[i].type );
-      buffer = buffer_copy_bytes(
-         &idx, buffer, &buffer_sz,
-         t.spawns[i].type, strlen( t.spawns[i].type ) );
+      idx = asn_write_string( &buffer, &buffer_sz, idx,
+         t.spawns[i].type, RESOURCE_PATH_MAX );
 
       /* script_id */
       idx = asn_write_int( &buffer, &buffer_sz, idx, t.spawns[i].script_id );
