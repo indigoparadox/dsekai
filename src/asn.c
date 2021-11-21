@@ -40,22 +40,24 @@ static int32_t asn_raw_write_int(
 }
 
 static int32_t asn_ensure_buffer_sz(
-   uint8_t** p_buffer, int32_t* p_buffer_sz, int32_t idx, int32_t val_sz
+   MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t val_sz
 ) {
-   int32_t sz_of_sz = 1;
-   uint8_t* buffer_new = NULL;
+   int32_t sz_of_sz = 1,
+      buffer_sz = 0;
+   uint8_t* buffer = NULL;
 
    if( 127 < val_sz ) {
       sz_of_sz = asn_get_int_sz( val_sz ) + 1; /* +1 for 0x80 | sz_of_sz */
    }
 
    /* Grow the buffer if we need to. */
-   while( idx + val_sz + sz_of_sz >= *p_buffer_sz ) {
+   buffer_sz = memory_sz( *ph_buffer );
+   assert( 0 < buffer_sz );
+   while( idx + val_sz + sz_of_sz >= buffer_sz ) {
       debug_printf( 2, "growing buffer from %d to %d bytes",
-         *p_buffer_sz, *p_buffer_sz * 2 );
-      (*p_buffer_sz) *= 2;
-      buffer_new = realloc( *p_buffer, *p_buffer_sz );
-      if( NULL == buffer_new ) {
+         buffer_sz, buffer_sz * 2 );
+      assert( buffer_sz < buffer_sz * 2 );
+      if( 0 >= memory_resize( ph_buffer, buffer_sz * 2 ) ) {
          error_printf( "unable to expand buffer" );
 
          /* We haven't written to the buffer yet, so caller can use same
@@ -63,30 +65,33 @@ static int32_t asn_ensure_buffer_sz(
           */
          return ASN_ERROR_UNABLE_TO_ALLOCATE;
       }
-      *p_buffer = buffer_new;
+      buffer_sz = memory_sz( *ph_buffer );
    }
 
-   return *p_buffer_sz;
+   return memory_sz( *ph_buffer );
 }
 
-int32_t asn_write_int(
-   uint8_t** p_buffer, int32_t* p_buffer_sz, int32_t idx, int32_t value
-) {
+int32_t asn_write_int( MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t value ) {
    int32_t i = 0,
       val_sz = 0;
+   uint8_t* buffer = NULL;
+   int32_t retval = 0;
    
    val_sz = asn_get_int_sz( value );
    if( 0 >= val_sz ) {
       error_printf( "invalid value size" );
-      return ASN_ERROR_INVALID_VALUE_SZ;
+      idx = ASN_ERROR_INVALID_VALUE_SZ;
+      goto cleanup;
    }
    debug_printf( 1, "(offset 0x%02x) value %d (0x%02x) is %d byte(s)",
       idx, value, value, val_sz );
 
    /* Grow the buffer if we need to. */
-   if( 0 >= asn_ensure_buffer_sz( p_buffer, p_buffer_sz, idx, val_sz ) ) {
+   retval = asn_ensure_buffer_sz( ph_buffer, idx, val_sz );
+   if( 0 >= retval ) {
       error_printf( "unable to grow buffer" );
-      return ASN_ERROR_UNABLE_TO_ALLOCATE;
+      idx = retval;
+      goto cleanup;
    }
 
    /* >32-bit ints not supported. */
@@ -94,65 +99,158 @@ int32_t asn_write_int(
 
    /* Start writing to the buffer! */
 
+   buffer = memory_lock( *ph_buffer );
+   if( NULL == buffer ) {
+      error_printf( "unable to lock buffer" );
+      idx = ASN_ERROR_UNABLE_TO_LOCK;
+      goto cleanup;
+   }
+
    /* Write the int type to the buffer. */
    if( 0 <= value ) {
-      (*p_buffer)[idx++] = ASN_INT;
+      buffer[idx++] = ASN_INT;
    } else {
       debug_printf( 1, "value %d (0x%02x) is negative", value, value );
-      (*p_buffer)[idx++] = ASN_INT | 0x40;
+      buffer[idx++] = ASN_INT | 0x40;
    }
 
    /* Write the size of the int to the buffer. */
-   (*p_buffer)[idx++] = val_sz;
+   buffer[idx++] = val_sz;
 
    /* Write the actual value to the buffer. */
-   idx = asn_raw_write_int( *p_buffer, idx, value, val_sz );
+   idx = asn_raw_write_int( buffer, idx, value, val_sz );
+
+cleanup:
+
+   if( NULL != buffer ) {
+      buffer = memory_unlock( *ph_buffer );
+   }
 
    return idx;
 }
 
 int32_t asn_write_string(
-   uint8_t** p_buffer, int32_t* p_buffer_sz, int32_t idx,
-   uint8_t* source, int32_t source_sz
+   MEMORY_HANDLE* ph_buffer, int32_t idx, uint8_t* source, int32_t source_sz
 ) {
    int i = 0;
    int8_t sz_of_sz = 1;
    int32_t source_len = 0;
+   uint8_t* buffer = NULL;
+   int32_t retval = 0;
 
    source_len = memory_strnlen_ptr( source, source_sz );
 
    /* Get the size of the size. */
    sz_of_sz = asn_get_int_sz( source_len );
    if( 0 >= sz_of_sz ) {
-      return ASN_ERROR_INVALID_VALUE_SZ;
+      error_printf( "invalid value size" );
+      idx = ASN_ERROR_INVALID_VALUE_SZ;
+      goto cleanup;
    }
    debug_printf( 1, "string length %d (0x%02x) takes %d bytes",
       source_len, source_len, sz_of_sz );
 
    /* Grow the buffer if we need to. */
-   if( 0 >= asn_ensure_buffer_sz( p_buffer, p_buffer_sz, idx, source_len ) ) {
+   retval = asn_ensure_buffer_sz( ph_buffer, idx, source_len );
+   if( 0 >= retval ) {
       error_printf( "unable to grow buffer" );
-      return ASN_ERROR_UNABLE_TO_ALLOCATE;
+      idx = retval;
+      goto cleanup;
    }
 
    /* Start writing to the buffer! */
 
-   (*p_buffer)[idx++] = ASN_STRING;
+   buffer = memory_lock( *ph_buffer );
+   if( NULL == buffer ) {
+      error_printf( "unable to lock buffer" );
+      idx = ASN_ERROR_UNABLE_TO_LOCK;
+      goto cleanup;
+   }
+
+   buffer[idx++] = ASN_STRING;
 
    if( 127 < source_len ) {
       /* 0x80 | size of size, followed by size. */
-      (*p_buffer)[idx++] = 0x80 | sz_of_sz;
-      idx = asn_raw_write_int( *p_buffer, idx, source_len, sz_of_sz );
+      buffer[idx++] = 0x80 | sz_of_sz;
+      idx = asn_raw_write_int( buffer, idx, source_len, sz_of_sz );
    } else {
-      (*p_buffer)[idx++] = source_len;
+      buffer[idx++] = source_len;
    }
 
    for( i = idx ; idx + source_len > i ; i++ ) {
-      (*p_buffer)[i] = 0;
+      buffer[i] = 0;
    }
    if( 0 < source_len ) {
-      memory_copy_ptr( &((*p_buffer)[idx]), source, source_len );
+      memory_copy_ptr( &(buffer[idx]), source, source_len );
       idx += source_len;
+   }
+
+cleanup:
+
+   if( NULL != buffer ) {
+      buffer = memory_unlock( *ph_buffer );
+   }
+
+   return idx;
+}
+
+int32_t asn_write_blob(
+   MEMORY_HANDLE* ph_buffer, int32_t idx, uint8_t* source, int32_t source_sz
+) {
+   int i = 0;
+   int8_t sz_of_sz = 1;
+   uint8_t* buffer = NULL;
+   int32_t retval = 0;
+
+   /* Get the size of the size. */
+   sz_of_sz = asn_get_int_sz( source_sz );
+   if( 0 >= sz_of_sz ) {
+      error_printf( "invalid value size" );
+      idx = ASN_ERROR_INVALID_VALUE_SZ;
+      goto cleanup;
+   }
+   debug_printf( 1, "blob length %d (0x%02x) takes %d bytes",
+      source_sz, source_sz, sz_of_sz );
+
+   /* Grow the buffer if we need to. */
+   retval = asn_ensure_buffer_sz( ph_buffer, idx, source_sz );
+   if( 0 >= retval ) {
+      error_printf( "unable to grow buffer" );
+      idx = retval;
+      goto cleanup;
+   }
+
+   /* Start writing to the buffer! */
+
+   buffer = memory_lock( *ph_buffer );
+   if( NULL == buffer ) {
+      error_printf( "unable to lock buffer" );
+      idx = ASN_ERROR_UNABLE_TO_LOCK;
+      goto cleanup;
+   }
+
+   buffer[idx++] = ASN_BLOB;
+
+   if( 127 < source_sz ) {
+      /* 0x80 | size of size, followed by size. */
+      buffer[idx++] = 0x80 | sz_of_sz;
+      idx = asn_raw_write_int( buffer, idx, source_sz, sz_of_sz );
+   } else {
+      buffer[idx++] = source_sz;
+   }
+
+   for( i = idx ; idx + source_sz > i ; i++ ) {
+      buffer[i] = 0;
+   }
+   if( 0 < source_sz ) {
+      memory_copy_ptr( &(buffer[idx]), source, source_sz );
+      idx += source_sz;
+   }
+
+cleanup:
+
+   if( NULL != buffer ) {
+      buffer = memory_unlock( *ph_buffer );
    }
 
    return idx;

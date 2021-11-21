@@ -28,12 +28,13 @@
 
 #define ASN_ERROR_INVALID_VALUE_SZ -1
 #define ASN_ERROR_UNABLE_TO_ALLOCATE -2
+#define ASN_ERROR_UNABLE_TO_LOCK -3
 
-int32_t asn_write_int(
-   uint8_t** p_buffer, int32_t* p_buffer_sz, int32_t idx, int32_t value );
+int32_t asn_write_int( MEMORY_HANDLE* h_buffer, int32_t idx, int32_t value );
 int32_t asn_write_string(
-   uint8_t** p_buffer, int32_t* p_buffer_sz, int32_t idx,
-   uint8_t* source, int32_t source_sz );
+   MEMORY_HANDLE* h_buffer, int32_t idx, uint8_t* source, int32_t source_sz );
+int32_t asn_write_blob(
+   MEMORY_HANDLE* h_buffer, int32_t idx, uint8_t* source, int32_t source_sz );
 
 /*! \} */
 

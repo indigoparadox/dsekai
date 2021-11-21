@@ -87,7 +87,7 @@ struct PACKED TILEMAP {
    uint8_t weather;
    /*! \brief Array of prototype tiles all map tiles are based on. */
    struct TILESET_TILE tileset[TILEMAP_TILESETS_MAX];
-   /*! \brief Array of tiles composing the map. */
+   /*! \brief Array of 4-bit numbers representing tiles composing the map. */
    uint8_t tiles[(TILEMAP_TH * TILEMAP_TW) / 2];
    /*! \brief Special flag bitfields indicating each tile's behavior. */
    uint8_t tiles_flags[TILEMAP_TH * TILEMAP_TW];
