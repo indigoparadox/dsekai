@@ -59,6 +59,7 @@ MAP2ASN_C_FILES := \
    src/script.c \
    src/json.c \
    src/tmjson.c \
+   src/asn.c \
    unilayer/src/resource/file.c \
    unilayer/src/graphics.c \
    unilayer/src/graphics/nullg.c \
@@ -153,7 +154,7 @@ DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\" -DDSEKAI_GIT_HASH=\"$(GIT_H
 ifeq ($(RESOURCE),FILE)
 
    DEFINES_RESOURCE := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\""
-   DSEKAI_C_FILES_RES := unilayer/src/resource/file.c src/json.c
+   DSEKAI_C_FILES_RES := unilayer/src/resource/file.c src/json.c src/asn.c
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-file
 
    ifeq ($(FMT_ASN),TRUE)
@@ -275,7 +276,7 @@ CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE 
 CFLAGS_CONVERT := -DNO_RESEXT -g -DRESOURCE_FILE -Iunilayer/src
 CFLAGS_LOOKUPS := -g -Iunilayer/src
 CFLAGS_HEADPACK := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG
-CFLAGS_MAP2ASN := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG $(FLAGS_GCC_SANITIZE)
+CFLAGS_MAP2ASN := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=1 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG $(FLAGS_GCC_SANITIZE)
 
 $(BIN_CHECK): LDFLAGS := $(shell pkg-config check --libs) -g $(LDFLAGS_GCC_GENERIC)
 

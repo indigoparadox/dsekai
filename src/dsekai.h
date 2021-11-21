@@ -27,6 +27,7 @@ struct DSEKAI_STATE;
 #include "engines.h"
 #ifdef RESOURCE_FILE
 #include "json.h"
+#include "asn.h"
 #endif /* RESOURCE_FILE */
 #include "script.h"
 #include "item.h"

@@ -50,10 +50,10 @@ int main( int argc, char* argv[] ) {
       * asn_file = NULL;
    struct TILEMAP t;
    uint8_t* buffer = NULL;
+   int32_t buffer_sz = 32;
    int retval = 0,
       i = 0,
       j = 0,
-      buffer_sz = 32,
       idx = 0,
       scripts_count = 0,
       script_sz_idx = 0,
@@ -77,9 +77,7 @@ int main( int argc, char* argv[] ) {
    idx += 2; /* Come back for these bytes at the end. */
    
    /* version */
-   buffer[idx++] = MAPBUF_ASN_INT;
-   buffer[idx++] = 1;
-   buffer[idx++] = 1;
+   idx = asn_write_int( &buffer, &buffer_sz, idx, 1 );
 
    /* name */
    buffer[idx++] = MAPBUF_ASN_STRING;
@@ -88,9 +86,7 @@ int main( int argc, char* argv[] ) {
       &idx, buffer, &buffer_sz, t.name, strlen( t.name ) );
 
    /* engine_type */
-   buffer[idx++] = MAPBUF_ASN_INT;
-   buffer[idx++] = 1;
-   buffer[idx++] = t.engine_type;
+   idx = asn_write_int( &buffer, &buffer_sz, idx, t.engine_type );
 
    /* tileset */
    buffer[idx++] = MAPBUF_ASN_SEQUENCE;
@@ -126,9 +122,7 @@ int main( int argc, char* argv[] ) {
          t.tileset[i].image, strlen( t.tileset[i].image ) );
 
       /* flags */
-      buffer[idx++] = MAPBUF_ASN_INT;
-      buffer[idx++] = 1;
-      buffer[idx++] = t.tileset[i].flags;
+      idx = asn_write_int( &buffer, &buffer_sz, idx, t.tileset[i].flags );
    }
    debug_printf( 3, "tileset seq: %d bytes", idx - sz_idx );
    buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
@@ -169,6 +163,7 @@ int main( int argc, char* argv[] ) {
    buffer[idx++] = MAPBUF_ASN_SEQUENCE;
    /* TODO: This will fail if there are only 1 or 2 spawners. */
    buffer[idx++] = 0x82;
+   /* Hold on to the index of the size specifier until we know the size. */
    sz_idx = idx;
    idx += 2;
    for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
@@ -201,14 +196,10 @@ int main( int argc, char* argv[] ) {
       buffer[idx++] = 0x6;
 
       /* coords.x */
-      buffer[idx++] = MAPBUF_ASN_INT;
-      buffer[idx++] = 1;
-      buffer[idx++] = t.spawns[i].coords.x;
+      idx = asn_write_int( &buffer, &buffer_sz, idx, t.spawns[i].coords.x );
 
       /* coords.y */
-      buffer[idx++] = MAPBUF_ASN_INT;
-      buffer[idx++] = 1;
-      buffer[idx++] = t.spawns[i].coords.y;
+      idx = asn_write_int( &buffer, &buffer_sz, idx, t.spawns[i].coords.y );
 
       /* type */
       buffer[idx++] = MAPBUF_ASN_STRING;
@@ -219,16 +210,7 @@ int main( int argc, char* argv[] ) {
 
       /* script_id */
       buffer[idx] = MAPBUF_ASN_INT;
-      if( 0 > t.spawns[i].script_id ) {
-         /* Negative numbers prepended with a zero. */
-         buffer[idx++] |= 0x40; /* Negative */
-         buffer[idx++] = 1;
-         buffer[idx++] = t.spawns[i].script_id * 1;
-      } else {
-         idx++;
-         buffer[idx++] = 1;
-         buffer[idx++] = t.spawns[i].script_id;
-      }
+      idx = asn_write_int( &buffer, &buffer_sz, idx, t.spawns[i].script_id );
    }
    debug_printf( 3, "spawners seq: %d bytes", idx - sz_idx );
    buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
@@ -269,28 +251,12 @@ int main( int argc, char* argv[] ) {
          buffer[idx++] = 0;
 
          /* action */
-         buffer[idx++] = MAPBUF_ASN_INT;
-         if( t.scripts[i].steps[j].action > 255 ) {
-            buffer[idx++] = 2;
-            buffer_assign_short(
-               &(buffer[idx]), t.scripts[i].steps[j].action );
-            idx += 2;
-         } else {
-            buffer[idx++] = 1;
-            buffer[idx++] = t.scripts[i].steps[j].action;
-         }
+         idx = asn_write_int(
+            &buffer, &buffer_sz, idx, t.scripts[i].steps[j].action );
 
          /* arg */
-         buffer[idx++] = MAPBUF_ASN_INT;
-         if( t.scripts[i].steps[j].arg > 255 ) {
-            buffer[idx++] = 2;
-            buffer_assign_short(
-               &(buffer[idx]), t.scripts[i].steps[j].arg );
-            idx += 2;
-         } else {
-            buffer[idx++] = 1;
-            buffer[idx++] = t.scripts[i].steps[j].arg;
-         }
+         idx = asn_write_int(
+            &buffer, &buffer_sz, idx, t.scripts[i].steps[j].arg );
 
          buffer[step_sz_idx] = idx - step_sz_idx - 1;
       }
