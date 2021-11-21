@@ -7,7 +7,6 @@
 #include "../src/dsekai.h"
 
 #define MAPBUF_ASN_STRING     0x16
-#define MAPBUF_ASN_INT        0x02
 #define MAPBUF_ASN_BLOB       0x04
 #define MAPBUF_ASN_SEQUENCE   0x30
 
@@ -87,6 +86,7 @@ int main( int argc, char* argv[] ) {
 
    /* engine_type */
    idx = asn_write_int( &buffer, &buffer_sz, idx, t.engine_type );
+   assert( 0 <= idx );
 
    /* tileset */
    buffer[idx++] = MAPBUF_ASN_SEQUENCE;
@@ -123,6 +123,7 @@ int main( int argc, char* argv[] ) {
 
       /* flags */
       idx = asn_write_int( &buffer, &buffer_sz, idx, t.tileset[i].flags );
+      assert( 0 <= idx );
    }
    debug_printf( 3, "tileset seq: %d bytes", idx - sz_idx );
    buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
@@ -197,9 +198,11 @@ int main( int argc, char* argv[] ) {
 
       /* coords.x */
       idx = asn_write_int( &buffer, &buffer_sz, idx, t.spawns[i].coords.x );
+      assert( 0 <= idx );
 
       /* coords.y */
       idx = asn_write_int( &buffer, &buffer_sz, idx, t.spawns[i].coords.y );
+      assert( 0 <= idx );
 
       /* type */
       buffer[idx++] = MAPBUF_ASN_STRING;
@@ -209,8 +212,8 @@ int main( int argc, char* argv[] ) {
          t.spawns[i].type, strlen( t.spawns[i].type ) );
 
       /* script_id */
-      buffer[idx] = MAPBUF_ASN_INT;
       idx = asn_write_int( &buffer, &buffer_sz, idx, t.spawns[i].script_id );
+      assert( 0 <= idx );
    }
    debug_printf( 3, "spawners seq: %d bytes", idx - sz_idx );
    buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
@@ -253,10 +256,12 @@ int main( int argc, char* argv[] ) {
          /* action */
          idx = asn_write_int(
             &buffer, &buffer_sz, idx, t.scripts[i].steps[j].action );
+         assert( 0 <= idx );
 
          /* arg */
          idx = asn_write_int(
             &buffer, &buffer_sz, idx, t.scripts[i].steps[j].arg );
+         assert( 0 <= idx );
 
          buffer[step_sz_idx] = idx - step_sz_idx - 1;
       }
