@@ -34,6 +34,7 @@ HEADPACK_C_FILES := \
    src/mobile.c \
    src/script.c \
    src/json.c \
+   src/item.c \
    unilayer/src/resource/file.c \
    unilayer/src/graphics.c \
    unilayer/src/graphics/nullg.c \
@@ -60,19 +61,7 @@ MAP2ASN_C_FILES := \
    src/json.c \
    src/tmjson.c \
    src/asn.c \
-   unilayer/src/resource/file.c \
-   unilayer/src/graphics.c \
-   unilayer/src/graphics/nullg.c \
-   unilayer/src/memory/fakem.c \
-   unilayer/src/dio.c
-
-MAP2BIN_C_FILES := \
-   tools/map2bin.c \
-   src/tilemap.c \
-   src/mobile.c \
-   src/script.c \
-   src/json.c \
-   src/tmjson.c \
+   src/item.c \
    unilayer/src/resource/file.c \
    unilayer/src/graphics.c \
    unilayer/src/graphics/nullg.c \
@@ -257,6 +246,7 @@ DSEKAI_ASSETS_BITMAPS := \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/s_*.bmp) \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/t_*.bmp) \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/p_*.bmp) \
+   $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/i_*.bmp) \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/title.bmp)
 
 DSEKAI_ASSETS_MAPS_JSON := \
