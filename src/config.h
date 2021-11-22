@@ -58,6 +58,14 @@
 #define DSEKAI_ITEMS_MAX 40
 #endif /* !DSEKAI_ITEMS_MAX */
 
+#ifndef JSON_TOKENS_MAX
+#define JSON_TOKENS_MAX 4096
+#endif /* !JSON_TOKENS_MAX */
+
+#ifndef JSON_PATH_SZ
+#define JSON_PATH_SZ 255
+#endif /* !JSON_PATH_SZ */
+
 /*! \} */
 
 /*! \} */

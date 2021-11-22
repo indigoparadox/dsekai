@@ -166,6 +166,28 @@
                  "width":18.5,
                  "x":9.5,
                  "y":-43
+                }, 
+                {
+                 "height":12,
+                 "id":15,
+                 "name":"apple",
+                 "properties":[
+                        {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1235
+                        }, 
+                        {
+                         "name":"sprite",
+                         "type":"string",
+                         "value":"16x16x4\/i_apple.bmp"
+                        }],
+                 "rotation":0,
+                 "type":"food",
+                 "visible":true,
+                 "width":13.5,
+                 "x":48.5,
+                 "y":-41.5
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -174,7 +196,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":15,
+ "nextobjectid":16,
  "orientation":"orthogonal",
  "properties":[
         {
@@ -200,7 +222,7 @@
         {
          "name":"script_2",
          "type":"string",
-         "value":"t0f1s5g0i0p3x32767"
+         "value":"t0f1s5g0i0p3h1235x32767"
         }, 
         {
          "name":"script_3",
@@ -235,7 +257,7 @@
         {
          "name":"string_3",
          "type":"string",
-         "value":"It's a secret tree!"
+         "value":"Found a fruit!"
         }, 
         {
          "name":"string_4",

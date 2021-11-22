@@ -3,7 +3,7 @@
 
 static int16_t tilemap_json_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
-   struct jsmntok* tokens, uint16_t tokens_sz,
+   struct jsmntok* tokens, int16_t tokens_sz,
    char* json_buffer, uint16_t json_buffer_sz,
    RESOURCE_ID map_path
 ) {
@@ -237,7 +237,7 @@ static int16_t tilemap_json_tilegrid(
 
 static int16_t tilemap_json_load_file(
    char* filename, char** json_buffer_p, RESOURCE_JSON_HANDLE* json_handle_p,
-   uint32_t* json_buffer_sz_p, uint16_t* tok_parsed_p, struct jsmntok* tokens
+   uint32_t* json_buffer_sz_p, int16_t* tok_parsed_p, struct jsmntok* tokens
 ) {
    if( NULL != *json_buffer_p ) {
       debug_printf( 1, "closing tilemap resource" );
@@ -256,6 +256,10 @@ static int16_t tilemap_json_load_file(
    memory_zero_ptr( tokens, JSON_TOKENS_MAX * sizeof( struct jsmntok ) );
    *tok_parsed_p = json_load(
       *json_buffer_p, *json_buffer_sz_p, tokens, JSON_TOKENS_MAX );
+   if( 0 > *tok_parsed_p ) {
+      error_printf( "unable to parse any tokens" );
+      return 0;
+   }
 
    debug_printf( 1, "parsed %d tokens", *tok_parsed_p );
 
@@ -264,7 +268,7 @@ static int16_t tilemap_json_load_file(
 
 void tilemap_json_parse_engine(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
-   struct jsmntok* tokens, uint16_t tokens_sz
+   struct jsmntok* tokens, int16_t tokens_sz
 ) {
    char engine_type[TILEMAP_NAME_MAX];
 
@@ -283,7 +287,7 @@ void tilemap_json_parse_engine(
 
 void tilemap_json_parse_weather(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
-   struct jsmntok* tokens, uint16_t tokens_sz
+   struct jsmntok* tokens, int16_t tokens_sz
 ) {
    char weather[TILEMAP_NAME_MAX];
 
@@ -301,7 +305,7 @@ void tilemap_json_parse_weather(
 int16_t tilemap_json_parse_items(
    struct TILEMAP* t,
    char* json_buffer, uint16_t json_buffer_sz,
-   struct jsmntok* tokens, uint16_t tokens_sz
+   struct jsmntok* tokens, int16_t tokens_sz
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t i = 0,
@@ -351,7 +355,7 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
    RESOURCE_JSON_HANDLE json_handle = (RESOURCE_JSON_HANDLE)0;
    MEMORY_HANDLE tokens_handle = (MEMORY_HANDLE)0;
    uint32_t json_buffer_sz = 0;
-   uint16_t ts_name_sz = 0,
+   int16_t ts_name_sz = 0,
       tok_parsed = 0;
    char ts_name[JSON_PATH_SZ];
    struct jsmntok* tokens = NULL;
