@@ -37,21 +37,6 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          /* Mark as dirty any on-screen tiles under an animation. */
          for( i = 0 ; ANIMATE_ANIMATIONS_MAX > i ; i++ ) {
 
-#if 0
-            if(
-               ANIMATE_FLAG_ACTIVE ==
-                  (g_animations[i].flags & ANIMATE_FLAG_ACTIVE)
-            ) {
-               debug_printf( 3, "%d %d vs %d %d %d %d",
-                  tile_px,
-                  tile_py,
-                  g_animations[i].x,
-                  g_animations[i].y,
-                  g_animations[i].w,
-                  g_animations[i].h );
-            }
-#endif
-
             if(
                ANIMATE_FLAG_ACTIVE ==
                   (g_animations[i].flags & ANIMATE_FLAG_ACTIVE) &&
