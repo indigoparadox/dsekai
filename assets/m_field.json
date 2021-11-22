@@ -154,9 +154,14 @@
                          "name":"gid",
                          "type":"int",
                          "value":1234
+                        }, 
+                        {
+                         "name":"sprite",
+                         "type":"string",
+                         "value":"16x16x4\/i_seed.bmp"
                         }],
                  "rotation":0,
-                 "type":"",
+                 "type":"seed",
                  "visible":true,
                  "width":18.5,
                  "x":9.5,
@@ -185,7 +190,7 @@
         {
          "name":"script_0",
          "type":"string",
-         "value":"t0f2r1s1r1s3f3l1s1l1s3g0i0p0x32767"
+         "value":"t0f2r1s1r1s3f3l1s1l1s3g0i0p0h1234x32767"
         }, 
         {
          "name":"script_1",
@@ -215,7 +220,7 @@
         {
          "name":"string_0",
          "type":"string",
-         "value":"Have you seen it?"
+         "value":"Try planting this."
         }, 
         {
          "name":"string_1",

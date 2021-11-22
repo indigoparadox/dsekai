@@ -57,6 +57,8 @@ typedef uint16_t (*SCRIPT_CB)(
  * \section scripting_commands_i INTERACT (i)
  *
  * \section scripting_commands_h GIVE (i)
+ * Give a "copy" of the item with the GID specified by arg and the owner
+ * ::ITEM_OWNER_META to the actee.
  *
  * \}
  */

@@ -214,7 +214,7 @@ uint16_t script_handle_WARP(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   if( arg < 0 || TILEMAP_STRINGS_MAX <= arg ) {
+   if( 0 > arg || TILEMAP_STRINGS_MAX <= arg ) {
       error_printf( "invalid warp map string index: %d", arg );
       return pc;
    }
@@ -358,6 +358,17 @@ uint16_t script_handle_ITEM_GIVE(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
+   int8_t i = 0;
+
+   for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
+      if( t->items[i].gid == arg ) {
+         item_give_mobile( &(t->items[i]), &(state->player), state );
+         return pc + 1;
+      }
+   }
+   
+   error_printf( "unable to give: invalid item GID: %d", arg );
+
    return pc + 1;
 }
 

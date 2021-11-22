@@ -263,8 +263,3 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
 
 }
 
-int8_t mobile_give_item( struct MOBILE* m, struct ITEM* e ) {
-   /* TODO: Fail if giving would result in two items existing w/ same true GID.
-    */
-}
-

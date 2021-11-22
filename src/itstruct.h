@@ -12,7 +12,10 @@
  *  \brief Structs pertaining to inventory objects.
  */
 
-/*! \brief The maximum characters in an item name. */
+/**
+ * \relates ITEM_NAME
+ * \brief The maximum characters in an ITEM::name.
+ */
 #define ITEM_NAME_SZ 8
 
 /**
@@ -25,8 +28,8 @@ struct PACKED ITEM {
    /*! \brief Engine-defined functionality of this item. */
    uint8_t type;
    /**
-    * \brief Index of the mobile holding this item in DSEKAI_STATE::mobiles.
-    *        Part of item_true_gid().
+    * \brief Index in DSEKAI_STATE::mobiles holding this item. Part of
+    *        item_true_gid().
     *
     * If the owner is ::ITEM_OWNER_NONE, this item has no owner and is sitting
     * free on the map.

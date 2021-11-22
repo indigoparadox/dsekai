@@ -15,3 +15,16 @@ void item_draw( const struct ITEM* i, int16_t screen_x, int16_t screen_y ) {
    */
 }
 
+int8_t item_give_mobile(
+   struct ITEM* e, struct MOBILE* m, struct DSEKAI_STATE* state
+) {
+
+   /* TODO: Test to make sure would dupe True GID OR incr counter depending on
+    *       item type.
+    */
+
+   debug_printf( 3, "giving item %d to %s", e->gid, m->name );
+
+   return 1;
+}
+
