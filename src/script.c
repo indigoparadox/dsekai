@@ -387,6 +387,17 @@ uint16_t script_handle_ITEM_TAKE(
    return pc + 1;
 }
 
+uint16_t script_handle_DIE(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   /* Trigger pre-death blinking effect. */
+   actor->hp = -10;
+
+   return pc + 1;
+}
+
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;
 
 uint16_t script_parse_str(

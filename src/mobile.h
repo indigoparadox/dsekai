@@ -16,8 +16,8 @@ struct PACKED MOBILE {
    /*! \brief The direction the mobile is currently facing. */
    uint8_t dir;
    uint8_t active;
-   uint8_t hp;
-   uint8_t mp;
+   int8_t hp;
+   int8_t mp;
    RESOURCE_ID sprite;
    /*! \brief Current tile on which object is located. */
    struct TILEMAP_COORDS coords;

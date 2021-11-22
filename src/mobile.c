@@ -114,10 +114,12 @@ struct MOBILE* mobile_interact(
 
    if( 
       NULL == actee ||
+      !actee->active ||
+      0 >= actee->hp ||
       0 > actee->script_id ||
       actee->script_id >= TILEMAP_SCRIPTS_MAX
    ) {
-      /* Invalid script. */
+      /* Inactive mobile or invalid script. */
       return NULL;
    }
 
@@ -147,10 +149,11 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    int16_t arg = 0;
 
    if(
+      !m->active ||
       0 > m->script_id ||
       m->script_id >= TILEMAP_SCRIPTS_MAX
    ) {
-      /* Invalid script. */
+      /* Mobile inactive or invalid script. */
       return;
    }
 
@@ -195,6 +198,7 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
    t->tiles_flags[(m->coords_prev.y * TILEMAP_TW) + m->coords_prev.x] |=
       TILEMAP_TILE_FLAG_DIRTY;
 
+   /* Sync up prev and current coords if no steps left. */
    if(
       m->coords.x != m->coords_prev.x ||
       m->coords.y != m->coords_prev.y
@@ -205,6 +209,14 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
       if( 0 == m->steps_y ) {
          m->coords_prev.y = m->coords.y;
       }
+   }
+
+   /* Use negative HP for blinking effect on death, or remove if we're up to -1.
+    */
+   if( -1 == m->hp ) {
+      m->active = 0;
+   } else if( 0 > m->hp ) {
+      m->hp++;
    }
 }
 

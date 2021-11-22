@@ -95,7 +95,11 @@ static void topdown_draw_mobile(
       x_offset = 0,
       y_offset = 0;
 
-   if( !m->active ) {
+   if(
+      !m->active ||
+      /* Pre-death blinking effect. */
+      (0 > m->hp && 0 == m->hp % 2)
+   ) {
       return;
    }
 

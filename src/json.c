@@ -9,7 +9,6 @@ int16_t json_load(
    int16_t tok_parsed = 0;
    jsmn_parser parser;
 
-   /* TODO: Move this over to json.c and dissolve this function. */
    if( '{' != json_buffer[0] ) {
       error_printf( "invalid json (must start with '{') found: %s",
          json_buffer );
@@ -20,7 +19,6 @@ int16_t json_load(
    tok_parsed = jsmn_parse(
       &parser, json_buffer, json_buffer_sz, tokens, tokens_sz );
 
-   /* TODO: Move this over to json.c and dissolve this function. */
    debug_printf( 2, "%d tokens parsed", tok_parsed );
    return tok_parsed;
 }
