@@ -232,7 +232,8 @@ int16_t json_str_from_path(
    int16_t id = 0,
       excerpt_sz = 0,
       i_src = 0,
-      i_dest = 0;
+      i_dest = 0,
+      escape = 0;
 
    debug_printf( 1, "fetching JSON path %s...", path );
 
@@ -251,11 +252,19 @@ int16_t json_str_from_path(
    }
    /* memory_copy_ptr( buffer, &(buf[tokens[id].start]), excerpt_sz ); */
    while( i_src < excerpt_sz && buf[tokens[id].start + i_src] != '\0' ) {
-      if( '\\' == buf[tokens[id].start + i_src] ) {
+      if( !escape && '\\' == buf[tokens[id].start + i_src] ) {
+         escape = 1;
          i_src++;
-         continue;
+
+      } else if( escape && 'n' == buf[tokens[id].start + i_src] ) {
+         buffer[i_dest++] = '\n';
+         i_src++;
+         escape = 0;
+         
+      } else {
+         buffer[i_dest++] = buf[tokens[id].start + i_src++];
+         escape = 0;
       }
-      buffer[i_dest++] = buf[tokens[id].start + i_src++];
    }
 
    /* Enforce NULL termination. */

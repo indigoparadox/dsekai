@@ -242,7 +242,7 @@
         {
          "name":"string_0",
          "type":"string",
-         "value":"Try planting this."
+         "value":"Try planting this\nin dirt."
         }, 
         {
          "name":"string_1",

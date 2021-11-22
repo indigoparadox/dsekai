@@ -50,6 +50,10 @@
  */
 #define CONTROL_COUNT_MAX           20
 
+#define CONTROL_PLACEMENT_CENTER -1
+#define CONTROL_PLACEMENT_GRID_RIGHT -2
+#define CONTROL_PLACEMENT_GRID_DOWN -3
+
 /*! \brief CONTROL::status indicating control is hidden/inactive. */
 #define CONTROL_STATE_NONE          0
 /*! \brief CONTROL::status indicating control is visible and interactive. */
