@@ -285,6 +285,50 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
    }
    fprintf( header_file, "   },\n" );
 
+   /* items */
+   fprintf( header_file, "   /* items */\n" );
+   fprintf( header_file, "   {\n" );
+   for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
+      fprintf( header_file, "      {\n" );
+      fprintf( header_file, "         /* sprite */\n" );
+
+      if( '\0' != t->items[i].sprite[0] ) {
+         ts_basename_idx = dio_basename(
+            t->items[i].sprite, strlen( t->items[i].sprite ) );
+
+         /* Blank out the filename extension. */
+         t->items[i].sprite[strlen( t->items[i].sprite ) - 4] = '\0';
+
+         /* items[i].sprite */
+         /* Let the preprocessor figure it out. */
+         fprintf( header_file, "         %s,\n",
+            &(t->items[i].sprite[ts_basename_idx]) );
+      } else {
+         fprintf( header_file, "         0,\n" );
+      }
+
+      fprintf( header_file, "         /* name */\n" );
+      fprintf( header_file, "         \"%s\",\n", t->items[i].name );
+
+      fprintf( header_file, "         /* type */\n" );
+      fprintf( header_file, "         %d,\n", t->items[i].type );
+
+      fprintf( header_file, "         /* owner */\n" );
+      fprintf( header_file, "         %d,\n", t->items[i].owner );
+
+      fprintf( header_file, "         /* gid */\n" );
+      fprintf( header_file, "         %d,\n", t->items[i].gid );
+
+      fprintf( header_file, "         /* data */\n" );
+      fprintf( header_file, "         %d,\n", t->items[i].data );
+
+      fprintf( header_file, "         /* count */\n" );
+      fprintf( header_file, "         %d,\n", t->items[i].count );
+
+      fprintf( header_file, "      },\n" );
+   }
+   fprintf( header_file, "   },\n" );
+
    fprintf( header_file, "};\n\n" );
 
    return 1;
@@ -320,6 +364,7 @@ int main( int argc, char* argv[] ) {
    /* Output header include guard start. */
    fprintf( header, "#ifndef RESEMB_H\n#define RESEMB_H\n\n" );
 
+   fprintf( header, "#include \"../../src/itstruct.h\"\n\n" );
    fprintf( header, "#include \"../../src/tmstruct.h\"\n\n" );
 
    /* fprintf( header, "#include \"residx.h\"\n\n" ); */

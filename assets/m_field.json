@@ -122,6 +122,45 @@
                  "width":12,
                  "x":81.5,
                  "y":243.5
+                }, 
+                {
+                 "height":14,
+                 "id":13,
+                 "name":"chest",
+                 "rotation":0,
+                 "type":"16x16x4\/s_fount.bmp",
+                 "visible":true,
+                 "width":15,
+                 "x":80,
+                 "y":159
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":3,
+         "name":"items",
+         "objects":[
+                {
+                 "height":12,
+                 "id":14,
+                 "name":"bseed",
+                 "properties":[
+                        {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1234
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":18.5,
+                 "x":9.5,
+                 "y":-43
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -129,8 +168,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":3,
- "nextobjectid":13,
+ "nextlayerid":4,
+ "nextobjectid":15,
  "orientation":"orthogonal",
  "properties":[
         {
@@ -167,6 +206,11 @@
          "name":"script_4",
          "type":"string",
          "value":"t0f2s5g0i0v5v1w5x32767"
+        }, 
+        {
+         "name":"script_5",
+         "type":"string",
+         "value":"t0f3s5g0i0x32767"
         }, 
         {
          "name":"string_0",

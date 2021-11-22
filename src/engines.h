@@ -139,6 +139,12 @@ int topdown_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
  */
 int pov_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
 
+/* TODO */
+/**
+ * \brief Change the currently loaded ::TILEMAP.
+ */
+void engines_change_map();
+
 /*! \} */
 
 #endif /* ENGINES_H */

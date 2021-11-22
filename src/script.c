@@ -353,6 +353,24 @@ uint16_t script_handle_LESSER_JUMP(
       pc + 1;                                                     /* FALSE */
 }
 
+uint16_t script_handle_ITEM_GIVE(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   return pc + 1;
+}
+
+uint16_t script_handle_ITEM_TAKE(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   /* TODO: Push onto the stack how many taken. */
+
+   return pc + 1;
+}
+
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;
 
 uint16_t script_parse_str(

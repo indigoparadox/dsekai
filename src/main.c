@@ -124,6 +124,9 @@ unilayer_main() {
             window_pop( 0, state );
          }
 
+         /* TODO: Clean up items held by NPC mobiles and items w/ no owners. */
+         /* TODO: Preserve ownerless items in save for this map. */
+
          tilemap_deinit( &(state->map) );
 
          if( (MEMORY_HANDLE)NULL != state->engine_state_handle ) {

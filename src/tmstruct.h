@@ -40,6 +40,7 @@
 /*! \brief Screen height in tiles. */
 #define SCREEN_TH (SCREEN_MAP_H / TILE_H)
 #define TILEMAP_TS ((TILEMAP_TH * TILEMAP_TW) / 2)
+#define TILEMAP_ITEMS_MAX 20
 
 /*! \brief X/Y coordinates of a tile on the current map. */
 struct PACKED TILEMAP_COORDS {
@@ -97,6 +98,7 @@ struct PACKED TILEMAP {
    char strings[TILEMAP_STRINGS_MAX][TILEMAP_STRINGS_SZ];
    /* \brief Scripts available to attach to any MOBILE. */
    struct SCRIPT scripts[TILEMAP_SCRIPTS_MAX];
+   struct ITEM items[TILEMAP_ITEMS_MAX];
 };
 
 /*! \} */

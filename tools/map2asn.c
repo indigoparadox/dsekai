@@ -19,7 +19,7 @@ int main( int argc, char* argv[] ) {
    struct TILEMAP t;
    MEMORY_HANDLE h_buffer = (MEMORY_HANDLE)NULL;
    uint8_t* buffer = NULL;
-   int32_t buffer_sz = 32;
+   int32_t buffer_sz = 2048;
    int retval = 0,
       i = 0,
       j = 0,

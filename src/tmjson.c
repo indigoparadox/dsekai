@@ -298,6 +298,69 @@ void tilemap_json_parse_weather(
    }
 }
 
+int16_t tilemap_json_parse_item(
+   struct TILEMAP* t, int16_t spawn_idx,
+   struct jsmntok* tokens, uint16_t tokens_sz,
+   char* json_buffer, uint16_t json_buffer_sz,
+   RESOURCE_ID map_path
+) {
+
+}
+
+int16_t tilemap_json_parse_items(
+   struct TILEMAP t,
+   struct jsmntok* tokens, uint16_t tokens_sz,
+   char* json_buffer, uint16_t json_buffer_sz,
+   RESOURCE_ID map_path
+) {
+   char iter_path[JSON_PATH_SZ];
+   int16_t i = 0,
+      j = 0,
+      type_buffer_sz = 0,
+      name_buffer_sz = 0,
+      gid_in = 0;
+   char name_buffer[ITEM_NAME_SZ + 1];
+   char type_buffer[ITEM_NAME_SZ + 1];
+   
+   /* Load items.*/
+   debug_printf( 2, "loading items" ); 
+   do {
+      
+      /* gid */
+      dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_GID, i );
+      gid_in = json_int_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+
+      if( 0 < gid_in ) {
+         /* Check to see if GID exists in global items. */
+         for( j = 0 ; DSEKAI_ITEMS_MAX > j ; j++ ) {
+         #if 0
+            if( state->items[j].gid == gid_in ) {
+               /* Dupe found! Skip. */
+            }
+         #endif
+         }
+      }
+
+      /* type */
+      dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_TYPE, i );
+      memory_zero_ptr( type_buffer, ITEM_NAME_SZ + 1 );
+      type_buffer_sz = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         type_buffer, ITEM_NAME_SZ,
+         &(tokens[0]), tokens_sz, json_buffer );
+      if( 0 >= name_buffer_sz ) {
+         error_printf( "invalid item returned (loaded %d)", i );
+         break;
+      }
+
+      /* TODO: Check to see if global items catalog is full. */
+
+      /* TODO: Check owner property to match item to non-meta owner. */
+   } while( 0 >= type_buffer_sz );
+
+}
+
 int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
    char* json_buffer = NULL;
    int16_t retval = 1;
