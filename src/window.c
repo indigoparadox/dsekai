@@ -45,6 +45,7 @@ void window_init() {
       sizeof( struct WINDOW_FRAME ) ); */
 
 #ifdef RESOURCE_FILE
+   /* TODO: Use assets path passed by build system. */
    resource_assign_id( frames[0].tr, "assets/" DEPTH_SPEC "/p_chk_tr.bmp" );
    resource_assign_id( frames[0].tl, "assets/" DEPTH_SPEC "/p_chk_tl.bmp" );
    resource_assign_id( frames[0].br, "assets/" DEPTH_SPEC "/p_chk_br.bmp" );

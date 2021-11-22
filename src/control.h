@@ -2,19 +2,52 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-/*! \file control.h
- *  \brief Tools for drawing and interacting with graphical UI elements.
+/**
+ * \addtogroup dsekai_gui
  *
- *  | Type                | Description                                 | data_scalar                          | data_res_id                       |
- *  |---------------------|---------------------------------------------|--------------------------------------|-----------------------------------|
- *  | CONTROL_TYPE_BUTTON | Selectable control to perform an action.    |                                      |                                   |
- *  | CONTROL_TYPE_LABEL_T| Static text display field.                  | Index of string in TILEMAP::strings. |                                   |
- *  | CONTROL_TYPE_LABEL_G| Static text display field.                  | Index of string in ::gc_static_strings. |                                   |
- *  | CONTROL_TYPE_CHECK  | Selectable control to indicate an option.   |                                      |                                   |
- *  | CONTROL_TYPE_SPRITE | Static image display field.                 |                                      | ::RESOURCE_ID of image to display.|
- *
+ * \{
  */
 
+/*! \file control.h
+ *  \brief Tools for drawing and interacting with graphical UI elements.
+ */
+
+/**
+ * \addtogroup dsekai_gui_controls_sect GUI Control Types
+ * \brief Types of controls that can be drawn on windows.
+ *
+ * \{
+ *
+ * \page dsekai_gui_controls GUI Control Types
+ *
+ * \section dsekai_gui_controls_button CONTROL_TYPE_BUTTON
+ * Selectable control to perform an action.
+ *
+ * \section dsekai_gui_controls_label_t CONTROL_TYPE_LABEL_T
+ * Static text display field.
+ * \subsection dsekai_gui_controls_label_t_scalar Scalar Data
+ * Index of string in TILEMAP::strings.
+ *
+ * \section dsekai_gui_controls_label_g CONTROL_TYPE_LABEL_G
+ * Static text display field.
+ * \subsection dsekai_gui_controls_label_g_scalar Scalar Data
+ * Index of string in ::gc_static_strings.
+ *
+ * \section dsekai_gui_controls_check CONTROL_TYPE_CHECK
+ * Selectable control to indicate an option.
+ *
+ * \section dsekai_gui_controls_sprite CONTROL_TYPE_SPRITE
+ * Static image display field.
+ * \subsection dsekai_gui_controls_sprite_res Resource ID
+ * ::RESOURCE_ID of image to display.
+ *
+ * \}
+ */
+
+/**
+ * \relates WINDOW
+ * \brief Maximum number of controls permitted in WINDOW::controls_handle.
+ */
 #define CONTROL_COUNT_MAX           20
 
 /*! \brief CONTROL::status indicating control is hidden/inactive. */
@@ -84,6 +117,11 @@ int16_t control_push(
    int32_t data_scalar, RESOURCE_ID data_res_id,
    uint32_t window_id, struct DSEKAI_STATE* state,
    const char strings[][TILEMAP_STRINGS_SZ] );
+
+/**
+ * \brief Remove the control with the given ID from the control stack for the
+ *        given window.
+ */
 void control_pop( uint32_t, uint32_t, struct DSEKAI_STATE* );
 void control_draw_all(
    struct WINDOW* w,
@@ -133,6 +171,8 @@ CONTROL_CB_TABLE( CONTROL_CB_TABLE_CONSTS );
 #endif /* CONTROL_C */
 
 #endif /* !PLATFORM_PALM */
+
+/*! \} */
 
 #endif /* CONTROL_H */
 
