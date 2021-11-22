@@ -130,6 +130,20 @@ else
    DEFINES_DEPTH := -DDEPTH_CGA -DDEPTH_SPEC=\"16x16x4\"
 endif
 
+ifeq ($(FMT_ASN),TRUE)
+   BINDIR := $(BINDIR)-asn
+   GENDIR := $(GENDIR)-asn
+   DEPDIR := $(DEPDIR)-asn
+   OBJDIR := $(OBJDIR)-asn
+endif
+
+ifeq ($(FMT_JSON),TRUE)
+   BINDIR := $(BINDIR)-json
+   GENDIR := $(GENDIR)-json
+   DEPDIR := $(DEPDIR)-json
+   OBJDIR := $(OBJDIR)-json
+endif
+
 BIN_SDL := $(BINDIR)/$(DSEKAI)
 BIN_DOS := $(BINDIR)/$(DSEKAI).exe
 BIN_XLIB := $(BINDIR)/$(DSEKAI)x
