@@ -70,12 +70,23 @@ struct POV_STATE {
 
 /*! \brief General/shared state of the running engine in memory. */
 struct DSEKAI_STATE {
+   /**
+    * \brief Array consisting of all items in the current game world.
+    *
+    * Items in this array are considered to "exist" when the first character
+    * of ITEM::name is not NULL or '\0'. Items with no name may be replaced by
+    * new items.
+    */
    struct ITEM items[DSEKAI_ITEMS_MAX];
-   uint16_t items_count;
 
    struct TILEMAP map;
 
-   /*! \brief Array of currently loaded MOBILE objects on this map. */
+   /**
+    * \brief Array of currently loaded MOBILE objects on this map.
+    *
+    * Mobiles in this array are considered to "exist" when
+    * ::MOBILE_FLAG_ACTIVE is enabled in their MOBILE::flags.
+    */
    struct MOBILE mobiles[DSEKAI_MOBILES_MAX];
    /*! \brief Currently active player MOBILE. Stays between maps. */
    struct MOBILE player;

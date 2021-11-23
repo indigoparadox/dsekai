@@ -53,7 +53,11 @@ int8_t item_give_mobile(
    }
 
    debug_printf( 3, "giving item %d to mobile %d", e->gid, m_idx );
-   /* TODO: Create item from template. */
+
+   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      /* TODO: Add item flags with an active item flag, like mobiles. */
+      /* TODO: Create item from template. */
+   }
 
    return 1;
 }

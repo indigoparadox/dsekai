@@ -20,6 +20,8 @@
 
 /**
  * An instance of an item in the world.
+ *
+ * See ::DSEKAI_STATE for context on how items are stored.
  */
 struct PACKED ITEM {
    RESOURCE_ID sprite;
