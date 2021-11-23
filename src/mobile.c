@@ -38,11 +38,14 @@ struct MOBILE* mobile_get_facing(
       }
 
       if(
-         state->mobiles[i].active && (
-            state->mobiles[i].coords.x ==
-               m->coords.x + gc_mobile_x_offsets[m->dir] &&
-            state->mobiles[i].coords.y ==
-               m->coords.y + gc_mobile_y_offsets[m->dir]
+         (
+            MOBILE_FLAG_ACTIVE ==
+               (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
+            ) && (
+               state->mobiles[i].coords.x ==
+                  m->coords.x + gc_mobile_x_offsets[m->dir] &&
+               state->mobiles[i].coords.y ==
+                  m->coords.y + gc_mobile_y_offsets[m->dir]
          )
       ) {
          return &(state->mobiles[i]);
@@ -114,7 +117,7 @@ struct MOBILE* mobile_interact(
 
    if( 
       NULL == actee ||
-      !actee->active ||
+      (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & actee->flags)) ||
       0 >= actee->hp ||
       0 > actee->script_id ||
       actee->script_id >= TILEMAP_SCRIPTS_MAX
@@ -149,7 +152,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    int16_t arg = 0;
 
    if(
-      !m->active ||
+      (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & m->flags)) ||
       0 > m->script_id ||
       m->script_id >= TILEMAP_SCRIPTS_MAX
    ) {
@@ -214,7 +217,7 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
    /* Use negative HP for blinking effect on death, or remove if we're up to -1.
     */
    if( -1 == m->hp ) {
-      m->active = 0;
+      m->flags &= ~MOBILE_FLAG_ACTIVE;
    } else if( 0 > m->hp ) {
       m->hp++;
    }
@@ -244,7 +247,9 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
       }
 
       if( 0 == memory_strncmp_ptr( "player", state->map.spawns[i].name, 6 ) ) {
-         if( state->player.active ) {
+         if(
+            MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & state->player.flags)
+         ) {
             debug_printf( 2, "player already active" );
             continue;
          }
@@ -269,7 +274,7 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
       mobile_iter->script_id = state->map.spawns[i].script_id;
       mobile_iter->script_pc = 0;
       mobile_iter->script_next_ms = graphics_get_ms();
-      mobile_iter->active = 1;
+      mobile_iter->flags = MOBILE_FLAG_ACTIVE;
       resource_assign_id( mobile_iter->sprite, state->map.spawns[i].type );
    }
 

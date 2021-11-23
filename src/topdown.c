@@ -96,8 +96,9 @@ static void topdown_draw_mobile(
       y_offset = 0;
 
    if(
-      !m->active ||
-      /* Pre-death blinking effect. */
+      /* Don't draw inactive mobiles. */
+      (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & m->flags)) ||
+      /* Pre-death blinking effect (skip negative even frames). */
       (0 > m->hp && 0 == m->hp % 2)
    ) {
       return;
@@ -140,7 +141,8 @@ static void topdown_draw_mobile(
    assert( SPRITE_W > x_offset );
    assert( SPRITE_H > y_offset );
 
-   if( m->active ) {
+   if( MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & m->flags) ) {
+      /* Blit the mobile's current sprite/frame. */
       graphics_blit_sprite_at(
          m->sprite,
          state->ani_sprite_x,
@@ -373,7 +375,10 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
          /* Pause scripts if modal window is pending. */
          mobile_execute( &(state->mobiles[i]), state );
       }
-      if( !state->mobiles[i].active ) {
+      if(
+         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
+      ) {
+         /* Skip animating inactive mobiles. */
          continue;
       }
       mobile_animate( &(state->mobiles[i]), &(state->map) );

@@ -44,8 +44,9 @@ int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       state->mobiles[0].coords_prev.x = 3;
       state->mobiles[0].coords_prev.y = 3;
       state->mobiles[0].script_id = -1;
-      state->mobiles[0].active = 1;
+      state->mobiles[0].flags = MOBILE_FLAG_ACTIVE;
       state->mobiles[0].dir = 2;
+      state->mobiles[0].hp = 100;
       resource_assign_id( state->mobiles[0].sprite, s_world );
 
       state->mobiles[1].coords.x = 5;
@@ -53,8 +54,9 @@ int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       state->mobiles[1].coords_prev.x = 3;
       state->mobiles[1].coords_prev.y = 3;
       state->mobiles[1].script_id = -1;
-      state->mobiles[1].active = 1;
+      state->mobiles[1].flags = MOBILE_FLAG_ACTIVE;
       state->mobiles[1].dir = 0;
+      state->mobiles[1].hp = 100;
       resource_assign_id( state->mobiles[1].sprite, s_world );
 
       state->mobiles[2].coords.x = 4;
@@ -62,8 +64,9 @@ int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       state->mobiles[2].coords_prev.x = 3;
       state->mobiles[2].coords_prev.y = 3;
       state->mobiles[2].script_id = -1;
-      state->mobiles[2].active = 1;
+      state->mobiles[2].flags = MOBILE_FLAG_ACTIVE;
       state->mobiles[2].dir = 3;
+      state->mobiles[2].hp = 100;
       resource_assign_id( state->mobiles[2].sprite, s_world );
 
       state->mobiles[3].coords.x = 5;
@@ -71,8 +74,9 @@ int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
       state->mobiles[3].coords_prev.x = 3;
       state->mobiles[3].coords_prev.y = 3;
       state->mobiles[3].script_id = -1;
-      state->mobiles[3].active = 1;
+      state->mobiles[3].flags = MOBILE_FLAG_ACTIVE;
       state->mobiles[3].dir = 1;
+      state->mobiles[3].hp = 100;
       resource_assign_id( state->mobiles[3].sprite, s_world );
 
       state->engine_state = ENGINE_STATE_RUNNING;
@@ -95,19 +99,20 @@ int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      if( !state->mobiles[i].active ) {
+      if(
+         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
+      ) {
          continue;
       }
 
-      if( state->mobiles[i].active ) {
-         graphics_blit_sprite_at(
-            state->mobiles[i].sprite,
-            state->ani_sprite_x,
-            state->mobiles[i].dir * SPRITE_H,
-            (state->mobiles[i].coords.x * SPRITE_W),
-            (state->mobiles[i].coords.y * SPRITE_H),
-            SPRITE_W, SPRITE_H );
-      }
+      /* Draw current mobile sprite/frame. */
+      graphics_blit_sprite_at(
+         state->mobiles[i].sprite,
+         state->ani_sprite_x,
+         state->mobiles[i].dir * SPRITE_H,
+         (state->mobiles[i].coords.x * SPRITE_W),
+         (state->mobiles[i].coords.y * SPRITE_H),
+         SPRITE_W, SPRITE_H );
    }
 
 

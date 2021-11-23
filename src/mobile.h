@@ -6,6 +6,8 @@
  *  \brief Structs, functions and macros pertaining to interactive objects.
  */
 
+#define MOBILE_FLAG_ACTIVE 0x01
+
 /* TODO: Give mobiles unique IDs. */
 
 /* TODO: Log when spawned, with name of spawner and unique ID spawned. */
@@ -15,7 +17,7 @@ struct PACKED MOBILE {
    char* name;
    /*! \brief The direction the mobile is currently facing. */
    uint8_t dir;
-   uint8_t active;
+   uint8_t flags;
    int8_t hp;
    int8_t mp;
    RESOURCE_ID sprite;
