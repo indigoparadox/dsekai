@@ -24,6 +24,7 @@ int main( int argc, char* argv[] ) {
       mark_seq_ts = 0,
       mark_seq_spawn = 0,
       mark_seq_spawn_coords = 0,
+      mark_seq_scripts = 0,
       sz_idx = 0,
       script_sz_idx = 0,
       step_sz_idx = 0;
@@ -45,19 +46,8 @@ int main( int argc, char* argv[] ) {
    }
    retval = 0;
 
-   #if 0
-   buffer = memory_lock( h_buffer );
-   assert( NULL != buffer );
-
-   buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-   buffer[idx++] = 0x82;
-   idx += 2; /* Come back for these bytes at the end. */
-
-   buffer = memory_unlock( h_buffer );
-   assert( NULL == buffer );
-   #endif
-
    idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_main );
+   assert( 0 <= idx );
    
    /* version */
    debug_printf( 3, "(offset 0x%02x) writing map version", idx );
@@ -79,41 +69,17 @@ int main( int argc, char* argv[] ) {
    idx = asn_write_int( &h_buffer, idx, t.weather );
    assert( 0 <= idx );
 
-#if 0
-   buffer = memory_lock( h_buffer );
-   assert( NULL != buffer );
-#endif
-
    /* tileset */
    debug_printf( 3, "(offset 0x%02x) writing map tilesets", idx );
-#if 0
-   buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-   /* TODO: This will fail if there are only 1 or 2 tiles. */
-   buffer[idx++] = 0x82;
-   sz_idx = idx;
-   idx += 2;
-#endif
    idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
+   assert( 0 < idx );
    for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
       if( 0 == strlen( t.tileset[i].image ) ) {
          continue;
       }
 
-#if 0
-      buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-      buffer[idx++] = 
-         1 + /* MAPBUF_ASN_STRING */
-         1 + /* string length */
-         strlen( t.tileset[i].image ) + /* string */
-         1 + /* MAPBUF_ASN_INT */
-         1 + /* int length */
-         1; /* flags */
-
-      buffer = memory_unlock( h_buffer );
-      assert( NULL == buffer );
-#endif
-
       idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_ts );
+      assert( 0 < idx );
    
       /* image */
       debug_printf( 3, "(offset 0x%02x) writing map tileset image", idx );
@@ -127,34 +93,15 @@ int main( int argc, char* argv[] ) {
       assert( 0 <= idx );
 
       idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_ts );
-
-#if 0
-      buffer = memory_lock( h_buffer );
-      assert( NULL != buffer );
-#endif
+      assert( 0 < idx );
    }
-#if 0
-   debug_printf( 3, "tileset seq: %d bytes", idx - sz_idx );
-   buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
-
-   buffer = memory_unlock( h_buffer );
-   assert( NULL == buffer );
-#endif
    idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
+   assert( 0 < idx );
 
    /* tiles */
    debug_printf( 3, "(offset 0x%02x) writing map tiles", idx );
    idx = asn_write_blob(
       &h_buffer, idx, t.tiles, ((TILEMAP_TH * TILEMAP_TW) / 2) );
-   #if 0
-   buffer[idx++] = MAPBUF_ASN_BLOB;
-   buffer[idx++] = 0x82; /* 2 size bytes. */
-   buffer_assign_short( &(buffer[idx]), TILEMAP_TS );
-   idx += 2;
-   for( i = 0 ; ((TILEMAP_TH * TILEMAP_TW) / 2) > i ; i++ ) {
-      buffer[idx++] = t.tiles[i];
-   }
-   #endif
 
    /* strings */
    for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
@@ -168,22 +115,10 @@ int main( int argc, char* argv[] ) {
       assert( 0 <= idx );
    }
 
-#if 0
-   buffer = memory_lock( h_buffer );
-   assert( NULL != buffer );
-#endif
-
    /* spawns */
    debug_printf( 3, "(offset 0x%02x) writing map spawns", idx );
    idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
-#if 0
-   buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-   /* TODO: This will fail if there are only 1 or 2 spawners. */
-   buffer[idx++] = 0x82;
-   /* Hold on to the index of the size specifier until we know the size. */
-   sz_idx = idx;
-   idx += 2;
-#endif
+   assert( 0 < idx );
    for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
       if( 0 == strlen( t.spawns[i].name ) ) {
          continue;
@@ -191,23 +126,7 @@ int main( int argc, char* argv[] ) {
 
       debug_printf( 3, "(offset 0x%02x) writing map spawn", idx );
       idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_spawn );
-#if 0
-      buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-      buffer[idx++] = 
-         1 + /* MAPBUF_ASN_STRING */
-         1 + /* name size */
-         strlen( t.spawns[i].name ) + /* name */
-         2 + /* coords header */
-         3 + /* coords.x */
-         3 + /* coords.y */
-         1 + /* MAPBUF_ASN_STRING */
-         1 + /* type size */
-         strlen( t.spawns[i].type ) + /* type */
-         3; /* script_id */
-
-      buffer = memory_unlock( h_buffer );
-      assert( NULL == buffer );
-#endif
+      assert( 0 < idx );
 
       /* name */
       debug_printf( 3, "(offset 0x%02x) writing map spawn name", idx );
@@ -215,19 +134,9 @@ int main( int argc, char* argv[] ) {
          &h_buffer, idx, t.spawns[i].name, TILEMAP_SPAWN_NAME_SZ );
       assert( 0 <= idx );
 
-      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_spawn_coords );
-#if 0
-      buffer = memory_lock( h_buffer );
-      assert( NULL != buffer );
-
       /* coords */
-      debug_printf( 3, "(offset 0x%02x) writing map spawn coords", idx );
-      buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-      buffer[idx++] = 0x6;
-
-      buffer = memory_unlock( h_buffer );
-      assert( NULL == buffer );
-#endif
+      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_spawn_coords );
+      assert( 0 < idx );
 
       /* coords.x */
       debug_printf( 3, "(offset 0x%02x) writing map spawn coords x", idx );
@@ -253,16 +162,9 @@ int main( int argc, char* argv[] ) {
       assert( 0 <= idx );
 
       idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_spawn );
-#if 0
-      buffer = memory_lock( h_buffer );
-      assert( NULL != buffer );
-#endif
    }
-#if 0
-   debug_printf( 3, "spawners seq: %d bytes", idx - sz_idx );
-   buffer_assign_short( &(buffer[sz_idx]), idx - sz_idx - 2 );
-#endif
    idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
+   assert( 0 < idx );
 
    /* scripts */
    for(
@@ -276,16 +178,14 @@ int main( int argc, char* argv[] ) {
    buffer = memory_lock( h_buffer );
    assert( NULL != buffer );
       
-   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
-   buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-   buffer[idx++] = 0x80;
-   /* buffer_assign_short(
-      &(buffer[idx]), sizeof( struct SCRIPT ) * scripts_count );
-   idx += 2; */
+   idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_scripts );
+   assert( 0 < idx );
    for( i = 0 ; scripts_count > i ; i++ ) {
-      buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-      script_sz_idx = idx;
-      buffer[idx++] = 0;
+      buffer = memory_unlock( h_buffer );
+      assert( NULL == buffer );
+      
+      idx = asn_write_seq_start( &h_buffer, idx, &script_sz_idx );
+      assert( 0 < idx );
 
       /* steps */
       for( j = 0 ; SCRIPT_STEPS_MAX > j ; j++ ) {
@@ -293,12 +193,8 @@ int main( int argc, char* argv[] ) {
             break;
          }
 
-         buffer[idx++] = MAPBUF_ASN_SEQUENCE;
-         step_sz_idx = idx;
-         buffer[idx++] = 0;
-
-         buffer = memory_unlock( h_buffer );
-         assert( NULL == buffer );
+         idx = asn_write_seq_start( &h_buffer, idx, &step_sz_idx );
+         assert( 0 < idx );
 
          /* action */
          debug_printf(
@@ -312,24 +208,17 @@ int main( int argc, char* argv[] ) {
          idx = asn_write_int( &h_buffer, idx, t.scripts[i].steps[j].arg );
          assert( 0 <= idx );
 
-         buffer = memory_lock( h_buffer );
-         assert( NULL != buffer );
-
-         buffer[step_sz_idx] = idx - step_sz_idx - 1;
+         idx = asn_write_seq_end( &h_buffer, idx, &step_sz_idx );
+         assert( 0 < idx );
       }
-      buffer[script_sz_idx] = idx - script_sz_idx - 1;
+      idx = asn_write_seq_end( &h_buffer, idx, &script_sz_idx );
+      assert( 0 < idx );
+
+      buffer = memory_lock( h_buffer );
+      assert( NULL != buffer );
    }
-   buffer[idx++] = 0;
-   buffer[idx++] = 0;
-
-#if 0
-   /* Go back and write size to header. */
-   buffer_assign_short( &(buffer[2]), idx - 4 ); /* -4 for seq header. */
-   debug_printf( 3, "%d bytes encoded (0x%02x 0x%02x)", idx,
-      ((idx & 0xff00) >> 8), idx & 0x00ff );
-#endif
-
-   buffer = memory_unlock( h_buffer );
+   idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_scripts );
+   assert( 0 < idx );
 
    idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_main );
    assert( 0 < idx );
