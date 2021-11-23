@@ -47,12 +47,14 @@ uint16_t tilemap_fix_asset_path(
    char* path_in, uint16_t path_in_sz, const char* map_path );
 
 /**
+ * \relates TILEMAP
  * \brief Force a redraw of all tiles on a TILEMAP by marking them dirty.
  * \param t ::MEMORY_PTR to a TILEMAP to redraw.
  */
 void tilemap_refresh_tiles( struct TILEMAP* t );
 
 /**
+ * \relates TILEMAP
  * \brief Set the \ref dsekai_tilemaps_weather of the given ::TILEMAP.
  * \param t ::MEMORY_PTR to a TILEMAP to set the weather of.
  * \param weather \ref dsekai_tilemaps_weather definition.
@@ -73,6 +75,7 @@ uint8_t tilemap_collide(
    struct MOBILE* m, uint8_t dir, struct TILEMAP* t );
 
 /**
+ * \relates TILEMAP
  * \brief Prepare a TILEMAP for deallocation.
  * \param t ::MEMORY_PTR to a TILEMAP to deinitialize.
  */
