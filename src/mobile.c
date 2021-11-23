@@ -270,7 +270,6 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
       mobile_iter->coords_prev.y = state->map.spawns[i].coords.y;
       mobile_iter->steps_x = 0;
       mobile_iter->steps_y = 0;
-      mobile_iter->inventory = NULL;
       mobile_iter->script_id = state->map.spawns[i].script_id;
       mobile_iter->script_pc = 0;
       mobile_iter->script_next_ms = graphics_get_ms();
