@@ -35,6 +35,10 @@ int32_t asn_write_string(
    MEMORY_HANDLE* h_buffer, int32_t idx, uint8_t* source, int32_t source_sz );
 int32_t asn_write_blob(
    MEMORY_HANDLE* h_buffer, int32_t idx, uint8_t* source, int32_t source_sz );
+int32_t asn_write_seq_start(
+   MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t* mark );
+int32_t asn_write_seq_end(
+   MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t* mark );
 
 /*! \} */
 

@@ -71,6 +71,21 @@ static int32_t asn_ensure_buffer_sz(
    return memory_sz( *ph_buffer );
 }
 
+static int32_t asn_write_sz(
+   uint8_t* buffer, int32_t idx, int32_t sz, int32_t sz_of_sz
+) {
+
+   if( 127 < sz ) {
+      /* 0x80 | size of size, followed by size. */
+      buffer[idx++] = 0x80 | sz_of_sz;
+      idx = asn_raw_write_int( buffer, idx, sz, sz_of_sz );
+   } else {
+      buffer[idx++] = sz;
+   }
+
+   return idx;
+}
+
 int32_t asn_write_int( MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t value ) {
    int32_t i = 0,
       val_sz = 0;
@@ -246,6 +261,74 @@ int32_t asn_write_blob(
       memory_copy_ptr( &(buffer[idx]), source, source_sz );
       idx += source_sz;
    }
+
+cleanup:
+
+   if( NULL != buffer ) {
+      buffer = memory_unlock( *ph_buffer );
+   }
+
+   return idx;
+}
+
+int32_t asn_write_seq_start(
+   MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t* mark
+) {
+   /* Note space to insert the metadata in asn_write_seq_end() later. */
+   *mark = idx;
+
+   return idx;
+}
+
+int32_t asn_write_seq_end(
+   MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t* mark
+) {
+   int32_t idx_diff = idx - *mark,
+      sz_of_sz = 0,
+      meta_idx = 0,
+      shift_offset = 0,
+      retval = 0,
+      i = 0;
+   uint8_t* buffer = NULL;
+   
+   /* Get the size of the difference (body of the sequence). */
+   sz_of_sz = asn_get_int_sz( idx_diff );
+   if( 0 >= sz_of_sz ) {
+      error_printf( "invalid value size" );
+      idx = ASN_ERROR_INVALID_VALUE_SZ;
+      goto cleanup;
+   }
+   debug_printf( 1, "sequence length %d (0x%02x) takes %d bytes",
+      idx_diff, idx_diff, sz_of_sz );
+
+   /* Grow the buffer if we need to. */
+   retval = asn_ensure_buffer_sz( ph_buffer, idx, idx_diff );
+   if( 0 >= retval ) {
+      error_printf( "unable to grow buffer" );
+      idx = retval;
+      goto cleanup;
+   }
+
+   /* Start writing to the buffer! */
+
+   buffer = memory_lock( *ph_buffer );
+   if( NULL == buffer ) {
+      error_printf( "unable to lock buffer" );
+      idx = ASN_ERROR_UNABLE_TO_LOCK;
+      goto cleanup;
+   }
+
+   shift_offset = sz_of_sz + 1 + (127 < idx_diff ? 1 : 0);
+   debug_printf( 2, "shifting sequence contents by %d bytes...", shift_offset );
+   for( i = idx + shift_offset ; (*mark) + shift_offset <= i ; i-- ) {
+      buffer[i] = buffer[i - shift_offset];
+   }
+
+   meta_idx = *mark;
+   buffer[meta_idx++] = ASN_SEQUENCE;
+   meta_idx = asn_write_sz( buffer, meta_idx, idx_diff, sz_of_sz );
+
+   idx += shift_offset;
 
 cleanup:
 
