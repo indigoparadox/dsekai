@@ -16,6 +16,13 @@
  * \{
  */
 
+/*! \file tmasn.h
+ *  \brief Definitions and functions for reading an ASN.1-formatted ::TILEMAP.
+ */
+
+/*! \brief Read size returned when there was a parsing error. */
+#define TILEMAP_ASN_ERROR_READ -1
+
 int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t );
 
 /*! \} */

@@ -39,6 +39,8 @@ int32_t asn_write_seq_start(
    MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t* mark );
 int32_t asn_write_seq_end(
    MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t* mark );
+int32_t asn_read_meta_ptr(
+   const uint8_t* buffer, int32_t idx, uint8_t* type_out, int32_t* sz_out );
 
 /*! \} */
 

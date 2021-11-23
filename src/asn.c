@@ -39,6 +39,30 @@ static int32_t asn_raw_write_int(
    return idx;
 }
 
+static int32_t asn_raw_read_int(
+   const uint8_t* buffer, int32_t idx, int32_t* value_out, int32_t value_sz
+) {
+   int32_t i = 0,
+      byte_scratch = 0; /* Buffer to hold byte while it is shifted. */
+
+   assert( 0 < value_sz );
+
+   for( i = value_sz - 1 ; 0 <= i ; i-- ) {
+      /* Grab the buffer and shift it to the left i times. */
+      byte_scratch = buffer[idx++];
+      byte_scratch <<= (i * 8);
+
+      *value_out |= byte_scratch;
+
+      /*
+      n_out |= (asn_buffer[0] << 8);
+      n_out |= asn_buffer[1];
+      */
+   }
+
+   return idx;
+}
+
 static int32_t asn_ensure_buffer_sz(
    MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t val_sz
 ) {
@@ -319,7 +343,7 @@ int32_t asn_write_seq_end(
    }
 
    shift_offset = sz_of_sz + 1 + (127 < idx_diff ? 1 : 0);
-   debug_printf( 2, "shifting sequence contents by %d bytes...", shift_offset );
+   debug_printf( 1, "shifting sequence contents by %d bytes...", shift_offset );
    for( i = idx + shift_offset ; (*mark) + shift_offset <= i ; i-- ) {
       buffer[i] = buffer[i - shift_offset];
    }
@@ -335,6 +359,31 @@ cleanup:
    if( NULL != buffer ) {
       buffer = memory_unlock( *ph_buffer );
    }
+
+   return idx;
+}
+
+int32_t asn_read_meta_ptr(
+   const uint8_t* buffer, int32_t idx, uint8_t* type_out, int32_t* sz_out
+) {
+   uint8_t sz_of_sz = 0;
+   int32_t i = 0;
+
+   *type_out = buffer[idx++];
+
+   if( 0x80 == (0x80 & buffer[idx]) ) {
+      /* Strip high bit. */
+      sz_of_sz = (buffer[idx++] & 0x7f);
+      *sz_out = 0;
+      idx = asn_raw_read_int( buffer, idx, sz_out, sz_of_sz );
+
+   } else {
+      /* Size of size is one byte long. */
+      *sz_out = buffer[idx++];
+   }
+
+   debug_printf(
+      1, "sequence type is %02x, %d bytes long", *type_out, *sz_out );
 
    return idx;
 }
