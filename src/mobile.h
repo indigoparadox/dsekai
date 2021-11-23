@@ -2,11 +2,28 @@
 #ifndef MOBILE_H
 #define MOBILE_H
 
+/**
+ * \addtogroup dsekai_mobiles Mobile Objects
+ * \brief Player- or script-controlled world objects or "mobiles".
+ *
+ * \{
+ */
+
 /*! \file mobile.h
  *  \brief Structs, functions and macros pertaining to interactive objects.
  */
 
+/**
+ * \relates MOBILE
+ * \brief MOBILE::flags indicating that this mobile is extant and active.
+ */
 #define MOBILE_FLAG_ACTIVE 0x01
+
+/**
+ * \relates MOBILE
+ * \brief Value to set MOBILE::hp to on death but before deactivation.
+ */
+#define MOBILE_HP_DEATH -10
 
 /* TODO: Give mobiles unique IDs. */
 
@@ -15,21 +32,34 @@
 /*! \brief A moving/interactive object in the world. */
 struct PACKED MOBILE {
    char* name;
-   /*! \brief The direction the mobile is currently facing. */
+   /**
+    * \brief Which of the \ref dsekai_mobiles_directions this mobile is
+    *        currently facing.
+    */
    uint8_t dir;
+   /*! \brief Flags affecting this mobile's display and behavior. */
    uint8_t flags;
+   /**
+    * \brief This mobile's hit points. Death occurs at zero.
+    *
+    * This value should be set to ::MOBILE_HP_DEATH on this mobile's death
+    * blow. From there, the engine will increment it up to its final value,
+    * -1, where the mobile will be deleted.
+    *
+    * This allows for a relatively simple "blinking" death animation to occur
+    * by hiding frames for mobiles on negative even HP values.
+    */
    int8_t hp;
    int8_t mp;
    RESOURCE_ID sprite;
-   /*! \brief Current tile on which object is located. */
+   /*! \brief Current tile on which this mobile is located. */
    struct TILEMAP_COORDS coords;
-   /*! \brief Previous tile, if object is currently moving. */
+   /*! \brief Previous tile, if this mobile is currently moving. */
    struct TILEMAP_COORDS coords_prev;
    /*! \brief Number of steps remaining on X axis in current walk animation. */
    uint8_t steps_x;
    /*! \brief Number of steps remaining on Y axis in current walk animation. */
    uint8_t steps_y;
-   struct ITEM* inventory;
    /*! \brief Index currently executing behavior script in TILEMAP::scripts. */
    int16_t script_id;
    /*! \brief Position in currently executing behavior script. */
@@ -44,6 +74,13 @@ struct PACKED MOBILE {
    uint32_t script_next_ms;
 };
 
+/**
+ * \addtogroup dsekai_mobiles_directions Cardinal Directions
+ * \brief Directions in which ::MOBILE objects may face.
+ *
+ * \{
+ */
+
 /*! \brief MOBILE::dir indicating down direction for movement/animation. */
 #define MOBILE_DIR_SOUTH   0
 /*! \brief MOBILE::dir indicating up direction for movement/animation. */
@@ -53,7 +90,10 @@ struct PACKED MOBILE {
 /*! \brief MOBILE::dir indicating left direction for movement/animation. */
 #define MOBILE_DIR_WEST    3
 
+/*! \} */
+
 /**
+ * \relates MOBILE
  * \brief Have the given MOBILE attempt to begin walking movement/animation.
  * \param m ::MEMORY_PTR to MOBILE that should attempt moving.
  * \param dir Index of direction offsets in ::gc_mobile_x_offsets.
@@ -64,6 +104,7 @@ struct PACKED MOBILE {
 uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
 
 /**
+ * \relates MOBILE
  * \brief Get a ::MEMORY_PTR to the mobile m is currently facing.
  * \param m MOBILE to center the check around.
  * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
@@ -73,6 +114,7 @@ struct MOBILE* mobile_get_facing(
    struct MOBILE* m, struct DSEKAI_STATE* state );
 
 /**
+ * \relates MOBILE
  * \brief Force a ::MOBILE to jump to the SCRIPT_ACTION_INTERACT in its
  *        ::SCRIPT.
  * \param actor ::MEMORY_PTR to the MOBILE sending the interact call.
@@ -89,6 +131,7 @@ struct MOBILE* mobile_interact(
 void mobile_state_animate( struct DSEKAI_STATE* state );
 
 /**
+ * \relates MOBILE
  * \brief Perform animation frame for the given MOBILE.
  * \param m ::MEMORY_PTR to MOBILE to animate.
  * \param t ::MEMORY_PTR to TILEMAP on which MOBILE is located.
@@ -102,6 +145,7 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t );
 void mobile_deinit( struct MOBILE* );
 
 /**
+ * \relates MOBILE
  * \brief Get the MOBILE being faced by a given MOBILE if there is one.
  * \param m ::MEMORY_PTR to a MOBILE on which to center the search.
  * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
@@ -110,6 +154,7 @@ void mobile_deinit( struct MOBILE* );
 struct MOBILE* mobile_get_dir( struct MOBILE* m, struct DSEKAI_STATE* state );
 
 /**
+ * \relates MOBILE
  * \brief Push a value onto MOBILE::script_stack.
  * \param m ::MEMORY_PTR to ::MOBILE on which to push to ::MOBILE::script_stack.
  * \param v Value to push onto the stack.
@@ -117,6 +162,7 @@ struct MOBILE* mobile_get_dir( struct MOBILE* m, struct DSEKAI_STATE* state );
 void mobile_stack_push( struct MOBILE* m, int8_t v );
 
 /**
+ * \relates MOBILE
  * \brief Pop a value from a MOBILE::script_stack.
  * \param m ::MEMORY_PTR to ::MOBILE from which to pop ::MOBILE::script_stack.
  * \return The value popped.
@@ -124,6 +170,7 @@ void mobile_stack_push( struct MOBILE* m, int8_t v );
 int8_t mobile_stack_pop( struct MOBILE* m );
 
 /**
+ * \relates MOBILE
  * \brief Execute the next available ::SCRIPT_STEP in the currently running
  *        ::SCRIPT on a MOBILE.
  * \param m ::MEMORY_PTR to the MOBILE running the desired ::SCRIPT.
@@ -161,6 +208,8 @@ extern const int8_t gc_mobile_y_offsets[4];
 /*! \brief Lookup table for horizontal offset based on MOBILE::dir. */
 extern const int8_t gc_mobile_x_offsets[4];
 #endif /* MOBILE_C */
+
+/*! \} */
 
 #endif /* MOBILE_H */
 
