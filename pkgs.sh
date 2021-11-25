@@ -25,7 +25,14 @@ if [ "$1" = "win" ] || [ -z "$1" ]; then
    make -f Makefile.win32 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_JSON=TRUE BUILD=$BUILD ARCFMT=ZIP pkg_win32 || exit
 fi
 
-if [ "$1" = "mac" ] || [ -z "$1" ]; then
-   make -f Makefile.mac6 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=MONO FMT_ASN=TRUE RESOURCE=FILE bin-file-mono/dsekai.APPL || exit
+if [ "$1" = "wasm" ] || [ -z "$1" ]; then
+   make -f Makefile.wasm DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA BUILD=$BUILD ARCFMT=ZIP pkg_wasm || exit
+   make -f Makefile.wasm DTHRESHOLD=$DEBUG_THRESHOLD BUILD=$BUILD ARCFMT=ZIP pkg_wasm || exit
 fi
+
+#if [ "$1" = "mac" ] || [ -z "$1" ]; then
+#   make -f Makefile.mac6 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=MONO FMT_ASN=TRUE RESOURCE=FILE bin-file-mono/dsekai.APPL || exit
+#fi
+
+echo "All packages built OK!"
 

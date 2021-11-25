@@ -355,6 +355,16 @@ define RESEXT_H_RULE
 		$(MD) $$(dir $$@)
 		cp $$< $$@
 
+   $(GENDIR)/$(platform)/%.wasm: %.wasm | \
+   $(GENDIR)/$(platform)/$(STAMPFILE)
+		$(MD) $$(dir $$@)
+		cp $$< $$@
+
+   $(GENDIR)/$(platform)/%.js: %.js | \
+   $(GENDIR)/$(platform)/$(STAMPFILE)
+		$(MD) $$(dir $$@)
+		cp $$< $$@
+
    # Preprocess JSON maps/tilesets for depth path.
    $(GENDIR)/$(platform)/$(ASSETDIR)/t2_%.json: $(ASSETDIR)/t2_%.json \
    | $(GENDIR)/$(platform)/$(STAMPFILE)

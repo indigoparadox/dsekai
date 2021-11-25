@@ -364,7 +364,9 @@ int main( int argc, char* argv[] ) {
    fprintf( header, "#include \"../../src/tmstruct.h\"\n" );
 
    /* TODO: Use dynamic path to resource header. */
+   fprintf( header, "#ifdef RESOURCE_FILE\n" );
    fprintf( header, "#include \"../../unilayer/src/resource/header.h\"\n" );
+   fprintf( header, "#endif /* RESOURCE_HEADER */\n" );
 
    fprintf( header, "\n" );
 

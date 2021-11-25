@@ -339,6 +339,10 @@ int16_t tilemap_json_parse_items(
          iter_path, JSON_PATH_SZ,
          sprite_buffer, RESOURCE_PATH_MAX,
          &(tokens[0]), tokens_sz, json_buffer );
+      if( 0 >= type_buffer_sz ) {
+         error_printf( "invalid item sprite returned (loaded %d)", i );
+         break;
+      }
       resource_assign_id( t->items[i].sprite, sprite_buffer );
 
       /* gid */

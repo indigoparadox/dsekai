@@ -194,13 +194,16 @@ uint16_t script_handle_SPEAK(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-#ifdef SCRIPT_HAS_GFX
-   window_prefab_dialog( WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state,
 #ifdef DEPTH_VGA
+   window_prefab_dialog( WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state,
       GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_MAGENTA );
-#else
+#elif defined( DEPTH_CGA )
+   window_prefab_dialog( WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state,
       GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA );
-#endif
+#elif defined( DEPTH_MONO )
+   /* TODO: Verify this looks OK. */
+   window_prefab_dialog( WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state,
+      GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_MAGENTA );
 #endif /* SCRIPT_HAS_GFX */
    return pc + 1;
 }

@@ -64,11 +64,15 @@ $(eval $(RESEXT_H_RULE))
 pkg_bin := $(BIN_WASM)
 pkg_strip := echo
 pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
-pkg_reqs :=
+pkg_reqs := \
+   $(BINDIR)/$(DSEKAI).wasm \
+   $(BINDIR)/$(DSEKAI).js
 $(eval $(PKG_RULE))
 
-$(BIN_WASM): $(DSEKAI_O_FILES_WASM) | $(BINDIR)/$(STAMPFILE)
-	$(LD_WASM) -o $@ $^ $(LDFLAGS_WASM)
+$(BIN_WASM) $(BINDIR)/$(DSEKAI).wasm $(BINDIR)/$(DSEKAI).js: \
+$(DSEKAI_O_FILES_WASM) | $(BINDIR)/$(STAMPFILE)
+	$(LD_WASM) -o $(BIN_WASM) $^ $(LDFLAGS_WASM)
+
 
 $(OBJDIR_WASM)/%.o: %.c $(RESEXT_H) | $(DSEKAI_ASSETS_MAPS_JSON)
 	$(MD) $(dir $@)
