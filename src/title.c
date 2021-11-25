@@ -10,7 +10,7 @@
 #endif /* PLATFORM_DOS */
 #endif /* RESOURCE_FILE */
 
-int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
+int title_loop( MEMORY_HANDLE state_handle ) {
    struct DSEKAI_STATE* state = NULL;
    int retval = 1,
       i = 0;
@@ -157,13 +157,13 @@ cleanup:
       if( '\0' != state->warp_to[0] ) {
          /* There's a warp-in map, so unload the current map and load it. */
          state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
-         engines_warp_loop( state_handle, args );
+         engines_warp_loop( state_handle );
       } else {
          state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
       }
    }
 
-   graphics_flip( args );
+   graphics_flip();
    return retval;
 }
 

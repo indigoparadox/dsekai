@@ -1,7 +1,7 @@
 
 #include "dsekai.h"
 
-int pov_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
+int pov_loop( MEMORY_HANDLE state_handle ) {
    struct DSEKAI_STATE* state = NULL;
    int retval = 1;
    uint8_t in_char = 0;
@@ -53,7 +53,7 @@ cleanup:
       state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
    }
 
-   graphics_flip( args );
+   graphics_flip();
    return retval;
 }
 

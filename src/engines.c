@@ -10,9 +10,7 @@ extern const struct TILEMAP* gc_map_structs[];
 extern const uint8_t gc_map_count;
 #endif /* !RESOURCE_FILE */
 
-int16_t engines_warp_loop(
-   MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args
-) {
+int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    int16_t retval = 1,
       map_retval = 0,
       i = 0;
@@ -113,12 +111,12 @@ int16_t engines_warp_loop(
    switch( state->map.engine_type ) {
    case ENGINE_TYPE_TOPDOWN:
       debug_printf( 2, "selecting topdown engine" );
-      loop_set( topdown_loop, state_handle, args );
+      unilayer_loop_set( topdown_loop, state_handle );
       break;
 
    case ENGINE_TYPE_POV:
       debug_printf( 2, "selecting pov engine" );
-      loop_set( pov_loop, state_handle, args );
+      unilayer_loop_set( pov_loop, state_handle );
       break;
 
    default:

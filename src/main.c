@@ -18,10 +18,9 @@ unilayer_main() {
 /* === Main Preamble === */
 
    struct DSEKAI_STATE* state = NULL;
-   struct GRAPHICS_ARGS graphics_args;
    int retval = 0;
 
-   platform_init( graphics_args, icon_dsekai );
+   platform_init( icon_dsekai );
 
    assert( 0 == TILEMAP_TW % 4 );
    assert( 0 == TILEMAP_TH % 4 );
@@ -48,7 +47,7 @@ unilayer_main() {
 
    /* Initialize subsystems. */
 
-   if( !graphics_init( &graphics_args ) ) {
+   if( !graphics_init() ) {
       error_printf( "unable to initialize graphics" );
       retval = 1;
       goto exit;
@@ -78,7 +77,7 @@ unilayer_main() {
 
    state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    state->engine_state = ENGINE_STATE_OPENING;
-   loop_set( title_loop, g_state_handle, &graphics_args );
+   unilayer_loop_set( title_loop, g_state_handle );
 
    /*
    state->warp_to[0] = 'f';
@@ -138,7 +137,7 @@ unilayer_main() {
 
    window_shutdown();
    script_shutdown();
-   graphics_shutdown( &graphics_args );
+   graphics_shutdown();
 
    logging_shutdown();
  

@@ -127,34 +127,30 @@ struct DSEKAI_STATE {
  * \relates TITLE_STATE
  * \brief Handler for ::ENGINE_TYPE_NONE.
  * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
  * \return 1 if engine should continue executing or 0 if it should quit.
  */
-int title_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args );
+int title_loop( MEMORY_HANDLE state_handle );
 
 /**
  * \relates TOPDOWN_STATE
  * \brief Handler for ::ENGINE_TYPE_TOPDOWN.
  * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
  * \return 1 if engine should continue executing or 0 if it should quit.
  */
-int topdown_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
+int topdown_loop( MEMORY_HANDLE state_handle );
 
 /**
  * \relates POV_STATE
  * \brief Handler for ::ENGINE_TYPE_POV.
  * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \param args ::MEMORY_PTR to ::GRAPHICS_ARGS to be passed to graphics_flip().
  * \return 1 if engine should continue executing or 0 if it should quit.
  */
-int pov_loop( MEMORY_HANDLE, struct GRAPHICS_ARGS* );
+int pov_loop( MEMORY_HANDLE state_handle );
 
 /**
  * \brief Change the currently loaded ::TILEMAP.
  */
-int16_t engines_warp_loop(
-   MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args );
+int16_t engines_warp_loop( MEMORY_HANDLE state_handle );
 
 /*! \} */
 

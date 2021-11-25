@@ -155,7 +155,7 @@ static void topdown_draw_mobile(
    }
 }
 
-int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
+int topdown_draw( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
    int in_char = 0,
       i = 0,
@@ -199,7 +199,7 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
       /* Drain input. */
       in_char = input_poll();
       if( INPUT_KEY_QUIT == in_char ) {
-         graphics_flip( args );
+         graphics_flip();
          retval = 0;
          goto cleanup;
       }
@@ -218,7 +218,7 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
       }
 
       /* Keep running. */
-      graphics_flip( args );
+      graphics_flip();
       retval = 1;
       goto cleanup;
    }
@@ -233,7 +233,7 @@ int topdown_draw( struct DSEKAI_STATE* state, struct GRAPHICS_ARGS* args ) {
    animate_frame();
 
    /* Keep running. */
-   graphics_flip( args );
+   graphics_flip();
 
 cleanup:
 
@@ -267,7 +267,7 @@ void topdown_focus_player( struct DSEKAI_STATE* state ) {
    gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
 }
 
-int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
+int topdown_loop( MEMORY_HANDLE state_handle ) {
    int i = 0;
    uint8_t in_char = 0;
    struct DSEKAI_STATE* state = NULL;
@@ -315,7 +315,7 @@ int topdown_loop( MEMORY_HANDLE state_handle, struct GRAPHICS_ARGS* args ) {
    in_char = 0;
 
    if( 0 >= window_modal( state ) ) {
-      topdown_draw( state, args );
+      topdown_draw( state );
    }
 
    window_draw_all( state );
@@ -431,13 +431,13 @@ cleanup:
       if( '\0' != state->warp_to[0] ) {
          /* There's a warp-in map, so unload the current map and load it. */
          state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
-         engines_warp_loop( state_handle, args );
+         engines_warp_loop( state_handle );
       } else {
          state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
       }
    }
 
-   graphics_flip( args );
+   graphics_flip();
 
    return retval;
 }
