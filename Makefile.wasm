@@ -45,7 +45,7 @@ INCLUDES_WASM := \
    -I unilayer/src \
    -I $(GENDIR_WASM)
 
-CFLAGS_WASM := $(CFLAGS_GCC_GENERIC) $(DEFINES_WASM) $(INCLUDES_WASM)
+CFLAGS_WASM := $(CFLAGS_GCC_GENERIC) $(DEFINES_WASM) $(INCLUDES_WASM) -s USE_SDL=2
 
 LDFLAGS_WASM := $(LDFLAGS_GCC_GENERIC)
 
@@ -56,8 +56,13 @@ res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
-#$(BIN_WASM): $(DSEKAI_O_FILES_WASM) | $(BINDIR)/$(STAMPFILE)
-bin/dsekai.js: $(DSEKAI_O_FILES_WASM) | $(BINDIR)/$(STAMPFILE)
+pkg_bin := $(BIN_WASM)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs :=
+$(eval $(PKG_RULE))
+
+$(BIN_WASM): $(DSEKAI_O_FILES_WASM) | $(BINDIR)/$(STAMPFILE)
 	$(LD_WASM) -o $@ $^ $(LDFLAGS_WASM)
 
 $(OBJDIR_WASM)/%.o: %.c $(RESEXT_H) | $(DSEKAI_ASSETS_MAPS_JSON)

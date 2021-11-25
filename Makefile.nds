@@ -1,4 +1,6 @@
 
+include Makefile
+
 # 1. Directories
 
 OBJDIR_NDS := $(OBJDIR)/nds
@@ -23,6 +25,8 @@ DSEKAI_O_FILES_NDS := \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY))) \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
+RESEXT_H := $(GENDIR_NDS)/resext.h
+
 # 3. Programs
 
 CC_NDS := arm-none-eabi-gcc
@@ -33,7 +37,23 @@ NDSTOOL := ndstool
 
 ARCH_NDS := -mthumb -mthumb-interwork
 
-CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -I$(DEVKITPRO)/libnds/include -DPLATFORM_NDS -DARM9 -g -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) -DUSE_SOFTWARE_TEXT $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(CFLAGS_GCC_GENERIC) $(DEFINES_DEPTH)
+DEFINES_NDS := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   $(DEFINES_RESOURCE) \
+   -DPLATFORM_NDS \
+   -DUSE_SOFTWARE_TEXT \
+   -DUSE_SOFTWARE_LINES \
+   -DARM9 \
+   -DSCREEN_W=160 \
+   -DSCREEN_H=160
+
+INCLUDES_NDS := \
+   -I unilayer/src \
+   -I $(GENDIR_NDS) \
+   -I$(DEVKITPRO)/libnds/include
+
+CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) $(INCLUDES_NDS) $(DEFINES_NDS)
 
 LIBS_NDS := -L$(DEVKITPRO)/libnds/lib -lnds9
 
@@ -45,7 +65,14 @@ $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 
 platform := nds
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_NDS)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs :=
+$(eval $(PKG_RULE))
 
 $(BIN_NDS): $(OBJDIR_NDS)/$(DSEKAI).elf $(GENDIR_NDS)/$(DSEKAI)-1.bmp
 	$(NDSTOOL) -c $@ -9 $< -b $(GENDIR_NDS)/$(DSEKAI)-1.bmp "$(DSEKAI);$(DSEKAI);$(DSEKAI)"
@@ -56,8 +83,7 @@ $(GENDIR_NDS)/$(DSEKAI)-1.bmp: $(ASSETDIR)/$(DSEKAI).ico
 $(OBJDIR_NDS)/$(DSEKAI).elf: $(DSEKAI_O_FILES_NDS)
 	$(LD_NDS) $(LDFLAGS_NDS) $^ $(LIBS_NDS) -o $@
 
-$(OBJDIR_NDS)/%.o: \
-%.c $(DSEKAI_ASSETS_MAPS_NDS) $(GENDIR_NDS)/resext.h
+$(OBJDIR_NDS)/%.o: %.c $(RESEXT_H) | $(BINDIR)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CC_NDS) $(CFLAGS_NDS) -c -o $@ $(<:%.o=%)
 
