@@ -1,6 +1,10 @@
 
 #include "tmjson.h"
 
+#ifndef RESOURCE_FILE
+#error Loading maps from JSON requires file resources!
+#endif /* !RESOURCE_FILE */
+
 static int16_t tilemap_json_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
    struct jsmntok* tokens, int16_t tokens_sz,
@@ -236,7 +240,7 @@ static int16_t tilemap_json_tilegrid(
 }
 
 static int16_t tilemap_json_load_file(
-   char* filename, char** json_buffer_p, RESOURCE_JSON_HANDLE* json_handle_p,
+   char* filename, char** json_buffer_p, RESOURCE_HANDLE* json_handle_p,
    uint32_t* json_buffer_sz_p, int16_t* tok_parsed_p, struct jsmntok* tokens
 ) {
    if( NULL != *json_buffer_p ) {
@@ -245,8 +249,8 @@ static int16_t tilemap_json_load_file(
       resource_free_handle( *json_handle_p );
    }
    debug_printf( 1, "opening tilemap resource: %s", filename );
-   *json_handle_p = resource_get_json_handle( filename );
-   if( (RESOURCE_JSON_HANDLE)0 == *json_handle_p ) {
+   *json_handle_p = resource_get_handle( filename );
+   if( (RESOURCE_HANDLE)0 == *json_handle_p ) {
       error_printf( "could not get handle for %s", filename );
       return 0;
    }
@@ -309,11 +313,8 @@ int16_t tilemap_json_parse_items(
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t i = 0,
-      j = 0,
-      type_buffer_sz = 0,
-      name_buffer_sz = 0,
       sprite_buffer_sz = 0,
-      gid_in = 0;
+      type_buffer_sz = 0;
    char sprite_buffer[RESOURCE_PATH_MAX],
       type_buffer[ITEM_NAME_SZ];
    
@@ -347,12 +348,13 @@ int16_t tilemap_json_parse_items(
 
    }
 
+   return i;
 }
 
 int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
    char* json_buffer = NULL;
    int16_t retval = 1;
-   RESOURCE_JSON_HANDLE json_handle = (RESOURCE_JSON_HANDLE)0;
+   RESOURCE_HANDLE json_handle = (RESOURCE_HANDLE)0;
    MEMORY_HANDLE tokens_handle = (MEMORY_HANDLE)0;
    uint32_t json_buffer_sz = 0;
    int16_t ts_name_sz = 0,
@@ -364,8 +366,8 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
    memory_zero_ptr( t, sizeof( struct TILEMAP ) );
 
    /* Allocate buffers for parsing JSON. */
-   json_handle = resource_get_json_handle( id );
-   if( (RESOURCE_JSON_HANDLE)0 == json_handle ) {
+   json_handle = resource_get_handle( id );
+   if( (RESOURCE_HANDLE)0 == json_handle ) {
       error_printf( "could not get tilemap resource handle" );
       retval = 0;
       goto cleanup;
@@ -482,7 +484,7 @@ cleanup:
       json_buffer = resource_unlock_handle( json_handle );
    }
 
-   if( (RESOURCE_JSON_HANDLE)0 != json_handle ) {
+   if( (RESOURCE_HANDLE)0 != json_handle ) {
       resource_free_handle( json_handle );
    }
 

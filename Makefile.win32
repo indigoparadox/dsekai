@@ -114,11 +114,11 @@ $(OBJDIR_WIN32)/%.o: %.c $(OBJDIR_WIN32)/win.res $(RESEXT_H)
 	$(MD) $(dir $@)
 	$(CC_WIN32) $(CFLAGS_WIN32) -fo=$@ $(<:%.c=%)
 
-$(DEPDIR_WIN32)/%.d: %.c $(RESEXT_H)
-	$(MD) $(dir $@)
-	$(HOST_CC) $(subst -i=,-I ,$(INCLUDES_WIN32)) $(DEFINES_WIN32) -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN32)/,$<)) -MF $@
+#$(DEPDIR_WIN32)/%.d: %.c $(RESEXT_H)
+#	$(MD) $(dir $@)
+#	$(HOST_CC) $(subst -i=,-I ,$(INCLUDES_WIN32)) $(DEFINES_WIN32) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN32)/,$<)) -MF $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN32:.o=.d))
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN32:.o=.d))
 
 

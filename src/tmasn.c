@@ -1,6 +1,10 @@
 
 #include "dsekai.h"
 
+#ifndef RESOURCE_FILE
+#error Loading maps from ASN requires file resources!
+#endif /* !RESOURCE_FILE */
+
 int16_t tilemap_asn_read_short( const uint8_t* asn_buffer ) {
    int16_t n_out = 0;
    n_out |= (asn_buffer[0] << 8);
@@ -395,13 +399,13 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    int16_t retval = 1,
       idx = 0;
    int32_t read_sz = 0;
-   RESOURCE_JSON_HANDLE asn_handle = (RESOURCE_JSON_HANDLE)0;
+   RESOURCE_HANDLE asn_handle = (RESOURCE_HANDLE)0;
 
    memory_zero_ptr( (MEMORY_PTR)t, sizeof( struct TILEMAP ) );
 
    /* Allocate buffers for parsing ASN.1. */
-   asn_handle = resource_get_json_handle( id );
-   if( (RESOURCE_JSON_HANDLE)0 == asn_handle ) {
+   asn_handle = resource_get_handle( id );
+   if( (RESOURCE_HANDLE)0 == asn_handle ) {
       error_printf( "could not get tilemap resource handle" );
       retval = 0;
       goto cleanup;
@@ -500,7 +504,7 @@ cleanup:
       resource_unlock_handle( asn_handle );
    }
 
-   if( (MEMORY_HANDLE)NULL != asn_handle ) {
+   if( (RESOURCE_HANDLE)NULL != asn_handle ) {
       resource_free_handle( asn_handle );
    }
 

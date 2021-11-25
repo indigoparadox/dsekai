@@ -72,9 +72,6 @@ MAP2ASN_C_FILES := \
 # ALL platforms.
 PLATFORMS := sdl xlib dos win16 win32 palm mac6 nds curses check_null
 
-# Platforms on which RESOURCE=FILE is working.
-PLATFORMS_FILE := sdl xlib win32
-
 ASSETDIR := assets
 ASSETPATH :=
 DTHRESHOLD := 2

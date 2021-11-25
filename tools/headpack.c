@@ -54,12 +54,15 @@ int path_to_define( const char* path, FILE* header ) {
    return written;
 }
 
+#define encode_generic_file_line( ... ) written = fprintf( header, __VA_ARGS__ ); if( 0 >= written ) { error_printf( "unable to write to header" ); goto cleanup; } total_written += written;
+
 int encode_generic_file( char* path, int id, FILE* header ) {
    unsigned char bin_buffer[BIN_BUFFER_SZ];
    int read = 0,
       j = 0,
       written = 0,
-      total_written = 0;
+      total_written = 0,
+      fsize = 0;
    FILE* bin = NULL;
 
    bin = fopen( path, "rb" );
@@ -68,52 +71,37 @@ int encode_generic_file( char* path, int id, FILE* header ) {
    }
 
    /* Create a static const in the output header to hold this blob. */
-   written = fprintf(
-      header, "static const " RES_TYPE " gsc_resource_%d[] = {\n   ",
+   encode_generic_file_line( 
+      "static const " RES_TYPE " gsc_resource_%d[] = {\n   ",
       /* Subtract 1 since this is argv (program name and output header args),
        * but we index from 1. */
       id - 1 );
-   if( 0 >= written ) {
-      error_printf( "unable to write to header" );
-      goto cleanup;
-   }
-   total_written += written;
 
-   written = fprintf( header, "   /* %s */\n", path );
-   if( 0 >= written ) {
-      error_printf( "unable to write to header" );
-      goto cleanup;
-   }
-   total_written += written;
+   encode_generic_file_line( "   /* %s */\n", path );
    
    /* Translate each byte into a hex number in the output header. */
    while( 0 < (read = fread( bin_buffer, 1, BIN_BUFFER_SZ, bin )) ) {
       for( j = 0 ; read > j ; j++ ) {
-         written = fprintf( header, "0x%02x, ", (unsigned char)bin_buffer[j] );
-         if( 0 >= written ) {
-            error_printf( "unable to write to header" );
-            goto cleanup;
-         }
-         total_written += written;
+         encode_generic_file_line( "0x%02x, ", (unsigned char)bin_buffer[j] );
       }
    }
 
    /* Add a null terminator. */
    if( PATH_TYPE_TXT == path_bin_or_txt( path ) ) {
-      written = fprintf( header, "0x00" );
-      if( 0 >= written ) {
-         error_printf( "unable to write to header" );
-         goto cleanup;
-      }
-      total_written += written;
+      encode_generic_file_line( "0x00" );
    }
 
-   written = fprintf( header, "\n};\n\n" );
-   if( 0 >= written ) {
-      error_printf( "unable to write to header" );
-      goto cleanup;
-   }
-   total_written += written;
+   encode_generic_file_line( "\n};\n\n" );
+
+   encode_generic_file_line(
+      "static const struct RESOURCE_HEADER_HANDLE gsc_resource_handle_%d[] = {\n   ",
+      id - 1 );
+
+   fsize = ftell( bin );
+   encode_generic_file_line( "gsc_resource_%d,\n   %d,\n   0",
+      id - 1, fsize );
+
+   encode_generic_file_line( "\n};\n\n" );
 
 cleanup:
 
@@ -372,8 +360,13 @@ int main( int argc, char* argv[] ) {
    /* Output header include guard start. */
    fprintf( header, "#ifndef RESEMB_H\n#define RESEMB_H\n\n" );
 
-   fprintf( header, "#include \"../../src/itstruct.h\"\n\n" );
-   fprintf( header, "#include \"../../src/tmstruct.h\"\n\n" );
+   fprintf( header, "#include \"../../src/itstruct.h\"\n" );
+   fprintf( header, "#include \"../../src/tmstruct.h\"\n" );
+
+   /* TODO: Use dynamic path to resource header. */
+   fprintf( header, "#include \"../../unilayer/src/resource/header.h\"\n" );
+
+   fprintf( header, "\n" );
 
    /* fprintf( header, "#include \"residx.h\"\n\n" ); */
 
@@ -425,7 +418,7 @@ int main( int argc, char* argv[] ) {
 
    /* Resource Index */
 
-   fprintf( header, "static const " RES_TYPE "* gsc_resources[] = {\n" );
+   fprintf( header, "static const struct RESOURCE_HEADER_HANDLE* gsc_resources[] = {\n" );
    fprintf( header, "   NULL,\n" );
    for( i = 2 ; argc > i ; i++ ) {
       if(
@@ -435,7 +428,7 @@ int main( int argc, char* argv[] ) {
          /* Map structs are handled in the map index table below. */
       } else {
          /* Use a generic resource ID. */
-         fprintf( header, "   gsc_resource_%d,\n", i - 1 );
+         fprintf( header, "   gsc_resource_handle_%d,\n", i - 1 );
       }
    }
    fprintf( header, "};\n\n" );

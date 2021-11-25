@@ -68,7 +68,6 @@ static int32_t asn_ensure_buffer_sz(
 ) {
    int32_t sz_of_sz = 1,
       buffer_sz = 0;
-   uint8_t* buffer = NULL;
 
    if( 127 < val_sz ) {
       sz_of_sz = asn_get_int_sz( val_sz ) + 1; /* +1 for 0x80 | sz_of_sz */
@@ -111,8 +110,7 @@ static int32_t asn_write_sz(
 }
 
 int32_t asn_write_int( MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t value ) {
-   int32_t i = 0,
-      val_sz = 0;
+   int32_t val_sz = 0;
    uint8_t* buffer = NULL;
    int32_t retval = 0;
    
@@ -169,7 +167,7 @@ cleanup:
 }
 
 int32_t asn_write_string(
-   MEMORY_HANDLE* ph_buffer, int32_t idx, uint8_t* source, int32_t source_sz
+   MEMORY_HANDLE* ph_buffer, int32_t idx, const char* source, int32_t source_sz
 ) {
    int i = 0;
    int8_t sz_of_sz = 1;
@@ -367,7 +365,6 @@ int32_t asn_read_meta_ptr(
    const uint8_t* buffer, int32_t idx, uint8_t* type_out, int32_t* sz_out
 ) {
    uint8_t sz_of_sz = 0;
-   int32_t i = 0;
 
    *type_out = buffer[idx++];
 
