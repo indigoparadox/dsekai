@@ -253,7 +253,15 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
    fprintf( header_file, "   /* strings */\n" );
    fprintf( header_file, "   {\n" );
    for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
-      fprintf( header_file, "      \"%s\",\n", t->strings[i] );
+      fprintf( header_file, "      \"" );
+      for( j = 0 ; strlen( t->strings[i] ) > j ; j++ ) {
+         if( '\n' == t->strings[i][j] ) {
+            fprintf( header_file, "\\n" );
+         } else {
+            fprintf( header_file, "%c", t->strings[i][j] );
+         }
+      }
+      fprintf( header_file, "\",\n" );
    }
    fprintf( header_file, "   },\n" );
 
