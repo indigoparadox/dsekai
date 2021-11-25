@@ -154,7 +154,13 @@ cleanup:
    }
 
    if( NULL != state ) {
-      state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
+      if( '\0' != state->warp_to[0] ) {
+         /* There's a warp-in map, so unload the current map and load it. */
+         state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
+         engines_warp_loop( state_handle, args );
+      } else {
+         state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
+      }
    }
 
    graphics_flip( args );

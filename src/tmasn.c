@@ -432,6 +432,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    read_sz =
       tilemap_asn_parse_string( t->name, TILEMAP_NAME_MAX, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
+      retval = read_sz;
       goto cleanup;
    }
    debug_printf( 3, "tilemap name: %s (%d)", t->name, read_sz );
@@ -440,6 +441,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    /* engine_type */
    read_sz = tilemap_asn_parse_int( &t->engine_type, 1, 0, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
+      retval = read_sz;
       goto cleanup;
    }
    idx += read_sz;
@@ -447,6 +449,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    /* weather */
    read_sz = tilemap_asn_parse_int( &t->weather, 1, 0, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
+      retval = read_sz;
       goto cleanup;
    }
    idx += read_sz;
@@ -454,6 +457,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    /* tileset */
    read_sz = tilemap_asn_parse_tileset( t, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
+      retval = read_sz;
       goto cleanup;
    }
    idx += read_sz;
@@ -461,6 +465,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    /* tiles */
    read_sz = tilemap_asn_parse_tiles( t, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
+      retval = read_sz;
       goto cleanup;
    }
    idx += read_sz;
@@ -468,6 +473,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    /* strings */
    read_sz = tilemap_asn_parse_strings( t, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
+      retval = read_sz;
       goto cleanup;
    }
    idx += read_sz;
@@ -475,6 +481,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    /* spawns */
    read_sz = tilemap_asn_parse_spawns( t, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
+      retval = read_sz;
       goto cleanup;
    }
    idx += read_sz;
@@ -482,6 +489,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    /* scripts */
    read_sz = tilemap_asn_parse_scripts( t, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
+      retval = read_sz;
       goto cleanup;
    }
    idx += read_sz;

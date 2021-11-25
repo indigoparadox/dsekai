@@ -9,14 +9,6 @@ MEMORY_HANDLE g_state_handle = (MEMORY_HANDLE)NULL;
 #include "winstat.h"
 #endif /* PLATFORM_WIN */
 
-#include "tmjson.h"
-#include "tmasn.h"
-#ifndef RESOURCE_FILE
-extern const char gc_map_names[][TILEMAP_NAME_MAX];
-extern const struct TILEMAP* gc_map_structs[];
-extern const uint8_t gc_map_count;
-#endif /* !RESOURCE_FILE */
-
 
 
 /* === Main Class Definition === */
@@ -27,11 +19,7 @@ unilayer_main() {
 
    struct DSEKAI_STATE* state = NULL;
    struct GRAPHICS_ARGS graphics_args;
-   int retval = 0,
-      i = 0;
-#ifdef RESOURCE_FILE
-   char map_load_path[RESOURCE_PATH_MAX];
-#endif /* RESOURCE_FILE */
+   int retval = 0;
 
    platform_init( graphics_args, icon_dsekai );
 
@@ -102,108 +90,17 @@ unilayer_main() {
 
    state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
 
+
+
 /* === Main Loop === */
 
-   while( g_running ) {
-      state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
-      if( '\0' != state->warp_to[0] ) {
-         /* There's a warp-in map, so unload the current map and load it. */
+#ifdef PLATFORM_WASM
 
-         for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-            mobile_deinit( &(state->mobiles[i]) );
-         }
+   emscripten_set_main_loop_arg
 
-         /* Set the player's new position. */
-         state->player.coords.x = state->warp_to_x;
-         state->player.coords.y = state->warp_to_y;
-         state->player.coords_prev.x = state->warp_to_x;
-         state->player.coords_prev.y = state->warp_to_y;
-
-         /* Close any open windows (e.g. player state). */
-         while( state->windows_count > 0 ) {
-            window_pop( 0, state );
-         }
-
-         /* TODO: Clean up items held by NPC mobiles and items w/ no owners. */
-         /* TODO: Preserve ownerless items in save for this map. */
-
-         tilemap_deinit( &(state->map) );
-
-         if( (MEMORY_HANDLE)NULL != state->engine_state_handle ) {
-            memory_free( state->engine_state_handle );
-            state->engine_state_handle = NULL;
-         }
-
-         graphics_clear_cache();
-
-         animate_stop_all();
-
-#ifdef RESOURCE_FILE
-#  ifdef TILEMAP_FMT_JSON
-         memory_zero_ptr( (MEMORY_PTR)map_load_path, TILEMAP_NAME_MAX );
-         dio_snprintf(
-            map_load_path,
-            RESOURCE_PATH_MAX,
-            /* TODO: ASSETS_PATH broken? */
-            ASSETS_PATH "assets/m_%s.json", state->warp_to );
-         tilemap_json_load( map_load_path, &(state->map) );
-#  elif defined TILEMAP_FMT_ASN
-         dio_snprintf(
-            map_load_path,
-            RESOURCE_PATH_MAX,
-            /* TODO: ASSETS_PATH broken? */
-            ASSETS_PATH "assets/m_%s.asn", state->warp_to );
-         tilemap_asn_load( map_load_path, &(state->map) );
-#  else
-#     error "No loader defined!"
-#  endif
 #else
-         for( i = 0 ; gc_map_count > i ; i++ ) {
-            if( 0 == memory_strncmp_ptr(
-               gc_map_names[i], state->warp_to, TILEMAP_NAME_MAX
-            ) ) {
-               /* debug_printf( 3, "gc_map_%s: %s",
-                  gc_map_names[i], engine_mapize( ENTRY_MAP ).name ); */
-               memory_copy_ptr( (MEMORY_PTR)&(state->map),
-                  (MEMORY_PTR)gc_map_structs[i],
-                  sizeof( struct TILEMAP ) );
-               break;
-            }
-         }
 
-         /* TODO: Handle failure to find map. */
-
-#endif /* RESOURCE_FILE */
-
-         memory_zero_ptr( state->warp_to, TILEMAP_NAME_MAX );
-
-         /* Spawn mobiles. */
-         memory_zero_ptr( (MEMORY_PTR)(state->mobiles),
-            sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
-         mobile_spawns( state );
-
-         /* Setup engine. */
-         switch( state->map.engine_type ) {
-         case ENGINE_TYPE_TOPDOWN:
-            debug_printf( 2, "selecting topdown engine" );
-            loop_set( topdown_loop, g_state_handle, &graphics_args );
-            break;
-
-         case ENGINE_TYPE_POV:
-            debug_printf( 2, "selecting pov engine" );
-            loop_set( pov_loop, g_state_handle, &graphics_args );
-            break;
-
-         default:
-            error_printf( "invalid engine requested: %d",
-               state->map.engine_type );
-            goto shutdown;
-         }
-
-         state->engine_state = ENGINE_STATE_OPENING;
-      }
-      state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
-
+   while( g_running ) {
       unilayer_loop_iter();
 
 #ifdef USE_SOFT_ASSERT
@@ -218,11 +115,10 @@ unilayer_main() {
 #endif /* USE_SOFT_ASSERT */
    }
 
+#endif /* PLATFORM_WASM */
 
 
 /* === Shutdown === */
-
-shutdown:
 
    state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    if( NULL == state ) {
@@ -240,7 +136,7 @@ shutdown:
 
    memory_free( g_state_handle );
 
-   window_shutdown( NULL );
+   window_shutdown();
    script_shutdown();
    graphics_shutdown( &graphics_args );
 
