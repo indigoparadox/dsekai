@@ -93,11 +93,7 @@ unilayer_main() {
 
 /* === Main Loop === */
 
-#ifdef PLATFORM_WASM
-
-   emscripten_set_main_loop_arg
-
-#else
+#ifndef PLATFORM_WASM
 
    while( g_running ) {
       unilayer_loop_iter();
@@ -114,7 +110,6 @@ unilayer_main() {
 #endif /* USE_SOFT_ASSERT */
    }
 
-#endif /* PLATFORM_WASM */
 
 
 /* === Shutdown === */
@@ -142,6 +137,8 @@ unilayer_main() {
    logging_shutdown();
  
    platform_shutdown();
+
+#endif /* !PLATFORM_WASM */
 
 exit:
 

@@ -17,6 +17,7 @@ DSEKAI_C_FILES := \
    src/script.c \
    unilayer/src/dio.c \
    src/control.c \
+   src/engines.c \
    src/topdown.c \
    src/pov.c \
    src/title.c
