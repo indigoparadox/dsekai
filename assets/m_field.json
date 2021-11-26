@@ -124,15 +124,21 @@
                  "y":243.5
                 }, 
                 {
-                 "height":14,
+                 "height":11.5,
                  "id":13,
                  "name":"chest",
+                 "properties":[
+                        {
+                         "name":"script",
+                         "type":"int",
+                         "value":5
+                        }],
                  "rotation":0,
                  "type":"16x16x4\/s_fount.bmp",
                  "visible":true,
-                 "width":15,
-                 "x":80,
-                 "y":159
+                 "width":10.5,
+                 "x":117,
+                 "y":164
                 }],
          "opacity":1,
          "type":"objectgroup",
