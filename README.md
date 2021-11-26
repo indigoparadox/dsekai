@@ -94,6 +94,7 @@ The following platforms are currently supported:
 * **MS-DOS w/ CGA Graphics** (Maybe VGA graphics in the future...)
 * **GNU/Linux with SDL** (May work with other POSIX platforms.)
 * **Windows (16-bit/32-bit)**
+* **WebASM**
 
 The following platforms are planned to be supported but not yet functional:
 
@@ -102,7 +103,6 @@ The following platforms are planned to be supported but not yet functional:
 * **GNU/Linux with Xlib** (May work with other POSIX platforms.)
 * **GNU/Linux with NCurses** (May work with other POSIX platforms.)
 * **Nintendo DS**
-* **WebASM/WebGL**
 
 | Platform | Make Target         | Requirements |
 |----------|---------------------|--------------
@@ -114,7 +114,7 @@ The following platforms are planned to be supported but not yet functional:
 | Win32    | bin/dsekai32.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | \*MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
 | \*NDS     | bin/dsekai.nds   | [DevKitPro](https://devkitpro.org/)
-| \*WebASM  | bin/dsekai.js    | emscripten
+| WebASM    | bin/dsekai.js    | [emscripten](https://github.com/emscripten-core/emscripten)
 | \*Curses  | bin/dsekait      | NCurses
 
  * + Platforms marked with + [**require** FMT_ASN if RESOURCE=FILE](#options).
