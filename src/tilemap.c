@@ -56,14 +56,13 @@ void tilemap_refresh_tiles( struct TILEMAP* t ) {
 
 void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) {
 
-#if defined( SCREEN_W ) && defined( SCREEN_H )
-
    switch( weather ) {
    case TILEMAP_WEATHER_SNOW:
       debug_printf( 2, "current weather is snowy" );
 #ifndef DISABLE_WEATHER_EFFECTS
       animate_create(
-         ANIMATE_TYPE_SNOW, 0, 0, SCREEN_MAP_W, SCREEN_MAP_H );
+         ANIMATE_TYPE_SNOW,
+         SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H );
 #endif /* !DISABLE_WEATHER_EFFECTS */
       break;
 
@@ -72,14 +71,8 @@ void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) {
       break;
    }
 
-#endif /* SCREEN_W && SCREEN_H */
-
    t->weather = weather;
 }
-
-#if defined( SCREEN_W ) && defined( SCREEN_H )
-
-#endif /* SCREEN_W && SCREEN_H */
 
 uint8_t tilemap_collide(
    struct MOBILE* m, uint8_t dir, struct TILEMAP* t

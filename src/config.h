@@ -27,8 +27,25 @@
 #define ITEM_INVENTORY_MAX 20
 #endif /* !ITEM_INVENTORY_MAX */
 
-#define SCREEN_MAP_W (SCREEN_W)
+#ifndef SCREEN_MAP_W
+/*! \brief Width of the overview or viewport area in pixels. */
+#define SCREEN_MAP_W (160)
+#endif /* !SCREEN_MAP_W */
+
+#ifndef SCREEN_MAP_H
+/*! \brief Height of the overview or viewport area in pixels. */
 #define SCREEN_MAP_H (160 - 32)
+#endif /* !SCREEN_MAP_H */
+
+#ifndef SCREEN_MAP_X
+/*! \brief Left offset of the overview or viewport area in pixels. */
+#define SCREEN_MAP_X ((SCREEN_W / 2) - (SCREEN_MAP_W / 2))
+#endif /* !SCREEN_MAP_X */
+
+#ifndef SCREEN_MAP_Y
+/*! \brief Top offset of the overview or viewport area in pixels. */
+#define SCREEN_MAP_Y (0)
+#endif /* !SCREEN_MAP_Y */
 
 #define WINDOW_STRINGS_MAX 5
 #define WINDOW_STRING_LEN_MAX 64

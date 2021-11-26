@@ -46,8 +46,8 @@ DEFINES_NDS := \
    -DUSE_SOFTWARE_TEXT \
    -DUSE_SOFTWARE_LINES \
    -DARM9 \
-   -DSCREEN_W=160 \
-   -DSCREEN_H=160
+   -DSCREEN_W=256 \
+   -DSCREEN_H=192
 
 INCLUDES_NDS := \
    -I unilayer/src \

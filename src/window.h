@@ -105,7 +105,7 @@ struct WINDOW {
  * \param state Current global ::DSEKAI_STATE.
  * \param state ::MEMORY_PTR to the global engine ::DSEKAI_STATE.
  */
-#define window_prefab_dialog( id, dialog, sprite, state, fg, bg ) window_push( id, WINDOW_STATUS_MODAL, WINDOW_CENTERED, WINDOW_CENTERED, 160, 64, 0, state ); control_push( 0x2323, CONTROL_TYPE_LABEL_T, CONTROL_STATE_ENABLED, CONTROL_PLACEMENT_CENTER, 30, CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER, fg, bg, 1, dialog, 0, id, state, state->map.strings ); control_push( 0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED, CONTROL_PLACEMENT_CENTER, 6, CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER, fg, bg, 1, 0, sprite, id, state, state->map.strings ); 
+#define window_prefab_dialog( id, dialog, sprite, state, fg, bg ) window_push( id, WINDOW_STATUS_MODAL, SCREEN_MAP_X, WINDOW_CENTERED, SCREEN_MAP_W, 64, 0, state ); control_push( 0x2323, CONTROL_TYPE_LABEL_T, CONTROL_STATE_ENABLED, CONTROL_PLACEMENT_CENTER, 30, CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER, fg, bg, 1, dialog, 0, id, state, state->map.strings ); control_push( 0x2324, CONTROL_TYPE_SPRITE, CONTROL_STATE_ENABLED, CONTROL_PLACEMENT_CENTER, 6, CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER, fg, bg, 1, 0, sprite, id, state, state->map.strings ); 
 
 #endif /* PLATFORM_PALM */
 

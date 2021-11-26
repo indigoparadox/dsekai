@@ -40,10 +40,14 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
             if(
                ANIMATE_FLAG_ACTIVE ==
                   (g_animations[i].flags & ANIMATE_FLAG_ACTIVE) &&
-               g_animations[i].x <= tile_px &&
-               g_animations[i].x + g_animations[i].w > tile_px &&
-               g_animations[i].y <= tile_py &&
-               g_animations[i].y + g_animations[i].h > tile_py
+               (g_animations[i].x - SCREEN_MAP_X)
+                  <= tile_px &&
+               (g_animations[i].x - SCREEN_MAP_X) + g_animations[i].w
+                  > tile_px &&
+               (g_animations[i].y - SCREEN_MAP_Y)
+                  <= tile_py &&
+               (g_animations[i].y - SCREEN_MAP_Y) + g_animations[i].h
+                  > tile_py
             ) {
                state->map.tiles_flags[(y * TILEMAP_TW) + x] |=
                   TILEMAP_TILE_FLAG_DIRTY;
@@ -80,7 +84,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          graphics_blit_tile_at(
             state->map.tileset[tile_id].image,
             0, 0,
-            tile_px, tile_py,
+            SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
             TILE_W, TILE_H );
       }
    }
@@ -147,10 +151,10 @@ static void topdown_draw_mobile(
          m->sprite,
          state->ani_sprite_x,
          m->dir * SPRITE_H,
-         ((m->coords.x * SPRITE_W) + x_offset)
-            - gstate->screen_scroll_x,
-         ((m->coords.y * SPRITE_H) + y_offset)
-            - gstate->screen_scroll_y,
+         SCREEN_MAP_X + (((m->coords.x * SPRITE_W) + x_offset)
+            - gstate->screen_scroll_x),
+         SCREEN_MAP_Y + (((m->coords.y * SPRITE_H) + y_offset)
+            - gstate->screen_scroll_y),
          SPRITE_W, SPRITE_H );
    }
 }
