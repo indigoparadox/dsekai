@@ -90,7 +90,7 @@ $(eval $(RESEXT_H_RULE))
 
 $(GENDIR_MAC6)/%.icns: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_MAC6)/$(STAMPFILE)
 	$(MD) $(dir $@)
-	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bitmap -oc icns
+	$(CONVERT) -if $< -of $@ -ob 1 -r -ic bmp -oc icns
 
 $(OBJDIR_MAC6)/$(DSEKAI).code.bin: $(DSEKAI_O_FILES_MAC6) | $(OBJDIR_MAC6)
 	$(CXX_MAC6) $(LDFLAGS_MAC6) -o $@ $^ # Use CXX to link for RetroConsole.

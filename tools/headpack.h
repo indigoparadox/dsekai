@@ -8,6 +8,10 @@
 
 #include <stdio.h>
 
+#define HEADPACK_INCLUDE_GUARD "RESEMB_H"
+
+#define HEADPACK_INCLUDES_TABLE( f ) f( ../../src/itstruct.h ) f( ../../src/tmstruct.h )
+
 struct TILEMAP;
 
 /*! \brief Constant indicating path is to a bitmap (or binary) file. */

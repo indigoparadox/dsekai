@@ -1,6 +1,9 @@
 
 #include "headpack.h"
 
+#define CONVERT_C
+#include "../unilayer/tools/convert.h"
+
 #include <assert.h>
 #include <string.h>
 
@@ -54,15 +57,16 @@ int path_to_define( const char* path, FILE* header ) {
    return written;
 }
 
-#define encode_generic_file_line( ... ) written = fprintf( header, __VA_ARGS__ ); if( 0 >= written ) { error_printf( "unable to write to header" ); goto cleanup; } total_written += written;
+#define encode_bitmap_file_line( ... ) written = fprintf( header, __VA_ARGS__ ); if( 0 >= written ) { error_printf( "unable to write to header" ); goto cleanup; } total_written += written;
 
-int encode_generic_file( char* path, int id, FILE* header ) {
+int encode_bitmap_file( char* path, int id, FILE* header ) {
    unsigned char bin_buffer[BIN_BUFFER_SZ];
    int read = 0,
       j = 0,
       written = 0,
       total_written = 0,
-      fsize = 0;
+      fsize = 0,
+      retval = 0;
    FILE* bin = NULL;
 
    bin = fopen( path, "rb" );
@@ -71,37 +75,37 @@ int encode_generic_file( char* path, int id, FILE* header ) {
    }
 
    /* Create a static const in the output header to hold this blob. */
-   encode_generic_file_line( 
+   encode_bitmap_file_line( 
       "static const " RES_TYPE " gsc_resource_%d[] = {\n   ",
       /* Subtract 1 since this is argv (program name and output header args),
        * but we index from 1. */
       id - 1 );
 
-   encode_generic_file_line( "   /* %s */\n", path );
+   encode_bitmap_file_line( "   /* %s */\n", path );
    
    /* Translate each byte into a hex number in the output header. */
    while( 0 < (read = fread( bin_buffer, 1, BIN_BUFFER_SZ, bin )) ) {
       for( j = 0 ; read > j ; j++ ) {
-         encode_generic_file_line( "0x%02x, ", (unsigned char)bin_buffer[j] );
+         encode_bitmap_file_line( "0x%02x, ", (unsigned char)bin_buffer[j] );
       }
    }
 
    /* Add a null terminator. */
    if( PATH_TYPE_TXT == path_bin_or_txt( path ) ) {
-      encode_generic_file_line( "0x00" );
+      encode_bitmap_file_line( "0x00" );
    }
 
-   encode_generic_file_line( "\n};\n\n" );
+   encode_bitmap_file_line( "\n};\n\n" );
 
-   encode_generic_file_line(
+   encode_bitmap_file_line(
       "static const struct RESOURCE_HEADER_HANDLE gsc_resource_handle_%d[] = {\n   ",
       id - 1 );
 
    fsize = ftell( bin );
-   encode_generic_file_line( "gsc_resource_%d,\n   %d,\n   0",
+   encode_bitmap_file_line( "gsc_resource_%d,\n   %d,\n   0",
       id - 1, fsize );
 
-   encode_generic_file_line( "\n};\n\n" );
+   encode_bitmap_file_line( "\n};\n\n" );
 
 cleanup:
 
@@ -330,43 +334,27 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
    return 1;
 }
 
-#ifndef HEADPACK_NOMAIN
+#define HEADPACK_WRITE_INCLUDES( inc ) fprintf( header, "#include \"" #inc "\"\n" );
 
-int main( int argc, char* argv[] ) {
-   int res_id = 0,
-      i = 0,
-      j = 0,
-      read = 0,
-      define_offset = 0,
+int write_header( FILE* header, int argc, char* argv[] ) {
+   char name_buffer[TILEMAP_NAME_MAX];
+   int i = 0,
       path_iter_fname_idx = 0,
       path_iter_sz = 0,
       map_count = 0,
       retval = 0;
-   FILE* header = NULL;
    struct TILEMAP t;
-   unsigned char byte_buffer = 0;
-   char name_buffer[TILEMAP_NAME_MAX];
-
-   if( 2 >= argc ) {
-      printf( "usage: headpack <header path> <paths to files to encode>\n" );
-      return 1;
-   }
-
-   memset( &t, '\0', sizeof( struct TILEMAP ) );
-
-   header = fopen( argv[1], "w" );
-   assert( NULL != header );
 
    /* Output header include guard start. */
-   fprintf( header, "#ifndef RESEMB_H\n#define RESEMB_H\n\n" );
+   fprintf(
+      header, "#ifndef " HEADPACK_INCLUDE_GUARD "\n#define RESEMB_H\n\n" );
 
-   fprintf( header, "#include \"../../src/itstruct.h\"\n" );
-   fprintf( header, "#include \"../../src/tmstruct.h\"\n" );
+   HEADPACK_INCLUDES_TABLE( HEADPACK_WRITE_INCLUDES )
 
    /* TODO: Use dynamic path to resource header. */
    fprintf( header, "#ifdef RESOURCE_FILE\n" );
    fprintf( header, "#include \"../../unilayer/src/resource/header.h\"\n" );
-   fprintf( header, "#endif /* RESOURCE_HEADER */\n" );
+   fprintf( header, "#endif /* RESOURCE_FILE */\n" );
 
    fprintf( header, "\n" );
 
@@ -414,7 +402,7 @@ int main( int argc, char* argv[] ) {
          /* Second arg (header) will be ignored since 1-indexing. */
          map2h( &t, header );
       } else {
-         encode_generic_file( &(argv[i][0]), i, header );
+         encode_bitmap_file( &(argv[i][0]), i, header );
       }
    }
 
@@ -488,6 +476,32 @@ int main( int argc, char* argv[] ) {
 
    /* Output header include guard end. */
    fprintf( header, "#endif /* !RESEMB_H */\n\n" );
+
+cleanup:
+
+   return retval;
+}
+
+#ifndef HEADPACK_NOMAIN
+
+int main( int argc, char* argv[] ) {
+   int res_id = 0,
+      i = 0,
+      read = 0,
+      define_offset = 0,
+      retval = 0;
+   FILE* header = NULL;
+   unsigned char byte_buffer = 0;
+
+   if( 2 >= argc ) {
+      printf( "usage: headpack <header path> <paths to files to encode>\n" );
+      return 1;
+   }
+
+   header = fopen( argv[1], "w" );
+   assert( NULL != header );
+
+   retval = write_header( header, argc, argv );
 
 cleanup:
 

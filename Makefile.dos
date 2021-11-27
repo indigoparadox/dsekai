@@ -105,28 +105,28 @@ $(eval $(PKG_RULE))
 #      -if $(GENDIR_DOS)/*.cga $(DSEKAI_ASSETS_MAPS) -lh $(GENDIR_DOS)/resext.h
 
 $(ASSETDIR)/%.cga: $(ASSETDIR)/%.bmp | $(CONVERT)
-	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
+	$(CONVERT) -ic bmp -oc cga -ob 2 -if $< -of $@ -og
 
 $(ASSETDIR)/%.vga: $(ASSETDIR)/%.bmp | $(CONVERT)
-	$(CONVERT) -ic bitmap -oc cga -ob 4 -if $< -of $@ -og
+	$(CONVERT) -ic bmp -oc cga -ob 4 -if $< -of $@ -og
 
 $(BINDIR)/assets/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | \
 $(BINDIR)/assets/$(STAMPFILE)
 	$(MD) $(dir $@)
-	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
+	$(CONVERT) -ic bmp -oc cga -ob 2 -if $< -of $@ -og
 
 $(BINDIR)/assets/%.vga: $(ASSETDIR)/%.bmp $(CONVERT) | \
 $(BINDIR)/assets/$(STAMPFILE)
 	$(MD) $(dir $@)
-	$(CONVERT) -ic bitmap -oc cga -ob 4 -if $< -of $@ -og
+	$(CONVERT) -ic bmp -oc cga -ob 4 -if $< -of $@ -og
 
 $(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
-	$(CONVERT) -ic bitmap -oc cga -ob 2 -if $< -of $@ -og
+	$(CONVERT) -ic bmp -oc cga -ob 2 -if $< -of $@ -og
 
 $(GENDIR_DOS)/%.vga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
-	$(CONVERT) -ic bitmap -oc cga -ob 4 -if $< -of $@ -og
+	$(CONVERT) -ic bmp -oc cga -ob 4 -if $< -of $@ -og
 
 $(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE)
 	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^

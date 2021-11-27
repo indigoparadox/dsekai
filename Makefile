@@ -36,6 +36,9 @@ HEADPACK_C_FILES := \
    src/script.c \
    src/json.c \
    src/item.c \
+   unilayer/tools/data/bmp.c \
+   unilayer/tools/data/cga.c \
+   unilayer/tools/data/icns.c \
    unilayer/src/resource/file.c \
    unilayer/src/graphics.c \
    unilayer/src/graphics/nullg.c \
@@ -44,11 +47,11 @@ HEADPACK_C_FILES := \
 
 CONVERT_C_FILES := \
    unilayer/tools/convert.c \
-   unilayer/tools/data/bmp.c \
    unilayer/src/memory/fakem.c \
+   unilayer/tools/data/bmp.c \
    unilayer/tools/data/cga.c \
-   unilayer/src/dio.c \
    unilayer/tools/data/icns.c \
+   unilayer/src/dio.c \
    src/json.c
 
 LOOKUPS_C_FILES := \
