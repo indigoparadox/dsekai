@@ -4,9 +4,9 @@
 #ifdef RESOURCE_FILE
 /* TODO: Detect graphics format, not platform. */
 #ifdef PLATFORM_DOS
-#  define s_world "assets/" DEPTH_SPEC "/s_world.cga"
+#  define s_world ASSETS_PATH DEPTH_SPEC "/s_world.cga"
 #else
-#  define s_world "assets/" DEPTH_SPEC "/s_world.bmp"
+#  define s_world ASSETS_PATH DEPTH_SPEC "/s_world.bmp"
 #endif /* PLATFORM_DOS */
 #endif /* RESOURCE_FILE */
 
@@ -83,16 +83,6 @@ int title_loop( MEMORY_HANDLE state_handle ) {
    }
 
    graphics_loop_start();
-
-#if 0
-   graphics_blit_at(
-#ifdef RESOURCE_FILE
-      "assets/" DEPTH_SPEC "/title.bmp",
-#else
-      title,
-#endif
-      0, 0, 0, 0, SCREEN_W, SCREEN_H );
-#endif
 
    mobile_state_animate( state );
 

@@ -135,10 +135,10 @@ $(OBJDIR_DOS)/%.o: %.c $(RESEXT_H)
 	$(MD) $(dir $@)
 	$(CC_DOS) $(CFLAGS_DOS) -fo=$@ $(<:%.c=%)
 
-$(DEPDIR_DOS)/%.d: %.c $(RESEXT_H)
-	$(MD) $(dir $@)
-	$(HOST_CC) $(subst -i=,-I ,$(INCLUDES_DOS)) $(DEFINES_DOS) -MM $< \
-      -MT $(subst .c,.o,$(addprefix $(DEPDIR_DOS)/,$<)) -MF $@
-
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_DOS:.o=.d))
+#$(DEPDIR_DOS)/%.d: %.c $(RESEXT_H)
+#	$(MD) $(dir $@)
+#	$(HOST_CC) $(subst -i=,-I ,$(INCLUDES_DOS)) $(DEFINES_DOS) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_DOS)/,$<)) -MF $@
+#
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_DOS:.o=.d))
 

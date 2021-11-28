@@ -57,15 +57,13 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    dio_snprintf(
       map_load_path,
       RESOURCE_PATH_MAX,
-      /* TODO: ASSETS_PATH broken? */
-      ASSETS_PATH "assets/m_%s.json", state->warp_to );
+      ASSETS_PATH "m_%s.json", state->warp_to );
    map_retval = tilemap_json_load( map_load_path, &(state->map) );
 #  elif defined TILEMAP_FMT_ASN
    dio_snprintf(
       map_load_path,
       RESOURCE_PATH_MAX,
-      /* TODO: ASSETS_PATH broken? */
-      ASSETS_PATH "assets/m_%s.asn", state->warp_to );
+      ASSETS_PATH "m_%s.asn", state->warp_to );
    map_retval = tilemap_asn_load( map_load_path, &(state->map) );
 #  else
 #     error "No loader defined!"

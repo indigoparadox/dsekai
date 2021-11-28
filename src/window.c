@@ -45,16 +45,15 @@ void window_init() {
       sizeof( struct WINDOW_FRAME ) ); */
 
 #ifdef RESOURCE_FILE
-   /* TODO: Use assets path passed by build system. */
-   resource_assign_id( frames[0].tr, "assets/" DEPTH_SPEC "/p_chk_tr.bmp" );
-   resource_assign_id( frames[0].tl, "assets/" DEPTH_SPEC "/p_chk_tl.bmp" );
-   resource_assign_id( frames[0].br, "assets/" DEPTH_SPEC "/p_chk_br.bmp" );
-   resource_assign_id( frames[0].bl, "assets/" DEPTH_SPEC "/p_chk_bl.bmp" );
-   resource_assign_id( frames[0].t , "assets/" DEPTH_SPEC "/p_chk_t.bmp" );
-   resource_assign_id( frames[0].b , "assets/" DEPTH_SPEC "/p_chk_b.bmp" );
-   resource_assign_id( frames[0].r , "assets/" DEPTH_SPEC "/p_chk_r.bmp" );
-   resource_assign_id( frames[0].l , "assets/" DEPTH_SPEC "/p_chk_l.bmp" );
-   resource_assign_id( frames[0].c , "assets/" DEPTH_SPEC "/p_chk_c.bmp" );
+   resource_assign_id( frames[0].tr, ASSETS_PATH DEPTH_SPEC "/p_chk_tr.bmp" );
+   resource_assign_id( frames[0].tl, ASSETS_PATH DEPTH_SPEC "/p_chk_tl.bmp" );
+   resource_assign_id( frames[0].br, ASSETS_PATH DEPTH_SPEC "/p_chk_br.bmp" );
+   resource_assign_id( frames[0].bl, ASSETS_PATH DEPTH_SPEC "/p_chk_bl.bmp" );
+   resource_assign_id( frames[0].t , ASSETS_PATH DEPTH_SPEC "/p_chk_t.bmp" );
+   resource_assign_id( frames[0].b , ASSETS_PATH DEPTH_SPEC "/p_chk_b.bmp" );
+   resource_assign_id( frames[0].r , ASSETS_PATH DEPTH_SPEC "/p_chk_r.bmp" );
+   resource_assign_id( frames[0].l , ASSETS_PATH DEPTH_SPEC "/p_chk_l.bmp" );
+   resource_assign_id( frames[0].c , ASSETS_PATH DEPTH_SPEC "/p_chk_c.bmp" );
 #else
    resource_assign_id( frames[0].tr , p_chk_tr );
    resource_assign_id( frames[0].tl , p_chk_tl );
