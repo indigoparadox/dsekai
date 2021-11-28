@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h> /* For calloc() */
 
 #include "../src/dsekai.h"
 
@@ -57,61 +58,48 @@ int path_to_define( const char* path, FILE* header ) {
    return written;
 }
 
-#define encode_bitmap_file_line( ... ) written = fprintf( header, __VA_ARGS__ ); if( 0 >= written ) { error_printf( "unable to write to header" ); goto cleanup; } total_written += written;
 
-int encode_bitmap_file( char* path, int id, FILE* header ) {
-   unsigned char bin_buffer[BIN_BUFFER_SZ];
-   int read = 0,
-      j = 0,
+
+#define encode_binary_buffer_line( ... ) written = fprintf( header, __VA_ARGS__ ); if( 0 >= written ) { error_printf( "unable to write to header" ); goto cleanup; } total_written += written;
+
+int encode_binary_buffer(
+   /* TODO: Use int32 for buffer_in_sz. */
+   unsigned char* buffer_in, int buffer_in_sz, char* res_path,
+   int id, FILE* header, int in_fmt, int out_fmt
+) {
+   int j = 0,
       written = 0,
       total_written = 0,
-      fsize = 0,
       retval = 0;
-   FILE* bin = NULL;
-
-   bin = fopen( path, "rb" );
-   if( NULL == bin ) {
-      error_printf( "unable to open resource: %s", path );
-   }
 
    /* Create a static const in the output header to hold this blob. */
-   encode_bitmap_file_line( 
-      "static const " RES_TYPE " gsc_resource_%d[] = {\n   ",
-      /* Subtract 1 since this is argv (program name and output header args),
-       * but we index from 1. */
-      id - 1 );
+   encode_binary_buffer_line( 
+      "static const " RES_TYPE " gsc_resource_%d[] = {\n   ", id );
 
-   encode_bitmap_file_line( "   /* %s */\n", path );
+   encode_binary_buffer_line( "   /* %s */\n", res_path );
    
    /* Translate each byte into a hex number in the output header. */
-   while( 0 < (read = fread( bin_buffer, 1, BIN_BUFFER_SZ, bin )) ) {
-      for( j = 0 ; read > j ; j++ ) {
-         encode_bitmap_file_line( "0x%02x, ", (unsigned char)bin_buffer[j] );
-      }
+   for( j = 0 ; buffer_in_sz > j ; j++ ) {
+      encode_binary_buffer_line( "0x%02x, ", (unsigned char)buffer_in[j] );
    }
 
    /* Add a null terminator. */
-   if( PATH_TYPE_TXT == path_bin_or_txt( path ) ) {
-      encode_bitmap_file_line( "0x00" );
+   if( PATH_TYPE_TXT == path_bin_or_txt( res_path ) ) {
+      encode_binary_buffer_line( "0x00" );
    }
 
-   encode_bitmap_file_line( "\n};\n\n" );
+   encode_binary_buffer_line( "\n};\n\n" );
 
-   encode_bitmap_file_line(
+   encode_binary_buffer_line(
       "static const struct RESOURCE_HEADER_HANDLE gsc_resource_handle_%d[] = {\n   ",
-      id - 1 );
+      id );
 
-   fsize = ftell( bin );
-   encode_bitmap_file_line( "gsc_resource_%d,\n   %d,\n   0",
-      id - 1, fsize );
+   encode_binary_buffer_line( "gsc_resource_%d,\n   %d,\n   0",
+      id, buffer_in_sz );
 
-   encode_bitmap_file_line( "\n};\n\n" );
+   encode_binary_buffer_line( "\n};\n\n" );
 
 cleanup:
-
-   if( NULL != bin ) {
-      fclose( bin );
-   }
 
    return total_written;
 }
@@ -336,14 +324,22 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
 
 #define HEADPACK_WRITE_INCLUDES( inc ) fprintf( header, "#include \"" #inc "\"\n" );
 
-int write_header( FILE* header, int argc, char* argv[] ) {
+int write_header(
+   FILE* header, int paths_in_sz, char* paths_in[], int in_fmt, int out_fmt
+) {
    char name_buffer[TILEMAP_NAME_MAX];
    int i = 0,
       path_iter_fname_idx = 0,
+      path_iter_ext_idx = 0,
       path_iter_sz = 0,
       map_count = 0,
-      retval = 0;
+      retval = 0,
+      cvt_retval = 0;
    struct TILEMAP t;
+   FILE* file_in = NULL;
+   uint8_t* buffer_file_in = NULL;
+   int32_t buffer_file_sz = 0;
+   struct CONVERT_GRID* grid;
 
    /* Output header include guard start. */
    fprintf(
@@ -360,10 +356,10 @@ int write_header( FILE* header, int argc, char* argv[] ) {
 
    /* fprintf( header, "#include \"residx.h\"\n\n" ); */
 
-   for( i = 2 ; argc > i ; i++ ) {
+   for( i = 0 ; paths_in_sz > i ; i++ ) {
       fprintf( header, "#define " );
-      path_to_define( argv[i], header );
-      fprintf( header, " %d\n", i - 1 );
+      path_to_define( paths_in[i], header );
+      fprintf( header, " %d\n", i );
    }
 
    /* Resource Data */
@@ -372,26 +368,26 @@ int write_header( FILE* header, int argc, char* argv[] ) {
    fprintf( header, "\n#ifdef " RES_C_DEF "\n\n" );
 
    /* Iterate through each file on the command line. */
-   for( i = 2 ; argc > i ; i++ ) {
-      path_iter_sz = strlen( argv[i] );
-      path_iter_fname_idx = dio_basename( argv[i], path_iter_sz );
-      debug_printf(
-         3, "encoding resource: %s", &(argv[i][path_iter_fname_idx]) );
-      printf(
-         "encoding resource: %s\n", &(argv[i][path_iter_fname_idx]) );
+   for( i = 0 ; paths_in_sz > i ; i++ ) {
+      path_iter_sz = strlen( paths_in[i] );
+      path_iter_fname_idx = dio_basename( paths_in[i], path_iter_sz );
+      path_iter_ext_idx = dio_char_idx_r( paths_in[i], path_iter_sz, '.' ) + 1;
       /* TODO: Delay maps until we have all other resources so we can map tilesets. */
+
       if(
-         'm' == argv[i][path_iter_fname_idx] &&
-         '_' == argv[i][path_iter_fname_idx + 1]
+         'm' == paths_in[i][path_iter_fname_idx] &&
+         '_' == paths_in[i][path_iter_fname_idx + 1]
       ) {
          /* This is a map JSON file, so preload it. */
+         debug_printf(
+            3, "encoding map: %s", &(paths_in[i][path_iter_fname_idx]) );
 
-         retval = tilemap_json_load( argv[i], &t );
+         retval = tilemap_json_load( paths_in[i], &t );
          if( !retval ) {
             error_printf( "unable to load tilemap: %s",
-               &(argv[i][path_iter_fname_idx]) );
+               &(paths_in[i][path_iter_fname_idx]) );
             printf( "unable to load tilemap: %s\n",
-               &(argv[i][path_iter_fname_idx]) );
+               &(paths_in[i][path_iter_fname_idx]) );
             retval = 1;
             goto cleanup;
          } else {
@@ -402,23 +398,68 @@ int write_header( FILE* header, int argc, char* argv[] ) {
          /* Second arg (header) will be ignored since 1-indexing. */
          map2h( &t, header );
       } else {
-         encode_bitmap_file( &(argv[i][0]), i, header );
+         debug_printf(
+            3, "encoding resource: %s", &(paths_in[i][path_iter_fname_idx]) );
+         
+         #if 0
+         /* Determine if file needs to be converted. */
+         j = 0;
+         while( 0 <= in_fmt && '\0' != gc_fmt_tokens[j][0] ) {
+            if( 0 == strncmp(
+               gc_fmt_tokens[j],
+               &(paths_in[i][path_iter_ext_idx]),
+               strlen( gc_fmt_tokens[j] )
+            ) ) {
+               if( j == in_fmt ) {
+                  debug_printf( 3, "converting resource..." );
+                  /* TODO: Handle NULL options? */
+                  grid = gc_fmt_read_file_cbs[j]( paths_in[i], NULL );
+                  assert( NULL != grid );
+                  /* TODO: Get grid size. */
+                  cvt_retval = gc_fmt_write_cbs[out_fmt](
+                     buffer_in, uint32_t buf_sz,
+   const struct CONVERT_GRID* grid, struct CONVERT_OPTIONS* o
+                     , grid, &options_out );
+                  assert( 0 < cvt_retval );
+
+               }
+               break;
+            }
+            j++;
+         }
+         #endif
+
+         if( 0 > in_fmt ) {
+            /* Read in resource contents. */
+            debug_printf( 3, "reading resource..." );
+            file_in = fopen( paths_in[i], "rb" );
+            assert( NULL != file_in );
+            fseek( file_in, 0, SEEK_END );
+            buffer_file_sz = ftell( file_in );
+            fseek( file_in, 0, SEEK_SET );
+            buffer_file_in = calloc( 1, buffer_file_sz );
+            fread( buffer_file_in, 1, buffer_file_sz, file_in );
+            fclose( file_in );
+         }
+
+         encode_binary_buffer(
+            buffer_file_in, buffer_file_sz, paths_in[i],
+            i, header, in_fmt, out_fmt );
       }
    }
 
    /* Resource Index */
 
    fprintf( header, "static const struct RESOURCE_HEADER_HANDLE* gsc_resources[] = {\n" );
-   fprintf( header, "   NULL,\n" );
-   for( i = 2 ; argc > i ; i++ ) {
+   for( i = 0 ; paths_in_sz > i ; i++ ) {
       if(
-         'm' == argv[i][path_iter_fname_idx] &&
-         '_' == argv[i][path_iter_fname_idx + 1]
+         'm' == paths_in[i][path_iter_fname_idx] &&
+         '_' == paths_in[i][path_iter_fname_idx + 1]
       ) {
          /* Map structs are handled in the map index table below. */
       } else {
          /* Use a generic resource ID. */
-         fprintf( header, "   gsc_resource_handle_%d,\n", i - 1 );
+         fprintf( header, "   gsc_resource_handle_%d,\n", i );
       }
    }
    fprintf( header, "};\n\n" );
@@ -426,10 +467,10 @@ int write_header( FILE* header, int argc, char* argv[] ) {
    /* Map Index */
 
    fprintf( header, "const char gc_map_names[][TILEMAP_NAME_MAX] = {\n" );
-   for( i = 2 ; argc > i ; i++ ) {
+   for( i = 0 ; paths_in_sz > i ; i++ ) {
       if(
-         'm' == argv[i][path_iter_fname_idx] &&
-         '_' == argv[i][path_iter_fname_idx + 1]
+         'm' == paths_in[i][path_iter_fname_idx] &&
+         '_' == paths_in[i][path_iter_fname_idx + 1]
       ) {
          /* This is a map struct, so use its name. */
 
@@ -439,8 +480,8 @@ int write_header( FILE* header, int argc, char* argv[] ) {
          memory_zero_ptr( name_buffer, TILEMAP_NAME_MAX );
          strncpy(
             name_buffer,
-            &(argv[i][path_iter_fname_idx + 2]),
-            strlen( &(argv[i][path_iter_fname_idx + 2]) ) - 5 );
+            &(paths_in[i][path_iter_fname_idx + 2]),
+            strlen( &(paths_in[i][path_iter_fname_idx + 2]) ) - 5 );
 
          fprintf( header, "   \"%s\",\n", name_buffer );
       }
@@ -448,10 +489,10 @@ int write_header( FILE* header, int argc, char* argv[] ) {
    fprintf( header, "};\n\n" );
 
    fprintf( header, "const struct TILEMAP* gc_map_structs[] = {\n" );
-   for( i = 2 ; argc > i ; i++ ) {
+   for( i = 0 ; paths_in_sz > i ; i++ ) {
       if(
-         'm' == argv[i][path_iter_fname_idx] &&
-         '_' == argv[i][path_iter_fname_idx + 1]
+         'm' == paths_in[i][path_iter_fname_idx] &&
+         '_' == paths_in[i][path_iter_fname_idx + 1]
       ) {
          /* This is a map struct, so use its name. */
 
@@ -459,8 +500,8 @@ int write_header( FILE* header, int argc, char* argv[] ) {
          memory_zero_ptr( name_buffer, TILEMAP_NAME_MAX );
          strncpy(
             name_buffer,
-            &(argv[i][path_iter_fname_idx + 2]),
-            strlen( &(argv[i][path_iter_fname_idx + 2]) ) - 5 );
+            &(paths_in[i][path_iter_fname_idx + 2]),
+            strlen( &(paths_in[i][path_iter_fname_idx + 2]) ) - 5 );
 
          fprintf( header, "   &gc_map_%s,\n", name_buffer );
       }
@@ -487,21 +528,82 @@ cleanup:
 int main( int argc, char* argv[] ) {
    int res_id = 0,
       i = 0,
+      j = 0,
       read = 0,
       define_offset = 0,
-      retval = 0;
+      retval = 0,
+      args_end = 0,
+      state = 0,
+      in_fmt = -1,
+      out_fmt = -1;
    FILE* header = NULL;
    unsigned char byte_buffer = 0;
+   char out_fname[HEADPACK_FNAME_MAX];
 
    if( 2 >= argc ) {
       printf( "usage: headpack <header path> <paths to files to encode>\n" );
       return 1;
    }
 
+   memset( out_fname, '\0', HEADPACK_FNAME_MAX );
+
+   for( i = 1 ; argc > i ; i++ ) {
+      if( 0 == strncmp( "-i", argv[i], 2 ) ) {
+         /* Input format arg. */
+         state = HEADPACK_STATE_IN_FMT_ARG;
+         args_end = i;
+
+      } else if( 0 == strncmp( "-i", argv[i], 2 ) ) {
+         /* Input format arg. */
+         state = HEADPACK_STATE_OUT_FMT_ARG;
+         args_end = i;
+
+      } else if( HEADPACK_STATE_IN_FMT_ARG == state ) {
+         /* Get the input format. */
+         j = 0;
+         while( '\0' != gc_fmt_tokens[j][0] ) {
+            if( 0 == strncmp(
+               argv[i], gc_fmt_tokens[j], strlen( gc_fmt_tokens[j] )
+            ) ) {
+               
+               in_fmt = j;
+               args_end = i;
+               break;
+            }
+            j++;
+         }
+         state = 0;
+
+      } else if( HEADPACK_STATE_OUT_FMT_ARG == state ) {
+         /* Get the output format. */
+         j = 0;
+         while( '\0' != gc_fmt_tokens[j][0] ) {
+            if( 0 == strncmp(
+               argv[i], gc_fmt_tokens[j], strlen( gc_fmt_tokens[j] )
+            ) ) {
+               out_fmt = j;
+               args_end = i;
+               break;
+            }
+            j++;
+         }
+         state = 0;
+
+      } else if( '\0' == out_fname[0] ) {
+         /* Not an arg and we don't have an output filename, so this must be it!
+          */
+
+         strncpy( out_fname, argv[i], HEADPACK_FNAME_MAX );
+         args_end = i;
+      }
+   }
+
    header = fopen( argv[1], "w" );
    assert( NULL != header );
 
-   retval = write_header( header, argc, argv );
+   /* Pass the rest of the args left as input names. */
+   retval = write_header( header, argc - args_end - 1, &(argv[args_end + 1]),
+      in_fmt, out_fmt );
 
 cleanup:
 
