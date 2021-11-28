@@ -7,20 +7,22 @@ ENTRY_MAP := field
 
 ROOT := $(shell pwd)
 
+STAMPFILE := .stamp
+
 DSEKAI_C_FILES := \
    src/tilemap.c \
-   unilayer/src/graphics.c \
-   unilayer/src/animate.c \
    src/mobile.c \
    src/item.c \
    src/window.c \
    src/script.c \
-   unilayer/src/dio.c \
    src/control.c \
    src/engines.c \
    src/topdown.c \
    src/pov.c \
-   src/title.c
+   src/title.c \
+   unilayer/src/graphics.c \
+   unilayer/src/animate.c \
+   unilayer/src/dio.c
 
 MKRESH_C_FILES := \
    tools/mkresh.c \
@@ -45,15 +47,6 @@ HEADPACK_C_FILES := \
    unilayer/src/memory/fakem.c \
    unilayer/src/dio.c
 
-CONVERT_C_FILES := \
-   unilayer/tools/convert.c \
-   unilayer/src/memory/fakem.c \
-   unilayer/tools/data/bmp.c \
-   unilayer/tools/data/cga.c \
-   unilayer/tools/data/icns.c \
-   unilayer/src/dio.c \
-   src/json.c
-
 LOOKUPS_C_FILES := \
    tools/lookups.c
 
@@ -71,9 +64,6 @@ MAP2ASN_C_FILES := \
    unilayer/src/graphics/nullg.c \
    unilayer/src/memory/fakem.c \
    unilayer/src/dio.c
-
-# ALL platforms.
-PLATFORMS := sdl xlib dos win16 win32 palm mac6 nds curses check_null
 
 ASSETDIR := assets
 ASSETPATH :=
@@ -237,6 +227,8 @@ else
    PKG_OUT_EXT := .tar.gz
 endif
 
+include unilayer/Makefile
+
 DSEKAI_ASSETS_SPRITES := \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/s_*.bmp)
 DSEKAI_ASSETS_TILES := \
@@ -272,13 +264,11 @@ GZIP := gzip
 ZIP := zip
 
 MKRESH := $(BINDIR)/mkresh
-CONVERT := $(BINDIR)/convert
 LOOKUPS := $(BINDIR)/lookups
 HEADPACK := $(BINDIR)/headpack
 MAP2ASN := $(BINDIR)/map2asn
 
 CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer/src -DASSETS_PATH="\"$(ASSETPATH)\""
-CFLAGS_CONVERT := -DNO_RESEXT -g -DRESOURCE_FILE -Iunilayer/src
 CFLAGS_LOOKUPS := -g -Iunilayer/src
 CFLAGS_HEADPACK := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG -DDISABLE_WEATHER_EFFECTS
 CFLAGS_MAP2ASN := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=1 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG $(FLAGS_GCC_SANITIZE) -DDISABLE_WEATHER_EFFECTS
@@ -287,37 +277,11 @@ $(BIN_CHECK): LDFLAGS := $(shell pkg-config check --libs) -g $(LDFLAGS_GCC_GENER
 
 .PHONY: clean grc_palm
 
-STAMPFILE := .stamp
-
 # ====== Generic Rules ======
 
 pkgbuild/$(STAMPFILE):
 	$(MD) $(dir $@)
 	touch $@
-
-$(BINDIR)/$(ASSETDIR)/$(STAMPFILE):
-	$(MD) $(dir $@)
-	touch $@
-
-$(BINDIR)/$(ASSETDIR)/%.bmp: \
-$(ASSETDIR)/%.bmp | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
-	$(MD) $(dir $@)
-	cp $^ $@
-
-$(BINDIR)/$(ASSETDIR)/%.cga: \
-$(ASSETDIR)/%.cga | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
-	$(MD) $(dir $@)
-	cp $^ $@
-
-$(BINDIR)/$(ASSETDIR)/%.vga: \
-$(ASSETDIR)/%.vga | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
-	$(MD) $(dir $@)
-	cp $^ $@
-
-$(BINDIR)/$(ASSETDIR)/%.json: \
-$(ASSETDIR)/%.json | $(BINDIR)/$(ASSETDIR)/$(STAMPFILE)
-	$(MD) $(dir $@)
-	cp $^ $@
 
 $(PKGDIR)/$(STAMPFILE):
 	$(MD) $(dir $@)
@@ -476,14 +440,6 @@ define RESEXT_H_RULE
 
 endef
 
-define ICO_RULE
-   $(GENDIR)/$(platform)/%.ico: $(ASSETDIR)/%.bmp | \
-   $(GENDIR)/$(platform)/$(STAMPFILE)
-		$(IMAGEMAGICK) $$< $$@
-endef
-
-$(foreach platform,$(PLATFORMS), $(eval $(ICO_RULE)))
-
 define PKG_RULE
    PKGBUILD := pkgbuild/$(pkg_name)$(PKG_OUT_FLAGS)
 
@@ -523,9 +479,6 @@ endef
 
 $(MKRESH): $(MKRESH_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_MKRESH) -o $@ $^
-
-$(CONVERT): $(CONVERT_C_FILES) | $(BINDIR)/$(STAMPFILE)
-	$(HOST_CC) $(CFLAGS_CONVERT) -o $@ $^
 
 $(LOOKUPS): $(LOOKUPS_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_LOOKUPS) -o $@ $^
