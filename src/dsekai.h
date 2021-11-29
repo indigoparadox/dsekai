@@ -35,6 +35,9 @@ struct DSEKAI_STATE;
 #include "mobile.h"
 #include "window.h"
 #include "control.h"
+#ifdef NETWORK_IRC
+#include "irc.h"
+#endif /* NETWORK_IRC */
 
 #ifdef TILEMAP_FMT_JSON
 #include "tmjson.h"
