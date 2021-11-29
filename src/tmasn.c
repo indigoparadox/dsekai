@@ -310,7 +310,6 @@ static int32_t tilemap_asn_parse_scripts(
    int32_t script_seq_sz = 0,
       step_seq_sz = 0,
       all_scripts_seq_sz = 0,
-      op_arg_int_sz = 0,
       total_read_sz = 0,
       script_seq_start = 0,
       read_sz = 0;
