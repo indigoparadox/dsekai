@@ -15,7 +15,8 @@ DSEKAI_C_FILES_WIN32_ONLY := \
    src/main.c \
    unilayer/src/input/wini.c \
    unilayer/src/memory/winm.c \
-   unilayer/src/graphics/wing.c
+   unilayer/src/graphics/wing.c \
+   unilayer/src/network/socketn.c
 
 ifeq ($(RESOURCE),DEFAULT)
    DSEKAI_C_FILES_WIN32_ONLY += unilayer/src/resource/winr.c
@@ -65,7 +66,7 @@ DEFINES_WIN32 := \
    $(DEFINES_DSEKAI) \
    $(DEFINES_DEPTH) \
    -DPLATFORM_WIN32 \
-   -DPLATFORM_WIN \
+   -DNETWORK_SOCKET \
    -DUSE_SOFTWARE_TEXT \
    -DSCREEN_W=320 \
    -DSCREEN_H=200 \

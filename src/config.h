@@ -83,6 +83,10 @@
 #define JSON_PATH_SZ 255
 #endif /* !JSON_PATH_SZ */
 
+#if defined( UNILAYER_NETWORK ) && !defined( NETWORK_STEPS_MAX )
+#define NETWORK_STEPS_MAX 20
+#endif /* UNILAYER_NETWORK && !NETWORK_STEPS_MAX */
+
 /*! \} */
 
 /*! \} */

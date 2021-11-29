@@ -279,7 +279,27 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
 
 }
 
-int8_t mobile_queue_step( struct MOBILE* m, struct SCRIPT_STEP* s ) {
+#ifdef UNILAYER_NETWORK
 
+int8_t mobile_queue_step( struct MOBILE* m, struct SCRIPT_STEP* s ) {
+   if( network_queue_pos + 1 >= NETWORK_STEPS_MAX ) {
+      error_printf( "mobile %s queue exceeded", m->name );
+      return MOBILE_ERROR_QUEUE_FULL;
+   }
+
+   if( m->script_id >= 0 ) {
+      error_printf( "cannot modify scripted NPC %s", m->name );
+      return MOBILE_ERROR_MOBILE_SCRIPTED;
+   }
+
+   memory_copy_ptr(
+      &(m->network_queue[m->network_queue_pos]), s,
+      sizeof( struct SCRIPT_STEP ) );
+
+   m->network_queue_pos++;
+
+   return m->network_queue_pos;
 }
+
+#endif /* UNILAYER_NETWORK */
 

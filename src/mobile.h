@@ -14,6 +14,21 @@
  */
 
 /**
+ * \addtogroup dsekai_mobiles_errors Mobile Error Codes
+ * \brief Return codes for MOBILE -related functions on failure.
+ *
+ * \{
+ */
+
+/*! \brief Mobile's network action queue is full. */
+#define MOBILE_ERROR_QUEUE_FULL -1
+
+/*! \brief Mobile's uses a script, so cannot use a network action queue. */
+#define MOBILE_ERROR_MOBILE_SCRIPTED -2
+
+/*! \} */
+
+/**
  * \relates MOBILE
  * \brief MOBILE::flags indicating that this mobile is extant and active.
  */
@@ -72,6 +87,10 @@ struct PACKED MOBILE {
    int8_t script_stack[SCRIPT_STACK_DEPTH];
    /*! \brief Delay script until this result from graphics_get_ms(). */
    uint32_t script_next_ms;
+#ifdef UNILAYER_NETWORK
+   struct SCRIPT_STEP network_queue[NETWORK_STEPS_MAX];
+   int8_t network_queue_pos;
+#endif /* UNILAYER_NETWORK */
 };
 
 /**
@@ -177,6 +196,14 @@ int8_t mobile_stack_pop( struct MOBILE* m );
  * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  */
 void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state );
+
+/**
+ * \brief Add a script instruction to the given mobile. If the mobile's
+ *        network queue is full, request resync and update the mobile with
+ *        received full state.
+ * \return New queue size on success or \ref dsekai_mobiles_errors on failure.
+ */
+int8_t mobile_queue_step( struct MOBILE* m, struct SCRIPT_STEP* s );
 
 /**
  * \brief Spawn from ::TILEMAP::spawners according to spawner rules.
