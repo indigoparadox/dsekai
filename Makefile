@@ -18,7 +18,6 @@ DSEKAI_C_FILES := \
    src/control.c \
    src/engines.c \
    src/topdown.c \
-   src/pov.c \
    src/title.c \
    unilayer/src/graphics.c \
    unilayer/src/animate.c \
