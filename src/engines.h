@@ -24,7 +24,7 @@
  * \{
  */
 
- #define ENGINE_TABLE( f ) f( 0, NONE ) f( 1, TOPDOWN )
+#define ENGINE_TABLE( f ) f( 0, NONE, title ) f( 1, TOPDOWN, topdown )
 
 /*! \brief Display the title screen. */
 #define ENGINE_TYPE_NONE 0
@@ -125,43 +125,23 @@ struct DSEKAI_STATE {
 
    uint16_t engine_state;
 
+   uint8_t engine_sel;
+
    uint8_t flags;
 };
-
-/**
- * \relates TITLE_STATE
- * \brief Handler for ::ENGINE_TYPE_NONE.
- * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \return 1 if engine should continue executing or 0 if it should quit.
- */
-int16_t title_loop( MEMORY_HANDLE state_handle );
-
-/**
- * \relates TOPDOWN_STATE
- * \brief Handler for ::ENGINE_TYPE_TOPDOWN.
- * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \return 1 if engine should continue executing or 0 if it should quit.
- */
-int16_t topdown_loop( MEMORY_HANDLE state_handle );
-
-/**
- * \relates POV_STATE
- * \brief Handler for ::ENGINE_TYPE_POV.
- * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \return 1 if engine should continue executing or 0 if it should quit.
- */
-int16_t pov_loop( MEMORY_HANDLE state_handle );
-
-/**
- * \brief Change the currently loaded ::TILEMAP.
- */
-int16_t engines_warp_loop( MEMORY_HANDLE state_handle );
 
 /**
  * \brief Do generic mobile animation and execute their scripts.
  * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
  */
 void engines_animate_mobiles( struct DSEKAI_STATE* state );
+
+/**
+ * \brief Central loop iteration handler. Calls engine-specific callbacks.
+ * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
+ * \return 1 if engine should continue executing or 0 if it should quit.
+ */
+int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
 
 /**
  * \brief Handle generic player movement commmand.
@@ -175,11 +155,49 @@ int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
 typedef int16_t (*ENGINES_SETUP)( struct DSEKAI_STATE* state );
 typedef int16_t (*ENGINES_INPUT)( char in_char, struct DSEKAI_STATE* state );
 typedef void (*ENGINES_ANIMATE)( struct DSEKAI_STATE* state );
-typedef int16_t (*ENGINES_DRAW)( struct DSEKAI_STATE* state );
+typedef void (*ENGINES_DRAW)( struct DSEKAI_STATE* state );
 
-#define ENGINES_TABLE_PROTOTYPES
+#define ENGINES_SETUP_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _setup( struct DSEKAI_STATE* state );
+
+ENGINE_TABLE( ENGINES_SETUP_PROTOTYPES )
+
+#define ENGINES_INPUT_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _input( char in_char, struct DSEKAI_STATE* state );
+
+ENGINE_TABLE( ENGINES_INPUT_PROTOTYPES )
+
+#define ENGINES_ANIMATE_PROTOTYPES( idx, eng, prefix ) void prefix ## _animate( struct DSEKAI_STATE* state );
+
+ENGINE_TABLE( ENGINES_ANIMATE_PROTOTYPES )
+
+#define ENGINES_DRAW_PROTOTYPES( idx, eng, prefix ) void prefix ## _draw( struct DSEKAI_STATE* state );
+
+ENGINE_TABLE( ENGINES_DRAW_PROTOTYPES )
 
 #ifdef ENGINES_C
+
+#define ENGINES_LIST_SETUP( idx, eng, prefix ) prefix ## _setup,
+
+const ENGINES_SETUP gc_engines_setup[] = {
+   ENGINE_TABLE( ENGINES_LIST_SETUP )
+};
+
+#define ENGINES_LIST_INPUT( idx, eng, prefix ) prefix ## _input,
+
+const ENGINES_INPUT gc_engines_input[] = {
+   ENGINE_TABLE( ENGINES_LIST_INPUT )
+};
+
+#define ENGINES_LIST_ANIMATE( idx, eng, prefix ) prefix ## _animate,
+
+const ENGINES_ANIMATE gc_engines_animate[] = {
+   ENGINE_TABLE( ENGINES_LIST_ANIMATE )
+};
+
+#define ENGINES_LIST_DRAW( idx, eng, prefix ) prefix ## _draw,
+
+const ENGINES_DRAW gc_engines_draw[] = {
+   ENGINE_TABLE( ENGINES_LIST_DRAW )
+};
 
 #else
 

@@ -105,25 +105,6 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
    mobile_spawns( state );
 
-   /* Setup engine. */
-   switch( state->map.engine_type ) {
-   case ENGINE_TYPE_TOPDOWN:
-      debug_printf( 2, "selecting topdown engine" );
-      unilayer_loop_set( topdown_loop, state_handle );
-      break;
-
-   case ENGINE_TYPE_POV:
-      debug_printf( 2, "selecting pov engine" );
-      unilayer_loop_set( pov_loop, state_handle );
-      break;
-
-   default:
-      error_printf( "invalid engine requested: %d",
-         state->map.engine_type );
-      retval = 0;
-      goto cleanup;
-   }
-
    state->engine_state = ENGINE_STATE_OPENING;
 
 cleanup:
@@ -200,7 +181,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       /* Clear the title screen. */
       graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
 
-      retval = topdown_setup( state );
+      retval = gc_engines_setup[state->map.engine_type]( state );
       if( !retval ) {
          /* Setup failed. */
          goto cleanup;
@@ -210,19 +191,21 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    graphics_loop_start();
 
    if( 0 >= window_modal( state ) ) {
-      topdown_draw( state );
+      gc_engines_draw[state->map.engine_type]( state );
    }
 
-   window_draw_all( state );
+   if( NULL != state->windows_handle ) {
+      window_draw_all( state );
+   }
 
    animate_frame();
 
    in_char = input_poll();
-   retval = topdown_handle_input( in_char, state );
+   retval = gc_engines_input[state->map.engine_type]( in_char, state );
 
    engines_animate_mobiles( state );
 
-   topdown_animate( state );
+   gc_engines_animate[state->map.engine_type]( state );
 
    graphics_loop_end();
 

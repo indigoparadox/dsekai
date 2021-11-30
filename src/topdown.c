@@ -320,7 +320,7 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    return retval;
 }
 
-int16_t topdown_handle_input( char in_char, struct DSEKAI_STATE* state ) {
+int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
 
    switch( in_char ) {
@@ -361,67 +361,6 @@ int16_t topdown_handle_input( char in_char, struct DSEKAI_STATE* state ) {
       graphics_loop_end();
       break;
    }
-
-   return retval;
-}
-
-int16_t topdown_loop( MEMORY_HANDLE state_handle ) {
-   uint8_t in_char = 0;
-   struct DSEKAI_STATE* state = NULL;
-   int16_t retval = 1;
-
-   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
-   if( NULL == state ) {
-      error_printf( "unable to lock state" );
-      retval = 0;
-      goto cleanup;
-   }
-
-   if( ENGINE_STATE_OPENING == state->engine_state ) {
-      /* Clear the title screen. */
-      graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
-
-      retval = topdown_setup( state );
-      if( !retval ) {
-         /* Setup failed. */
-         goto cleanup;
-      }
-   }
-
-   graphics_loop_start();
-
-   in_char = 0;
-
-   if( 0 >= window_modal( state ) ) {
-      topdown_draw( state );
-   }
-
-   window_draw_all( state );
-
-   animate_frame();
-
-   in_char = input_poll();
-   retval = topdown_handle_input( in_char, state );
-
-   engines_animate_mobiles( state );
-
-   topdown_animate( state );
-
-   graphics_loop_end();
-
-cleanup:
-
-   if( NULL != state ) {
-      if( '\0' != state->warp_to[0] ) {
-         /* There's a warp-in map, so unload the current map and load it. */
-         state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
-         engines_warp_loop( state_handle );
-      } else {
-         state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
-      }
-   }
-
-   graphics_flip();
 
    return retval;
 }
