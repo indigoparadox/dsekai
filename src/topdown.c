@@ -111,8 +111,8 @@ static void topdown_draw_mobile(
    if(
       m->coords.x < gstate->screen_scroll_tx ||
       m->coords.y < gstate->screen_scroll_ty ||
-      m->coords.x > gstate->screen_scroll_tx + SCREEN_TW ||
-      m->coords.y > gstate->screen_scroll_ty + SCREEN_TH
+      m->coords.x >= gstate->screen_scroll_tx + SCREEN_TW ||
+      m->coords.y >= gstate->screen_scroll_ty + SCREEN_TH
    ) {
       /* Mobile is off-screen. */
       return;
@@ -142,90 +142,23 @@ static void topdown_draw_mobile(
       y_offset = 0;
    }
 
-   assert( SPRITE_W > x_offset );
-   assert( SPRITE_H > y_offset );
-
-   if( MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & m->flags) ) {
-      /* Blit the mobile's current sprite/frame. */
-      graphics_blit_sprite_at(
-         m->sprite,
-         state->ani_sprite_x,
-         m->dir * SPRITE_H,
-         SCREEN_MAP_X + (((m->coords.x * SPRITE_W) + x_offset)
-            - gstate->screen_scroll_x),
-         SCREEN_MAP_Y + (((m->coords.y * SPRITE_H) + y_offset)
-            - gstate->screen_scroll_y),
-         SPRITE_W, SPRITE_H );
-   }
+   /* Blit the mobile's current sprite/frame. */
+   graphics_blit_sprite_at(
+      m->sprite,
+      state->ani_sprite_x,
+      m->dir * SPRITE_H,
+      SCREEN_MAP_X + (((m->coords.x * SPRITE_W) + x_offset)
+         - gstate->screen_scroll_x),
+      SCREEN_MAP_Y + (((m->coords.y * SPRITE_H) + y_offset)
+         - gstate->screen_scroll_y),
+      SPRITE_W, SPRITE_H );
 }
 
-int topdown_draw( struct DSEKAI_STATE* state ) {
+void topdown_draw( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
-   int in_char = 0,
-      i = 0,
-      retval = 1;
+   int8_t i = 0;
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
-
-   /*
-   If the screen is scrolling, prioritize that before accepting more
-   commands or drawing mobiles.
-   */
-   if(
-      gstate->screen_scroll_x_tgt != gstate->screen_scroll_x ||
-      gstate->screen_scroll_y_tgt != gstate->screen_scroll_y 
-   ) {
-      if( gstate->screen_scroll_x_tgt > gstate->screen_scroll_x ) {
-         gstate->screen_scroll_x += TILE_W;
-         gstate->screen_scroll_tx = gstate->screen_scroll_x / TILE_W;
-      }
-      if( gstate->screen_scroll_y_tgt > gstate->screen_scroll_y ) {
-         gstate->screen_scroll_y += TILE_H;
-         gstate->screen_scroll_ty = gstate->screen_scroll_y / TILE_H;
-      }
-      if( gstate->screen_scroll_x_tgt < gstate->screen_scroll_x ) {
-         gstate->screen_scroll_x -= TILE_W;
-         gstate->screen_scroll_tx = gstate->screen_scroll_x / TILE_W;
-      }
-      if( gstate->screen_scroll_y_tgt < gstate->screen_scroll_y ) {
-         gstate->screen_scroll_y -= TILE_H;
-         gstate->screen_scroll_ty = gstate->screen_scroll_y / TILE_H;
-      }
-
-      state->input_blocked_countdown = INPUT_BLOCK_DELAY;
-
-      assert( 0 <= gstate->screen_scroll_x );
-      assert( 0 <= gstate->screen_scroll_tx );
-
-      tilemap_refresh_tiles( &(state->map) );
-      topdown_draw_tilemap( state );
-
-      /* Drain input. */
-      in_char = input_poll();
-      if( INPUT_KEY_QUIT == in_char ) {
-         graphics_flip();
-         retval = 0;
-         goto cleanup;
-      }
-
-      if(
-         gstate->screen_scroll_y == gstate->screen_scroll_y_tgt &&
-         gstate->screen_scroll_x == gstate->screen_scroll_x_tgt
-      ) {
-         /* Screen scroll finished. */
-         state->player.coords_prev.x =
-            state->player.coords.x;
-         state->player.coords_prev.y =
-            state->player.coords.y;
-         state->player.steps_x = 0;
-         state->player.steps_y = 0;
-      }
-
-      /* Keep running. */
-      graphics_flip();
-      retval = 1;
-      goto cleanup;
-   }
 
    topdown_draw_tilemap( state );
 
@@ -234,15 +167,12 @@ int topdown_draw( struct DSEKAI_STATE* state ) {
    }
    topdown_draw_mobile( state, gstate, &(state->player) );
 
-   animate_frame();
-
    /* Keep running. */
    graphics_flip();
 
 cleanup:
 
    gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
-   return retval;
 }
 
 void topdown_focus_player( struct DSEKAI_STATE* state ) {
@@ -306,6 +236,54 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
       gstate->screen_scroll_y_tgt = gstate->screen_scroll_y - SCREEN_MAP_H;
       debug_printf( 2, "scrolling screen up to %d, %d...",
          gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
+   }
+
+   /*
+   If the screen is scrolling, prioritize that before accepting more
+   commands or drawing mobiles.
+   */
+   if(
+      gstate->screen_scroll_x_tgt != gstate->screen_scroll_x ||
+      gstate->screen_scroll_y_tgt != gstate->screen_scroll_y 
+   ) {
+
+      state->flags |= DSEKAI_FLAG_INPUT_BLOCKED;
+
+      /* Increment map scroll. */
+      if( gstate->screen_scroll_x_tgt > gstate->screen_scroll_x ) {
+         gstate->screen_scroll_x += TILE_W;
+         gstate->screen_scroll_tx = gstate->screen_scroll_x / TILE_W;
+      }
+      if( gstate->screen_scroll_y_tgt > gstate->screen_scroll_y ) {
+         gstate->screen_scroll_y += TILE_H;
+         gstate->screen_scroll_ty = gstate->screen_scroll_y / TILE_H;
+      }
+      if( gstate->screen_scroll_x_tgt < gstate->screen_scroll_x ) {
+         gstate->screen_scroll_x -= TILE_W;
+         gstate->screen_scroll_tx = gstate->screen_scroll_x / TILE_W;
+      }
+      if( gstate->screen_scroll_y_tgt < gstate->screen_scroll_y ) {
+         gstate->screen_scroll_y -= TILE_H;
+         gstate->screen_scroll_ty = gstate->screen_scroll_y / TILE_H;
+      }
+
+      tilemap_refresh_tiles( &(state->map) );
+
+      /* Check if map scroll finished. */
+      if(
+         gstate->screen_scroll_y == gstate->screen_scroll_y_tgt &&
+         gstate->screen_scroll_x == gstate->screen_scroll_x_tgt
+      ) {
+         /* Screen scroll finished. */
+         state->player.coords_prev.x =
+            state->player.coords.x;
+         state->player.coords_prev.y =
+            state->player.coords.y;
+         state->player.steps_x = 0;
+         state->player.steps_y = 0;
+      }
+   } else {
+      state->flags &= ~DSEKAI_FLAG_INPUT_BLOCKED;
    }
 
    if( NULL != gstate ) {
@@ -411,6 +389,8 @@ int16_t topdown_loop( MEMORY_HANDLE state_handle ) {
    }
 
    graphics_loop_start();
+
+   in_char = 0;
 
    if( 0 >= window_modal( state ) ) {
       topdown_draw( state );

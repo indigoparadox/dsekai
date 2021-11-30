@@ -24,6 +24,8 @@
  * \{
  */
 
+ #define ENGINE_TABLE( f ) f( 0, NONE ) f( 1, TOPDOWN )
+
 /*! \brief Display the title screen. */
 #define ENGINE_TYPE_NONE 0
 /*! \brief Use the topdown 2D engine. */
@@ -67,6 +69,8 @@ struct POV_STATE {
 };
 
 /*! \} */
+
+#define DSEKAI_FLAG_INPUT_BLOCKED 0x01
 
 /*! \brief General/shared state of the running engine in memory. */
 struct DSEKAI_STATE {
@@ -121,6 +125,7 @@ struct DSEKAI_STATE {
 
    uint16_t engine_state;
 
+   uint8_t flags;
 };
 
 /**
@@ -166,6 +171,19 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state );
 int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
 
 /*! \} */
+
+typedef int16_t (*ENGINES_SETUP)( struct DSEKAI_STATE* state );
+typedef int16_t (*ENGINES_INPUT)( char in_char, struct DSEKAI_STATE* state );
+typedef void (*ENGINES_ANIMATE)( struct DSEKAI_STATE* state );
+typedef int16_t (*ENGINES_DRAW)( struct DSEKAI_STATE* state );
+
+#define ENGINES_TABLE_PROTOTYPES
+
+#ifdef ENGINES_C
+
+#else
+
+#endif /* ENGINES_C */
 
 #endif /* ENGINES_H */
 
