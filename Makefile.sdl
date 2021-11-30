@@ -13,6 +13,7 @@ GENDIR_SDL := $(GENDIR)/sdl
 
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
+   src/pov.c \
    unilayer/src/input/sdli.c \
    unilayer/src/graphics/sdlg.c \
    unilayer/src/memory/fakem.c
@@ -54,6 +55,7 @@ DEFINES_SDL := \
    $(DEFINES_DEPTH) \
    $(DEFINES_RESOURCE) \
    -DPLATFORM_SDL \
+   -DENGINE_POV \
    -DUSE_SOFTWARE_TEXT \
    -DSCREEN_W=160 \
    -DSCREEN_H=160 \

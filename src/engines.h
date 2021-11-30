@@ -171,16 +171,46 @@ int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
  * \{
  */
 
+#ifdef ENGINE_POV
+
+#define ENGINE_TABLE( f ) f( 0, NONE, title ) f( 1, TOPDOWN, topdown ) f( 2, POV, pov )
+
+#else
+
 /**
  * \brief List of available engine types.
  */
-#define ENGINE_TABLE( f ) f( 0, NONE, title ) f( 1, TOPDOWN, topdown ) f( 2, POV, pov )
+#define ENGINE_TABLE( f ) f( 0, NONE, title ) f( 1, TOPDOWN, topdown )
+
+#endif /* ENGINE_POV */
 
 #ifndef ENGINES_TOKENS_ONLY
 
+/**
+ * \brief Sets up the current engine (allocates specific state, etc).
+ * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
+ * \return 1 if engine should continue running or 0 on failure.
+ */
 typedef int16_t (*ENGINES_SETUP)( struct DSEKAI_STATE* state );
+
+/**
+ * \brief Handles polled input according to the rules of the current engine.
+ * \param in_char Last char polled from user input.
+ * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
+ * \return 1 if engine should continue running or 0 to quit.
+ */
 typedef int16_t (*ENGINES_INPUT)( char in_char, struct DSEKAI_STATE* state );
+
+/**
+ * \brief Cycles animations and executes scripts relevant to the current engine.
+ * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
+ */
 typedef void (*ENGINES_ANIMATE)( struct DSEKAI_STATE* state );
+
+/**
+ * \brief Draws the engine sceen on-screen according to current state.
+ * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
+ */
 typedef void (*ENGINES_DRAW)( struct DSEKAI_STATE* state );
 
 #define ENGINES_SETUP_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _setup( struct DSEKAI_STATE* state );
