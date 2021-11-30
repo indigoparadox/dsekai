@@ -279,7 +279,3 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
 
 }
 
-int8_t mobile_queue_step( struct MOBILE* m, struct SCRIPT_STEP* s ) {
-
-}
-
