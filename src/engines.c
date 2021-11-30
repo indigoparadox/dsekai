@@ -196,7 +196,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    animate_frame();
 
-   if( NULL != state->windows_handle ) {
+   if( (MEMORY_HANDLE)NULL != state->windows_handle ) {
       window_draw_all( state );
    }
 
