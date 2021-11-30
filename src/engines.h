@@ -13,6 +13,8 @@
  *  \brief Macros, structs, and prototypes for the various engine types.
  */
 
+#ifndef ENGINES_TOKENS_ONLY
+
 /**
  * \addtogroup dsekai_engines_specific_struct Engine-Specific Struct
  * \brief Structs containing information only used by certain engines.
@@ -161,6 +163,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
  */
 int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
 
+#endif /* !ENGINES_TOKENS_ONLY */
+
 /**
  * \addtogroup dsekai_engines_types_sect Engine Types
  *
@@ -171,6 +175,8 @@ int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
  * \brief List of available engine types.
  */
 #define ENGINE_TABLE( f ) f( 0, NONE, title ) f( 1, TOPDOWN, topdown ) f( 2, POV, pov )
+
+#ifndef ENGINES_TOKENS_ONLY
 
 typedef int16_t (*ENGINES_SETUP)( struct DSEKAI_STATE* state );
 typedef int16_t (*ENGINES_INPUT)( char in_char, struct DSEKAI_STATE* state );
@@ -193,7 +199,18 @@ ENGINE_TABLE( ENGINES_ANIMATE_PROTOTYPES )
 
 ENGINE_TABLE( ENGINES_DRAW_PROTOTYPES )
 
+#endif /* !ENGINES_TOKENS_ONLY */
+
 #ifdef ENGINES_C
+
+#define ENGINES_LIST_TOKENS( idx, eng, prefix ) #prefix,
+
+const char* gc_engines_tokens[] = {
+   ENGINE_TABLE( ENGINES_LIST_TOKENS )
+   ""
+};
+
+#ifndef ENGINES_TOKENS_ONLY
 
 #define ENGINES_LIST_SETUP( idx, eng, prefix ) prefix ## _setup,
 
@@ -219,12 +236,20 @@ const ENGINES_DRAW gc_engines_draw[] = {
    ENGINE_TABLE( ENGINES_LIST_DRAW )
 };
 
+#endif /* !ENGINES_TOKENS_ONLY */
+
 #else
+
+extern const char* gc_engines_tokens[];
+
+#ifndef ENGINES_TOKENS_ONLY
 
 extern const ENGINES_SETUP gc_engines_setup[];
 extern const ENGINES_INPUT gc_engines_input[];
 extern const ENGINES_ANIMATE gc_engines_animate[];
 extern const ENGINES_DRAW gc_engines_draw[];
+
+#endif /* !ENGINES_TOKENS_ONLY */
 
 #endif /* ENGINES_C */
 
