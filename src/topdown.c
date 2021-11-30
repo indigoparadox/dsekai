@@ -167,9 +167,6 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
    }
    topdown_draw_mobile( state, gstate, &(state->player) );
 
-   /* Keep running. */
-   graphics_flip();
-
 cleanup:
 
    gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
