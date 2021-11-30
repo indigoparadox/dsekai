@@ -58,7 +58,7 @@ struct TOPDOWN_STATE {
  *        world using raycasting.
  */
 struct POV_STATE {
-   double plane_y;
+   uint8_t dirty;
 };
 
 /*! \} */

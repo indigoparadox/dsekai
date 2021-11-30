@@ -65,7 +65,7 @@ INCLUDES_SDL := \
 
 CFLAGS_SDL := $(shell pkg-config sdl2 --cflags) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_SDL) $(INCLUDES_SDL)
 
-LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
+LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) -lm
 
 # 5. Targets
 
