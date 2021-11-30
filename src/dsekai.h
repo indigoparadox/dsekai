@@ -19,9 +19,6 @@
 
 struct DSEKAI_STATE;
 
-#define ENGINE_STATE_OPENING 1
-#define ENGINE_STATE_RUNNING 2
-
 #include "itstruct.h"
 #include "tmstruct.h"
 

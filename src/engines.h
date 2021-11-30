@@ -3,7 +3,7 @@
 #define ENGINES_H
 
 /**
- * \addtogroup dsekai_engines DSekai Engines
+ * \addtogroup dsekai_engines Engines
  * \brief Central state and subsystem coordination.
  *
  * \{
@@ -14,7 +14,7 @@
  */
 
 /**
- * \addtogroup dsekai_engines_specific_struct DSekai Engine-Specific Struct
+ * \addtogroup dsekai_engines_specific_struct Engine-Specific Struct
  * \brief Structs containing information only used by certain engines.
  *
  * These are kept in a separate handle from the main ::DSEKAI_STATE, attached
@@ -23,15 +23,6 @@
  *
  * \{
  */
-
-#define ENGINE_TABLE( f ) f( 0, NONE, title ) f( 1, TOPDOWN, topdown )
-
-/*! \brief Display the title screen. */
-#define ENGINE_TYPE_NONE 0
-/*! \brief Use the topdown 2D engine. */
-#define ENGINE_TYPE_TOPDOWN 1
-/*! \brief Use the POV 3D engine. */
-#define ENGINE_TYPE_POV 2
 
 /**
  * \brief State for ::ENGINE_TYPE_NONE. A simple title screen engine.
@@ -70,7 +61,24 @@ struct POV_STATE {
 
 /*! \} */
 
+/**
+ * \relates DSEKAI_STATE
+ * \brief DSEKAI_STATE::flags indicating no player input should be accepted.
+ */
 #define DSEKAI_FLAG_INPUT_BLOCKED 0x01
+
+/**
+ * \relates DSEKAI_STATE
+ * \brief DSEKAI_STATE::engine_state indicating engine is has not yet
+ *        initialized its specific structures.
+ */
+#define ENGINE_STATE_OPENING 1
+
+/**
+ * \relates DSEKAI_STATE
+ * \brief DSEKAI_STATE::engine_state indicating engine is running.
+ */
+#define ENGINE_STATE_RUNNING 2
 
 /*! \brief General/shared state of the running engine in memory. */
 struct DSEKAI_STATE {
@@ -123,10 +131,13 @@ struct DSEKAI_STATE {
    /*! \brief Sets the player MOBILE::coords vertical on map change. */
    uint8_t warp_to_y;
 
+   /*! \brief Current engine state (see below in struct reference). */
    uint16_t engine_state;
 
+   /*! \brief Currently active \ref dsekai_engines_types_sect. */
    uint8_t engine_sel;
 
+   /*! \brief Global boolean values dictating engine state and behavior. */
    uint8_t flags;
 };
 
@@ -150,7 +161,16 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
  */
 int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
 
-/*! \} */
+/**
+ * \addtogroup dsekai_engines_types_sect Engine Types
+ *
+ * \{
+ */
+
+/**
+ * \brief List of available engine types.
+ */
+#define ENGINE_TABLE( f ) f( 0, NONE, title ) f( 1, TOPDOWN, topdown ) f( 2, POV, pov )
 
 typedef int16_t (*ENGINES_SETUP)( struct DSEKAI_STATE* state );
 typedef int16_t (*ENGINES_INPUT)( char in_char, struct DSEKAI_STATE* state );
@@ -201,7 +221,16 @@ const ENGINES_DRAW gc_engines_draw[] = {
 
 #else
 
+extern const ENGINES_SETUP gc_engines_setup[];
+extern const ENGINES_INPUT gc_engines_input[];
+extern const ENGINES_ANIMATE gc_engines_animate[];
+extern const ENGINES_DRAW gc_engines_draw[];
+
 #endif /* ENGINES_C */
+
+/*! \} */
+
+/*! \} */
 
 #endif /* ENGINES_H */
 
