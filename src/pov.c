@@ -11,6 +11,8 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
+   gstate->dirty = 1;
+
    gstate = (struct POV_STATE*)memory_unlock( state->engine_state_handle );
 
    state->engine_state = ENGINE_STATE_RUNNING;
@@ -64,42 +66,139 @@ struct POV_RAY {
    double dir_y;
    int16_t map_tx;
    int16_t map_ty;
+   int16_t step_x;
+   int16_t step_y;
+   double side_dist_x;
+   double side_dist_y;
+   double delta_dist_x;
+   double delta_dist_y;
+   double wall_x;
+   double wall_dist;
+   int8_t wall_side;
+   int8_t tile_id;
 };
 
-void pov_cast_ray( int16_t x, struct POV_RAY* ray ) {
+static int8_t pov_cast_ray(
+   double x_orig, double y_orig, int16_t x,
+   struct POV_RAY* ray, struct TILEMAP* t
+) {
+   int16_t wall_hit = 0;
 
+   while( !wall_hit ) {
+
+      /* Increment the ray. */
+      if( ray->side_dist_x < ray->side_dist_y ) {
+         ray->side_dist_x += ray->delta_dist_x;
+         ray->map_tx += ray->step_x;
+         ray->wall_side = 0;
+      } else {
+         ray->side_dist_y += ray->delta_dist_y;
+         ray->map_ty += ray->step_y;
+         ray->wall_side = 1;
+      }
+
+      /* Detect if the ray went off the map. */
+      if(
+         ray->map_ty > TILEMAP_TH || 0 > ray->map_ty ||
+         ray->map_tx > TILEMAP_TW || 0 > ray->map_tx
+      ) {
+         wall_hit = 2;
+      }
+
+      /* Determine the tile hit by the ray. */
+      ray->tile_id = tilemap_get_tile_id( t, ray->map_tx, ray->map_ty );
+      if( 0 > ray->tile_id ) {
+         error_printf( "invalid tile_id at %d, %d", ray->map_tx, ray->map_ty );
+         wall_hit = 2;
+      }
+
+      if(
+         TILEMAP_TILESET_FLAG_BLOCK ==
+         (t->tileset[ray->tile_id].flags & TILEMAP_TILESET_FLAG_BLOCK)
+      ) {
+         debug_printf( 3,
+            "tile id at screen %d, %dx%d: %d (%d)", x,
+               ray->map_tx, ray->map_ty, ray->tile_id, ray->wall_side );
+         wall_hit = 1;
+      }
+   }
+
+   if( 2 == wall_hit ) {
+      return -1;
+   }
+
+   /* Figure out the wall distance. */
+   if( 0 == ray->wall_side ) {
+      ray->wall_dist = ray->side_dist_x - ray->delta_dist_x;
+   } else {
+      ray->wall_dist = ray->side_dist_y - ray->delta_dist_y;
+   }
+
+   /* Get the X coordinate on the wall for the texture. */
+   if( 0 == ray->wall_side ) {
+      ray->wall_x = x_orig + ray->wall_dist * ray->dir_y;
+   } else {
+      ray->wall_x = x_orig + ray->wall_dist * ray->dir_x;
+   }
+   ray->wall_x -= floor( ray->wall_x );
+
+   return ray->tile_id;
+}
+
+void pov_draw_wall_x( int16_t x, struct POV_RAY* ray, struct TILEMAP* t ) {
+   double tex_step = 0,
+      tex_pos = 0;
+   int16_t tex_x = 0,
+      tex_y = 0,
+      y = 0,
+      line_px_height = 0,
+      line_px_start = 0,
+      line_px_end = 0;
+         
+   line_px_height = (int32_t)(SCREEN_MAP_H / ray->wall_dist);
+   line_px_start = -line_px_height / 2 + SCREEN_MAP_H / 2;
+   if( 0 > line_px_start ) {
+      line_px_start = 0;
+   }
+   line_px_end = line_px_height / 2 + SCREEN_MAP_H / 2;
+   if( SCREEN_MAP_H < line_px_end ) {
+      line_px_end = SCREEN_MAP_H - 1;
+   }
+
+   /* Figure out the X coordinate on the texture bitmap. */
+   tex_x = (int32_t)(ray->wall_x * (double)TILE_W);
+   if( 0 == ray->wall_side && 0 < ray->dir_x ) {
+      tex_x = TILE_W - tex_x - 1;
+   }
+   if( 1 == ray->wall_side && 0 > ray->dir_y ) {
+      tex_x = TILE_W - tex_x - 1;
+   }
+
+   tex_step = 1.0 * TILE_H / line_px_height;
+   tex_pos =
+      (line_px_start - SCREEN_MAP_H / 2 + SCREEN_MAP_H / 2) * tex_step;
+
+   for( y = line_px_start ; line_px_end > y ; y++ ) {
+      tex_y = (int32_t)tex_pos & (TILE_H - 1);
+      tex_pos += tex_step;
+      if( !ray->wall_side || (ray->wall_side && 0 == y % 2) ) {
+         graphics_blit_tile_at(
+            t->tileset[ray->tile_id].image,
+            tex_x, tex_y,
+            x, y,
+            1, 1 );
+      }
+   }
 }
 
 void pov_draw( struct DSEKAI_STATE* state ) {
    struct POV_STATE* gstate = NULL;
    double plane_x = 0,
       plane_y = 0.66,
-      camera_x = 0,
-      side_dist_x = 0,
-      side_dist_y = 0,
-      delta_dist_x = 0,
-      delta_dist_y = 0,
-      ray_dir_x = 0,
-      ray_dir_y = 0,
-      perp_wall_dist = 0,
-      wall_x = 0,
-      tex_step = 0,
-      tex_pos = 0;
-   int32_t x = 0,
-      y = 0,
-      ray_map_tx = 0,
-      ray_map_ty = 0,
-      wall_hit = 0,
-      wall_side = 0,
-      ray_step_x = 0,
-      ray_step_y = 0,
-      line_px_height = 0,
-      line_px_start = 0,
-      line_px_end = 0,
-      tex_x = 0,
-      tex_y = 0;
+      camera_x = 0;
+   int16_t x = 0;
    int8_t tile_id = 0;
-   GRAPHICS_COLOR color;
+   struct POV_RAY ray;
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
@@ -110,157 +209,70 @@ void pov_draw( struct DSEKAI_STATE* state ) {
    graphics_draw_block(
       0, 0, SCREEN_MAP_W, SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
 
+   debug_printf( 3, "casting..." );
+
    for( x = 0 ; SCREEN_MAP_W > x ; x++ ) {
+      memory_zero_ptr( &ray, sizeof( struct POV_RAY ) );
       /* Setup ray direction and position. */
       camera_x = 2 * x / (double)SCREEN_MAP_W - 1;
-      /*ray_dir_x = gc_mobile_x_offsets[state->player.dir] + plane_x * camera_x;
-      ray_dir_y = gc_mobile_y_offsets[state->player.dir] + plane_y * camera_x; */
-      ray_dir_x = -1 + plane_x * camera_x;
-      ray_dir_y = 0 + plane_y * camera_x;
-      ray_map_tx = state->player.coords.x;
-      ray_map_ty = state->player.coords.y;
+      /*
+      ray.dir_x = gc_mobile_x_offsets[state->player.dir] + plane_x * camera_x;
+      ray.dir_y = gc_mobile_y_offsets[state->player.dir] + plane_y * camera_x;
+      */
+      ray.dir_x = -1.0 + plane_x * camera_x;
+      ray.dir_y = 0.0 + plane_y * camera_x;
+      ray.map_tx = state->player.coords.x;
+      ray.map_ty = state->player.coords.y;
 
       /* Set ray distance to next tile side. */
-      delta_dist_x = (0 == ray_dir_x) ? 1e30 : fabs( 1 / ray_dir_x );
-      delta_dist_y = (0 == ray_dir_y) ? 1e30 : fabs( 1 / ray_dir_y );
+      ray.delta_dist_x = (0 == ray.dir_x) ? 1e30 : fabs( 1 / ray.dir_x );
+      ray.delta_dist_y = (0 == ray.dir_y) ? 1e30 : fabs( 1 / ray.dir_y );
       /*
-      delta_dist_x = 
-         sqrt( 1 + (ray_dir_y * ray_dir_y) / (ray_dir_x * ray_dir_x) );
-      delta_dist_y =
-         sqrt( 1 + (ray_dir_x * ray_dir_x) / (ray_dir_y * ray_dir_y) );
+      ray.delta_dist_x = 
+         sqrt( 1 + (ray.dir_y * ray.dir_y) / (ray.dir_x * ray.dir_x) );
+      ray.delta_dist_y =
+         sqrt( 1 + (ray.dir_x * ray.dir_x) / (ray.dir_y * ray.dir_y) );
       */
+
+      debug_printf( 3, "x %d %f", x, camera_x );
+
+      /*assert(
+         (x >= 80 && ray.delta_dist_x >= 0) ||
+         (x < 80 && ray.delta_dist_x <= 0) );*/
 
       /* Figure out the ray direction. */
 
-      if( 0 > ray_dir_x ) {
-         ray_step_x = -1;
-         side_dist_x = (state->player.coords.x - ray_map_tx) * delta_dist_x;
+      if( 0 > ray.dir_x ) {
+         ray.step_x = -1;
+         ray.side_dist_x =
+            (state->player.coords.x - ray.map_tx) * ray.delta_dist_x;
       } else {
-         ray_step_x = 1;
-         side_dist_x =
-            (ray_map_tx + 1 - (double)(state->player.coords.x)) * delta_dist_x;
+         ray.step_x = 1;
+         ray.side_dist_x =
+            (ray.map_tx + 1 - (double)(state->player.coords.x)) * ray.delta_dist_x;
       }
 
-      if( 0 > ray_dir_y ) {
-         ray_step_y = -1;
-         side_dist_y = (state->player.coords.x - ray_map_ty) * delta_dist_y;
+      if( 0 > ray.dir_y ) {
+         ray.step_y = -1;
+         ray.side_dist_y =
+            (state->player.coords.x - ray.map_ty) * ray.delta_dist_y;
       } else {
-         ray_step_y = 1;
-         side_dist_y =
-            (ray_map_ty + 1 - (double)(state->player.coords.y)) * delta_dist_y;
+         ray.step_y = 1;
+         ray.side_dist_y =
+            (ray.map_ty + 1 - (double)(state->player.coords.y)) * ray.delta_dist_y;
       }
 
       /* Launch the ray! */
-      wall_hit = 0;
-      while( !wall_hit ) {
-         if( side_dist_x < side_dist_y ) {
-            side_dist_x += delta_dist_x;
-            ray_map_tx += ray_step_x;
-            wall_side = 0;
-         } else {
-            side_dist_y += delta_dist_y;
-            ray_map_ty += ray_step_y;
-            wall_side = 1;
-         }
-
-         if(
-            ray_map_ty > TILEMAP_TH || 0 > ray_map_ty ||
-            ray_map_tx > TILEMAP_TW || 0 > ray_map_tx
-         ) {
-            wall_hit = 2;
-         }
-
-         tile_id = tilemap_get_tile_id( &(state->map), ray_map_tx, ray_map_ty );
-         if( 0 > tile_id ) {
-            error_printf( "invalid tile_id at %d, %d", ray_map_tx, ray_map_ty );
-            wall_hit = 2;
-         }
-
-         if(
-            TILEMAP_TILESET_FLAG_BLOCK ==
-            (state->map.tileset[tile_id].flags & TILEMAP_TILESET_FLAG_BLOCK)
-         ) {
-            debug_printf( 3,
-               "tile id at screen %d (%f), %dx%d: %d (%d)", x, camera_x,
-                  ray_map_tx, ray_map_ty, tile_id, wall_side );
-            wall_hit = 1;
-         }
-      }
-
-      if( 2 == wall_hit ) {
+      tile_id = pov_cast_ray(
+         state->player.coords.x,
+         state->player.coords.y,
+         x, &ray, &(state->map) );
+      if( 0 > tile_id ) {
          /* Ray went off the map. */
          continue;
       }
 
-      /* Figure out the wall distance. */
-      if( 0 == wall_side ) {
-         perp_wall_dist = side_dist_x - delta_dist_x;
-      } else {
-         perp_wall_dist = side_dist_y - delta_dist_y;
-      }
-
-      line_px_height = (int32_t)(SCREEN_MAP_H / perp_wall_dist);
-      line_px_start = -line_px_height / 2 + SCREEN_MAP_H / 2;
-      if( 0 > line_px_start ) {
-         line_px_start = 0;
-      }
-      line_px_end = line_px_height / 2 + SCREEN_MAP_H / 2;
-      if( SCREEN_MAP_H < line_px_end ) {
-         line_px_end = SCREEN_MAP_H - 1;
-      }
-
-      /* debug_printf( 3, "%d %d %d %d",
-         x, line_px_height, line_px_start, line_px_end ); */
-
-#if 0
-      if( wall_side ) {
-         color = GRAPHICS_COLOR_WHITE;
-      } else {
-         color = GRAPHICS_COLOR_CYAN;
-      }
-
-      /* debug_printf( 3, "%d %d %d %d",
-         x, line_px_height, line_px_start, line_px_end ); */
-         
-      graphics_draw_line(
-         SCREEN_MAP_X + x,
-         SCREEN_MAP_Y + line_px_start,
-         SCREEN_MAP_X + x,
-         SCREEN_MAP_Y + line_px_end, 1, color );
-#endif
-         
-      /* Get the X coordinate on the wall for the texture. */
-      if( 0 == wall_side ) {
-         wall_x = state->player.coords.x + perp_wall_dist * ray_dir_y;
-      } else {
-         wall_x = state->player.coords.x + perp_wall_dist * ray_dir_x;
-      }
-      wall_x -= floor( wall_x );
-
-      /* Figure out the X coordinate on the texture bitmap. */
-      tex_x = (int32_t)(wall_x * (double)TILE_W);
-      if( 0 == wall_side && 0 < ray_dir_x ) {
-         tex_x = TILE_W - tex_x - 1;
-      }
-      if( 1 == wall_side && 0 > ray_dir_y ) {
-         tex_x = TILE_W - tex_x - 1;
-      }
-
-      tex_step = 1.0 * TILE_H / line_px_height;
-      tex_pos =
-         (line_px_start - SCREEN_MAP_H / 2 + SCREEN_MAP_H / 2) * tex_step;
-
-      for( y = line_px_start ; line_px_end > y ; y++ ) {
-         tex_y = (int32_t)tex_pos & (TILE_H - 1);
-         tex_pos += tex_step;
-         if( !wall_side || (wall_side && 0 == y % 2) ) {
-            graphics_blit_tile_at(
-               state->map.tileset[tile_id].image,
-               tex_x, tex_y,
-               x, y,
-               1, 1 );
-         }
-      }
+      pov_draw_wall_x( x, &ray, &(state->map) );
    }
 
    gstate->dirty = 0;
