@@ -13,6 +13,7 @@ GENDIR_SDL := $(GENDIR)/sdl
 
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
+   src/irc.c \
    unilayer/src/input/sdli.c \
    unilayer/src/graphics/sdlg.c \
    unilayer/src/memory/fakem.c \
