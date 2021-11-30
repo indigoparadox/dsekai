@@ -4,11 +4,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define ENGINES_TOKENS_ONLY
+#define ENGINES_C
 #include "../src/dsekai.h"
 
 #include "../src/tmjson.h"
-
-#define MAPBUF_ASN_SEQUENCE   0x30
 
 void buffer_assign_short( uint8_t* buffer, uint16_t n ) {
    buffer[0] = ((n & 0xff00) >> 8);

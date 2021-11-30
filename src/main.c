@@ -18,7 +18,7 @@ unilayer_main() {
 /* === Main Preamble === */
 
    struct DSEKAI_STATE* state = NULL;
-   int retval = 0;
+   int16_t retval = 0;
 
    platform_init( icon_dsekai );
 
@@ -77,7 +77,7 @@ unilayer_main() {
 
    state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    state->engine_state = ENGINE_STATE_OPENING;
-   unilayer_loop_set( title_loop, g_state_handle );
+   unilayer_loop_set( engines_loop_iter, g_state_handle );
 
    /*
    state->warp_to[0] = 'f';

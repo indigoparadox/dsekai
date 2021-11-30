@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdlib.h> /* For calloc() */
 
+#define ENGINES_TOKENS_ONLY
+#define ENGINES_C
 #include "../src/dsekai.h"
 
 #include "../src/tmjson.h"

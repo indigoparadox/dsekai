@@ -275,18 +275,27 @@ void tilemap_json_parse_engine(
    struct jsmntok* tokens, int16_t tokens_sz
 ) {
    char engine_type[TILEMAP_NAME_MAX];
+   int8_t i = 0;
 
    json_str_from_path(
       TILEMAP_JPATH_PROP_ENGINE, sizeof( TILEMAP_JPATH_PROP_ENGINE ),
       engine_type, TILEMAP_NAME_MAX, tokens, tokens_sz, json_buffer );
 
-   if( 0 == memory_strncmp_ptr( engine_type, "topdown", 7 ) ) {
-      t->engine_type = ENGINE_TYPE_TOPDOWN;
-   } else if( 0 == memory_strncmp_ptr( engine_type, "pov", 3 ) ) {
-      t->engine_type = ENGINE_TYPE_POV;
-   } else {
-      t->engine_type = ENGINE_TYPE_NONE;
+   t->engine_type = 0; /* ENGINE_TYPE_NONE */
+
+   /* Loop through available engines and find matching token. */
+   for( i = 0 ; '\0' != gc_engines_tokens[i][0] ; i++ ) {
+      if( 0 == memory_strncmp_ptr(
+         engine_type,
+         gc_engines_tokens[i],
+         TILEMAP_NAME_MAX
+      ) ) {
+         t->engine_type = i;
+      }
    }
+
+   /* XXX */
+   /* t->engine_type = ENGINE_TYPE_POV; */
 }
 
 void tilemap_json_parse_weather(

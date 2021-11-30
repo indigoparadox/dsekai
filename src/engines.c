@@ -105,25 +105,6 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
    mobile_spawns( state );
 
-   /* Setup engine. */
-   switch( state->map.engine_type ) {
-   case ENGINE_TYPE_TOPDOWN:
-      debug_printf( 2, "selecting topdown engine" );
-      unilayer_loop_set( topdown_loop, state_handle );
-      break;
-
-   case ENGINE_TYPE_POV:
-      debug_printf( 2, "selecting pov engine" );
-      unilayer_loop_set( pov_loop, state_handle );
-      break;
-
-   default:
-      error_printf( "invalid engine requested: %d",
-         state->map.engine_type );
-      retval = 0;
-      goto cleanup;
-   }
-
    state->engine_state = ENGINE_STATE_OPENING;
 
 cleanup:
@@ -131,6 +112,116 @@ cleanup:
    if( NULL != state ) {
       state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
    }
+
+   return retval;
+}
+
+void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
+   int8_t i = 0;
+
+   mobile_state_animate( state );
+   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+      if(
+         /* Pause scripts if modal window is pending. */
+         0 >= window_modal( state ) ||
+         /* Pause scripts if screen is scrolling. */
+         DSEKAI_FLAG_INPUT_BLOCKED == (DSEKAI_FLAG_INPUT_BLOCKED & state->flags)
+      ) {
+         mobile_execute( &(state->mobiles[i]), state );
+      }
+      if(
+         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
+      ) {
+         /* Skip animating inactive mobiles. */
+         continue;
+      }
+      mobile_animate( &(state->mobiles[i]), &(state->map) );
+   }
+   mobile_animate( &(state->player), &(state->map) );
+
+}
+
+int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state ) {
+   if( 0 < window_modal( state ) ) {
+      return 1;
+   }
+
+   if(
+      DSEKAI_FLAG_INPUT_BLOCKED == (DSEKAI_FLAG_INPUT_BLOCKED & state->flags)
+   ) {
+      return 1;
+   }
+   
+   state->player.dir = dir_move;
+
+   if(
+      !tilemap_collide( &(state->player), dir_move, &(state->map) ) &&
+      NULL == mobile_get_facing( &(state->player), state )
+   ) {
+      /* No blocking tiles or mobiles. */
+      mobile_walk_start( &(state->player), dir_move );
+   }
+
+   return dir_move;
+}
+
+int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
+   uint8_t in_char = 0;
+   struct DSEKAI_STATE* state = NULL;
+   int16_t retval = 1;
+
+   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
+   if( NULL == state ) {
+      error_printf( "unable to lock state" );
+      retval = 0;
+      goto cleanup;
+   }
+
+   if( ENGINE_STATE_OPENING == state->engine_state ) {
+      /* Clear the title screen. */
+      graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
+
+      retval = gc_engines_setup[state->map.engine_type]( state );
+      if( !retval ) {
+         /* Setup failed. */
+         goto cleanup;
+      }
+   }
+
+   graphics_loop_start();
+
+   if( 0 >= window_modal( state ) ) {
+      gc_engines_draw[state->map.engine_type]( state );
+   }
+
+   if( NULL != state->windows_handle ) {
+      window_draw_all( state );
+   }
+
+   animate_frame();
+
+   in_char = input_poll();
+   retval = gc_engines_input[state->map.engine_type]( in_char, state );
+
+   engines_animate_mobiles( state );
+
+   gc_engines_animate[state->map.engine_type]( state );
+
+   graphics_loop_end();
+
+cleanup:
+
+   if( NULL != state ) {
+      if( '\0' != state->warp_to[0] ) {
+         /* There's a warp-in map, so unload the current map and load it. */
+         state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
+         engines_warp_loop( state_handle );
+      } else {
+         state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
+      }
+   }
+
+   graphics_flip();
 
    return retval;
 }

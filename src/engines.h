@@ -3,7 +3,7 @@
 #define ENGINES_H
 
 /**
- * \addtogroup dsekai_engines DSekai Engines
+ * \addtogroup dsekai_engines Engines
  * \brief Central state and subsystem coordination.
  *
  * \{
@@ -13,8 +13,10 @@
  *  \brief Macros, structs, and prototypes for the various engine types.
  */
 
+#ifndef ENGINES_TOKENS_ONLY
+
 /**
- * \addtogroup dsekai_engines_specific_struct DSekai Engine-Specific Struct
+ * \addtogroup dsekai_engines_specific_struct Engine-Specific Struct
  * \brief Structs containing information only used by certain engines.
  *
  * These are kept in a separate handle from the main ::DSEKAI_STATE, attached
@@ -23,13 +25,6 @@
  *
  * \{
  */
-
-/*! \brief Display the title screen. */
-#define ENGINE_TYPE_NONE 0
-/*! \brief Use the topdown 2D engine. */
-#define ENGINE_TYPE_TOPDOWN 1
-/*! \brief Use the POV 3D engine. */
-#define ENGINE_TYPE_POV 2
 
 /**
  * \brief State for ::ENGINE_TYPE_NONE. A simple title screen engine.
@@ -67,6 +62,25 @@ struct POV_STATE {
 };
 
 /*! \} */
+
+/**
+ * \relates DSEKAI_STATE
+ * \brief DSEKAI_STATE::flags indicating no player input should be accepted.
+ */
+#define DSEKAI_FLAG_INPUT_BLOCKED 0x01
+
+/**
+ * \relates DSEKAI_STATE
+ * \brief DSEKAI_STATE::engine_state indicating engine is has not yet
+ *        initialized its specific structures.
+ */
+#define ENGINE_STATE_OPENING 1
+
+/**
+ * \relates DSEKAI_STATE
+ * \brief DSEKAI_STATE::engine_state indicating engine is running.
+ */
+#define ENGINE_STATE_RUNNING 2
 
 /*! \brief General/shared state of the running engine in memory. */
 struct DSEKAI_STATE {
@@ -119,38 +133,127 @@ struct DSEKAI_STATE {
    /*! \brief Sets the player MOBILE::coords vertical on map change. */
    uint8_t warp_to_y;
 
+   /*! \brief Current engine state (see below in struct reference). */
    uint16_t engine_state;
 
+   /*! \brief Currently active \ref dsekai_engines_types_sect. */
+   uint8_t engine_sel;
+
+   /*! \brief Global boolean values dictating engine state and behavior. */
+   uint8_t flags;
 };
 
 /**
- * \relates TITLE_STATE
- * \brief Handler for ::ENGINE_TYPE_NONE.
+ * \brief Do generic mobile animation and execute their scripts.
+ * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
+ */
+void engines_animate_mobiles( struct DSEKAI_STATE* state );
+
+/**
+ * \brief Central loop iteration handler. Calls engine-specific callbacks.
  * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
  * \return 1 if engine should continue executing or 0 if it should quit.
  */
-int title_loop( MEMORY_HANDLE state_handle );
+int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
 
 /**
- * \relates TOPDOWN_STATE
- * \brief Handler for ::ENGINE_TYPE_TOPDOWN.
- * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \return 1 if engine should continue executing or 0 if it should quit.
+ * \brief Handle generic player movement commmand.
+ * \param dir_move
+ * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
  */
-int topdown_loop( MEMORY_HANDLE state_handle );
+int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
+
+#endif /* !ENGINES_TOKENS_ONLY */
 
 /**
- * \relates POV_STATE
- * \brief Handler for ::ENGINE_TYPE_POV.
- * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
- * \return 1 if engine should continue executing or 0 if it should quit.
+ * \addtogroup dsekai_engines_types_sect Engine Types
+ *
+ * \{
  */
-int pov_loop( MEMORY_HANDLE state_handle );
 
 /**
- * \brief Change the currently loaded ::TILEMAP.
+ * \brief List of available engine types.
  */
-int16_t engines_warp_loop( MEMORY_HANDLE state_handle );
+#define ENGINE_TABLE( f ) f( 0, NONE, title ) f( 1, TOPDOWN, topdown ) f( 2, POV, pov )
+
+#ifndef ENGINES_TOKENS_ONLY
+
+typedef int16_t (*ENGINES_SETUP)( struct DSEKAI_STATE* state );
+typedef int16_t (*ENGINES_INPUT)( char in_char, struct DSEKAI_STATE* state );
+typedef void (*ENGINES_ANIMATE)( struct DSEKAI_STATE* state );
+typedef void (*ENGINES_DRAW)( struct DSEKAI_STATE* state );
+
+#define ENGINES_SETUP_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _setup( struct DSEKAI_STATE* state );
+
+ENGINE_TABLE( ENGINES_SETUP_PROTOTYPES )
+
+#define ENGINES_INPUT_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _input( char in_char, struct DSEKAI_STATE* state );
+
+ENGINE_TABLE( ENGINES_INPUT_PROTOTYPES )
+
+#define ENGINES_ANIMATE_PROTOTYPES( idx, eng, prefix ) void prefix ## _animate( struct DSEKAI_STATE* state );
+
+ENGINE_TABLE( ENGINES_ANIMATE_PROTOTYPES )
+
+#define ENGINES_DRAW_PROTOTYPES( idx, eng, prefix ) void prefix ## _draw( struct DSEKAI_STATE* state );
+
+ENGINE_TABLE( ENGINES_DRAW_PROTOTYPES )
+
+#endif /* !ENGINES_TOKENS_ONLY */
+
+#ifdef ENGINES_C
+
+#define ENGINES_LIST_TOKENS( idx, eng, prefix ) #prefix,
+
+const char* gc_engines_tokens[] = {
+   ENGINE_TABLE( ENGINES_LIST_TOKENS )
+   ""
+};
+
+#ifndef ENGINES_TOKENS_ONLY
+
+#define ENGINES_LIST_SETUP( idx, eng, prefix ) prefix ## _setup,
+
+const ENGINES_SETUP gc_engines_setup[] = {
+   ENGINE_TABLE( ENGINES_LIST_SETUP )
+};
+
+#define ENGINES_LIST_INPUT( idx, eng, prefix ) prefix ## _input,
+
+const ENGINES_INPUT gc_engines_input[] = {
+   ENGINE_TABLE( ENGINES_LIST_INPUT )
+};
+
+#define ENGINES_LIST_ANIMATE( idx, eng, prefix ) prefix ## _animate,
+
+const ENGINES_ANIMATE gc_engines_animate[] = {
+   ENGINE_TABLE( ENGINES_LIST_ANIMATE )
+};
+
+#define ENGINES_LIST_DRAW( idx, eng, prefix ) prefix ## _draw,
+
+const ENGINES_DRAW gc_engines_draw[] = {
+   ENGINE_TABLE( ENGINES_LIST_DRAW )
+};
+
+#endif /* !ENGINES_TOKENS_ONLY */
+
+#else
+
+extern const char* gc_engines_tokens[];
+
+#ifndef ENGINES_TOKENS_ONLY
+
+extern const ENGINES_SETUP gc_engines_setup[];
+extern const ENGINES_INPUT gc_engines_input[];
+extern const ENGINES_ANIMATE gc_engines_animate[];
+extern const ENGINES_DRAW gc_engines_draw[];
+
+#endif /* !ENGINES_TOKENS_ONLY */
+
+#endif /* ENGINES_C */
+
+/*! \} */
 
 /*! \} */
 
