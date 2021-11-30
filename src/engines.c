@@ -135,3 +135,21 @@ cleanup:
    return retval;
 }
 
+int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state ) {
+   if( 0 < window_modal( state ) ) {
+      return -1;
+   }
+   
+   state->player.dir = dir_move;
+
+   if(
+      !tilemap_collide( &(state->player), dir_move, &(state->map) ) &&
+      NULL == mobile_get_facing( &(state->player), state )
+   ) {
+      /* No blocking tiles or mobiles. */
+      mobile_walk_start( &(state->player), dir_move );
+   }
+
+   return dir_move;
+}
+

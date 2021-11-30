@@ -18,7 +18,7 @@ unilayer_main() {
 /* === Main Preamble === */
 
    struct DSEKAI_STATE* state = NULL;
-   int retval = 0;
+   int16_t retval = 0;
 
    platform_init( icon_dsekai );
 

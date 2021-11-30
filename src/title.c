@@ -10,7 +10,7 @@
 #endif /* PLATFORM_DOS */
 #endif /* RESOURCE_FILE */
 
-int title_loop( MEMORY_HANDLE state_handle ) {
+int16_t title_loop( MEMORY_HANDLE state_handle ) {
    struct DSEKAI_STATE* state = NULL;
    int retval = 1,
       i = 0;

@@ -129,7 +129,7 @@ struct DSEKAI_STATE {
  * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
  * \return 1 if engine should continue executing or 0 if it should quit.
  */
-int title_loop( MEMORY_HANDLE state_handle );
+int16_t title_loop( MEMORY_HANDLE state_handle );
 
 /**
  * \relates TOPDOWN_STATE
@@ -137,7 +137,7 @@ int title_loop( MEMORY_HANDLE state_handle );
  * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
  * \return 1 if engine should continue executing or 0 if it should quit.
  */
-int topdown_loop( MEMORY_HANDLE state_handle );
+int16_t topdown_loop( MEMORY_HANDLE state_handle );
 
 /**
  * \relates POV_STATE
@@ -145,12 +145,17 @@ int topdown_loop( MEMORY_HANDLE state_handle );
  * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
  * \return 1 if engine should continue executing or 0 if it should quit.
  */
-int pov_loop( MEMORY_HANDLE state_handle );
+int16_t pov_loop( MEMORY_HANDLE state_handle );
 
 /**
  * \brief Change the currently loaded ::TILEMAP.
  */
 int16_t engines_warp_loop( MEMORY_HANDLE state_handle );
+
+/**
+ * \brief Handle generic player movement commmand.
+ */
+int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
 
 /*! \} */
 

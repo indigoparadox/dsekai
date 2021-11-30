@@ -1,7 +1,7 @@
 
 #include "dsekai.h"
 
-int pov_loop( MEMORY_HANDLE state_handle ) {
+int16_t pov_loop( MEMORY_HANDLE state_handle ) {
    struct DSEKAI_STATE* state = NULL;
    int retval = 1;
    uint8_t in_char = 0;

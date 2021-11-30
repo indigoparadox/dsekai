@@ -271,7 +271,7 @@ void topdown_focus_player( struct DSEKAI_STATE* state ) {
    gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
 }
 
-int topdown_loop( MEMORY_HANDLE state_handle ) {
+int16_t topdown_loop( MEMORY_HANDLE state_handle ) {
    int i = 0;
    uint8_t in_char = 0;
    struct DSEKAI_STATE* state = NULL;
@@ -332,23 +332,21 @@ int topdown_loop( MEMORY_HANDLE state_handle ) {
       in_char = input_poll();
    }
 
-   #define handle_movement( dir_move ) if( 0 < window_modal( state ) ) { break; } state->player.dir = dir_move; if( !tilemap_collide( &(state->player), dir_move, &(state->map) ) && NULL == mobile_get_facing( &(state->player), state ) ) { mobile_walk_start( &(state->player), dir_move ); }
-
    switch( in_char ) {
    case INPUT_KEY_UP:
-      handle_movement( MOBILE_DIR_NORTH );
+      engines_handle_movement( MOBILE_DIR_NORTH, state );
       break;
 
    case INPUT_KEY_LEFT:
-      handle_movement( MOBILE_DIR_WEST );
+      engines_handle_movement( MOBILE_DIR_WEST, state );
       break;
 
    case INPUT_KEY_DOWN:
-      handle_movement( MOBILE_DIR_SOUTH );
+      engines_handle_movement( MOBILE_DIR_SOUTH, state );
       break;
 
    case INPUT_KEY_RIGHT:
-      handle_movement( MOBILE_DIR_EAST );
+      engines_handle_movement( MOBILE_DIR_EAST, state );
       break;
 
    case INPUT_KEY_OK:
