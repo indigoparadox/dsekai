@@ -254,7 +254,7 @@ uint16_t script_handle_ANIMATE(
    a_x = mobile_stack_pop( actor ) * TILE_W;
 
 #ifdef SCRIPT_HAS_GFX
-   animate_create( arg, SCREEN_MAP_X + a_x, SCREEN_MAP_Y + a_y, a_w, a_h );
+   animate_create( arg, 0, SCREEN_MAP_X + a_x, SCREEN_MAP_Y + a_y, a_w, a_h );
 #endif /* SCRIPT_HAS_GFX */
 
    /* TODO */

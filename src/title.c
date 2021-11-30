@@ -22,11 +22,12 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
 
    /* Create the environmental animations. */
    animate_create(
-      ANIMATE_TYPE_FIRE,
+      ANIMATE_TYPE_FIRE, ANIMATE_FLAG_CLEANUP,
       0, SCREEN_H - ANIMATE_TILE_H, SCREEN_W, ANIMATE_TILE_H );
 
    animate_create(
-      ANIMATE_TYPE_SNOW, 0, 0, SCREEN_W, SCREEN_H - ANIMATE_TILE_H );
+      ANIMATE_TYPE_SNOW, ANIMATE_FLAG_CLEANUP,
+      0, 0, SCREEN_W, SCREEN_H - ANIMATE_TILE_H );
 
    gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
 
@@ -72,6 +73,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[3].hp = 100;
    resource_assign_id( state->mobiles[3].sprite, s_world );
 
+   graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
+
    state->engine_state = ENGINE_STATE_RUNNING;
 
    return retval;
@@ -80,7 +83,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
 void title_draw( struct DSEKAI_STATE* state ) {
    int8_t i = 0;
 
-   graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
+   /* graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK ); */
 
 #ifdef DEPTH_VGA
    graphics_string_at( "dsekai", 6, 55, 30, GRAPHICS_COLOR_DARKRED, 1 );

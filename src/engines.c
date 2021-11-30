@@ -194,11 +194,11 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       gc_engines_draw[state->map.engine_type]( state );
    }
 
+   animate_frame();
+
    if( NULL != state->windows_handle ) {
       window_draw_all( state );
    }
-
-   animate_frame();
 
    in_char = input_poll();
    retval = gc_engines_input[state->map.engine_type]( in_char, state );
