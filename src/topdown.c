@@ -271,66 +271,79 @@ void topdown_focus_player( struct DSEKAI_STATE* state ) {
    gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
 }
 
-int16_t topdown_loop( MEMORY_HANDLE state_handle ) {
-   int i = 0;
-   uint8_t in_char = 0;
-   struct DSEKAI_STATE* state = NULL;
-   int retval = 1;
+void topdown_animate( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
-
-   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
-   if( NULL == state ) {
-      error_printf( "unable to lock state" );
-      retval = 0;
-      goto cleanup;
-   }
-
-   if( ENGINE_STATE_OPENING == state->engine_state ) {
-
-      assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
-      state->engine_state_handle = memory_alloc(
-            sizeof( struct TOPDOWN_STATE ), 1 );
-
-      /* Clear the title screen. */
-      graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
-
-      /* Make sure the tilemap is drawn at least once behind any initial
-       * windows.
-       */
-      topdown_focus_player( state );
-      tilemap_refresh_tiles( &(state->map) );
-      topdown_draw_tilemap( state );
-
-      window_push(
-         WINDOW_ID_STATUS, WINDOW_STATUS_VISIBLE,
-         0, (SCREEN_TH * SPRITE_H), STATUS_WINDOW_W, STATUS_WINDOW_H, 0,
-         state );
-
-      /* Force reset the weather to start the animation. */
-      tilemap_set_weather( &(state->map), state->map.weather );
-
-      state->engine_state = ENGINE_STATE_RUNNING;
-   }
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
 
-   graphics_loop_start();
+   /* Scroll the screen by one if the player goes off-screen. */
+   if(
+      state->player.coords.x >=
+         gstate->screen_scroll_tx + SCREEN_TW
+   ) {
+      gstate->screen_scroll_x_tgt = gstate->screen_scroll_x + SCREEN_MAP_W;
+      debug_printf( 2, "scrolling screen right to %d, %d...",
+         gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
 
-   in_char = 0;
+   } else if(
+      state->player.coords.y >=
+         gstate->screen_scroll_ty + SCREEN_TH
+   ) {
+      gstate->screen_scroll_y_tgt = gstate->screen_scroll_y + SCREEN_MAP_H;
+      debug_printf( 2, "scrolling screen down to %d, %d...",
+         gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
 
-   if( 0 >= window_modal( state ) ) {
-      topdown_draw( state );
+   } else if(
+      state->player.coords.x < gstate->screen_scroll_tx
+   ) {
+      gstate->screen_scroll_x_tgt = gstate->screen_scroll_x - SCREEN_MAP_W;
+      debug_printf( 2, "scrolling screen left to %d, %d...",
+         gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
+
+   } else if(
+      state->player.coords.y < gstate->screen_scroll_ty
+   ) {
+      gstate->screen_scroll_y_tgt = gstate->screen_scroll_y - SCREEN_MAP_H;
+      debug_printf( 2, "scrolling screen up to %d, %d...",
+         gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
    }
 
-   window_draw_all( state );
-
-   animate_frame();
-
-   if( state->input_blocked_countdown ) {
-      state->input_blocked_countdown--;
-   } else {
-      in_char = input_poll();
+   if( NULL != gstate ) {
+      assert( NULL != state );
+      gstate = (struct TOPDOWN_STATE*)memory_unlock(
+         state->engine_state_handle );
    }
+}
+
+int16_t topdown_setup( struct DSEKAI_STATE* state ) {
+   int16_t retval = 1;
+
+   assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
+   state->engine_state_handle = memory_alloc(
+         sizeof( struct TOPDOWN_STATE ), 1 );
+
+   /* Make sure the tilemap is drawn at least once behind any initial windows.
+    */
+   topdown_focus_player( state );
+   tilemap_refresh_tiles( &(state->map) );
+   topdown_draw_tilemap( state );
+
+   /* Show status window. */
+   window_push(
+      WINDOW_ID_STATUS, WINDOW_STATUS_VISIBLE,
+      0, (SCREEN_TH * SPRITE_H), STATUS_WINDOW_W, STATUS_WINDOW_H, 0,
+      state );
+
+   /* Force reset the weather to start the animation. */
+   tilemap_set_weather( &(state->map), state->map.weather );
+
+   state->engine_state = ENGINE_STATE_RUNNING;
+   
+   return retval;
+}
+
+int16_t topdown_handle_input( char in_char, struct DSEKAI_STATE* state ) {
+   int16_t retval = 1;
 
    switch( in_char ) {
    case INPUT_KEY_UP:
@@ -368,66 +381,55 @@ int16_t topdown_loop( MEMORY_HANDLE state_handle ) {
       window_pop( WINDOW_ID_STATUS, state );
       retval = 0;
       graphics_loop_end();
+      break;
+   }
+
+   return retval;
+}
+
+int16_t topdown_loop( MEMORY_HANDLE state_handle ) {
+   uint8_t in_char = 0;
+   struct DSEKAI_STATE* state = NULL;
+   int16_t retval = 1;
+
+   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
+   if( NULL == state ) {
+      error_printf( "unable to lock state" );
+      retval = 0;
       goto cleanup;
    }
 
-   mobile_state_animate( state );
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      if( 0 >= window_modal( state ) ) {
-         /* Pause scripts if modal window is pending. */
-         mobile_execute( &(state->mobiles[i]), state );
+   if( ENGINE_STATE_OPENING == state->engine_state ) {
+      /* Clear the title screen. */
+      graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
+
+      retval = topdown_setup( state );
+      if( !retval ) {
+         /* Setup failed. */
+         goto cleanup;
       }
-      if(
-         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
-      ) {
-         /* Skip animating inactive mobiles. */
-         continue;
-      }
-      mobile_animate( &(state->mobiles[i]), &(state->map) );
    }
-   mobile_animate( &(state->player), &(state->map) );
 
-   /* Scroll the screen by one if the player goes off-screen. */
-   if(
-      state->player.coords.x >=
-         gstate->screen_scroll_tx + SCREEN_TW
-   ) {
-      gstate->screen_scroll_x_tgt = gstate->screen_scroll_x + SCREEN_MAP_W;
-      debug_printf( 2, "scrolling screen right to %d, %d...",
-         gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
+   graphics_loop_start();
 
-   } else if(
-      state->player.coords.y >=
-         gstate->screen_scroll_ty + SCREEN_TH
-   ) {
-      gstate->screen_scroll_y_tgt = gstate->screen_scroll_y + SCREEN_MAP_H;
-      debug_printf( 2, "scrolling screen down to %d, %d...",
-         gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
-
-   } else if(
-      state->player.coords.x < gstate->screen_scroll_tx
-   ) {
-      gstate->screen_scroll_x_tgt = gstate->screen_scroll_x - SCREEN_MAP_W;
-      debug_printf( 2, "scrolling screen left to %d, %d...",
-         gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
-
-   } else if(
-      state->player.coords.y < gstate->screen_scroll_ty
-   ) {
-      gstate->screen_scroll_y_tgt = gstate->screen_scroll_y - SCREEN_MAP_H;
-      debug_printf( 2, "scrolling screen up to %d, %d...",
-         gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
+   if( 0 >= window_modal( state ) ) {
+      topdown_draw( state );
    }
+
+   window_draw_all( state );
+
+   animate_frame();
+
+   in_char = input_poll();
+   retval = topdown_handle_input( in_char, state );
+
+   engines_animate_mobiles( state );
+
+   topdown_animate( state );
 
    graphics_loop_end();
 
 cleanup:
-
-   if( NULL != gstate ) {
-      assert( NULL != state );
-      gstate = (struct TOPDOWN_STATE*)memory_unlock(
-         state->engine_state_handle );
-   }
 
    if( NULL != state ) {
       if( '\0' != state->warp_to[0] ) {

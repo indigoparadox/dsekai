@@ -153,7 +153,15 @@ int16_t pov_loop( MEMORY_HANDLE state_handle );
 int16_t engines_warp_loop( MEMORY_HANDLE state_handle );
 
 /**
+ * \brief Do generic mobile animation and execute their scripts.
+ * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
+ */
+void engines_animate_mobiles( struct DSEKAI_STATE* state );
+
+/**
  * \brief Handle generic player movement commmand.
+ * \param dir_move
+ * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
  */
 int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
 

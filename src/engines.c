@@ -135,6 +135,27 @@ cleanup:
    return retval;
 }
 
+void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
+   int8_t i = 0;
+
+   mobile_state_animate( state );
+   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+      if( 0 >= window_modal( state ) ) {
+         /* Pause scripts if modal window is pending. */
+         mobile_execute( &(state->mobiles[i]), state );
+      }
+      if(
+         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
+      ) {
+         /* Skip animating inactive mobiles. */
+         continue;
+      }
+      mobile_animate( &(state->mobiles[i]), &(state->map) );
+   }
+   mobile_animate( &(state->player), &(state->map) );
+
+}
+
 int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state ) {
    if( 0 < window_modal( state ) ) {
       return -1;
