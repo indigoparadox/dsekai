@@ -174,10 +174,11 @@ static int16_t tilemap_asn_parse_strings(
    struct TILEMAP* t, const uint8_t* asn_buffer
 ) {
    int16_t total_read_sz = 0,
-      read_sz = 0,
-      str_idx = 0;
+      strpool_sz = 0;
 
    debug_printf( 2, "parsing strings..." );
+
+#if 0
    while( 0x16 == asn_buffer[total_read_sz] ) {
       read_sz = tilemap_asn_parse_string(
          t->strings[str_idx], DIALOG_TEXT_SZ,
@@ -190,6 +191,28 @@ static int16_t tilemap_asn_parse_strings(
       }
       debug_printf( 2, "found string: %s", t->strings[str_idx - 1] );
    }
+#endif
+
+   if( 0x04 != asn_buffer[0] ) {
+      error_printf(
+         "invalid tile blob type byte: 0x%02x", asn_buffer[0] );
+      goto cleanup;
+   }
+   strpool_sz = tilemap_asn_read_short( &(asn_buffer[2]) );
+   if( strpool_sz != TILEMAP_STRPOOL_SZ ) {
+      error_printf( "invalid strpool sequence size: %d", strpool_sz );
+      goto cleanup;
+   }
+   debug_printf( 2, "strpool sequence size: %d bytes", strpool_sz );
+
+   total_read_sz += 4; /* sequence type, length fields */
+
+   while( total_read_sz - 4 < strpool_sz ) {
+      t->strpool[total_read_sz - 4] = asn_buffer[total_read_sz];
+      total_read_sz++;
+   }
+
+cleanup:
 
    return total_read_sz;
 }

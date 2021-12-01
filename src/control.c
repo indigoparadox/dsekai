@@ -5,12 +5,11 @@
 #ifdef PLATFORM_PALM
 
 int16_t control_push(
-   uint32_t control_id, uint16_t type, uint16_t status,
+   uint32_t control_id, uint16_t type, uint8_t flags,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
    int32_t data_scalar, RESOURCE_ID data_res_id,
-   uint32_t window_id, struct DSEKAI_STATE* state,
-   const DIALOG_TEXT strings[]
+   uint32_t window_id, struct DSEKAI_STATE* state
 ) {
    return 0;
 }
@@ -20,16 +19,14 @@ int16_t control_push(
 /* Drawing Callbacks */
 
 int16_t control_draw_BUTTON(
-   struct WINDOW* w, struct CONTROL* c,
-   const DIALOG_TEXT strings[]
+   struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state
 ) {
    /* TODO */
    return 1;
 }
 
 int16_t control_draw_CHECK(
-   struct WINDOW* w, struct CONTROL* c,
-   const DIALOG_TEXT strings[]
+   struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state
 ) {
    /* TODO */
    return 1;
@@ -46,32 +43,28 @@ static void control_draw_text(
       w->x + c->x, w->y + c->y, c->fg, c->scale );
 }
 
-int16_t control_draw_LABEL_T(
-   struct WINDOW* w, struct CONTROL* c,
-   const DIALOG_TEXT strings[]
+int16_t control_draw_LABEL(
+   struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state
 ) {
+   int16_t str_sz = 0;
+   const char* str_ptr = NULL;
 
-   assert( NULL != c );
-   assert( 0 <= c->data.scalar && c->data.scalar < TILEMAP_STRINGS_MAX );
+   if( CONTROL_FLAG_TEXT_TILEMAP == (CONTROL_FLAG_TEXT_TILEMAP & c->flags) ) {
+      str_ptr = strpool_get( state->map.strpool, c->data.scalar, &str_sz );
+   }
 
-   control_draw_text( w, c, 
-      strings[c->data.scalar],
-      memory_strnlen_ptr( strings[c->data.scalar], DIALOG_TEXT_SZ ) );
+   if( NULL == str_ptr ) {
+      error_printf( "invalid string specified to control" );
+      return 0;
+   }
 
-   return 1;
-}
+   control_draw_text( w, c, str_ptr, str_sz );
 
-int16_t control_draw_LABEL_G(
-   struct WINDOW* w, struct CONTROL* c,
-   const DIALOG_TEXT strings[]
-) {
-   /* TODO */
    return 1;
 }
 
 int16_t control_draw_SPRITE(
-   struct WINDOW* w, struct CONTROL* c,
-   const DIALOG_TEXT strings[]
+   struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state
 ) {
 
    assert( NULL != c );
@@ -96,60 +89,45 @@ int16_t control_draw_SPRITE(
 /* Sizing Callbacks */
 
 uint8_t control_sz_BUTTON(
-   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const DIALOG_TEXT strings[]
+   struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state,
+   struct GRAPHICS_RECT* sz
 ) {
    /* TODO */
    return 0;
 }
 
 uint8_t control_sz_CHECK(
-   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const DIALOG_TEXT strings[]
+   struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state,
+   struct GRAPHICS_RECT* sz
 ) {
    /* TODO */
    return 0;
 }
 
-uint8_t control_sz_LABEL_T(
-   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const DIALOG_TEXT strings[]
+uint8_t control_sz_LABEL(
+   struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state,
+   struct GRAPHICS_RECT* sz
 ) {
-   int str_sz = 0;
+   int16_t str_sz = 0;
+   const char* str_ptr = NULL;
 
-   assert( NULL != c );
+   if( CONTROL_FLAG_TEXT_TILEMAP == (CONTROL_FLAG_TEXT_TILEMAP & c->flags) ) {
+      str_ptr = strpool_get( state->map.strpool, c->data.scalar, &str_sz );
+   }
 
-   if(
-      0 > c->data.scalar ||
-      c->data.scalar >= TILEMAP_STRINGS_MAX ||
-      0 == memory_strnlen_ptr( strings[c->data.scalar], DIALOG_TEXT_SZ )
-   ) {
+   if( NULL == str_ptr ) {
       error_printf( "invalid string specified to control" );
       return 0;
    }
 
-   str_sz = memory_strnlen_ptr( strings[c->data.scalar], DIALOG_TEXT_SZ );
-   if( 0 >= str_sz ) {
-      error_printf( "invalid string size returned: %d", str_sz );
-      return 0;
-   }
-
-   graphics_string_sz( strings[c->data.scalar], str_sz, c->scale, sz );
+   graphics_string_sz( str_ptr, str_sz, c->scale, sz );
 
    return 1;
 }
 
-uint8_t control_sz_LABEL_G(
-   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const DIALOG_TEXT strings[]
-) {
-   /* TODO */
-   return 0;
-}
-
 uint8_t control_sz_SPRITE(
-   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const DIALOG_TEXT strings[]
+   struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state,
+   struct GRAPHICS_RECT* sz
 ) {
    /* TODO: Verify sprite exists. */
    sz->w = SPRITE_W + 4; /* For border. */
@@ -160,12 +138,11 @@ uint8_t control_sz_SPRITE(
 /* General Functions */
 
 int16_t control_push(
-   uint32_t control_id, uint16_t type, uint16_t status,
+   uint32_t control_id, uint16_t type, uint8_t flags,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
    int32_t data_scalar, RESOURCE_ID data_res_id,
-   uint32_t window_id, struct DSEKAI_STATE* state,
-   const DIALOG_TEXT strings[]
+   uint32_t window_id, struct DSEKAI_STATE* state
 ) {
    int i = 0;
    struct WINDOW* windows = NULL;
@@ -224,12 +201,12 @@ int16_t control_push(
       resource_assign_id( controls[0].data.res_id, data_res_id );
    }
    controls[0].scale = scale;
-   controls[0].status = status;
+   controls[0].flags = flags;
    controls[0].id = control_id;
 
    if(
       !gc_control_sz_callbacks[type](
-         &(windows[window_idx]), &(controls[0]), &control_sz, strings )
+         &(windows[window_idx]), &(controls[0]), state, &control_sz )
    ) {
       error_printf( "unable to create control" );
       goto cleanup;
@@ -361,10 +338,7 @@ cleanup:
    }
 }
 
-void control_draw_all(
-   struct WINDOW* w,
-   const DIALOG_TEXT strings[]
-) {
+void control_draw_all( struct WINDOW* w, struct DSEKAI_STATE* state ) {
    struct CONTROL* controls = NULL;
    int16_t i = 0;
 
@@ -376,7 +350,7 @@ void control_draw_all(
 
    for( i = w->controls_count - 1 ; 0 <= i ; i-- ) {
       gc_control_draw_callbacks[controls[i].type](
-         w, &(controls[i]), strings );
+         w, &(controls[i]), state );
    }
 
    if( NULL != controls ) {

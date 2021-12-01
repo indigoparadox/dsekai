@@ -232,6 +232,14 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
    fprintf( header_file, "   },\n" );
 
    /* strings */
+   fprintf( header_file, "   /* strings */\n   {\n      " );
+   for( i = 0 ; TILEMAP_STRPOOL_SZ > i ; i++ ) {
+      fprintf( header_file, "0x%02x, ", (unsigned char)(t->strpool[i] & 0xff) );
+   }
+   fprintf( header_file, "   },\n" );
+
+#if 0
+   /* strings */
    fprintf( header_file, "   /* strings */\n" );
    fprintf( header_file, "   {\n" );
    for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
@@ -246,6 +254,7 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
       fprintf( header_file, "\",\n" );
    }
    fprintf( header_file, "   },\n" );
+#endif
 
    /* scripts */
    fprintf( header_file, "   /* scripts */\n" );

@@ -22,6 +22,8 @@ struct DSEKAI_STATE;
 #include "itstruct.h"
 #include "tmstruct.h"
 
+#include "strpool.h"
+
 #ifdef RESOURCE_FILE
 #include "json.h"
 #include "asn.h"

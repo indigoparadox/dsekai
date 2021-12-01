@@ -174,7 +174,7 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
          }
       }
 
-      control_draw_all( &(windows[i]), state->map.strings );
+      control_draw_all( &(windows[i]), state );
       windows[i].dirty -= 1;
    }
 

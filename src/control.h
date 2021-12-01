@@ -23,15 +23,11 @@
  * \section dsekai_gui_controls_button CONTROL_TYPE_BUTTON
  * Selectable control to perform an action.
  *
- * \section dsekai_gui_controls_label_t CONTROL_TYPE_LABEL_T
+ * \section dsekai_gui_controls_label_t CONTROL_TYPE_LABEL
  * Static text display field.
  * \subsection dsekai_gui_controls_label_t_scalar Scalar Data
+ * TODO: FIXME
  * Index of string in TILEMAP::strings.
- *
- * \section dsekai_gui_controls_label_g CONTROL_TYPE_LABEL_G
- * Static text display field.
- * \subsection dsekai_gui_controls_label_g_scalar Scalar Data
- * Index of string in ::gc_static_strings.
  *
  * \section dsekai_gui_controls_check CONTROL_TYPE_CHECK
  * Selectable control to indicate an option.
@@ -54,14 +50,14 @@
 #define CONTROL_PLACEMENT_GRID_RIGHT -2
 #define CONTROL_PLACEMENT_GRID_DOWN -3
 
-/*! \brief CONTROL::status indicating control is hidden/inactive. */
-#define CONTROL_STATE_NONE          0
-/*! \brief CONTROL::status indicating control is visible and interactive. */
-#define CONTROL_STATE_ENABLED       1
-/*! \brief CONTROL::status indicating control has cursor focus. */
-#define CONTROL_STATE_ACTIVE        2
-/*! \brief CONTROL::status indicating control option has been selected. */
-#define CONTROL_STATE_CHECKED       3
+/*! \brief CONTROL::flags indicating control is visible and interactive. */
+#define CONTROL_FLAG_ENABLED       0x01
+/*! \brief CONTROL::flags indicating control has cursor focus. */
+#define CONTROL_FLAG_ACTIVE        0x02
+/*! \brief CONTROL::flags indicating control option has been selected. */
+#define CONTROL_FLAG_CHECKED       0x10
+#define CONTROL_FLAG_TEXT_TILEMAP   0x10
+#define CONTROL_FLAG_TEXT_MENU      0x20
 
 /*! \brief A piece of data attached to CONTROL::data. */
 union CONTROL_DATA {
@@ -76,8 +72,6 @@ struct CONTROL {
    uint32_t id;
    /*! \brief Type of control defined by a constant. */
    uint16_t type;
-   /*! \brief Current drawing status of this control. */
-   uint16_t status;
    /**
     * \brief The left horizontal offset of the control in pixels.
     *
@@ -99,37 +93,35 @@ struct CONTROL {
    GRAPHICS_COLOR bg;
    /*! \brief Data used to draw a control (e.g. text or sprite to display). */
    union CONTROL_DATA data;
+   /*! \brief Control-specific flags. */
+   uint8_t flags;
 };
 
-#define CONTROL_CB_TABLE( f ) f( 0, LABEL_T ) f( 1, BUTTON ) f( 2, CHECK ) f( 3, SPRITE ) f( 4, LABEL_G )
+#define CONTROL_CB_TABLE( f ) f( 0, LABEL ) f( 1, BUTTON ) f( 2, CHECK ) f( 3, SPRITE )
 
 typedef int16_t (*CONTROL_CB_DRAW)(
-   struct WINDOW* w, struct CONTROL* c,
-   const DIALOG_TEXT strings[] );
+   struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state );
 
 /**
  * \return 1 if successful and 0 otherwise.
  */
 typedef uint8_t (*CONTROL_CB_SZ)(
-   struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* r,
-   const DIALOG_TEXT strings[] );
+   struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state,
+   struct GRAPHICS_RECT* r );
 
 int16_t control_push(
-   uint32_t control_id, uint16_t type, uint16_t status,
+   uint32_t control_id, uint16_t type, uint8_t flags,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
    int32_t data_scalar, RESOURCE_ID data_res_id,
-   uint32_t window_id, struct DSEKAI_STATE* state,
-   const DIALOG_TEXT strings[] );
+   uint32_t window_id, struct DSEKAI_STATE* state );
 
 /**
  * \brief Remove the control with the given ID from the control stack for the
  *        given window.
  */
 void control_pop( uint32_t, uint32_t, struct DSEKAI_STATE* );
-void control_draw_all(
-   struct WINDOW* w,
-   const DIALOG_TEXT strings[] );
+void control_draw_all( struct WINDOW* w, struct DSEKAI_STATE* state );
 
 #ifndef PLATFORM_PALM
 
@@ -137,11 +129,11 @@ void control_draw_all(
 
 /* === If we're being called inside control.c === */
 
-#define CONTROL_CB_DRAW_TABLE_PROTOTYPES( idx, name ) static int16_t control_draw_ ## name( struct WINDOW*, struct CONTROL*, const DIALOG_TEXT strings[] );
+#define CONTROL_CB_DRAW_TABLE_PROTOTYPES( idx, name ) static int16_t control_draw_ ## name( struct WINDOW*, struct CONTROL*, struct DSEKAI_STATE* state );
 
 CONTROL_CB_TABLE( CONTROL_CB_DRAW_TABLE_PROTOTYPES );
 
-#define CONTROL_CB_SZ_TABLE_PROTOTYPES( idx, name ) static uint8_t control_sz_ ## name( struct WINDOW*, struct CONTROL*, struct GRAPHICS_RECT*, const DIALOG_TEXT strings[] );
+#define CONTROL_CB_SZ_TABLE_PROTOTYPES( idx, name ) static uint8_t control_sz_ ## name( struct WINDOW*, struct CONTROL*, struct DSEKAI_STATE* state, struct GRAPHICS_RECT* );
 
 CONTROL_CB_TABLE( CONTROL_CB_SZ_TABLE_PROTOTYPES );
 

@@ -106,6 +106,8 @@ int main( int argc, char* argv[] ) {
       &h_buffer, idx, t.tiles, ((TILEMAP_TH * TILEMAP_TW) / 2) );
 
    /* strings */
+   idx = asn_write_blob( &h_buffer, idx, t.strpool, TILEMAP_STRPOOL_SZ );
+#if 0
    for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
       if( 0 == strlen( t.strings[i] ) ) {
          continue;
@@ -116,6 +118,7 @@ int main( int argc, char* argv[] ) {
          t.strings[i], DIALOG_TEXT_SZ );
       assert( 0 <= idx );
    }
+#endif
 
    /* spawns */
    debug_printf( 3, "(offset 0x%02x) writing map spawns", idx );

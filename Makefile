@@ -20,6 +20,7 @@ DSEKAI_C_FILES := \
    src/topdown.c \
    src/title.c \
    src/menu.c \
+   src/strpool.c \
    unilayer/src/graphics.c \
    unilayer/src/animate.c \
    unilayer/src/dio.c
@@ -38,6 +39,7 @@ HEADPACK_C_FILES := \
    src/script.c \
    src/json.c \
    src/item.c \
+   src/strpool.c \
    unilayer/tools/data/bmp.c \
    unilayer/tools/data/cga.c \
    unilayer/tools/data/icns.c \
@@ -59,6 +61,7 @@ MAP2ASN_C_FILES := \
    src/tmjson.c \
    src/asn.c \
    src/item.c \
+   src/strpool.c \
    unilayer/src/resource/file.c \
    unilayer/src/graphics.c \
    unilayer/src/graphics/nullg.c \

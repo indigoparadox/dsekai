@@ -197,27 +197,32 @@ static void tilemap_json_parse_strings(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, uint16_t tokens_sz
 ) {
-   char iter_path[JSON_PATH_SZ];
+   char iter_path[JSON_PATH_SZ],
+      string_buf[TILEMAP_JSON_STRBUF_SZ];
    int16_t string_sz_tmp = 0;
    int i = 0;
+
+   strpool_init( t->strpool, TILEMAP_STRPOOL_SZ );
    
    /* Load strings.*/
    debug_printf( 2, "loading strings" ); 
-   for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
+   do {
       dio_snprintf(
          iter_path, JSON_PATH_SZ, TILEMAP_JPATH_STRING, i );
       string_sz_tmp = json_str_from_path(
          iter_path, JSON_PATH_SZ,
-         t->strings[i], DIALOG_TEXT_SZ,
+         string_buf, TILEMAP_JSON_STRBUF_SZ,
          tokens, tokens_sz, json_buffer );
       if( 0 >= string_sz_tmp ) {
          /* Last string index was not parsed, so we're done. */
          break;
       } else {
+         strpool_add_string( t->strpool, string_buf, string_sz_tmp );
          debug_printf( 1, "loaded string: %s (%d)",
-            t->strings[i], string_sz_tmp );
+            string_buf, string_sz_tmp );
+         i++;
       }
-   }
+   } while( 0 < string_sz_tmp );
 }
 
 static int16_t tilemap_json_tilegrid(

@@ -23,6 +23,8 @@
  * \}
  */
 
+#define TILEMAP_JSON_STRBUF_SZ 128
+
 /**
  * \addtogroup dsekai_tilemaps_json_paths Tilemaps JSON Paths
  * \brief Paths to map properties in a Tiled \ref json file.
