@@ -245,7 +245,7 @@ int16_t control_push(
       }
       debug_printf( 3, "adding control using grid at X: %d",
          windows[window_idx].grid_x );
-      controls[0].x = windows[window_idx].grid_x;
+      controls[0].x = windows[window_idx].grid_x + 2; /* 2px padding. */
       windows[window_idx].grid_x += controls[0].w;
    } else {
       controls[0].x = x;
@@ -260,7 +260,7 @@ int16_t control_push(
       }
       debug_printf( 3, "adding control using grid at Y: %d",
          windows[window_idx].grid_y );
-      controls[0].y = windows[window_idx].grid_y;
+      controls[0].y = windows[window_idx].grid_y + 2; /* 2px padding. */
       windows[window_idx].grid_y += controls[0].h;
    } else {
       controls[0].y = y;
