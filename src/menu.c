@@ -58,9 +58,7 @@ int16_t menu_handler_main( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_QUIT:
-      window_pop( MENU_WINDOW_ID, state );
-      state->menu.menu_id = -1;
-      state->menu.highlight_id = -1;
+      menu_close( state );
       break;
    }
 
@@ -83,5 +81,24 @@ void menu_renderer_quit( struct DSEKAI_STATE* state ) {
 
 int16_t menu_handler_quit( char in_char, struct DSEKAI_STATE* state ) {
    return 0;
+}
+
+void menu_open( struct DSEKAI_STATE* state ) {
+   state->menu.menu_id = 0;
+   state->menu.highlight_id = 1;
+   state->menu.flags |= MENU_FLAG_DIRTY;
+
+   animate_pause( ANIMATE_FLAG_SCRIPT );
+   animate_pause( ANIMATE_FLAG_WEATHER );
+}
+
+void menu_close( struct DSEKAI_STATE* state ) {
+   window_pop( MENU_WINDOW_ID, state );
+   state->menu.menu_id = -1;
+   state->menu.highlight_id = -1;
+   tilemap_refresh_tiles( &(state->map) );
+
+   animate_resume( ANIMATE_FLAG_SCRIPT );
+   animate_resume( ANIMATE_FLAG_WEATHER );
 }
 

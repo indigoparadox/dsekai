@@ -14,6 +14,10 @@
 #define MENU_WINDOW_ID 786
 #define MENU_TEXT_SZ 20
 
+void menu_open( struct DSEKAI_STATE* state );
+
+void menu_close( struct DSEKAI_STATE* state );
+
 /**
  * \brief Render a currently active menu on-screen.
  */

@@ -12,6 +12,9 @@
  *  be placed in this file.
  */
 
+#define ANIMATE_FLAG_WEATHER  0x0200
+#define ANIMATE_FLAG_SCRIPT   0x0100
+
  /* === Includes === */
 
 #include "config.h"

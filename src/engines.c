@@ -204,13 +204,13 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       if( 0 >= window_modal( state ) ) {
          gc_engines_draw[state->map.engine_type]( state );
       }
-
-      animate_frame();
    }
 
    if( (MEMORY_HANDLE)NULL != state->windows_handle ) {
       window_draw_all( state );
    }
+   
+   animate_frame();
 
    /* === Input Phase === */
 
