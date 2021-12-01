@@ -23,6 +23,7 @@
  * \}
  */
 
+/*! \brief Maximum possible length of an individual dialog string. */
 #define TILEMAP_JSON_STRBUF_SZ 128
 
 /**

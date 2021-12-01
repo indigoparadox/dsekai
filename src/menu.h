@@ -2,8 +2,6 @@
 #ifndef MENU_H
 #define MENU_H
 
-#define MENU_WINDOW_ID 786
-
 /**
  * \addtogroup dsekai_menus Menus
  * \brief On-screen menu handling world-specific functions.
@@ -12,6 +10,9 @@
  */
 
 #define MENU_TABLE( f ) f( main ) f( items ) f( quit )
+
+#define MENU_WINDOW_ID 786
+#define MENU_TEXT_SZ 20
 
 /**
  * \brief Render a currently active menu on-screen.
@@ -55,7 +56,7 @@ const MENU_HANDLER gc_menu_handlers[] = {
 
 #define MENU_TABLE_TOKENS( name ) #name,
 
-const char gc_menu_tokens[][DIALOG_TEXT_SZ] = {
+const char gc_menu_tokens[][MENU_TEXT_SZ] = {
    MENU_TABLE( MENU_TABLE_TOKENS )
    ""
 };
@@ -64,7 +65,7 @@ const char gc_menu_tokens[][DIALOG_TEXT_SZ] = {
 
 extern const MENU_RENDERER gc_menu_renderers[];
 extern const MENU_HANDLER gc_menu_handlers[];
-extern const char* gc_menu_tokens[];
+extern const char gc_menu_tokens[][MENU_TEXT_SZ];
 
 #endif /* MENU_C */
 

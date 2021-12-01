@@ -51,12 +51,19 @@ int16_t control_draw_LABEL(
 
    if( CONTROL_FLAG_TEXT_TILEMAP == (CONTROL_FLAG_TEXT_TILEMAP & c->flags) ) {
       str_ptr = strpool_get( state->map.strpool, c->data.scalar, &str_sz );
+   } else if( CONTROL_FLAG_TEXT_MENU == (CONTROL_FLAG_TEXT_MENU & c->flags) ) {
+      str_ptr = gc_menu_tokens[c->data.scalar];
+      str_sz = 
+         memory_strnlen_ptr( gc_menu_tokens[c->data.scalar], MENU_TEXT_SZ );
    }
 
    if( NULL == str_ptr ) {
       error_printf( "invalid string specified to control" );
       return 0;
    }
+
+   debug_printf( 3, "drawing menu string %d at %d, %d: %s",
+      c->data.scalar, w->x + c->x, w->y + c->y, str_ptr );
 
    control_draw_text( w, c, str_ptr, str_sz );
 
@@ -113,6 +120,11 @@ uint8_t control_sz_LABEL(
 
    if( CONTROL_FLAG_TEXT_TILEMAP == (CONTROL_FLAG_TEXT_TILEMAP & c->flags) ) {
       str_ptr = strpool_get( state->map.strpool, c->data.scalar, &str_sz );
+   } else if( CONTROL_FLAG_TEXT_MENU == (CONTROL_FLAG_TEXT_MENU & c->flags) ) {
+      str_ptr = gc_menu_tokens[c->data.scalar];
+      debug_printf( 1, "menu string %d: %s", c->data.scalar, str_ptr );
+      str_sz =
+         memory_strnlen_ptr( gc_menu_tokens[c->data.scalar], MENU_TEXT_SZ );
    }
 
    if( NULL == str_ptr ) {
@@ -227,6 +239,12 @@ int16_t control_push(
    if( CONTROL_PLACEMENT_CENTER == x ) {
       controls[0].x = (windows[window_idx].w / 2) - (controls[0].w / 2);
    } else if( CONTROL_PLACEMENT_GRID_RIGHT == x ) {
+      if( 0 >= windows[window_idx].grid_x ) {
+         /* Setup initial grid. */
+         windows[window_idx].grid_x = 10;
+      }
+      debug_printf( 3, "adding control using grid at X: %d",
+         windows[window_idx].grid_x );
       controls[0].x = windows[window_idx].grid_x;
       windows[window_idx].grid_x += controls[0].w;
    } else {
@@ -235,7 +253,13 @@ int16_t control_push(
 
    if( CONTROL_PLACEMENT_CENTER == y ) {
       controls[0].y = (windows[window_idx].h / 2) - (controls[0].h / 2);
-   } else if( CONTROL_PLACEMENT_GRID_DOWN == x ) {
+   } else if( CONTROL_PLACEMENT_GRID_DOWN == y ) {
+      if( 0 >= windows[window_idx].grid_y ) {
+         /* Setup initial grid. */
+         windows[window_idx].grid_y = 10;
+      }
+      debug_printf( 3, "adding control using grid at Y: %d",
+         windows[window_idx].grid_y );
       controls[0].y = windows[window_idx].grid_y;
       windows[window_idx].grid_y += controls[0].h;
    } else {
