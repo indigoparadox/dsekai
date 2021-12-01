@@ -141,6 +141,8 @@ struct DSEKAI_STATE {
 
    /*! \brief Global boolean values dictating engine state and behavior. */
    uint8_t flags;
+
+   struct MENU_STATE menu;
 };
 
 /**

@@ -353,9 +353,12 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_QUIT:
-      window_pop( WINDOW_ID_STATUS, state );
+      /* window_pop( WINDOW_ID_STATUS, state );
       retval = 0;
-      graphics_loop_end();
+      graphics_loop_end(); */
+      state->menu.menu_id = 0;
+      state->menu.highlight_id = 0;
+      state->menu.flags |= MENU_FLAG_DIRTY;
       break;
    }
 
