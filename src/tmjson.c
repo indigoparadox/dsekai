@@ -208,7 +208,7 @@ static void tilemap_json_parse_strings(
          iter_path, JSON_PATH_SZ, TILEMAP_JPATH_STRING, i );
       string_sz_tmp = json_str_from_path(
          iter_path, JSON_PATH_SZ,
-         t->strings[i], TILEMAP_STRINGS_SZ,
+         t->strings[i], DIALOG_TEXT_SZ,
          tokens, tokens_sz, json_buffer );
       if( 0 >= string_sz_tmp ) {
          /* Last string index was not parsed, so we're done. */

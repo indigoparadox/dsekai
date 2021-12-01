@@ -30,8 +30,6 @@
 #define TILEMAP_TILESETS_MAX 12
 /*! \brief TILEMAP::strings maximum number of strings. */
 #define TILEMAP_STRINGS_MAX 20
-/*! \brief Maximum length of each string in TILEMAP::strings. */
-#define TILEMAP_STRINGS_SZ 128
 /*! \brief Maximum number of TILEMAP::spawns. */
 #define TILEMAP_SPAWNS_MAX 20
 #define TILEMAP_SPAWN_NAME_SZ 12
@@ -95,7 +93,7 @@ struct PACKED TILEMAP {
    /*! \brief Mobile spawns on this map. */
    struct TILEMAP_SPAWN spawns[TILEMAP_SPAWNS_MAX];
    /*! \brief Strings used in dialog/signs on this map. */
-   char strings[TILEMAP_STRINGS_MAX][TILEMAP_STRINGS_SZ];
+   DIALOG_TEXT strings[TILEMAP_STRINGS_MAX];
    /* \brief Scripts available to attach to any MOBILE. */
    struct SCRIPT scripts[TILEMAP_SCRIPTS_MAX];
    struct ITEM items[TILEMAP_ITEMS_MAX];

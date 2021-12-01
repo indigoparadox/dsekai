@@ -113,7 +113,7 @@ int main( int argc, char* argv[] ) {
 
       debug_printf( 3, "(offset 0x%02x) writing map string", idx );
       idx = asn_write_string( &h_buffer, idx,
-         t.strings[i], TILEMAP_STRINGS_SZ );
+         t.strings[i], DIALOG_TEXT_SZ );
       assert( 0 <= idx );
    }
 

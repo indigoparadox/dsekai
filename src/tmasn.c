@@ -180,7 +180,7 @@ static int16_t tilemap_asn_parse_strings(
    debug_printf( 2, "parsing strings..." );
    while( 0x16 == asn_buffer[total_read_sz] ) {
       read_sz = tilemap_asn_parse_string(
-         t->strings[str_idx], TILEMAP_STRINGS_SZ,
+         t->strings[str_idx], DIALOG_TEXT_SZ,
          &(asn_buffer[total_read_sz]) );
       str_idx++;
       total_read_sz += read_sz;

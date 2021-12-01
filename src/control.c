@@ -10,7 +10,7 @@ int16_t control_push(
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
    int32_t data_scalar, RESOURCE_ID data_res_id,
    uint32_t window_id, struct DSEKAI_STATE* state,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    return 0;
 }
@@ -21,7 +21,7 @@ int16_t control_push(
 
 int16_t control_draw_BUTTON(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    /* TODO */
    return 1;
@@ -29,7 +29,7 @@ int16_t control_draw_BUTTON(
 
 int16_t control_draw_CHECK(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    /* TODO */
    return 1;
@@ -48,7 +48,7 @@ static void control_draw_text(
 
 int16_t control_draw_LABEL_T(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
 
    assert( NULL != c );
@@ -56,14 +56,14 @@ int16_t control_draw_LABEL_T(
 
    control_draw_text( w, c, 
       strings[c->data.scalar],
-      memory_strnlen_ptr( strings[c->data.scalar], TILEMAP_STRINGS_SZ ) );
+      memory_strnlen_ptr( strings[c->data.scalar], DIALOG_TEXT_SZ ) );
 
    return 1;
 }
 
 int16_t control_draw_LABEL_G(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    /* TODO */
    return 1;
@@ -71,7 +71,7 @@ int16_t control_draw_LABEL_G(
 
 int16_t control_draw_SPRITE(
    struct WINDOW* w, struct CONTROL* c,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
 
    assert( NULL != c );
@@ -97,7 +97,7 @@ int16_t control_draw_SPRITE(
 
 uint8_t control_sz_BUTTON(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    /* TODO */
    return 0;
@@ -105,7 +105,7 @@ uint8_t control_sz_BUTTON(
 
 uint8_t control_sz_CHECK(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    /* TODO */
    return 0;
@@ -113,7 +113,7 @@ uint8_t control_sz_CHECK(
 
 uint8_t control_sz_LABEL_T(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    int str_sz = 0;
 
@@ -122,13 +122,13 @@ uint8_t control_sz_LABEL_T(
    if(
       0 > c->data.scalar ||
       c->data.scalar >= TILEMAP_STRINGS_MAX ||
-      0 == memory_strnlen_ptr( strings[c->data.scalar], TILEMAP_STRINGS_SZ )
+      0 == memory_strnlen_ptr( strings[c->data.scalar], DIALOG_TEXT_SZ )
    ) {
       error_printf( "invalid string specified to control" );
       return 0;
    }
 
-   str_sz = memory_strnlen_ptr( strings[c->data.scalar], TILEMAP_STRINGS_SZ );
+   str_sz = memory_strnlen_ptr( strings[c->data.scalar], DIALOG_TEXT_SZ );
    if( 0 >= str_sz ) {
       error_printf( "invalid string size returned: %d", str_sz );
       return 0;
@@ -141,7 +141,7 @@ uint8_t control_sz_LABEL_T(
 
 uint8_t control_sz_LABEL_G(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    /* TODO */
    return 0;
@@ -149,7 +149,7 @@ uint8_t control_sz_LABEL_G(
 
 uint8_t control_sz_SPRITE(
    struct WINDOW* w, struct CONTROL* c, struct GRAPHICS_RECT* sz,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    /* TODO: Verify sprite exists. */
    sz->w = SPRITE_W + 4; /* For border. */
@@ -165,7 +165,7 @@ int16_t control_push(
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
    int32_t data_scalar, RESOURCE_ID data_res_id,
    uint32_t window_id, struct DSEKAI_STATE* state,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    int i = 0;
    struct WINDOW* windows = NULL;
@@ -363,7 +363,7 @@ cleanup:
 
 void control_draw_all(
    struct WINDOW* w,
-   const char strings[][TILEMAP_STRINGS_SZ]
+   const DIALOG_TEXT strings[]
 ) {
    struct CONTROL* controls = NULL;
    int16_t i = 0;

@@ -55,7 +55,7 @@ const MENU_HANDLER gc_menu_handlers[] = {
 
 #define MENU_TABLE_TOKENS( name ) #name,
 
-const char gc_menu_tokens[][TILEMAP_STRINGS_SZ] = {
+const char gc_menu_tokens[][DIALOG_TEXT_SZ] = {
    MENU_TABLE( MENU_TABLE_TOKENS )
    ""
 };
