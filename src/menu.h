@@ -9,13 +9,28 @@
  * \{
  */
 
+/**
+ * \brief Defines the top-level menu items and callbacks used to handle each
+ *        submenu.
+ */
 #define MENU_TABLE( f ) f( main ) f( items ) f( quit )
 
+/*! \brief WINDOW::id that can safely be used by on-screen menus. */
 #define MENU_WINDOW_ID 786
+
+/**
+ * \brief Maximum length of a menu item's display text.
+ */
 #define MENU_TEXT_SZ 20
 
+/**
+ * \brief Open the on-screen menu, pausing the current engine.
+ */
 void menu_open( struct DSEKAI_STATE* state );
 
+/**
+ * \brief Close the on-screen menu, resuming the current engine.
+ */
 void menu_close( struct DSEKAI_STATE* state );
 
 /**
@@ -36,11 +51,21 @@ MENU_TABLE( MENU_RENDERER_PROTOTYPES )
 
 MENU_TABLE( MENU_HANDLER_PROTOTYPES )
 
+/**
+ * \relates MENU_STATE
+ * \brief MENU_STATE::flags indicating menu draw callback should be called
+ *        again.
+ */
 #define MENU_FLAG_DIRTY 0x01
 
 struct MENU_STATE {
+   /*! \brief Currently open menu as an index in the MENU_TABLE. */
    int8_t menu_id;
+   /*! \brief Currently selected item. Managed by the callback of the menu
+    *         indicated by MENU_STATE::menu_id.
+    */
    int8_t highlight_id;
+   /*! \brief Bitfield used to manage menu behavior. */
    uint8_t flags;
 };
 
@@ -67,8 +92,24 @@ const char gc_menu_tokens[][MENU_TEXT_SZ] = {
 
 #else
 
+/**
+ * \brief Table of callbacks used to draw menus.
+ *
+ * These are called once when the menu is opened, and should create a ::WINDOW.
+ */
 extern const MENU_RENDERER gc_menu_renderers[];
+
+/**
+ * \brief Table of callacks used to handle menu input.
+ *
+ * These should close the menu's ::WINDOW and set MENU_FLAG_DIRTY on global
+ * MENU_STATE.
+ */
 extern const MENU_HANDLER gc_menu_handlers[];
+
+/**
+ * \brief Table of menu item names as strings.
+ */
 extern const char gc_menu_tokens[][MENU_TEXT_SZ];
 
 #endif /* MENU_C */

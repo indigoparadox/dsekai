@@ -263,7 +263,6 @@ uint16_t script_handle_ANIMATE(
    );
 #endif /* SCRIPT_HAS_GFX */
 
-   /* TODO */
    return pc + 1;
 }
 
