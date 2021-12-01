@@ -317,6 +317,10 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    return retval;
 }
 
+void topdown_shutdown( struct DSEKAI_STATE* state ) {
+   window_pop( WINDOW_ID_STATUS, state );
+}
+
 int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
 

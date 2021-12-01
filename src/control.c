@@ -235,26 +235,32 @@ int16_t control_push(
       goto cleanup;
    }
 
-   if( WINDOW_CENTERED == w ) {
+   if( CONTROL_PLACEMENT_CENTER == w ) {
       controls[0].w = control_sz.w;
    } else {
       controls[0].w = w;
    }
 
-   if( WINDOW_CENTERED == h ) {
+   if( CONTROL_PLACEMENT_CENTER == h ) {
       controls[0].h = control_sz.h;
    } else {
       controls[0].h = h;
    }
 
-   if( WINDOW_CENTERED == x ) {
+   if( CONTROL_PLACEMENT_CENTER == x ) {
       controls[0].x = (windows[window_idx].w / 2) - (controls[0].w / 2);
+   } else if( CONTROL_PLACEMENT_GRID_RIGHT == x ) {
+      controls[0].x = windows[window_idx].grid_x;
+      windows[window_idx].grid_x += controls[0].w;
    } else {
       controls[0].x = x;
    }
 
-   if( WINDOW_CENTERED == y ) {
+   if( CONTROL_PLACEMENT_CENTER == y ) {
       controls[0].y = (windows[window_idx].h / 2) - (controls[0].h / 2);
+   } else if( CONTROL_PLACEMENT_GRID_DOWN == x ) {
+      controls[0].y = windows[window_idx].grid_y;
+      windows[window_idx].grid_y += controls[0].h;
    } else {
       controls[0].y = y;
    }

@@ -2,6 +2,8 @@
 #ifndef MENU_H
 #define MENU_H
 
+#define MENU_WINDOW_ID 786
+
 /**
  * \addtogroup dsekai_menus Menus
  * \brief On-screen menu handling world-specific functions.
@@ -19,13 +21,13 @@ typedef void (*MENU_RENDERER)( struct DSEKAI_STATE* state );
 /**
  * \brief Handle input for a currently active menu.
  */
-typedef int16_t (*MENU_HANDLER)( struct DSEKAI_STATE* state );
+typedef int16_t (*MENU_HANDLER)( char in_char, struct DSEKAI_STATE* state );
 
 #define MENU_RENDERER_PROTOTYPES( name ) void menu_renderer_ ## name( struct DSEKAI_STATE* state );
 
 MENU_TABLE( MENU_RENDERER_PROTOTYPES )
 
-#define MENU_HANDLER_PROTOTYPES( name ) int16_t menu_handler_ ## name( struct DSEKAI_STATE* state );
+#define MENU_HANDLER_PROTOTYPES( name ) int16_t menu_handler_ ## name( char in_char, struct DSEKAI_STATE* state );
 
 MENU_TABLE( MENU_HANDLER_PROTOTYPES )
 
@@ -53,7 +55,7 @@ const MENU_HANDLER gc_menu_handlers[] = {
 
 #define MENU_TABLE_TOKENS( name ) #name,
 
-const char* gc_menu_tokens[] = {
+const char gc_menu_tokens[][TILEMAP_STRINGS_SZ] = {
    MENU_TABLE( MENU_TABLE_TOKENS )
    ""
 };

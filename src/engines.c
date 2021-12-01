@@ -196,6 +196,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       /* Draw the menu. */
       if( MENU_FLAG_DIRTY == (MENU_FLAG_DIRTY & state->menu.flags) ) {
          gc_menu_renderers[state->menu.menu_id]( state );
+         state->menu.flags &= ~MENU_FLAG_DIRTY;
       }
 
    } else {
@@ -215,7 +216,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    in_char = input_poll();
    if( 0 <= state->menu.menu_id ) {
-      retval = gc_menu_handlers[state->menu.menu_id]( state );
+      retval = gc_menu_handlers[state->menu.menu_id]( in_char, state );
    } else {
       retval = gc_engines_input[state->map.engine_type]( in_char, state );
    }
@@ -229,6 +230,10 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    graphics_loop_end();
 
 cleanup:
+
+   if( 0 == retval && NULL != state ) {
+      gc_engines_shutdown[state->map.engine_type]( state );
+   }
 
    if( NULL != state ) {
       if( '\0' != state->warp_to[0] ) {
