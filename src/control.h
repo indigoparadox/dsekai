@@ -58,6 +58,7 @@
 #define CONTROL_FLAG_CHECKED       0x10
 #define CONTROL_FLAG_TEXT_TILEMAP   0x10
 #define CONTROL_FLAG_TEXT_MENU      0x20
+#define CONTROL_FLAG_TEXT_ITEM      0x40
 
 /*! \brief A piece of data attached to CONTROL::data. */
 union CONTROL_DATA {

@@ -43,19 +43,40 @@ static void control_draw_text(
       w->x + c->x, w->y + c->y, c->fg, c->scale );
 }
 
+static const char* control_get_text(
+   struct CONTROL* c, const struct DSEKAI_STATE* state, int16_t* sz_out
+) {
+   const char* str_ptr;
+
+   if( CONTROL_FLAG_TEXT_TILEMAP == (CONTROL_FLAG_TEXT_TILEMAP & c->flags) ) {
+      /* Get the string from the tilemap strpool. */
+      str_ptr = strpool_get( state->map.strpool, c->data.scalar, sz_out );
+
+   } else if( CONTROL_FLAG_TEXT_MENU == (CONTROL_FLAG_TEXT_MENU & c->flags) ) {
+      /* Get the string from the global menu table. */
+      str_ptr = gc_menu_tokens[c->data.scalar];
+      *sz_out = 
+         memory_strnlen_ptr( gc_menu_tokens[c->data.scalar], MENU_TEXT_SZ );
+   
+   } else if( CONTROL_FLAG_TEXT_ITEM == (CONTROL_FLAG_TEXT_ITEM & c->flags) ) {
+      /* Get the string from the player items list. */
+      str_ptr = state->items[(0xff & c->data.scalar)].name;
+      *sz_out = memory_strnlen_ptr( str_ptr, ITEM_NAME_SZ );
+   
+   } else {
+      str_ptr = NULL;
+   }
+
+   return str_ptr;
+}
+
 int16_t control_draw_LABEL(
    struct WINDOW* w, struct CONTROL* c, struct DSEKAI_STATE* state
 ) {
    int16_t str_sz = 0;
-   const char* str_ptr = NULL;
+   const char* str_ptr;
 
-   if( CONTROL_FLAG_TEXT_TILEMAP == (CONTROL_FLAG_TEXT_TILEMAP & c->flags) ) {
-      str_ptr = strpool_get( state->map.strpool, c->data.scalar, &str_sz );
-   } else if( CONTROL_FLAG_TEXT_MENU == (CONTROL_FLAG_TEXT_MENU & c->flags) ) {
-      str_ptr = gc_menu_tokens[c->data.scalar];
-      str_sz = 
-         memory_strnlen_ptr( gc_menu_tokens[c->data.scalar], MENU_TEXT_SZ );
-   }
+   str_ptr = control_get_text( c, state, &str_sz );
 
    if( NULL == str_ptr ) {
       error_printf( "invalid string specified to control" );
@@ -116,16 +137,9 @@ uint8_t control_sz_LABEL(
    struct GRAPHICS_RECT* sz
 ) {
    int16_t str_sz = 0;
-   const char* str_ptr = NULL;
+   const char* str_ptr;
 
-   if( CONTROL_FLAG_TEXT_TILEMAP == (CONTROL_FLAG_TEXT_TILEMAP & c->flags) ) {
-      str_ptr = strpool_get( state->map.strpool, c->data.scalar, &str_sz );
-   } else if( CONTROL_FLAG_TEXT_MENU == (CONTROL_FLAG_TEXT_MENU & c->flags) ) {
-      str_ptr = gc_menu_tokens[c->data.scalar];
-      debug_printf( 1, "menu string %d: %s", c->data.scalar, str_ptr );
-      str_sz =
-         memory_strnlen_ptr( gc_menu_tokens[c->data.scalar], MENU_TEXT_SZ );
-   }
+   str_ptr = control_get_text( c, state, &str_sz );
 
    if( NULL == str_ptr ) {
       error_printf( "invalid string specified to control" );

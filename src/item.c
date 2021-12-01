@@ -24,6 +24,8 @@ int8_t item_give_mobile(
 
    /* TODO: Check for full inventory. */
 
+   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & e->flags) );
+
    /* Translate MEMORY_PTR to mobile index. Default to player on failure. */
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       if( m == &(state->mobiles[i]) ) {
@@ -35,6 +37,7 @@ int8_t item_give_mobile(
    /* Determine if the recipient has one of these already. */
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
       if(
+         ITEM_FLAG_ACTIVE == (state->items[i].flags & ITEM_FLAG_ACTIVE) &&
          state->items[i].gid == e->gid &&
          state->items[i].owner == m_idx
       ) {
@@ -52,11 +55,22 @@ int8_t item_give_mobile(
       }
    }
 
-   debug_printf( 3, "giving item %d to mobile %d", e->gid, m_idx );
+   debug_printf( 3, "giving item %s (%d) to mobile %d",
+      e->name, e->gid, m_idx );
 
+   /* Create item from template. */
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
-      /* TODO: Add item flags with an active item flag, like mobiles. */
-      /* TODO: Create item from template. */
+      if( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & state->items[i].flags) ) {
+         /* Skip active items. */
+         continue;
+      }
+
+      memory_copy_ptr( &(state->items[i]), e, sizeof( struct ITEM ) );
+
+      state->items[i].owner = m_idx;
+
+      /* Found and created the item, so quit. */
+      break;
    }
 
    return 1;

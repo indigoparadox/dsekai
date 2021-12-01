@@ -324,6 +324,9 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
       fprintf( header_file, "         /* count */\n" );
       fprintf( header_file, "         %d,\n", t->items[i].count );
 
+      fprintf( header_file, "         /* flags */\n" );
+      fprintf( header_file, "         %d,\n", t->items[i].flags );
+
       fprintf( header_file, "      },\n" );
    }
    fprintf( header_file, "   },\n" );

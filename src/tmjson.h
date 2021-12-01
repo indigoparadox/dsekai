@@ -67,6 +67,7 @@
 /*! \brief JSON path to TILESET_TILE::flags. */
 #define TILEMAP_JPATH_TS_FLAGS "/tiles/%d/properties/[name=flags]/value"
 #define TILEMAP_JPATH_ITEM_GID "/layers/[name=items]/objects/%d/properties/[name=gid]/value"
+#define TILEMAP_JPATH_ITEM_NAME "/layers/[name=items]/objects/%d/name"
 #define TILEMAP_JPATH_ITEM_TYPE "/layers/[name=items]/objects/%d/type"
 #define TILEMAP_JPATH_ITEM_SPRITE "/layers/[name=items]/objects/%d/properties/[name=sprite]/value"
 
