@@ -222,7 +222,7 @@ uint16_t script_handle_WARP(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   char* warp_map = NULL;
+   const char* warp_map = NULL;
 
    warp_map = strpool_get( t->strpool, arg, NULL );
 
