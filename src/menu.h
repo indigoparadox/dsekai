@@ -17,6 +17,8 @@
 
 /*! \brief WINDOW::id that can safely be used by on-screen menus. */
 #define MENU_WINDOW_ID 786
+#define MENU_WINDOW_INFO_ID 787
+#define MENU_WINDOW_STATUS_ID 788
 
 /**
  * \brief Maximum length of a menu item's display text.

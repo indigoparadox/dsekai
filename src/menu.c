@@ -75,8 +75,27 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
    GRAPHICS_COLOR color;
 
    window_push(
-      MENU_WINDOW_ID, WINDOW_STATUS_MODAL,
-      SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H,
+      MENU_WINDOW_ID, 0,
+      SCREEN_MAP_X,
+      SCREEN_MAP_Y,
+      SCREEN_MAP_W / 2,
+      SCREEN_MAP_H,
+      0, state );
+   
+   window_push(
+      MENU_WINDOW_INFO_ID, 0,
+      SCREEN_MAP_X + (SCREEN_MAP_W / 2),
+      SCREEN_MAP_Y,
+      SCREEN_MAP_W / 2,
+      SCREEN_MAP_H / 2,
+      0, state );
+   
+   window_push(
+      MENU_WINDOW_STATUS_ID, 0,
+      SCREEN_MAP_X + (SCREEN_MAP_W / 2),
+      SCREEN_MAP_Y + (SCREEN_MAP_H / 2),
+      SCREEN_MAP_W / 2,
+      SCREEN_MAP_H / 2,
       0, state );
    
    while( '\0' != gc_menu_tokens[i][0] ) {
@@ -126,19 +145,17 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
 
    switch( in_char ) {
    case INPUT_KEY_UP:
+      /* TODO: Limit based on player item indexes. */
       if( 1 < state->menu.highlight_id ) {
          state->menu.highlight_id--;
       }
-      window_pop( MENU_WINDOW_ID, state );
-      state->menu.flags |= MENU_FLAG_DIRTY;
       break;
 
    case INPUT_KEY_DOWN:
+      /* TODO: Limit based on player item indexes. */
       if( '\0' != gc_menu_tokens[state->menu.highlight_id + 1][0] ) {
          state->menu.highlight_id++;
       }
-      window_pop( MENU_WINDOW_ID, state );
-      state->menu.flags |= MENU_FLAG_DIRTY;
       break;
 
    case INPUT_KEY_OK:
@@ -148,10 +165,14 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
    case INPUT_KEY_QUIT:
       state->menu.menu_id = 0;
       state->menu.highlight_id = 1;
-      window_pop( MENU_WINDOW_ID, state );
-      state->menu.flags |= MENU_FLAG_DIRTY;
       break;
    }
+
+   /* Close all item menu windows to and refresh. */
+   window_pop( MENU_WINDOW_ID, state );
+   window_pop( MENU_WINDOW_INFO_ID, state );
+   window_pop( MENU_WINDOW_STATUS_ID, state );
+   state->menu.flags |= MENU_FLAG_DIRTY;
 
    return retval;
 }

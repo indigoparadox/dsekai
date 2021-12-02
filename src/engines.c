@@ -195,6 +195,11 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    if( 0 <= state->menu.menu_id ) {
       /* Draw the menu. */
       if( MENU_FLAG_DIRTY == (MENU_FLAG_DIRTY & state->menu.flags) ) {
+         /* Repaint the screen in the background. */
+         gc_engines_draw[state->map.engine_type]( state );
+         tilemap_refresh_tiles( &(state->map) );
+
+         /* Show the new menu state. */
          gc_menu_renderers[state->menu.menu_id]( state );
          state->menu.flags &= ~MENU_FLAG_DIRTY;
       }
