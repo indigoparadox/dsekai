@@ -404,7 +404,7 @@ static int16_t tilemap_asn_parse_items(
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
-      debug_printf( 2, "item %d owner: %s (%d)",
+      debug_printf( 2, "item %d owner: %d (%d)",
          item_idx, t->items[item_idx].owner, read_sz );
       total_read_sz += read_sz;
 

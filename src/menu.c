@@ -104,7 +104,6 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          ITEM_OWNER_PLAYER != state->items[i].owner ||
          ITEM_FLAG_ACTIVE != (ITEM_FLAG_ACTIVE & state->items[i].flags)
       ) {
-         i++;
          continue;
       }
 
@@ -134,7 +133,6 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          color, GRAPHICS_COLOR_BLACK, 0,
          state->items[i].count, 0, MENU_WINDOW_ID, state );
 
-      i++;
       player_item_idx++;
    }  
 
@@ -170,7 +168,6 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
          }
          player_item_count++;
       }
-      i++;
    }
 
    switch( in_char ) {

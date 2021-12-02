@@ -67,7 +67,9 @@ struct POV_STATE {
  * \relates DSEKAI_STATE
  * \brief DSEKAI_STATE::flags indicating no player input should be accepted.
  */
-#define DSEKAI_FLAG_INPUT_BLOCKED 0x01
+#define DSEKAI_FLAG_INPUT_BLOCKED   0x01
+
+#define DSEKAI_FLAG_MENU_BLOCKED    0x02
 
 /**
  * \relates DSEKAI_STATE
