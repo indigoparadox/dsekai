@@ -42,7 +42,7 @@ int8_t item_give_mobile(
          state->items[i].owner == m_idx
       ) {
          /* Found a dupe. */
-         if( gc_items_max[e->type] > state->items[i].count + 1 ) {
+         if( gc_items_max[e->type] > state->items[i].count + e->count ) {
             state->items[i].count++;
             debug_printf( 3, "adding item %d to mobile %d stack (%d)",
                e->gid, m_idx, state->items[i].count );

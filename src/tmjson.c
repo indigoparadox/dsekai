@@ -378,6 +378,10 @@ int16_t tilemap_json_parse_items(
 
       /* flags */
       t->items[i].flags |= ITEM_FLAG_ACTIVE;
+
+      /* count */
+      /* TODO: Parse count from map. */
+      t->items[i].count = 1;
    }
 
    return i;
