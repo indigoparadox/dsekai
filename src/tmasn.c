@@ -324,6 +324,146 @@ cleanup:
    return total_read_sz;
 }
 
+static int16_t tilemap_asn_parse_items(
+   struct TILEMAP* t, const uint8_t* asn_buffer
+) {
+   uint8_t type_buf = 0;
+   int32_t total_read_sz = 0,
+      read_sz = 0,
+      all_items_seq_start = 0,
+      all_items_seq_sz = 0,
+      item_def_seq_sz = 0;
+   int16_t item_idx = 0;
+
+   total_read_sz = asn_read_meta_ptr(
+      asn_buffer, total_read_sz, &type_buf, &all_items_seq_sz );
+   if( ASN_SEQUENCE != type_buf ) {
+      error_printf(
+         "invalid item sequence type byte: 0x%02x", type_buf );
+      goto cleanup;
+   }
+   debug_printf( 1, "item seq is %d bytes...", all_items_seq_sz );
+
+   all_items_seq_start = total_read_sz;
+
+   while( total_read_sz - all_items_seq_start < all_items_seq_sz ) {
+      total_read_sz = asn_read_meta_ptr(
+         asn_buffer, total_read_sz, &type_buf, &item_def_seq_sz );
+      if( ASN_SEQUENCE != type_buf ) {
+         error_printf(
+            "invalid item def sequence type byte: 0x%02x", type_buf );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      
+      /* index */
+      read_sz = tilemap_asn_parse_int(
+         (uint8_t*)&item_idx, 2, 0, &(asn_buffer[total_read_sz]) );
+      total_read_sz += read_sz;
+
+      /* sprite */
+      read_sz = tilemap_asn_parse_string( t->items[item_idx].sprite,
+         RESOURCE_PATH_MAX, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "item %d sprite: %s (%d)",
+         item_idx, t->items[item_idx].sprite, read_sz );
+      total_read_sz += read_sz; /* item sprite and header */
+
+      /* name */
+      read_sz = tilemap_asn_parse_string( t->items[item_idx].name,
+            ITEM_NAME_SZ, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading item name" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "item %d name: %s (%d)",
+         item_idx, t->items[item_idx].name, read_sz );
+      total_read_sz += read_sz; /* item name and header */
+
+      /* type */
+      read_sz = tilemap_asn_parse_int(
+         &(t->items[item_idx].type), 1, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading item type" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "item %d type: %d (%d)",
+         item_idx, t->items[item_idx].type, read_sz );
+      total_read_sz += read_sz;
+
+      /* owner */
+      read_sz = tilemap_asn_parse_int(
+         (uint8_t*)&(t->items[item_idx].owner), 1, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading item owner" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "item %d owner: %s (%d)",
+         item_idx, t->items[item_idx].owner, read_sz );
+      total_read_sz += read_sz;
+
+      /* gid */
+      read_sz = tilemap_asn_parse_int(
+         (uint8_t*)&(t->items[item_idx].gid), 2, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading item gid" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "item %d gid: %d (%d)",
+         item_idx, t->items[item_idx].gid, read_sz );
+      total_read_sz += read_sz;
+
+      /* data */
+      read_sz = tilemap_asn_parse_int(
+         &(t->items[item_idx].data), 1, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading item data" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "item %d data: %d (%d)",
+         item_idx, t->items[item_idx].data, read_sz );
+      total_read_sz += read_sz;
+
+      /* count */
+      read_sz = tilemap_asn_parse_int(
+         &(t->items[item_idx].count), 1, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading item count" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "item %d count: %d (%d)",
+         item_idx, t->items[item_idx].count, read_sz );
+      total_read_sz += read_sz;
+
+      /* flags */
+      read_sz = tilemap_asn_parse_int(
+         &(t->items[item_idx].flags), 1, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading item flags" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "item %d flags: %d (%d)",
+         item_idx, t->items[item_idx].flags, read_sz );
+      total_read_sz += read_sz;
+
+   }
+
+cleanup:
+
+   return total_read_sz;
+}
+
+
 static int32_t tilemap_asn_parse_scripts(
    struct TILEMAP* t, const uint8_t* asn_buffer
 ) {
@@ -514,6 +654,14 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
 
    /* scripts */
    read_sz = tilemap_asn_parse_scripts( t, &(asn_buffer[idx]) );
+   if( 0 >= read_sz ) {
+      retval = read_sz;
+      goto cleanup;
+   }
+   idx += read_sz;
+
+   /* items */
+   read_sz = tilemap_asn_parse_items( t, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
       retval = read_sz;
       goto cleanup;

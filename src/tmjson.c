@@ -376,6 +376,7 @@ int16_t tilemap_json_parse_items(
       t->items[i].gid = json_int_from_path(
          iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
 
+      /* flags */
       t->items[i].flags |= ITEM_FLAG_ACTIVE;
    }
 
