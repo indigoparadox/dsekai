@@ -72,6 +72,7 @@ struct PACKED MOBILE {
    int8_t script_stack[SCRIPT_STACK_DEPTH];
    /*! \brief Delay script until this result from graphics_get_ms(). */
    uint32_t script_next_ms;
+   uint32_t spawned_ms;
 };
 
 /**
@@ -177,6 +178,8 @@ int8_t mobile_stack_pop( struct MOBILE* m );
  * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  */
 void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state );
+
+struct MOBILE* mobile_spawn_npc( struct DSEKAI_STATE* state, uint8_t player );
 
 /**
  * \brief Spawn from ::TILEMAP::spawners according to spawner rules.
