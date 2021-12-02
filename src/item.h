@@ -61,6 +61,17 @@ void item_draw( const struct ITEM*, int16_t, int16_t );
 int8_t item_give_mobile(
    struct ITEM* e, struct MOBILE* m, struct DSEKAI_STATE* state );
 
+/**
+ * \return 1 if the item was used successfully or 0 otherwise. -1 if the item
+ *         was used and the menu should be closed.
+ */
+typedef int8_t (*ITEM_USE_CB)(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state );
+
+#define ITEM_TABLE_USE_CB_PROTOS( idx, type, max ) int8_t item_use_ ## type( struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state );
+
+ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
+
 #ifdef ITEM_C
 
 #define ITEM_TABLE_MAX( idx, type, max ) max,
@@ -69,10 +80,18 @@ const uint8_t gc_items_max[] = {
    ITEM_TABLE( ITEM_TABLE_MAX )
 };
 
+#define ITEM_TABLE_USE_CBS( idx, type, max ) item_use_ ## type,
+
+const ITEM_USE_CB gc_item_use_cbs[] = {
+   ITEM_TABLE( ITEM_TABLE_USE_CBS )
+};
+
 #else
 
 /*! \brief Lookup table of maximum of each item type permitted in inventory. */
 extern const uint8_t gc_items_max[];
+
+extern const ITEM_USE_CB gc_item_use_cbs[];
 
 #endif
 

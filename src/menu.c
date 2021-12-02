@@ -98,9 +98,12 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       SCREEN_MAP_H / 2,
       0, state );
    
-   while( '\0' != gc_menu_tokens[i][0] ) {
-      /* Skip non-player-held items. */
-      if( ITEM_OWNER_PLAYER != state->items[i].owner ) {
+   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      /* Skip non-player-held or deleted items. */
+      if(
+         ITEM_OWNER_PLAYER != state->items[i].owner ||
+         ITEM_FLAG_ACTIVE != (ITEM_FLAG_ACTIVE & state->items[i].flags)
+      ) {
          i++;
          continue;
       }
@@ -149,25 +152,51 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
 }
 
 int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
-   int16_t retval = 1;
+   int16_t retval = 1,
+      i = 0,
+      player_item_count = 0;
+   int8_t use_retval = 0;
+   struct ITEM* selected_item = NULL;
+
+   /* Count player-owned items to enforce limits below. */
+   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      if(
+         ITEM_OWNER_PLAYER == state->items[i].owner &&
+         ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & state->items[i].flags)
+      ) {
+         if( player_item_count == state->menu.highlight_id ) {
+            /* This is the currently selected item. */
+            selected_item = &(state->items[i]);
+         }
+         player_item_count++;
+      }
+      i++;
+   }
 
    switch( in_char ) {
    case INPUT_KEY_UP:
-      /* TODO: Limit based on player item indexes. */
-      if( 1 < state->menu.highlight_id ) {
+      if( 0 < state->menu.highlight_id ) {
          state->menu.highlight_id--;
       }
       break;
 
    case INPUT_KEY_DOWN:
-      /* TODO: Limit based on player item indexes. */
-      if( '\0' != gc_menu_tokens[state->menu.highlight_id + 1][0] ) {
+      if( state->menu.highlight_id + 1 < player_item_count ) {
          state->menu.highlight_id++;
       }
       break;
 
    case INPUT_KEY_OK:
       /* TODO: Use item. */
+      if( NULL == selected_item ) {
+         error_printf( "no item selected!" );
+         break;
+      }
+      use_retval = gc_item_use_cbs[selected_item->type](
+         selected_item, &(state->player), state );
+      if( 0 > use_retval ) {
+         menu_close( state );
+      }
       break;
 
    case INPUT_KEY_QUIT:

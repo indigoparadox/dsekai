@@ -2,6 +2,18 @@
 #define ITEM_C
 #include "dsekai.h"
 
+int8_t item_use_NONE(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+) {
+   return 0;
+}
+
+int8_t item_use_SEED(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+) {
+   return -1;
+}
+
 void item_draw( const struct ITEM* i, int16_t screen_x, int16_t screen_y ) {
    /*
    int16_t x_offset = 0,
