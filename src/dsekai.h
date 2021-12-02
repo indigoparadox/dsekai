@@ -26,6 +26,7 @@ struct DSEKAI_STATE;
 
 #include "itstruct.h"
 #include "tmstruct.h"
+#include "gustruct.h"
 
 #include "strpool.h"
 

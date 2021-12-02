@@ -15,6 +15,23 @@
  *  \brief Tools for drawing and interacting with graphical windows on-screen.
  */
 
+/**
+ * \brief Specifies X coordinate in WINDOW::coords or CONTROL::coords.
+ */
+#define GUI_X 0
+/**
+ * \brief Specifies X coordinate in WINDOW::coords or CONTROL::coords.
+ */
+#define GUI_Y 1
+/**
+ * \brief Specifies width coordinate in WINDOW::coords or CONTROL::coords.
+ */
+#define GUI_W 2
+/**
+ * \brief Specifies height in WINDOW::coords or CONTROL::coords.
+ */
+#define GUI_H 3
+
 /*! \brief WINDOW::x or WINDOW::y value indicating the system should do its
  *         best to center the WINDOW onscreen.
  */
@@ -30,66 +47,26 @@
 /*! \brief Recommended WINDOW::id for a script speech window. */
 #define WINDOW_ID_SCRIPT_SPEAK 0x897
 
-/*! \brief WINDOW::status indicating window is hidden/inactive. */
-#define WINDOW_STATUS_EMPTY    0
-/*! \brief WINDOW::status indicating window is being animated open. */
-#define WINDOW_STATUS_OPENING  1
-/*! \brief WINDOW::status indicating window is visible normally. */
-#define WINDOW_STATUS_VISIBLE  2
-/*! \brief WINDOW::status indicating window is blocking all input. */
-#define WINDOW_STATUS_MODAL  3
-
 /**
- * \brief Defines a graphical window frame/background with a set of image
- *        assets.
+ * \relates WINDOW
+ * \brief WINDOW::status indicating window is hidden/inactive.
  */
-struct WINDOW_FRAME {
-   /*! \brief Top-right corner. */
-   RESOURCE_ID tr;
-   /*! \brief Top-left corner. */
-   RESOURCE_ID tl;
-   /*! \brief Bottom-right corner. */
-   RESOURCE_ID br;
-   /*! \brief Bottom-left corner. */
-   RESOURCE_ID bl;
-   /*! \brief Top edge. */
-   RESOURCE_ID t;
-   /*! \brief Bottom edge. */
-   RESOURCE_ID b;
-   /*! \brief Right edge. */
-   RESOURCE_ID r;
-   /*! \brief Left edge. */
-   RESOURCE_ID l;
-   /*! \brief Center fill. */
-   RESOURCE_ID c;
-};
-
-/*! \brief Struct representing an on-screen graphical window. */
-struct WINDOW {
-   /*! \brief Unique identifier used to find this window in the global stack. */
-   uint32_t id;
-   /*! \brief Current drawing status of this window. */
-   uint8_t status;
-   /*! \brief 1 indicates window must be redrawn, 0 otherwise. */
-   uint8_t dirty;
-   uint8_t frame_idx;
-   /*! \brief Number of controls in WINDOW::controls_handle. */
-   uint8_t controls_count;
-   /*! \brief List of CONTROL to draw inside this window. */
-   MEMORY_HANDLE controls_handle;
-   /*! \brief The left horizontal offset of the window in pixels. */
-   int16_t x;
-   /*! \brief The top vertical offset of the window in pixels. */
-   int16_t y;
-   /*! \brief The width of the window in pixels. */
-   int16_t w;
-   /*! \brief The height of the window in pixels. */
-   int16_t h;
-   int16_t grid_x;
-   int16_t grid_x_prev;
-   int16_t grid_y;
-   int16_t grid_y_prev;
-};
+#define WINDOW_STATUS_EMPTY    0
+/**
+ * \relates WINDOW
+ * \brief WINDOW::status indicating window is being animated open.
+ */
+#define WINDOW_STATUS_OPENING  1
+/**
+ * \relates WINDOW
+ * \brief WINDOW::status indicating window is visible normally.
+ */
+#define WINDOW_STATUS_VISIBLE  2
+/**
+ * \relates WINDOW
+ * \brief WINDOW::status indicating window is blocking all input.
+ */
+#define WINDOW_STATUS_MODAL  3
 
 #ifdef PLATFORM_PALM
 

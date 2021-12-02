@@ -55,20 +55,15 @@
 
 /*! \brief Place the control in the center of the window. */
 #define CONTROL_PLACEMENT_CENTER       (-1)
-/*! \brief Alight the control's right side to the window's right side. */
-#define CONTROL_PLACEMENT_RIGHT        (-2)
-/*! \brief Alight the control's bottom side to the window's bottom side. */
-#define CONTROL_PLACEMENT_BOTTOM       (-2)
 /**
- * \brief Place the control at the grid X, and set the grid width at the
- *        control's width.
- */
-#define CONTROL_PLACEMENT_GRID_RIGHT   (-3)
+ * \brief Alight the control's right side (if specified as X) or bottom side
+ *        (if specified as Y) to the window's respective side. */
+#define CONTROL_PLACEMENT_RIGHT_BOTTOM (-2)
 /**
- * \brief Place the control at the grid Y, and set the grid height at the
- *        control's height.
+ * \brief Place the control at the grid X or Y as relevant, and set the grid
+ *        width or height respectively at the control's width or height.
  */
-#define CONTROL_PLACEMENT_GRID_DOWN    (-3)
+#define CONTROL_PLACEMENT_GRID_RIGHT_DOWN   (-3)
 /**
  * \brief Place the control at the grid X or Y without modifying the grid.
  */
@@ -86,46 +81,39 @@
  * \brief Options specifying how a ::CONTROL behaves.
  *
  * The lower 4 bits are general to all controls while the upper 4 bits are
- * specific to each ::CONTRO:type.
+ * specific to each ::CONTROL:type.
  *
  * \{
  */
 
 /**
- * \relates CONTROL
  * \brief CONTROL::flags indicating control is visible and interactive.
  */
 #define CONTROL_FLAG_ENABLED       0x01
 /**
- * \relates CONTROL
  * \brief CONTROL::flags indicating control has cursor focus.
  */
 #define CONTROL_FLAG_ACTIVE        0x02
 /**
- * \relates CONTROL
  * \brief CONTROL::flags indicating control option has been selected.
  */
 #define CONTROL_FLAG_CHECKED       0x10
 /**
- * \relates CONTROL
  * \brief CONTROL::flags for CONTROL_TYPE_LABEL indicating text comes from
  *        ::TILEMAP:strpool.
  */
 #define CONTROL_FLAG_TEXT_TILEMAP   0x10
 /**
- * \relates CONTROL
  * \brief CONTROL::flags for CONTROL_TYPE_LABEL indicating text comes from
  *        ::gc_menu_tokens.
  */
 #define CONTROL_FLAG_TEXT_MENU      0x20
 /**
- * \relates CONTROL
  * \brief CONTROL::flags for CONTROL_TYPE_LABEL indicating text comes from
  *        the name of an item in ::DSEKAI_STATE:items.
  */
 #define CONTROL_FLAG_TEXT_ITEM      0x40
 /**
- * \relates CONTROL
  * \brief CONTROL::flags for CONTROL_TYPE_LABEL indicating text is a number.
  */
 #define CONTROL_FLAG_TEXT_NUM       0x80
@@ -137,44 +125,6 @@
  *        ::CONTROL_FLAG_TEXT_NUM.
  */
 #define CONTROL_NUM_BUFFER_SZ       10
-
-/*! \brief A piece of data attached to CONTROL::data. */
-union CONTROL_DATA {
-   int32_t scalar;
-   /*! \brief Identifier for an asset (e.g. for CONTROL_TYPE_SPRITE). */
-   RESOURCE_ID res_id;
-};
-
-/*! \brief A graphical UI element, typically attached to a WINDOW. */
-struct CONTROL {
-   /*! \brief Unique identifier used to find this control in a window stack. */
-   uint32_t id;
-   /*! \brief Type of control defined by a constant. */
-   uint16_t type;
-   /**
-    * \brief The left horizontal offset of the control in pixels.
-    *
-    * Relative to containing window.
-    */
-   int16_t x;
-   /**
-    * \brief The top vertical offset of the control in pixels.
-    *
-    * Relative to containing window.
-    */
-   int16_t y;
-   /*! \brief The width of the control in pixels. */
-   int16_t w;
-   /*! \brief The height of the control in pixels. */
-   int16_t h;
-   int8_t scale;
-   GRAPHICS_COLOR fg;
-   GRAPHICS_COLOR bg;
-   /*! \brief Data used to draw a control (e.g. text or sprite to display). */
-   union CONTROL_DATA data;
-   /*! \brief Control-specific flags. */
-   uint8_t flags;
-};
 
 #define CONTROL_CB_TABLE( f ) f( 0, LABEL ) f( 1, BUTTON ) f( 2, CHECK ) f( 3, SPRITE )
 

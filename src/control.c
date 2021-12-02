@@ -42,7 +42,8 @@ static void control_draw_text(
 
    graphics_string_at( 
       str, str_sz,
-      w->x + c->x, w->y + c->y, c->fg, c->scale );
+      w->coords[GUI_X] + c->coords[GUI_X],
+      w->coords[GUI_Y] + c->coords[GUI_Y], c->fg, c->scale );
 }
 
 static const char* control_get_text(
@@ -92,7 +93,9 @@ int16_t control_draw_LABEL(
    }
 
    debug_printf( 3, "drawing menu string %d at %d, %d: %s",
-      c->data.scalar, w->x + c->x, w->y + c->y, str_ptr );
+      c->data.scalar,
+      w->coords[GUI_X] + c->coords[GUI_X],
+      w->coords[GUI_Y] + c->coords[GUI_Y], str_ptr );
 
    control_draw_text( w, c, str_ptr, str_sz );
 
@@ -110,13 +113,21 @@ int16_t control_draw_SPRITE(
     */
    graphics_blit_sprite_at(
       c->data.res_id,
-      0, 0, w->x + c->x + 2, w->y + c->y + 2, SPRITE_W, SPRITE_H );
+      0, 0,
+      w->coords[GUI_X] + c->coords[GUI_X] + 2,
+      w->coords[GUI_Y] + c->coords[GUI_Y] + 2,
+      SPRITE_W, SPRITE_H );
 
-   graphics_draw_rect( w->x + c->x, w->y + c->y, SPRITE_W + 4, SPRITE_H + 4,
+   graphics_draw_rect(
+      w->coords[GUI_X] + c->coords[GUI_X],
+      w->coords[GUI_Y] + c->coords[GUI_Y],
+      SPRITE_W + 4, SPRITE_H + 4,
       1, GRAPHICS_COLOR_BLACK );
 
    graphics_draw_rect(
-      w->x + c->x + 1, w->y + c->y + 1, SPRITE_W + 3, SPRITE_H + 3,
+      w->coords[GUI_X] + c->coords[GUI_X] + 1,
+      w->coords[GUI_Y] + c->coords[GUI_Y] + 1,
+      SPRITE_W + 3, SPRITE_H + 3,
       1, GRAPHICS_COLOR_WHITE );
 
    return 1;
@@ -170,6 +181,46 @@ uint8_t control_sz_SPRITE(
 }
 
 /* General Functions */
+
+void control_placement(
+   struct CONTROL* c, struct WINDOW* w, int16_t coord, uint8_t x_y
+) {
+
+   assert( 2 > x_y );
+
+   if( 0 >= w->grid[x_y] ) {
+      /* Setup initial grid. */
+      w->grid[x_y] = CONTROL_PADDING_OUTSIDE;
+      w->grid[x_y + 2] = CONTROL_PADDING_OUTSIDE;
+   }
+
+   switch( coord ){
+   case CONTROL_PLACEMENT_CENTER:
+      /* Window width / 2 - Control width / 2 */
+      c->coords[x_y] = (w->coords[x_y + 2] / 2) - (c->coords[x_y + 2] / 2);
+      break;
+
+   case CONTROL_PLACEMENT_RIGHT_BOTTOM:
+      c->coords[x_y] =
+         /* Window width - Padding - Control width */
+         w->coords[x_y + 2] - CONTROL_PADDING_OUTSIDE - c->coords[x_y + 2];
+      break;
+
+   case CONTROL_PLACEMENT_GRID_RIGHT_DOWN:
+      w->grid[x_y + 2] = w->grid[x_y];
+      w->grid[x_y] += c->coords[x_y + 2] + CONTROL_PADDING_INSIDE;
+      /* No break. */
+
+   case CONTROL_PLACEMENT_GRID:
+      debug_printf( 0, "adding control using grid at: %d", w->grid[x_y + 2] );
+      c->coords[x_y] = w->grid[x_y + 2];
+      break;
+
+   default:
+      c->coords[x_y] = coord;
+      break;
+   }
+}
 
 int16_t control_push(
    uint32_t control_id, uint16_t type, uint8_t flags,
@@ -246,93 +297,14 @@ int16_t control_push(
       goto cleanup;
    }
 
-   if( CONTROL_PLACEMENT_CENTER == w ) {
-      controls[0].w = control_sz.w;
-   } else {
-      controls[0].w = w;
-   }
+   controls[0].coords[GUI_W] = control_sz.w;
+   controls[0].coords[GUI_H] = control_sz.h;
 
-   if( CONTROL_PLACEMENT_CENTER == h ) {
-      controls[0].h = control_sz.h;
-   } else {
-      controls[0].h = h;
-   }
-
-   /* X Placement */
-
-   if( 0 >= windows[window_idx].grid_x ) {
-      /* Setup initial grid. */
-      windows[window_idx].grid_x_prev = CONTROL_PADDING_OUTSIDE;
-      windows[window_idx].grid_x = CONTROL_PADDING_OUTSIDE;
-   }
-
-   switch( x ){
-   case CONTROL_PLACEMENT_CENTER:
-      controls[0].x = (windows[window_idx].w / 2) - (controls[0].w / 2);
-      break;
-
-   case CONTROL_PLACEMENT_RIGHT:
-      controls[0].x =
-         windows[window_idx].w - CONTROL_PADDING_OUTSIDE - controls[0].w;
-      break;
-
-   case CONTROL_PLACEMENT_GRID_RIGHT:
-      windows[window_idx].grid_x_prev = windows[window_idx].grid_x;
-      windows[window_idx].grid_x += controls[0].w + CONTROL_PADDING_INSIDE;
-      /* No break. */
-
-   case CONTROL_PLACEMENT_GRID:
-      debug_printf( 3, "adding control using grid at X: %d",
-         windows[window_idx].grid_x_prev );
-      controls[0].x = windows[window_idx].grid_x_prev;
-      break;
-
-      if( 0 >= windows[window_idx].grid_x ) {
-         /* Setup initial grid. */
-         windows[window_idx].grid_x = CONTROL_PADDING_OUTSIDE;
-      }
-      debug_printf( 3, "adding control using grid at X: %d",
-         windows[window_idx].grid_x );
-      controls[0].x = windows[window_idx].grid_x + CONTROL_PADDING_INSIDE;
-      break;
-
-   default:
-      controls[0].x = x;
-      break;
-   }
-
-   /* Y Placement */
-
-   if( 0 >= windows[window_idx].grid_y ) {
-      /* Setup initial grid. */
-      windows[window_idx].grid_y = CONTROL_PADDING_OUTSIDE;
-   }
-
-   switch( y ) {
-   case CONTROL_PLACEMENT_CENTER:
-      controls[0].y = (windows[window_idx].h / 2) - (controls[0].h / 2);
-      break;
-   
-   case CONTROL_PLACEMENT_BOTTOM:
-      controls[0].x =
-         windows[window_idx].w - CONTROL_PADDING_OUTSIDE - controls[0].w;
-      break;
-
-   case CONTROL_PLACEMENT_GRID_DOWN:
-      windows[window_idx].grid_y_prev = windows[window_idx].grid_y;
-      windows[window_idx].grid_y += controls[0].h + CONTROL_PADDING_INSIDE;
-      /* No break. */
-
-   case CONTROL_PLACEMENT_GRID:
-      debug_printf( 3, "adding control using grid at Y: %d",
-         windows[window_idx].grid_y_prev );
-      controls[0].y = windows[window_idx].grid_y_prev;
-      break;
-
-   default:
-      controls[0].y = y;
-      break;
-   }
+   /* X/Y Placement */
+   control_placement(
+      &(controls[0]), &(windows[window_idx]), x, GUI_X );
+   control_placement(
+      &(controls[0]), &(windows[window_idx]), y, GUI_Y );
 
    controls[0].fg = fg;
    controls[0].bg = bg;
