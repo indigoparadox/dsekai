@@ -46,19 +46,97 @@
  */
 #define CONTROL_COUNT_MAX           20
 
-#define CONTROL_PLACEMENT_CENTER -1
-#define CONTROL_PLACEMENT_GRID_RIGHT -2
-#define CONTROL_PLACEMENT_GRID_DOWN -3
+/**
+ * \addtogroup dsekai_gui_controls_placement GUI Control Placement
+ * \brief Options for specifying ::CONTROL placement in a ::WINDOW.
+ *
+ * \{
+ */
 
-/*! \brief CONTROL::flags indicating control is visible and interactive. */
+/*! \brief Place the control in the center of the window. */
+#define CONTROL_PLACEMENT_CENTER       (-1)
+/*! \brief Alight the control's right side to the window's right side. */
+#define CONTROL_PLACEMENT_RIGHT        (-2)
+/*! \brief Alight the control's bottom side to the window's bottom side. */
+#define CONTROL_PLACEMENT_BOTTOM       (-2)
+/**
+ * \brief Place the control at the grid X, and set the grid width at the
+ *        control's width.
+ */
+#define CONTROL_PLACEMENT_GRID_RIGHT   (-3)
+/**
+ * \brief Place the control at the grid Y, and set the grid height at the
+ *        control's height.
+ */
+#define CONTROL_PLACEMENT_GRID_DOWN    (-3)
+/**
+ * \brief Place the control at the grid X or Y without modifying the grid.
+ */
+#define CONTROL_PLACEMENT_GRID         (-4)
+
+/*! \} */
+
+/*! \brief Internally-used padding in pixels from controls to window border. */
+#define CONTROL_PADDING_OUTSIDE  10
+/*! \brief Internally-used padding in pixels between controls. */
+#define CONTROL_PADDING_INSIDE   2
+
+/**
+ * \addtogroup dsekai_gui_controls_flags GUI Control Flags
+ * \brief Options specifying how a ::CONTROL behaves.
+ *
+ * The lower 4 bits are general to all controls while the upper 4 bits are
+ * specific to each ::CONTRO:type.
+ *
+ * \{
+ */
+
+/**
+ * \relates CONTROL
+ * \brief CONTROL::flags indicating control is visible and interactive.
+ */
 #define CONTROL_FLAG_ENABLED       0x01
-/*! \brief CONTROL::flags indicating control has cursor focus. */
+/**
+ * \relates CONTROL
+ * \brief CONTROL::flags indicating control has cursor focus.
+ */
 #define CONTROL_FLAG_ACTIVE        0x02
-/*! \brief CONTROL::flags indicating control option has been selected. */
+/**
+ * \relates CONTROL
+ * \brief CONTROL::flags indicating control option has been selected.
+ */
 #define CONTROL_FLAG_CHECKED       0x10
+/**
+ * \relates CONTROL
+ * \brief CONTROL::flags for CONTROL_TYPE_LABEL indicating text comes from
+ *        ::TILEMAP:strpool.
+ */
 #define CONTROL_FLAG_TEXT_TILEMAP   0x10
+/**
+ * \relates CONTROL
+ * \brief CONTROL::flags for CONTROL_TYPE_LABEL indicating text comes from
+ *        ::gc_menu_tokens.
+ */
 #define CONTROL_FLAG_TEXT_MENU      0x20
+/**
+ * \relates CONTROL
+ * \brief CONTROL::flags for CONTROL_TYPE_LABEL indicating text comes from
+ *        the name of an item in ::DSEKAI_STATE:items.
+ */
 #define CONTROL_FLAG_TEXT_ITEM      0x40
+/**
+ * \relates CONTROL
+ * \brief CONTROL::flags for CONTROL_TYPE_LABEL indicating text is a number.
+ */
+#define CONTROL_FLAG_TEXT_NUM       0x80
+
+/*! \} */
+
+/**
+ * \brief Size of internal text buffer used to represent
+ *        ::CONTROL_FLAG_TEXT_NUM.
+ */
+#define CONTROL_NUM_BUFFER_SZ       10
 
 /*! \brief A piece of data attached to CONTROL::data. */
 union CONTROL_DATA {

@@ -78,23 +78,23 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       MENU_WINDOW_ID, 0,
       SCREEN_MAP_X,
       SCREEN_MAP_Y,
-      SCREEN_MAP_W / 2,
+      (SCREEN_MAP_W / 2) + TILE_W,
       SCREEN_MAP_H,
       0, state );
    
    window_push(
       MENU_WINDOW_INFO_ID, 0,
-      SCREEN_MAP_X + (SCREEN_MAP_W / 2),
+      SCREEN_MAP_X + (SCREEN_MAP_W / 2) + TILE_W,
       SCREEN_MAP_Y,
-      SCREEN_MAP_W / 2,
+      (SCREEN_MAP_W / 2) - TILE_W,
       SCREEN_MAP_H / 2,
       0, state );
    
    window_push(
       MENU_WINDOW_STATUS_ID, 0,
-      SCREEN_MAP_X + (SCREEN_MAP_W / 2),
+      SCREEN_MAP_X + (SCREEN_MAP_W / 2) + TILE_W,
       SCREEN_MAP_Y + (SCREEN_MAP_H / 2),
-      SCREEN_MAP_W / 2,
+      (SCREEN_MAP_W / 2) - TILE_W,
       SCREEN_MAP_H / 2,
       0, state );
    
@@ -122,6 +122,14 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          color, GRAPHICS_COLOR_BLACK,
          GRAPHICS_STRING_FLAGS_ALL_CAPS,
          i, 0, MENU_WINDOW_ID, state );
+
+      control_push(
+         0x2333 + i,
+         CONTROL_TYPE_LABEL, CONTROL_FLAG_ENABLED | CONTROL_FLAG_TEXT_NUM,
+         CONTROL_PLACEMENT_RIGHT, CONTROL_PLACEMENT_GRID,
+         CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER,
+         color, GRAPHICS_COLOR_BLACK, 0,
+         state->items[i].count, 0, MENU_WINDOW_ID, state );
 
       i++;
       player_item_idx++;

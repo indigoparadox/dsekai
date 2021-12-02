@@ -2,6 +2,8 @@
 #define CONTROL_C
 #include "dsekai.h"
 
+char g_control_num_buf[CONTROL_NUM_BUFFER_SZ] = "";
+
 #ifdef PLATFORM_PALM
 
 int16_t control_push(
@@ -62,6 +64,12 @@ static const char* control_get_text(
       /* Get the string from the player items list. */
       str_ptr = state->items[(0xff & c->data.scalar)].name;
       *sz_out = memory_strnlen_ptr( str_ptr, ITEM_NAME_SZ );
+
+   } else if( CONTROL_FLAG_TEXT_NUM == (CONTROL_FLAG_TEXT_NUM & c->flags) ) {
+      *sz_out = dio_itoa(
+         g_control_num_buf, CONTROL_NUM_BUFFER_SZ, c->data.scalar, 10 );
+      str_ptr = g_control_num_buf;
+      debug_printf( 3, "text num: %s (%d)", str_ptr, *sz_out );
    
    } else {
       str_ptr = NULL;
@@ -250,34 +258,80 @@ int16_t control_push(
       controls[0].h = h;
    }
 
-   if( CONTROL_PLACEMENT_CENTER == x ) {
+   /* X Placement */
+
+   if( 0 >= windows[window_idx].grid_x ) {
+      /* Setup initial grid. */
+      windows[window_idx].grid_x_prev = CONTROL_PADDING_OUTSIDE;
+      windows[window_idx].grid_x = CONTROL_PADDING_OUTSIDE;
+   }
+
+   switch( x ){
+   case CONTROL_PLACEMENT_CENTER:
       controls[0].x = (windows[window_idx].w / 2) - (controls[0].w / 2);
-   } else if( CONTROL_PLACEMENT_GRID_RIGHT == x ) {
+      break;
+
+   case CONTROL_PLACEMENT_RIGHT:
+      controls[0].x =
+         windows[window_idx].w - CONTROL_PADDING_OUTSIDE - controls[0].w;
+      break;
+
+   case CONTROL_PLACEMENT_GRID_RIGHT:
+      windows[window_idx].grid_x_prev = windows[window_idx].grid_x;
+      windows[window_idx].grid_x += controls[0].w + CONTROL_PADDING_INSIDE;
+      /* No break. */
+
+   case CONTROL_PLACEMENT_GRID:
+      debug_printf( 3, "adding control using grid at X: %d",
+         windows[window_idx].grid_x_prev );
+      controls[0].x = windows[window_idx].grid_x_prev;
+      break;
+
       if( 0 >= windows[window_idx].grid_x ) {
          /* Setup initial grid. */
-         windows[window_idx].grid_x = 10;
+         windows[window_idx].grid_x = CONTROL_PADDING_OUTSIDE;
       }
       debug_printf( 3, "adding control using grid at X: %d",
          windows[window_idx].grid_x );
-      controls[0].x = windows[window_idx].grid_x + 2; /* 2px padding. */
-      windows[window_idx].grid_x += controls[0].w;
-   } else {
+      controls[0].x = windows[window_idx].grid_x + CONTROL_PADDING_INSIDE;
+      break;
+
+   default:
       controls[0].x = x;
+      break;
    }
 
-   if( CONTROL_PLACEMENT_CENTER == y ) {
+   /* Y Placement */
+
+   if( 0 >= windows[window_idx].grid_y ) {
+      /* Setup initial grid. */
+      windows[window_idx].grid_y = CONTROL_PADDING_OUTSIDE;
+   }
+
+   switch( y ) {
+   case CONTROL_PLACEMENT_CENTER:
       controls[0].y = (windows[window_idx].h / 2) - (controls[0].h / 2);
-   } else if( CONTROL_PLACEMENT_GRID_DOWN == y ) {
-      if( 0 >= windows[window_idx].grid_y ) {
-         /* Setup initial grid. */
-         windows[window_idx].grid_y = 10;
-      }
+      break;
+   
+   case CONTROL_PLACEMENT_BOTTOM:
+      controls[0].x =
+         windows[window_idx].w - CONTROL_PADDING_OUTSIDE - controls[0].w;
+      break;
+
+   case CONTROL_PLACEMENT_GRID_DOWN:
+      windows[window_idx].grid_y_prev = windows[window_idx].grid_y;
+      windows[window_idx].grid_y += controls[0].h + CONTROL_PADDING_INSIDE;
+      /* No break. */
+
+   case CONTROL_PLACEMENT_GRID:
       debug_printf( 3, "adding control using grid at Y: %d",
-         windows[window_idx].grid_y );
-      controls[0].y = windows[window_idx].grid_y + 2; /* 2px padding. */
-      windows[window_idx].grid_y += controls[0].h;
-   } else {
+         windows[window_idx].grid_y_prev );
+      controls[0].y = windows[window_idx].grid_y_prev;
+      break;
+
+   default:
       controls[0].y = y;
+      break;
    }
 
    controls[0].fg = fg;

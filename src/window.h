@@ -86,7 +86,9 @@ struct WINDOW {
    /*! \brief The height of the window in pixels. */
    int16_t h;
    int16_t grid_x;
+   int16_t grid_x_prev;
    int16_t grid_y;
+   int16_t grid_y_prev;
 };
 
 #ifdef PLATFORM_PALM
