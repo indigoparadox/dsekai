@@ -154,8 +154,6 @@ int16_t control_push(
 void control_pop( uint32_t, uint32_t, struct DSEKAI_STATE* );
 void control_draw_all( struct WINDOW* w, struct DSEKAI_STATE* state );
 
-#ifndef PLATFORM_PALM
-
 #ifdef CONTROL_C
 
 /* === If we're being called inside control.c === */
@@ -196,8 +194,6 @@ CONTROL_CB_TABLE( CONTROL_CB_TABLE_CONSTS );
 CONTROL_CB_TABLE( CONTROL_CB_TABLE_CONSTS );
 
 #endif /* CONTROL_C */
-
-#endif /* !PLATFORM_PALM */
 
 /*! \} */
 

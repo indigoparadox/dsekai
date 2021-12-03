@@ -4,20 +4,6 @@
 
 char g_control_num_buf[CONTROL_NUM_BUFFER_SZ] = "";
 
-#ifdef PLATFORM_PALM
-
-int16_t control_push(
-   uint32_t control_id, uint16_t type, uint8_t flags,
-   int16_t x, int16_t y, int16_t w, int16_t h,
-   GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
-   int32_t data_scalar, RESOURCE_ID data_res_id,
-   uint32_t window_id, struct DSEKAI_STATE* state
-) {
-   return 0;
-}
-
-#else
-
 /* Drawing Callbacks */
 
 int16_t control_draw_BUTTON(
@@ -431,6 +417,4 @@ void control_draw_all( struct WINDOW* w, struct DSEKAI_STATE* state ) {
       controls = (struct CONTROL*)memory_unlock( w->controls_handle );
    }
 }
-
-#endif /* PLATFORM */
 
