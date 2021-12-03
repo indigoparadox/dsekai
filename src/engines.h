@@ -63,6 +63,7 @@ struct TOPDOWN_STATE {
 struct POV_STATE {
    uint8_t dirty;
    uint8_t minimap[TILEMAP_TH * TILEMAP_TW];
+   uint16_t inc;
 };
 
 /*! \} */

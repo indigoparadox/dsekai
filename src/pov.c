@@ -136,6 +136,8 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
          window_pop( WINDOW_ID_WELCOME, state );
          window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
       }
+      gstate->inc++;
+      debug_printf( 3, "inc: %d", gstate->inc );
       break;
    }
 
@@ -161,6 +163,7 @@ struct POV_RAY {
    double delta_dist_y;
    double wall_x;
    double wall_dist;
+   double camera_x;
    int8_t wall_side;
    int8_t tile_id;
 };
@@ -237,7 +240,9 @@ static int8_t pov_cast_ray(
    return ray->tile_id;
 }
 
-void pov_draw_wall_x( int16_t x, struct POV_RAY* ray, struct TILEMAP* t ) {
+void pov_draw_wall_x(
+   int16_t x, struct POV_RAY* ray, struct TILEMAP* t, struct POV_STATE* gstate
+) {
    double tex_step = 0,
       tex_pos = 0;
    int32_t tex_x = 0,
@@ -266,13 +271,23 @@ void pov_draw_wall_x( int16_t x, struct POV_RAY* ray, struct TILEMAP* t ) {
       tex_x = TILE_W - tex_x - 1;
    }
 
-   tex_step = 1.0 * TILE_H / line_px_height;
+   tex_step = 2.0 * (2 * TILE_H) / (2 * line_px_height);
    tex_pos =
       (line_px_start - SCREEN_MAP_H / 2 + SCREEN_MAP_H / 2) * tex_step;
 
+   if(
+      (!ray->wall_side && 0 != ray->dir_x) ||
+      (ray->wall_side && 0 != ray->dir_y)
+   ) {
+      /* We're drawing a wall orthoganal to the viewer. */
+      tex_pos -= (2000 + gstate->inc) / (line_px_height);
+   }
+
+   /* debug_printf( 3, "XXX" ); */
    for( y = line_px_start ; line_px_end > y ; y++ ) {
+      /* debug_printf( 3, "y: %d tp: %f", y, tex_pos ); */
       tex_y = (int32_t)tex_pos & (TILE_H - 1);
-      tex_pos += tex_step;
+      tex_pos += tex_step / 2;
 
       /* Create checkerboard effect on off sides. */
       if(
@@ -333,7 +348,6 @@ void pov_draw_minimap( uint8_t* minimap, struct MOBILE* player ) {
 
 void pov_draw( struct DSEKAI_STATE* state ) {
    struct POV_STATE* gstate = NULL;
-   double camera_x = 0;
    int16_t x = 0;
    int8_t tile_id = 0;
    struct POV_RAY ray;
@@ -356,11 +370,11 @@ void pov_draw( struct DSEKAI_STATE* state ) {
    for( x = 0 ; SCREEN_MAP_W > x ; x++ ) {
       memory_zero_ptr( &ray, sizeof( struct POV_RAY ) );
       /* Setup ray direction and position. */
-      camera_x = 2 * x / (double)SCREEN_MAP_W - 1;
+      ray.camera_x = 2 * x / (double)SCREEN_MAP_W - 1;
       ray.dir_x = gc_pov_dir_x[state->player.dir] + 
-         gc_pov_plane_x[state->player.dir] * camera_x;
+         gc_pov_plane_x[state->player.dir] * ray.camera_x;
       ray.dir_y = gc_pov_dir_y[state->player.dir] +
-         gc_pov_plane_y[state->player.dir] * camera_x;
+         gc_pov_plane_y[state->player.dir] * ray.camera_x;
       ray.map_tx = state->player.coords.x;
       ray.map_ty = state->player.coords.y;
 
@@ -400,7 +414,7 @@ void pov_draw( struct DSEKAI_STATE* state ) {
          continue;
       }
 
-      pov_draw_wall_x( x, &ray, &(state->map) );
+      pov_draw_wall_x( x, &ray, &(state->map), gstate );
    }
 
    pov_draw_minimap( gstate->minimap, &(state->player) );
