@@ -2,6 +2,10 @@
 #define MENU_C
 #include "dsekai.h"
 
+const char* gc_menu_msgs[] = {
+   "no items"
+};
+
 void menu_renderer_main( struct DSEKAI_STATE* state ) {
    int8_t i = 1; /* Entry 0 is the main menu, itself. */
    GRAPHICS_COLOR color;
@@ -25,7 +29,7 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
          CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER,
          color, GRAPHICS_COLOR_BLACK,
          GRAPHICS_STRING_FLAGS_ALL_CAPS,
-         i, 0, MENU_WINDOW_ID, state );
+         i, 0, NULL, MENU_WINDOW_ID, state );
       i++;
    }  
 }
@@ -123,7 +127,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER,
          color, GRAPHICS_COLOR_BLACK,
          GRAPHICS_STRING_FLAGS_ALL_CAPS,
-         i, 0, MENU_WINDOW_ID, state );
+         i, 0, NULL, MENU_WINDOW_ID, state );
 
       control_push(
          0x2333 + i,
@@ -131,7 +135,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          CONTROL_PLACEMENT_RIGHT_BOTTOM, CONTROL_PLACEMENT_GRID,
          CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER,
          color, GRAPHICS_COLOR_BLACK, 0,
-         state->items[i].count, 0, MENU_WINDOW_ID, state );
+         state->items[i].count, 0, NULL, MENU_WINDOW_ID, state );
 
       player_item_idx++;
    }  
@@ -140,12 +144,12 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       /* No items were pushed. */
       control_push(
          0x2320,
-         CONTROL_TYPE_LABEL, CONTROL_FLAG_ENABLED | CONTROL_FLAG_TEXT_MENU,
+         CONTROL_TYPE_LABEL, CONTROL_FLAG_ENABLED | CONTROL_FLAG_TEXT_PTR,
          10, CONTROL_PLACEMENT_GRID_RIGHT_DOWN,
          CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER,
          GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK,
          GRAPHICS_STRING_FLAGS_ALL_CAPS,
-         0, 0, MENU_WINDOW_ID, state );
+         0, 0, gc_menu_msgs[0], MENU_WINDOW_ID, state );
    }
 }
 

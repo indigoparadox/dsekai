@@ -51,7 +51,15 @@ static const char* control_get_text(
 ) {
    const char* str_ptr;
 
-   if( CONTROL_FLAG_TEXT_TILEMAP == (CONTROL_FLAG_TEXT_TILEMAP & c->flags) ) {
+   if( CONTROL_FLAG_TEXT_PTR == (CONTROL_FLAG_TEXT_PTR & c->flags) ) {
+      /* Get the string from a directly passed pointer. */
+      str_ptr = c->data.string;
+      /* TODO: Sane maximum length default. */
+      *sz_out = memory_strnlen_ptr( str_ptr, 100 );
+
+   } else if(
+      CONTROL_FLAG_TEXT_TILEMAP == (CONTROL_FLAG_TEXT_TILEMAP & c->flags)
+   ) {
       /* Get the string from the tilemap strpool. */
       str_ptr = strpool_get( state->map.strpool, c->data.scalar, sz_out );
 
@@ -226,7 +234,7 @@ int16_t control_push(
    uint32_t control_id, uint16_t type, uint8_t flags,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
-   int32_t data_scalar, RESOURCE_ID data_res_id,
+   int32_t data_scalar, RESOURCE_ID data_res_id, const char* data_string,
    uint32_t window_id, struct DSEKAI_STATE* state
 ) {
    int i = 0;
@@ -280,7 +288,9 @@ int16_t control_push(
 
    /* Sizing callbacks below might need these. */
    controls[0].type = type;
-   if( 0 != data_scalar ) {
+   if( NULL != data_string ) {
+      controls[0].data.string = data_string;
+   } else if( 0 != data_scalar ) {
       controls[0].data.scalar = data_scalar;
    } else if( !resource_compare_id( 0, data_res_id ) ) {
       resource_assign_id( controls[0].data.res_id, data_res_id );

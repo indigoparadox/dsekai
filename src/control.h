@@ -118,6 +118,8 @@
  */
 #define CONTROL_FLAG_TEXT_NUM       0x80
 
+#define CONTROL_FLAG_TEXT_PTR (CONTROL_FLAG_TEXT_TILEMAP | CONTROL_FLAG_TEXT_MENU | CONTROL_FLAG_TEXT_MENU | CONTROL_FLAG_TEXT_ITEM)      
+
 /*! \} */
 
 /**
@@ -142,7 +144,7 @@ int16_t control_push(
    uint32_t control_id, uint16_t type, uint8_t flags,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, int8_t scale,
-   int32_t data_scalar, RESOURCE_ID data_res_id,
+   int32_t data_scalar, RESOURCE_ID data_res_id, const char* data_string,
    uint32_t window_id, struct DSEKAI_STATE* state );
 
 /**
