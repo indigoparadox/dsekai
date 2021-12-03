@@ -222,9 +222,26 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    in_char = input_poll();
    if( 0 <= state->menu.menu_id ) {
       retval = gc_menu_handlers[state->menu.menu_id]( in_char, state );
-   } else {
+   
+   } else if(
+      /* Only open the menu if no modal windows are open and it's not
+      *  blocked.
+      */
+      0 >= window_modal( state ) &&
+      INPUT_KEY_QUIT == in_char &&
+      DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
+   ) {
+      menu_open( state );
+
+   } else if( 0 >= window_modal( state ) ) {
       retval = gc_engines_input[state->map.engine_type]( in_char, state );
+
+   } else if( INPUT_KEY_OK == in_char ) {
+      /* Try to close any windows that are open. */
+      window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
+      tilemap_refresh_tiles( &(state->map) );
    }
+   
 
    /* === Animation Phase === */
 

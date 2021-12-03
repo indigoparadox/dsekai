@@ -224,6 +224,8 @@ int16_t menu_handler_quit( char in_char, struct DSEKAI_STATE* state ) {
 }
 
 void menu_open( struct DSEKAI_STATE* state ) {
+   debug_printf( 3, "opening menu..." );
+
    state->menu.menu_id = 0;
    state->menu.highlight_id = 1;
    state->menu.flags |= MENU_FLAG_DIRTY;
@@ -233,6 +235,7 @@ void menu_open( struct DSEKAI_STATE* state ) {
 }
 
 void menu_close( struct DSEKAI_STATE* state ) {
+   debug_printf( 3, "closing menu..." );
    window_pop( MENU_WINDOW_ID, state );
    state->menu.menu_id = -1;
    state->menu.highlight_id = -1;

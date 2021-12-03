@@ -342,30 +342,11 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_OK:
-      if( 0 >= window_modal( state ) ) {
-         /* Try to interact with facing mobile. */
-         mobile_interact(
-            &(state->player),
-            mobile_get_facing( &(state->player), state ),
-            &(state->map) );
-      } else {
-         /* Try to close any windows that are open. */
-         window_pop( WINDOW_ID_WELCOME, state );
-         window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
-      }
-      tilemap_refresh_tiles( &(state->map) );
-      break;
-
-   case INPUT_KEY_QUIT:
-      if(
-         /* Only open the menu if no modal windows are open and it's not
-         *  blocked.
-         */
-         0 >= window_modal( state ) &&
-         DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
-      ) {
-         menu_open( state );
-      }
+      /* Try to interact with facing mobile. */
+      mobile_interact(
+         &(state->player),
+         mobile_get_facing( &(state->player), state ),
+         &(state->map) );
       break;
    }
 

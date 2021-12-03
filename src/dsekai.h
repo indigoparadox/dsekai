@@ -24,6 +24,8 @@
 
 struct DSEKAI_STATE;
 
+#include "winids.h"
+
 #include "itstruct.h"
 #include "tmstruct.h"
 #include "gustruct.h"
