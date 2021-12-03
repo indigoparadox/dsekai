@@ -84,7 +84,8 @@ struct POV_RAY {
 
 static int8_t pov_cast_ray(
    double x_orig, double y_orig, int16_t x,
-   struct POV_RAY* ray, struct TILEMAP* t
+   struct POV_RAY* ray, struct TILEMAP* t,
+   uint8_t* minimap
 ) {
    int16_t wall_hit = 0;
 
@@ -109,6 +110,8 @@ static int8_t pov_cast_ray(
          wall_hit = 2;
       }
 
+      minimap[(ray->map_ty * TILEMAP_TW) + ray->map_tx] = 1;
+
       /* Determine the tile hit by the ray. */
       ray->tile_id = tilemap_get_tile_id( t, ray->map_tx, ray->map_ty );
       if( 0 > ray->tile_id ) {
@@ -124,6 +127,7 @@ static int8_t pov_cast_ray(
             "tile id at screen %d, %dx%d: %d (%d)", x,
                ray->map_tx, ray->map_ty, ray->tile_id, ray->wall_side );
          wall_hit = 1;
+         minimap[(ray->map_ty * TILEMAP_TW) + ray->map_tx] = 2;
       }
    }
 
@@ -200,15 +204,19 @@ void pov_draw( struct DSEKAI_STATE* state ) {
    double plane_x = 0,
       plane_y = 0.66,
       camera_x = 0;
-   int16_t x = 0;
+   int16_t x = 0,
+      y = 0;
    int8_t tile_id = 0;
    struct POV_RAY ray;
+   GRAPHICS_COLOR color;
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
    if( !(gstate->dirty) ) {
       goto cleanup;
    }
+   
+   memory_zero_ptr( gstate->minimap, TILEMAP_TH * TILEMAP_TW );
 
    graphics_draw_block(
       0, 0, SCREEN_MAP_W, SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
@@ -270,7 +278,7 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       tile_id = pov_cast_ray(
          state->player.coords.x,
          state->player.coords.y,
-         x, &ray, &(state->map) );
+         x, &ray, &(state->map), gstate->minimap );
       if( 0 > tile_id ) {
          /* Ray went off the map. */
          continue;
@@ -278,6 +286,31 @@ void pov_draw( struct DSEKAI_STATE* state ) {
 
       pov_draw_wall_x( x, &ray, &(state->map) );
    }
+
+   for( y = 0 ; TILEMAP_TH > y ; y++ ) {
+      for( x = 0 ; TILEMAP_TW > x ; x++ ) {
+         switch( gstate->minimap[(y * TILEMAP_TW) + x] ) {
+         case 2:
+            color = GRAPHICS_COLOR_CYAN;
+            break;
+
+         case 1:
+            color = GRAPHICS_COLOR_WHITE;
+            break;
+
+         default:
+            color = GRAPHICS_COLOR_BLACK;
+            break;
+         }
+      
+         graphics_draw_px( MINIMAP_X + x, MINIMAP_Y + y, color );
+      }
+   }
+
+   graphics_draw_px(
+      MINIMAP_X + state->player.coords.x,
+      MINIMAP_Y + state->player.coords.y,
+      GRAPHICS_COLOR_MAGENTA );
 
    gstate->dirty = 0;
 

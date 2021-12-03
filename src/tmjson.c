@@ -300,7 +300,7 @@ void tilemap_json_parse_engine(
    }
 
    /* XXX */
-   /* t->engine_type = ENGINE_TYPE_POV; */
+   t->engine_type = 2 /* POV */;
 }
 
 void tilemap_json_parse_weather(

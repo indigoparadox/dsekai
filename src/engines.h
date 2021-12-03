@@ -13,6 +13,9 @@
  *  \brief Macros, structs, and prototypes for the various engine types.
  */
 
+#define MINIMAP_X (SCREEN_W - TILEMAP_TW - 10)
+#define MINIMAP_Y (10)
+
 #ifndef ENGINES_TOKENS_ONLY
 
 /**
@@ -59,6 +62,7 @@ struct TOPDOWN_STATE {
  */
 struct POV_STATE {
    uint8_t dirty;
+   uint8_t minimap[TILEMAP_TH * TILEMAP_TW];
 };
 
 /*! \} */
