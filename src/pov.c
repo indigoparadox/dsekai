@@ -122,6 +122,21 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
    case INPUT_KEY_QUIT:
       window_pop( WINDOW_ID_STATUS, state );
       retval = 0;
+      break;
+
+   case INPUT_KEY_OK:
+      if( 0 >= window_modal( state ) ) {
+         /* Try to interact with facing mobile. */
+         mobile_interact(
+            &(state->player),
+            mobile_get_facing( &(state->player), state ),
+            &(state->map) );
+      } else {
+         /* Try to close any windows that are open. */
+         window_pop( WINDOW_ID_WELCOME, state );
+         window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
+      }
+      break;
    }
 
    gstate = (struct POV_STATE*)memory_unlock( state->engine_state_handle );
@@ -172,8 +187,8 @@ static int8_t pov_cast_ray(
 
       /* Detect if the ray went off the map. */
       if(
-         ray->map_ty > TILEMAP_TH || 0 > ray->map_ty ||
-         ray->map_tx > TILEMAP_TW || 0 > ray->map_tx
+         ray->map_ty >= TILEMAP_TH || 0 > ray->map_ty ||
+         ray->map_tx >= TILEMAP_TW || 0 > ray->map_tx
       ) {
          wall_hit = 2;
          continue;
@@ -192,7 +207,7 @@ static int8_t pov_cast_ray(
          TILEMAP_TILESET_FLAG_BLOCK ==
          (t->tileset[ray->tile_id].flags & TILEMAP_TILESET_FLAG_BLOCK)
       ) {
-         debug_printf( 3,
+         debug_printf( 0,
             "tile id at screen %d, %dx%d: %d (%d)", x,
                ray->map_tx, ray->map_ty, ray->tile_id, ray->wall_side );
          wall_hit = 1;
@@ -225,7 +240,7 @@ static int8_t pov_cast_ray(
 void pov_draw_wall_x( int16_t x, struct POV_RAY* ray, struct TILEMAP* t ) {
    double tex_step = 0,
       tex_pos = 0;
-   int16_t tex_x = 0,
+   int32_t tex_x = 0,
       tex_y = 0,
       y = 0,
       line_px_height = 0,
@@ -258,17 +273,20 @@ void pov_draw_wall_x( int16_t x, struct POV_RAY* ray, struct TILEMAP* t ) {
    for( y = line_px_start ; line_px_end > y ; y++ ) {
       tex_y = (int32_t)tex_pos & (TILE_H - 1);
       tex_pos += tex_step;
+
+      /* Create checkerboard effect on off sides. */
       if(
-         !ray->wall_side || ( ray->wall_side && (
-            (0 == x % 2 && 1 == y % 2) || (1 == x % 2 && 0 == y % 2)
-         ) )
+         !ray->wall_side && 
+         ((0 == x % 2 && 1 == y % 2) || (1 == x % 2 && 0 == y % 2))
       ) {
-         graphics_blit_tile_at(
-            t->tileset[ray->tile_id].image,
-            tex_x, tex_y,
-            x, y,
-            1, 1 );
+         continue;
       }
+
+      graphics_blit_tile_at(
+         t->tileset[ray->tile_id].image,
+         tex_x, tex_y,
+         x, y,
+         1, 1 );
    }
 }
 
@@ -322,16 +340,18 @@ void pov_draw( struct DSEKAI_STATE* state ) {
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
+   /*
    if( !(gstate->dirty) ) {
       goto cleanup;
    }
+   */
    
    memory_zero_ptr( gstate->minimap, TILEMAP_TH * TILEMAP_TW );
 
    graphics_draw_block(
       0, 0, SCREEN_MAP_W, SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
 
-   debug_printf( 3, "casting..." );
+   debug_printf( 0, "casting..." );
 
    for( x = 0 ; SCREEN_MAP_W > x ; x++ ) {
       memory_zero_ptr( &ray, sizeof( struct POV_RAY ) );
