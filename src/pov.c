@@ -1,6 +1,88 @@
 
 #include "dsekai.h"
 
+const double gc_pov_dir_x[4] = {
+   /* SOUTH */
+   0.0,
+   /* NORTH */
+   0.0,
+   /* EAST */
+   /* 0 * cos( -4.7124 ) - -1 * sin( -4.7124 ) */
+   /*-0.0821542,*/
+   1.000000,
+   /* WEST */
+   /* 0 * cos( 4.7124 ) - -1 * sin( 4.7124 ) */
+   /*0.0821542*/
+   -1.000000
+};
+
+const double gc_pov_dir_y[4] = {
+   /* SOUTH */
+   1.0,
+   /* NORTH */
+   -1.0,
+   /* EAST */
+   /* 0 * sin( -4.7124 ) + -1 * cos( -4.7124 ) */
+   /* -0.99661963, */
+   -0.000011,
+   /* WEST */
+   /* 0 * sin( 4.7124 ) + -1 * cos( 4.7124 ) */
+   /* -0.99661963 */
+   -0.000011
+};
+
+const double gc_pov_plane_x[4] = {
+   /* SOUTH */
+   -0.66,
+   /* NORTH */
+   0.66,
+   /* EAST */
+   /* 0.66 * cos(-4.7124 ) - 0 * sin( -4.7124 ) */
+   /* 0.657768956, */
+   0.000007,
+   /* WEST */
+   /* 0.66 * cos( 4.7124 ) - 0 * sin( 4.7124 ) */
+   /* 0.657768956 */
+   0.000007
+};
+
+const double gc_pov_plane_y[4] = {
+   /* SOUTH */
+   0.0,
+   /* NORTH */
+   0.0,
+   /* EAST */
+   /* 0.66 * sin( -4.7124 ) + 0 * cos( -4.7124 ) */
+   /* -0.054221772, */
+   0.660000,
+   /* WEST */
+   /* 0.66 * sin( 4.7124 ) + 0 * cos( 4.7124 ) */
+   /* 0.054221772 */
+   -0.660000
+};
+
+const uint8_t gc_pov_dir_turn_right[] = {
+   /* SOUTH */
+   MOBILE_DIR_WEST,
+   /* NORTH */
+   MOBILE_DIR_EAST,
+   /* EAST */
+   MOBILE_DIR_SOUTH,
+   /* WEST */
+   MOBILE_DIR_NORTH
+};
+
+const uint8_t gc_pov_dir_turn_left[] = {
+   MOBILE_DIR_EAST,
+   MOBILE_DIR_WEST,
+   MOBILE_DIR_NORTH,
+   MOBILE_DIR_SOUTH
+};
+
+const char gc_pov_compass[] = {
+   'S', 'N', 'E', 'W'
+};
+
 int16_t pov_setup( struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
    struct POV_STATE* gstate = NULL;
@@ -32,12 +114,13 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
 
    switch( in_char ) {
    case INPUT_KEY_UP:
-      engines_handle_movement( MOBILE_DIR_NORTH, state );
+      engines_handle_movement( state->player.dir, state );
       gstate->dirty = 1;
       break;
 
    case INPUT_KEY_LEFT:
-      engines_handle_movement( MOBILE_DIR_WEST, state );
+      /* engines_handle_movement( MOBILE_DIR_WEST, state ); */
+      state->player.dir = gc_pov_dir_turn_left[state->player.dir];
       gstate->dirty = 1;
       break;
 
@@ -47,7 +130,8 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_RIGHT:
-      engines_handle_movement( MOBILE_DIR_EAST, state );
+      /* engines_handle_movement( MOBILE_DIR_EAST, state ); */
+      state->player.dir = gc_pov_dir_turn_right[state->player.dir];
       gstate->dirty = 1;
       break;
 
@@ -108,6 +192,7 @@ static int8_t pov_cast_ray(
          ray->map_tx > TILEMAP_TW || 0 > ray->map_tx
       ) {
          wall_hit = 2;
+         continue;
       }
 
       minimap[(ray->map_ty * TILEMAP_TW) + ray->map_tx] = 1;
@@ -238,13 +323,15 @@ void pov_draw_minimap( uint8_t* minimap, struct MOBILE* player ) {
       MINIMAP_X + 1 + player->coords.x,
       MINIMAP_Y + 1 + player->coords.y,
       GRAPHICS_COLOR_MAGENTA );
+
+   graphics_char_at(
+      gc_pov_compass[player->dir], MINIMAP_X - 12, MINIMAP_Y,
+      GRAPHICS_COLOR_WHITE, 0 );
 }
 
 void pov_draw( struct DSEKAI_STATE* state ) {
    struct POV_STATE* gstate = NULL;
-   double plane_x = 0,
-      plane_y = 0.66,
-      camera_x = 0;
+   double camera_x = 0;
    int16_t x = 0;
    int8_t tile_id = 0;
    struct POV_RAY ray;
@@ -270,8 +357,10 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       ray.dir_x = gc_mobile_x_offsets[state->player.dir] + plane_x * camera_x;
       ray.dir_y = gc_mobile_y_offsets[state->player.dir] + plane_y * camera_x;
       */
-      ray.dir_x = -1.0 + plane_x * camera_x;
-      ray.dir_y = 0.0 + plane_y * camera_x;
+      ray.dir_x = gc_pov_dir_x[state->player.dir] + 
+         gc_pov_plane_x[state->player.dir] * camera_x;
+      ray.dir_y = gc_pov_dir_y[state->player.dir] +
+         gc_pov_plane_y[state->player.dir] * camera_x;
       ray.map_tx = state->player.coords.x;
       ray.map_ty = state->player.coords.y;
 
@@ -285,14 +374,12 @@ void pov_draw( struct DSEKAI_STATE* state ) {
          sqrt( 1 + (ray.dir_x * ray.dir_x) / (ray.dir_y * ray.dir_y) );
       */
 
-      debug_printf( 3, "x %d %f", x, camera_x );
-
       /* Figure out the ray direction. */
 
       if( 0 > ray.dir_x ) {
          ray.step_x = -1;
          ray.side_dist_x =
-            (state->player.coords.x - ray.map_tx) * ray.delta_dist_x;
+            ((double)(state->player.coords.x) - ray.map_tx) * ray.delta_dist_x;
       } else {
          ray.step_x = 1;
          ray.side_dist_x =
@@ -302,7 +389,7 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       if( 0 > ray.dir_y ) {
          ray.step_y = -1;
          ray.side_dist_y =
-            (state->player.coords.y - ray.map_ty) * ray.delta_dist_y;
+            ((double)(state->player.coords.y) - ray.map_ty) * ray.delta_dist_y;
       } else {
          ray.step_y = 1;
          ray.side_dist_y =

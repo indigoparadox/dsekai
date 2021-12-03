@@ -1,7 +1,14 @@
 
 #include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#include <math.h>
 
-void print_table(
+#define GRAPHICS_90DEG_RADS 1.5708
+#define GRAPHICS_RAY_ROTATE_INC (3 * GRAPHICS_90DEG_RADS)
+#define GRAPHICS_RAY_FOV 0.66
+
+void print_table_cga_bytes(
    FILE* hout, const char* type, const char* name, int my, int mx, int modulus,
    int offset
 ) {
@@ -30,54 +37,57 @@ void print_table(
    fprintf( hout, "};\n\n" );
 }
 
-int main() {
+int main( int argc, char* argv[] ) {
    int x = 0, y = 0;
    FILE* hout = NULL;
-   hout = fopen( "hout.h", "w" );
 
-   print_table( hout, "uint16_t", "gc_offsets_cga_bytes_p1", 200, 320, 0, 0 );
-   print_table( hout, "uint16_t", "gc_offsets_cga_bytes_p2", 200, 320, 0, 0 );
-#if 0
-   fprintf( hout, "static const uint16_t huge gc_offsets_cga_bytes_p1[100][320] = {\n" );
-   for( y = 0 ; 100 > y ; y++ ) {
-      fprintf( hout, "   {" );
-      for( x = 0 ; 320 > x ; x++ ) {
-         fprintf( hout, "0x%04x", ((y * 320) + x) / 4 );
-         if( x + 1 < 320 ) {
-            fprintf( hout, ", " );
-         }
-      }
-      fprintf( hout, "}" );
-      if( y + 1 < 200 ) {
-         fprintf( hout, ",\n" );
-      } else {
-         fprintf( hout, "\n" );
-      }
+   assert( argc == 3 );
+
+   hout = fopen( argv[2], "w" );
+
+   if( 0 == strncmp( "cga", argv[1], 3 ) ) {
+      print_table_cga_bytes(
+         hout, "uint16_t", "gc_offsets_cga_bytes_p1", 200, 320, 0, 0 );
+      print_table_cga_bytes(
+         hout, "uint16_t", "gc_offsets_cga_bytes_p2", 200, 320, 0, 0 );
+      print_table_cga_bytes(
+         hout, "uint8_t", "gc_offsets_cga_bits_p1", 200, 320, 1, 0 );
+   } else if( 0 == strncmp( "pov", argv[1], 3 ) ) {
+      /* left */
+      fprintf( hout, "\n/* left */\n\n" );
+
+      fprintf( hout, "/* facing_x */\n%f,\n",
+         0 * cos( GRAPHICS_RAY_ROTATE_INC ) -
+            -1 * sin( GRAPHICS_RAY_ROTATE_INC ) );
+      fprintf( hout, "/* facing_y */\n%f,\n",
+         0 * sin( GRAPHICS_RAY_ROTATE_INC ) +
+            -1 * cos( GRAPHICS_RAY_ROTATE_INC ) );
+      fprintf( hout, "/* plane_x */\n%f,\n",
+         GRAPHICS_RAY_FOV * cos( GRAPHICS_RAY_ROTATE_INC ) -
+            0 * sin( GRAPHICS_RAY_ROTATE_INC ) );
+      fprintf( hout, "/* plane_y */\n%f,\n",
+         GRAPHICS_RAY_FOV * sin( GRAPHICS_RAY_ROTATE_INC ) +
+            0 * cos( GRAPHICS_RAY_ROTATE_INC ) );
+
+      /* right */
+      fprintf( hout, "\n/* right */\n\n" );
+
+      fprintf( hout, "/* facing_x */\n%f,\n",
+         0 * cos( -GRAPHICS_RAY_ROTATE_INC ) -
+            -1 * sin( -GRAPHICS_RAY_ROTATE_INC ) );
+      fprintf( hout, "/* facing_y */\n%f,\n",
+         0 * sin( -GRAPHICS_RAY_ROTATE_INC ) +
+            -1 * cos( -GRAPHICS_RAY_ROTATE_INC ) );
+      fprintf( hout, "/* plane_x */\n%f,\n",
+         GRAPHICS_RAY_FOV * cos(-GRAPHICS_RAY_ROTATE_INC ) -
+            0 * sin( -GRAPHICS_RAY_ROTATE_INC ) );
+      fprintf( hout, "/* plane_y */\n%f,\n",
+         GRAPHICS_RAY_FOV * sin( -GRAPHICS_RAY_ROTATE_INC ) +
+            0 * cos( -GRAPHICS_RAY_ROTATE_INC ) );
+
+   } else {
+      printf( "usage: lookups [cga|pov] <header.h>" );
    }
-   fprintf( hout, "};\n\n" );
-#endif
-
-   print_table( hout, "uint8_t", "gc_offsets_cga_bits_p1", 200, 320, 1, 0 );
-
-#if 0
-   fprintf( hout, "static const uint8_t huge gc_offsets_cga_bits_p1[100][320] = {\n" );
-   for( y = 0 ; 100 > y ; y++ ) {
-      fprintf( hout, "   {" );
-      for( x = 0 ; 320 > x ; x++ ) {
-         fprintf( hout, "0x%02x", (8 - (((y * 320) + x) % 4 )) * 2);
-         if( x + 1 < 320 ) {
-            fprintf( hout, ", " );
-         }
-      }
-      fprintf( hout, "}" );
-      if( y + 1 < 200 ) {
-         fprintf( hout, ",\n" );
-      } else {
-         fprintf( hout, "\n" );
-      }
-   }
-   fprintf( hout, "};\n" );
-#endif
 
    fclose( hout );
 
