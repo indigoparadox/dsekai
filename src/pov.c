@@ -7,13 +7,9 @@ const double gc_pov_dir_x[4] = {
    /* NORTH */
    0.0,
    /* EAST */
-   /* 0 * cos( -4.7124 ) - -1 * sin( -4.7124 ) */
-   /*-0.0821542,*/
-   1.000000,
+   1.0,
    /* WEST */
-   /* 0 * cos( 4.7124 ) - -1 * sin( 4.7124 ) */
-   /*0.0821542*/
-   -1.000000
+   -1.0
 };
 
 const double gc_pov_dir_y[4] = {
@@ -22,13 +18,9 @@ const double gc_pov_dir_y[4] = {
    /* NORTH */
    -1.0,
    /* EAST */
-   /* 0 * sin( -4.7124 ) + -1 * cos( -4.7124 ) */
-   /* -0.99661963, */
-   -0.000011,
+   0.0,
    /* WEST */
-   /* 0 * sin( 4.7124 ) + -1 * cos( 4.7124 ) */
-   /* -0.99661963 */
-   -0.000011
+   0.0
 };
 
 const double gc_pov_plane_x[4] = {
@@ -37,13 +29,9 @@ const double gc_pov_plane_x[4] = {
    /* NORTH */
    0.66,
    /* EAST */
-   /* 0.66 * cos(-4.7124 ) - 0 * sin( -4.7124 ) */
-   /* 0.657768956, */
-   0.000007,
+   0.0,
    /* WEST */
-   /* 0.66 * cos( 4.7124 ) - 0 * sin( 4.7124 ) */
-   /* 0.657768956 */
-   0.000007
+   0.0
 };
 
 const double gc_pov_plane_y[4] = {
@@ -52,13 +40,9 @@ const double gc_pov_plane_y[4] = {
    /* NORTH */
    0.0,
    /* EAST */
-   /* 0.66 * sin( -4.7124 ) + 0 * cos( -4.7124 ) */
-   /* -0.054221772, */
-   0.660000,
+   0.66,
    /* WEST */
-   /* 0.66 * sin( 4.7124 ) + 0 * cos( 4.7124 ) */
-   /* 0.054221772 */
-   -0.660000
+   -0.66
 };
 
 const uint8_t gc_pov_dir_turn_right[] = {
@@ -353,10 +337,6 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       memory_zero_ptr( &ray, sizeof( struct POV_RAY ) );
       /* Setup ray direction and position. */
       camera_x = 2 * x / (double)SCREEN_MAP_W - 1;
-      /*
-      ray.dir_x = gc_mobile_x_offsets[state->player.dir] + plane_x * camera_x;
-      ray.dir_y = gc_mobile_y_offsets[state->player.dir] + plane_y * camera_x;
-      */
       ray.dir_x = gc_pov_dir_x[state->player.dir] + 
          gc_pov_plane_x[state->player.dir] * camera_x;
       ray.dir_y = gc_pov_dir_y[state->player.dir] +
@@ -367,12 +347,6 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       /* Set ray distance to next tile side. */
       ray.delta_dist_x = (0 == ray.dir_x) ? 1e30 : fabs( 1 / ray.dir_x );
       ray.delta_dist_y = (0 == ray.dir_y) ? 1e30 : fabs( 1 / ray.dir_y );
-      /*
-      ray.delta_dist_x = 
-         sqrt( 1 + (ray.dir_y * ray.dir_y) / (ray.dir_x * ray.dir_x) );
-      ray.delta_dist_y =
-         sqrt( 1 + (ray.dir_x * ray.dir_x) / (ray.dir_y * ray.dir_y) );
-      */
 
       /* Figure out the ray direction. */
 
