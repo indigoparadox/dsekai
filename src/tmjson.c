@@ -327,6 +327,7 @@ int16_t tilemap_json_parse_items(
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t i = 0,
+      j = 0,
       sprite_buffer_sz = 0,
       type_buffer_sz = 0,
       name_buffer_sz = 0;
@@ -348,6 +349,16 @@ int16_t tilemap_json_parse_items(
          break;
       }
 
+      for( j = 0 ; '\0' != gc_items_types[j][0] ; j++ ) {
+         if( 0 == memory_strncmp_ptr(
+            type_buffer, gc_items_types[j], type_buffer_sz )
+         ) {
+            debug_printf( 1, "item is type: %s (%d)", gc_items_types[j], j );
+            t->items[i].type = j;
+            break;
+         }
+      }
+
       /* name */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_NAME, i );
       name_buffer_sz = json_str_from_path(
@@ -365,7 +376,7 @@ int16_t tilemap_json_parse_items(
          iter_path, JSON_PATH_SZ,
          sprite_buffer, RESOURCE_PATH_MAX,
          &(tokens[0]), tokens_sz, json_buffer );
-      if( 0 >= type_buffer_sz ) {
+      if( 0 >= sprite_buffer_sz ) {
          error_printf( "invalid item sprite returned (loaded %d)", i );
          break;
       }

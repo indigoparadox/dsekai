@@ -2,15 +2,36 @@
 #define ITEM_C
 #include "dsekai.h"
 
-int8_t item_use_NONE(
+static void item_consume( struct ITEM* e ) {
+   if( 1 < e->count ) {
+      /* Reduce the item's count. */
+      e->count--;
+   } else {
+      /* Delete the item. */
+      e->flags &= ~ITEM_FLAG_ACTIVE;
+   }
+}
+
+int8_t item_use_none(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
    return 0;
 }
 
-int8_t item_use_SEED(
+int8_t item_use_seed(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
+   return -1;
+}
+
+int8_t item_use_food(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+) {
+
+   user->hp += e->data;
+
+   item_consume( e );
+
    return -1;
 }
 

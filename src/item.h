@@ -12,7 +12,7 @@
  *  \brief Definitions, functions, and macros pertaining to inventory objects.
  */
 
-#define ITEM_TABLE( f ) f( 0, NONE, 0 ) f( 1, SEED, 10 )
+#define ITEM_TABLE( f ) f( none, 0 ) f( seed, 10 ) f( food, 10 )
 
 /**
  * \relates ITEM
@@ -68,19 +68,26 @@ int8_t item_give_mobile(
 typedef int8_t (*ITEM_USE_CB)(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state );
 
-#define ITEM_TABLE_USE_CB_PROTOS( idx, type, max ) int8_t item_use_ ## type( struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state );
+#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state );
 
 ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
 
 #ifdef ITEM_C
 
-#define ITEM_TABLE_MAX( idx, type, max ) max,
+#define ITEM_TABLE_MAX( type, max ) max,
 
 const uint8_t gc_items_max[] = {
    ITEM_TABLE( ITEM_TABLE_MAX )
 };
 
-#define ITEM_TABLE_USE_CBS( idx, type, max ) item_use_ ## type,
+#define ITEM_TABLE_TYPES( type, max ) #type,
+
+const char* gc_items_types[] = {
+   ITEM_TABLE( ITEM_TABLE_TYPES )
+   ""
+};
+
+#define ITEM_TABLE_USE_CBS( type, max ) item_use_ ## type,
 
 const ITEM_USE_CB gc_item_use_cbs[] = {
    ITEM_TABLE( ITEM_TABLE_USE_CBS )
@@ -92,6 +99,8 @@ const ITEM_USE_CB gc_item_use_cbs[] = {
 extern const uint8_t gc_items_max[];
 
 extern const ITEM_USE_CB gc_item_use_cbs[];
+
+extern const char* gc_items_types[];
 
 #endif
 
