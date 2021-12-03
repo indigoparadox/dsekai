@@ -61,7 +61,7 @@ void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) {
       debug_printf( 2, "current weather is snowy" );
 #ifndef DISABLE_WEATHER_EFFECTS
       animate_create(
-         ANIMATE_TYPE_SNOW, 0,
+         ANIMATE_TYPE_SNOW, ANIMATE_FLAG_WEATHER,
          SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H );
 #endif /* !DISABLE_WEATHER_EFFECTS */
       break;

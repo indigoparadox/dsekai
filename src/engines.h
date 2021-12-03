@@ -67,7 +67,9 @@ struct POV_STATE {
  * \relates DSEKAI_STATE
  * \brief DSEKAI_STATE::flags indicating no player input should be accepted.
  */
-#define DSEKAI_FLAG_INPUT_BLOCKED 0x01
+#define DSEKAI_FLAG_INPUT_BLOCKED   0x01
+
+#define DSEKAI_FLAG_MENU_BLOCKED    0x02
 
 /**
  * \relates DSEKAI_STATE
@@ -141,6 +143,8 @@ struct DSEKAI_STATE {
 
    /*! \brief Global boolean values dictating engine state and behavior. */
    uint8_t flags;
+
+   struct MENU_STATE menu;
 };
 
 /**
@@ -229,6 +233,10 @@ ENGINE_TABLE( ENGINES_ANIMATE_PROTOTYPES )
 
 ENGINE_TABLE( ENGINES_DRAW_PROTOTYPES )
 
+#define ENGINES_SHUTDOWN_PROTOTYPES( idx, eng, prefix ) void prefix ## _shutdown( struct DSEKAI_STATE* state );
+
+ENGINE_TABLE( ENGINES_SHUTDOWN_PROTOTYPES )
+
 #endif /* !ENGINES_TOKENS_ONLY */
 
 #ifdef ENGINES_C
@@ -264,6 +272,12 @@ const ENGINES_ANIMATE gc_engines_animate[] = {
 
 const ENGINES_DRAW gc_engines_draw[] = {
    ENGINE_TABLE( ENGINES_LIST_DRAW )
+};
+
+#define ENGINES_LIST_SHUTDOWN( idx, eng, prefix ) prefix ## _shutdown,
+
+const ENGINES_DRAW gc_engines_shutdown[] = {
+   ENGINE_TABLE( ENGINES_LIST_SHUTDOWN )
 };
 
 #endif /* !ENGINES_TOKENS_ONLY */

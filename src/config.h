@@ -83,6 +83,13 @@
 #define JSON_PATH_SZ 255
 #endif /* !JSON_PATH_SZ */
 
+#if 0
+#ifndef DIALOG_TEXT_SZ
+#define DIALOG_TEXT_SZ 128
+#endif /* !DIALOG_TEXT_SZ */
+typedef char DIALOG_TEXT[DIALOG_TEXT_SZ];
+#endif
+
 /*! \} */
 
 /*! \} */

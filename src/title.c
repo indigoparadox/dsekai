@@ -80,6 +80,10 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    return retval;
 }
 
+void title_shutdown( struct DSEKAI_STATE* state ) {
+
+}
+
 void title_draw( struct DSEKAI_STATE* state ) {
    int8_t i = 0;
 

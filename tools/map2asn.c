@@ -27,6 +27,7 @@ int main( int argc, char* argv[] ) {
       mark_seq_spawn = 0,
       mark_seq_spawn_coords = 0,
       mark_seq_scripts = 0,
+      mark_seq_item = 0,
       sz_idx = 0,
       script_sz_idx = 0,
       step_sz_idx = 0;
@@ -106,6 +107,8 @@ int main( int argc, char* argv[] ) {
       &h_buffer, idx, t.tiles, ((TILEMAP_TH * TILEMAP_TW) / 2) );
 
    /* strings */
+   idx = asn_write_blob( &h_buffer, idx, t.strpool, TILEMAP_STRPOOL_SZ );
+#if 0
    for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
       if( 0 == strlen( t.strings[i] ) ) {
          continue;
@@ -113,9 +116,10 @@ int main( int argc, char* argv[] ) {
 
       debug_printf( 3, "(offset 0x%02x) writing map string", idx );
       idx = asn_write_string( &h_buffer, idx,
-         t.strings[i], TILEMAP_STRINGS_SZ );
+         t.strings[i], DIALOG_TEXT_SZ );
       assert( 0 <= idx );
    }
+#endif
 
    /* spawns */
    debug_printf( 3, "(offset 0x%02x) writing map spawns", idx );
@@ -221,6 +225,70 @@ int main( int argc, char* argv[] ) {
    }
    idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_scripts );
    assert( 0 < idx );
+
+   /* items */
+   debug_printf( 3, "(offset 0x%02x) writing map items", idx );
+   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
+   assert( 0 < idx );
+   for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
+      if( ITEM_FLAG_ACTIVE != (t.items[i].flags & ITEM_FLAG_ACTIVE) ) {
+         continue;
+      }
+
+      debug_printf( 3, "(offset 0x%02x) writing map item", idx );
+      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_item );
+      assert( 0 < idx );
+
+      /* index */
+      debug_printf( 3, "(offset 0x%02x) writing item index", idx );
+      idx = asn_write_int( &h_buffer, idx, i );
+      assert( 0 <= idx );
+
+      /* sprite */
+      debug_printf( 3, "(offset 0x%02x) writing item sprite path", idx );
+      idx = asn_write_string(
+         &h_buffer, idx, t.items[i].sprite, RESOURCE_PATH_MAX );
+      assert( 0 <= idx );
+
+      /* name */
+      debug_printf( 3, "(offset 0x%02x) writing item name", idx );
+      idx = asn_write_string( &h_buffer, idx, t.items[i].name, ITEM_NAME_SZ );
+      assert( 0 <= idx );
+
+      /* type */
+      debug_printf( 3, "(offset 0x%02x) writing item type", idx );
+      idx = asn_write_int( &h_buffer, idx, t.items[i].type );
+      assert( 0 <= idx );
+
+      /* owner */
+      debug_printf( 3, "(offset 0x%02x) writing item owner", idx );
+      idx = asn_write_int( &h_buffer, idx, t.items[i].owner );
+      assert( 0 <= idx );
+ 
+      /* gid */
+      debug_printf( 3, "(offset 0x%02x) writing item gid", idx );
+      idx = asn_write_int( &h_buffer, idx, t.items[i].gid );
+      assert( 0 <= idx );
+
+      /* data */
+      debug_printf( 3, "(offset 0x%02x) writing item data", idx );
+      idx = asn_write_int( &h_buffer, idx, t.items[i].data );
+      assert( 0 <= idx );
+
+      /* count */
+      debug_printf( 3, "(offset 0x%02x) writing item count", idx );
+      idx = asn_write_int( &h_buffer, idx, t.items[i].count );
+      assert( 0 <= idx );
+
+      /* flags */
+      debug_printf( 3, "(offset 0x%02x) writing item flags", idx );
+      idx = asn_write_int( &h_buffer, idx, t.items[i].flags );
+      assert( 0 <= idx );
+
+      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_item );
+      assert( 0 < idx );
+   }
+   idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
 
    idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_main );
    assert( 0 < idx );

@@ -222,14 +222,18 @@ uint16_t script_handle_WARP(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   if( 0 > arg || TILEMAP_STRINGS_MAX <= arg ) {
+   const char* warp_map = NULL;
+
+   warp_map = strpool_get( t->strpool, arg, NULL );
+
+   if( NULL == warp_map ) {
       error_printf( "invalid warp map string index: %d", arg );
       return pc;
    }
 
-   debug_printf( 2, "warp requested to: %s", t->strings[arg] );
+   debug_printf( 2, "warp requested to: %s", warp_map );
    memory_zero_ptr( (MEMORY_PTR)(state->warp_to), TILEMAP_NAME_MAX );
-   memory_strncpy_ptr( state->warp_to, t->strings[arg], TILEMAP_NAME_MAX );
+   memory_strncpy_ptr( state->warp_to, warp_map, TILEMAP_NAME_MAX );
 
    state->warp_to_y = mobile_stack_pop( actor );
    state->warp_to_x = mobile_stack_pop( actor );
@@ -254,10 +258,11 @@ uint16_t script_handle_ANIMATE(
    a_x = mobile_stack_pop( actor ) * TILE_W;
 
 #ifdef SCRIPT_HAS_GFX
-   animate_create( arg, 0, SCREEN_MAP_X + a_x, SCREEN_MAP_Y + a_y, a_w, a_h );
+   animate_create(
+      arg, ANIMATE_FLAG_SCRIPT, SCREEN_MAP_X + a_x, SCREEN_MAP_Y + a_y, a_w, a_h
+   );
 #endif /* SCRIPT_HAS_GFX */
 
-   /* TODO */
    return pc + 1;
 }
 

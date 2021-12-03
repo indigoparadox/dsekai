@@ -98,34 +98,42 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
          continue;
       }
 
-      assert( 0 == windows[i].w % PATTERN_W );
-      assert( 0 == windows[i].h % PATTERN_H );
+      assert( 0 == windows[i].coords[GUI_W] % PATTERN_W );
+      assert( 0 == windows[i].coords[GUI_H] % PATTERN_H );
 
       debug_printf(
          1, "min: %d, %d; max: %d, %d",
-         windows[i].x, windows[i].y, x_max, y_max );
+         windows[i].coords[GUI_X], windows[i].coords[GUI_Y],
+         x_max, y_max );
 
-      x_max = windows[i].x + windows[i].w;
-      y_max = windows[i].y + windows[i].h;
+      x_max = windows[i].coords[GUI_X] + windows[i].coords[GUI_W];
+      y_max = windows[i].coords[GUI_Y] + windows[i].coords[GUI_H];
 
       debug_printf( 1, "drawing window with frame %d...",
          windows[i].frame_idx );
 
-      for( y = windows[i].y ; y < y_max ; y += PATTERN_H ) {
-         for( x = windows[i].x ; x < x_max ; x += PATTERN_W ) {
-            if( windows[i].x == x && windows[i].y == y ) {
+      for( y = windows[i].coords[GUI_Y] ; y < y_max ; y += PATTERN_H ) {
+         for( x = windows[i].coords[GUI_X] ; x < x_max ; x += PATTERN_W ) {
+            if(
+               windows[i].coords[GUI_X] == x &&
+               windows[i].coords[GUI_Y] == y
+            ) {
                /* Top Left */
                blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].tl, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
 
-            } else if( x_max - PATTERN_W == x && windows[i].y == y ) {
+            } else if(
+               x_max - PATTERN_W == x && windows[i].coords[GUI_Y] == y
+            ) {
                /* Top Right */
                blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].tr, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
 
-            } else if( windows[i].x == x && y_max - PATTERN_H == y ) {
+            } else if(
+               windows[i].coords[GUI_X] == x && y_max - PATTERN_H == y
+            ) {
                /* Bottom Left */
                blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].bl, 0, 0, x, y,
@@ -143,13 +151,13 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
                   frames[windows[i].frame_idx].r, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
             
-            } else if( windows[i].x == x ) {
+            } else if( windows[i].coords[GUI_X] == x ) {
                /* Left */
                blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].l, 0, 0, x, y,
                   PATTERN_W, PATTERN_H );
             
-            } else if( windows[i].y == y ) {
+            } else if( windows[i].coords[GUI_Y] == y ) {
                /* Top */
                blit_retval = graphics_blit_tile_at(
                   frames[windows[i].frame_idx].t, 0, 0, x, y,
@@ -174,7 +182,7 @@ int window_draw_all( struct DSEKAI_STATE* state ) {
          }
       }
 
-      control_draw_all( &(windows[i]), state->map.strings );
+      control_draw_all( &(windows[i]), state );
       windows[i].dirty -= 1;
    }
 
@@ -230,22 +238,24 @@ int16_t window_push(
    windows[0].status =
       WINDOW_STATUS_MODAL == status ?
          WINDOW_STATUS_MODAL : WINDOW_STATUS_VISIBLE;
-   windows[0].w = w;
-   windows[0].h = h;
+   windows[0].coords[GUI_W] = w;
+   windows[0].coords[GUI_H] = h;
 
-   assert( 0 < windows[0].w );
-   assert( 0 < windows[0].h );
+   assert( 0 < windows[0].coords[GUI_W] );
+   assert( 0 < windows[0].coords[GUI_H] );
 
    if( WINDOW_CENTERED == x ) {
-      windows[0].x = (SCREEN_MAP_W / 2) - (windows[0].w / 2);
+      windows[0].coords[GUI_X] =
+         (SCREEN_MAP_W / 2) - (windows[0].coords[GUI_W] / 2);
    } else {
-      windows[0].x = x;
+      windows[0].coords[GUI_X] = x;
    }
 
    if( WINDOW_CENTERED == y ) {
-      windows[0].y = (SCREEN_MAP_H / 2) - (windows[0].h / 2);
+      windows[0].coords[GUI_Y] =
+         (SCREEN_MAP_H / 2) - (windows[0].coords[GUI_H] / 2);
    } else {
-      windows[0].y = y;
+      windows[0].coords[GUI_Y] = y;
    }
 
    windows[0].frame_idx = frame_idx;

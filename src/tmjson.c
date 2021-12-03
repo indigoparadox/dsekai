@@ -197,27 +197,32 @@ static void tilemap_json_parse_strings(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, uint16_t tokens_sz
 ) {
-   char iter_path[JSON_PATH_SZ];
+   char iter_path[JSON_PATH_SZ],
+      string_buf[TILEMAP_JSON_STRBUF_SZ];
    int16_t string_sz_tmp = 0;
    int i = 0;
+
+   strpool_init( t->strpool, TILEMAP_STRPOOL_SZ );
    
    /* Load strings.*/
    debug_printf( 2, "loading strings" ); 
-   for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
+   do {
       dio_snprintf(
          iter_path, JSON_PATH_SZ, TILEMAP_JPATH_STRING, i );
       string_sz_tmp = json_str_from_path(
          iter_path, JSON_PATH_SZ,
-         t->strings[i], TILEMAP_STRINGS_SZ,
+         string_buf, TILEMAP_JSON_STRBUF_SZ,
          tokens, tokens_sz, json_buffer );
       if( 0 >= string_sz_tmp ) {
          /* Last string index was not parsed, so we're done. */
          break;
       } else {
+         strpool_add_string( t->strpool, string_buf, string_sz_tmp );
          debug_printf( 1, "loaded string: %s (%d)",
-            t->strings[i], string_sz_tmp );
+            string_buf, string_sz_tmp );
+         i++;
       }
-   }
+   } while( 0 < string_sz_tmp );
 }
 
 static int16_t tilemap_json_tilegrid(
@@ -322,10 +327,12 @@ int16_t tilemap_json_parse_items(
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t i = 0,
+      j = 0,
       sprite_buffer_sz = 0,
-      type_buffer_sz = 0;
+      type_buffer_sz = 0,
+      name_buffer_sz = 0;
    char sprite_buffer[RESOURCE_PATH_MAX],
-      type_buffer[ITEM_NAME_SZ];
+      type_buffer[ITEM_NAME_SZ + 1];
    
    /* Load items.*/
    debug_printf( 2, "loading items" ); 
@@ -342,13 +349,34 @@ int16_t tilemap_json_parse_items(
          break;
       }
 
+      for( j = 0 ; '\0' != gc_items_types[j][0] ; j++ ) {
+         if( 0 == memory_strncmp_ptr(
+            type_buffer, gc_items_types[j], type_buffer_sz )
+         ) {
+            debug_printf( 1, "item is type: %s (%d)", gc_items_types[j], j );
+            t->items[i].type = j;
+            break;
+         }
+      }
+
+      /* name */
+      dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_NAME, i );
+      name_buffer_sz = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         t->items[i].name, ITEM_NAME_SZ,
+         &(tokens[0]), tokens_sz, json_buffer );
+      if( 0 >= name_buffer_sz ) {
+         error_printf( "invalid item returned (loaded %d)", i );
+         break;
+      }
+
       /* sprite */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_SPRITE, i );
       sprite_buffer_sz = json_str_from_path(
          iter_path, JSON_PATH_SZ,
          sprite_buffer, RESOURCE_PATH_MAX,
          &(tokens[0]), tokens_sz, json_buffer );
-      if( 0 >= type_buffer_sz ) {
+      if( 0 >= sprite_buffer_sz ) {
          error_printf( "invalid item sprite returned (loaded %d)", i );
          break;
       }
@@ -359,6 +387,12 @@ int16_t tilemap_json_parse_items(
       t->items[i].gid = json_int_from_path(
          iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
 
+      /* flags */
+      t->items[i].flags |= ITEM_FLAG_ACTIVE;
+
+      /* count */
+      /* TODO: Parse count from map. */
+      t->items[i].count = 1;
    }
 
    return i;

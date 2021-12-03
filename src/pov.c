@@ -20,6 +20,10 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
    return retval;
 }
 
+void pov_shutdown( struct DSEKAI_STATE* state ) {
+
+}
+
 int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
    struct POV_STATE* gstate = NULL;

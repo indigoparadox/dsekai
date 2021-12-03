@@ -77,6 +77,8 @@ unilayer_main() {
 
    state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
    state->engine_state = ENGINE_STATE_OPENING;
+   state->menu.menu_id = -1;
+   state->menu.highlight_id = -1;
    unilayer_loop_set( engines_loop_iter, g_state_handle );
 
    /*

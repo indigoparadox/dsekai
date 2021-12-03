@@ -12,6 +12,8 @@
  *  \brief Structs pertaining to inventory objects.
  */
 
+#define ITEM_FLAG_ACTIVE 0x01
+
 /**
  * \relates ITEM_NAME
  * \brief The maximum characters in an ITEM::name.
@@ -26,7 +28,7 @@
 struct PACKED ITEM {
    RESOURCE_ID sprite;
    /*! \brief Meaningful name of this tiem. */
-   char name[ITEM_NAME_SZ];
+   char name[ITEM_NAME_SZ + 1]; /* +1 for NULL. */
    /*! \brief Engine-defined functionality of this item. */
    uint8_t type;
    /**
@@ -54,6 +56,8 @@ struct PACKED ITEM {
    uint8_t data; 
    /*! \brief This struct represents this many of this item in a "stack." */
    uint8_t count;
+   /*! \brief System flags pertaining to this item. */
+   uint8_t flags;
    /*! \brief If ITEM::owner is ::ITEM_OWNER_NONE, the coords of this item on
     *         the ::TILEMAP. */
    /* struct TILEMAP_COORDS coords; */

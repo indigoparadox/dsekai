@@ -190,18 +190,43 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    graphics_loop_start();
 
-   if( 0 >= window_modal( state ) ) {
-      gc_engines_draw[state->map.engine_type]( state );
-   }
+   /* === Drawing Phase === */
 
-   animate_frame();
+   if( 0 <= state->menu.menu_id ) {
+      /* Draw the menu. */
+      if( MENU_FLAG_DIRTY == (MENU_FLAG_DIRTY & state->menu.flags) ) {
+         /* Repaint the screen in the background. */
+         gc_engines_draw[state->map.engine_type]( state );
+         tilemap_refresh_tiles( &(state->map) );
+
+         /* Show the new menu state. */
+         gc_menu_renderers[state->menu.menu_id]( state );
+         state->menu.flags &= ~MENU_FLAG_DIRTY;
+      }
+
+   } else {
+      /* Draw the engine. */
+      if( 0 >= window_modal( state ) ) {
+         gc_engines_draw[state->map.engine_type]( state );
+      }
+   }
 
    if( (MEMORY_HANDLE)NULL != state->windows_handle ) {
       window_draw_all( state );
    }
+   
+   animate_frame();
+
+   /* === Input Phase === */
 
    in_char = input_poll();
-   retval = gc_engines_input[state->map.engine_type]( in_char, state );
+   if( 0 <= state->menu.menu_id ) {
+      retval = gc_menu_handlers[state->menu.menu_id]( in_char, state );
+   } else {
+      retval = gc_engines_input[state->map.engine_type]( in_char, state );
+   }
+
+   /* === Animation Phase === */
 
    engines_animate_mobiles( state );
 
@@ -210,6 +235,10 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    graphics_loop_end();
 
 cleanup:
+
+   if( 0 == retval && NULL != state ) {
+      gc_engines_shutdown[state->map.engine_type]( state );
+   }
 
    if( NULL != state ) {
       if( '\0' != state->warp_to[0] ) {

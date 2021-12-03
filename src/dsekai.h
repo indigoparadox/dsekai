@@ -12,6 +12,11 @@
  *  be placed in this file.
  */
 
+/*! \brief Indicates that an animation is being used for TILEMAP::weather. */
+#define ANIMATE_FLAG_WEATHER  0x0200
+/*! \brief Indicates that an animation was created by a ::SCRIPT. */
+#define ANIMATE_FLAG_SCRIPT   0x0100
+
  /* === Includes === */
 
 #include "config.h"
@@ -21,6 +26,9 @@ struct DSEKAI_STATE;
 
 #include "itstruct.h"
 #include "tmstruct.h"
+#include "gustruct.h"
+
+#include "strpool.h"
 
 #ifdef RESOURCE_FILE
 #include "json.h"
@@ -35,6 +43,7 @@ struct DSEKAI_STATE;
 #ifdef NETWORK_IRC
 #include "irc.h"
 #endif /* NETWORK_IRC */
+#include "menu.h"
 
 #ifdef TILEMAP_FMT_JSON
 #include "tmjson.h"

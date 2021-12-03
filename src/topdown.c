@@ -317,6 +317,10 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    return retval;
 }
 
+void topdown_shutdown( struct DSEKAI_STATE* state ) {
+   window_pop( WINDOW_ID_STATUS, state );
+}
+
 int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
 
@@ -353,9 +357,15 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_QUIT:
-      window_pop( WINDOW_ID_STATUS, state );
-      retval = 0;
-      graphics_loop_end();
+      if(
+         /* Only open the menu if no modal windows are open and it's not
+         *  blocked.
+         */
+         0 >= window_modal( state ) &&
+         DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
+      ) {
+         menu_open( state );
+      }
       break;
    }
 
