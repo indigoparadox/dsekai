@@ -56,6 +56,8 @@ struct TOPDOWN_STATE {
    int16_t screen_scroll_y_tgt;
 };
 
+#ifndef NO_ENGINE_POV
+
 /**
  * \brief State for ::ENGINE_TYPE_POV. Displays a first-person 3D view of the
  *        world using raycasting.
@@ -65,6 +67,8 @@ struct POV_STATE {
    uint8_t minimap[TILEMAP_TH * TILEMAP_TW];
    uint16_t inc;
 };
+
+#endif /* !NO_ENGINE_POV */
 
 /*! \} */
 
@@ -180,7 +184,7 @@ int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
  * \{
  */
 
-#ifdef ENGINE_POV
+#ifndef NO_ENGINE_POV
 
 #define ENGINE_TABLE( f ) f( 0, NONE, title ) f( 1, TOPDOWN, topdown ) f( 2, POV, pov )
 

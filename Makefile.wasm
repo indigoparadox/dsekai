@@ -13,6 +13,7 @@ GENDIR_WASM := $(GENDIR)/wasm
 
 DSEKAI_C_FILES_WASM_ONLY := \
    src/main.c \
+   src/pov.c \
    unilayer/src/input/sdli.c \
    unilayer/src/graphics/sdlg.c \
    unilayer/src/memory/fakem.c
