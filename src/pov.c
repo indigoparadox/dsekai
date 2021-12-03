@@ -189,7 +189,11 @@ void pov_draw_wall_x( int16_t x, struct POV_RAY* ray, struct TILEMAP* t ) {
    for( y = line_px_start ; line_px_end > y ; y++ ) {
       tex_y = (int32_t)tex_pos & (TILE_H - 1);
       tex_pos += tex_step;
-      if( !ray->wall_side || (ray->wall_side && 0 == y % 2) ) {
+      if(
+         !ray->wall_side || ( ray->wall_side && (
+            (0 == x % 2 && 1 == y % 2) || (1 == x % 2 && 0 == y % 2)
+         ) )
+      ) {
          graphics_blit_tile_at(
             t->tileset[ray->tile_id].image,
             tex_x, tex_y,
@@ -199,16 +203,51 @@ void pov_draw_wall_x( int16_t x, struct POV_RAY* ray, struct TILEMAP* t ) {
    }
 }
 
+void pov_draw_minimap( uint8_t* minimap, struct MOBILE* player ) {
+   int16_t x = 0,
+      y = 0;
+   GRAPHICS_COLOR color;
+
+   /* Draw the minimap. */
+
+   for( y = 0 ; TILEMAP_TH > y ; y++ ) {
+      for( x = 0 ; TILEMAP_TW > x ; x++ ) {
+         switch( minimap[(y * TILEMAP_TW) + x] ) {
+         case 2:
+            color = GRAPHICS_COLOR_CYAN;
+            break;
+
+         case 1:
+            color = GRAPHICS_COLOR_WHITE;
+            break;
+
+         default:
+            color = GRAPHICS_COLOR_BLACK;
+            break;
+         }
+      
+         graphics_draw_px( MINIMAP_X + 1 + x, MINIMAP_Y + 1 + y, color );
+      }
+   }
+
+   graphics_draw_rect(
+      MINIMAP_X, MINIMAP_Y, TILEMAP_TW + 1, TILEMAP_TH + 1,
+      1, GRAPHICS_COLOR_WHITE );
+
+   graphics_draw_px(
+      MINIMAP_X + 1 + player->coords.x,
+      MINIMAP_Y + 1 + player->coords.y,
+      GRAPHICS_COLOR_MAGENTA );
+}
+
 void pov_draw( struct DSEKAI_STATE* state ) {
    struct POV_STATE* gstate = NULL;
    double plane_x = 0,
       plane_y = 0.66,
       camera_x = 0;
-   int16_t x = 0,
-      y = 0;
+   int16_t x = 0;
    int8_t tile_id = 0;
    struct POV_RAY ray;
-   GRAPHICS_COLOR color;
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
@@ -248,10 +287,6 @@ void pov_draw( struct DSEKAI_STATE* state ) {
 
       debug_printf( 3, "x %d %f", x, camera_x );
 
-      /*assert(
-         (x >= 80 && ray.delta_dist_x >= 0) ||
-         (x < 80 && ray.delta_dist_x <= 0) );*/
-
       /* Figure out the ray direction. */
 
       if( 0 > ray.dir_x ) {
@@ -267,7 +302,7 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       if( 0 > ray.dir_y ) {
          ray.step_y = -1;
          ray.side_dist_y =
-            (state->player.coords.x - ray.map_ty) * ray.delta_dist_y;
+            (state->player.coords.y - ray.map_ty) * ray.delta_dist_y;
       } else {
          ray.step_y = 1;
          ray.side_dist_y =
@@ -287,30 +322,7 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       pov_draw_wall_x( x, &ray, &(state->map) );
    }
 
-   for( y = 0 ; TILEMAP_TH > y ; y++ ) {
-      for( x = 0 ; TILEMAP_TW > x ; x++ ) {
-         switch( gstate->minimap[(y * TILEMAP_TW) + x] ) {
-         case 2:
-            color = GRAPHICS_COLOR_CYAN;
-            break;
-
-         case 1:
-            color = GRAPHICS_COLOR_WHITE;
-            break;
-
-         default:
-            color = GRAPHICS_COLOR_BLACK;
-            break;
-         }
-      
-         graphics_draw_px( MINIMAP_X + x, MINIMAP_Y + y, color );
-      }
-   }
-
-   graphics_draw_px(
-      MINIMAP_X + state->player.coords.x,
-      MINIMAP_Y + state->player.coords.y,
-      GRAPHICS_COLOR_MAGENTA );
+   pov_draw_minimap( gstate->minimap, &(state->player) );
 
    gstate->dirty = 0;
 
