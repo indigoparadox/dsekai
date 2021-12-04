@@ -240,7 +240,6 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
       tilemap_refresh_tiles( &(state->map) );
    }
-   
 
    /* === Animation Phase === */
 

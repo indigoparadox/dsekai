@@ -285,7 +285,6 @@ static int16_t window_draw_WINDOW(
       windows[i].flags &= ~WINDOW_FLAG_DIRTY;
    }
 
-
 cleanup:
 
    if( NULL != windows ) {
