@@ -11,9 +11,11 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
    GRAPHICS_COLOR color;
 
    window_push(
-      MENU_WINDOW_ID, WINDOW_STATUS_MODAL,
+      MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW,
+      0,
       SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H,
-      0, state );
+      GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
+      0, 0, NULL, state );
    
    while( '\0' != gc_menu_tokens[i][0] ) {
       if( state->menu.highlight_id == i ) {
@@ -22,14 +24,13 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
          color = GRAPHICS_COLOR_WHITE;
       }
 
-      control_push(
-         0x2323 + i,
-         CONTROL_TYPE_LABEL, CONTROL_FLAG_ENABLED | CONTROL_FLAG_TEXT_MENU,
-         10, CONTROL_PLACEMENT_GRID_RIGHT_DOWN,
-         CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER,
-         color, GRAPHICS_COLOR_BLACK,
-         GRAPHICS_STRING_FLAGS_ALL_CAPS,
-         i, 0, NULL, MENU_WINDOW_ID, state );
+      window_push(
+         WINDOW_ID_MENU_LABEL_ITEM + i, MENU_WINDOW_ID, WINDOW_TYPE_LABEL,
+         WINDOW_FLAG_TEXT_MENU,
+         10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
+         WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
+         color, GRAPHICS_COLOR_BLACK, GRAPHICS_STRING_FLAGS_ALL_CAPS,
+         i, 0, NULL, state );
       i++;
    }  
 }
@@ -79,28 +80,34 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
    GRAPHICS_COLOR color;
 
    window_push(
-      MENU_WINDOW_ID, 0,
+      MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW, 0,
       SCREEN_MAP_X,
       SCREEN_MAP_Y,
       (SCREEN_MAP_W / 2) + TILE_W,
       SCREEN_MAP_H,
-      0, state );
-   
+      GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
+      0, 0, NULL,
+      state );
+
    window_push(
-      MENU_WINDOW_INFO_ID, 0,
+      MENU_WINDOW_INFO_ID, 0, WINDOW_TYPE_WINDOW, 0,
       SCREEN_MAP_X + (SCREEN_MAP_W / 2) + TILE_W,
       SCREEN_MAP_Y,
       (SCREEN_MAP_W / 2) - TILE_W,
       SCREEN_MAP_H / 2,
-      0, state );
+      GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
+      0, 0, NULL,
+      state );
    
    window_push(
-      MENU_WINDOW_STATUS_ID, 0,
+      MENU_WINDOW_STATUS_ID, 0, WINDOW_TYPE_WINDOW, 0,
       SCREEN_MAP_X + (SCREEN_MAP_W / 2) + TILE_W,
       SCREEN_MAP_Y + (SCREEN_MAP_H / 2),
       (SCREEN_MAP_W / 2) - TILE_W,
       SCREEN_MAP_H / 2,
-      0, state );
+      GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
+      0, 0, NULL,
+      state );
    
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
       /* Skip non-player-held or deleted items. */
@@ -120,36 +127,36 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
 
       /* TODO: Draw icons for item types/flags. */
 
-      control_push(
-         0x2323 + i,
-         CONTROL_TYPE_LABEL, CONTROL_FLAG_ENABLED | CONTROL_FLAG_TEXT_ITEM,
-         10, CONTROL_PLACEMENT_GRID_RIGHT_DOWN,
-         CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER,
-         color, GRAPHICS_COLOR_BLACK,
-         GRAPHICS_STRING_FLAGS_ALL_CAPS,
-         i, 0, NULL, MENU_WINDOW_ID, state );
+      window_push(
+         WINDOW_ID_MENU_LABEL_ITEM + i, MENU_WINDOW_ID,
+         WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_ITEM,
+         10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
+         WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
+         color, GRAPHICS_COLOR_BLACK, GRAPHICS_STRING_FLAGS_ALL_CAPS,
+         i, 0, NULL, state );
 
-      control_push(
-         0x2333 + i,
-         CONTROL_TYPE_LABEL, CONTROL_FLAG_ENABLED | CONTROL_FLAG_TEXT_NUM,
-         CONTROL_PLACEMENT_RIGHT_BOTTOM, CONTROL_PLACEMENT_GRID,
-         CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER,
+      window_push(
+         WINDOW_ID_MENU_LABEL_ITEM + 100 + i, MENU_WINDOW_ID,
+         WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_NUM,
+         WINDOW_PLACEMENT_RIGHT_BOTTOM, WINDOW_PLACEMENT_GRID,
+         WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, GRAPHICS_COLOR_BLACK, 0,
-         state->items[i].count, 0, NULL, MENU_WINDOW_ID, state );
+         state->items[i].count, 0, NULL, state );
 
       player_item_idx++;
    }  
 
    if( 0 == player_item_idx ) {
       /* No items were pushed. */
+      /* TODO
       control_push(
          0x2320,
          CONTROL_TYPE_LABEL, CONTROL_FLAG_ENABLED | CONTROL_FLAG_TEXT_PTR,
-         10, CONTROL_PLACEMENT_GRID_RIGHT_DOWN,
-         CONTROL_PLACEMENT_CENTER, CONTROL_PLACEMENT_CENTER,
+         10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
+         WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK,
          GRAPHICS_STRING_FLAGS_ALL_CAPS,
-         0, 0, gc_menu_msgs[0], MENU_WINDOW_ID, state );
+         0, 0, gc_menu_msgs[0], MENU_WINDOW_ID, state ); */
    }
 }
 
@@ -224,6 +231,8 @@ int16_t menu_handler_quit( char in_char, struct DSEKAI_STATE* state ) {
 }
 
 void menu_open( struct DSEKAI_STATE* state ) {
+   debug_printf( 3, "opening menu..." );
+
    state->menu.menu_id = 0;
    state->menu.highlight_id = 1;
    state->menu.flags |= MENU_FLAG_DIRTY;
@@ -233,6 +242,7 @@ void menu_open( struct DSEKAI_STATE* state ) {
 }
 
 void menu_close( struct DSEKAI_STATE* state ) {
+   debug_printf( 3, "closing menu..." );
    window_pop( MENU_WINDOW_ID, state );
    state->menu.menu_id = -1;
    state->menu.highlight_id = -1;

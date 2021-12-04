@@ -75,6 +75,10 @@
 #define DSEKAI_ITEMS_MAX 40
 #endif /* !DSEKAI_ITEMS_MAX */
 
+#ifndef DSEKAI_WINDOWS_MAX
+#define DSEKAI_WINDOWS_MAX 30
+#endif /* !DSEKAI_WINDOWS_MAX */
+
 #ifndef JSON_TOKENS_MAX
 #define JSON_TOKENS_MAX 4096
 #endif /* !JSON_TOKENS_MAX */

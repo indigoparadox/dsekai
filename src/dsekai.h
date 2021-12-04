@@ -24,9 +24,10 @@
 
 struct DSEKAI_STATE;
 
+#include "winids.h"
+
 #include "itstruct.h"
 #include "tmstruct.h"
-#include "gustruct.h"
 
 #include "strpool.h"
 
@@ -39,7 +40,6 @@ struct DSEKAI_STATE;
 #include "tilemap.h"
 #include "mobile.h"
 #include "window.h"
-#include "control.h"
 #ifdef NETWORK_IRC
 #include "irc.h"
 #endif /* NETWORK_IRC */

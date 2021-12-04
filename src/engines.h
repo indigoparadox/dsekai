@@ -133,9 +133,6 @@ struct DSEKAI_STATE {
 
    /*! \brief Contains ::WINDOW structs currently on-screen. */
    MEMORY_HANDLE windows_handle;
-   /*! \brief Number of active ::WINDOW structs in DSEKAI_STATE::windows_handle.
-    */
-   uint16_t windows_count;
 
    /*! \brief When holding a valid string, triggers the map change process. */
    char warp_to[TILEMAP_NAME_MAX];

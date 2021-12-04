@@ -25,7 +25,7 @@
  *
  * See ::DSEKAI_STATE for context on how items are stored.
  */
-struct PACKED ITEM {
+struct ITEM {
    RESOURCE_ID sprite;
    /*! \brief Meaningful name of this tiem. */
    char name[ITEM_NAME_SZ + 1]; /* +1 for NULL. */

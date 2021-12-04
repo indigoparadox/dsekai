@@ -79,6 +79,8 @@ unilayer_main() {
    state->engine_state = ENGINE_STATE_OPENING;
    state->menu.menu_id = -1;
    state->menu.highlight_id = -1;
+   state->windows_handle = 
+      memory_alloc( DSEKAI_WINDOWS_MAX, sizeof( struct WINDOW ) );
    unilayer_loop_set( engines_loop_iter, g_state_handle );
 
    /*
@@ -122,12 +124,12 @@ unilayer_main() {
       retval = 1;
       goto exit;
    }
-#ifndef PLATFORM_PALM
-   while( state->windows_count > 0 ) {
+   /* while( state->windows_count > 0 ) {
       window_pop( 0, state );
+   } */
+   if( (MEMORY_HANDLE)NULL != state->windows_handle ) {
+      memory_free( state->windows_handle );
    }
-   memory_free( state->windows_handle );
-#endif /* !PLATFORM_PALM */
    state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
 
    memory_free( g_state_handle );

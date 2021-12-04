@@ -167,8 +167,6 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
    }
    topdown_draw_mobile( state, gstate, &(state->player) );
 
-cleanup:
-
    gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
 }
 
@@ -305,9 +303,10 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
 
    /* Show status window. */
    window_push(
-      WINDOW_ID_STATUS, WINDOW_STATUS_VISIBLE,
-      0, (SCREEN_TH * SPRITE_H), STATUS_WINDOW_W, STATUS_WINDOW_H, 0,
-      state );
+      WINDOW_ID_STATUS, 0, WINDOW_TYPE_WINDOW, 0,
+      0, SCREEN_MAP_X + SCREEN_MAP_H, STATUS_WINDOW_W, STATUS_WINDOW_H,
+      GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
+      0, 0, NULL, state );
 
    /* Force reset the weather to start the animation. */
    tilemap_set_weather( &(state->map), state->map.weather );
@@ -318,6 +317,7 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
 }
 
 void topdown_shutdown( struct DSEKAI_STATE* state ) {
+   debug_printf( 3, "shutting down topdown engine..." );
    window_pop( WINDOW_ID_STATUS, state );
 }
 
@@ -342,30 +342,11 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_OK:
-      if( 0 >= window_modal( state ) ) {
-         /* Try to interact with facing mobile. */
-         mobile_interact(
-            &(state->player),
-            mobile_get_facing( &(state->player), state ),
-            &(state->map) );
-      } else {
-         /* Try to close any windows that are open. */
-         window_pop( WINDOW_ID_WELCOME, state );
-         window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
-      }
-      tilemap_refresh_tiles( &(state->map) );
-      break;
-
-   case INPUT_KEY_QUIT:
-      if(
-         /* Only open the menu if no modal windows are open and it's not
-         *  blocked.
-         */
-         0 >= window_modal( state ) &&
-         DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
-      ) {
-         menu_open( state );
-      }
+      /* Try to interact with facing mobile. */
+      mobile_interact(
+         &(state->player),
+         mobile_get_facing( &(state->player), state ),
+         &(state->map) );
       break;
    }
 
