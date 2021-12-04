@@ -108,6 +108,11 @@ struct DSEKAI_STATE {
 
    struct TILEMAP map;
 
+   /*! \brief Engine type tilemap is supposed to be used with. */
+   uint8_t engine_type;
+
+   uint8_t engine_type_change;
+
    /**
     * \brief Array of currently loaded MOBILE objects on this map.
     *

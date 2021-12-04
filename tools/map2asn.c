@@ -62,10 +62,12 @@ int main( int argc, char* argv[] ) {
    idx = asn_write_string( &h_buffer, idx, t.name, TILEMAP_NAME_MAX );
    assert( 0 <= idx );
 
+#if 0
    /* engine_type */
    debug_printf( 3, "(offset 0x%02x) writing map engine type", idx );
    idx = asn_write_int( &h_buffer, idx, t.engine_type );
    assert( 0 <= idx );
+#endif
 
    /* weather */
    debug_printf( 3, "(offset 0x%02x) writing map weather", idx );

@@ -79,8 +79,6 @@ struct PACKED TILEMAP_SPAWN {
 struct PACKED TILEMAP {
    /*! \brief Tilemap name. */
    char name[TILEMAP_NAME_MAX];
-   /*! \brief Engine type tilemap is supposed to be used with. */
-   uint8_t engine_type;
    /*! \brief Current \ref dsekai_tilemaps_weather. */
    uint8_t weather;
    /*! \brief Array of prototype tiles all map tiles are based on. */

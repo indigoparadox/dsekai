@@ -133,8 +133,10 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
    /* name */
    fprintf( header_file, "   \"%s\",\n", t->name );
 
+#if 0
    /* engine_type */
    fprintf( header_file, "   %d,\n", t->engine_type );
+#endif
 
    /* weather */
    fprintf( header_file, "   %d,\n", t->weather );
