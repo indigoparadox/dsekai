@@ -167,8 +167,6 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
    }
    topdown_draw_mobile( state, gstate, &(state->player) );
 
-cleanup:
-
    gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
 }
 
@@ -304,10 +302,13 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    topdown_draw_tilemap( state );
 
    /* Show status window. */
+   /*
+   TODO
    window_push(
       WINDOW_ID_STATUS, WINDOW_STATUS_VISIBLE,
       0, (SCREEN_TH * SPRITE_H), STATUS_WINDOW_W, STATUS_WINDOW_H, 0,
       state );
+   */
 
    /* Force reset the weather to start the animation. */
    tilemap_set_weather( &(state->map), state->map.weather );
@@ -318,6 +319,7 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
 }
 
 void topdown_shutdown( struct DSEKAI_STATE* state ) {
+   debug_printf( 3, "shutting down topdown engine..." );
    window_pop( WINDOW_ID_STATUS, state );
 }
 

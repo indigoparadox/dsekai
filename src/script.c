@@ -195,14 +195,14 @@ uint16_t script_handle_SPEAK(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
 #ifdef DEPTH_VGA
-   window_prefab_dialog( WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state,
+   window_prefab_dialog( arg, actor->sprite, (actor->dir << 4), state,
       GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_MAGENTA );
 #elif defined( DEPTH_CGA )
-   window_prefab_dialog( WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state,
+   window_prefab_dialog( arg, actor->sprite, (actor->dir << 4), state,
       GRAPHICS_COLOR_BLACK, GRAPHICS_COLOR_MAGENTA );
 #elif defined( DEPTH_MONO )
    /* TODO: Verify this looks OK. */
-   window_prefab_dialog( WINDOW_ID_SCRIPT_SPEAK, arg, actor->sprite, state,
+   window_prefab_dialog( arg, actor->sprite, (actor->dir << 4), state,
       GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_MAGENTA );
 #endif /* SCRIPT_HAS_GFX */
    return pc + 1;

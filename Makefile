@@ -15,7 +15,6 @@ DSEKAI_C_FILES := \
    src/item.c \
    src/window.c \
    src/script.c \
-   src/control.c \
    src/engines.c \
    src/topdown.c \
    src/title.c \

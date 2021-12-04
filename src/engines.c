@@ -32,9 +32,9 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    state->player.coords_prev.y = state->warp_to_y;
 
    /* Close any open windows (e.g. player state). */
-   while( state->windows_count > 0 ) {
+   /* while( state->windows_count > 0 ) {
       window_pop( 0, state );
-   }
+   } */
 
    /* TODO: Clean up items held by NPC mobiles and items w/ no owners. */
    /* TODO: Preserve ownerless items in save for this map. */
@@ -211,16 +211,14 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       }
    }
 
-   if( (MEMORY_HANDLE)NULL != state->windows_handle ) {
-      window_draw_all( state );
-   }
+   window_draw_all( state );
    
    animate_frame();
 
    /* === Input Phase === */
 
    in_char = input_poll();
-   if( 0 <= state->menu.menu_id ) {
+   if( 0 <= state->menu.menu_id && 0 != in_char ) {
       retval = gc_menu_handlers[state->menu.menu_id]( in_char, state );
    
    } else if(
@@ -233,11 +231,12 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    ) {
       menu_open( state );
 
-   } else if( 0 >= window_modal( state ) ) {
+   } else if( 0 >= window_modal( state ) && 0 != in_char ) {
       retval = gc_engines_input[state->map.engine_type]( in_char, state );
 
    } else if( INPUT_KEY_OK == in_char ) {
       /* Try to close any windows that are open. */
+      debug_printf( 1, "speech window requests closed by user" );
       window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
       tilemap_refresh_tiles( &(state->map) );
    }
