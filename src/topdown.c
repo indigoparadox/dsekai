@@ -304,7 +304,7 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    /* Show status window. */
    window_push(
       WINDOW_ID_STATUS, 0, WINDOW_TYPE_WINDOW, 0,
-      0, SCREEN_MAP_X + SCREEN_MAP_H, STATUS_WINDOW_W, STATUS_WINDOW_H,
+      0, SCREEN_MAP_Y + SCREEN_MAP_H, STATUS_WINDOW_W, STATUS_WINDOW_H,
       GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
       0, 0, NULL, state );
 

@@ -132,9 +132,9 @@ void title_draw( struct DSEKAI_STATE* state ) {
    /* graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK ); */
 
 #ifdef DEPTH_VGA
-   graphics_string_at( "dsekai", 6, 55, 30, GRAPHICS_COLOR_DARKRED, 1 );
+   graphics_string_at( "dsekai", 6, 55, 20, GRAPHICS_COLOR_DARKRED, 1 );
 #else
-   graphics_string_at( "dsekai", 6, 55, 30, GRAPHICS_COLOR_MAGENTA, 1 );
+   graphics_string_at( "dsekai", 6, 55, 20, GRAPHICS_COLOR_MAGENTA, 1 );
 #endif
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {

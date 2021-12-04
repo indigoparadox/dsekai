@@ -267,7 +267,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
 cleanup:
 
-   if( 0 == retval && NULL != state ) {
+   if( NULL != state && (0 == retval || '\0' != state->warp_to[0]) ) {
       gc_engines_shutdown[state->map.engine_type]( state );
    }
 
