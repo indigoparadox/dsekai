@@ -272,7 +272,7 @@ static MEMORY_HANDLE g_frames_handle = NULL;
 static char g_window_num_buf[WINDOW_NUM_BUFFER_SZ] = "";
 
 static const int16_t gc_window_screen_coords[4] = {
-   0, 0, SCREEN_W, SCREEN_H
+   0, 0, SCREEN_MAP_W, SCREEN_MAP_H
 };
 
 static int16_t g_window_screen_grid[4] = {
