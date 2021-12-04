@@ -241,6 +241,8 @@ int16_t window_push(
  */
 void window_pop( uint16_t id, struct DSEKAI_STATE* state );
 
+void window_refresh( uint16_t w_id, struct DSEKAI_STATE* state );
+
 /**
  * \brief Determine if there is a WINDOW_FLAG_MODAL WINDOW on-screen.
  * \param windows Locked ::MEMORY_PTR to the global window list.

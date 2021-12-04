@@ -192,6 +192,13 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    /* === Drawing Phase === */
 
+   if(
+      DSEKAI_FLAG_ANIMATIONS_BG == (DSEKAI_FLAG_ANIMATIONS_BG & state->flags)
+   ) {
+      /* Draw animations before anything else. */
+      animate_frame();
+   }
+
    if( 0 <= state->menu.menu_id ) {
       /* Draw the menu. */
       if( MENU_FLAG_DIRTY == (MENU_FLAG_DIRTY & state->menu.flags) ) {
@@ -213,7 +220,12 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    window_draw_all( state );
    
-   animate_frame();
+   if(
+      DSEKAI_FLAG_ANIMATIONS_BG != (DSEKAI_FLAG_ANIMATIONS_BG & state->flags)
+   ) {
+      /* Draw animations after anything else. */
+      animate_frame();
+   }
 
    /* === Input Phase === */
 
@@ -229,7 +241,11 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       INPUT_KEY_QUIT == in_char &&
       DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
    ) {
-      menu_open( state );
+      if( !state->map.engine_type ) {
+         retval = 0;
+      } else {
+         menu_open( state );
+      }
 
    } else if( 0 >= window_modal( state ) && 0 != in_char ) {
       retval = gc_engines_input[state->map.engine_type]( in_char, state );

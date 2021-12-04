@@ -709,6 +709,21 @@ void window_pop( uint16_t id, struct DSEKAI_STATE* state ) {
    windows = (struct WINDOW*)memory_unlock( state->windows_handle );
 }
 
+void window_refresh( uint16_t w_id, struct DSEKAI_STATE* state ) {
+   struct WINDOW* windows = NULL,
+      * w = NULL;
+
+   windows = (struct WINDOW*)memory_lock( state->windows_handle );
+   assert( NULL != windows );
+
+   w = window_get( w_id, windows );
+   if( NULL != w ) {
+      w->flags |= WINDOW_FLAG_DIRTY;
+   }
+
+   windows = (struct WINDOW*)memory_unlock( state->windows_handle );
+}
+
 int16_t window_modal( struct DSEKAI_STATE* state ) {
    int i = 0;
    int16_t modal = 0;
