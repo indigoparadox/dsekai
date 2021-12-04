@@ -10,11 +10,17 @@
 #endif /* PLATFORM_DOS */
 #endif /* RESOURCE_FILE */
 
+#ifndef NO_ENGINE_POV
 #define TITLE_OPTIONS_COUNT 3
+#else
+#define TITLE_OPTIONS_COUNT 2
+#endif /* !NO_ENGINE_POV */
 
 const char* gc_title_options[] = {
    "topdown",
+#ifndef NO_ENGINE_POV
    "pov",
+#endif /* !NO_ENGINE_POV */
    "quit"
 };
 
@@ -185,8 +191,19 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_OK:
+#ifdef NO_ENGINE_POV
+      if( 1 == gstate->option_high ) {
+         retval = 0;
+#else
       if( 2 == gstate->option_high ) {
          retval = 0;
+
+      } else if( 1 == gstate->option_high ) {
+         memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
+            memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
+         state->engine_type_change = 2 /* ENGINE_TYPE_POV */;
+
+#endif /* NO_ENGINE_POV */
       } else if( 0 == gstate->option_high ) {
          memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
             memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
