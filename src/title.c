@@ -190,6 +190,7 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
       } else if( 0 == gstate->option_high ) {
          memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
             memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
+         state->engine_type_change = 1 /* ENGINE_TYPE_TOPDOWN */;
       }
       break;
 

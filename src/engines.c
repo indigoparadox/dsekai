@@ -51,6 +51,15 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
    animate_stop_all();
 
+   /* Finished unloading old state, so get ready to load new state if needed. */
+
+   state->engine_type = state->engine_type_change;
+   state->engine_state = ENGINE_STATE_OPENING;
+
+   if( '\0' == state->warp_to[0] ) {
+      goto cleanup;
+   }
+
 #ifdef RESOURCE_FILE
 #  ifdef TILEMAP_FMT_JSON
    memory_zero_ptr( (MEMORY_PTR)map_load_path, TILEMAP_NAME_MAX );
@@ -104,8 +113,6 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    memory_zero_ptr( (MEMORY_PTR)(state->mobiles),
       sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
    mobile_spawns( state );
-
-   state->engine_state = ENGINE_STATE_OPENING;
 
 cleanup:
    
@@ -181,7 +188,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       /* Clear the title screen. */
       graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
 
-      retval = gc_engines_setup[state->map.engine_type]( state );
+      retval = gc_engines_setup[state->engine_type]( state );
       if( !retval ) {
          /* Setup failed. */
          goto cleanup;
@@ -203,7 +210,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       /* Draw the menu. */
       if( MENU_FLAG_DIRTY == (MENU_FLAG_DIRTY & state->menu.flags) ) {
          /* Repaint the screen in the background. */
-         gc_engines_draw[state->map.engine_type]( state );
+         gc_engines_draw[state->engine_type]( state );
          tilemap_refresh_tiles( &(state->map) );
 
          /* Show the new menu state. */
@@ -214,7 +221,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    } else {
       /* Draw the engine. */
       if( 0 >= window_modal( state ) ) {
-         gc_engines_draw[state->map.engine_type]( state );
+         gc_engines_draw[state->engine_type]( state );
       }
    }
 
@@ -241,14 +248,14 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       INPUT_KEY_QUIT == in_char &&
       DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
    ) {
-      if( !state->map.engine_type ) {
+      if( !state->engine_type ) {
          retval = 0;
       } else {
          menu_open( state );
       }
 
    } else if( 0 >= window_modal( state ) && 0 != in_char ) {
-      retval = gc_engines_input[state->map.engine_type]( in_char, state );
+      retval = gc_engines_input[state->engine_type]( in_char, state );
 
    } else if( INPUT_KEY_OK == in_char ) {
       /* Try to close any windows that are open. */
@@ -261,18 +268,25 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    engines_animate_mobiles( state );
 
-   gc_engines_animate[state->map.engine_type]( state );
+   gc_engines_animate[state->engine_type]( state );
 
    graphics_loop_end();
 
 cleanup:
 
-   if( NULL != state && (0 == retval || '\0' != state->warp_to[0]) ) {
-      gc_engines_shutdown[state->map.engine_type]( state );
+   if( NULL != state && (
+      0 == retval ||
+      '\0' != state->warp_to[0] ||
+      state->engine_type != state->engine_type_change
+   ) ) {
+      gc_engines_shutdown[state->engine_type]( state );
    }
 
    if( NULL != state ) {
-      if( '\0' != state->warp_to[0] ) {
+      if(
+         '\0' != state->warp_to[0] ||
+         state->engine_type != state->engine_type_change
+      ) {
          /* There's a warp-in map, so unload the current map and load it. */
          state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
          engines_warp_loop( state_handle );
