@@ -302,13 +302,11 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    topdown_draw_tilemap( state );
 
    /* Show status window. */
-   /*
-   TODO
    window_push(
-      WINDOW_ID_STATUS, WINDOW_STATUS_VISIBLE,
-      0, (SCREEN_TH * SPRITE_H), STATUS_WINDOW_W, STATUS_WINDOW_H, 0,
-      state );
-   */
+      WINDOW_ID_STATUS, 0, WINDOW_TYPE_WINDOW, 0,
+      0, SCREEN_MAP_X + SCREEN_MAP_H, STATUS_WINDOW_W, STATUS_WINDOW_H,
+      GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
+      0, 0, NULL, state );
 
    /* Force reset the weather to start the animation. */
    tilemap_set_weather( &(state->map), state->map.weather );
