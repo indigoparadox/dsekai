@@ -80,6 +80,8 @@ struct POV_STATE {
 
 #define DSEKAI_FLAG_MENU_BLOCKED    0x02
 
+#define DSEKAI_FLAG_ANIMATIONS_BG   0x04
+
 /**
  * \relates DSEKAI_STATE
  * \brief DSEKAI_STATE::engine_state indicating engine is has not yet
@@ -143,9 +145,6 @@ struct DSEKAI_STATE {
 
    /*! \brief Current engine state (see below in struct reference). */
    uint16_t engine_state;
-
-   /*! \brief Currently active \ref dsekai_engines_types_sect. */
-   uint8_t engine_sel;
 
    /*! \brief Global boolean values dictating engine state and behavior. */
    uint8_t flags;

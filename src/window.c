@@ -285,7 +285,6 @@ static int16_t window_draw_WINDOW(
       windows[i].flags &= ~WINDOW_FLAG_DIRTY;
    }
 
-
 cleanup:
 
    if( NULL != windows ) {
@@ -706,6 +705,21 @@ void window_pop( uint16_t id, struct DSEKAI_STATE* state ) {
    debug_printf( 0, "window %d popped", id );
 
    window_print_all( windows );
+
+   windows = (struct WINDOW*)memory_unlock( state->windows_handle );
+}
+
+void window_refresh( uint16_t w_id, struct DSEKAI_STATE* state ) {
+   struct WINDOW* windows = NULL,
+      * w = NULL;
+
+   windows = (struct WINDOW*)memory_lock( state->windows_handle );
+   assert( NULL != windows );
+
+   w = window_get( w_id, windows );
+   if( NULL != w ) {
+      w->flags |= WINDOW_FLAG_DIRTY;
+   }
 
    windows = (struct WINDOW*)memory_unlock( state->windows_handle );
 }
