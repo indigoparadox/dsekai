@@ -119,23 +119,12 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
       gstate->dirty = 1;
       break;
 
-   case INPUT_KEY_QUIT:
-      window_pop( WINDOW_ID_STATUS, state );
-      retval = 0;
-      break;
-
    case INPUT_KEY_OK:
-      if( 0 >= window_modal( state ) ) {
-         /* Try to interact with facing mobile. */
-         mobile_interact(
-            &(state->player),
-            mobile_get_facing( &(state->player), state ),
-            &(state->map) );
-      } else {
-         /* Try to close any windows that are open. */
-         window_pop( WINDOW_ID_WELCOME, state );
-         window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
-      }
+      /* Try to interact with facing mobile. */
+      mobile_interact(
+         &(state->player),
+         mobile_get_facing( &(state->player), state ),
+         &(state->map) );
       gstate->inc++;
       debug_printf( 3, "inc: %d", gstate->inc );
       break;
