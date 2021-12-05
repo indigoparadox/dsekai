@@ -61,6 +61,43 @@ struct POV_STATE {
    double plane_y;
 };
 
+#ifndef NO_ENGINE_EDITOR
+
+/**
+ * \addtoground dsekai_engines_editor Tilemap Editor
+ * \brief In-world editor for tilemaps.
+ */
+
+/**
+ * \relates EDITOR_STATE
+ * \brief EDITOR_STATE::flags indicating editor is currently active.
+ */
+#define EDITOR_FLAG_ACTIVE       0x01
+
+/**
+ * \relates EDITOR_STATE
+ * \brief EDITOR_STATE::flags indicating next frame should not be blocked out.
+ *
+ * This is a quality of life improvement so that it's easier to see while
+ * cycling through tiles.
+ */
+#define EDITOR_FLAG_FORCE_FRAME  0x02
+
+struct EDITOR_STATE {
+   /*! \brief Tile coordinates currently being edited. */
+   struct TILEMAP_COORDS coords;
+   /*! \deprecated */
+   uint8_t current_tile;
+   /*! \deprecated */
+   uint8_t selected_tile;
+   /*! \brief Bitfield controlling behavior and flow of editor. */
+   uint8_t flags;
+};
+
+/*! \} */
+
+#endif /* !NO_ENGINE_EDITOR */
+
 /*! \} */
 
 /**
@@ -144,6 +181,12 @@ struct DSEKAI_STATE {
 
    /*! \brief Global boolean values dictating engine state and behavior. */
    uint8_t flags;
+
+#ifndef NO_ENGINE_EDITOR
+
+   struct EDITOR_STATE editor;
+
+#endif /* !NO_ENGINE_EDITOR */
 
    struct MENU_STATE menu;
 };

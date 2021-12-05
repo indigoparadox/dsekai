@@ -34,6 +34,33 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          tile_px = (x * TILE_W) - gstate->screen_scroll_x;
          tile_py = (y * TILE_H) - gstate->screen_scroll_y;
 
+         /* Flash the tile and continue if the editor is active. */
+         if(
+            EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags)
+            && x == state->editor.coords.x && y == state->editor.coords.y &&
+            0 == state->ani_sprite_x
+         ) {
+            state->map.tiles_flags[(y * TILEMAP_TW) + x] |=
+               TILEMAP_TILE_FLAG_DIRTY;
+            
+            /* If we're not forcing the frame, black out the block.
+             * If we ARE, then just draw as usual after marking dirty above. */
+            if(
+               EDITOR_FLAG_FORCE_FRAME !=
+               (EDITOR_FLAG_FORCE_FRAME & state->editor.flags)
+            ) {
+               /* Black out the block. */
+               graphics_draw_block(
+                  SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
+                  TILE_W, TILE_H, GRAPHICS_COLOR_BLACK );
+               continue;
+
+            } else {
+               /* Un-force the next frame. */
+               state->editor.flags &= ~EDITOR_FLAG_FORCE_FRAME;
+            }
+         }
+
          /* Mark as dirty any on-screen tiles under an animation. */
          for( i = 0 ; ANIMATE_ANIMATIONS_MAX > i ; i++ ) {
 
@@ -326,27 +353,50 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
 
    switch( in_char ) {
    case INPUT_KEY_UP:
-      engines_handle_movement( MOBILE_DIR_NORTH, state );
+      if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+         state->editor.coords.y--;
+      } else {
+         engines_handle_movement( MOBILE_DIR_NORTH, state );
+      }
       break;
 
    case INPUT_KEY_LEFT:
-      engines_handle_movement( MOBILE_DIR_WEST, state );
+      if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+         state->editor.coords.x--;
+      } else {
+         engines_handle_movement( MOBILE_DIR_WEST, state );
+      }
       break;
 
    case INPUT_KEY_DOWN:
-      engines_handle_movement( MOBILE_DIR_SOUTH, state );
+      if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+         state->editor.coords.y++;
+      } else {
+         engines_handle_movement( MOBILE_DIR_SOUTH, state );
+      }
       break;
 
    case INPUT_KEY_RIGHT:
-      engines_handle_movement( MOBILE_DIR_EAST, state );
+      if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+         state->editor.coords.x++;
+      } else {
+         engines_handle_movement( MOBILE_DIR_EAST, state );
+      }
       break;
 
    case INPUT_KEY_OK:
-      /* Try to interact with facing mobile. */
-      mobile_interact(
-         &(state->player),
-         mobile_get_facing( &(state->player), state ),
-         &(state->map) );
+      if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+         tilemap_advance_tile_id( &(state->map),
+            state->editor.coords.x,
+            state->editor.coords.y );
+         state->editor.flags |= EDITOR_FLAG_FORCE_FRAME;
+      } else {
+         /* Try to interact with facing mobile. */
+         mobile_interact(
+            &(state->player),
+            mobile_get_facing( &(state->player), state ),
+            &(state->map) );
+      }
       break;
    }
 

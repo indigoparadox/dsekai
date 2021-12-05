@@ -51,6 +51,20 @@ int8_t item_use_axe(
    return 0;
 }
 
+int8_t item_use_editor(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+) {
+   if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+      state->editor.flags &= ~EDITOR_FLAG_ACTIVE;
+   } else {
+      state->editor.flags |= EDITOR_FLAG_ACTIVE;
+      state->editor.coords.x = state->player.coords.x;
+      state->editor.coords.y = state->player.coords.y;
+   }
+
+   return -1;
+}
+
 void item_draw( const struct ITEM* i, int16_t screen_x, int16_t screen_y ) {
    /*
    int16_t x_offset = 0,
