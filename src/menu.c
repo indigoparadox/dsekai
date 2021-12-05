@@ -55,10 +55,7 @@ int16_t menu_handler_main( char in_char, struct DSEKAI_STATE* state ) {
       /* TODO: Use quit callback. */
       if( state->menu.highlight_id == 2 /* quit */ ) {
          /* retval = 0; */
-         state->engine_type_change = 0;
-         memory_zero_ptr( &(state->player), sizeof( struct MOBILE ) );
-         memory_zero_ptr( &(state->items), sizeof( struct ITEM ) *
-            DSEKAI_ITEMS_MAX );
+         engines_exit_to_title( state );
          menu_close( state );
       } else {
          state->menu.menu_id = state->menu.highlight_id;
