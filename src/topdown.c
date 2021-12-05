@@ -158,9 +158,9 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
    int8_t i = 0;
 
-   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
-
    topdown_draw_tilemap( state );
+
+   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       topdown_draw_mobile( state, gstate, &(state->mobiles[i]) );

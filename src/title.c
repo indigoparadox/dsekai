@@ -164,6 +164,7 @@ void title_animate( struct DSEKAI_STATE* state ) {
 int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
    struct TITLE_STATE* gstate = NULL;
+   uint8_t redraw_menu = 0;
 
    gstate = (struct TITLE_STATE*)memory_lock( state->engine_state_handle );
 
@@ -172,7 +173,7 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
       if( 0 < gstate->option_high ) {
          gstate->option_high--;
          window_pop( WINDOW_ID_TITLE_MENU, state );
-         title_draw_menu( state );
+         redraw_menu = 1;
       }
       break;
 
@@ -180,7 +181,7 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
       if( TITLE_OPTIONS_COUNT > gstate->option_high + 1 ) {
          gstate->option_high++;
          window_pop( WINDOW_ID_TITLE_MENU, state );
-         title_draw_menu( state );
+         redraw_menu = 1;
       }
       break;
 
@@ -200,6 +201,11 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
    }
  
    gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
+
+   /* Redraw menu here after gstate freed. */
+   if( redraw_menu ) {
+      title_draw_menu( state );
+   }
 
    return retval;
 }

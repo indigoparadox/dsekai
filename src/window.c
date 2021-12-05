@@ -181,7 +181,7 @@ static int16_t window_draw_WINDOW(
    c = window_get( w_id, windows );
    assert( NULL != c );
 
-   frames =  (struct WINDOW_FRAME*)memory_lock( g_frames_handle );
+   frames = (struct WINDOW_FRAME*)memory_lock( g_frames_handle );
 
    debug_printf(
       0, "min: %d, %d; max: %d, %d",
@@ -286,10 +286,6 @@ static int16_t window_draw_WINDOW(
    }
 
 cleanup:
-
-   if( NULL != windows ) {
-      windows = (struct WINDOW*)memory_unlock( state->windows_handle );
-   }
 
    if( NULL != frames ) {
       frames = (struct WINDOW_FRAME*)memory_unlock( g_frames_handle );
