@@ -177,6 +177,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
  */
 int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
 
+void engines_exit_to_title( struct DSEKAI_STATE* state );
+
 #endif /* !ENGINES_TOKENS_ONLY */
 
 /**

@@ -183,15 +183,9 @@ int main( int argc, char* argv[] ) {
       }
    }
 
-   buffer = memory_lock( h_buffer );
-   assert( NULL != buffer );
-      
    idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_scripts );
    assert( 0 < idx );
    for( i = 0 ; scripts_count > i ; i++ ) {
-      buffer = memory_unlock( h_buffer );
-      assert( NULL == buffer );
-      
       idx = asn_write_seq_start( &h_buffer, idx, &script_sz_idx );
       assert( 0 < idx );
 
@@ -221,9 +215,6 @@ int main( int argc, char* argv[] ) {
       }
       idx = asn_write_seq_end( &h_buffer, idx, &script_sz_idx );
       assert( 0 < idx );
-
-      buffer = memory_lock( h_buffer );
-      assert( NULL != buffer );
    }
    idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_scripts );
    assert( 0 < idx );

@@ -138,9 +138,9 @@ void title_draw( struct DSEKAI_STATE* state ) {
    /* graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK ); */
 
 #ifdef DEPTH_VGA
-   graphics_string_at( "dsekai", 6, 55, 20, GRAPHICS_COLOR_DARKRED, 1 );
+   graphics_string_at( "dsekai", 6, 55, TILE_H, GRAPHICS_COLOR_DARKRED, 1 );
 #else
-   graphics_string_at( "dsekai", 6, 55, 20, GRAPHICS_COLOR_MAGENTA, 1 );
+   graphics_string_at( "dsekai", 6, 55, TILE_H, GRAPHICS_COLOR_MAGENTA, 1 );
 #endif
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
@@ -170,6 +170,7 @@ void title_animate( struct DSEKAI_STATE* state ) {
 int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
    struct TITLE_STATE* gstate = NULL;
+   uint8_t redraw_menu = 0;
 
    gstate = (struct TITLE_STATE*)memory_lock( state->engine_state_handle );
 
@@ -178,7 +179,7 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
       if( 0 < gstate->option_high ) {
          gstate->option_high--;
          window_pop( WINDOW_ID_TITLE_MENU, state );
-         title_draw_menu( state );
+         redraw_menu = 1;
       }
       break;
 
@@ -186,7 +187,7 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
       if( TITLE_OPTIONS_COUNT > gstate->option_high + 1 ) {
          gstate->option_high++;
          window_pop( WINDOW_ID_TITLE_MENU, state );
-         title_draw_menu( state );
+         redraw_menu = 1;
       }
       break;
 
@@ -217,6 +218,11 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
    }
  
    gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
+
+   /* Redraw menu here after gstate freed. */
+   if( redraw_menu ) {
+      title_draw_menu( state );
+   }
 
    return retval;
 }

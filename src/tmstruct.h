@@ -40,7 +40,7 @@
 #define TILEMAP_STRPOOL_SZ 1024
 
 /*! \brief X/Y coordinates of a tile on the current map. */
-struct PACKED TILEMAP_COORDS {
+struct TILEMAP_COORDS {
    /*! \brief Horizontal coordinate in tiles. */
    uint8_t x;
    /*! \brief Vertical coordinate in tiles. */
@@ -48,7 +48,7 @@ struct PACKED TILEMAP_COORDS {
 };
 
 /*! \brief Tile prototype stored in TILEMAP::tileset. */
-struct PACKED TILESET_TILE {
+struct TILESET_TILE {
    /*! \brief Indentifier for graphical asset representing this tile. */
    RESOURCE_ID image;
    /*! \brief Flags indicating behavior for this tile. */
@@ -59,7 +59,7 @@ struct PACKED TILESET_TILE {
  *
  *  Modifications to this struct should also be reflected in tools/map2h.c.
  */
-struct PACKED TILEMAP_SPAWN {
+struct TILEMAP_SPAWN {
    /*! \brief Internal name of a spawned MOBILE. */
    char name[TILEMAP_SPAWN_NAME_SZ];
    /* TODO: Allow a range of coordinates in which to spawn. */
@@ -76,7 +76,7 @@ struct PACKED TILEMAP_SPAWN {
  *
  *  Modifications to this struct should also be reflected in tools/map2h.c.
  */
-struct PACKED TILEMAP {
+struct TILEMAP {
    /*! \brief Tilemap name. */
    char name[TILEMAP_NAME_MAX];
    /*! \brief Current \ref dsekai_tilemaps_weather. */

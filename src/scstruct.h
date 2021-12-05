@@ -21,7 +21,7 @@
  *  Modifications to this struct should also be reflected in
  *  tools/map2h.c (map2h.h).
  */
-struct PACKED SCRIPT_STEP {
+struct SCRIPT_STEP {
    /*! \brief Opcode of the action as defined by ::SCRIPT_CB_TABLE. */
    uint16_t action;
    /*! \brief Argument that will be passed to this action on execution. */
@@ -34,7 +34,7 @@ struct PACKED SCRIPT_STEP {
  *  Modifications to this struct should also be reflected in
  *  tools/map2h.c (map2h.h).
  */
-struct PACKED SCRIPT {
+struct SCRIPT {
    /*! \brief Indexed list of script steps in order. */
    struct SCRIPT_STEP steps[SCRIPT_STEPS_MAX];
    /*! \brief Number of SCRIPT::steps attached to this script. */

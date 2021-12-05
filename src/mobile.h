@@ -30,7 +30,7 @@
 /* TODO: Log when spawned, with name of spawner and unique ID spawned. */
 
 /*! \brief A moving/interactive object in the world. */
-struct PACKED MOBILE {
+struct MOBILE {
    char* name;
    /**
     * \brief Which of the \ref dsekai_mobiles_directions this mobile is
