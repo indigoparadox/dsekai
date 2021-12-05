@@ -15,12 +15,14 @@ static void item_consume( struct ITEM* e ) {
 int8_t item_use_none(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
+   /* TODO */
    return 0;
 }
 
 int8_t item_use_seed(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
+   /* TODO */
    return -1;
 }
 
@@ -33,6 +35,20 @@ int8_t item_use_food(
    item_consume( e );
 
    return -1;
+}
+
+int8_t item_use_shovel(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+) {
+   /* TODO */
+   return 0;
+}
+
+int8_t item_use_axe(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+) {
+   /* TODO */
+   return 0;
 }
 
 void item_draw( const struct ITEM* i, int16_t screen_x, int16_t screen_y ) {
