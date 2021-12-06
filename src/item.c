@@ -29,10 +29,30 @@ int8_t item_use_seed(
 int8_t item_use_food(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
+   int8_t anim_idx = 0;
+   int16_t px = 0,
+      py = 0;
+   char num_str[10];
+
+   item_consume( e );
 
    user->hp += e->data;
 
-   item_consume( e );
+   dio_snprintf( num_str, 10, "+%d", e->data );
+
+#if defined( DEPTH_VGA ) || defined( DEPTH_CGA )
+   anim_idx = animate_create(
+      ANIMATE_TYPE_STRING, 0, user->screen_px, user->screen_py,
+      SPRITE_W, SPRITE_H );
+   animate_set_string(
+      anim_idx, num_str, 10,
+#  ifdef DEPTH_VGA
+      ANIMATE_COLOR_GREEN
+#  else
+      ANIMATE_COLOR_CYAN
+#  endif /* DEPTH_VGA */
+   );
+#endif
 
    return -1;
 }

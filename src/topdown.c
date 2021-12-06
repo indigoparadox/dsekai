@@ -126,9 +126,6 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
 static void topdown_draw_mobile(
    struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate, struct MOBILE* m
 ) {
-   int16_t
-      x_offset = 0,
-      y_offset = 0;
 
    if(
       /* Don't draw inactive mobiles. */
@@ -146,43 +143,34 @@ static void topdown_draw_mobile(
       m->coords.y >= gstate->screen_scroll_ty + SCREEN_TH
    ) {
       /* Mobile is off-screen. */
+      m->screen_px = -1;
+      m->screen_py = -1;
       return;
    }
 
+   m->screen_px = 
+      SCREEN_MAP_X + (m->coords.x * SPRITE_W) - gstate->screen_scroll_x;
+   m->screen_py =
+      SCREEN_MAP_Y + (m->coords.y * SPRITE_H) - gstate->screen_scroll_y;
+
    /* Figure out direction to offset steps in. */
    if( m->coords_prev.x > m->coords.x ) {
-      x_offset = SPRITE_W - m->steps_x;
-      y_offset = 0;
-   } else if(
-      m->coords_prev.x < m->coords.x
-   ) {
-      x_offset = (SPRITE_W - m->steps_x) * -1;
-      y_offset = 0;
-   } else if(
-      m->coords_prev.y > m->coords.y
-   ) {
-      x_offset = 0;
-      y_offset = SPRITE_H - m->steps_y;
-   } else if(
-      m->coords_prev.y < m->coords.y
-   ) {
-      x_offset = 0;
-      y_offset = (SPRITE_H - m->steps_y) * -1;
-   } else {
-      x_offset = 0;
-      y_offset = 0;
+      m->screen_px += SPRITE_W - m->steps_x;
+   
+   } else if( m->coords_prev.x < m->coords.x ) {
+      m->screen_px -= SPRITE_W - m->steps_x;
+
+   } else if( m->coords_prev.y > m->coords.y ) {
+      m->screen_py += SPRITE_H - m->steps_y;
+   
+   } else if( m->coords_prev.y < m->coords.y ) {
+      m->screen_py -= SPRITE_H - m->steps_y;
    }
 
    /* Blit the mobile's current sprite/frame. */
    graphics_blit_sprite_at(
-      m->sprite,
-      state->ani_sprite_x,
-      m->dir * SPRITE_H,
-      SCREEN_MAP_X + (((m->coords.x * SPRITE_W) + x_offset)
-         - gstate->screen_scroll_x),
-      SCREEN_MAP_Y + (((m->coords.y * SPRITE_H) + y_offset)
-         - gstate->screen_scroll_y),
-      SPRITE_W, SPRITE_H );
+      m->sprite, state->ani_sprite_x, m->dir * SPRITE_H,
+      m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
 }
 
 void topdown_draw( struct DSEKAI_STATE* state ) {

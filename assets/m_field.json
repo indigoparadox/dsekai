@@ -179,6 +179,11 @@
                  "name":"apple",
                  "properties":[
                         {
+                         "name":"data",
+                         "type":"int",
+                         "value":10
+                        }, 
+                        {
                          "name":"gid",
                          "type":"int",
                          "value":1235
