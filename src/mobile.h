@@ -51,6 +51,25 @@ struct MOBILE {
     */
    int8_t hp;
    int8_t mp;
+   /*! \brief Current on-screen pixel left of sprite. -1 if off-screen. */
+   int16_t screen_px;
+   /*! \brief Current on-screen pixel top of sprite. -1 if off-screen. */
+   int16_t screen_py;
+   /*! \brief Currently loaded spritesheet.
+    *
+    * Spritesheets for mobiles are divided up as follows:
+    *
+    * |      | 16px                       | 16px
+    * |------|----------------------------|----------------------------
+    * | 16px | ::MOBILE_DIR_SOUTH Frame 1 | ::MOBILE_DIR_SOUTH Frame 2
+    * |------|----------------------------|----------------------------
+    * | 16px | ::MOBILE_DIR_NORTH Frame 1 | ::MOBILE_DIR_NORTH Frame 2
+    * |------|----------------------------|----------------------------
+    * | 16px | ::MOBILE_DIR_EAST Frame 1  | ::MOBILE_DIR_EAST Frame 2
+    * |------|----------------------------|----------------------------
+    * | 16px | ::MOBILE_DIR_WEST Frame 1  | ::MOBILE_DIR_WEST Frame 2
+    *
+    */
    RESOURCE_ID sprite;
    /*! \brief Current tile on which this mobile is located. */
    struct TILEMAP_COORDS coords;

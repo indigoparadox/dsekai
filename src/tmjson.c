@@ -119,6 +119,8 @@ static int16_t tilemap_json_parse_tileset(
          debug_printf(
             2, "tile flags: %s, %d\n", tile_json_path, t->tileset[i].flags );
             resource_assign_id( t->tileset[i].image, tile_filename );
+
+         t->tileset[i].flags |= TILEMAP_TILESET_FLAG_LOADED;
       }
 
       i++;
@@ -387,6 +389,11 @@ int16_t tilemap_json_parse_items(
       /* gid */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_GID, i );
       t->items[i].gid = json_int_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+
+      /* data */
+      dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_DATA, i );
+      t->items[i].data = json_int_from_path(
          iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
 
       /* flags */

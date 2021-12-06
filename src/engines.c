@@ -25,6 +25,9 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       mobile_deinit( &(state->mobiles[i]) );
    }
 
+   memory_zero_ptr(
+      &(state->mobiles), sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
+
    /* Set the player's new position. */
    state->player.coords.x = state->warp_to_x;
    state->player.coords.y = state->warp_to_y;
@@ -50,6 +53,11 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    graphics_clear_cache();
 
    animate_stop_all();
+
+#ifndef NO_ENGINE_EDITOR
+   /* Disable editor. */
+   memory_zero_ptr( &(state->editor), sizeof( struct EDITOR_STATE ) );
+#endif /* !NO_ENGINE_EDITOR */
 
    /* Finished unloading old state, so get ready to load new state if needed. */
 

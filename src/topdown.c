@@ -34,6 +34,37 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          tile_px = (x * TILE_W) - gstate->screen_scroll_x;
          tile_py = (y * TILE_H) - gstate->screen_scroll_y;
 
+#ifndef NO_ENGINE_EDITOR
+
+         /* Flash the tile and continue if the editor is active. */
+         if(
+            EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags)
+            && x == state->editor.coords.x && y == state->editor.coords.y &&
+            0 == state->ani_sprite_x
+         ) {
+            state->map.tiles_flags[(y * TILEMAP_TW) + x] |=
+               TILEMAP_TILE_FLAG_DIRTY;
+            
+            /* If we're not forcing the frame, black out the block.
+             * If we ARE, then just draw as usual after marking dirty above. */
+            if(
+               EDITOR_FLAG_FORCE_FRAME !=
+               (EDITOR_FLAG_FORCE_FRAME & state->editor.flags)
+            ) {
+               /* Black out the block. */
+               graphics_draw_block(
+                  SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
+                  TILE_W, TILE_H, GRAPHICS_COLOR_BLACK );
+               continue;
+
+            } else {
+               /* Un-force the next frame. */
+               state->editor.flags &= ~EDITOR_FLAG_FORCE_FRAME;
+            }
+         }
+
+#endif /* !NO_ENGINE_EDITOR */
+
          /* Mark as dirty any on-screen tiles under an animation. */
          for( i = 0 ; ANIMATE_ANIMATIONS_MAX > i ; i++ ) {
 
@@ -95,9 +126,6 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
 static void topdown_draw_mobile(
    struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate, struct MOBILE* m
 ) {
-   int16_t
-      x_offset = 0,
-      y_offset = 0;
 
    if(
       /* Don't draw inactive mobiles. */
@@ -115,43 +143,34 @@ static void topdown_draw_mobile(
       m->coords.y >= gstate->screen_scroll_ty + SCREEN_TH
    ) {
       /* Mobile is off-screen. */
+      m->screen_px = -1;
+      m->screen_py = -1;
       return;
    }
 
+   m->screen_px = 
+      SCREEN_MAP_X + (m->coords.x * SPRITE_W) - gstate->screen_scroll_x;
+   m->screen_py =
+      SCREEN_MAP_Y + (m->coords.y * SPRITE_H) - gstate->screen_scroll_y;
+
    /* Figure out direction to offset steps in. */
    if( m->coords_prev.x > m->coords.x ) {
-      x_offset = SPRITE_W - m->steps_x;
-      y_offset = 0;
-   } else if(
-      m->coords_prev.x < m->coords.x
-   ) {
-      x_offset = (SPRITE_W - m->steps_x) * -1;
-      y_offset = 0;
-   } else if(
-      m->coords_prev.y > m->coords.y
-   ) {
-      x_offset = 0;
-      y_offset = SPRITE_H - m->steps_y;
-   } else if(
-      m->coords_prev.y < m->coords.y
-   ) {
-      x_offset = 0;
-      y_offset = (SPRITE_H - m->steps_y) * -1;
-   } else {
-      x_offset = 0;
-      y_offset = 0;
+      m->screen_px += SPRITE_W - m->steps_x;
+   
+   } else if( m->coords_prev.x < m->coords.x ) {
+      m->screen_px -= SPRITE_W - m->steps_x;
+
+   } else if( m->coords_prev.y > m->coords.y ) {
+      m->screen_py += SPRITE_H - m->steps_y;
+   
+   } else if( m->coords_prev.y < m->coords.y ) {
+      m->screen_py -= SPRITE_H - m->steps_y;
    }
 
    /* Blit the mobile's current sprite/frame. */
    graphics_blit_sprite_at(
-      m->sprite,
-      state->ani_sprite_x,
-      m->dir * SPRITE_H,
-      SCREEN_MAP_X + (((m->coords.x * SPRITE_W) + x_offset)
-         - gstate->screen_scroll_x),
-      SCREEN_MAP_Y + (((m->coords.y * SPRITE_H) + y_offset)
-         - gstate->screen_scroll_y),
-      SPRITE_W, SPRITE_H );
+      m->sprite, state->ani_sprite_x, m->dir * SPRITE_H,
+      m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
 }
 
 void topdown_draw( struct DSEKAI_STATE* state ) {
@@ -326,27 +345,70 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
 
    switch( in_char ) {
    case INPUT_KEY_UP:
-      engines_handle_movement( MOBILE_DIR_NORTH, state );
+#ifndef NO_ENGINE_EDITOR
+      if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+         state->editor.coords.y--;
+      } else {
+#endif /* !NO_ENGINE_EDITOR */
+         engines_handle_movement( MOBILE_DIR_NORTH, state );
+#ifndef NO_ENGINE_EDITOR
+      }
+#endif /* !NO_ENGINE_EDITOR */
       break;
 
    case INPUT_KEY_LEFT:
-      engines_handle_movement( MOBILE_DIR_WEST, state );
+#ifndef NO_ENGINE_EDITOR
+      if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+         state->editor.coords.x--;
+      } else {
+#endif /* !NO_ENGINE_EDITOR */
+         engines_handle_movement( MOBILE_DIR_WEST, state );
+#ifndef NO_ENGINE_EDITOR
+      }
+#endif /* !NO_ENGINE_EDITOR */
       break;
 
    case INPUT_KEY_DOWN:
-      engines_handle_movement( MOBILE_DIR_SOUTH, state );
+#ifndef NO_ENGINE_EDITOR
+      if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+         state->editor.coords.y++;
+      } else {
+#endif /* !NO_ENGINE_EDITOR */
+         engines_handle_movement( MOBILE_DIR_SOUTH, state );
+#ifndef NO_ENGINE_EDITOR
+      }
+#endif /* !NO_ENGINE_EDITOR */
       break;
 
    case INPUT_KEY_RIGHT:
-      engines_handle_movement( MOBILE_DIR_EAST, state );
+#ifndef NO_ENGINE_EDITOR
+      if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+         state->editor.coords.x++;
+      } else {
+#endif /* !NO_ENGINE_EDITOR */
+         engines_handle_movement( MOBILE_DIR_EAST, state );
+#ifndef NO_ENGINE_EDITOR
+      }
+#endif /* !NO_ENGINE_EDITOR */
       break;
 
    case INPUT_KEY_OK:
-      /* Try to interact with facing mobile. */
-      mobile_interact(
-         &(state->player),
-         mobile_get_facing( &(state->player), state ),
-         &(state->map) );
+#ifndef NO_ENGINE_EDITOR
+      if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+         tilemap_advance_tile_id( &(state->map),
+            state->editor.coords.x,
+            state->editor.coords.y );
+         state->editor.flags |= EDITOR_FLAG_FORCE_FRAME;
+      } else {
+#endif /* !NO_ENGINE_EDITOR */
+         /* Try to interact with facing mobile. */
+         mobile_interact(
+            &(state->player),
+            mobile_get_facing( &(state->player), state ),
+            &(state->map) );
+#ifndef NO_ENGINE_EDITOR
+      }
+#endif /* !NO_ENGINE_EDITOR */
       break;
    }
 

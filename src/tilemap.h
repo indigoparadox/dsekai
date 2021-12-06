@@ -30,6 +30,12 @@
 #define TILEMAP_TILESET_FLAG_BLOCK  0x01
 
 /**
+ * \relates ::TILESET_TILE
+ * \brief TILESET_TILE::flags bit flag indicating tile is not empty.
+ */
+#define TILEMAP_TILESET_FLAG_LOADED 0x80
+
+/**
  * \relates ::TILEMAP
  * \brief TILEMAP::tiles_flags bit flag indicating tile must be redrawn.
  */
@@ -73,6 +79,8 @@ void tilemap_set_weather( struct TILEMAP* t, uint8_t weather );
  */
 uint8_t tilemap_collide( 
    struct MOBILE* m, uint8_t dir, struct TILEMAP* t );
+
+void tilemap_advance_tile_id( struct TILEMAP* t, uint16_t x, uint16_t y );
 
 /**
  * \relates TILEMAP

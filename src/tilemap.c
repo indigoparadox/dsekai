@@ -90,6 +90,40 @@ uint8_t tilemap_collide(
    return 0;
 }
 
+void tilemap_advance_tile_id( struct TILEMAP* t, uint16_t x, uint16_t y ) {
+   int8_t tile_id = 0;
+
+   if( x >= TILEMAP_TW || y >= TILEMAP_TH ) {
+      error_printf( "attempted to advance tile out of range!" );
+      return;
+   }
+
+   tile_id = tilemap_get_tile_id( t, x, y );
+
+   /* Find the next highest loaded tile, wrapping around to 0 if needed. */
+   do {
+      tile_id++;
+
+      if( TILEMAP_TILESETS_MAX <= tile_id ) {
+         tile_id = 0;
+      }
+   } while(
+      TILEMAP_TILESET_FLAG_LOADED !=
+      (TILEMAP_TILESET_FLAG_LOADED & t->tileset[tile_id].flags)
+   );
+
+   debug_printf( 0, "tile_id: %d", tile_id );
+
+   /* Merge the tile ID back into the tilemap. */
+   if( 0 == x % 2 ) {
+      t->tiles[((y * TILEMAP_TW) + x) / 2] &= ~0xf0;
+      tile_id <<= 4;
+   } else {
+      t->tiles[((y * TILEMAP_TW) + x) / 2] &= ~0x0f;
+   }
+   t->tiles[((y * TILEMAP_TW) + x) / 2] |= tile_id;
+}
+
 void tilemap_deinit( struct TILEMAP* t ) {
    if( NULL == t ) {
       return;

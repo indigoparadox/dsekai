@@ -29,10 +29,30 @@ int8_t item_use_seed(
 int8_t item_use_food(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
+   int8_t anim_idx = 0;
+   int16_t px = 0,
+      py = 0;
+   char num_str[10];
+
+   item_consume( e );
 
    user->hp += e->data;
 
-   item_consume( e );
+   dio_snprintf( num_str, 10, "+%d", e->data );
+
+#if defined( DEPTH_VGA ) || defined( DEPTH_CGA )
+   anim_idx = animate_create(
+      ANIMATE_TYPE_STRING, 0, user->screen_px, user->screen_py,
+      SPRITE_W, SPRITE_H );
+   animate_set_string(
+      anim_idx, num_str, 10,
+#  ifdef DEPTH_VGA
+      ANIMATE_COLOR_GREEN
+#  else
+      ANIMATE_COLOR_CYAN
+#  endif /* DEPTH_VGA */
+   );
+#endif
 
    return -1;
 }
@@ -49,6 +69,22 @@ int8_t item_use_axe(
 ) {
    /* TODO */
    return 0;
+}
+
+int8_t item_use_editor(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+) {
+#ifndef NO_ENGINE_EDITOR
+   if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+      state->editor.flags &= ~EDITOR_FLAG_ACTIVE;
+   } else {
+      state->editor.flags |= EDITOR_FLAG_ACTIVE;
+      state->editor.coords.x = state->player.coords.x;
+      state->editor.coords.y = state->player.coords.y;
+   }
+#endif /* !NO_ENGINE_EDITOR */
+
+   return -1;
 }
 
 void item_draw( const struct ITEM* i, int16_t screen_x, int16_t screen_y ) {
