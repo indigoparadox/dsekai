@@ -34,6 +34,8 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          tile_px = (x * TILE_W) - gstate->screen_scroll_x;
          tile_py = (y * TILE_H) - gstate->screen_scroll_y;
 
+#ifndef NO_ENGINE_EDITOR
+
          /* Flash the tile and continue if the editor is active. */
          if(
             EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags)
@@ -60,6 +62,8 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
                state->editor.flags &= ~EDITOR_FLAG_FORCE_FRAME;
             }
          }
+
+#endif /* !NO_ENGINE_EDITOR */
 
          /* Mark as dirty any on-screen tiles under an animation. */
          for( i = 0 ; ANIMATE_ANIMATIONS_MAX > i ; i++ ) {
@@ -353,50 +357,70 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
 
    switch( in_char ) {
    case INPUT_KEY_UP:
+#ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.y--;
       } else {
+#endif /* !NO_ENGINE_EDITOR */
          engines_handle_movement( MOBILE_DIR_NORTH, state );
+#ifndef NO_ENGINE_EDITOR
       }
+#endif /* !NO_ENGINE_EDITOR */
       break;
 
    case INPUT_KEY_LEFT:
+#ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.x--;
       } else {
+#endif /* !NO_ENGINE_EDITOR */
          engines_handle_movement( MOBILE_DIR_WEST, state );
+#ifndef NO_ENGINE_EDITOR
       }
+#endif /* !NO_ENGINE_EDITOR */
       break;
 
    case INPUT_KEY_DOWN:
+#ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.y++;
       } else {
+#endif /* !NO_ENGINE_EDITOR */
          engines_handle_movement( MOBILE_DIR_SOUTH, state );
+#ifndef NO_ENGINE_EDITOR
       }
+#endif /* !NO_ENGINE_EDITOR */
       break;
 
    case INPUT_KEY_RIGHT:
+#ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.x++;
       } else {
+#endif /* !NO_ENGINE_EDITOR */
          engines_handle_movement( MOBILE_DIR_EAST, state );
+#ifndef NO_ENGINE_EDITOR
       }
+#endif /* !NO_ENGINE_EDITOR */
       break;
 
    case INPUT_KEY_OK:
+#ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          tilemap_advance_tile_id( &(state->map),
             state->editor.coords.x,
             state->editor.coords.y );
          state->editor.flags |= EDITOR_FLAG_FORCE_FRAME;
       } else {
+#endif /* !NO_ENGINE_EDITOR */
          /* Try to interact with facing mobile. */
          mobile_interact(
             &(state->player),
             mobile_get_facing( &(state->player), state ),
             &(state->map) );
+#ifndef NO_ENGINE_EDITOR
       }
+#endif /* !NO_ENGINE_EDITOR */
       break;
    }
 

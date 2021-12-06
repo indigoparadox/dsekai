@@ -51,8 +51,10 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
    animate_stop_all();
 
+#ifndef NO_ENGINE_EDITOR
    /* Disable editor. */
    memory_zero_ptr( &(state->editor), sizeof( struct EDITOR_STATE ) );
+#endif /* !NO_ENGINE_EDITOR */
 
    /* Finished unloading old state, so get ready to load new state if needed. */
 

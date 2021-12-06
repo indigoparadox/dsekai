@@ -54,6 +54,7 @@ int8_t item_use_axe(
 int8_t item_use_editor(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
+#ifndef NO_ENGINE_EDITOR
    if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
       state->editor.flags &= ~EDITOR_FLAG_ACTIVE;
    } else {
@@ -61,6 +62,7 @@ int8_t item_use_editor(
       state->editor.coords.x = state->player.coords.x;
       state->editor.coords.y = state->player.coords.y;
    }
+#endif /* !NO_ENGINE_EDITOR */
 
    return -1;
 }
