@@ -267,7 +267,7 @@
         {
          "name":"script_1",
          "type":"string",
-         "value":"h1236t0s5g0i0p2x32767"
+         "value":"t0s5g0i0p2x32767"
         }, 
         {
          "name":"script_2",
@@ -287,7 +287,7 @@
         {
          "name":"script_5",
          "type":"string",
-         "value":"t0f3s5g0i0x32767"
+         "value":"t0f3s5g0i0p6h1236z0x32767"
         }, 
         {
          "name":"string_0",
@@ -318,6 +318,11 @@
          "name":"string_5",
          "type":"string",
          "value":"forst"
+        }, 
+        {
+         "name":"string_6",
+         "type":"string",
+         "value":"Found an editor!"
         }, 
         {
          "name":"weather",
