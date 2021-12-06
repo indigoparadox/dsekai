@@ -1,6 +1,8 @@
 
 #include "dsekai.h"
 
+#include <math.h>
+
 const double gc_pov_dir_x[4] = {
    /* SOUTH */
    0.0,
@@ -125,8 +127,10 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
          &(state->player),
          mobile_get_facing( &(state->player), state ),
          &(state->map) );
+#ifdef POV_DEBUG_INC
       gstate->inc++;
       debug_printf( 3, "inc: %d", gstate->inc );
+#endif /* POV_DEBUG_INC */
       break;
    }
 
@@ -269,7 +273,11 @@ void pov_draw_wall_x(
       (ray->wall_side && 0 != ray->dir_y)
    ) {
       /* We're drawing a wall orthoganal to the viewer. */
-      tex_pos -= (2000 + gstate->inc) / (line_px_height);
+      tex_pos -= (2000
+#ifdef POV_DEBUG_INC
+         + gstate->inc
+#endif /* POV_DEBUG_INC */
+      ) / (line_px_height);
    }
 
    /* debug_printf( 3, "XXX" ); */
@@ -343,11 +351,9 @@ void pov_draw( struct DSEKAI_STATE* state ) {
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
-   /*
    if( !(gstate->dirty) ) {
       goto cleanup;
    }
-   */
    
    memory_zero_ptr( gstate->minimap, TILEMAP_TH * TILEMAP_TW );
 
