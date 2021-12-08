@@ -71,17 +71,21 @@ const char gc_pov_compass[] = {
 
 int16_t pov_setup( struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
+   /*
    struct POV_STATE* gstate = NULL;
+   */
 
    assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
    state->engine_state_handle =
       memory_alloc( sizeof( struct POV_STATE ), 1 );
 
+   /*
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
-   gstate->dirty = 1;
-
    gstate = (struct POV_STATE*)memory_unlock( state->engine_state_handle );
+   */
+
+   tilemap_refresh_tiles( &(state->map) );
 
    state->engine_state = ENGINE_STATE_RUNNING;
 
@@ -94,31 +98,37 @@ void pov_shutdown( struct DSEKAI_STATE* state ) {
 
 int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
+   /*
    struct POV_STATE* gstate = NULL;
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
+   */
 
    switch( in_char ) {
    case INPUT_KEY_UP:
       engines_handle_movement( state->player.dir, state );
-      gstate->dirty = 1;
+      tilemap_refresh_tiles( &(state->map) );
+      /* gstate->dirty = 1; */
       break;
 
    case INPUT_KEY_LEFT:
       /* engines_handle_movement( MOBILE_DIR_WEST, state ); */
       state->player.dir = gc_pov_dir_turn_left[state->player.dir];
-      gstate->dirty = 1;
+      tilemap_refresh_tiles( &(state->map) );
+      /* gstate->dirty = 1; */
       break;
 
    case INPUT_KEY_DOWN:
       engines_handle_movement( MOBILE_DIR_SOUTH, state );
-      gstate->dirty = 1;
+      tilemap_refresh_tiles( &(state->map) );
+      /* gstate->dirty = 1; */
       break;
 
    case INPUT_KEY_RIGHT:
       /* engines_handle_movement( MOBILE_DIR_EAST, state ); */
       state->player.dir = gc_pov_dir_turn_right[state->player.dir];
-      gstate->dirty = 1;
+      tilemap_refresh_tiles( &(state->map) );
+      /* gstate->dirty = 1; */
       break;
 
    case INPUT_KEY_OK:
@@ -134,7 +144,9 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
       break;
    }
 
+   /*
    gstate = (struct POV_STATE*)memory_unlock( state->engine_state_handle );
+   */
 
    return retval;
 }
@@ -197,17 +209,31 @@ static int8_t pov_cast_ray(
       if( 0 > ray->tile_id ) {
          error_printf( "invalid tile_id at %d, %d", ray->map_tx, ray->map_ty );
          wall_hit = 2;
-      }
 
-      if(
+      } else if(
          TILEMAP_TILESET_FLAG_BLOCK ==
          (t->tileset[ray->tile_id].flags & TILEMAP_TILESET_FLAG_BLOCK)
       ) {
+         if(
+            TILEMAP_TILE_FLAG_DIRTY !=
+            (TILEMAP_TILE_FLAG_DIRTY &
+            t->tiles_flags[(ray->map_ty * TILEMAP_TW) + ray->map_tx])
+         ) {
+            wall_hit = 2;
+         }
+
+         /* Mark wall dirty. */
+         t->tiles_flags[(ray->map_ty * TILEMAP_TW) + ray->map_tx] |=
+            TILEMAP_TILE_FLAG_DIRTY;
+
          debug_printf( 0,
             "tile id at screen %d, %dx%d: %d (%d)", x,
                ray->map_tx, ray->map_ty, ray->tile_id, ray->wall_side );
          wall_hit = 1;
+
+         /* Draw wall on minimap. */
          minimap[(ray->map_ty * TILEMAP_TW) + ray->map_tx] = 2;
+
       }
    }
 
@@ -344,16 +370,18 @@ void pov_draw_minimap( uint8_t* minimap, struct MOBILE* player ) {
 }
 
 void pov_draw( struct DSEKAI_STATE* state ) {
-   struct POV_STATE* gstate = NULL;
    int16_t x = 0;
    int8_t tile_id = 0;
    struct POV_RAY ray;
+   struct POV_STATE* gstate = NULL;
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
+   /*
    if( !(gstate->dirty) ) {
       goto cleanup;
    }
+   */
    
    memory_zero_ptr( gstate->minimap, TILEMAP_TH * TILEMAP_TW );
 
@@ -414,7 +442,9 @@ void pov_draw( struct DSEKAI_STATE* state ) {
 
    pov_draw_minimap( gstate->minimap, &(state->player) );
 
+   /*
    gstate->dirty = 0;
+   */
 
 cleanup:
 
