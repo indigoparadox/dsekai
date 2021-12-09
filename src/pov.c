@@ -377,12 +377,6 @@ void pov_draw( struct DSEKAI_STATE* state ) {
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
-   /*
-   if( !(gstate->dirty) ) {
-      goto cleanup;
-   }
-   */
-   
    memory_zero_ptr( gstate->minimap, TILEMAP_TH * TILEMAP_TW );
 
    graphics_draw_block(
@@ -441,12 +435,6 @@ void pov_draw( struct DSEKAI_STATE* state ) {
    }
 
    pov_draw_minimap( gstate->minimap, &(state->player) );
-
-   /*
-   gstate->dirty = 0;
-   */
-
-cleanup:
 
    if( NULL != gstate ) {
       gstate = memory_unlock( state->engine_state_handle );

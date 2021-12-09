@@ -39,6 +39,15 @@ void print_table_cga_bytes(
 
 int main( int argc, char* argv[] ) {
    int x = 0, y = 0;
+   double dir_x_right,
+      dir_y_right,
+      plane_x_right,
+      plane_y_right,
+      delta_dist_x,
+      delta_dist_y,
+      dir_x,
+      dir_y,
+      camera_x;
    FILE* hout = NULL;
 
    assert( argc == 3 );
@@ -52,6 +61,7 @@ int main( int argc, char* argv[] ) {
          hout, "uint16_t", "gc_offsets_cga_bytes_p2", 200, 320, 0, 0 );
       print_table_cga_bytes(
          hout, "uint8_t", "gc_offsets_cga_bits_p1", 200, 320, 1, 0 );
+
    } else if( 0 == strncmp( "pov", argv[1], 3 ) ) {
       /* left */
       fprintf( hout, "\n/* left */\n\n" );
@@ -72,18 +82,38 @@ int main( int argc, char* argv[] ) {
       /* right */
       fprintf( hout, "\n/* right */\n\n" );
 
-      fprintf( hout, "/* facing_x */\n%f,\n",
-         0 * cos( -GRAPHICS_RAY_ROTATE_INC ) -
-            -1 * sin( -GRAPHICS_RAY_ROTATE_INC ) );
-      fprintf( hout, "/* facing_y */\n%f,\n",
-         0 * sin( -GRAPHICS_RAY_ROTATE_INC ) +
-            -1 * cos( -GRAPHICS_RAY_ROTATE_INC ) );
-      fprintf( hout, "/* plane_x */\n%f,\n",
-         GRAPHICS_RAY_FOV * cos(-GRAPHICS_RAY_ROTATE_INC ) -
-            0 * sin( -GRAPHICS_RAY_ROTATE_INC ) );
-      fprintf( hout, "/* plane_y */\n%f,\n",
-         GRAPHICS_RAY_FOV * sin( -GRAPHICS_RAY_ROTATE_INC ) +
-            0 * cos( -GRAPHICS_RAY_ROTATE_INC ) );
+      dir_x_right = 0 * cos( -GRAPHICS_RAY_ROTATE_INC ) -
+         -1 * sin( -GRAPHICS_RAY_ROTATE_INC );
+      dir_y_right = 0 * sin( -GRAPHICS_RAY_ROTATE_INC ) +
+         -1 * cos( -GRAPHICS_RAY_ROTATE_INC );
+      plane_x_right = GRAPHICS_RAY_FOV * cos(-GRAPHICS_RAY_ROTATE_INC ) -
+         0 * sin( -GRAPHICS_RAY_ROTATE_INC );
+      plane_y_right = GRAPHICS_RAY_FOV * sin( -GRAPHICS_RAY_ROTATE_INC ) +
+         0 * cos( -GRAPHICS_RAY_ROTATE_INC );
+
+      fprintf( hout, "/* facing_x */\n%f,\n", dir_x_right );
+      fprintf( hout, "/* facing_y */\n%f,\n", dir_y_right );
+      fprintf( hout, "/* plane_x */\n%f,\n", plane_x_right );
+      fprintf( hout, "/* plane_y */\n%f,\n", plane_y_right );
+
+      fprintf( hout, "\n/* fabs */\n\n" );
+      
+      for( x = 0 ; 160 > x ; x++ ) {
+         /* Setup ray direction and position. */
+         camera_x = 2 * x / (double)160 - 1;
+         dir_x = dir_x_right + plane_x_right * camera_x;
+         dir_y = dir_y_right + plane_y_right * camera_x;
+
+         /* Set ray distance to next tile side. */
+         delta_dist_x = (0 == dir_x) ? 1e30 : fabs( 1 / dir_x );
+         delta_dist_y = (0 == dir_y) ? 1e30 : fabs( 1 / dir_y );
+         fprintf( hout, "/* dir_x */\n%f\n", dir_x_right );
+         fprintf( hout, "/* dir_y */\n%f\n", dir_y_right );
+         fprintf( hout, "/* delta_dist_x */\n%f\n", delta_dist_x );
+         fprintf( hout, "/* delta_dist_y */\n%f\n", delta_dist_y );
+         fprintf( hout, "\n" );
+      }
+
 
    } else {
       printf( "usage: lookups [cga|pov] <header.h>" );

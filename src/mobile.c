@@ -26,7 +26,7 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
 struct MOBILE* mobile_get_facing(
    struct MOBILE* m, struct DSEKAI_STATE* state
 ) {
-   int i = 0;
+   int8_t i = 0;
 
    assert( 0 <= m->dir );
    assert( 4 > m->dir );

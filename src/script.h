@@ -82,7 +82,7 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
  * \param script ::MEMORY_PTR to the SCRIPT struct to populate.
  */
 uint16_t script_parse_str(
-   int script_idx,
+   int8_t script_idx,
    char* script_txt, int16_t script_txt_sz, struct SCRIPT* script );
 
 /**

@@ -30,8 +30,6 @@ int8_t item_use_food(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
    int8_t anim_idx = 0;
-   int16_t px = 0,
-      py = 0;
    char num_str[10];
 
    item_consume( e );

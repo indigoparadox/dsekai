@@ -21,7 +21,7 @@ int16_t tilemap_asn_parse_int(
    int8_t* int8_buffer = (int8_t*)buffer;
 
    if( 0x02 != asn_buffer[0] ) {
-      error_printf( "invalid int type byte: 0x%02x", asn_buffer[0] );
+      error_printf( "invalid integer type byte: 0x%02x", asn_buffer[0] );
       goto cleanup;
    }
 

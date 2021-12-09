@@ -409,10 +409,10 @@ uint16_t script_handle_DIE(
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;
 
 uint16_t script_parse_str(
-   int script_idx,
+   int8_t script_idx,
    char* script_txt, int16_t script_txt_sz, struct SCRIPT* script
 ) {
-   int c_idx = 0;
+   int16_t c_idx = 0;
 
    debug_printf( 2, "parsing script %d: %s", script_idx, script_txt );
 

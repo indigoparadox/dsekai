@@ -28,7 +28,7 @@ int16_t json_get_token_idx(
    struct jsmntok* tokens, uint16_t tokens_sz,
    const char* buf, uint16_t tree_depth_id
 ) {
-   int i = 0;
+   uint16_t i = 0;
    int16_t tentative_child_idx = -1,
       cmp_str_as_i = 0,
       child_idx = 0,
@@ -42,7 +42,8 @@ int16_t json_get_token_idx(
 
    if( NULL != path && JSMN_ARRAY == parent->type ) {
       cmp_str_as_i = dio_atoi( path, 10 );
-      debug_printf( 0, "(%u) idx as int is: %d", tree_depth_id, cmp_str_as_i );
+      debug_printf( 0, "(%u) idx as integer is: %d",
+         tree_depth_id, cmp_str_as_i );
    }
 
    for( i = 0 ; tokens_sz > i ; i++ ) {

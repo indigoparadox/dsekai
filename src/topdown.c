@@ -7,7 +7,7 @@
  *              what is currently on-screen.
  */
 void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
-   int x = 0,
+   int16_t x = 0,
       y = 0,
       i = 0;
    uint8_t tile_id = 0;
@@ -191,7 +191,7 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
 
 void topdown_focus_player( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
-   int player_x_px = 0,
+   int16_t player_x_px = 0,
       player_y_px = 0;
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );

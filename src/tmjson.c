@@ -170,7 +170,7 @@ static void tilemap_json_parse_scripts(
    struct jsmntok* tokens, uint16_t tokens_sz
 ) {
    char iter_path[JSON_PATH_SZ];
-   int i = 0,
+   int16_t i = 0,
       script_buffer_sz = 0,
       loaded = 0;
    char script_buffer[SCRIPT_STR_MAX];
@@ -202,7 +202,7 @@ static void tilemap_json_parse_strings(
    char iter_path[JSON_PATH_SZ],
       string_buf[TILEMAP_JSON_STRBUF_SZ];
    int16_t string_sz_tmp = 0;
-   int i = 0;
+   int8_t str_idx = 0;
 
    strpool_init( t->strpool, TILEMAP_STRPOOL_SZ );
    
@@ -210,7 +210,7 @@ static void tilemap_json_parse_strings(
    debug_printf( 2, "loading strings" ); 
    do {
       dio_snprintf(
-         iter_path, JSON_PATH_SZ, TILEMAP_JPATH_STRING, i );
+         iter_path, JSON_PATH_SZ, TILEMAP_JPATH_STRING, str_idx );
       string_sz_tmp = json_str_from_path(
          iter_path, JSON_PATH_SZ,
          string_buf, TILEMAP_JSON_STRBUF_SZ,
@@ -222,7 +222,7 @@ static void tilemap_json_parse_strings(
          strpool_add_string( t->strpool, string_buf, string_sz_tmp );
          debug_printf( 1, "loaded string: %s (%d)",
             string_buf, string_sz_tmp );
-         i++;
+         str_idx++;
       }
    } while( 0 < string_sz_tmp );
 }
@@ -417,7 +417,7 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
       tok_parsed = 0;
    char ts_name[JSON_PATH_SZ];
    struct jsmntok* tokens = NULL;
-   int i = 0;
+   int8_t spawn_idx = 0;
 
    memory_zero_ptr( t, sizeof( struct TILEMAP ) );
 
@@ -458,11 +458,6 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
    json_str_from_path(
       TILEMAP_JPATH_PROP_NAME, sizeof( TILEMAP_JPATH_PROP_NAME ),
       t->name, TILEMAP_NAME_MAX, tokens, tok_parsed, json_buffer );
-
-#if 0
-   tilemap_json_parse_engine(
-      t, json_buffer, json_buffer_sz, tokens, tok_parsed );
-#endif
 
    tilemap_json_parse_weather(
       t, json_buffer, json_buffer_sz, tokens, tok_parsed );
@@ -509,14 +504,14 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
 
    debug_printf( 2, "loading spawns" ); 
    while(
-      TILEMAP_SPAWNS_MAX > i &&
+      TILEMAP_SPAWNS_MAX > spawn_idx &&
       tilemap_json_parse_spawn(
-         t, i, tokens, tok_parsed, json_buffer, json_buffer_sz, id
+         t, spawn_idx, tokens, tok_parsed, json_buffer, json_buffer_sz, id
       )
    ) {
       
       /* Iterate to the next spawn. */
-      i++;
+      spawn_idx++;
    }
 
    tilemap_json_parse_items(

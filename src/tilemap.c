@@ -45,7 +45,7 @@ uint16_t tilemap_fix_asset_path(
 #endif /* RESOURCE_FILE */
 
 void tilemap_refresh_tiles( struct TILEMAP* t ) {
-   int x = 0, y = 0;
+   int8_t x = 0, y = 0;
 
    for( y = 0 ; TILEMAP_TH > y ; y++ ) {
       for( x = 0 ; TILEMAP_TW > x ; x++ ) {

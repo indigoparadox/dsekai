@@ -5,7 +5,7 @@ static int8_t asn_get_int_sz( int32_t value ) {
    int8_t val_sz = -1;
 
    if( value <= 0x7f ) {
-      /* TODO: 0x7f only for int types? */
+      /* TODO: 0x7f only for integer types? */
       val_sz = 1;
       
    } else if( value == (value & 0xffff) ) {
@@ -143,7 +143,7 @@ int32_t asn_write_int( MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t value ) {
       goto cleanup;
    }
 
-   /* Write the int type to the buffer. */
+   /* Write the integer type to the buffer. */
    if( 0 <= value ) {
       buffer[idx++] = ASN_INT;
    } else {
@@ -151,7 +151,7 @@ int32_t asn_write_int( MEMORY_HANDLE* ph_buffer, int32_t idx, int32_t value ) {
       buffer[idx++] = ASN_INT | 0x40;
    }
 
-   /* Write the size of the int to the buffer. */
+   /* Write the size of the integer to the buffer. */
    buffer[idx++] = val_sz;
 
    /* Write the actual value to the buffer. */
@@ -169,9 +169,9 @@ cleanup:
 int32_t asn_write_string(
    MEMORY_HANDLE* ph_buffer, int32_t idx, const char* source, int32_t source_sz
 ) {
-   int i = 0;
    int8_t sz_of_sz = 1;
-   int32_t source_len = 0;
+   int32_t source_len = 0,
+      i = 0;
    uint8_t* buffer = NULL;
    int32_t retval = 0;
 
@@ -234,10 +234,10 @@ cleanup:
 int32_t asn_write_blob(
    MEMORY_HANDLE* ph_buffer, int32_t idx, uint8_t* source, int32_t source_sz
 ) {
-   int i = 0;
    int8_t sz_of_sz = 1;
    uint8_t* buffer = NULL;
-   int32_t retval = 0;
+   int32_t retval = 0,
+      i = 0;
 
    /* Get the size of the size. */
    sz_of_sz = asn_get_int_sz( source_sz );
