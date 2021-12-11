@@ -79,15 +79,16 @@ uint8_t tilemap_collide(
 ) {
    uint8_t tile_id = 0;
    int16_t x = 0, y = 0;
+   uint8_t collide_out = 0;
 
    x = m->coords.x + gc_mobile_x_offsets[dir];
    y = m->coords.y + gc_mobile_y_offsets[dir];
 
    tile_id = tilemap_get_tile_id( t, x, y );
    if( t->tileset[tile_id].flags & (uint8_t)TILEMAP_TILESET_FLAG_BLOCK ) {
-      return 1;
+      collide_out = 1;
    }
-   return 0;
+   return collide_out;
 }
 
 void tilemap_advance_tile_id( struct TILEMAP* t, uint16_t x, uint16_t y ) {

@@ -136,7 +136,7 @@ extern int8_t g_script_globals[SCRIPT_GLOBALS_MAX];
  */
 #define SCRIPT_CB_TABLE_CONSTS( idx, name, c ) extern const uint16_t SCRIPT_ACTION_ ## name;
 
-SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS );
+SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS )
 
 extern const SCRIPT_CB gc_script_handlers[];
 #endif /* !SCRIPT_C */
