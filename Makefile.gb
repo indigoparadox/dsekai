@@ -1,0 +1,112 @@
+
+# vi:syntax=make
+
+include Makefile
+
+# 1. Directories
+
+OBJDIR_GB := $(OBJDIR)/gb
+DEPDIR_GB := $(DEPDIR)/gb
+GENDIR_GB := $(GENDIR)/gb
+
+BIN_GB := $(BINDIR)/$(DSEKAI).gb
+
+# 2. Files
+
+DSEKAI_C_FILES_GB_ONLY := \
+   src/main.c \
+   unilayer/src/input/gbi.c \
+   unilayer/src/graphics/gbg.c \
+   unilayer/src/memory/fakem.c
+
+DSEKAI_O_FILES_GB := \
+   $(addprefix $(OBJDIR_GB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
+   $(addprefix $(OBJDIR_GB)/,$(subst .c,.o,$(DSEKAI_C_FILES_GB_ONLY))) \
+   $(addprefix $(OBJDIR_GB)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+
+# 1a. Packaging Manifest
+
+GB_MANIFEST :=
+
+ifeq ($(RESOURCE),FILE)
+   ifeq ($(DEPTH),VGA)
+      GB_MANIFEST += $(subst .bmp,.vga,$(DSEKAI_ASSETS_BITMAPS))
+   else
+      # Assume CGA by default.
+      GB_MANIFEST += $(subst .bmp,.cga,$(DSEKAI_ASSETS_BITMAPS))
+   endif
+endif
+
+ifeq ($(FMT_ASN),TRUE)
+   GB_MANIFEST += $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON))
+endif
+
+ifeq ($(FMT_JSON),TRUE)
+   GB_MANIFEST += $(DSEKAI_ASSETS_MAPS_JSON)
+endif
+
+RESEXT_H := $(GENDIR_GB)/resext.h
+
+# 3. Programs
+
+CC_GB := /opt/gbdk/bin/lcc
+LD_GB := /opt/gbdk/bin/link-gbz80
+
+# 4. Arguments
+
+DEFINES_GB := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   $(DEFINES_RESOURCE) \
+   -DNO_ENGINE_POV \
+   -DDISABLE_FILESYSTEM \
+   -DDISABLE_ASSERT \
+   -DANCIENT_C \
+   -DSKIP_TITLE \
+   -DPLATFORM_GB \
+   -DUSE_SOFTWARE_TEXT \
+   -DUSE_SOFTWARE_LINES \
+   -DDISABLE_WEATHER_EFFECTS \
+   -DSCREEN_W=320 \
+   -DSCREEN_H=200 \
+   -DUSE_LOOKUPS
+
+INCLUDES_GB := \
+   -Iunilayer/src \
+   -I$(GENDIR_GB) 
+
+CFLAGS_GB := -Wa-l $(CFLAGS_OWC_GENERIC) $(DEFINES_GB) $(INCLUDES_GB)
+
+LDFLAGS_GB := -m -j $(LDFLAGS_OWC_GENERIC)
+
+# 5. Targets
+
+#platform := gb
+#res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+#res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
+#$(eval $(RESEXT_H_RULE))
+
+pkg_bin := $(BIN_GB)
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs := $(GB_MANIFEST)
+$(eval $(PKG_RULE))
+
+$(RESEXT_H):
+	$(MD) $(dir $@)
+	touch $@
+
+$(BIN_GB): $(DSEKAI_O_FILES_GB) | $(BINDIR)/$(STAMPFILE)
+	$(LD_GB) $(LDFLAGS_GB) -fe=$@ $^
+
+$(OBJDIR_GB)/%.o: %.c $(RESEXT_H)
+	$(MD) $(dir $@)
+	$(CC_GB) $(CFLAGS_GB) -o $@ $<
+
+#$(DEPDIR_GB)/%.d: %.c $(RESEXT_H)
+#	$(MD) $(dir $@)
+#	$(HOST_CC) $(subst -i=,-I ,$(INCLUDES_GB)) $(DEFINES_GB) -MM $< \
+#      -MT $(subst .c,.o,$(addprefix $(DEPDIR_GB)/,$<)) -MF $@
+#
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_GB:.o=.d))
+
