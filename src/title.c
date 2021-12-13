@@ -51,7 +51,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
          WINDOW_PLACEMENT_GRID, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
          color, GRAPHICS_COLOR_BLACK,
-         GRAPHICS_STRING_FLAGS_ALL_CAPS,
+         GRAPHICS_STRING_FLAG_ALL_CAPS,
          0, 0, gc_title_options[i], state );
    }
 

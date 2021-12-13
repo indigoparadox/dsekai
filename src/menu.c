@@ -29,7 +29,7 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
          WINDOW_FLAG_TEXT_MENU,
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
-         color, GRAPHICS_COLOR_BLACK, GRAPHICS_STRING_FLAGS_ALL_CAPS,
+         color, GRAPHICS_COLOR_BLACK, GRAPHICS_STRING_FLAG_ALL_CAPS,
          i, 0, NULL, state );
       i++;
    }  
@@ -134,7 +134,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_ITEM,
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
-         color, GRAPHICS_COLOR_BLACK, GRAPHICS_STRING_FLAGS_ALL_CAPS,
+         color, GRAPHICS_COLOR_BLACK, GRAPHICS_STRING_FLAG_ALL_CAPS,
          i, 0, NULL, state );
 
       window_push(
@@ -157,7 +157,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK,
-         GRAPHICS_STRING_FLAGS_ALL_CAPS,
+         GRAPHICS_STRING_FLAG_ALL_CAPS,
          0, 0, gc_menu_msgs[0], MENU_WINDOW_ID, state ); */
    }
 }

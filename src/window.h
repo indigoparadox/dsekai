@@ -201,7 +201,7 @@ struct WINDOW {
  * \param state Current global ::DSEKAI_STATE.
  * \param state ::MEMORY_PTR to the global engine ::DSEKAI_STATE.
  */
-#define window_prefab_dialog( dialog, sprite, dir_flag, state, fg, bg ) window_push( WINDOW_ID_SCRIPT_SPEAK, 0, WINDOW_TYPE_WINDOW, WINDOW_FLAG_MODAL, SCREEN_MAP_X, WINDOW_PLACEMENT_CENTER, SCREEN_MAP_W, 64, fg, bg, 0, 0, 0, NULL, state ); window_push( WINDOW_ID_SCRIPT_SPEAK + 1, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_TILEMAP, WINDOW_PLACEMENT_CENTER, 30, WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER, fg, bg, 0, dialog, 0, NULL, state ); window_push( WINDOW_ID_SCRIPT_SPEAK + 2, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_SPRITE, dir_flag, WINDOW_PLACEMENT_CENTER, 6, WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, fg, bg, 0, 0, sprite, NULL, state ); 
+#define window_prefab_dialog( dialog, sprite, dir_flag, state, fg, bg ) window_push( WINDOW_ID_SCRIPT_SPEAK, 0, WINDOW_TYPE_WINDOW, WINDOW_FLAG_MODAL, SCREEN_MAP_X, WINDOW_PLACEMENT_CENTER, SCREEN_MAP_W, 64, fg, bg, 0, 0, 0, NULL, state ); window_push( WINDOW_ID_SCRIPT_SPEAK + 1, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_TILEMAP, WINDOW_PLACEMENT_CENTER, 30, WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER, fg, bg, GRAPHICS_STRING_FLAG_FONT_SCRIPT, dialog, 0, NULL, state ); window_push( WINDOW_ID_SCRIPT_SPEAK + 2, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_SPRITE, dir_flag, WINDOW_PLACEMENT_CENTER, 6, WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, fg, bg, 0, 0, sprite, NULL, state ); 
 
 /**
  * \brief Global initialization for the window subsystem. Runs at startup.
