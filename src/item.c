@@ -85,6 +85,13 @@ int8_t item_use_editor(
    return -1;
 }
 
+int8_t item_use_material(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+) {
+   /* TODO */
+   return 0;
+}
+
 void item_draw( const struct ITEM* i, int16_t screen_x, int16_t screen_y ) {
    /*
    int16_t x_offset = 0,

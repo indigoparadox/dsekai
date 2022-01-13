@@ -53,7 +53,7 @@ int16_t menu_handler_main( char in_char, struct DSEKAI_STATE* state ) {
 
    case INPUT_KEY_OK:
       /* TODO: Use quit callback. */
-      if( state->menu.highlight_id == 2 /* quit */ ) {
+      if( state->menu.highlight_id == gc_menu_idx_quit ) {
          /* retval = 0; */
          engines_exit_to_title( state );
          menu_close( state );
@@ -222,6 +222,17 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
    state->menu.flags |= MENU_FLAG_DIRTY;
 
    return retval;
+}
+
+void menu_renderer_craft( struct DSEKAI_STATE* state ) {
+}
+
+int16_t menu_handler_craft( char in_char, struct DSEKAI_STATE* state ) {
+
+   state->menu.menu_id = 0;
+   state->menu.highlight_id = 1;
+
+   return 1;
 }
 
 void menu_renderer_quit( struct DSEKAI_STATE* state ) {

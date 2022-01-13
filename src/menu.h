@@ -13,7 +13,7 @@
  * \brief Defines the top-level menu items and callbacks used to handle each
  *        submenu.
  */
-#define MENU_TABLE( f ) f( main ) f( items ) f( quit )
+#define MENU_TABLE( f ) f( 0, main ) f( 1, items ) f( 2, craft ) f( 3, quit )
 
 /**
  * \brief Maximum length of a menu item's display text.
@@ -40,11 +40,11 @@ typedef void (*MENU_RENDERER)( struct DSEKAI_STATE* state );
  */
 typedef int16_t (*MENU_HANDLER)( char in_char, struct DSEKAI_STATE* state );
 
-#define MENU_RENDERER_PROTOTYPES( name ) void menu_renderer_ ## name( struct DSEKAI_STATE* state );
+#define MENU_RENDERER_PROTOTYPES( idx, name ) void menu_renderer_ ## name( struct DSEKAI_STATE* state );
 
 MENU_TABLE( MENU_RENDERER_PROTOTYPES )
 
-#define MENU_HANDLER_PROTOTYPES( name ) int16_t menu_handler_ ## name( char in_char, struct DSEKAI_STATE* state );
+#define MENU_HANDLER_PROTOTYPES( idx, name ) int16_t menu_handler_ ## name( char in_char, struct DSEKAI_STATE* state );
 
 MENU_TABLE( MENU_HANDLER_PROTOTYPES )
 
@@ -68,24 +68,28 @@ struct MENU_STATE {
 
 #ifdef MENU_C
 
-#define MENU_TABLE_RENDERERS( name ) menu_renderer_ ## name,
+#define MENU_TABLE_RENDERERS( idx, name ) menu_renderer_ ## name,
 
 const MENU_RENDERER gc_menu_renderers[] = {
    MENU_TABLE( MENU_TABLE_RENDERERS )
 };
 
-#define MENU_TABLE_HANDLERS( name ) menu_handler_ ## name,
+#define MENU_TABLE_HANDLERS( idx, name ) menu_handler_ ## name,
 
 const MENU_HANDLER gc_menu_handlers[] = {
    MENU_TABLE( MENU_TABLE_HANDLERS )
 };
 
-#define MENU_TABLE_TOKENS( name ) #name,
+#define MENU_TABLE_TOKENS( idx, name ) #name,
 
 const char gc_menu_tokens[][MENU_TEXT_SZ] = {
    MENU_TABLE( MENU_TABLE_TOKENS )
    ""
 };
+
+#define MENU_TABLE_CONSTS( idx, name ) const uint8_t gc_menu_idx_ ## name = idx;
+
+MENU_TABLE( MENU_TABLE_CONSTS )
 
 #else
 
@@ -108,6 +112,10 @@ extern const MENU_HANDLER gc_menu_handlers[];
  * \brief Table of menu item names as strings.
  */
 extern const char gc_menu_tokens[][MENU_TEXT_SZ];
+
+#define MENU_TABLE_CONSTS( idx, name ) extern const uint8_t gc_menu_idx_ ## name;
+
+MENU_TABLE( MENU_TABLE_CONSTS )
 
 #endif /* MENU_C */
 
