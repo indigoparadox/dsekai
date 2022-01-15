@@ -223,6 +223,32 @@ int16_t json_int_from_path(
    return out;
 }
 
+int16_t json_bool_from_path(
+   const char* path, uint16_t path_sz,
+   struct jsmntok* tokens, uint16_t tokens_sz, const char* buf
+) {
+   int16_t out = 0,
+      id = 0;
+
+   id = json_token_id_from_path( path, path_sz, tokens, tokens_sz, buf );
+   if( 0 > id ) {
+      return id;
+   }
+   
+   assert( id < tokens_sz );
+   assert( 0 <= id );
+
+   if( 0 == memory_strncmp_ptr(
+      "true",
+      &(buf[tokens[id].start]),
+      4
+   ) ) {
+      out = 1;
+   }
+
+   return out;
+}
+
 int16_t json_str_from_path(
    const char* path, uint16_t path_sz,
    char* buffer, uint16_t buffer_sz,

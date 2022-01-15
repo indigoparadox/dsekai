@@ -202,10 +202,17 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
          error_printf( "no item selected!" );
          break;
       }
-      use_retval = gc_item_use_cbs[selected_item->type](
-         selected_item, &(state->player), state );
-      if( 0 > use_retval ) {
-         menu_close( state );
+      if(
+         MENU_FLAG_ITEM_CRAFTABLE ==
+         (state->menu.flags & MENU_FLAG_ITEM_CRAFTABLE)
+      ) {
+         /* TODO: Open crafting menu. */
+      } else {
+         use_retval = gc_item_use_cbs[selected_item->type](
+            selected_item, &(state->player), state );
+         if( 0 > use_retval ) {
+            menu_close( state );
+         }
       }
       break;
 
@@ -225,6 +232,17 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
 }
 
 void menu_renderer_craft( struct DSEKAI_STATE* state ) {
+
+   window_push(
+      MENU_WINDOW_CRAFT_ID, 0, WINDOW_TYPE_WINDOW, 0,
+      WINDOW_PLACEMENT_CENTER,
+      WINDOW_PLACEMENT_CENTER,
+      SCREEN_MAP_W / 2,
+      SCREEN_MAP_H / 2,
+      GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
+      0, 0, NULL,
+      state );
+
 }
 
 int16_t menu_handler_craft( char in_char, struct DSEKAI_STATE* state ) {

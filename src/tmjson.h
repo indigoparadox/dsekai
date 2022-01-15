@@ -71,6 +71,7 @@
 #define TILEMAP_JPATH_ITEM_TYPE "/layers/[name=items]/objects/%d/type"
 #define TILEMAP_JPATH_ITEM_SPRITE "/layers/[name=items]/objects/%d/properties/[name=sprite]/value"
 #define TILEMAP_JPATH_ITEM_DATA "/layers/[name=items]/objects/%d/properties/[name=data]/value"
+#define TILEMAP_JPATH_ITEM_CRAFTABLE "/layers/[name=items]/objects/%d/properties/[name=craftable]/value"
 
 /*! \} */
 

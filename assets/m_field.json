@@ -206,6 +206,11 @@
                  "name":"editor",
                  "properties":[
                         {
+                         "name":"craftable",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"gid",
                          "type":"int",
                          "value":1236

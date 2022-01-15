@@ -55,6 +55,13 @@ MENU_TABLE( MENU_HANDLER_PROTOTYPES )
  */
 #define MENU_FLAG_DIRTY 0x01
 
+/**
+ * \relates MENU_STATE
+ * \brief MENU_STATE::flags indicating item menu should only show craftable
+ *        items and return to craft menu when item is selected.
+ */
+#define MENU_FLAG_ITEM_CRAFTABLE    0x02
+
 struct MENU_STATE {
    /*! \brief Currently open menu as an index in the MENU_TABLE. */
    int8_t menu_id;
@@ -64,6 +71,8 @@ struct MENU_STATE {
    int8_t highlight_id;
    /*! \brief Bitfield used to manage menu behavior. */
    uint8_t flags;
+   int8_t craft_item_ids[3];
+   int8_t craft_mod_idx;
 };
 
 #ifdef MENU_C

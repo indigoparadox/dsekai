@@ -12,7 +12,8 @@
  *  \brief Structs pertaining to inventory objects.
  */
 
-#define ITEM_FLAG_ACTIVE 0x01
+#define ITEM_FLAG_ACTIVE      0x01
+#define ITEM_FLAG_CRAFTABLE   0x02
 
 /**
  * \relates ITEM_NAME

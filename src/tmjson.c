@@ -396,7 +396,21 @@ int16_t tilemap_json_parse_items(
       t->items[i].data = json_int_from_path(
          iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
 
-      /* flags */
+      /* craftable  */
+      dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_CRAFTABLE, i );
+      /* -1 or 1 is true, only 0 is false. This way flag is optional/defaults
+       * to true. */
+      if( json_bool_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer
+      ) ) {
+         debug_printf( 1, "item %d is craftable", i );
+         t->items[i].flags |= ITEM_FLAG_CRAFTABLE;
+      } else {
+         debug_printf( 1, "item %d is NOT craftable", i );
+         t->items[i].flags &= ~ITEM_FLAG_CRAFTABLE;
+      }
+
+      /* active */
       t->items[i].flags |= ITEM_FLAG_ACTIVE;
 
       /* count */

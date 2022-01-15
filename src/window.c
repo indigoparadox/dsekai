@@ -643,7 +643,7 @@ int16_t window_push(
       resource_assign_id( window_new->data.res_id, data_res_id );
    }
 
-   window_new->flags = flags | WINDOW_FLAG_DIRTY | WINDOW_FLAG_ACTIVE;
+   window_new->flags = gc_window_default_flags[type] | flags | WINDOW_FLAG_DIRTY | WINDOW_FLAG_ACTIVE;
    window_new->render_flags = render_flags;
    window_new->type = type;
    window_new->id = id;

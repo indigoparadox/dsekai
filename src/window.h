@@ -54,6 +54,13 @@ struct WINDOW {
    uint8_t flags;
    /* TODO: Work into flags. */
    uint8_t render_flags;
+   /*!
+    * \brief Index of currently selected control.
+    *
+    * Only counts controls with ::WINDOW_FLAG_SELECTABLE set.
+    * If set to < 0, no control is selected.
+    */
+   int8_t selected;
    /**
     * \brief Window coordinates and dimensions indexed as ::GUI_X, ::GUI_Y,
     *        ::GUI_W, ::GUI_H.
@@ -116,9 +123,9 @@ struct WINDOW {
  */
 #define WINDOW_FLAG_ACTIVE       0x01
 /**
- * \brief WINDOW::flags indicating control has cursor focus.
+ * \brief WINDOW::flags indicating control is able to gain cursor focus.
  */
-#define WINDOW_FLAG_SELECTED        0x02
+#define WINDOW_FLAG_SELECTABLE        0x02
 #define WINDOW_FLAG_DIRTY  0x04
 /**
  * \brief WINDOW::status indicating window is blocking all input.
@@ -250,7 +257,7 @@ void window_refresh( uint16_t w_id, struct DSEKAI_STATE* state );
  */
 int16_t window_modal( struct DSEKAI_STATE* state );
 
-#define WINDOW_CB_TABLE( f ) f( 0, LABEL ) f( 1, BUTTON ) f( 2, CHECK ) f( 3, SPRITE ) f( 4, WINDOW )
+#define WINDOW_CB_TABLE( f ) f( 0, LABEL, 0 ) f( 1, BUTTON, WINDOW_FLAG_SELECTABLE ) f( 2, CHECK, WINDOW_FLAG_SELECTABLE ) f( 3, SPRITE, 0 ) f( 4, WINDOW, 0 )
 
 typedef int16_t (*WINDOW_CB_DRAW)(
    uint16_t w_id,
@@ -281,36 +288,42 @@ static int16_t g_window_screen_grid[4] = {
    0, 0, 0, 0
 };
 
-#define WINDOW_CB_DRAW_TABLE_PROTOTYPES( idx, name ) static int16_t window_draw_ ## name( uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX], struct DSEKAI_STATE* state );
+#define WINDOW_CB_DRAW_TABLE_PROTOTYPES( idx, name, default_flags ) static int16_t window_draw_ ## name( uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX], struct DSEKAI_STATE* state );
 
 WINDOW_CB_TABLE( WINDOW_CB_DRAW_TABLE_PROTOTYPES );
 
-#define WINDOW_CB_SZ_TABLE_PROTOTYPES( idx, name ) static uint8_t window_sz_ ## name( uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX], struct DSEKAI_STATE* state, int16_t r[2] );
+#define WINDOW_CB_SZ_TABLE_PROTOTYPES( idx, name, default_flags ) static uint8_t window_sz_ ## name( uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX], struct DSEKAI_STATE* state, int16_t r[2] );
 
 WINDOW_CB_TABLE( WINDOW_CB_SZ_TABLE_PROTOTYPES );
 
-#define WINDOW_CB_DRAW_TABLE_LIST( idx, name ) window_draw_ ## name,
+#define WINDOW_CB_DRAW_TABLE_LIST( idx, name, default_flags ) window_draw_ ## name,
 
 static const WINDOW_CB_DRAW gc_window_draw_callbacks[] = {
    WINDOW_CB_TABLE( WINDOW_CB_DRAW_TABLE_LIST )
 };
 
-#define WINDOW_CB_SZ_TABLE_LIST( idx, name ) window_sz_ ## name,
+#define WINDOW_CB_SZ_TABLE_LIST( idx, name, default_flags ) window_sz_ ## name,
 
 static const WINDOW_CB_SZ gc_window_sz_callbacks[] = {
    WINDOW_CB_TABLE( WINDOW_CB_SZ_TABLE_LIST )
 };
 
-#define WINDOW_CB_TABLE_CONSTS( idx, name ) const uint16_t WINDOW_TYPE_ ## name = idx;
+#define WINDOW_CB_TABLE_CONSTS( idx, name, default_flags ) const uint16_t WINDOW_TYPE_ ## name = idx;
 
 WINDOW_CB_TABLE( WINDOW_CB_TABLE_CONSTS );
+
+#define WINDOW_CB_DEFAULT_FLAGS( idx, name, default_flags ) default_flags,
+
+static const uint8_t gc_window_default_flags[] = {
+   WINDOW_CB_TABLE( WINDOW_CB_DEFAULT_FLAGS )
+};
 
 #else
 
 /**
  * \brief Define extern constants that can be used e.g. in spawners.
  */
-#define WINDOW_CB_TABLE_CONSTS( idx, name ) extern const uint16_t WINDOW_TYPE_ ## name;
+#define WINDOW_CB_TABLE_CONSTS( idx, name, default_flags ) extern const uint16_t WINDOW_TYPE_ ## name;
 
 WINDOW_CB_TABLE( WINDOW_CB_TABLE_CONSTS )
 
