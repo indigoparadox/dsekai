@@ -67,11 +67,11 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
 
    /* Create the environmental animations. */
    animate_create(
-      ANIMATE_TYPE_FIRE, ANIMATE_FLAG_CLEANUP,
+      ANIMATE_TYPE_FIRE, ANIMATE_FLAG_CLEANUP | ANIMATE_FLAG_BG,
       0, SCREEN_H - ANIMATE_TILE_H, SCREEN_W, ANIMATE_TILE_H );
 
    animate_create(
-      ANIMATE_TYPE_SNOW, ANIMATE_FLAG_CLEANUP,
+      ANIMATE_TYPE_SNOW, ANIMATE_FLAG_CLEANUP | ANIMATE_FLAG_BG,
       0, 0, SCREEN_W, SCREEN_H - ANIMATE_TILE_H );
 
    title_draw_menu( state );
@@ -120,16 +120,12 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
 
    graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
 
-   /* Put snow behind windows and globe. */
-   state->flags |= DSEKAI_FLAG_ANIMATIONS_BG;
-
    state->engine_state = ENGINE_STATE_RUNNING;
 
    return retval;
 }
 
 void title_shutdown( struct DSEKAI_STATE* state ) {
-   state->flags &= ~DSEKAI_FLAG_ANIMATIONS_BG;
 }
 
 void title_draw( struct DSEKAI_STATE* state ) {

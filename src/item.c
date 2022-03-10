@@ -40,7 +40,7 @@ int8_t item_use_food(
 
 #if defined( DEPTH_VGA ) || defined( DEPTH_CGA )
    anim_idx = animate_create(
-      ANIMATE_TYPE_STRING, 0, user->screen_px, user->screen_py,
+      ANIMATE_TYPE_STRING, ANIMATE_FLAG_FG, user->screen_px, user->screen_py,
       SPRITE_W, SPRITE_H );
    animate_set_string(
       anim_idx, num_str, 10,

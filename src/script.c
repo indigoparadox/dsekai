@@ -259,7 +259,8 @@ uint16_t script_handle_ANIMATE(
 
 #ifdef SCRIPT_HAS_GFX
    animate_create(
-      arg, ANIMATE_FLAG_SCRIPT, SCREEN_MAP_X + a_x, SCREEN_MAP_Y + a_y, a_w, a_h
+      arg, ANIMATE_FLAG_SCRIPT | ANIMATE_FLAG_FG,
+      SCREEN_MAP_X + a_x, SCREEN_MAP_Y + a_y, a_w, a_h
    );
 #endif /* SCRIPT_HAS_GFX */
 

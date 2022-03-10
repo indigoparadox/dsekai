@@ -12,9 +12,25 @@
  *  be placed in this file.
  */
 
-/*! \brief Indicates that an animation is being used for TILEMAP::weather. */
+/**
+ * \relates ANIMATION
+ * \brief Indicates that an animation is behind tiles.
+ */
+#define ANIMATE_FLAG_BG  0x0400
+/**
+ * \relates ANIMATION
+ * \brief Indicates that an animation is in front of tiles.
+ */
+#define ANIMATE_FLAG_FG  0x0800
+/**
+ * \relates ANIMATION
+ * \brief Indicates that an animation is being used for TILEMAP::weather.
+ */
 #define ANIMATE_FLAG_WEATHER  0x0200
-/*! \brief Indicates that an animation was created by a ::SCRIPT. */
+/**
+ * \relates ANIMATION
+ * \brief Indicates that an animation was created by a ::SCRIPT.
+ */
 #define ANIMATE_FLAG_SCRIPT   0x0100
 
  /* === Includes === */

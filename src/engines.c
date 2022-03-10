@@ -207,12 +207,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    /* === Drawing Phase === */
 
-   if(
-      DSEKAI_FLAG_ANIMATIONS_BG == (DSEKAI_FLAG_ANIMATIONS_BG & state->flags)
-   ) {
-      /* Draw animations before anything else. */
-      animate_frame();
-   }
+   /* Draw background animations before anything else. */
+   animate_frame( ANIMATE_FLAG_BG );
 
    if( 0 <= state->menu.menu_id ) {
       /* Draw the menu. */
@@ -235,12 +231,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    window_draw_all( state );
    
-   if(
-      DSEKAI_FLAG_ANIMATIONS_BG != (DSEKAI_FLAG_ANIMATIONS_BG & state->flags)
-   ) {
-      /* Draw animations after anything else. */
-      animate_frame();
-   }
+   /* Draw foreground animations after anything else. */
+   animate_frame( ANIMATE_FLAG_FG );
 
    /* === Input Phase === */
 

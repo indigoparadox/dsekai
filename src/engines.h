@@ -117,8 +117,6 @@ struct EDITOR_STATE {
 
 #define DSEKAI_FLAG_MENU_BLOCKED    0x02
 
-#define DSEKAI_FLAG_ANIMATIONS_BG   0x04
-
 /**
  * \relates DSEKAI_STATE
  * \brief DSEKAI_STATE::engine_state indicating engine is has not yet
