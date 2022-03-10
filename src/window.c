@@ -405,7 +405,7 @@ static int16_t window_draw_SPRITE(
       0, "sprite %u screen offset: %d, %d", w_id, offset_x, offset_y );
 
    /* Set offset_sprite based on dir flags. */
-   dir = ((c->flags & 0x30) >> 4);
+   dir = ((c->flags & WINDOW_FLAG_SPRITE_DIR_MASK) >> 4);
    offset_sprite = dir * TILE_H;
 
    graphics_blit_sprite_at(
@@ -415,17 +415,22 @@ static int16_t window_draw_SPRITE(
       offset_y + c->coords[GUI_Y] + 2,
       SPRITE_W, SPRITE_H );
 
-   graphics_draw_rect(
-      offset_x + c->coords[GUI_X],
-      offset_y + c->coords[GUI_Y],
-      SPRITE_W + 4, SPRITE_H + 4,
-      1, GRAPHICS_COLOR_BLACK );
+   if(
+      WINDOW_FLAG_SPRITE_BORDER_SINGLE ==
+      (WINDOW_FLAG_SPRITE_BORDER_SINGLE & c->flags)
+   ) {
+      graphics_draw_rect(
+         offset_x + c->coords[GUI_X],
+         offset_y + c->coords[GUI_Y],
+         SPRITE_W + 4, SPRITE_H + 4,
+         1, GRAPHICS_COLOR_BLACK );
 
-   graphics_draw_rect(
-      offset_x + c->coords[GUI_X] + 1,
-      offset_y + c->coords[GUI_Y] + 1,
-      SPRITE_W + 3, SPRITE_H + 3,
-      1, GRAPHICS_COLOR_WHITE );
+      graphics_draw_rect(
+         offset_x + c->coords[GUI_X] + 1,
+         offset_y + c->coords[GUI_Y] + 1,
+         SPRITE_W + 3, SPRITE_H + 3,
+         1, GRAPHICS_COLOR_WHITE );
+   }
 
    return 1;
 }
