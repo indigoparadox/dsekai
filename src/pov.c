@@ -87,7 +87,7 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
 
    /* Create the environmental animations. */
    animate_create(
-      ANIMATE_TYPE_SNOW,
+      ANIMATE_TYPE_CLOUDS,
       ANIMATE_FLAG_WEATHER | ANIMATE_FLAG_BG,
       0, 0, SCREEN_MAP_W, SCREEN_MAP_H / 2 );
 
