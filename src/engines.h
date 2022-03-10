@@ -119,6 +119,13 @@ struct EDITOR_STATE {
 
 /**
  * \relates DSEKAI_STATE
+ * \brief DSEKAI_STATE::flags indicating every frame should be drawn fresh on
+ *        a clean black canvas (unless the menu is open).
+ */
+#define DSEKAI_FLAG_BLANK_FRAME     0x04
+
+/**
+ * \relates DSEKAI_STATE
  * \brief DSEKAI_STATE::engine_state indicating engine is has not yet
  *        initialized its specific structures.
  */

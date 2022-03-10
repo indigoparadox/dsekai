@@ -85,6 +85,14 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
    gstate = (struct POV_STATE*)memory_unlock( state->engine_state_handle );
    */
 
+   /* Create the environmental animations. */
+   animate_create(
+      ANIMATE_TYPE_SNOW,
+      ANIMATE_FLAG_WEATHER | ANIMATE_FLAG_BG,
+      0, 0, SCREEN_MAP_W, SCREEN_MAP_H / 2 );
+
+   state->flags |= DSEKAI_FLAG_BLANK_FRAME;
+
    tilemap_refresh_tiles( &(state->map) );
 
    state->engine_state = ENGINE_STATE_RUNNING;
@@ -317,6 +325,8 @@ void pov_draw_wall_x(
          !ray->wall_side && 
          ((0 == x % 2 && 1 == y % 2) || (1 == x % 2 && 0 == y % 2))
       ) {
+         /* Draw black to blank out skybox. */
+         graphics_draw_px( x, y, GRAPHICS_COLOR_BLACK );
          continue;
       }
 
@@ -378,9 +388,6 @@ void pov_draw( struct DSEKAI_STATE* state ) {
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
 
    memory_zero_ptr( gstate->minimap, TILEMAP_TH * TILEMAP_TW );
-
-   graphics_draw_block(
-      0, 0, SCREEN_MAP_W, SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
 
    debug_printf( 0, "casting..." );
 

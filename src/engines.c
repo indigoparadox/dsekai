@@ -207,6 +207,15 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    /* === Drawing Phase === */
 
+   /* Blank out canvas if required. */
+   if(
+      0 > state->menu.menu_id &&
+      DSEKAI_FLAG_BLANK_FRAME == (state->flags & DSEKAI_FLAG_BLANK_FRAME)
+   ) {
+      graphics_draw_block(
+         0, 0, SCREEN_MAP_W, SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
+   }
+
    /* Draw background animations before anything else. */
    animate_frame( ANIMATE_FLAG_BG );
 
