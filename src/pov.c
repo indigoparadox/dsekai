@@ -101,7 +101,7 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
 }
 
 void pov_shutdown( struct DSEKAI_STATE* state ) {
-
+   state->flags &= ~DSEKAI_FLAG_BLANK_FRAME;
 }
 
 int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
