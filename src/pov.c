@@ -69,6 +69,8 @@ const char gc_pov_compass[] = {
    'S', 'N', 'E', 'W'
 };
 
+int8_t g_pov_skybox_idx = 0;
+
 int16_t pov_setup( struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
    /*
@@ -86,9 +88,10 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
    */
 
    /* Create the environmental animations. */
-   animate_create(
+   /* TODO: Correct for initial facing direction? */
+   g_pov_skybox_idx = animate_create(
       ANIMATE_TYPE_CLOUDS,
-      ANIMATE_FLAG_WEATHER | ANIMATE_FLAG_BG,
+      ANIMATE_FLAG_WEATHER | ANIMATE_FLAG_BG | ANIMATE_FLAG_CLOUDS_ROTATE,
       0, 0, SCREEN_MAP_W, SCREEN_MAP_H / 2 );
 
    state->flags |= DSEKAI_FLAG_BLANK_FRAME;
@@ -106,6 +109,7 @@ void pov_shutdown( struct DSEKAI_STATE* state ) {
 
 int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
+   uint8_t recreate_clouds = 0;
    /*
    struct POV_STATE* gstate = NULL;
 
@@ -123,6 +127,11 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
       /* engines_handle_movement( MOBILE_DIR_WEST, state ); */
       state->player.dir = gc_pov_dir_turn_left[state->player.dir];
       tilemap_refresh_tiles( &(state->map) );
+      if( 0 == state->player.dir || 1 == state->player.dir ) {
+         recreate_clouds = 1;
+      } else {
+         recreate_clouds = 2;
+      }
       /* gstate->dirty = 1; */
       break;
 
@@ -136,6 +145,11 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
       /* engines_handle_movement( MOBILE_DIR_EAST, state ); */
       state->player.dir = gc_pov_dir_turn_right[state->player.dir];
       tilemap_refresh_tiles( &(state->map) );
+      if( 2 == state->player.dir || 3 == state->player.dir ) {
+         recreate_clouds = 1;
+      } else {
+         recreate_clouds = 2;
+      }
       /* gstate->dirty = 1; */
       break;
 
@@ -150,6 +164,20 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
       debug_printf( 3, "inc: %d", gstate->inc );
 #endif /* POV_DEBUG_INC */
       break;
+   }
+   
+   if( 1 == recreate_clouds ) {
+      animate_stop( g_pov_skybox_idx );
+      g_pov_skybox_idx = animate_create(
+         ANIMATE_TYPE_CLOUDS,
+         ANIMATE_FLAG_WEATHER | ANIMATE_FLAG_BG,
+         0, 0, SCREEN_MAP_W, SCREEN_MAP_H / 2 );
+   } else if( 2 == recreate_clouds ) {
+      animate_stop( g_pov_skybox_idx );
+      g_pov_skybox_idx = animate_create(
+         ANIMATE_TYPE_CLOUDS,
+         ANIMATE_FLAG_WEATHER | ANIMATE_FLAG_BG | ANIMATE_FLAG_CLOUDS_ROTATE,
+         0, 0, SCREEN_MAP_W, SCREEN_MAP_H / 2 );
    }
 
    /*
