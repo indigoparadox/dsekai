@@ -40,6 +40,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
 
    for( i = 0 ; TITLE_OPTIONS_COUNT > i ; i++ ) {
       if( gstate->option_high == i ) {
+         debug_printf( 1, "title option selected for draw: %d", i );
          color = GRAPHICS_COLOR_CYAN;
       } else {
          color = GRAPHICS_COLOR_WHITE;
@@ -61,6 +62,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
 int16_t title_setup( struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
 
+   debug_printf( 2, "allocating engine-specific state" );
    assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
    state->engine_state_handle =
       memory_alloc( sizeof( struct TITLE_STATE ), 1 );
@@ -188,6 +190,9 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_OK:
+
+      window_pop( WINDOW_ID_TITLE_MENU, state );
+
 #ifdef NO_ENGINE_POV
       if( 1 == gstate->option_high ) {
          retval = 0;

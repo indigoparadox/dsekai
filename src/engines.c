@@ -35,6 +35,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    state->player.coords_prev.y = state->warp_to_y;
 
    /* Close any open windows (e.g. player state). */
+   /* TODO: Clean up open windows lingering after engine cleanup. */
    /* while( state->windows_count > 0 ) {
       window_pop( 0, state );
    } */
@@ -46,6 +47,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
    /* Clean up existing engine-specific data. */
    if( (MEMORY_HANDLE)NULL != state->engine_state_handle ) {
+      debug_printf( 2, "cleaning up engine-specific state" );
       memory_free( state->engine_state_handle );
       state->engine_state_handle = NULL;
    }
