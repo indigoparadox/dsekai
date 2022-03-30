@@ -52,6 +52,8 @@
 #define TILEMAP_JPATH_PROP_ENGINE "/properties/[name=engine]/value"
 /*! \brief JSON path to weather property. */
 #define TILEMAP_JPATH_PROP_WEATHER "/properties/[name=weather]/value"
+/*! \brief JSON path to editable property. */
+#define TILEMAP_JPATH_PROP_EDITABLE "/properties/[name=editable]/value"
 /*! \brief JSON path to mobile tile X. */
 #define TILEMAP_JPATH_MOB_X      "/layers/[name=mobiles]/objects/%d/x"
 /*! \brief JSON path to mobile tile Y. */

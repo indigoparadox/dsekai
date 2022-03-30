@@ -26,6 +26,8 @@
 #define TILEMAP_FLAG_WEATHER_SNOW 0x01
 #define TILEMAP_FLAG_WEATHER_RAIN 0x02
 
+#define TILEMAP_FLAG_EDITABLE 0x10
+
 /*! \} */
 
 /**
@@ -33,6 +35,8 @@
  * \brief TILESET_TILE::flags bit flag indicating tile will block movement.
  */
 #define TILEMAP_TILESET_FLAG_BLOCK  0x01
+
+#define TILEMAP_TILESET_FLAG_FARMABLE 0x02
 
 /**
  * \relates ::TILESET_TILE

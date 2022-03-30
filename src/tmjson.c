@@ -307,11 +307,12 @@ void tilemap_json_parse_engine(
 }
 #endif
 
-void tilemap_json_parse_weather(
+void tilemap_json_parse_flags(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, int16_t tokens_sz
 ) {
    char weather[TILEMAP_NAME_MAX];
+   int16_t editable = 0;
 
    json_str_from_path(
       TILEMAP_JPATH_PROP_WEATHER, sizeof( TILEMAP_JPATH_PROP_WEATHER ),
@@ -321,6 +322,13 @@ void tilemap_json_parse_weather(
       t->flags |= TILEMAP_FLAG_WEATHER_SNOW;
    } else if( 0 == memory_strncmp_ptr( weather, "rain", 4 ) ) {
       t->flags |= TILEMAP_FLAG_WEATHER_RAIN;
+   }
+
+   editable = json_int_from_path(
+      TILEMAP_JPATH_PROP_EDITABLE,
+      JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+   if( 0 < editable ) {
+      t->flags |= TILEMAP_FLAG_EDITABLE;
    }
 }
 
@@ -473,7 +481,7 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
       TILEMAP_JPATH_PROP_NAME, sizeof( TILEMAP_JPATH_PROP_NAME ),
       t->name, TILEMAP_NAME_MAX, tokens, tok_parsed, json_buffer );
 
-   tilemap_json_parse_weather(
+   tilemap_json_parse_flags(
       t, json_buffer, json_buffer_sz, tokens, tok_parsed );
 
    ts_name_sz = tilemap_fix_asset_path(

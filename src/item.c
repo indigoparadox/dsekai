@@ -73,7 +73,13 @@ int8_t item_use_editor(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
 #ifndef NO_ENGINE_EDITOR
-   if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
+   if( TILEMAP_FLAG_EDITABLE != (TILEMAP_FLAG_EDITABLE & state->map.flags) ) {
+
+      /* TODO: Display warning message on-screen. */
+      error_printf( "unable to edit current tilemap" );
+
+   } else if(
+      EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
       state->editor.flags &= ~EDITOR_FLAG_ACTIVE;
    } else {
       state->editor.flags |= EDITOR_FLAG_ACTIVE;

@@ -70,6 +70,11 @@
          "name":"weather",
          "type":"string",
          "value":"clear"
+        }, 
+        {
+         "name":"editable",
+         "type":"int",
+         "value":1
         }],
  "renderorder":"right-down",
  "tiledversion":"1.7.2",
