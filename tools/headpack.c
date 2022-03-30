@@ -138,8 +138,8 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
    fprintf( header_file, "   %d,\n", t->engine_type );
 #endif
 
-   /* weather */
-   fprintf( header_file, "   %d,\n", t->weather );
+   /* flags */
+   fprintf( header_file, "   %d,\n", t->flags );
 
    /* tileset */
    fprintf( header_file, "   /* tileset */\n" );

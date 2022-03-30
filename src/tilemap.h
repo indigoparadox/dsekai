@@ -13,13 +13,18 @@
  */
 
 /**
- * \addtogroup dsekai_tilemaps_weather Tilemap Weather
+ * \addtogroup dsekai_tilemaps_flags Tilemap Flags
  * 
  * \{
  */
 
- #define TILEMAP_WEATHER_CLEAR 0
- #define TILEMAP_WEATHER_SNOW 1
+/**
+ * \brief Bitmask indicating flags that determine ::TILEMAP weather.
+ */
+#define TILEMAP_FLAG_WEATHER_MASK 0x0f
+
+#define TILEMAP_FLAG_WEATHER_SNOW 0x01
+#define TILEMAP_FLAG_WEATHER_RAIN 0x02
 
 /*! \} */
 
@@ -61,9 +66,10 @@ void tilemap_refresh_tiles( struct TILEMAP* t );
 
 /**
  * \relates TILEMAP
- * \brief Set the \ref dsekai_tilemaps_weather of the given ::TILEMAP.
+ * \brief Set the \ref dsekai_tilemaps_weather of the given ::TILEMAP,
+ *        including starting any related animation effects.
  * \param t ::MEMORY_PTR to a TILEMAP to set the weather of.
- * \param weather \ref dsekai_tilemaps_weather definition.
+ * \param weather Weather-related \ref dsekai_tilemaps_flags.
  *
  * This will start the relevant animation if necessary.
  */

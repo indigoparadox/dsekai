@@ -69,9 +69,9 @@ int main( int argc, char* argv[] ) {
    assert( 0 <= idx );
 #endif
 
-   /* weather */
-   debug_printf( 3, "(offset 0x%02x) writing map weather", idx );
-   idx = asn_write_int( &h_buffer, idx, t.weather );
+   /* flags */
+   debug_printf( 3, "(offset 0x%02x) writing map flags", idx );
+   idx = asn_write_int( &h_buffer, idx, t.flags );
    assert( 0 <= idx );
 
    /* tileset */

@@ -614,8 +614,8 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    idx += read_sz;
 #endif
 
-   /* weather */
-   read_sz = tilemap_asn_parse_int( &t->weather, 1, 0, &(asn_buffer[idx]) );
+   /* flags */
+   read_sz = tilemap_asn_parse_int( &t->flags, 1, 0, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
       retval = read_sz;
       goto cleanup;

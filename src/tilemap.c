@@ -56,22 +56,21 @@ void tilemap_refresh_tiles( struct TILEMAP* t ) {
 
 void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) {
 
-   switch( weather ) {
-   case TILEMAP_WEATHER_SNOW:
+   if(
+      TILEMAP_FLAG_WEATHER_SNOW ==
+      (TILEMAP_FLAG_WEATHER_MASK & weather)
+   ) {
       debug_printf( 2, "current weather is snowy" );
 #ifndef DISABLE_WEATHER_EFFECTS
       animate_create(
          ANIMATE_TYPE_SNOW, ANIMATE_FLAG_WEATHER | ANIMATE_FLAG_FG,
          SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H );
 #endif /* !DISABLE_WEATHER_EFFECTS */
-      break;
-
-   default:
+   } else {
       debug_printf( 2, "current weather is clear" );
-      break;
    }
 
-   t->weather = weather;
+   t->flags |= (TILEMAP_FLAG_WEATHER_MASK & weather);
 }
 
 uint8_t tilemap_collide(

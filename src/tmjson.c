@@ -318,9 +318,9 @@ void tilemap_json_parse_weather(
       weather, TILEMAP_NAME_MAX, tokens, tokens_sz, json_buffer );
 
    if( 0 == memory_strncmp_ptr( weather, "snow", 4 ) ) {
-      t->weather = TILEMAP_WEATHER_SNOW;
-   } else {
-      t->weather = TILEMAP_WEATHER_CLEAR;
+      t->flags |= TILEMAP_FLAG_WEATHER_SNOW;
+   } else if( 0 == memory_strncmp_ptr( weather, "rain", 4 ) ) {
+      t->flags |= TILEMAP_FLAG_WEATHER_RAIN;
    }
 }
 

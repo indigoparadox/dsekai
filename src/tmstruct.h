@@ -79,8 +79,8 @@ struct TILEMAP_SPAWN {
 struct TILEMAP {
    /*! \brief Tilemap name. */
    char name[TILEMAP_NAME_MAX];
-   /*! \brief Current \ref dsekai_tilemaps_weather. */
-   uint8_t weather;
+   /*! \brief Current \ref dsekai_tilemaps_flags. */
+   uint8_t flags;
    /*! \brief Array of prototype tiles all map tiles are based on. */
    struct TILESET_TILE tileset[TILEMAP_TILESETS_MAX];
    /*! \brief Array of 4-bit numbers representing tiles composing the map. */

@@ -328,7 +328,8 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
       0, 0, NULL, state );
 
    /* Force reset the weather to start the animation. */
-   tilemap_set_weather( &(state->map), state->map.weather );
+   tilemap_set_weather( 
+      &(state->map), (TILEMAP_FLAG_WEATHER_MASK & state->map.flags) );
 
    state->engine_state = ENGINE_STATE_RUNNING;
    
