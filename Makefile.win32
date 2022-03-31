@@ -84,7 +84,7 @@ endif
 
 LDFLAGS_WIN32 := -bcl=nt_win -zp=1 $(LDFLAGS_OWC_GENERIC)
 
-RCFLAGS_WIN32 := -r $(DEFINES_WIN32) -i $(INCLUDE)win
+RCFLAGS_WIN32 := -r $(DEFINES_WIN32) -i=$(INCLUDE)win -bt=nt
 
 ifeq ($(RESOURCE),DEFAULT)
    RCFLAGS_WIN32 += -DRESOURCE_WIN
@@ -108,7 +108,7 @@ $(DSEKAI_O_FILES_WIN32) $(OBJDIR_WIN32)/win.res | $(BINDIR)/$(STAMPFILE)
 	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
 
 $(OBJDIR_WIN32)/win.res: $(WIN32_RES_FILES) | $(OBJDIR_WIN32)/$(STAMPFILE)
-	$(RC_WIN32) $(RCFLAGS_WIN32) $< -o $@
+	$(RC_WIN32) $(RCFLAGS_WIN32) $< -fo=$@
 
 $(OBJDIR_WIN32)/%.o: %.c $(OBJDIR_WIN32)/win.res $(RESEXT_H)
 	$(MD) $(dir $@)
