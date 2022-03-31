@@ -253,17 +253,20 @@ static int8_t pov_cast_ray(
          TILEMAP_TILESET_FLAG_BLOCK ==
          (t->tileset[ray->tile_id].flags & TILEMAP_TILESET_FLAG_BLOCK)
       ) {
+#if 0
          if(
             TILEMAP_TILE_FLAG_DIRTY !=
             (TILEMAP_TILE_FLAG_DIRTY &
             t->tiles_flags[(ray->map_ty * TILEMAP_TW) + ray->map_tx])
          ) {
+            /* Wall is not dirty. */
             wall_hit = 2;
          }
 
          /* Mark wall dirty. */
          t->tiles_flags[(ray->map_ty * TILEMAP_TW) + ray->map_tx] |=
             TILEMAP_TILE_FLAG_DIRTY;
+#endif
 
          debug_printf( 0,
             "tile id at screen %d, %dx%d: %d (%d)", x,
@@ -472,9 +475,10 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       pov_draw_wall_x( x, &ray, &(state->map), gstate );
    }
 
-   pov_draw_minimap( gstate->minimap, &(state->player) );
-
    if( NULL != gstate ) {
+      /* Minimap needs valid gstate. */
+      pov_draw_minimap( gstate->minimap, &(state->player) );
+
       gstate = memory_unlock( state->engine_state_handle );
    }
 
