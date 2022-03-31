@@ -42,9 +42,6 @@ unilayer_main() {
    debug_printf( 3, "animations cache is %lu bytes",
       sizeof( struct ANIMATION ) * ANIMATE_ANIMATIONS_MAX );
 
-   debug_printf( 3, "initial graphics cache is %lu bytes",
-      sizeof( struct GRAPHICS_BITMAP ) * GRAPHICS_CACHE_INITIAL_SZ );
-
    /* Initialize subsystems. */
 
    if( !graphics_init() ) {

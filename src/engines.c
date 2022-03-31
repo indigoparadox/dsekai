@@ -244,10 +244,13 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    /* === Input Phase === */
 
    in_char = input_poll();
+#ifndef NO_TRANSITIONS
    if( 0 < (state->transition & DSEKAI_TRANSITION_MASK_FRAME) ) {
       engines_draw_transition( state );
+   } else
+#endif /* !NO_TRANSITIONS */
 
-   } else if( 0 <= state->menu.menu_id && 0 != in_char ) {
+   if( 0 <= state->menu.menu_id && 0 != in_char ) {
       retval = gc_menu_handlers[state->menu.menu_id]( in_char, state );
    
    } else if(
@@ -321,6 +324,8 @@ void engines_set_transition(
    struct DSEKAI_STATE* state, uint8_t trans_type, uint8_t trans_open
 ) {
 
+#ifndef NO_TRANSITIONS
+
    /* Assume the transition increments in tiles from the center of the screen,
     * add a frame for setup/cleanup.
     */
@@ -329,9 +334,15 @@ void engines_set_transition(
 
    state->transition |= (trans_open & DSEKAI_TRANSITION_DIR_OPEN);
    state->transition |= (trans_type & DSEKAI_TRANSITION_MASK_TYPE);
+
+#endif /* !NO_TRANSITIONS */
+
 }
 
 void engines_draw_transition( struct DSEKAI_STATE* state ) {
+
+#ifndef NO_TRANSITIONS
+
    uint8_t trans_type = (state->transition & DSEKAI_TRANSITION_MASK_TYPE);
    uint8_t trans_frame = (state->transition & DSEKAI_TRANSITION_MASK_FRAME);
    uint8_t trans_w = TILE_W * (trans_frame - 1);
@@ -350,5 +361,8 @@ void engines_draw_transition( struct DSEKAI_STATE* state ) {
    }
 
    (state->transition)--;
+
+#endif /* !NO_TRANSITIONS */
+
 }
 
