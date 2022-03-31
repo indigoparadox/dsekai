@@ -98,6 +98,9 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
 
    tilemap_refresh_tiles( &(state->map) );
 
+   engines_set_transition(
+      state, DSEKAI_TRANSITION_TYPE_CURTAIN, DSEKAI_TRANSITION_DIR_OPEN );
+
    state->engine_state = ENGINE_STATE_RUNNING;
 
    return retval;

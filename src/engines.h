@@ -16,6 +16,41 @@
 #define MINIMAP_X (SCREEN_W - TILEMAP_TW - 10)
 #define MINIMAP_Y (10)
 
+/**
+ * \addtogroup dsekai_engines_transitions Engine Transitions
+ * \brief Flags for specifying screen transitions.
+
+ * \{
+ */
+
+/**
+ * \brief Mask indicating bits of DSEKAI_STATE::transition that denote the 
+ *        current transition's frame.
+ *
+ * A frame of 0 indicates no transition is currently in progress.
+ */
+#define DSEKAI_TRANSITION_MASK_FRAME 0x0f
+
+/**
+ * \brief Mask indicating bits of DSEKAI_STATE::transition that denote the
+ *        current transition's type.
+ *
+ * Only used if bits masked by ::DSEKAI_TRANSITION_MASK_FRAME are greather than
+ * zero.
+ */
+#define DSEKAI_TRANSITION_MASK_TYPE 0x70
+
+/**
+ * \brief If this bit is on, then the currently playing transition should be
+ *        opening. If it's off, the transition is closing.
+ */
+#define DSEKAI_TRANSITION_DIR_OPEN  0x80
+
+#define DSEKAI_TRANSITION_TYPE_CURTAIN    0x00
+#define DSEKAI_TRANSITION_TYPE_ZOOM       0x10
+
+/*! \} */
+
 #ifndef ENGINES_TOKENS_ONLY
 
 /**
@@ -196,6 +231,8 @@ struct DSEKAI_STATE {
    /*! \brief Global boolean values dictating engine state and behavior. */
    uint8_t flags;
 
+   uint8_t transition;
+
 #ifndef NO_ENGINE_EDITOR
 
    struct EDITOR_STATE editor;
@@ -226,6 +263,11 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
 int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
 
 void engines_exit_to_title( struct DSEKAI_STATE* state );
+
+void engines_set_transition(
+   struct DSEKAI_STATE* state, uint8_t trans_type, uint8_t trans_open );
+
+void engines_draw_transition( struct DSEKAI_STATE* state );
 
 #endif /* !ENGINES_TOKENS_ONLY */
 

@@ -300,6 +300,11 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
       state->flags &= ~DSEKAI_FLAG_INPUT_BLOCKED;
    }
 
+   /* Refresh the tilemap if a transition is in progress. */
+   if( 0 < (state->transition & DSEKAI_TRANSITION_MASK_FRAME) ) {
+      tilemap_refresh_tiles( &(state->map) );
+   }
+
    if( NULL != gstate ) {
       assert( NULL != state );
       gstate = (struct TOPDOWN_STATE*)memory_unlock(
@@ -330,6 +335,9 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    /* Force reset the weather to start the animation. */
    tilemap_set_weather( 
       &(state->map), (TILEMAP_FLAG_WEATHER_MASK & state->map.flags) );
+
+   engines_set_transition(
+      state, DSEKAI_TRANSITION_TYPE_CURTAIN, DSEKAI_TRANSITION_DIR_OPEN );
 
    state->engine_state = ENGINE_STATE_RUNNING;
    

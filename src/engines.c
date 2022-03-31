@@ -248,7 +248,10 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    /* === Input Phase === */
 
    in_char = input_poll();
-   if( 0 <= state->menu.menu_id && 0 != in_char ) {
+   if( 0 < (state->transition & DSEKAI_TRANSITION_MASK_FRAME) ) {
+      engines_draw_transition( state );
+
+   } else if( 0 <= state->menu.menu_id && 0 != in_char ) {
       retval = gc_menu_handlers[state->menu.menu_id]( in_char, state );
    
    } else if(
@@ -316,5 +319,40 @@ void engines_exit_to_title( struct DSEKAI_STATE* state ) {
    memory_zero_ptr( &(state->player), sizeof( struct MOBILE ) );
    memory_zero_ptr( &(state->items), sizeof( struct ITEM ) *
       DSEKAI_ITEMS_MAX );
+}
+
+void engines_set_transition(
+   struct DSEKAI_STATE* state, uint8_t trans_type, uint8_t trans_open
+) {
+
+   /* Assume the transition increments in tiles from the center of the screen,
+    * add a frame for setup/cleanup.
+    */
+   state->transition =
+      (((SCREEN_MAP_W / TILE_W) / 2 ) & DSEKAI_TRANSITION_MASK_FRAME) + 2;
+
+   state->transition |= (trans_open & DSEKAI_TRANSITION_DIR_OPEN);
+   state->transition |= (trans_type & DSEKAI_TRANSITION_MASK_TYPE);
+}
+
+void engines_draw_transition( struct DSEKAI_STATE* state ) {
+   uint8_t trans_type = (state->transition & DSEKAI_TRANSITION_MASK_TYPE);
+   uint8_t trans_frame = (state->transition & DSEKAI_TRANSITION_MASK_FRAME);
+   uint8_t trans_w = TILE_W * (trans_frame - 1);
+
+   switch( trans_type ) {
+   case DSEKAI_TRANSITION_TYPE_CURTAIN:
+      /* TODO: Opening/closing. */
+      graphics_draw_block( 0, 0, trans_w, SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
+      graphics_draw_block(
+         SCREEN_MAP_W - trans_w, 0,
+         trans_w, 
+         SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
+      break;
+
+   /* TODO: Other transition types. */
+   }
+
+   (state->transition)--;
 }
 
