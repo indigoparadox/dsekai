@@ -28,7 +28,6 @@ struct MOBILE* mobile_get_facing(
 ) {
    int8_t i = 0;
 
-   assert( 0 <= m->dir );
    assert( 4 > m->dir );
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {

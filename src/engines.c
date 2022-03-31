@@ -88,10 +88,6 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 #     error "No loader defined!"
 #  endif
 
-   if( 0 >= map_retval ) {
-
-   }
-
 #else
    for( i = 0 ; gc_map_count > i ; i++ ) {
       if( 0 == memory_strncmp_ptr(
