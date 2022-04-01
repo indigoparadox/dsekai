@@ -60,6 +60,7 @@ struct DSEKAI_STATE;
 #include "irc.h"
 #endif /* NETWORK_IRC */
 #include "menu.h"
+#include "crop.h"
 
 #ifdef TILEMAP_FMT_JSON
 #include "tmjson.h"

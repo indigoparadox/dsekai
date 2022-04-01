@@ -233,6 +233,14 @@ struct DSEKAI_STATE {
 
    uint8_t transition;
 
+   /*!
+   * \brief Array of all crops growing on all maps.
+   * 
+   * This is kept as part of the state so that crops can continue growing in
+   * the background.
+   */
+   struct CROP_PLOT crops[DSEKAI_CROPS_MAX];
+
 #ifndef NO_ENGINE_EDITOR
 
    struct EDITOR_STATE editor;

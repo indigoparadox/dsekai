@@ -22,7 +22,7 @@ int8_t item_use_none(
 int8_t item_use_seed(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
-   /* TODO */
+   /* TODO: Check the list of CROP_PLOTs for a fertile, unseeded plot. */
    return -1;
 }
 
@@ -94,8 +94,74 @@ int8_t item_use_editor(
 int8_t item_use_material(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
-   /* TODO */
+   /* TODO: Warn that materials cannot be used directly. */
    return 0;
+}
+
+int8_t item_use_watercan(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+) {
+   /* TODO: Check for CROP_PLOTs that can be watered. */
+   return 0;
+}
+
+int8_t item_use_hoe(
+   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+) {
+   int8_t i = 0,
+      crop_idx = -1,
+      retval = -1;
+   int16_t x = 0, y = 0;
+
+   x = user->coords.x + gc_mobile_x_offsets[user->dir];
+   y = user->coords.y + gc_mobile_y_offsets[user->dir];
+
+   for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
+      /* Find an empty CROP_PLOT. */
+      if( CROP_FLAG_ACTIVE != (CROP_FLAG_ACTIVE & state->crops[i].flags) ) {
+         if( 0 > crop_idx ) {
+            /* First empty encountered, use this one later. */
+            crop_idx = i;
+         }
+         continue;
+      }
+
+      /* Crop plot is not empty, but does it collide? */
+      if(
+         0 == memory_strncmp_ptr(
+            state->crops[i].map_name, state->map.name, TILEMAP_NAME_MAX ) &&
+         x == state->crops[i].coords.x && y == state->crops[i].coords.y
+      ) {
+         /* TODO: Display warning on screen. */
+         retval = 0;
+         crop_idx = -1;
+         error_printf( "crop plot already exists" );
+         goto cleanup;
+      }
+   }
+
+   if( 0 > crop_idx ) {
+      /* TODO: Display warning on screen. */
+      retval = 0;
+      error_printf( "no available crop plots" );
+      goto cleanup;
+   }
+
+   /* Create crop plot. */
+   memory_zero_ptr( &(state->crops[crop_idx]), sizeof( struct CROP_PLOT ) );
+   memory_strncpy_ptr( state->crops[crop_idx].map_name, state->map.name,
+      TILEMAP_NAME_MAX );
+   state->crops[crop_idx].coords.x = x;
+   state->crops[crop_idx].coords.y = y;
+   state->crops[crop_idx].flags |= CROP_FLAG_ACTIVE;
+   debug_printf( 2, "created crop plot %d at %d, %d on map %s",
+      crop_idx,
+      state->crops[crop_idx].coords.x, state->crops[crop_idx].coords.y,
+      state->crops[crop_idx].map_name );
+
+cleanup:
+
+   return retval;
 }
 
 void item_draw( const struct ITEM* i, int16_t screen_x, int16_t screen_y ) {

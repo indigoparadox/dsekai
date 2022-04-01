@@ -19,6 +19,7 @@ DSEKAI_C_FILES := \
    src/topdown.c \
    src/title.c \
    src/menu.c \
+   src/crop.c \
    src/strpool.c \
    unilayer/src/graphics.c \
    unilayer/src/animate.c \

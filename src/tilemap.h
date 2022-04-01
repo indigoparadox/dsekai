@@ -36,6 +36,11 @@
  */
 #define TILEMAP_TILESET_FLAG_BLOCK  0x01
 
+/**
+ * \relates ::TILESET_TILE
+ * \brief TILESET_TILE::flags bit flag indicating player is allowed to grow a
+ *        ::CROP_PLOT on this tile.
+ */
 #define TILEMAP_TILESET_FLAG_FARMABLE 0x02
 
 /**

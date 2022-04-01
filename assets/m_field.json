@@ -131,6 +131,23 @@
                         {
                          "name":"script",
                          "type":"int",
+                         "value":6
+                        }],
+                 "rotation":0,
+                 "type":"16x16x4\/s_maid.bmp",
+                 "visible":true,
+                 "width":10.5,
+                 "x":130,
+                 "y":88
+                }, 
+                {
+                 "height":11.5,
+                 "id":13,
+                 "name":"chest",
+                 "properties":[
+                        {
+                         "name":"script",
+                         "type":"int",
                          "value":5
                         }],
                  "rotation":0,
@@ -226,6 +243,33 @@
                  "width":14.5,
                  "x":79,
                  "y":-43
+                }, 
+                {
+                 "height":10.5,
+                 "id":16,
+                 "name":"hoe",
+                 "properties":[
+                        {
+                         "name":"craftable",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1237
+                        }, 
+                        {
+                         "name":"sprite",
+                         "type":"string",
+                         "value":"16x16x4\/i_hoe.bmp"
+                        }],
+                 "rotation":0,
+                 "type":"hoe",
+                 "visible":true,
+                 "width":14.5,
+                 "x":90,
+                 "y":-43
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -300,9 +344,14 @@
          "value":"t0f3s5g0i0p6h1236z0x32767"
         }, 
         {
+         "name":"script_6",
+         "type":"string",
+         "value":"t0s5g0i0p7h1237x32767"
+        }, 
+        {
          "name":"string_0",
          "type":"string",
-         "value":"Try planting this\nin dirt."
+         "value":"Try planting this\nin soil."
         }, 
         {
          "name":"string_1",
@@ -333,6 +382,11 @@
          "name":"string_6",
          "type":"string",
          "value":"Found an editor!"
+        }, 
+        {
+         "name":"string_7",
+         "type":"string",
+         "value":"You'll need this hoe\nto till soil."
         }, 
         {
          "name":"weather",

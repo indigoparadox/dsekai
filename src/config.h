@@ -75,6 +75,11 @@
 #define DSEKAI_ITEMS_MAX 40
 #endif /* !DSEKAI_ITEMS_MAX */
 
+#ifndef DSEKAI_CROPS_MAX
+/*! \brief Maximum number of crops growing in the world accross all maps. */
+#define DSEKAI_CROPS_MAX 20
+#endif /* !DSEKAI_CROPS_MAX */
+
 #ifndef DSEKAI_WINDOWS_MAX
 #define DSEKAI_WINDOWS_MAX 30
 #endif /* !DSEKAI_WINDOWS_MAX */

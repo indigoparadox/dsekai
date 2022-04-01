@@ -12,7 +12,7 @@
  *  \brief Definitions, functions, and macros pertaining to inventory objects.
  */
 
-#define ITEM_TABLE( f ) f( none, 0 ) f( seed, 10 ) f( food, 10 ) f( shovel, 1 ) f( axe, 1 ) f( editor, 1 ) f( material, 10 )
+#define ITEM_TABLE( f ) f( none, 0 ) f( seed, 10 ) f( food, 10 ) f( shovel, 1 ) f( axe, 1 ) f( editor, 1 ) f( material, 10 ) f( watercan, 1 ) f( hoe, 1 )
 
 /**
  * \relates ITEM
