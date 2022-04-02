@@ -333,6 +333,43 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
    }
    fprintf( header_file, "   },\n" );
 
+   /* crop_defs */
+   fprintf( header_file, "   /* crop_defs */\n" );
+   fprintf( header_file, "   {\n" );
+   for( i = 0 ; TILEMAP_CROP_DEFS_MAX > i ; i++ ) {
+      fprintf( header_file, "      {\n" );
+      fprintf( header_file, "         /* sprite */\n" );
+
+      if( '\0' != t->crop_defs[i].sprite[0] ) {
+         ts_basename_idx = dio_basename(
+            t->crop_defs[i].sprite, strlen( t->crop_defs[i].sprite ) );
+
+         /* Blank out the filename extension. */
+         t->crop_defs[i].sprite[strlen( t->crop_defs[i].sprite ) - 4] = '\0';
+
+         /* items[i].sprite */
+         /* Let the preprocessor figure it out. */
+         fprintf( header_file, "         %s,\n",
+            &(t->crop_defs[i].sprite[ts_basename_idx]) );
+      } else {
+         fprintf( header_file, "         0,\n" );
+      }
+
+      fprintf( header_file, "         /* name */\n" );
+      fprintf( header_file, "         \"%s\",\n", t->crop_defs[i].name );
+
+      fprintf( header_file, "         /* flags */\n" );
+      fprintf( header_file, "         %d,\n", t->crop_defs[i].flags );
+
+      fprintf( header_file, "         /* cycle */\n" );
+      fprintf( header_file, "         %d\n", t->crop_defs[i].cycle );
+
+      fprintf( header_file, "      },\n" );
+   }
+
+
+   fprintf( header_file, "   },\n" );
+
    fprintf( header_file, "};\n\n" );
 
    return 1;

@@ -74,6 +74,10 @@
 #define TILEMAP_JPATH_ITEM_SPRITE "/layers/[name=items]/objects/%d/properties/[name=sprite]/value"
 #define TILEMAP_JPATH_ITEM_DATA "/layers/[name=items]/objects/%d/properties/[name=data]/value"
 #define TILEMAP_JPATH_ITEM_CRAFTABLE "/layers/[name=items]/objects/%d/properties/[name=craftable]/value"
+#define TILEMAP_JPATH_CROP_DEF_NAME "/layers/[name=crops]/objects/%d/name"
+#define TILEMAP_JPATH_CROP_DEF_CYCLE "/layers/[name=crops]/objects/%d/properties/[name=cycle]/value"
+#define TILEMAP_JPATH_CROP_DEF_REGROWS "/layers/[name=crops]/objects/%d/properties/[name=regrows]/value"
+#define TILEMAP_JPATH_CROP_DEF_SPRITE "/layers/[name=crops]/objects/%d/properties/[name=sprite]/value"
 
 /*! \} */
 

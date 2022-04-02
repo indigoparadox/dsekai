@@ -43,6 +43,7 @@ struct DSEKAI_STATE;
 #include "winids.h"
 
 #include "itstruct.h"
+#include "cropdef.h"
 #include "tmstruct.h"
 
 #include "strpool.h"

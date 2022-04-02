@@ -10,7 +10,7 @@
 
 #define HEADPACK_INCLUDE_GUARD "RESEMB_H"
 
-#define HEADPACK_INCLUDES_TABLE( f ) f( ../../src/config.h ) f( ../../src/itstruct.h ) f( ../../src/tmstruct.h )
+#define HEADPACK_INCLUDES_TABLE( f ) f( ../../src/config.h ) f( ../../src/itstruct.h ) f( ../../src/cropdef.h ) f( ../../src/tmstruct.h )
 
 #define HEADPACK_FNAME_MAX 255
 

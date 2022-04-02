@@ -22,8 +22,19 @@ int8_t item_use_none(
 int8_t item_use_seed(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
+   int8_t crop_def_idx = -1,
+      retval = -1;
    /* TODO: Check the list of CROP_PLOTs for a fertile, unseeded plot. */
-   return -1;
+
+   /* TODO: Check TILEMAP::crop_defs for ::CROP_DEF with same name. */
+
+   if( 0 > crop_def_idx ) { 
+      /* TODO: On-screen warning. */
+      error_printf( "unable to grow this crop on the current tilemap" );
+      retval = 0;
+   }
+
+   return retval;
 }
 
 int8_t item_use_food(

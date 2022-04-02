@@ -53,7 +53,15 @@ struct ITEM {
     * \brief Arbitrary portion of the GID of the item. Part of item_true_gid().
     */
    int16_t gid;
-   /*! \brief Qualitative value specific to each ITEM::type (e.g. weap str). */
+   /**
+    * \brief Qualitative value specific to each ITEM::type:
+    *
+    * | Item | Data        |
+    * |------|-------------|
+    * | Seed | Crop Index  |
+    * | Food | HP+         |
+    *
+    */
    uint8_t data; 
    /*! \brief This struct represents this many of this item in a "stack." */
    uint8_t count;

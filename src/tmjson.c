@@ -381,6 +381,8 @@ int16_t tilemap_json_parse_items(
          error_printf( "invalid item returned (loaded %d)", i );
          break;
       }
+      
+      debug_printf( 1, "found item: %s", t->items[i].name );
 
       /* sprite */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_SPRITE, i );
@@ -424,6 +426,77 @@ int16_t tilemap_json_parse_items(
       /* count */
       /* TODO: Parse count from map. */
       t->items[i].count = 1;
+   }
+
+   return i;
+}
+
+int16_t tilemap_json_parse_crop_defs(
+   struct TILEMAP* t,
+   char* json_buffer, uint16_t json_buffer_sz,
+   struct jsmntok* tokens, int16_t tokens_sz
+) {
+   char iter_path[JSON_PATH_SZ];
+   int16_t i = 0,
+      j = 0,
+      sprite_buffer_sz = 0,
+      type_buffer_sz = 0,
+      name_buffer_sz = 0;
+   char sprite_buffer[RESOURCE_PATH_MAX],
+      type_buffer[ITEM_NAME_SZ + 1];
+   
+   /* Load crop definitions.*/
+   debug_printf( 2, "loading crop definitions" ); 
+   for( i = 0 ; TILEMAP_CROP_DEFS_MAX > i ; i++ ) {
+      
+      /* name */
+      dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_NAME, i );
+      name_buffer_sz = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         t->crop_defs[i].name, CROP_NAME_MAX,
+         &(tokens[0]), tokens_sz, json_buffer );
+      if( 0 >= name_buffer_sz ) {
+         error_printf( "invalid crop definition returned (loaded %d)", i );
+         break;
+      }
+
+      debug_printf( 1, "found crop definition: %s", t->crop_defs[i].name );
+
+      /* sprite */
+      dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_SPRITE, i );
+      sprite_buffer_sz = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         sprite_buffer, RESOURCE_PATH_MAX,
+         &(tokens[0]), tokens_sz, json_buffer );
+      if( 0 >= sprite_buffer_sz ) {
+         error_printf(
+            "invalid crop definition sprite returned (loaded %d)", i );
+         break;
+      }
+      resource_assign_id( t->crop_defs[i].sprite, sprite_buffer );
+
+      /* cycle */
+      dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_CYCLE, i );
+      t->crop_defs[i].cycle = json_int_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+
+      debug_printf( 1, "crop crow cycle: %d ticks", t->crop_defs[i].cycle );
+
+      t->crop_defs[i].flags = 0;
+
+      /* regrows */
+      dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_CYCLE, i );
+      if( json_bool_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer
+      ) ) {
+         debug_printf( 1, "crop %s regrows", t->crop_defs[i].name );
+         t->crop_defs[i].flags |= CROP_DEF_FLAG_REGROWS;
+      } else {
+         debug_printf( 1, "crop %s does NOT regrow", t->crop_defs[i].name );
+      }
+
+      /* activate */
+      t->crop_defs[i].flags |= CROP_DEF_FLAG_ACTIVE;
    }
 
    return i;
@@ -537,6 +610,9 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
    }
 
    tilemap_json_parse_items(
+      t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
+
+   tilemap_json_parse_crop_defs(
       t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
 
    tilemap_json_parse_strings(

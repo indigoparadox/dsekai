@@ -25,7 +25,7 @@
 /*! \brief Maximum TILEMAP height in tiles. */
 #define TILEMAP_TH 40
 /*! \brief TILEMAP::name maxium length. */
-#define TILEMAP_NAME_MAX 32
+#define TILEMAP_NAME_MAX 8
 /*! \brief TILEMAP::tileset maximum length. */
 #define TILEMAP_TILESETS_MAX 12
 /*! \brief Maximum number of TILEMAP::spawns. */
@@ -94,6 +94,7 @@ struct TILEMAP {
    /* \brief Scripts available to attach to any MOBILE. */
    struct SCRIPT scripts[TILEMAP_SCRIPTS_MAX];
    struct ITEM items[TILEMAP_ITEMS_MAX];
+   struct CROP_DEF crop_defs[TILEMAP_CROP_DEFS_MAX];
 };
 
 /*! \} */
