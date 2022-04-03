@@ -26,11 +26,11 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
 
       window_push(
          WINDOW_ID_MENU_LABEL_ITEM + i, MENU_WINDOW_ID, WINDOW_TYPE_LABEL,
-         WINDOW_FLAG_TEXT_MENU,
+         WINDOW_FLAG_TEXT_PTR,
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, GRAPHICS_COLOR_BLACK, GRAPHICS_STRING_FLAG_ALL_CAPS,
-         i, 0, NULL, state );
+         0, 0, gc_menu_tokens[i], state );
       i++;
    }  
 }

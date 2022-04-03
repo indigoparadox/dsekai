@@ -143,8 +143,12 @@ int8_t item_use_hoe(
             state->crops[i].map_name, state->map.name, TILEMAP_NAME_MAX ) &&
          x == state->crops[i].coords.x && y == state->crops[i].coords.y
       ) {
-         /* TODO: Display warning on screen. */
-         retval = 0;
+#ifdef SCREEN_W
+         window_prefab_system_dialog(
+            "There is already\na plot here!", state,
+            GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_MAGENTA );
+#endif /* SCREEN_W */
+         retval = -1;
          crop_idx = -1;
          error_printf( "crop plot already exists" );
          goto cleanup;

@@ -319,9 +319,10 @@ static const char* window_get_text(
 
    if( WINDOW_FLAG_TEXT_PTR == (WINDOW_FLAG_TEXT_PTR & c->flags) ) {
       /* Get the string from a directly passed pointer. */
-      str_ptr = c->data.string;
+      str_ptr = (const char*)(c->data.string);
       /* TODO: Sane maximum length default. */
       *sz_out = memory_strnlen_ptr( str_ptr, 100 );
+      debug_printf( 0, "text str: %s", str_ptr );
 
    } else if(
       WINDOW_FLAG_TEXT_TILEMAP == (WINDOW_FLAG_TEXT_TILEMAP & c->flags)
@@ -641,7 +642,7 @@ int16_t window_push(
 
    /* Sizing callbacks below might need these. */
    if( NULL != data_string ) {
-      window_new->data.string = data_string;
+      window_new->data.string = (char*)data_string;
    } else if( 0 != data_scalar ) {
       window_new->data.scalar = data_scalar;
    } else if( !resource_compare_id( 0, data_res_id ) ) {

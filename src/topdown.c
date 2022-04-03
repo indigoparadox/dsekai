@@ -123,6 +123,43 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
    gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
 }
 
+static void topdown_draw_crops(
+   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate
+) {
+   int8_t i = 0;
+   struct CROP_PLOT* plot = NULL;
+   RESOURCE_ID plot_gfx;
+   uint16_t plot_px = 0,
+      plot_py = 0;
+
+   /* Draw crops/plots. */
+   for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
+      plot = &(state->crops[i]);
+      if(
+         CROP_FLAG_ACTIVE != (plot->flags & CROP_FLAG_ACTIVE) ||
+         0 != memory_strncmp_ptr(
+            plot->map_name, state->map.name,
+            memory_strnlen_ptr( plot->map_name, CROP_NAME_MAX )
+         )
+      ) {
+         continue;
+      }
+
+      plot_px = (plot->coords.x * TILE_W) - gstate->screen_scroll_x;
+      plot_py = (plot->coords.y * TILE_H) - gstate->screen_scroll_y;
+
+#ifdef RESOURCE_FILE
+      resource_assign_id( plot_gfx, ASSETS_PATH DEPTH_SPEC "/i_plot.bmp" );
+#else
+      resource_assign_id( plot_gfx, i_plot );
+#endif /* RESOURCE_FILE */
+
+      graphics_blit_sprite_at(
+         plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
+   }
+
+}
+
 static void topdown_draw_mobile(
    struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate, struct MOBILE* m
 ) {
@@ -180,6 +217,8 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
    topdown_draw_tilemap( state );
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
+
+   topdown_draw_crops( state, gstate );
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       topdown_draw_mobile( state, gstate, &(state->mobiles[i]) );
