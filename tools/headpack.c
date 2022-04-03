@@ -358,6 +358,9 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
       fprintf( header_file, "         /* name */\n" );
       fprintf( header_file, "         \"%s\",\n", t->crop_defs[i].name );
 
+      fprintf( header_file, "         /* gid */\n" );
+      fprintf( header_file, "         %d,\n", t->crop_defs[i].gid );
+
       fprintf( header_file, "         /* flags */\n" );
       fprintf( header_file, "         %d,\n", t->crop_defs[i].flags );
 
