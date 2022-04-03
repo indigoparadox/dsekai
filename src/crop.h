@@ -35,10 +35,9 @@
 struct CROP_PLOT {
    char map_name[TILEMAP_NAME_MAX];
    /**
-    * \brief System name for currently growing crop, used to index
-    *        TILEMAP::crop_defs.
+    * \brief Compared to GIDs in TILEMAP::crop_defs to find crop details.
     */
-   char crop_name[CROP_NAME_MAX];
+   uint8_t crop_gid;
    uint8_t flags;
    uint32_t next_at_ticks;
    struct TILEMAP_COORDS coords;

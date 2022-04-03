@@ -26,7 +26,7 @@ int8_t item_use_seed(
       retval = -1;
    /* TODO: Check the list of CROP_PLOTs for a fertile, unseeded plot. */
 
-   /* TODO: Check TILEMAP::crop_defs for ::CROP_DEF with same name. */
+   /* TODO: Check TILEMAP::crop_defs for ::CROP_DEF with same GID. */
 
    if( 0 > crop_def_idx ) { 
       /* TODO: On-screen warning. */

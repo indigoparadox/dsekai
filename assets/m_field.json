@@ -218,6 +218,11 @@
                          "value":3000
                         }, 
                         {
+                         "name":"gid",
+                         "type":"int",
+                         "value":33
+                        }, 
+                        {
                          "name":"regrows",
                          "type":"bool",
                          "value":false

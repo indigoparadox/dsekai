@@ -122,6 +122,23 @@ The following platforms are planned to be supported but not yet functional:
 
 Just using "make" will attempt to build all currently working targets with OS-level resources and statically compiled maps.
 
+# Mechanics
+
+## Items
+
+Items are defined in each tilemap in an array. Through scripts, items can be
+coped from the item definition array into the player's inventory where they
+can then be used even if the player is on a different tilemap.
+
+## Crops
+
+Crops are also defined in each tilemap in an array. However, seeds in the
+player's inventory only reference the crop GID. This means that crops can
+only grow on a tilemap in which they are defined. This also means that crop
+GIDs MUST NOT collide between tilemaps.
+
+## Crops
+
 # Modding
 
 ## Mapping

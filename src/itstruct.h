@@ -58,7 +58,7 @@ struct ITEM {
     *
     * | Item | Data        |
     * |------|-------------|
-    * | Seed | Crop Index  |
+    * | Seed | Crop GID    |
     * | Food | HP+         |
     *
     */

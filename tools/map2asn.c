@@ -283,6 +283,60 @@ int main( int argc, char* argv[] ) {
    }
    idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
 
+   /* crop defs */
+   debug_printf( 3, "(offset 0x%02x) writing map crop defs", idx );
+   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
+   assert( 0 < idx );
+   for( i = 0 ; TILEMAP_CROP_DEFS_MAX > i ; i++ ) {
+      if(
+         CROP_DEF_FLAG_ACTIVE != (t.crop_defs[i].flags & CROP_DEF_FLAG_ACTIVE)
+      ) {
+         continue;
+      }
+
+      debug_printf( 3, "(offset 0x%02x) writing map crop def", idx );
+      /* Reuse mark_seq_item for crop def since it's not used in this scope. */
+      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_item );
+      assert( 0 < idx );
+
+      /* index */
+      debug_printf( 3, "(offset 0x%02x) writing crop def index", idx );
+      idx = asn_write_int( &h_buffer, idx, i );
+      assert( 0 <= idx );
+
+      /* sprite */
+      debug_printf( 3, "(offset 0x%02x) writing crop def sprite path", idx );
+      idx = asn_write_string(
+         &h_buffer, idx, t.crop_defs[i].sprite, RESOURCE_PATH_MAX );
+      assert( 0 <= idx );
+
+      /* name */
+      debug_printf( 3, "(offset 0x%02x) writing crop def name", idx );
+      idx = asn_write_string(
+         &h_buffer, idx, t.crop_defs[i].name, CROP_NAME_MAX );
+      assert( 0 <= idx );
+
+      /* gid */
+      debug_printf( 3, "(offset 0x%02x) writing crop def gid", idx );
+      idx = asn_write_int( &h_buffer, idx, t.crop_defs[i].gid );
+      assert( 0 <= idx );
+
+      /* flags */
+      debug_printf( 3, "(offset 0x%02x) writing crop def flags", idx );
+      idx = asn_write_int( &h_buffer, idx, t.crop_defs[i].flags );
+      assert( 0 <= idx );
+
+      /* cycle */
+      debug_printf( 3, "(offset 0x%02x) writing crop def cycle", idx );
+      idx = asn_write_int( &h_buffer, idx, t.crop_defs[i].cycle );
+      assert( 0 <= idx );
+
+      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_item );
+      assert( 0 < idx );
+   }
+   idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
+
+   /* End the main sequence. */
    idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_main );
    assert( 0 < idx );
 

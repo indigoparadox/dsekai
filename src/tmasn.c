@@ -463,6 +463,109 @@ cleanup:
    return total_read_sz;
 }
 
+static int16_t tilemap_asn_parse_crop_defs(
+   struct TILEMAP* t, const uint8_t* asn_buffer
+) {
+   uint8_t type_buf = 0;
+   int32_t total_read_sz = 0,
+      read_sz = 0,
+      all_crops_seq_start = 0,
+      all_crops_seq_sz = 0,
+      crop_def_seq_sz = 0;
+   int16_t crop_idx = 0;
+
+   total_read_sz = asn_read_meta_ptr(
+      asn_buffer, total_read_sz, &type_buf, &all_crops_seq_sz );
+   if( ASN_SEQUENCE != type_buf ) {
+      error_printf(
+         "invalid crop def sequence type byte: 0x%02x", type_buf );
+      goto cleanup;
+   }
+   debug_printf( 1, "crop def seq is %d bytes...", all_crops_seq_sz );
+
+   all_crops_seq_start = total_read_sz;
+
+   while( total_read_sz - all_crops_seq_start < all_crops_seq_sz ) {
+      total_read_sz = asn_read_meta_ptr(
+         asn_buffer, total_read_sz, &type_buf, &crop_def_seq_sz );
+      if( ASN_SEQUENCE != type_buf ) {
+         error_printf(
+            "invalid crop def sequence type byte: 0x%02x", type_buf );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      
+      /* index */
+      read_sz = tilemap_asn_parse_int(
+         (uint8_t*)&crop_idx, 2, 0, &(asn_buffer[total_read_sz]) );
+      total_read_sz += read_sz;
+
+      /* sprite */
+      read_sz = tilemap_asn_parse_string( t->crop_defs[crop_idx].sprite,
+         RESOURCE_PATH_MAX, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "crop def %d sprite: %s (%d)",
+         crop_idx, t->crop_defs[crop_idx].sprite, read_sz );
+      total_read_sz += read_sz; /* crop def sprite and header */
+
+      /* name */
+      read_sz = tilemap_asn_parse_string( t->crop_defs[crop_idx].name,
+            CROP_NAME_MAX, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading crop def name" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "crop %d name: %s (%d)",
+         crop_idx, t->crop_defs[crop_idx].name, read_sz );
+      total_read_sz += read_sz; /* crop def name and header */
+
+      /* gid */
+      read_sz = tilemap_asn_parse_int(
+         &(t->crop_defs[crop_idx].gid), 1, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading crop def gid" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "crop def %d gid: %d (%d)",
+         crop_idx, t->crop_defs[crop_idx].gid, read_sz );
+      total_read_sz += read_sz;
+
+      /* flags */
+      read_sz = tilemap_asn_parse_int(
+         &(t->crop_defs[crop_idx].flags), 1, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading crop def flags" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "crop def %d flags: %d (%d)",
+         crop_idx, t->crop_defs[crop_idx].flags, read_sz );
+      total_read_sz += read_sz;
+
+      /* cycle */
+      read_sz = tilemap_asn_parse_int(
+         (uint8_t*)&(t->crop_defs[crop_idx].cycle), 4, 0,
+         &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading crop def cycle" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "crop def %d cycle: %d (%d)",
+         crop_idx, t->crop_defs[crop_idx].cycle, read_sz );
+      total_read_sz += read_sz;
+
+   }
+
+cleanup:
+
+   return total_read_sz;
+}
 
 static int32_t tilemap_asn_parse_scripts(
    struct TILEMAP* t, const uint8_t* asn_buffer
@@ -664,6 +767,14 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
 
    /* items */
    read_sz = tilemap_asn_parse_items( t, &(asn_buffer[idx]) );
+   if( 0 >= read_sz ) {
+      retval = read_sz;
+      goto cleanup;
+   }
+   idx += read_sz;
+
+   /* crop defs */
+   read_sz = tilemap_asn_parse_crop_defs( t, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
       retval = read_sz;
       goto cleanup;

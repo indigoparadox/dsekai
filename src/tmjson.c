@@ -438,12 +438,9 @@ int16_t tilemap_json_parse_crop_defs(
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t i = 0,
-      j = 0,
       sprite_buffer_sz = 0,
-      type_buffer_sz = 0,
       name_buffer_sz = 0;
-   char sprite_buffer[RESOURCE_PATH_MAX],
-      type_buffer[ITEM_NAME_SZ + 1];
+   char sprite_buffer[RESOURCE_PATH_MAX];
    
    /* Load crop definitions.*/
    debug_printf( 2, "loading crop definitions" ); 
@@ -474,6 +471,13 @@ int16_t tilemap_json_parse_crop_defs(
          break;
       }
       resource_assign_id( t->crop_defs[i].sprite, sprite_buffer );
+
+      /* gid */
+      dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_GID, i );
+      t->crop_defs[i].gid = json_int_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+
+      debug_printf( 1, "crop gid: %d", t->crop_defs[i].gid );
 
       /* cycle */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_CYCLE, i );
