@@ -145,8 +145,12 @@ static void topdown_draw_crops(
          continue;
       }
 
-      plot_px = (plot->coords.x * TILE_W) - gstate->screen_scroll_x;
-      plot_py = (plot->coords.y * TILE_H) - gstate->screen_scroll_y;
+      /* TODO: Hide off-screen plots. */
+
+      plot_px =
+         SCREEN_MAP_X + ((plot->coords.x * TILE_W) - gstate->screen_scroll_x);
+      plot_py =
+         SCREEN_MAP_Y + ((plot->coords.y * TILE_H) - gstate->screen_scroll_y);
 
 #ifdef RESOURCE_FILE
       resource_assign_id( plot_gfx, ASSETS_PATH DEPTH_SPEC "/i_plot.bmp" );

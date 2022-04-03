@@ -146,7 +146,7 @@ int8_t item_use_hoe(
 #ifdef SCREEN_W
          window_prefab_system_dialog(
             "There is already\na plot here!", state,
-            GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_MAGENTA );
+            WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
          retval = -1;
          crop_idx = -1;

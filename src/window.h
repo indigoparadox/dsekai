@@ -191,6 +191,18 @@ struct WINDOW {
 
 #define window_screen_reset_grid() memory_zero_ptr( g_window_screen_grid, 4 * sizeof( int16_t ) );
 
+#ifdef DEPTH_VGA
+#  define WINDOW_PREFAB_DEFAULT_FG() GRAPHICS_COLOR_WHITE
+#  define WINDOW_PREFAB_DEFAULT_BG() GRAPHICS_COLOR_MAGENTA
+#elif defined( DEPTH_CGA )
+#  define WINDOW_PREFAB_DEFAULT_FG() GRAPHICS_COLOR_BLACK
+#  define WINDOW_PREFAB_DEFAULT_BG() GRAPHICS_COLOR_MAGENTA
+#elif defined( DEPTH_MONO )
+   /* TODO: Verify this looks OK. */
+#  define WINDOW_PREFAB_DEFAULT_FG() GRAPHICS_COLOR_WHITE
+#  define WINDOW_PREFAB_DEFAULT_BG() GRAPHICS_COLOR_BLACK
+#endif /* DEPTH */
+
 /**
  * \brief Convenience macro for creating a dialog ::WINDOW with a sprite and
  *        text string specified from TILEMAP::strpool.
