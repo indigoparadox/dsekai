@@ -549,7 +549,7 @@ static int16_t tilemap_asn_parse_crop_defs(
 
       /* cycle */
       read_sz = tilemap_asn_parse_int(
-         (uint8_t*)&(t->crop_defs[crop_idx].cycle), 4, 0,
+         (uint8_t*)&(t->crop_defs[crop_idx].cycle), 2, 0,
          &(asn_buffer[total_read_sz]) );
       if( 0 >= read_sz ) {
          error_printf( "error reading crop def cycle" );

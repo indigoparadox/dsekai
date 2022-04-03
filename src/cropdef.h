@@ -7,7 +7,7 @@ struct CROP_DEF {
    char name[CROP_NAME_MAX];
    uint8_t gid;
    uint8_t flags;
-   uint32_t cycle;
+   uint16_t cycle;
 };
 
 #endif /* !CROPDEF_H */
