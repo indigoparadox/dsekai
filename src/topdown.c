@@ -126,11 +126,13 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
 static void topdown_draw_crops(
    struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate
 ) {
-   int8_t i = 0;
+   int8_t i = 0,
+      crop_idx = 0;
    struct CROP_PLOT* plot = NULL;
    RESOURCE_ID plot_gfx;
    uint16_t plot_px = 0,
       plot_py = 0;
+   uint8_t crop_stage = 0;
 
    /* Draw crops/plots. */
    for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
@@ -160,6 +162,30 @@ static void topdown_draw_crops(
 
       graphics_blit_sprite_at(
          plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
+
+      if(
+         0 < plot->crop_gid &&
+         0 <= (crop_idx = crop_get_def_idx( state, plot->crop_gid ))
+      ) {
+         crop_stage = (plot->flags & CROP_FLAG_STAGE_MASK);
+
+         if( 0 < crop_stage ) {
+            /* Crop has germinated. */
+            graphics_blit_sprite_at(
+               state->map.crop_defs[crop_idx].sprite,
+               (crop_stage - 1) * TILE_W, 0, plot_px, plot_py, TILE_W, TILE_H );
+         } else {
+            /* Crop is still seeds. */
+#ifdef RESOURCE_FILE
+            resource_assign_id(
+               plot_gfx, ASSETS_PATH DEPTH_SPEC "/i_seed.bmp" );
+#else
+            resource_assign_id( plot_gfx, i_seed );
+#endif /* RESOURCE_FILE */
+            graphics_blit_sprite_at(
+               plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
+         }
+      }
    }
 
 }

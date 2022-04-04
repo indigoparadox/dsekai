@@ -39,6 +39,7 @@ HEADPACK_C_FILES := \
    src/script.c \
    src/json.c \
    src/item.c \
+   src/crop.c \
    src/strpool.c \
    unilayer/tools/data/bmp.c \
    unilayer/tools/data/cga.c \
@@ -61,6 +62,7 @@ MAP2ASN_C_FILES := \
    src/tmjson.c \
    src/asn.c \
    src/item.c \
+   src/crop.c \
    src/strpool.c \
    unilayer/src/resource/file.c \
    unilayer/src/graphics.c \

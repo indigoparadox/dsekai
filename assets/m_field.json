@@ -253,8 +253,13 @@
                 {
                  "height":12,
                  "id":14,
-                 "name":"bseed",
+                 "name":"tseed",
                  "properties":[
+                        {
+                         "name":"data",
+                         "type":"int",
+                         "value":33
+                        }, 
                         {
                          "name":"gid",
                          "type":"int",

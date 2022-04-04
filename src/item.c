@@ -23,16 +23,53 @@ int8_t item_use_seed(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
    int8_t crop_def_idx = -1,
-      retval = -1;
-   /* TODO: Check the list of CROP_PLOTs for a fertile, unseeded plot. */
+      retval = -1,
+      i = 0;
+   int16_t x = 0,
+      y = 0;
+   struct CROP_PLOT* plot = NULL;
+   struct CROP_DEF* crop_def = NULL;
 
-   /* TODO: Check TILEMAP::crop_defs for ::CROP_DEF with same GID. */
-
-   if( 0 > crop_def_idx ) { 
+   crop_def_idx = crop_get_def_idx( state, e->data );
+   if( 0 > crop_def_idx ) {
       /* TODO: On-screen warning. */
-      error_printf( "unable to grow this crop on the current tilemap" );
-      retval = 0;
+      goto cleanup;
    }
+
+   crop_def = &(state->map.crop_defs[crop_def_idx]);
+
+   x = user->coords.x + gc_mobile_x_offsets[user->dir];
+   y = user->coords.y + gc_mobile_y_offsets[user->dir];
+
+   /* Find a plot in front of the user. */
+   for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
+      if(
+         CROP_FLAG_ACTIVE != (CROP_FLAG_ACTIVE & state->crops[i].flags) ||
+         0 != memory_strncmp_ptr(
+            state->crops[i].map_name, state->map.name, TILEMAP_NAME_MAX ) ||
+         x != state->crops[i].coords.x || y != state->crops[i].coords.y
+      ) {
+         continue;
+      }
+
+      plot = &(state->crops[i]);
+      break;
+   }
+
+   if( NULL == plot ) {
+      error_printf( "could not find plot" );
+      goto cleanup;
+   }
+
+   plot->crop_gid = e->data;
+   plot->next_at_ticks = graphics_get_ms() + crop_def->cycle;
+
+   item_consume( e );
+
+   debug_printf( 1, "planted crop %d at %d, %d on map %s",
+      plot->crop_gid, x, y, state->map.name );
+
+cleanup:
 
    return retval;
 }
@@ -144,13 +181,15 @@ int8_t item_use_hoe(
          x == state->crops[i].coords.x && y == state->crops[i].coords.y
       ) {
 #ifdef SCREEN_W
-         window_prefab_system_dialog(
+         /* window_prefab_system_dialog(
             "There is already\na plot here!", state,
-            WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
+            WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() ); */
 #endif /* SCREEN_W */
          retval = -1;
+         /* Destroy plot. */
+         state->crops[i].flags &= ~CROP_FLAG_ACTIVE;
          crop_idx = -1;
-         error_printf( "crop plot already exists" );
+         debug_printf( 1, "crop plot already exists; destroyed" );
          goto cleanup;
       }
    }

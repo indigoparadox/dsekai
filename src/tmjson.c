@@ -335,7 +335,8 @@ void tilemap_json_parse_flags(
 int16_t tilemap_json_parse_items(
    struct TILEMAP* t,
    char* json_buffer, uint16_t json_buffer_sz,
-   struct jsmntok* tokens, int16_t tokens_sz
+   struct jsmntok* tokens, int16_t tokens_sz,
+   RESOURCE_ID map_path
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t i = 0,
@@ -384,11 +385,17 @@ int16_t tilemap_json_parse_items(
       
       debug_printf( 1, "found item: %s", t->items[i].name );
 
+#ifndef NO_FIX_ASSET_PATH
+      sprite_buffer_sz = tilemap_fix_asset_path(
+         sprite_buffer, RESOURCE_PATH_MAX, map_path );
+#endif /* NO_FIX_ASSET_PATH */
+
       /* sprite */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_SPRITE, i );
       sprite_buffer_sz = json_str_from_path(
          iter_path, JSON_PATH_SZ,
-         sprite_buffer, RESOURCE_PATH_MAX,
+         &(sprite_buffer[sprite_buffer_sz]),
+         RESOURCE_PATH_MAX - sprite_buffer_sz,
          &(tokens[0]), tokens_sz, json_buffer );
       if( 0 >= sprite_buffer_sz ) {
          error_printf( "invalid item sprite returned (loaded %d)", i );
@@ -434,7 +441,8 @@ int16_t tilemap_json_parse_items(
 int16_t tilemap_json_parse_crop_defs(
    struct TILEMAP* t,
    char* json_buffer, uint16_t json_buffer_sz,
-   struct jsmntok* tokens, int16_t tokens_sz
+   struct jsmntok* tokens, int16_t tokens_sz,
+   RESOURCE_ID map_path
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t i = 0,
@@ -460,10 +468,17 @@ int16_t tilemap_json_parse_crop_defs(
       debug_printf( 1, "found crop definition: %s", t->crop_defs[i].name );
 
       /* sprite */
+
+#ifndef NO_FIX_ASSET_PATH
+      sprite_buffer_sz = tilemap_fix_asset_path(
+         sprite_buffer, RESOURCE_PATH_MAX, map_path );
+#endif /* NO_FIX_ASSET_PATH */
+
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_SPRITE, i );
       sprite_buffer_sz = json_str_from_path(
          iter_path, JSON_PATH_SZ,
-         sprite_buffer, RESOURCE_PATH_MAX,
+         &(sprite_buffer[sprite_buffer_sz]),
+         RESOURCE_PATH_MAX - sprite_buffer_sz,
          &(tokens[0]), tokens_sz, json_buffer );
       if( 0 >= sprite_buffer_sz ) {
          error_printf(
@@ -614,10 +629,10 @@ int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
    }
 
    tilemap_json_parse_items(
-      t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
+      t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX, id );
 
    tilemap_json_parse_crop_defs(
-      t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
+      t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX, id );
 
    tilemap_json_parse_strings(
       t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );

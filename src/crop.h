@@ -43,6 +43,8 @@ struct CROP_PLOT {
    struct TILEMAP_COORDS coords;
 };
 
+int8_t crop_get_def_idx( struct DSEKAI_STATE* state, uint8_t gid );
+
 /*! \} */
 
 #endif /* !CROP_H */
