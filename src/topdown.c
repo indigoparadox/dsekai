@@ -165,7 +165,7 @@ static void topdown_draw_crops(
 
       if(
          0 < plot->crop_gid &&
-         0 <= (crop_idx = crop_get_def_idx( state, plot->crop_gid ))
+         0 <= (crop_idx = crop_get_def_idx( plot->crop_gid, state ))
       ) {
          crop_stage = (plot->flags & CROP_FLAG_STAGE_MASK);
 
@@ -480,9 +480,10 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
             state->editor.coords.y );
          state->editor.flags |= EDITOR_FLAG_FORCE_FRAME;
       } else if( NULL != (plot = crop_find_plot(
-         state, &(state->map),
+         &(state->map),
          state->player.coords.x + gc_mobile_x_offsets[state->player.dir],
-         state->player.coords.y + gc_mobile_y_offsets[state->player.dir]
+         state->player.coords.y + gc_mobile_y_offsets[state->player.dir],
+         state
       )) ) {
          /* Try to harvest facing crop plot. */
 
@@ -495,7 +496,7 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
                "This crop is\nnot ready!", state,
                WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
          } else {
-            crop_harvest( state, &(state->player), plot );
+            crop_harvest( &(state->player), plot, state );
          }
 
       } else {

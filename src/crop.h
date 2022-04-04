@@ -86,7 +86,7 @@ struct CROP_PLOT {
  * \brief Check the crop's current cycle/flags and grow to the next stage if
  *        able to.
  */
-void crop_grow( struct DSEKAI_STATE* state, struct CROP_PLOT* plot );
+void crop_grow( struct CROP_PLOT* plot, struct DSEKAI_STATE* state );
 
 /**
  * \brief Call crop_grow() on all crops active in the engine state.
@@ -94,23 +94,23 @@ void crop_grow( struct DSEKAI_STATE* state, struct CROP_PLOT* plot );
 void crop_grow_all( struct DSEKAI_STATE* state );
 
 struct CROP_PLOT* crop_find_plot(
-   struct DSEKAI_STATE* state, struct TILEMAP* t, uint8_t x, uint8_t y );
+   struct TILEMAP* t, uint8_t x, uint8_t y, struct DSEKAI_STATE* state );
 
 /**
  * \brief Given a ::CROP_DEF::gid, plant on a plot at the given coordinates on
  *        the currently loaded ::TILEMAP.
  */
 int8_t crop_plant(
-   struct DSEKAI_STATE* state, uint8_t crop_gid, struct CROP_PLOT* plot );
+   uint8_t crop_gid, struct CROP_PLOT* plot, struct DSEKAI_STATE* state );
 
 int8_t crop_harvest(
-   struct DSEKAI_STATE* state, struct MOBILE* harvester,
-   struct CROP_PLOT* plot );
+   struct MOBILE* harvester, struct CROP_PLOT* plot,
+   struct DSEKAI_STATE* state );
 
 /**
  * \brief Given a ::CROP_DEF::gid, find the index in ::TILEMAP::crop_defs.
  */
-int8_t crop_get_def_idx( struct DSEKAI_STATE* state, uint8_t gid );
+int8_t crop_get_def_idx( uint8_t gid, struct DSEKAI_STATE* state );
 
 /*! \} */
 

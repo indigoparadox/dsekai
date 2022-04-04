@@ -31,7 +31,7 @@ int8_t item_use_seed(
    y = user->coords.y + gc_mobile_y_offsets[user->dir];
 
    /* Get the plot in front of the user. */
-   plot = crop_find_plot( state, &(state->map), x, y );
+   plot = crop_find_plot( &(state->map), x, y, state );
    if( NULL == plot ) {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
@@ -43,7 +43,7 @@ int8_t item_use_seed(
       goto cleanup;
    }
 
-   if( 0 < crop_plant( state, e->data, plot ) ) {
+   if( 0 < crop_plant( e->data, plot, state ) ) {
       /* Planting was successful. */
       item_consume( e );
    } else {

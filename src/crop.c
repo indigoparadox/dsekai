@@ -2,7 +2,7 @@
 #define CROPS_C
 #include "dsekai.h"
 
-void crop_grow( struct DSEKAI_STATE* state, struct CROP_PLOT* plot ) {
+void crop_grow( struct CROP_PLOT* plot, struct DSEKAI_STATE* state ) {
    uint8_t crop_stage = (plot->flags & CROP_FLAG_STAGE_MASK);
 
    if( plot->next_at_ticks <= graphics_get_ms() ) {
@@ -28,12 +28,12 @@ void crop_grow_all( struct DSEKAI_STATE* state ) {
          continue;
       }
 
-      crop_grow( state, &(state->crops[i]) );
+      crop_grow( &(state->crops[i]), state );
    }
 }
 
 struct CROP_PLOT* crop_find_plot(
-   struct DSEKAI_STATE* state, struct TILEMAP* t, uint8_t x, uint8_t y
+   struct TILEMAP* t, uint8_t x, uint8_t y, struct DSEKAI_STATE* state
 ) {
    int8_t i = 0;
    struct CROP_PLOT* plot = NULL;
@@ -57,14 +57,14 @@ struct CROP_PLOT* crop_find_plot(
 }
 
 int8_t crop_plant(
-   struct DSEKAI_STATE* state, uint8_t crop_gid, struct CROP_PLOT* plot
+   uint8_t crop_gid, struct CROP_PLOT* plot, struct DSEKAI_STATE* state
 ) {
    int8_t retval = 1,
       i = 0;
    struct CROP_DEF* crop_def = NULL;
 
    /* Find the crop definition. */
-   i = crop_get_def_idx( state, crop_gid );
+   i = crop_get_def_idx( crop_gid, state );
    if( 0 > i ) {
       retval = CROP_ERROR_DEF_NOT_FOUND;
       error_printf( "could not find crop def for: %d", crop_gid );
@@ -87,7 +87,7 @@ cleanup:
 }
 
 int8_t crop_harvest(
-   struct DSEKAI_STATE* state, struct MOBILE* harvester, struct CROP_PLOT* plot
+   struct MOBILE* harvester, struct CROP_PLOT* plot, struct DSEKAI_STATE* state
 ) {
    struct CROP_DEF* crop_def = NULL;
    int8_t i = 0,
@@ -98,7 +98,7 @@ int8_t crop_harvest(
    assert( CROP_STAGE_MAX == (CROP_FLAG_STAGE_MASK & plot->flags) );
 
    /* Find the crop definition. */
-   i = crop_get_def_idx( state, plot->crop_gid );
+   i = crop_get_def_idx( plot->crop_gid, state );
    if( 0 > i ) {
       retval = CROP_ERROR_DEF_NOT_FOUND;
       error_printf( "could not find crop def for: %d", plot->crop_gid );
@@ -142,7 +142,7 @@ cleanup:
    return retval;
 }
 
-int8_t crop_get_def_idx( struct DSEKAI_STATE* state, uint8_t gid ) {
+int8_t crop_get_def_idx( uint8_t gid, struct DSEKAI_STATE* state ) {
    int8_t i = 0,
       retval = -1;
 
