@@ -138,16 +138,28 @@ static void topdown_draw_crops(
    for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
       plot = &(state->crops[i]);
       if(
+         /* Crop plot is inactive. */
          CROP_FLAG_ACTIVE != (plot->flags & CROP_FLAG_ACTIVE) ||
+         /* Crop is on a different TILEMAP. */
          0 != memory_strncmp_ptr(
             plot->map_name, state->map.name,
-            memory_strnlen_ptr( plot->map_name, CROP_NAME_MAX )
-         )
+            memory_strnlen_ptr( plot->map_name, CROP_NAME_MAX ) ) ||
+         /* Crop is off-screen. */
+         plot->coords.x < gstate->screen_scroll_tx ||
+            plot->coords.y < gstate->screen_scroll_ty ||
+            plot->coords.x >= gstate->screen_scroll_tx + SCREEN_TW ||
+            plot->coords.y >= gstate->screen_scroll_ty + SCREEN_TH
       ) {
          continue;
       }
 
-      /* TODO: Hide off-screen plots. */
+      /*
+      debug_printf( 1, "%d, %d is between %d, %d and %d, %d",
+         plot->coords.x, plot->coords.y,
+         gstate->screen_scroll_tx, gstate->screen_scroll_ty,
+         gstate->screen_scroll_tx + SCREEN_TW,
+         gstate->screen_scroll_ty + SCREEN_TH );
+      */
 
       plot_px =
          SCREEN_MAP_X + ((plot->coords.x * TILE_W) - gstate->screen_scroll_x);
@@ -163,32 +175,35 @@ static void topdown_draw_crops(
       graphics_blit_sprite_at(
          plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
 
+      /* Skip drawing crop if it hasn't germinated. */
       if(
-         0 < plot->crop_gid &&
-         0 <= (crop_idx = crop_get_def_idx( plot->crop_gid, state ))
+         0 == plot->crop_gid ||
+         0 > (crop_idx = crop_get_def_idx( plot->crop_gid, state ))
       ) {
-         crop_stage = (plot->flags & CROP_FLAG_STAGE_MASK);
+         continue;
+      }
 
-         if( 0 < crop_stage ) {
-            /* Crop has germinated. */
-            graphics_blit_sprite_at(
-               state->map.crop_defs[crop_idx].sprite,
-               (crop_stage - 1) * TILE_W, 0,
-               plot_px, plot_py, TILE_W, TILE_H );
-         } else {
-            /* Crop is still seeds. */
+      crop_stage = (plot->flags & CROP_FLAG_STAGE_MASK);
+
+      if( 0 < crop_stage ) {
+         /* Crop has germinated. */
+         graphics_blit_sprite_at(
+            state->map.crop_defs[crop_idx].sprite,
+            (crop_stage - 1) * TILE_W, 0,
+            plot_px, plot_py, TILE_W, TILE_H );
+
+      } else {
+         /* Crop is still seeds. */
 #ifdef RESOURCE_FILE
-            resource_assign_id(
-               plot_gfx, ASSETS_PATH DEPTH_SPEC "/i_seed.bmp" );
+         resource_assign_id(
+            plot_gfx, ASSETS_PATH DEPTH_SPEC "/i_seed.bmp" );
 #else
-            resource_assign_id( plot_gfx, i_seed );
+         resource_assign_id( plot_gfx, i_seed );
 #endif /* RESOURCE_FILE */
-            graphics_blit_sprite_at(
-               plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
-         }
+         graphics_blit_sprite_at(
+            plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
       }
    }
-
 }
 
 static void topdown_draw_mobile(
