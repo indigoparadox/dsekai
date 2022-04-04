@@ -151,6 +151,7 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
       mobile_animate( &(state->mobiles[i]), &(state->map) );
    }
    mobile_animate( &(state->player), &(state->map) );
+   crop_grow_all( state );
 
 }
 

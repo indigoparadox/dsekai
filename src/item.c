@@ -22,52 +22,20 @@ int8_t item_use_none(
 int8_t item_use_seed(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
-   int8_t crop_def_idx = -1,
-      retval = -1,
-      i = 0;
-   int16_t x = 0,
+   int8_t retval = -1;
+   uint8_t x = 0,
       y = 0;
-   struct CROP_PLOT* plot = NULL;
-   struct CROP_DEF* crop_def = NULL;
-
-   crop_def_idx = crop_get_def_idx( state, e->data );
-   if( 0 > crop_def_idx ) {
-      /* TODO: On-screen warning. */
-      goto cleanup;
-   }
-
-   crop_def = &(state->map.crop_defs[crop_def_idx]);
 
    x = user->coords.x + gc_mobile_x_offsets[user->dir];
    y = user->coords.y + gc_mobile_y_offsets[user->dir];
 
-   /* Find a plot in front of the user. */
-   for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
-      if(
-         CROP_FLAG_ACTIVE != (CROP_FLAG_ACTIVE & state->crops[i].flags) ||
-         0 != memory_strncmp_ptr(
-            state->crops[i].map_name, state->map.name, TILEMAP_NAME_MAX ) ||
-         x != state->crops[i].coords.x || y != state->crops[i].coords.y
-      ) {
-         continue;
-      }
-
-      plot = &(state->crops[i]);
-      break;
+   if( 0 < crop_plant( state, e->data, x, y ) ) {
+      /* Planting was successful. */
+      item_consume( e );
+   } else {
+      /* TODO: On-screen warning. */
+      retval = -1;
    }
-
-   if( NULL == plot ) {
-      error_printf( "could not find plot" );
-      goto cleanup;
-   }
-
-   plot->crop_gid = e->data;
-   plot->next_at_ticks = graphics_get_ms() + crop_def->cycle;
-
-   item_consume( e );
-
-   debug_printf( 1, "planted crop %d at %d, %d on map %s",
-      plot->crop_gid, x, y, state->map.name );
 
 cleanup:
 

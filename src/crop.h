@@ -32,6 +32,11 @@
  */
 #define CROP_FLAG_STAGE_MASK 0x03
 
+#define CROP_STAGE_MAX 3
+
+#define CROP_ERROR_DEF_NOT_FOUND -1
+#define CROP_ERROR_PLOT_NOT_FOUND -2
+
 struct CROP_PLOT {
    char map_name[TILEMAP_NAME_MAX];
    /**
@@ -39,10 +44,15 @@ struct CROP_PLOT {
     */
    uint8_t crop_gid;
    uint8_t flags;
+   uint16_t cycle;
    uint32_t next_at_ticks;
    struct TILEMAP_COORDS coords;
 };
 
+void crop_grow( struct DSEKAI_STATE* state, struct CROP_PLOT* plot );
+void crop_grow_all( struct DSEKAI_STATE* state );
+int8_t crop_plant(
+   struct DSEKAI_STATE* state, uint8_t crop_gid, uint8_t x, uint8_t y );
 int8_t crop_get_def_idx( struct DSEKAI_STATE* state, uint8_t gid );
 
 /*! \} */
