@@ -331,6 +331,11 @@ int main( int argc, char* argv[] ) {
       idx = asn_write_int( &h_buffer, idx, t.crop_defs[i].cycle );
       assert( 0 <= idx );
 
+      /* produce gid */
+      debug_printf( 3, "(offset 0x%02x) writing crop produce gid", idx );
+      idx = asn_write_int( &h_buffer, idx, t.crop_defs[i].produce_gid );
+      assert( 0 <= idx );
+
       idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_item );
       assert( 0 < idx );
    }

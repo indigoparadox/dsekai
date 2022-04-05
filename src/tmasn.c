@@ -560,6 +560,19 @@ static int16_t tilemap_asn_parse_crop_defs(
          crop_idx, t->crop_defs[crop_idx].cycle, read_sz );
       total_read_sz += read_sz;
 
+      /* produce gid */
+      read_sz = tilemap_asn_parse_int(
+         (uint8_t*)&(t->crop_defs[crop_idx].produce_gid),
+         2, 0, &(asn_buffer[total_read_sz]) );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading crop def produce gid" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "crop def %d produce gid: %d (%d)",
+         crop_idx, t->crop_defs[crop_idx].produce_gid, read_sz );
+      total_read_sz += read_sz;
+
    }
 
 cleanup:

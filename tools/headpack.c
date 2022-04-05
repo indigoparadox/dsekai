@@ -365,7 +365,10 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
       fprintf( header_file, "         %d,\n", t->crop_defs[i].flags );
 
       fprintf( header_file, "         /* cycle */\n" );
-      fprintf( header_file, "         %d\n", t->crop_defs[i].cycle );
+      fprintf( header_file, "         %d,\n", t->crop_defs[i].cycle );
+
+      fprintf( header_file, "         /* produce gid */\n" );
+      fprintf( header_file, "         %d\n", t->crop_defs[i].produce_gid );
 
       fprintf( header_file, "      },\n" );
    }

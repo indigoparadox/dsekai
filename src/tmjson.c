@@ -516,6 +516,13 @@ int16_t tilemap_json_parse_crop_defs(
 
       /* activate */
       t->crop_defs[i].flags |= CROP_DEF_FLAG_ACTIVE;
+
+      /* produce gid */
+      dio_snprintf(
+         iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_PRODUCE_GID, i );
+      t->crop_defs[i].produce_gid = json_int_from_path(
+         iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+
    }
 
    return i;

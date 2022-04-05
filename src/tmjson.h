@@ -79,6 +79,7 @@
 #define TILEMAP_JPATH_CROP_DEF_CYCLE "/layers/[name=crops]/objects/%d/properties/[name=cycle]/value"
 #define TILEMAP_JPATH_CROP_DEF_REGROWS "/layers/[name=crops]/objects/%d/properties/[name=regrows]/value"
 #define TILEMAP_JPATH_CROP_DEF_SPRITE "/layers/[name=crops]/objects/%d/properties/[name=sprite]/value"
+#define TILEMAP_JPATH_CROP_DEF_PRODUCE_GID "/layers/[name=crops]/objects/%d/properties/[name=produce]/value"
 
 /*! \} */
 

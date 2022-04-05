@@ -71,6 +71,8 @@ struct MENU_STATE {
    int8_t highlight_id;
    /*! \brief Bitfield used to manage menu behavior. */
    uint8_t flags;
+   /*! \brief graphics_get_ms() at which menu was last opened. */
+   uint32_t open_ms;
    int8_t craft_item_ids[3];
    int8_t craft_mod_idx;
 };

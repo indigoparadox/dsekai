@@ -267,17 +267,43 @@ void menu_open( struct DSEKAI_STATE* state ) {
    state->menu.menu_id = 0;
    state->menu.highlight_id = 1;
    state->menu.flags |= MENU_FLAG_DIRTY;
+   state->menu.open_ms = graphics_get_ms();
 
    animate_pause( ANIMATE_FLAG_SCRIPT );
    animate_pause( ANIMATE_FLAG_WEATHER );
 }
 
 void menu_close( struct DSEKAI_STATE* state ) {
+   int8_t i = 0;
+   uint32_t open_ms_diff = 0;
+
    debug_printf( 3, "closing menu..." );
    window_pop( MENU_WINDOW_ID, state );
    state->menu.menu_id = -1;
    state->menu.highlight_id = -1;
    tilemap_refresh_tiles( &(state->map) );
+
+   open_ms_diff = graphics_get_ms() - state->menu.open_ms;
+
+   /* Bump up all crop cycles to compensate for menu time. */
+   for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
+      if(
+         CROP_FLAG_ACTIVE != (CROP_FLAG_ACTIVE & state->crops[i].flags) ||
+         0 == state->crops[i].crop_gid
+      ) {
+         continue;
+      }
+
+      debug_printf( 1, "crop %d next cycle bumped up %d ms from %d to %d",
+         state->crops[i].crop_gid,
+         open_ms_diff,
+         state->crops[i].next_at_ticks,
+         state->crops[i].next_at_ticks + open_ms_diff );
+
+      state->crops[i].next_at_ticks += open_ms_diff;
+   }
+
+   /* TODO: Bump up all script waits to compensate for menu time. */
 
    animate_resume( ANIMATE_FLAG_SCRIPT );
    animate_resume( ANIMATE_FLAG_WEATHER );

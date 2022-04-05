@@ -12,8 +12,13 @@
  *  \brief Structs, functions, and macros pertaining to crops.
  */
 
-#define CROP_DEF_FLAG_ACTIVE 0x01
-#define CROP_DEF_FLAG_REGROWS 0x02
+/**
+ * \addtogroup dsekai_crops_flags Crop Flags
+ *
+ * \brief Flags which affect an individual ::CROP_PLOT.
+ *
+ * \{
+ */
 
 /**
  * \brief CROP_PLOT::flags indicating plot is active (tilled).
@@ -32,27 +37,69 @@
  */
 #define CROP_FLAG_STAGE_MASK 0x03
 
+/*! \} */
+
+/**
+ * \brief Maximum potential crop growth stage, corresponds to
+ *        ::CROP_FLAG_STAGE_MASK.
+ */
 #define CROP_STAGE_MAX 3
 
+/*! \brief Return value indicating ::CROP_DEF was not found for provided GID. */
 #define CROP_ERROR_DEF_NOT_FOUND -1
+/**
+ * \brief Return value indicating ::CROP_PLOT was not found for provided
+ *        ::TILEMAP::name and ::TILEMAP_COORDS.
+ */
 #define CROP_ERROR_PLOT_NOT_FOUND -2
 
 struct CROP_PLOT {
+   /**
+    * \brief Name of the ::TILEMAP on which this crop is growing.
+    */
    char map_name[TILEMAP_NAME_MAX];
    /**
     * \brief Compared to GIDs in TILEMAP::crop_defs to find crop details.
     */
    uint8_t crop_gid;
+   /*! \brief See \ref dsekai_crops_flags for more information. */
    uint8_t flags;
+   /**
+    * \brief Nominal number of ms until crop reaches next growth stage.
+    *
+    * Intentionally duplicated from ::CROP_DEF::cycle so that crops are able
+    * to continue growing even when the ::TILEMAP they exist on is not loaded.
+    */
    uint16_t cycle;
+   /**
+    * \brief Next absolute ms at which this crop may advance to next growth
+    *        stage.
+    */
    uint32_t next_at_ticks;
    struct TILEMAP_COORDS coords;
 };
 
+
+/**
+ * \brief Check the crop's current cycle/flags and grow to the next stage if
+ *        able to.
+ */
 void crop_grow( struct DSEKAI_STATE* state, struct CROP_PLOT* plot );
+
+/**
+ * \brief Call crop_grow() on all crops active in the engine state.
+ */
 void crop_grow_all( struct DSEKAI_STATE* state );
+/**
+ * \brief Given a ::CROP_DEF::gid, plant on a plot at the given coordinates on
+ *        the currently loaded ::TILEMAP.
+ */
 int8_t crop_plant(
    struct DSEKAI_STATE* state, uint8_t crop_gid, uint8_t x, uint8_t y );
+
+/**
+ * \brief Given a ::CROP_DEF::gid, find the index in ::TILEMAP::crop_defs.
+ */
 int8_t crop_get_def_idx( struct DSEKAI_STATE* state, uint8_t gid );
 
 /*! \} */

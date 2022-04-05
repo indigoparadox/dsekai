@@ -136,9 +136,12 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       if(
          /* Pause scripts if modal window is pending. */
-         0 >= window_modal( state ) ||
+         0 >= window_modal( state ) &&
          /* Pause scripts if screen is scrolling. */
-         DSEKAI_FLAG_INPUT_BLOCKED == (DSEKAI_FLAG_INPUT_BLOCKED & state->flags)
+         DSEKAI_FLAG_INPUT_BLOCKED !=
+            (DSEKAI_FLAG_INPUT_BLOCKED & state->flags) &&
+         /* Pause scripts if menu is open. */
+         0 > state->menu.menu_id
       ) {
          mobile_execute( &(state->mobiles[i]), state );
       }
@@ -151,7 +154,17 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
       mobile_animate( &(state->mobiles[i]), &(state->map) );
    }
    mobile_animate( &(state->player), &(state->map) );
-   crop_grow_all( state );
+
+   if(
+      /* Pause crops if modal window is pending. */
+      0 >= window_modal( state ) &&
+      /* Pause crops if screen is scrolling. */
+      DSEKAI_FLAG_INPUT_BLOCKED != (DSEKAI_FLAG_INPUT_BLOCKED & state->flags) &&
+      /* Pause crops if menu is open. */
+      0 > state->menu.menu_id
+   ) {
+      crop_grow_all( state );
+   }
 
 }
 

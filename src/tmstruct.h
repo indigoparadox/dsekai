@@ -93,7 +93,9 @@ struct TILEMAP {
    char strpool[TILEMAP_STRPOOL_SZ];
    /* \brief Scripts available to attach to any MOBILE. */
    struct SCRIPT scripts[TILEMAP_SCRIPTS_MAX];
+   /*! \brief Items able to be collected on this map. */
    struct ITEM items[TILEMAP_ITEMS_MAX];
+   /*! \brief Crops able to be grown on this map. */
    struct CROP_DEF crop_defs[TILEMAP_CROP_DEFS_MAX];
 };
 

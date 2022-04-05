@@ -173,7 +173,8 @@ static void topdown_draw_crops(
             /* Crop has germinated. */
             graphics_blit_sprite_at(
                state->map.crop_defs[crop_idx].sprite,
-               (crop_stage - 1) * TILE_W, 0, plot_px, plot_py, TILE_W, TILE_H );
+               (crop_stage - 1) * TILE_W, 0,
+               plot_px, plot_py, TILE_W, TILE_H );
          } else {
             /* Crop is still seeds. */
 #ifdef RESOURCE_FILE
