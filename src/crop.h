@@ -53,6 +53,8 @@
  */
 #define CROP_ERROR_PLOT_NOT_FOUND -2
 
+#define CROP_ERROR_PRODUCE_NOT_FOUND -3
+
 struct CROP_PLOT {
    /**
     * \brief Name of the ::TILEMAP on which this crop is growing.
@@ -90,12 +92,20 @@ void crop_grow( struct DSEKAI_STATE* state, struct CROP_PLOT* plot );
  * \brief Call crop_grow() on all crops active in the engine state.
  */
 void crop_grow_all( struct DSEKAI_STATE* state );
+
+struct CROP_PLOT* crop_find_plot(
+   struct DSEKAI_STATE* state, struct TILEMAP* t, uint8_t x, uint8_t y );
+
 /**
  * \brief Given a ::CROP_DEF::gid, plant on a plot at the given coordinates on
  *        the currently loaded ::TILEMAP.
  */
 int8_t crop_plant(
-   struct DSEKAI_STATE* state, uint8_t crop_gid, uint8_t x, uint8_t y );
+   struct DSEKAI_STATE* state, uint8_t crop_gid, struct CROP_PLOT* plot );
+
+int8_t crop_harvest(
+   struct DSEKAI_STATE* state, struct MOBILE* harvester,
+   struct CROP_PLOT* plot );
 
 /**
  * \brief Given a ::CROP_DEF::gid, find the index in ::TILEMAP::crop_defs.

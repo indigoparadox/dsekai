@@ -421,6 +421,7 @@ void topdown_shutdown( struct DSEKAI_STATE* state ) {
 
 int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
+   struct CROP_PLOT* plot = NULL;
 
    switch( in_char ) {
    case INPUT_KEY_UP:
@@ -478,6 +479,25 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
             state->editor.coords.x,
             state->editor.coords.y );
          state->editor.flags |= EDITOR_FLAG_FORCE_FRAME;
+      } else if( NULL != (plot = crop_find_plot(
+         state, &(state->map),
+         state->player.coords.x + gc_mobile_x_offsets[state->player.dir],
+         state->player.coords.y + gc_mobile_y_offsets[state->player.dir]
+      )) ) {
+         /* Try to harvest facing crop plot. */
+
+         if( 0 == plot->crop_gid ) {
+            window_prefab_system_dialog(
+               "There is no crop\ngrowing here!", state,
+               WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
+         } else if( CROP_STAGE_MAX > (CROP_FLAG_STAGE_MASK & plot->flags) ) {
+            window_prefab_system_dialog(
+               "This crop is\nnot ready!", state,
+               WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
+         } else {
+            crop_harvest( state, &(state->player), plot );
+         }
+
       } else {
 #endif /* !NO_ENGINE_EDITOR */
          /* Try to interact with facing mobile. */

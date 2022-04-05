@@ -25,17 +25,38 @@ int8_t item_use_seed(
    int8_t retval = -1;
    uint8_t x = 0,
       y = 0;
+   struct CROP_PLOT* plot = NULL;
 
    x = user->coords.x + gc_mobile_x_offsets[user->dir];
    y = user->coords.y + gc_mobile_y_offsets[user->dir];
 
-   if( 0 < crop_plant( state, e->data, x, y ) ) {
+   /* Get the plot in front of the user. */
+   plot = crop_find_plot( state, &(state->map), x, y );
+   if( NULL == plot ) {
+#ifdef SCREEN_W
+      window_prefab_system_dialog(
+         "The soil is\ntoo firm!", state,
+         WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
+#endif /* SCREEN_W */
+      error_printf( "could not find plot" );
+      retval = -1;
+      goto cleanup;
+   }
+
+   if( 0 < crop_plant( state, e->data, plot ) ) {
       /* Planting was successful. */
       item_consume( e );
    } else {
-      /* TODO: On-screen warning. */
+#ifdef SCREEN_W
+      window_prefab_system_dialog(
+         "This won't\ngrow here!", state,
+         WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
+#endif /* SCREEN_W */
+      error_printf( "unable to plant seed" );
       retval = -1;
    }
+
+cleanup:
 
    return retval;
 }

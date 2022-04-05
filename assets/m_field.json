@@ -223,6 +223,11 @@
                          "value":33
                         }, 
                         {
+                         "name":"produce",
+                         "type":"int",
+                         "value":1238
+                        }, 
+                        {
                          "name":"regrows",
                          "type":"bool",
                          "value":false
