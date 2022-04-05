@@ -90,6 +90,11 @@ int8_t item_use_editor(
    if( TILEMAP_FLAG_EDITABLE != (TILEMAP_FLAG_EDITABLE & state->map.flags) ) {
 
       /* TODO: Display warning message on-screen. */
+#ifdef SCREEN_W
+      window_prefab_system_dialog(
+         "This map cannot\nbe edited!", state,
+         WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
+#endif /* SCREEN_W */
       error_printf( "unable to edit current tilemap" );
 
    } else if(
