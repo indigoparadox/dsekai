@@ -37,8 +37,6 @@ int8_t item_use_seed(
       retval = -1;
    }
 
-cleanup:
-
    return retval;
 }
 
