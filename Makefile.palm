@@ -54,6 +54,9 @@ INCLUDES_PALM := \
    -I unilayer/src \
    -I $(GENDIR_PALM) \
    -I /opt/palmdev/sdk-3.5/include \
+   -I /opt/palmdev/sdk-3.5/include/Libraries/ \
+   -I /opt/palmdev/sdk-3.5/include/Dynamic/ \
+   -I /opt/palmdev/sdk-3.5/include/Core/ \
    -I /opt/palmdev/sdk-3.5/include/Core/UI/ \
    -I /opt/palmdev/sdk-3.5/include/Core/System/ \
    -I /opt/palmdev/sdk-3.5/include/Core/Hardware/ \
