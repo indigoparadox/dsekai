@@ -14,12 +14,12 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
       MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW,
       0,
       SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H,
-      WINDOW_PREFAB_DEFAULT_FG(), GRAPHICS_COLOR_BLACK, 0,
+      WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, 0, NULL, state );
    
    while( '\0' != gc_menu_tokens[i][0] ) {
       if( state->menu.highlight_id == i ) {
-         color = GRAPHICS_COLOR_CYAN;
+         color = WINDOW_PREFAB_DEFAULT_HL();
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
       }
@@ -29,7 +29,7 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
          WINDOW_FLAG_TEXT_PTR,
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
-         color, GRAPHICS_COLOR_BLACK, GRAPHICS_STRING_FLAG_ALL_CAPS,
+         color, WINDOW_PREFAB_DEFAULT_BG(), GRAPHICS_STRING_FLAG_ALL_CAPS,
          0, 0, gc_menu_tokens[i], state );
       i++;
    }  
@@ -87,7 +87,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       SCREEN_MAP_Y,
       (SCREEN_MAP_W / 2) + TILE_W,
       SCREEN_MAP_H,
-      WINDOW_PREFAB_DEFAULT_FG(), GRAPHICS_COLOR_BLACK, 0,
+      WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, 0, NULL,
       state );
 
@@ -97,7 +97,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       SCREEN_MAP_Y,
       (SCREEN_MAP_W / 2) - TILE_W,
       SCREEN_MAP_H / 2,
-      WINDOW_PREFAB_DEFAULT_FG(), GRAPHICS_COLOR_BLACK, 0,
+      WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, 0, NULL,
       state );
    
@@ -107,7 +107,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       SCREEN_MAP_Y + (SCREEN_MAP_H / 2),
       (SCREEN_MAP_W / 2) - TILE_W,
       SCREEN_MAP_H / 2,
-      WINDOW_PREFAB_DEFAULT_FG(), GRAPHICS_COLOR_BLACK, 0,
+      WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, 0, NULL,
       state );
    
@@ -122,7 +122,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
 
       /* Highlight selected item. */
       if( state->menu.highlight_id == player_item_idx ) {
-         color = GRAPHICS_COLOR_CYAN;
+         color = WINDOW_PREFAB_DEFAULT_HL();
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
       }
@@ -134,7 +134,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_ITEM,
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
-         color, GRAPHICS_COLOR_BLACK, GRAPHICS_STRING_FLAG_ALL_CAPS,
+         color, WINDOW_PREFAB_DEFAULT_BG(), GRAPHICS_STRING_FLAG_ALL_CAPS,
          i, 0, NULL, state );
 
       window_push(
@@ -142,7 +142,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_NUM,
          WINDOW_PLACEMENT_RIGHT_BOTTOM, WINDOW_PLACEMENT_GRID,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
-         color, GRAPHICS_COLOR_BLACK, 0,
+         color, WINDOW_PREFAB_DEFAULT_BG(), 0,
          state->items[i].count, 0, NULL, state );
 
       player_item_idx++;
@@ -156,7 +156,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          CONTROL_TYPE_LABEL, CONTROL_FLAG_ENABLED | CONTROL_FLAG_TEXT_PTR,
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
-         WINDOW_PREFAB_DEFAULT_FG(), GRAPHICS_COLOR_BLACK,
+         WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(),
          GRAPHICS_STRING_FLAG_ALL_CAPS,
          0, 0, gc_menu_msgs[0], MENU_WINDOW_ID, state ); */
    }
@@ -239,7 +239,7 @@ void menu_renderer_craft( struct DSEKAI_STATE* state ) {
       WINDOW_PLACEMENT_CENTER,
       SCREEN_MAP_W / 2,
       SCREEN_MAP_H / 2,
-      WINDOW_PREFAB_DEFAULT_FG(), GRAPHICS_COLOR_BLACK, 0,
+      WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, 0, NULL,
       state );
 

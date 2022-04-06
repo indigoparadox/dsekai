@@ -35,15 +35,15 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
       WINDOW_ID_TITLE_MENU, 0, WINDOW_TYPE_WINDOW, 0,
       WINDOW_PLACEMENT_CENTER,
       SCREEN_H - (TILE_H * 5), TILE_H * 6, TILE_W * 3,
-      GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
+      WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, 0, NULL, state );
 
    for( i = 0 ; TITLE_OPTIONS_COUNT > i ; i++ ) {
       if( gstate->option_high == i ) {
          debug_printf( 1, "title option selected for draw: %d", i );
-         color = GRAPHICS_COLOR_CYAN;
+         color = WINDOW_PREFAB_DEFAULT_HL();
       } else {
-         color = GRAPHICS_COLOR_WHITE;
+         color = WINDOW_PREFAB_DEFAULT_FG();
       }
 
       window_push(
@@ -51,7 +51,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
          WINDOW_FLAG_TEXT_PTR,
          WINDOW_PLACEMENT_GRID, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
-         color, GRAPHICS_COLOR_BLACK,
+         color, WINDOW_PREFAB_DEFAULT_BG(),
          GRAPHICS_STRING_FLAG_ALL_CAPS,
          0, 0, gc_title_options[i], state );
    }
