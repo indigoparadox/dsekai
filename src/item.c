@@ -15,7 +15,7 @@ static void item_consume( struct ITEM* e ) {
 int8_t item_use_none(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
-   /* TODO */
+   error_printf( "attempted to use invalid item" );
    return 0;
 }
 
@@ -93,14 +93,7 @@ int8_t item_use_food(
 int8_t item_use_shovel(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
-   /* TODO */
-   return 0;
-}
-
-int8_t item_use_axe(
-   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
-) {
-   /* TODO */
+   /* TODO: Implement digging. */
    return 0;
 }
 
@@ -172,11 +165,6 @@ int8_t item_use_hoe(
             state->crops[i].map_name, state->map.name, TILEMAP_NAME_MAX ) &&
          x == state->crops[i].coords.x && y == state->crops[i].coords.y
       ) {
-#ifdef SCREEN_W
-         /* window_prefab_system_dialog(
-            "There is already\na plot here!", state,
-            WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() ); */
-#endif /* SCREEN_W */
          retval = -1;
          /* Destroy plot. */
          state->crops[i].flags &= ~CROP_FLAG_ACTIVE;
@@ -187,7 +175,11 @@ int8_t item_use_hoe(
    }
 
    if( 0 > crop_idx ) {
-      /* TODO: Display warning on screen. */
+#ifdef SCREEN_W
+      window_prefab_system_dialog(
+         "Too many crops\nalready planted!", state,
+         WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
+#endif /* SCREEN_W */
       retval = 0;
       error_printf( "no available crop plots" );
       goto cleanup;

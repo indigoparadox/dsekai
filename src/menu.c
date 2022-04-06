@@ -203,7 +203,6 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_OK:
-      /* TODO: Use item. */
       if( NULL == selected_item ) {
          error_printf( "no item selected!" );
          break;
@@ -214,6 +213,7 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
       ) {
          /* TODO: Open crafting menu. */
       } else {
+         /* Use item. */
          use_retval = gc_item_use_cbs[selected_item->type](
             selected_item, &(state->player), state );
          if( 0 > use_retval ) {
@@ -309,7 +309,26 @@ void menu_close( struct DSEKAI_STATE* state ) {
       state->crops[i].next_at_ticks += open_ms_diff;
    }
 
-   /* TODO: Bump up all script waits to compensate for menu time. */
+   /* Bump up all mobile script waits to compensate for menu time. */
+   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+      if(
+         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags) ||
+         0 > state->mobiles[i].script_id ||
+         state->mobiles[i].script_id >= TILEMAP_SCRIPTS_MAX
+      ) {
+         /* Mobile inactive or invalid script. */
+         continue;
+      }
+
+      debug_printf( 1,
+         "mobile %s next script step bumped up %d ms from %d to %d",
+         state->mobiles[i].name,
+         open_ms_diff,
+         state->mobiles[i].script_next_ms,
+         state->mobiles[i].script_next_ms + open_ms_diff );
+
+      state->mobiles[i].script_next_ms += open_ms_diff;
+   }
 
    animate_resume( ANIMATE_FLAG_SCRIPT );
    animate_resume( ANIMATE_FLAG_WEATHER );
