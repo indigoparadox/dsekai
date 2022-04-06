@@ -28,6 +28,10 @@ DSEKAI_O_FILES_PALM := \
 
 RESEXT_H := $(GENDIR_PALM)/resext.h
 
+MULIPALM_LD := $(GENDIR_PALM)/mulipalm.ld
+MULIPALM_DEF := src/mulipalm.def
+MULIPALM_O := $(OBJDIR_PALM)/mulipalm.o
+
 # 3. Programs
 
 CC_PALM := m68k-palmos-gcc
@@ -36,7 +40,7 @@ AS_PALM := m68k-palmos-as
 PILRC := pilrc
 OBJRES := m68k-palmos-obj-res
 BUILDPRC := build-prc
-#MULTIGEN := m68k-palmos-multigen
+MULTIGEN := m68k-palmos-multigen
 
 # 4. Arguments
 
@@ -70,8 +74,6 @@ endif
 
 LDFLAGS_PALM := $(CFLAGS_PALM)
 
-#DEF_PALM := src/mulipalm.def
-
 APPID := DSEK
 
 # 5. Targets
@@ -87,32 +89,33 @@ pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
 pkg_reqs :=
 $(eval $(PKG_RULE))
 
-grc_palm: $(OBJDIR_PALM)/$(DSEKAI)
-	cd $(OBJDIR_PALM) && $(OBJRES) $(DSEKAI)
+$(OBJDIR_PALM)/$(DSEKAI): $(DSEKAI_O_FILES_PALM) $(MULIPALM_O) | $(MULIPALM_LD)
+	$(LD_PALM) $(LDFLAGS_PALM) -o $@ $^ $(MULIPALM_LD)
 
-$(OBJDIR_PALM)/$(DSEKAI): $(DSEKAI_O_FILES_PALM)
-	#$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@ $(GENDIR_PALM)/mulipalm.ld
-	$(LD_PALM) $(LDFLAGS_PALM) $^ -o $@
-
-$(OBJDIR_PALM)/bin$(STAMPFILE): src/palms.rcp $(GENDIR_PALM)/palmd.rcp
+$(OBJDIR_PALM)/bin$(STAMPFILE): src/palms.rcp $(GENDIR_PALM)/palmd.rcp | \
+$(OBJDIR_PALM)/$(STAMPFILE)
 	$(PILRC) $(INCLUDES_PALM) $< $(OBJDIR_PALM)
 	touch $@
 
-#$(OBJDIR_PALM)/mulipalm.o: $(GENDIR_PALM)/mulipalm.s
-#	$(MD) $(dir $@)
-#	$(AS_PALM) -o $@ $<
+$(MULIPALM_O): $(GENDIR_PALM)/mulipalm.s
+	$(MD) $(dir $@)
+	$(AS_PALM) -o $@ $<
 
-#$(GENDIR_PALM)/mulipalm.ld $(GENDIR_PALM)/mulipalm.s: $(DEF_PALM) | $(GENDIR_PALM)
-#	$(MULTIGEN) -b $(GENDIR_PALM)/mulipalm $<
+$(GENDIR_PALM)/mulipalm.s $(MULIPALM_LD): $(MULIPALM_DEF) | \
+$(GENDIR_PALM)
+	$(MULTIGEN) -b $(GENDIR_PALM)/mulipalm $<
 
 ifeq ($(BUILD),RELEASE)
-$(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
+$(BIN_PALM): \
+$(OBJDIR_PALM)/bin$(STAMPFILE) $(MULIPALM_DEF) $(OBJDIR_PALM)/$(DSEKAI) | \
+$(BINDIR)/$(STAMPFILE)
 	m68k-palmos-strip $(OBJDIR_PALM)/$(DSEKAI)
-	$(BUILDPRC) $@ $(DSEKAI) $(APPID) $(OBJDIR_PALM)/*.grc $(OBJDIR_PALM)/*.bin
+	$(BUILDPRC) -o $@ $(MULIPALM_DEF) $(OBJDIR_PALM)/$(DSEKAI) $(OBJDIR_PALM)/*.bin
 else
-$(BIN_PALM): grc_palm $(OBJDIR_PALM)/bin$(STAMPFILE) | $(BINDIR)/$(STAMPFILE)
-	#$(BUILDPRC) -o $@ $(DEF_PALM) $(OBJDIR_PALM)/$(DSEKAI) $(OBJDIR_PALM)/*.bin
-	$(BUILDPRC) $@ $(DSEKAI) $(APPID) $(OBJDIR_PALM)/*.grc $(OBJDIR_PALM)/*.bin
+$(BIN_PALM): \
+$(OBJDIR_PALM)/bin$(STAMPFILE) $(MULIPALM_DEF) $(OBJDIR_PALM)/$(DSEKAI) | \
+$(BINDIR)/$(STAMPFILE)
+	$(BUILDPRC) -o $@ $(MULIPALM_DEF) $(OBJDIR_PALM)/$(DSEKAI) $(OBJDIR_PALM)/*.bin
 endif
 
 $(OBJDIR_PALM)/%.o: %.c $(GENDIR_PALM)/palmd.rcp $(RESEXT_H)

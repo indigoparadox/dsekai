@@ -83,18 +83,19 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
  */
 uint16_t script_parse_str(
    int8_t script_idx,
-   char* script_txt, int16_t script_txt_sz, struct SCRIPT* script );
+   char* script_txt, int16_t script_txt_sz, struct SCRIPT* script
+) SECTION_SCRIPT;
 
 /**
  * \brief Script subsystem init function that should be called in main().
  * \return 1 if successful or 0 otherwise.
  */
-uint8_t script_init();
+uint8_t script_init() SECTION_SCRIPT;
 
 /**
  * \brief Script subsystem cleanup function that should be called in main().
  */
-void script_shutdown();
+void script_shutdown() SECTION_SCRIPT;
 
 /**
  * \brief Find a label of the given type and return the program counter

@@ -142,7 +142,8 @@ struct MOBILE* mobile_get_facing(
  * \param t ::MEMORY_PTR to the currently loaded TILEMAP.
  */
 struct MOBILE* mobile_interact(
-   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t );
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t
+) SECTION_MOBILE;
 
 /**
  * \brief Map ::MOBILE animation frames to a number of real frames elapsed.
@@ -162,7 +163,7 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t );
  * \brief Prepare a ::MOBILE for deallocation.
  * \param t ::MEMORY_PTR to a ::MOBILE to deinitialize.
  */
-void mobile_deinit( struct MOBILE* );
+void mobile_deinit( struct MOBILE* ) SECTION_MOBILE;
 
 /**
  * \relates MOBILE
@@ -179,7 +180,7 @@ struct MOBILE* mobile_get_dir( struct MOBILE* m, struct DSEKAI_STATE* state );
  * \param m ::MEMORY_PTR to ::MOBILE on which to push to ::MOBILE::script_stack.
  * \param v Value to push onto the stack.
  */
-void mobile_stack_push( struct MOBILE* m, int8_t v );
+void mobile_stack_push( struct MOBILE* m, int8_t v ) SECTION_MOBILE;
 
 /**
  * \relates MOBILE
@@ -187,7 +188,7 @@ void mobile_stack_push( struct MOBILE* m, int8_t v );
  * \param m ::MEMORY_PTR to ::MOBILE from which to pop ::MOBILE::script_stack.
  * \return The value popped.
  */
-int8_t mobile_stack_pop( struct MOBILE* m );
+int8_t mobile_stack_pop( struct MOBILE* m ) SECTION_MOBILE;
 
 /**
  * \relates MOBILE
@@ -198,7 +199,8 @@ int8_t mobile_stack_pop( struct MOBILE* m );
  */
 void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state );
 
-struct MOBILE* mobile_spawn_npc( struct DSEKAI_STATE* state, uint8_t player );
+struct MOBILE* mobile_spawn_npc( struct DSEKAI_STATE* state, uint8_t player )
+SECTION_MOBILE;
 
 /**
  * \brief Spawn from ::TILEMAP::spawners according to spawner rules.

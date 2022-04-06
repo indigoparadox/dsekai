@@ -82,7 +82,7 @@ void tilemap_refresh_tiles( struct TILEMAP* t );
  *
  * This will start the relevant animation if necessary.
  */
-void tilemap_set_weather( struct TILEMAP* t, uint8_t weather );
+void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) SECTION_TILEMAP;
 
 /**
  * \brief Detect potential collision between a MOBILE and TILEMAP tile with
@@ -95,14 +95,19 @@ void tilemap_set_weather( struct TILEMAP* t, uint8_t weather );
 uint8_t tilemap_collide( 
    struct MOBILE* m, uint8_t dir, struct TILEMAP* t );
 
-void tilemap_advance_tile_id( struct TILEMAP* t, uint16_t x, uint16_t y );
+/**
+ * \brief Increment the tile_id on the specified tile coordinates. Useful for
+ *        editing ::TILEMAP.
+ */
+void tilemap_advance_tile_id( struct TILEMAP* t, uint16_t x, uint16_t y )
+SECTION_TILEMAP;
 
 /**
  * \relates TILEMAP
  * \brief Prepare a TILEMAP for deallocation.
  * \param t ::MEMORY_PTR to a TILEMAP to deinitialize.
  */
-void tilemap_deinit( struct TILEMAP* );
+void tilemap_deinit( struct TILEMAP* ) SECTION_TILEMAP;
 
 /*! \} */
 

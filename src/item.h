@@ -59,7 +59,8 @@ void item_draw( const struct ITEM*, int16_t, int16_t );
  */
 
 int8_t item_give_mobile(
-   struct ITEM* e, struct MOBILE* m, struct DSEKAI_STATE* state );
+   struct ITEM* e, struct MOBILE* m, struct DSEKAI_STATE* state
+) SECTION_ITEM;
 
 /**
  * \return 1 if the item was used successfully or 0 otherwise. -1 if the item
@@ -68,7 +69,7 @@ int8_t item_give_mobile(
 typedef int8_t (*ITEM_USE_CB)(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state );
 
-#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state );
+#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
 ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
 

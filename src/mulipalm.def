@@ -1,2 +1,3 @@
 application { "dsekai" DSEK }
+multiple code { cropfns itemfns mobfns scrfns tmapfns }
 

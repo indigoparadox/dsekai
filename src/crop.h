@@ -101,11 +101,13 @@ struct CROP_PLOT* crop_find_plot(
  *        the currently loaded ::TILEMAP.
  */
 int8_t crop_plant(
-   uint8_t crop_gid, struct CROP_PLOT* plot, struct DSEKAI_STATE* state );
+   uint8_t crop_gid, struct CROP_PLOT* plot, struct DSEKAI_STATE* state
+) SECTION_CROP;
 
 int8_t crop_harvest(
    struct MOBILE* harvester, struct CROP_PLOT* plot,
-   struct DSEKAI_STATE* state );
+   struct DSEKAI_STATE* state
+) SECTION_CROP;
 
 /**
  * \brief Given a ::CROP_DEF::gid, find the index in ::TILEMAP::crop_defs.

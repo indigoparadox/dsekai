@@ -33,6 +33,20 @@
  */
 #define ANIMATE_FLAG_SCRIPT   0x0100
 
+#ifdef PLATFORM_PALM
+#define SECTION_CROP __attribute__ ((section( "cropfns" )))
+#define SECTION_ITEM __attribute__ ((section( "itemfns" )))
+#define SECTION_MOBILE __attribute__ ((section( "mobfns" )))
+#define SECTION_SCRIPT __attribute__ ((section( "scrfns" )))
+#define SECTION_TILEMAP __attribute__ ((section( "tmapfns" )))
+#else
+#define SECTION_CROP
+#define SECTION_ITEM
+#define SECTION_MOBILE
+#define SECTION_SCRIPT
+#define SECTION_TILEMAP
+#endif /* PLATFORM_PALM */
+
  /* === Includes === */
 
 #include "config.h"
