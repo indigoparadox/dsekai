@@ -80,7 +80,7 @@ static int32_t asn_ensure_buffer_sz(
       debug_printf( 2, "growing buffer from %d to %d bytes",
          buffer_sz, buffer_sz * 2 );
       assert( buffer_sz < buffer_sz * 2 );
-      if( 0 >= memory_resize( ph_buffer, buffer_sz * 2 ) ) {
+      if( 0 == memory_resize( ph_buffer, buffer_sz * 2 ) ) {
          error_printf( "unable to expand buffer" );
 
          /* We haven't written to the buffer yet, so caller can use same
