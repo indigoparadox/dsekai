@@ -28,6 +28,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
    int16_t i = 0;
    struct TITLE_STATE* gstate = NULL;
    GRAPHICS_COLOR color;
+   uint8_t flags = 0;
 
    gstate = (struct TITLE_STATE*)memory_lock( state->engine_state_handle );
 
@@ -42,8 +43,10 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
       if( gstate->option_high == i ) {
          debug_printf( 1, "title option selected for draw: %d", i );
          color = WINDOW_PREFAB_DEFAULT_HL();
+         flags = GRAPHICS_STRING_FLAG_ALL_CAPS | GRAPHICS_STRING_FLAG_OUTLINE;
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
+         flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
       }
 
       window_push(
@@ -51,8 +54,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
          WINDOW_FLAG_TEXT_PTR,
          WINDOW_PLACEMENT_GRID, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
-         color, WINDOW_PREFAB_DEFAULT_BG(),
-         GRAPHICS_STRING_FLAG_ALL_CAPS,
+         color, WINDOW_PREFAB_DEFAULT_BG(), flags,
          0, 0, gc_title_options[i], state );
    }
 

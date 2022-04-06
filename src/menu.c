@@ -9,6 +9,7 @@ const char* gc_menu_msgs[] = {
 void menu_renderer_main( struct DSEKAI_STATE* state ) {
    int8_t i = 1; /* Entry 0 is the main menu, itself. */
    GRAPHICS_COLOR color;
+   uint8_t flags = 0;
 
    window_push(
       MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW,
@@ -20,8 +21,10 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
    while( '\0' != gc_menu_tokens[i][0] ) {
       if( state->menu.highlight_id == i ) {
          color = WINDOW_PREFAB_DEFAULT_HL();
+         flags = GRAPHICS_STRING_FLAG_ALL_CAPS | GRAPHICS_STRING_FLAG_OUTLINE;
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
+         flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
       }
 
       window_push(
@@ -29,7 +32,7 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
          WINDOW_FLAG_TEXT_PTR,
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
-         color, WINDOW_PREFAB_DEFAULT_BG(), GRAPHICS_STRING_FLAG_ALL_CAPS,
+         color, WINDOW_PREFAB_DEFAULT_BG(), flags,
          0, 0, gc_menu_tokens[i], state );
       i++;
    }  
@@ -80,6 +83,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
    int8_t i = 0,
       player_item_idx = 0;
    GRAPHICS_COLOR color;
+   uint8_t flags = 0;
 
    window_push(
       MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW, 0,
@@ -123,8 +127,10 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       /* Highlight selected item. */
       if( state->menu.highlight_id == player_item_idx ) {
          color = WINDOW_PREFAB_DEFAULT_HL();
+         flags = GRAPHICS_STRING_FLAG_ALL_CAPS | GRAPHICS_STRING_FLAG_OUTLINE;
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
+         flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
       }
 
       /* TODO: Draw icons for item types/flags. */
@@ -134,7 +140,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_ITEM,
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
-         color, WINDOW_PREFAB_DEFAULT_BG(), GRAPHICS_STRING_FLAG_ALL_CAPS,
+         color, WINDOW_PREFAB_DEFAULT_BG(), flags,
          i, 0, NULL, state );
 
       window_push(
