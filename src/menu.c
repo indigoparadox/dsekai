@@ -57,8 +57,11 @@ int16_t menu_handler_main( char in_char, struct DSEKAI_STATE* state ) {
    case INPUT_KEY_OK:
       /* TODO: Use quit callback. */
       if( state->menu.highlight_id == gc_menu_idx_quit ) {
-         /* retval = 0; */
+#ifndef NO_TITLE
          engines_exit_to_title( state );
+#else
+         retval = 0;
+#endif /* !NO_TITLE */
          menu_close( state );
       } else {
          state->menu.menu_id = state->menu.highlight_id;

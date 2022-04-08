@@ -38,7 +38,7 @@ if [ "$PLAT_SPEC" = "wasm" ] || [ -z "$PLAT_SPEC" ]; then
 fi
 
 #if [ "$PLAT_SPEC" = "mac" ] || [ -z "$PLAT_SPEC" ]; then
-#   make -f Makefile.mac6 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=MONO FMT_ASN=TRUE RESOURCE=FILE bin-file-mono/dsekai.APPL || exit
+#   make -f Makefile.mac6 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=MONO FMT_ASN=TRUE RESOURCE=FILE bin-file-mono-asn/dsekai.APPL || exit
 #fi
 
 echo "All packages built OK!"

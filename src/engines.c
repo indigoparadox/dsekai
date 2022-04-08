@@ -213,6 +213,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
          /* Setup failed. */
          goto cleanup;
       }
+
+      /* TODO: Optionally skip title screen. */
    }
 
    graphics_loop_start();
@@ -327,12 +329,16 @@ cleanup:
    return retval;
 }
 
+#ifndef NO_TITLE
+
 void engines_exit_to_title( struct DSEKAI_STATE* state ) {
    state->engine_type_change = 0;
    memory_zero_ptr( &(state->player), sizeof( struct MOBILE ) );
    memory_zero_ptr( &(state->items), sizeof( struct ITEM ) *
       DSEKAI_ITEMS_MAX );
 }
+
+#endif /* !NO_TITLE */
 
 void engines_set_transition(
    struct DSEKAI_STATE* state, uint8_t trans_type, uint8_t trans_open

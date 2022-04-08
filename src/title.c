@@ -24,6 +24,8 @@ const char* gc_title_options[] = {
    "quit"
 };
 
+#ifndef NO_TITLE
+
 static void title_draw_menu( struct DSEKAI_STATE* state ) {
    int16_t i = 0;
    struct TITLE_STATE* gstate = NULL;
@@ -61,8 +63,12 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
    gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
 }
 
+#endif /* !NO_TITLE */
+
 int16_t title_setup( struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
+
+#ifndef NO_TITLE
 
    debug_printf( 2, "allocating engine-specific state" );
    assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
@@ -124,6 +130,15 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
 
    graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
 
+#else
+   
+   /* Just start the first tilemap. */
+   memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
+      memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
+   state->engine_type_change = 1 /* ENGINE_TYPE_TOPDOWN */;
+
+#endif /* !NO_TITLE */
+
    state->engine_state = ENGINE_STATE_RUNNING;
 
    return retval;
@@ -133,6 +148,9 @@ void title_shutdown( struct DSEKAI_STATE* state ) {
 }
 
 void title_draw( struct DSEKAI_STATE* state ) {
+
+#ifndef NO_TITLE
+
    int8_t i = 0;
 
    /* graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK ); */
@@ -161,6 +179,9 @@ void title_draw( struct DSEKAI_STATE* state ) {
    }
 
    window_refresh( WINDOW_ID_TITLE_MENU, state );
+
+#endif /* !NO_TITLE */
+
 }
 
 void title_animate( struct DSEKAI_STATE* state ) {
@@ -169,6 +190,9 @@ void title_animate( struct DSEKAI_STATE* state ) {
 
 int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
+
+#ifndef NO_TITLE
+
    struct TITLE_STATE* gstate = NULL;
    uint8_t redraw_menu = 0;
 
@@ -226,6 +250,8 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
    if( redraw_menu ) {
       title_draw_menu( state );
    }
+
+#endif /* !NO_TITLE */
 
    return retval;
 }
