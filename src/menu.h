@@ -81,24 +81,24 @@ struct MENU_STATE {
 
 #define MENU_TABLE_RENDERERS( idx, name ) menu_renderer_ ## name,
 
-const MENU_RENDERER gc_menu_renderers[] = {
+RES_CONST MENU_RENDERER gc_menu_renderers[] = {
    MENU_TABLE( MENU_TABLE_RENDERERS )
 };
 
 #define MENU_TABLE_HANDLERS( idx, name ) menu_handler_ ## name,
 
-const MENU_HANDLER gc_menu_handlers[] = {
+RES_CONST MENU_HANDLER gc_menu_handlers[] = {
    MENU_TABLE( MENU_TABLE_HANDLERS )
 };
 
 #define MENU_TABLE_TOKENS( idx, name ) #name,
 
-const char gc_menu_tokens[][MENU_TEXT_SZ] = {
+RES_CONST char gc_menu_tokens[][MENU_TEXT_SZ] = {
    MENU_TABLE( MENU_TABLE_TOKENS )
    ""
 };
 
-#define MENU_TABLE_CONSTS( idx, name ) const uint8_t gc_menu_idx_ ## name = idx;
+#define MENU_TABLE_CONSTS( idx, name ) RES_CONST uint8_t gc_menu_idx_ ## name = idx;
 
 MENU_TABLE( MENU_TABLE_CONSTS )
 
@@ -109,7 +109,7 @@ MENU_TABLE( MENU_TABLE_CONSTS )
  *
  * These are called once when the menu is opened, and should create a ::WINDOW.
  */
-extern const MENU_RENDERER gc_menu_renderers[];
+extern RES_CONST MENU_RENDERER gc_menu_renderers[];
 
 /**
  * \brief Table of callacks used to handle menu input.
@@ -117,14 +117,14 @@ extern const MENU_RENDERER gc_menu_renderers[];
  * These should close the menu's ::WINDOW and set MENU_FLAG_DIRTY on global
  * MENU_STATE.
  */
-extern const MENU_HANDLER gc_menu_handlers[];
+extern RES_CONST MENU_HANDLER gc_menu_handlers[];
 
 /**
  * \brief Table of menu item names as strings.
  */
-extern const char gc_menu_tokens[][MENU_TEXT_SZ];
+extern RES_CONST char gc_menu_tokens[][MENU_TEXT_SZ];
 
-#define MENU_TABLE_CONSTS( idx, name ) extern const uint8_t gc_menu_idx_ ## name;
+#define MENU_TABLE_CONSTS( idx, name ) extern RES_CONST uint8_t gc_menu_idx_ ## name;
 
 MENU_TABLE( MENU_TABLE_CONSTS )
 

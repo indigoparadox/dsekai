@@ -77,31 +77,31 @@ ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
 
 #define ITEM_TABLE_MAX( type, max ) max,
 
-const uint8_t gc_items_max[] = {
+RES_CONST uint8_t gc_items_max[] = {
    ITEM_TABLE( ITEM_TABLE_MAX )
 };
 
 #define ITEM_TABLE_TYPES( type, max ) #type,
 
-const char* gc_items_types[] = {
+RES_CONST char* gc_items_types[] = {
    ITEM_TABLE( ITEM_TABLE_TYPES )
    ""
 };
 
 #define ITEM_TABLE_USE_CBS( type, max ) item_use_ ## type,
 
-const ITEM_USE_CB gc_item_use_cbs[] = {
+RES_CONST ITEM_USE_CB gc_item_use_cbs[] = {
    ITEM_TABLE( ITEM_TABLE_USE_CBS )
 };
 
 #else
 
 /*! \brief Lookup table of maximum of each item type permitted in inventory. */
-extern const uint8_t gc_items_max[];
+extern RES_CONST uint8_t gc_items_max[];
 
-extern const ITEM_USE_CB gc_item_use_cbs[];
+extern RES_CONST ITEM_USE_CB gc_item_use_cbs[];
 
-extern const char* gc_items_types[];
+extern RES_CONST char* gc_items_types[];
 
 #endif
 

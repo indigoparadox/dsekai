@@ -16,7 +16,7 @@
 #define TITLE_OPTIONS_COUNT 2
 #endif /* !NO_ENGINE_POV */
 
-const char* gc_title_options[] = {
+RES_CONST char* gc_title_options[] = {
    "topdown",
 #ifndef NO_ENGINE_POV
    "pov",

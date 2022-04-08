@@ -2,7 +2,7 @@
 #define MENU_C
 #include "dsekai.h"
 
-const char* gc_menu_msgs[] = {
+RES_CONST char* gc_menu_msgs[] = {
    "no items"
 };
 

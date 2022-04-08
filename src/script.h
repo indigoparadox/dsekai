@@ -117,11 +117,11 @@ int8_t g_script_globals[SCRIPT_GLOBALS_MAX];
 
 #define SCRIPT_CB_TABLE_LIST( idx, name, c ) script_handle_ ## name,
 
-const SCRIPT_CB gc_script_handlers[] = {
+RES_CONST SCRIPT_CB gc_script_handlers[] = {
    SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_LIST )
 };
 
-#define SCRIPT_CB_TABLE_CONSTS( idx, name, c ) const uint16_t SCRIPT_ACTION_ ## name = idx;
+#define SCRIPT_CB_TABLE_CONSTS( idx, name, c ) RES_CONST uint16_t SCRIPT_ACTION_ ## name = idx;
 
 SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS );
 
@@ -135,11 +135,11 @@ extern int8_t g_script_globals[SCRIPT_GLOBALS_MAX];
 /**
  * \brief Define extern constants that can be used e.g. in spawners.
  */
-#define SCRIPT_CB_TABLE_CONSTS( idx, name, c ) extern const uint16_t SCRIPT_ACTION_ ## name;
+#define SCRIPT_CB_TABLE_CONSTS( idx, name, c ) extern RES_CONST uint16_t SCRIPT_ACTION_ ## name;
 
 SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS )
 
-extern const SCRIPT_CB gc_script_handlers[];
+extern RES_CONST SCRIPT_CB gc_script_handlers[];
 #endif /* !SCRIPT_C */
 
 /*! \} */

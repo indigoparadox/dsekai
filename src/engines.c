@@ -5,9 +5,9 @@
 #include "tmjson.h"
 #include "tmasn.h"
 #ifndef RESOURCE_FILE
-extern const char gc_map_names[][TILEMAP_NAME_MAX];
-extern const struct TILEMAP* gc_map_structs[];
-extern const uint8_t gc_map_count;
+extern RES_CONST char gc_map_names[][TILEMAP_NAME_MAX];
+extern RES_CONST struct TILEMAP* gc_map_structs[];
+extern RES_CONST uint8_t gc_map_count;
 #endif /* !RESOURCE_FILE */
 
 int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {

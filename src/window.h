@@ -317,7 +317,7 @@ static const WINDOW_CB_SZ gc_window_sz_callbacks[] = {
    WINDOW_CB_TABLE( WINDOW_CB_SZ_TABLE_LIST )
 };
 
-#define WINDOW_CB_TABLE_CONSTS( idx, name ) const uint16_t WINDOW_TYPE_ ## name = idx;
+#define WINDOW_CB_TABLE_CONSTS( idx, name ) RES_CONST uint16_t WINDOW_TYPE_ ## name = idx;
 
 WINDOW_CB_TABLE( WINDOW_CB_TABLE_CONSTS );
 
@@ -326,7 +326,7 @@ WINDOW_CB_TABLE( WINDOW_CB_TABLE_CONSTS );
 /**
  * \brief Define extern constants that can be used e.g. in spawners.
  */
-#define WINDOW_CB_TABLE_CONSTS( idx, name ) extern const uint16_t WINDOW_TYPE_ ## name;
+#define WINDOW_CB_TABLE_CONSTS( idx, name ) extern RES_CONST uint16_t WINDOW_TYPE_ ## name;
 
 WINDOW_CB_TABLE( WINDOW_CB_TABLE_CONSTS )
 

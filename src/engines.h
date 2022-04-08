@@ -357,7 +357,7 @@ ENGINE_TABLE( ENGINES_SHUTDOWN_PROTOTYPES )
 
 #define ENGINES_LIST_TOKENS( idx, eng, prefix ) #prefix,
 
-const char* gc_engines_tokens[] = {
+RES_CONST char* gc_engines_tokens[] = {
    ENGINE_TABLE( ENGINES_LIST_TOKENS )
    ""
 };
@@ -366,31 +366,31 @@ const char* gc_engines_tokens[] = {
 
 #define ENGINES_LIST_SETUP( idx, eng, prefix ) prefix ## _setup,
 
-const ENGINES_SETUP gc_engines_setup[] = {
+RES_CONST ENGINES_SETUP gc_engines_setup[] = {
    ENGINE_TABLE( ENGINES_LIST_SETUP )
 };
 
 #define ENGINES_LIST_INPUT( idx, eng, prefix ) prefix ## _input,
 
-const ENGINES_INPUT gc_engines_input[] = {
+RES_CONST ENGINES_INPUT gc_engines_input[] = {
    ENGINE_TABLE( ENGINES_LIST_INPUT )
 };
 
 #define ENGINES_LIST_ANIMATE( idx, eng, prefix ) prefix ## _animate,
 
-const ENGINES_ANIMATE gc_engines_animate[] = {
+RES_CONST ENGINES_ANIMATE gc_engines_animate[] = {
    ENGINE_TABLE( ENGINES_LIST_ANIMATE )
 };
 
 #define ENGINES_LIST_DRAW( idx, eng, prefix ) prefix ## _draw,
 
-const ENGINES_DRAW gc_engines_draw[] = {
+RES_CONST ENGINES_DRAW gc_engines_draw[] = {
    ENGINE_TABLE( ENGINES_LIST_DRAW )
 };
 
 #define ENGINES_LIST_SHUTDOWN( idx, eng, prefix ) prefix ## _shutdown,
 
-const ENGINES_DRAW gc_engines_shutdown[] = {
+RES_CONST ENGINES_DRAW gc_engines_shutdown[] = {
    ENGINE_TABLE( ENGINES_LIST_SHUTDOWN )
 };
 
@@ -398,14 +398,14 @@ const ENGINES_DRAW gc_engines_shutdown[] = {
 
 #else
 
-extern const char* gc_engines_tokens[];
+extern RES_CONST char* gc_engines_tokens[];
 
 #ifndef ENGINES_TOKENS_ONLY
 
-extern const ENGINES_SETUP gc_engines_setup[];
-extern const ENGINES_INPUT gc_engines_input[];
-extern const ENGINES_ANIMATE gc_engines_animate[];
-extern const ENGINES_DRAW gc_engines_draw[];
+extern RES_CONST ENGINES_SETUP gc_engines_setup[];
+extern RES_CONST ENGINES_INPUT gc_engines_input[];
+extern RES_CONST ENGINES_ANIMATE gc_engines_animate[];
+extern RES_CONST ENGINES_DRAW gc_engines_draw[];
 
 #endif /* !ENGINES_TOKENS_ONLY */
 
