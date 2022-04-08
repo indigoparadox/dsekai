@@ -76,7 +76,7 @@ int encode_binary_buffer(
 
    /* Create a static const in the output header to hold this blob. */
    encode_binary_buffer_line( 
-      "static RES_C_DEF " RES_TYPE " gsc_resource_%d[] = {\n   ", id );
+      "static RES_CONST " RES_TYPE " gsc_resource_%d[] = {\n   ", id );
 
    encode_binary_buffer_line( "   /* %s */\n", res_path );
    
