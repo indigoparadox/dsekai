@@ -17,6 +17,8 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    struct DSEKAI_STATE* state = NULL;
 #ifdef RESOURCE_FILE
    char map_load_path[RESOURCE_PATH_MAX];
+#else
+   int8_t map_name_len = 0;
 #endif /* RESOURCE_FILE */
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
@@ -89,12 +91,15 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 #  endif
 
 #else
+   map_name_len = memory_strnlen_ptr( state->warp_to, TILEMAP_NAME_MAX );
+   debug_printf( 2, "attempting to open tilemap: %s (%d chars)",
+      state->warp_to, map_name_len );
+   debug_printf( 1, "looping through %d tilemaps...", gc_map_count );
    for( i = 0 ; gc_map_count > i ; i++ ) {
       if( 0 == memory_strncmp_ptr(
-         gc_map_names[i], state->warp_to, TILEMAP_NAME_MAX
+         gc_map_names[i], state->warp_to, map_name_len
       ) ) {
-         /* debug_printf( 3, "gc_map_%s: %s",
-            gc_map_names[i], engine_mapize( ENTRY_MAP ).name ); */
+         debug_printf( 1, "gc_map_%s vs %s", gc_map_names[i], state->warp_to );
          memory_copy_ptr( (MEMORY_PTR)&(state->map),
             (MEMORY_PTR)gc_map_structs[i],
             sizeof( struct TILEMAP ) );

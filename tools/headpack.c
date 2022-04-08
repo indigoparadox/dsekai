@@ -76,7 +76,7 @@ int encode_binary_buffer(
 
    /* Create a static const in the output header to hold this blob. */
    encode_binary_buffer_line( 
-      "static const " RES_TYPE " gsc_resource_%d[] = {\n   ", id );
+      "static RES_C_DEF " RES_TYPE " gsc_resource_%d[] = {\n   ", id );
 
    encode_binary_buffer_line( "   /* %s */\n", res_path );
    
@@ -93,7 +93,7 @@ int encode_binary_buffer(
    encode_binary_buffer_line( "\n};\n\n" );
 
    encode_binary_buffer_line(
-      "static const struct RESOURCE_HEADER_HANDLE gsc_resource_handle_%d[] = {\n   ",
+      "static RES_CONST struct RESOURCE_HEADER_HANDLE gsc_resource_handle_%d[] = {\n   ",
       id );
 
    encode_binary_buffer_line( "gsc_resource_%d,\n   %d,\n   0",
@@ -116,20 +116,10 @@ int map2h( struct TILEMAP* t, FILE* header_file ) {
    /* For some reason, declaring this as const crashes Palm with unallocated
     * error? */
 
-   fprintf( header_file, "#ifdef PLATFORM_PALM\n" );
-
    /* TODO: strtolower? */
-   fprintf( header_file, "struct TILEMAP gc_map_%s = {\n",
+   fprintf( header_file, "RES_CONST struct TILEMAP gc_map_%s = {\n",
       t->name );
 
-   fprintf( header_file, "#else\n" );
-   
-   /* TODO: strtolower? */
-   fprintf( header_file, "const struct TILEMAP gc_map_%s = {\n",
-      t->name );
-
-   fprintf( header_file, "#endif\n" );
-   
    /* name */
    fprintf( header_file, "   \"%s\",\n", t->name );
 
@@ -421,6 +411,13 @@ int write_header(
       fprintf( header, " %d\n", i );
    }
 
+   fprintf( header, "\n" );
+   fprintf( header, "#ifdef PLATFORM_PALM\n" );
+   fprintf( header, "#define RES_CONST\n" );
+   fprintf( header, "#else\n" );
+   fprintf( header, "#define RES_CONST const\n" );
+   fprintf( header, "#endif\n" );
+
    /* Resource Data */
 
    /* Translation unit check start. */
@@ -509,7 +506,7 @@ int write_header(
 
    /* Resource Index */
 
-   fprintf( header, "static const struct RESOURCE_HEADER_HANDLE* gsc_resources[] = {\n" );
+   fprintf( header, "static RES_CONST struct RESOURCE_HEADER_HANDLE* gsc_resources[] = {\n" );
    for( i = 0 ; paths_in_sz > i ; i++ ) {
       if(
          'm' == paths_in[i][path_iter_fname_idx] &&
@@ -525,7 +522,7 @@ int write_header(
 
    /* Map Index */
 
-   fprintf( header, "const char gc_map_names[][TILEMAP_NAME_MAX] = {\n" );
+   fprintf( header, "RES_CONST char gc_map_names[][TILEMAP_NAME_MAX] = {\n" );
    for( i = 0 ; paths_in_sz > i ; i++ ) {
       if(
          'm' == paths_in[i][path_iter_fname_idx] &&
@@ -547,7 +544,7 @@ int write_header(
    }
    fprintf( header, "};\n\n" );
 
-   fprintf( header, "const struct TILEMAP* gc_map_structs[] = {\n" );
+   fprintf( header, "RES_CONST struct TILEMAP* gc_map_structs[] = {\n" );
    for( i = 0 ; paths_in_sz > i ; i++ ) {
       if(
          'm' == paths_in[i][path_iter_fname_idx] &&
@@ -567,7 +564,7 @@ int write_header(
    }
    fprintf( header, "};\n\n" );
 
-   fprintf( header, "const uint8_t gc_map_count = %d;\n\n", map_count );
+   fprintf( header, "RES_CONST uint8_t gc_map_count = %d;\n\n", map_count );
 
    /* Header Footer */
 
