@@ -405,9 +405,9 @@ int write_header(
 
    /* fprintf( header, "#include \"residx.h\"\n\n" ); */
 
-   for( i = 0 ; paths_in_sz > i ; i++ ) {
+   for( i = 1 ; paths_in_sz >= i ; i++ ) {
       fprintf( header, "#define " );
-      path_to_define( paths_in[i], header );
+      path_to_define( paths_in[i - 1], header );
       fprintf( header, " %d\n", i );
    }
 
@@ -424,26 +424,27 @@ int write_header(
    fprintf( header, "\n#ifdef " RES_C_DEF "\n\n" );
 
    /* Iterate through each file on the command line. */
-   for( i = 0 ; paths_in_sz > i ; i++ ) {
-      path_iter_sz = strlen( paths_in[i] );
-      path_iter_fname_idx = dio_basename( paths_in[i], path_iter_sz );
-      path_iter_ext_idx = dio_char_idx_r( paths_in[i], path_iter_sz, '.' ) + 1;
+   for( i = 1 ; paths_in_sz >= i ; i++ ) {
+      path_iter_sz = strlen( paths_in[i - 1] );
+      path_iter_fname_idx = dio_basename( paths_in[i - 1], path_iter_sz );
+      path_iter_ext_idx = 
+         dio_char_idx_r( paths_in[i - 1], path_iter_sz, '.' ) + 1;
       /* TODO: Delay maps until we have all other resources so we can map tilesets. */
 
       if(
-         'm' == paths_in[i][path_iter_fname_idx] &&
-         '_' == paths_in[i][path_iter_fname_idx + 1]
+         'm' == paths_in[i - 1][path_iter_fname_idx] &&
+         '_' == paths_in[i - 1][path_iter_fname_idx + 1]
       ) {
          /* This is a map JSON file, so preload it. */
          debug_printf(
-            3, "encoding map: %s", &(paths_in[i][path_iter_fname_idx]) );
+            3, "encoding map: %s", &(paths_in[i - 1][path_iter_fname_idx]) );
 
-         retval = tilemap_json_load( paths_in[i], &t );
+         retval = tilemap_json_load( paths_in[i - 1], &t );
          if( !retval ) {
             error_printf( "unable to load tilemap: %s",
-               &(paths_in[i][path_iter_fname_idx]) );
+               &(paths_in[i - 1][path_iter_fname_idx]) );
             printf( "unable to load tilemap: %s\n",
-               &(paths_in[i][path_iter_fname_idx]) );
+               &(paths_in[i - 1][path_iter_fname_idx]) );
             retval = 1;
             goto cleanup;
          } else {
@@ -455,7 +456,8 @@ int write_header(
          map2h( &t, header );
       } else {
          debug_printf(
-            3, "encoding resource: %s", &(paths_in[i][path_iter_fname_idx]) );
+            3,
+            "encoding resource: %s", &(paths_in[i - 1][path_iter_fname_idx]) );
          
          #if 0
          /* Determine if file needs to be converted. */
@@ -488,7 +490,7 @@ int write_header(
          if( 0 > in_fmt ) {
             /* Read in resource contents. */
             debug_printf( 3, "reading resource..." );
-            file_in = fopen( paths_in[i], "rb" );
+            file_in = fopen( paths_in[i - 1], "rb" );
             assert( NULL != file_in );
             fseek( file_in, 0, SEEK_END );
             buffer_file_sz = ftell( file_in );
@@ -499,18 +501,18 @@ int write_header(
          }
 
          encode_binary_buffer(
-            buffer_file_in, buffer_file_sz, paths_in[i],
+            buffer_file_in, buffer_file_sz, paths_in[i - 1],
             i, header, in_fmt, out_fmt );
       }
    }
 
    /* Resource Index */
 
-   fprintf( header, "static RES_CONST struct RESOURCE_HEADER_HANDLE* gsc_resources[] = {\n" );
-   for( i = 0 ; paths_in_sz > i ; i++ ) {
+   fprintf( header, "static RES_CONST struct RESOURCE_HEADER_HANDLE* gsc_resources[] = {\n   NULL,\n" );
+   for( i = 1 ; paths_in_sz >= i ; i++ ) {
       if(
-         'm' == paths_in[i][path_iter_fname_idx] &&
-         '_' == paths_in[i][path_iter_fname_idx + 1]
+         'm' == paths_in[i - 1][path_iter_fname_idx] &&
+         '_' == paths_in[i - 1][path_iter_fname_idx + 1]
       ) {
          /* Map structs are handled in the map index table below. */
       } else {
