@@ -39,8 +39,10 @@ unilayer_main() {
 
    error_printf( "error test" );
 
+#ifndef NO_ANIMATE
    debug_printf( 3, "animations cache is %lu bytes",
       sizeof( struct ANIMATION ) * ANIMATE_ANIMATIONS_MAX );
+#endif /* !NO_ANIMATE */
 
    /* Initialize subsystems. */
 

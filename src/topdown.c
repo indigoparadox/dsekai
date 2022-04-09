@@ -65,6 +65,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
 
 #endif /* !NO_ENGINE_EDITOR */
 
+#ifndef NO_ANIMATE
          /* Mark as dirty any on-screen tiles under an animation. */
          for( i = 0 ; ANIMATE_ANIMATIONS_MAX > i ; i++ ) {
 
@@ -84,6 +85,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
                   TILEMAP_TILE_FLAG_DIRTY;
             }
          }
+#endif /* !NO_ANIMATE */
 
 #ifndef IGNORE_DIRTY
          if(

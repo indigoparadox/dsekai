@@ -14,6 +14,7 @@ GENDIR_WIN32 := $(GENDIR)/win32
 DSEKAI_C_FILES_WIN32_ONLY := \
    src/main.c \
    src/pov.c \
+   unilayer/src/animate.c \
    unilayer/src/input/wini.c \
    unilayer/src/memory/winm.c \
    unilayer/src/graphics/wing.c

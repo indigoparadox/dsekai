@@ -22,7 +22,6 @@ DSEKAI_C_FILES := \
    src/crop.c \
    src/strpool.c \
    unilayer/src/graphics.c \
-   unilayer/src/animate.c \
    unilayer/src/dio.c
 
 MKRESH_C_FILES := \

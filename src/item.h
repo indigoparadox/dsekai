@@ -75,20 +75,20 @@ ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
 
 #ifdef ITEM_C
 
-#define ITEM_TABLE_MAX( type, max ) max,
+#  define ITEM_TABLE_MAX( type, max ) max,
 
 RES_CONST uint8_t gc_items_max[] = {
    ITEM_TABLE( ITEM_TABLE_MAX )
 };
 
-#define ITEM_TABLE_TYPES( type, max ) #type,
+#  define ITEM_TABLE_TYPES( type, max ) #type,
 
 RES_CONST char* gc_items_types[] = {
    ITEM_TABLE( ITEM_TABLE_TYPES )
    ""
 };
 
-#define ITEM_TABLE_USE_CBS( type, max ) item_use_ ## type,
+#  define ITEM_TABLE_USE_CBS( type, max ) item_use_ ## type,
 
 RES_CONST ITEM_USE_CB gc_item_use_cbs[] = {
    ITEM_TABLE( ITEM_TABLE_USE_CBS )
@@ -103,7 +103,7 @@ extern RES_CONST ITEM_USE_CB gc_item_use_cbs[];
 
 extern RES_CONST char* gc_items_types[];
 
-#endif
+#endif /* ITEM_C */
 
 /* !\} */
 

@@ -14,6 +14,7 @@ DEVKITPATH := $(shell echo "$(DEVKITPRO)" | sed -e 's/^\([a-zA-Z]\):/\/\1/')
 DSEKAI_C_FILES_NDS_ONLY := \
    src/main.c \
    src/pov.c \
+   unilayer/src/animate.c \
    unilayer/src/input/ndsi.c \
    unilayer/src/graphics/ndsg.c \
    unilayer/src/memory/fakem.c

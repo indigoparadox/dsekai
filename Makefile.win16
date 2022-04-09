@@ -13,6 +13,7 @@ GENDIR_WIN16 := $(GENDIR)/win16
 
 DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
+   unilayer/src/animate.c \
    unilayer/src/input/wini.c \
    unilayer/src/memory/winm.c \
    unilayer/src/graphics/wing.c
