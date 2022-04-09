@@ -11,17 +11,27 @@
 #endif /* RESOURCE_FILE */
 
 #ifndef NO_ENGINE_POV
-#define TITLE_OPTIONS_COUNT 3
+#  ifndef NO_QUIT
+#     define TITLE_OPTIONS_COUNT 3
+#  else
+#     define TITLE_OPTIONS_COUNT 2
+#  endif /* !NO_QUIT */
 #else
-#define TITLE_OPTIONS_COUNT 2
+#  ifndef NO_QUIT
+#     define TITLE_OPTIONS_COUNT 2
+#  else
+#     define TITLE_OPTIONS_COUNT 1
+#  endif /* !NO_QUIT */
 #endif /* !NO_ENGINE_POV */
 
 RES_CONST char* gc_title_options[] = {
-   "topdown",
+   "topdown"
 #ifndef NO_ENGINE_POV
-   "pov",
+   , "pov"
 #endif /* !NO_ENGINE_POV */
-   "quit"
+#ifndef NO_QUIT
+   , "quit"
+#endif /* NO_QUIT */
 };
 
 #ifndef NO_TITLE
@@ -223,10 +233,13 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
       if( 1 == gstate->option_high ) {
          retval = 0;
 #else
+#  ifndef NO_QUIT
       if( 2 == gstate->option_high ) {
          retval = 0;
 
-      } else if( 1 == gstate->option_high ) {
+      } else
+#  endif /* NO_QUIT */
+      if( 1 == gstate->option_high ) {
          memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
             memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
          state->engine_type_change = 2 /* ENGINE_TYPE_POV */;
