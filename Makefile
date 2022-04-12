@@ -24,12 +24,6 @@ DSEKAI_C_FILES := \
    unilayer/src/graphics.c \
    unilayer/src/dio.c
 
-MKRESH_C_FILES := \
-   tools/mkresh.c \
-   unilayer/src/resource/file.c \
-   unilayer/src/memory/fakem.c \
-   unilayer/src/dio.c
-
 LOOKUPS_C_FILES := \
    tools/lookups.c
 
@@ -236,17 +230,15 @@ TAR := tar
 GZIP := gzip
 ZIP := zip
 
-MKRESH := $(BINDIR)/mkresh
 LOOKUPS := $(BINDIR)/lookups
 MAP2ASN := $(BINDIR)/map2asn
 
-CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer/src -DASSETS_PATH="\"$(ASSETPATH)\""
 CFLAGS_LOOKUPS := -g -Iunilayer/src
 CFLAGS_MAP2ASN := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=1 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG $(FLAGS_GCC_SANITIZE) -DDISABLE_WEATHER_EFFECTS
 
 $(BIN_CHECK): LDFLAGS := $(shell pkg-config check --libs) -g $(LDFLAGS_GCC_GENERIC)
 
-.PHONY: clean grc_palm
+.PHONY: clean
 
 # ====== Generic Rules ======
 
@@ -447,9 +439,6 @@ endif
 endef
 
 # ====== Utilities ======
-
-$(MKRESH): $(MKRESH_C_FILES) | $(BINDIR)/$(STAMPFILE)
-	$(HOST_CC) $(CFLAGS_MKRESH) -o $@ $^
 
 $(LOOKUPS): $(LOOKUPS_C_FILES) | $(BINDIR)/$(STAMPFILE)
 	$(HOST_CC) $(CFLAGS_LOOKUPS) -o $@ $^
