@@ -109,18 +109,6 @@ ifeq ($(FMT_JSON),TRUE)
    OBJDIR := $(OBJDIR)-json
 endif
 
-BIN_SDL := $(BINDIR)/$(DSEKAI)
-BIN_DOS := $(BINDIR)/$(DSEKAI).exe
-BIN_XLIB := $(BINDIR)/$(DSEKAI)x
-BIN_PALM := $(BINDIR)/$(DSEKAI).prc
-BIN_WIN16 := $(BINDIR)/$(DSEKAI)16.exe
-BIN_WIN32 := $(BINDIR)/$(DSEKAI)32.exe
-BIN_MAC6 := $(BINDIR)/$(DSEKAI).bin $(BINDIR)/$(DSEKAI).APPL $(BINDIR)/$(DSEKAI).dsk
-BIN_NDS := $(BINDIR)/$(DSEKAI).nds
-BIN_WASM := $(BINDIR)/$(DSEKAI).html
-BIN_CURSES := $(BINDIR)/$(DSEKAI)t
-BIN_SDL_ARM := $(BINDIR)/$(DSEKAI)r
-BIN_MEGAD := $(BINDIR)/$(DSEKAI).smd
 BIN_CHECK := $(BINDIR)/check
 
 PKGDIR := packages
@@ -136,23 +124,11 @@ ifeq ($(RESOURCE),FILE)
    DSEKAI_C_FILES_RES := unilayer/src/resource/file.c src/json.c src/asn.c
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-file
 
-   ifeq ($(FMT_ASN),TRUE)
-
-all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN32) $(BIN_WIN16)
-
-   else
-
-all: $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN32)
-
-   endif
-
 else
 
    RESOURCE := DEFAULT
    DEFINES_RESOURCE := -DRESOURCE_HEADER
    DSEKAI_C_FILES_RES := unilayer/src/resource/header.c
-
-all: $(BIN_DOS) $(BIN_SDL) $(BIN_XLIB) $(BIN_WIN16) $(BIN_WIN32)
 
 endif
 

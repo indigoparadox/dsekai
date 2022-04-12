@@ -11,6 +11,8 @@ GENDIR_XLIB := $(GENDIR)/xlib
 
 # 2. Files
 
+BIN_XLIB := $(BINDIR)/$(DSEKAI)x
+
 DSEKAI_C_FILES_XLIB_ONLY := \
    src/main.c \
    src/pov.c \

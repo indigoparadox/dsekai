@@ -7,6 +7,8 @@ GENDIR_MEGAD := $(GENDIR)/megad
 
 # 2. Files
 
+BIN_MEGAD := $(BINDIR)/$(DSEKAI).smd
+
 DSEKAI_C_FILES_MEGAD_ONLY := \
    src/main.c \
    src/megahead.c \

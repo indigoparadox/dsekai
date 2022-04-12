@@ -15,6 +15,8 @@ GENDIR_PALM := $(GENDIR)/palm
 
 # 2. Files
 
+BIN_PALM := $(BINDIR)/$(DSEKAI).prc
+
 DSEKAI_C_FILES_PALM_ONLY := \
    src/main.c \
    unilayer/src/input/palmi.c \

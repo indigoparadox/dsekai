@@ -11,6 +11,8 @@ GENDIR_DOS := $(GENDIR)/dos
 
 # 2. Files
 
+BIN_DOS := $(BINDIR)/$(DSEKAI).exe
+
 DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
    unilayer/src/animate.c \

@@ -11,6 +11,8 @@ DEVKITPATH := $(shell echo "$(DEVKITPRO)" | sed -e 's/^\([a-zA-Z]\):/\/\1/')
 
 # 2. Files
 
+BIN_NDS := $(BINDIR)/$(DSEKAI).nds
+
 DSEKAI_C_FILES_NDS_ONLY := \
    src/main.c \
    src/pov.c \

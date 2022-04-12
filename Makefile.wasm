@@ -11,6 +11,8 @@ GENDIR_WASM := $(GENDIR)/wasm
 
 # 2. Files
 
+BIN_WASM := $(BINDIR)/$(DSEKAI).html
+
 DSEKAI_C_FILES_WASM_ONLY := \
    src/main.c \
    src/pov.c \

@@ -11,6 +11,8 @@ GENDIR_WIN16 := $(GENDIR)/win16
 
 # 2. Files
 
+BIN_WIN16 := $(BINDIR)/$(DSEKAI)16.exe
+
 DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
    unilayer/src/animate.c \

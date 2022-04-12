@@ -7,6 +7,8 @@ GENDIR_CURSES := $(GENDIR)/curses
 
 # 2. Files
 
+BIN_CURSES := $(BINDIR)/$(DSEKAI)t
+
 DSEKAI_C_FILES_CURSES_ONLY := \
    src/main.c \
    unilayer/input/cursesi.c \

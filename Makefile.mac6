@@ -17,6 +17,8 @@ RETRO68_PREFIX := /opt/Retro68-build/toolchain
 
 # 2. Files
 
+BIN_MAC6 := $(BINDIR)/$(DSEKAI).bin $(BINDIR)/$(DSEKAI).APPL $(BINDIR)/$(DSEKAI).dsk
+
 DSEKAI_C_FILES_MAC6_ONLY := \
    src/main.c \
    unilayer/src/input/mac6i.c \
