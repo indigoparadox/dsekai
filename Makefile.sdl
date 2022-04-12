@@ -94,5 +94,5 @@ $(DEPDIR_SDL)/%.d: %.c $(RESEXT_H)
 	$(CC_SDL) $(CFLAGS_SDL) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL)/,$<)) -MF $@
 
-include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
+#include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_SDL:.o=.d))
 

@@ -17,12 +17,28 @@
 #define HEADPACK_STATE_IN_FMT_ARG 1
 #define HEADPACK_STATE_OUT_FMT_ARG 2
 
-struct TILEMAP;
+#define HEADPACK_DEFS_MAX 255
+
+#define HEADPACK_TYPE_MAX 8
 
 /*! \brief Constant indicating path is to a bitmap (or binary) file. */
 #define PATH_TYPE_BIN 0
 /*! \brief Constant indicating path is to a tilemap (text) file. */
 #define PATH_TYPE_TXT 1
+
+typedef int (*headpack_writer)( const char*, FILE* );
+typedef int (*headpack_indexer)( const char*[], int, FILE* );
+
+struct HEADPACK_DEF {
+   char prefix;
+   headpack_writer writer;
+   headpack_indexer indexer;
+   char type[HEADPACK_TYPE_MAX];
+};
+
+int headpack_register(
+   char prefix, headpack_writer writer, headpack_indexer indexer,
+   const char* type );
 
 /**
  * \brief Determine if a path points to a bitmap or tilemap.
@@ -48,19 +64,22 @@ int path_to_define( const char* path, FILE* header );
  * \return Number of bytes written.
  */
 int encode_binary_buffer(
-   unsigned char* buffer_in, int buffer_in_sz, char* res_path,
+   unsigned char* buffer_in, int buffer_in_sz, const char* res_path,
    int id, FILE* header, int in_fmt, int out_fmt );
 
-/**
- * \brief Write the given ::TILEMAP to a C header file on disk.
- * \param t ::TILEMAP to write to header.
- * \param header_file FILE pointer for header file on disk.
- * \return
- */
-int map2h( struct TILEMAP* t, FILE* header_file );
+struct HEADPACK_DEF* headpack_get_def( const char* filename );
 
 int write_header(
-   FILE* header, int paths_in_sz, char* paths_in[], int in_fmt, int out_fmt );
+   FILE* header, int paths_in_sz, const char* paths_in[],
+   int in_fmt, int out_fmt );
+
+#ifdef HEADPACK_C
+struct HEADPACK_DEF g_headpack_defs[HEADPACK_DEFS_MAX];
+int g_headpack_defs_sz = 0;
+#else
+extern struct HEADPACK_DEF g_headpack_defs[];
+extern int g_headpack_defs_sz;
+#endif /* HEADPACK_C */
 
 #endif /* !HEADPACK_H */
 

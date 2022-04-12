@@ -1,4 +1,5 @@
 
+#define HEADPACK_C
 #include "headpack.h"
 
 #define CONVERT_C
@@ -8,13 +9,6 @@
 #include <string.h>
 #include <stdlib.h> /* For calloc() */
 
-#define ENGINES_TOKENS_ONLY
-#define ENGINES_C
-#include "../src/dsekai.h"
-
-#include "../src/tmjson.h"
-
-#define BIN_BUFFER_SZ 1024
 #define RES_C_DEF "RESOURCE_C"
 #define RES_TYPE "unsigned char"
 
@@ -60,13 +54,11 @@ int path_to_define( const char* path, FILE* header ) {
    return written;
 }
 
-
-
 #define encode_binary_buffer_line( ... ) written = fprintf( header, __VA_ARGS__ ); if( 0 >= written ) { error_printf( "unable to write to header" ); goto cleanup; } total_written += written;
 
 int encode_binary_buffer(
    /* TODO: Use int32 for buffer_in_sz. */
-   unsigned char* buffer_in, int buffer_in_sz, char* res_path,
+   unsigned char* buffer_in, int buffer_in_sz, const char* res_path,
    int id, FILE* header, int in_fmt, int out_fmt
 ) {
    int j = 0,
@@ -106,289 +98,36 @@ cleanup:
    return total_written;
 }
 
-int map2h( struct TILEMAP* t, FILE* header_file ) {
-   int16_t
-      i = 0,
-      j = 0,
-      res_basename_idx = 0,
-      ts_basename_idx = 0;
+struct HEADPACK_DEF* headpack_get_def( const char* filename ) {
+   int i = 0;
 
-   /* For some reason, declaring this as const crashes Palm with unallocated
-    * error? */
-
-   /* TODO: strtolower? */
-   fprintf( header_file, "RES_CONST struct TILEMAP gc_map_%s = {\n",
-      t->name );
-
-   /* name */
-   fprintf( header_file, "   \"%s\",\n", t->name );
-
-#if 0
-   /* engine_type */
-   fprintf( header_file, "   %d,\n", t->engine_type );
-#endif
-
-   /* flags */
-   fprintf( header_file, "   %d,\n", t->flags );
-
-   /* tileset */
-   fprintf( header_file, "   /* tileset */\n" );
-   fprintf( header_file, "   {\n" );
-   for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
-      ts_basename_idx = dio_basename(
-         t->tileset[i].image, strlen( t->tileset[i].image ) );
-
-      /* Blank out the filename extension. */
-      t->tileset[i].image[strlen( t->tileset[i].image ) - 4] = '\0';
-
-      fprintf( header_file, "      {\n" );
-
-      if( 0 < strlen( t->tileset[i].image ) ) {
-         /* tileset[i].image */
-         fprintf( header_file, "         /* image */\n" );
-         /* Let the preprocessor figure it out. */
-         fprintf( header_file, "         %s,\n",
-            &(t->tileset[i].image[ts_basename_idx]) );
-
-         /* tileset[i].flags */
-         fprintf( header_file, "         /* flags */\n" );
-         fprintf( header_file, "         0x%02x,\n", t->tileset[i].flags );
-      } else {
-         fprintf( header_file, "         0, 0 /* not found */\n" );
-      }
-
-      fprintf( header_file, "      },\n" );
-   }
-   fprintf( header_file, "   },\n" );
-
-   /* tiles */
-   fprintf( header_file, "   /* tiles */\n" );
-   fprintf( header_file, "   {\n      " );
-   for( i = 0 ; ((TILEMAP_TH * TILEMAP_TW) / 2) > i ; i++ ) {
-      fprintf( header_file, "0x%02x, ", t->tiles[i] );
-      if( 0 == ((i + 1) % (TILEMAP_TW / 2)) ) {
-         fprintf( header_file, "\n" );
+   for( i = 0 ; g_headpack_defs_sz > i ; i++ ) {
+      if( g_headpack_defs[i].prefix == filename[0] && '_' == filename[1] ) {
+         return &(g_headpack_defs[i]);
       }
    }
-   fprintf( header_file, "   },\n" );
 
-   /* tiles_flags */ 
-   fprintf( header_file, "   /* tiles_flags */\n" );
-   fprintf( header_file, "   {\n      " );
-   for( i = 0 ; (TILEMAP_TH * TILEMAP_TW) > i ; i++ ) {
-      fprintf( header_file, "0x%02x, ", t->tiles_flags[i] );
-      if( 0 == ((i + 1) % (TILEMAP_TW)) ) {
-         fprintf( header_file, "\n" );
-      }
-   }
-   fprintf( header_file, "   },\n" );
-
-   /* spawns */
-   fprintf( header_file, "   /* spawns */\n" );
-   fprintf( header_file, "   {\n" );
-   for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
-      printf( "%s\n", t->spawns[i].type );
-      ts_basename_idx = dio_basename(
-         t->spawns[i].type, strlen( t->spawns[i].type ) );
-
-      /* Blank out the filename extension. */
-      t->spawns[i].type[strlen( t->spawns[i].type ) - 4] = '\0';
-
-      fprintf( header_file, "      {\n" );
-
-      /* name */
-      fprintf( header_file, "         /* name */\n" );
-      fprintf( header_file, "         \"%s\",\n", t->spawns[i].name );
-
-      /* coords */
-      fprintf( header_file, "         /* coords */\n" );
-      fprintf( header_file, "         { %d, %d },\n",
-         t->spawns[i].coords.x, t->spawns[i].coords.y );
-
-      /* type */
-      if( 0 < strlen( t->spawns[i].type ) ) {
-         fprintf( header_file, "         /* type */\n" );
-         /* Let the preprocessor figure it out. */
-         fprintf( header_file, "         %s,\n",
-            &(t->spawns[i].type[ts_basename_idx]) );
-      } else {
-         fprintf( header_file, "         0, /* not found */\n" );
-      }
-
-      /* script */
-      fprintf( header_file, "         /* script_id */\n" );
-      fprintf( header_file, "         %d\n", t->spawns[i].script_id );
-
-      fprintf( header_file, "      },\n" );
-   }
-   fprintf( header_file, "   },\n" );
-
-   /* strings */
-   fprintf( header_file, "   /* strings */\n   {\n      " );
-   for( i = 0 ; TILEMAP_STRPOOL_SZ > i ; i++ ) {
-      fprintf( header_file, "0x%02x, ", (unsigned char)(t->strpool[i] & 0xff) );
-   }
-   fprintf( header_file, "   },\n" );
-
-#if 0
-   /* strings */
-   fprintf( header_file, "   /* strings */\n" );
-   fprintf( header_file, "   {\n" );
-   for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
-      fprintf( header_file, "      \"" );
-      for( j = 0 ; strlen( t->strings[i] ) > j ; j++ ) {
-         if( '\n' == t->strings[i][j] ) {
-            fprintf( header_file, "\\n" );
-         } else {
-            fprintf( header_file, "%c", t->strings[i][j] );
-         }
-      }
-      fprintf( header_file, "\",\n" );
-   }
-   fprintf( header_file, "   },\n" );
-#endif
-
-   /* scripts */
-   fprintf( header_file, "   /* scripts */\n" );
-   fprintf( header_file, "   {\n" );
-   for( i = 0 ; TILEMAP_SCRIPTS_MAX > i ; i++ ) {
-      fprintf( header_file, "      {\n" );
-      /* steps */
-      fprintf( header_file, "         /* steps */\n" );
-      fprintf( header_file, "         {\n" );
-      for( j = 0 ; t->scripts[i].steps_count > j ; j++ ) {
-         fprintf( header_file, "            {\n" );
-         fprintf( header_file, "               /* action */\n" );
-         fprintf( header_file, "               %d,\n",
-            t->scripts[i].steps[j].action );
-         fprintf( header_file, "               /* arg */\n" );
-         fprintf( header_file, "               %d,\n",
-            t->scripts[i].steps[j].arg );
-         fprintf( header_file, "            },\n" );
-      }
-      fprintf( header_file, "         },\n" );
-
-      /* steps_count */
-      fprintf( header_file, "         /* steps_count */\n" );
-      fprintf( header_file, "         %d\n", t->scripts[i].steps_count );
-
-      fprintf( header_file, "      },\n" );
-   }
-   fprintf( header_file, "   },\n" );
-
-   /* items */
-   fprintf( header_file, "   /* items */\n" );
-   fprintf( header_file, "   {\n" );
-   for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
-      fprintf( header_file, "      {\n" );
-      fprintf( header_file, "         /* sprite */\n" );
-
-      if( '\0' != t->items[i].sprite[0] ) {
-         ts_basename_idx = dio_basename(
-            t->items[i].sprite, strlen( t->items[i].sprite ) );
-
-         /* Blank out the filename extension. */
-         t->items[i].sprite[strlen( t->items[i].sprite ) - 4] = '\0';
-
-         /* items[i].sprite */
-         /* Let the preprocessor figure it out. */
-         fprintf( header_file, "         %s,\n",
-            &(t->items[i].sprite[ts_basename_idx]) );
-      } else {
-         fprintf( header_file, "         0,\n" );
-      }
-
-      fprintf( header_file, "         /* name */\n" );
-      fprintf( header_file, "         \"%s\",\n", t->items[i].name );
-
-      fprintf( header_file, "         /* type */\n" );
-      fprintf( header_file, "         %d,\n", t->items[i].type );
-
-      fprintf( header_file, "         /* owner */\n" );
-      fprintf( header_file, "         %d,\n", t->items[i].owner );
-
-      fprintf( header_file, "         /* gid */\n" );
-      fprintf( header_file, "         %d,\n", t->items[i].gid );
-
-      fprintf( header_file, "         /* data */\n" );
-      fprintf( header_file, "         %d,\n", t->items[i].data );
-
-      fprintf( header_file, "         /* count */\n" );
-      fprintf( header_file, "         %d,\n", t->items[i].count );
-
-      fprintf( header_file, "         /* flags */\n" );
-      fprintf( header_file, "         %d,\n", t->items[i].flags );
-
-      fprintf( header_file, "      },\n" );
-   }
-   fprintf( header_file, "   },\n" );
-
-   /* crop_defs */
-   fprintf( header_file, "   /* crop_defs */\n" );
-   fprintf( header_file, "   {\n" );
-   for( i = 0 ; TILEMAP_CROP_DEFS_MAX > i ; i++ ) {
-      fprintf( header_file, "      {\n" );
-      fprintf( header_file, "         /* sprite */\n" );
-
-      if( '\0' != t->crop_defs[i].sprite[0] ) {
-         ts_basename_idx = dio_basename(
-            t->crop_defs[i].sprite, strlen( t->crop_defs[i].sprite ) );
-
-         /* Blank out the filename extension. */
-         t->crop_defs[i].sprite[strlen( t->crop_defs[i].sprite ) - 4] = '\0';
-
-         /* items[i].sprite */
-         /* Let the preprocessor figure it out. */
-         fprintf( header_file, "         %s,\n",
-            &(t->crop_defs[i].sprite[ts_basename_idx]) );
-      } else {
-         fprintf( header_file, "         0,\n" );
-      }
-
-      fprintf( header_file, "         /* name */\n" );
-      fprintf( header_file, "         \"%s\",\n", t->crop_defs[i].name );
-
-      fprintf( header_file, "         /* gid */\n" );
-      fprintf( header_file, "         %d,\n", t->crop_defs[i].gid );
-
-      fprintf( header_file, "         /* flags */\n" );
-      fprintf( header_file, "         %d,\n", t->crop_defs[i].flags );
-
-      fprintf( header_file, "         /* cycle */\n" );
-      fprintf( header_file, "         %d,\n", t->crop_defs[i].cycle );
-
-      fprintf( header_file, "         /* produce gid */\n" );
-      fprintf( header_file, "         %d\n", t->crop_defs[i].produce_gid );
-
-      fprintf( header_file, "      },\n" );
-   }
-
-
-   fprintf( header_file, "   },\n" );
-
-   fprintf( header_file, "};\n\n" );
-
-   return 1;
+   return NULL;
 }
 
 #define HEADPACK_WRITE_INCLUDES( inc ) fprintf( header, "#include \"" #inc "\"\n" );
 
 int write_header(
-   FILE* header, int paths_in_sz, char* paths_in[], int in_fmt, int out_fmt
+   FILE* header, int paths_in_sz, const char* paths_in[],
+   int in_fmt, int out_fmt
 ) {
-   char name_buffer[TILEMAP_NAME_MAX];
    int i = 0,
       path_iter_fname_idx = 0,
       path_iter_ext_idx = 0,
       path_iter_sz = 0,
-      map_count = 0,
       retval = 0,
       cvt_retval = 0;
-   struct TILEMAP t;
+   /* struct TILEMAP t; */
    FILE* file_in = NULL;
    uint8_t* buffer_file_in = NULL;
    int32_t buffer_file_sz = 0;
    struct CONVERT_GRID* grid;
+   struct HEADPACK_DEF* writer_def = NULL;
 
    /* Output header include guard start. */
    fprintf(
@@ -431,29 +170,15 @@ int write_header(
          dio_char_idx_r( paths_in[i - 1], path_iter_sz, '.' ) + 1;
       /* TODO: Delay maps until we have all other resources so we can map tilesets. */
 
-      if(
-         'm' == paths_in[i - 1][path_iter_fname_idx] &&
-         '_' == paths_in[i - 1][path_iter_fname_idx + 1]
-      ) {
-         /* This is a map JSON file, so preload it. */
-         debug_printf(
-            3, "encoding map: %s", &(paths_in[i - 1][path_iter_fname_idx]) );
+      writer_def =
+         headpack_get_def( &(paths_in[i - 1][path_iter_fname_idx]) );
 
-         retval = tilemap_json_load( paths_in[i - 1], &t );
-         if( !retval ) {
-            error_printf( "unable to load tilemap: %s",
-               &(paths_in[i - 1][path_iter_fname_idx]) );
-            printf( "unable to load tilemap: %s\n",
-               &(paths_in[i - 1][path_iter_fname_idx]) );
-            retval = 1;
-            goto cleanup;
-         } else {
-            retval = 0;
-         }
-      
-         /* Trim first arg (prog) off reslist. */
-         /* Second arg (header) will be ignored since 1-indexing. */
-         map2h( &t, header );
+      if( NULL != writer_def ) {
+         debug_printf(
+            3, "encoding %s: %s",
+            writer_def->type, &(paths_in[i - 1][path_iter_fname_idx]) );
+         retval = writer_def->writer( paths_in[i - 1], header );
+
       } else {
          debug_printf(
             3,
@@ -500,73 +225,50 @@ int write_header(
             fclose( file_in );
          }
 
-         encode_binary_buffer(
+         retval = encode_binary_buffer(
             buffer_file_in, buffer_file_sz, paths_in[i - 1],
             i, header, in_fmt, out_fmt );
+
+         /* Convert return value. */
+         if( 0 < retval ) {
+            retval = 0;
+         } else {
+            error_printf( "unable to write binary data" );
+         }
+      }
+
+      if( retval ) {
+         error_printf( "unable to write file" );
       }
    }
 
    /* Resource Index */
 
-   fprintf( header, "static RES_CONST struct RESOURCE_HEADER_HANDLE* gsc_resources[] = {\n   NULL,\n" );
+   fprintf(
+      header,
+      "static RES_CONST struct RESOURCE_HEADER_HANDLE* gsc_resources[] = {\n   NULL,\n"
+   );
    for( i = 1 ; paths_in_sz >= i ; i++ ) {
-      if(
-         'm' == paths_in[i - 1][path_iter_fname_idx] &&
-         '_' == paths_in[i - 1][path_iter_fname_idx + 1]
-      ) {
-         /* Map structs are handled in the map index table below. */
-      } else {
+      path_iter_sz = strlen( paths_in[i - 1] );
+      path_iter_fname_idx = dio_basename( paths_in[i - 1], path_iter_sz );
+      writer_def =
+         headpack_get_def( &(paths_in[i - 1][path_iter_fname_idx]) );
+      if( NULL == writer_def ) {
          /* Use a generic resource ID. */
          fprintf( header, "   gsc_resource_handle_%d,\n", i );
       }
    }
    fprintf( header, "};\n\n" );
 
-   /* Map Index */
+   /* Plugin Indexes */
 
-   fprintf( header, "RES_CONST char gc_map_names[][TILEMAP_NAME_MAX] = {\n" );
-   for( i = 0 ; paths_in_sz > i ; i++ ) {
-      if(
-         'm' == paths_in[i][path_iter_fname_idx] &&
-         '_' == paths_in[i][path_iter_fname_idx + 1]
-      ) {
-         /* This is a map struct, so use its name. */
-
-         map_count++;
-
-         /* Create a copy without the file extension. */
-         memory_zero_ptr( name_buffer, TILEMAP_NAME_MAX );
-         strncpy(
-            name_buffer,
-            &(paths_in[i][path_iter_fname_idx + 2]),
-            strlen( &(paths_in[i][path_iter_fname_idx + 2]) ) - 5 );
-
-         fprintf( header, "   \"%s\",\n", name_buffer );
+   for( i = 0 ; g_headpack_defs_sz > i ; i++ ) {
+      if( NULL == g_headpack_defs[i].indexer ) {
+         continue;
       }
+
+      g_headpack_defs[i].indexer( paths_in, paths_in_sz, header );
    }
-   fprintf( header, "};\n\n" );
-
-   fprintf( header, "RES_CONST struct TILEMAP* gc_map_structs[] = {\n" );
-   for( i = 0 ; paths_in_sz > i ; i++ ) {
-      if(
-         'm' == paths_in[i][path_iter_fname_idx] &&
-         '_' == paths_in[i][path_iter_fname_idx + 1]
-      ) {
-         /* This is a map struct, so use its name. */
-
-         /* Create a copy without the file extension. */
-         memory_zero_ptr( name_buffer, TILEMAP_NAME_MAX );
-         strncpy(
-            name_buffer,
-            &(paths_in[i][path_iter_fname_idx + 2]),
-            strlen( &(paths_in[i][path_iter_fname_idx + 2]) ) - 5 );
-
-         fprintf( header, "   &gc_map_%s,\n", name_buffer );
-      }
-   }
-   fprintf( header, "};\n\n" );
-
-   fprintf( header, "RES_CONST uint8_t gc_map_count = %d;\n\n", map_count );
 
    /* Header Footer */
 
@@ -579,6 +281,20 @@ int write_header(
 cleanup:
 
    return retval;
+}
+
+int headpack_register(
+   char prefix, headpack_writer writer, headpack_indexer indexer,
+   const char* type
+) {
+   memset(
+      &(g_headpack_defs[g_headpack_defs_sz]),
+      0, sizeof( struct HEADPACK_DEF ) );
+   g_headpack_defs[g_headpack_defs_sz].prefix = prefix;
+   g_headpack_defs[g_headpack_defs_sz].writer = writer;
+   g_headpack_defs[g_headpack_defs_sz].indexer = indexer;
+   strncpy( g_headpack_defs[g_headpack_defs_sz].type, type, HEADPACK_TYPE_MAX );
+   g_headpack_defs_sz++;
 }
 
 #ifndef HEADPACK_NOMAIN
@@ -660,14 +376,15 @@ int main( int argc, char* argv[] ) {
    assert( NULL != header );
 
    /* Pass the rest of the args left as input names. */
-   retval = write_header( header, argc - args_end - 1, &(argv[args_end + 1]),
-      in_fmt, out_fmt );
+   retval = write_header( header, argc - args_end - 1, 
+      (const char**)&(argv[args_end + 1]), in_fmt, out_fmt );
 
 cleanup:
 
    fclose( header );
    
-   return retval;
+   /* return retval; */
+   return 0;
 }
 
 #endif /* !HEADPACK_NOMAIN */

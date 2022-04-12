@@ -9,7 +9,7 @@ static int16_t tilemap_json_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
    struct jsmntok* tokens, int16_t tokens_sz,
    char* json_buffer, uint16_t json_buffer_sz,
-   RESOURCE_ID map_path
+   const RESOURCE_ID map_path
 ) {
    struct TILEMAP_SPAWN* spawn = (struct TILEMAP_SPAWN*)&(t->spawns[spawn_idx]);
    char spawn_buffer[RESOURCE_PATH_MAX];
@@ -84,7 +84,7 @@ static int16_t tilemap_json_parse_tileset(
    struct TILEMAP* t,
    struct jsmntok* tokens, uint16_t tokens_sz,
    char* json_buffer, uint16_t json_buffer_sz,
-   RESOURCE_ID map_path
+   const RESOURCE_ID map_path
 ) {
    int16_t i = 0,
       tile_filename_sz = 0;
@@ -247,7 +247,7 @@ static int16_t tilemap_json_tilegrid(
 }
 
 static int16_t tilemap_json_load_file(
-   char* filename, char** json_buffer_p, RESOURCE_HANDLE* json_handle_p,
+   const char* filename, char** json_buffer_p, RESOURCE_HANDLE* json_handle_p,
    uint32_t* json_buffer_sz_p, int16_t* tok_parsed_p, struct jsmntok* tokens
 ) {
    if( NULL != *json_buffer_p ) {
@@ -336,7 +336,7 @@ int16_t tilemap_json_parse_items(
    struct TILEMAP* t,
    char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, int16_t tokens_sz,
-   RESOURCE_ID map_path
+   const RESOURCE_ID map_path
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t i = 0,
@@ -442,7 +442,7 @@ int16_t tilemap_json_parse_crop_defs(
    struct TILEMAP* t,
    char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, int16_t tokens_sz,
-   RESOURCE_ID map_path
+   const RESOURCE_ID map_path
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t i = 0,
@@ -528,7 +528,7 @@ int16_t tilemap_json_parse_crop_defs(
    return i;
 }
 
-int16_t tilemap_json_load( RESOURCE_ID id, struct TILEMAP* t ) {
+int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
    char* json_buffer = NULL;
    int16_t retval = 1;
    RESOURCE_HANDLE json_handle = (RESOURCE_HANDLE)0;

@@ -32,6 +32,7 @@ MKRESH_C_FILES := \
 
 HEADPACK_C_FILES := \
    tools/headpack.c \
+   tools/mappack.c \
    src/tmjson.c \
    src/tilemap.c \
    src/mobile.c \
