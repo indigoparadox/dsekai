@@ -18,7 +18,6 @@
 #define FMT_FILE        3
 
 #define RTYPE_MISC      0
-#define RTYPE_JSON      1
 #define RTYPE_BITMAP    2
 
 #define FILE_LIST_MAX   255
@@ -28,7 +27,6 @@
 
 const char gc_win_res_bitmap[] = "BITMAP";
 const char gc_palm_res_bitmap[] = "BITMAP";
-const char gc_palm_res_data_json[] = "DATA \"json\"";
 const char gc_palm_res_data_misc[] = "DATA \"misc\"";
 
 /**
@@ -143,8 +141,8 @@ void mkresh_res(
 
       if( 0 == strncmp( &(file_list[i][extension_idx]), "bmp", 3 ) ) {
          rtype = RTYPE_BITMAP;
-      } else if( 0 == strncmp( &(file_list[i][extension_idx]), "js", 2 ) ) {
-         rtype = RTYPE_JSON;
+      } else {
+         fprintf( stderr, "invalid resource type\n" );
       }
 
       if( RTYPE_BITMAP == rtype ) {
@@ -156,12 +154,6 @@ void mkresh_res(
             res_type = gc_win_res_bitmap;
             break;
          }
-      } else if( RTYPE_JSON == rtype ) {
-         switch( fmt ) {
-         case FMT_PALM:
-            res_type = gc_palm_res_data_json;
-            break;
-         }
       } else {
          switch( fmt ) {
          case FMT_PALM:
@@ -170,36 +162,16 @@ void mkresh_res(
          }
       }
 
-      if( FMT_WIN16 == fmt && RTYPE_JSON == rtype ) {
+      switch( fmt ) {
+      case FMT_PALM:
+         fprintf( res_file, "%s ID %s \"%s\"\n",
+            res_type, file_basename_list[i], file_list[i] );
+         break;
 
-         assert( NULL == string_list[string_list_sz] );
-         string_file = fopen( file_list[i], "r" );
-         assert( NULL != string_file );
-         fseek( string_file, 0, SEEK_END );
-         string_file_sz = ftell( string_file ) + 1;
-         fseek( string_file, 0, SEEK_SET );
-         string_list[string_list_sz] = calloc( string_file_sz, 1 );
-         string_name_list[string_list_sz] =
-            calloc( strlen( file_basename_list[i] ) + 1, 1 );
-         strcpy( string_name_list[string_list_sz], file_basename_list[i] );
-         read = fread(
-            string_list[string_list_sz], 1, string_file_sz, string_file );
-         assert( read == string_file_sz - 1 );
-         fclose( string_file );
-         string_list_sz++;
-         
-      } else {
-         switch( fmt ) {
-         case FMT_PALM:
-            fprintf( res_file, "%s ID %s \"%s\"\n",
-               res_type, file_basename_list[i], file_list[i] );
-            break;
-
-         case FMT_WIN16:
-            fprintf( res_file, "%s %s \"%s\"\n",
-               file_basename_list[i], res_type, file_list[i] );
-            break;
-         }
+      case FMT_WIN16:
+         fprintf( res_file, "%s %s \"%s\"\n",
+            file_basename_list[i], res_type, file_list[i] );
+         break;
       }
    }
 
