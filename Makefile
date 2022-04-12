@@ -30,26 +30,6 @@ MKRESH_C_FILES := \
    unilayer/src/memory/fakem.c \
    unilayer/src/dio.c
 
-HEADPACK_C_FILES := \
-   tools/headpack.c \
-   tools/mappack.c \
-   src/tmjson.c \
-   src/tilemap.c \
-   src/mobile.c \
-   src/script.c \
-   src/json.c \
-   src/item.c \
-   src/crop.c \
-   src/strpool.c \
-   unilayer/tools/data/bmp.c \
-   unilayer/tools/data/cga.c \
-   unilayer/tools/data/icns.c \
-   unilayer/src/resource/file.c \
-   unilayer/src/graphics.c \
-   unilayer/src/graphics/nullg.c \
-   unilayer/src/memory/fakem.c \
-   unilayer/src/dio.c
-
 LOOKUPS_C_FILES := \
    tools/lookups.c
 
@@ -234,6 +214,18 @@ endif
 
 include unilayer/Makefile
 
+HEADPACK_C_FILES := \
+   $(HEADPACK_C_FILES_BASE) \
+   tools/mappack.c \
+   src/tmjson.c \
+   src/tilemap.c \
+   src/mobile.c \
+   src/script.c \
+   src/json.c \
+   src/item.c \
+   src/crop.c \
+   src/strpool.c
+
 DSEKAI_ASSETS_SPRITES := \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/s_*.bmp)
 DSEKAI_ASSETS_TILES := \
@@ -270,12 +262,10 @@ ZIP := zip
 
 MKRESH := $(BINDIR)/mkresh
 LOOKUPS := $(BINDIR)/lookups
-HEADPACK := $(BINDIR)/headpack
 MAP2ASN := $(BINDIR)/map2asn
 
 CFLAGS_MKRESH := -DNO_RESEXT -g -DDEBUG_LOG -DDEBUG_THRESHOLD=0 -DRESOURCE_FILE -Iunilayer/src -DASSETS_PATH="\"$(ASSETPATH)\""
 CFLAGS_LOOKUPS := -g -Iunilayer/src
-CFLAGS_HEADPACK := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=3 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG -DDISABLE_WEATHER_EFFECTS
 CFLAGS_MAP2ASN := -g -Iunilayer/src -DNO_RESEXT -DDEBUG_THRESHOLD=1 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG $(FLAGS_GCC_SANITIZE) -DDISABLE_WEATHER_EFFECTS
 
 $(BIN_CHECK): LDFLAGS := $(shell pkg-config check --libs) -g $(LDFLAGS_GCC_GENERIC)
