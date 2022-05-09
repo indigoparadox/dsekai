@@ -29,18 +29,17 @@ unilayer_main() {
 
    logging_init();
 
-   debug_printf( 3,
-      "dsekai compiled " __DATE__ __TIME__ ", state size is %lu bytes",
-      sizeof( struct DSEKAI_STATE ) );
-
+   debug_printf( 3, "dsekai compiled " __DATE__ __TIME__ );
    debug_printf( 3, "git hash: " DSEKAI_GIT_HASH );
-
    debug_printf( 3, "using " RESOURCES " resources" );
 
    error_printf( "error test" );
 
+   size_printf( 3, "state", sizeof( struct DSEKAI_STATE ) );
+   size_printf( 3, "tilemap", sizeof( struct TILEMAP ) );
+
 #ifndef NO_ANIMATE
-   debug_printf( 3, "animations cache is %lu bytes",
+   size_printf( 3, "animations cache",
       sizeof( struct ANIMATION ) * ANIMATE_ANIMATIONS_MAX );
 #endif /* !NO_ANIMATE */
 

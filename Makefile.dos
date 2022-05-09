@@ -15,7 +15,6 @@ BIN_DOS := $(BINDIR)/$(DSEKAI).exe
 
 DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
-   unilayer/src/animate.c \
    unilayer/src/input/dosi.c \
    unilayer/src/graphics/dosg.c \
    unilayer/src/memory/fakem.c
@@ -61,34 +60,32 @@ DEFINES_DOS := \
    $(DEFINES_RESOURCE) \
    -DNO_ENGINE_POV \
    -DNO_TRANSITIONS \
+   -DNO_ANIMATE \
    -DPLATFORM_DOS \
    -DUSE_SOFTWARE_TEXT \
    -DUSE_SOFTWARE_LINES \
    -DDISABLE_WEATHER_EFFECTS \
    -DSCREEN_W=320 \
    -DSCREEN_H=200 \
-   -DGRAPHICS_CACHE_INITIAL_SZ=30 \
+   -DGRAPHICS_CACHE_INITIAL_SZ=25 \
    -DDSEKAI_ITEMS_MAX=20 \
    -DTILEMAP_CROP_DEFS_MAX=5 \
+   -DDSEKAI_CROPS_MAX=15 \
+   -DTILEMAP_SPAWNS_MAX=10 \
+   -DTILEMAP_ITEMS_MAX=10 \
    -DDSEKAI_MOBILES_MAX=10 \
    -DDSEKAI_WINDOWS_MAX=10 \
    -DITEM_INVENTORY_MAX=10 \
-   -DRESOURCE_PATH_MAX=30 \
+   -DRESOURCE_PATH_MAX=28 \
    -DUSE_LOOKUPS
 
 INCLUDES_DOS := \
    -i=unilayer/src \
    -i=$(GENDIR_DOS) 
 
-CFLAGS_DOS := -hw -d3 -0 $(CFLAGS_OWC_GENERIC) $(DEFINES_DOS) $(INCLUDES_DOS) -we
+CFLAGS_DOS := -mm -os -hw -d0 -0 $(CFLAGS_OWC_GENERIC) $(DEFINES_DOS) $(INCLUDES_DOS) -we
 
 LDFLAGS_DOS := $(LDFLAGS_OWC_GENERIC)
-
-ifeq ($(FMT_JSON),TRUE)
-   CFLAGS_DOS += -mh
-else
-   CFLAGS_DOS += -mm
-endif
 
 # 5. Targets
 

@@ -183,7 +183,7 @@ struct DSEKAI_STATE {
     */
    struct ITEM items[DSEKAI_ITEMS_MAX];
 
-   MEMORY_PTR map_handle;
+   MEMORY_HANDLE map_handle;
 
    /*! \brief Engine type tilemap is supposed to be used with. */
    uint8_t engine_type;

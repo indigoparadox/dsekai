@@ -77,7 +77,16 @@
 
 #ifndef TILEMAP_CROP_DEFS_MAX
 #define TILEMAP_CROP_DEFS_MAX 10
-#endif /* TILEMAP_CROP_DEFS_MAX */
+#endif /* !TILEMAP_CROP_DEFS_MAX */
+
+#ifndef TILEMAP_ITEMS_MAX
+#define TILEMAP_ITEMS_MAX 20
+#endif /* !TILEMAP_ITEMS_MAX */
+
+#ifndef TILEMAP_SPAWNS_MAX
+/*! \brief Maximum number of TILEMAP::spawns. */
+#define TILEMAP_SPAWNS_MAX 20
+#endif /* !TILEMAP_SPAWNS_MAX */
 
 #ifndef DSEKAI_CROPS_MAX
 /*! \brief Maximum number of crops growing in the world accross all maps. */
