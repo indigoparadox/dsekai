@@ -15,7 +15,6 @@ BIN_SDL := $(BINDIR)/$(DSEKAI)
 
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
-   src/pov.c \
    unilayer/src/animate.c \
    unilayer/src/input/sdli.c \
    unilayer/src/graphics/sdlg.c \
@@ -58,7 +57,10 @@ DEFINES_SDL := \
    $(DEFINES_DEPTH) \
    $(DEFINES_RESOURCE) \
    -DPLATFORM_SDL \
+   -DNO_ENGINE_POV \
    -DUSE_SOFTWARE_TEXT \
+   -DUSE_BACKTRACE \
+   -DMEMORY_DEBUG_LOCKS \
    -DSCREEN_W=160 \
    -DSCREEN_H=160 \
    -DSCREEN_SCALE=$(SCREEN_SCALE)

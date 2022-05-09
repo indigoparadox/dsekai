@@ -183,7 +183,7 @@ struct DSEKAI_STATE {
     */
    struct ITEM items[DSEKAI_ITEMS_MAX];
 
-   struct TILEMAP map;
+   MEMORY_PTR map_handle;
 
    /*! \brief Engine type tilemap is supposed to be used with. */
    uint8_t engine_type;
@@ -267,8 +267,10 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
  * \brief Handle generic player movement commmand.
  * \param dir_move
  * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
+ * \param map Locked ::MEMORY_PTR for DSEKAI_STATE::map_handle.
  */
-int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state );
+int16_t engines_handle_movement(
+   int8_t dir_move, struct DSEKAI_STATE* state, struct TILEMAP* map );
 
 #ifndef NO_TITLE
 

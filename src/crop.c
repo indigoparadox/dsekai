@@ -33,7 +33,7 @@ void crop_grow_all( struct DSEKAI_STATE* state ) {
 }
 
 struct CROP_PLOT* crop_find_plot(
-   struct TILEMAP* t, uint8_t x, uint8_t y, struct DSEKAI_STATE* state
+   struct TILEMAP* t, uint8_t x, uint8_t y, const struct DSEKAI_STATE* state
 ) {
    int8_t i = 0;
    struct CROP_PLOT* plot = NULL;
@@ -49,7 +49,7 @@ struct CROP_PLOT* crop_find_plot(
          continue;
       }
 
-      plot = &(state->crops[i]);
+      plot = (struct CROP_PLOT*)&(state->crops[i]);
       break;
    }
 
@@ -57,20 +57,20 @@ struct CROP_PLOT* crop_find_plot(
 }
 
 int8_t crop_plant(
-   uint8_t crop_gid, struct CROP_PLOT* plot, struct DSEKAI_STATE* state
+   uint8_t crop_gid, struct CROP_PLOT* plot, struct TILEMAP* crop_def_map
 ) {
    int8_t retval = 1,
       i = 0;
    struct CROP_DEF* crop_def = NULL;
 
    /* Find the crop definition. */
-   i = crop_get_def_idx( crop_gid, state );
+   i = crop_get_def_idx( crop_gid, crop_def_map );
    if( 0 > i ) {
       retval = CROP_ERROR_DEF_NOT_FOUND;
       error_printf( "could not find crop def for: %d", crop_gid );
       goto cleanup;
    }
-   crop_def = &(state->map.crop_defs[i]);
+   crop_def = &(crop_def_map->crop_defs[i]);
 
    /* Plant the crop. */
    plot->crop_gid = crop_gid;
@@ -87,7 +87,8 @@ cleanup:
 }
 
 int8_t crop_harvest(
-   struct MOBILE* harvester, struct CROP_PLOT* plot, struct DSEKAI_STATE* state
+   struct MOBILE* harvester, struct CROP_PLOT* plot, struct DSEKAI_STATE* state,
+   struct TILEMAP* crop_def_map
 ) {
    struct CROP_DEF* crop_def = NULL;
    int8_t i = 0,
@@ -98,18 +99,18 @@ int8_t crop_harvest(
    assert( CROP_STAGE_MAX == (CROP_FLAG_STAGE_MASK & plot->flags) );
 
    /* Find the crop definition. */
-   i = crop_get_def_idx( plot->crop_gid, state );
+   i = crop_get_def_idx( plot->crop_gid, crop_def_map );
    if( 0 > i ) {
       retval = CROP_ERROR_DEF_NOT_FOUND;
       error_printf( "could not find crop def for: %d", plot->crop_gid );
       goto cleanup;
    }
-   crop_def = &(state->map.crop_defs[i]);
+   crop_def = &(crop_def_map->crop_defs[i]);
 
    /* Find the harvested item definition. */
    for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
-      if( state->map.items[i].gid == crop_def->produce_gid ) {
-         harvest = &(state->map.items[i]);
+      if( crop_def_map->items[i].gid == crop_def->produce_gid ) {
+         harvest = &(crop_def_map->items[i]);
       }
    }
    if( NULL == harvest ) {
@@ -142,13 +143,13 @@ cleanup:
    return retval;
 }
 
-int8_t crop_get_def_idx( uint8_t gid, struct DSEKAI_STATE* state ) {
+int8_t crop_get_def_idx( uint8_t gid, const struct TILEMAP* map ) {
    int8_t i = 0,
       retval = -1;
 
    /* Check TILEMAP::crop_defs for ::CROP_DEF with same GID. */
    for( i = 0 ; TILEMAP_CROP_DEFS_MAX > i ; i++ ) {
-      if( state->map.crop_defs[i].gid == gid ) {
+      if( map->crop_defs[i].gid == gid ) {
          retval = i;
          break;
       }

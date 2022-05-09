@@ -6,6 +6,7 @@
  * \param state ::MEMORY_PTR to the current engine state, used to determine
  *              what is currently on-screen.
  */
+static
 void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
    int16_t x = 0,
       y = 0,
@@ -17,8 +18,19 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
       viewport_tx2 = 0,
       viewport_ty2 = 0;
    struct TOPDOWN_STATE* gstate = NULL;
+   struct TILEMAP* map = NULL;
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
+   if( NULL == gstate ) {
+      error_printf( "could not lock gstate" );
+      goto cleanup;
+   }
+
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == map ) {
+      error_printf( "could not lock tilemap" );
+      goto cleanup;
+   }
 
    /* Tile-indexed rectangle of on-screen tiles. */
    viewport_tx2 = gstate->screen_scroll_tx + SCREEN_TW;
@@ -42,7 +54,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
             && x == state->editor.coords.x && y == state->editor.coords.y &&
             0 == state->ani_sprite_x
          ) {
-            state->map.tiles_flags[(y * TILEMAP_TW) + x] |=
+            map->tiles_flags[(y * TILEMAP_TW) + x] |=
                TILEMAP_TILE_FLAG_DIRTY;
             
             /* If we're not forcing the frame, black out the block.
@@ -81,7 +93,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
                (g_animations[i].y - SCREEN_MAP_Y) + g_animations[i].h
                   > tile_py
             ) {
-               state->map.tiles_flags[(y * TILEMAP_TW) + x] |=
+               map->tiles_flags[(y * TILEMAP_TW) + x] |=
                   TILEMAP_TILE_FLAG_DIRTY;
             }
          }
@@ -89,7 +101,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
 
 #ifndef IGNORE_DIRTY
          if(
-            !(state->map.tiles_flags[(y * TILEMAP_TW) + x] &
+            !(map->tiles_flags[(y * TILEMAP_TW) + x] &
                TILEMAP_TILE_FLAG_DIRTY)
          ) {
             continue;
@@ -102,11 +114,11 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          assert( y >= 0 );
          assert( x >= 0 );
 
-         state->map.tiles_flags[(y * TILEMAP_TW) + x] &=
+         map->tiles_flags[(y * TILEMAP_TW) + x] &=
             ~TILEMAP_TILE_FLAG_DIRTY;
 
          /* Grab the left byte if even or the right if odd. */
-         tile_id = tilemap_get_tile_id( &(state->map), x, y );
+         tile_id = tilemap_get_tile_id( map, x, y );
 
          if( tile_id >= TILEMAP_TILESETS_MAX ) {
             error_printf( "invalid tile id: %d", tile_id );
@@ -115,14 +127,23 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
 
          /* Blit the tile. */
          graphics_blit_tile_at(
-            state->map.tileset[tile_id].image,
+            map->tileset[tile_id].image,
             0, 0,
             SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
             TILE_W, TILE_H );
       }
    }
 
-   gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
+cleanup:
+
+   if( NULL != map ) {
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
+
+   if( NULL != gstate ) {
+      gstate =
+         (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
+   }
 }
 
 static void topdown_draw_crops(
@@ -135,6 +156,13 @@ static void topdown_draw_crops(
    uint16_t plot_px = 0,
       plot_py = 0;
    uint8_t crop_stage = 0;
+   struct TILEMAP* map = NULL;
+
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == map ) {
+      error_printf( "could not lock tilemap" );
+      return;
+   }
 
    /* Draw crops/plots. */
    for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
@@ -144,7 +172,7 @@ static void topdown_draw_crops(
          CROP_FLAG_ACTIVE != (plot->flags & CROP_FLAG_ACTIVE) ||
          /* Crop is on a different TILEMAP. */
          0 != memory_strncmp_ptr(
-            plot->map_name, state->map.name,
+            plot->map_name, map->name,
             memory_strnlen_ptr( plot->map_name, CROP_NAME_MAX ) ) ||
          /* Crop is off-screen. */
          plot->coords.x < gstate->screen_scroll_tx ||
@@ -180,7 +208,7 @@ static void topdown_draw_crops(
       /* Skip drawing crop if it hasn't germinated. */
       if(
          0 == plot->crop_gid ||
-         0 > (crop_idx = crop_get_def_idx( plot->crop_gid, state ))
+         0 > (crop_idx = crop_get_def_idx( plot->crop_gid, map ))
       ) {
          continue;
       }
@@ -190,7 +218,7 @@ static void topdown_draw_crops(
       if( 0 < crop_stage ) {
          /* Crop has germinated. */
          graphics_blit_sprite_at(
-            state->map.crop_defs[crop_idx].sprite,
+            map->crop_defs[crop_idx].sprite,
             (crop_stage - 1) * TILE_W, 0,
             plot_px, plot_py, TILE_W, TILE_H );
 
@@ -206,6 +234,8 @@ static void topdown_draw_crops(
             plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
       }
    }
+
+   map = (struct TILEMAP*)memory_unlock( state->map_handle );
 }
 
 static void topdown_draw_mobile(
@@ -304,8 +334,19 @@ void topdown_focus_player( struct DSEKAI_STATE* state ) {
 
 void topdown_animate( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
+   struct TILEMAP* map = NULL;
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
+   if( NULL == gstate ) {
+      error_printf( "could not lock gstate" );
+      goto cleanup;
+   }
+
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == map ) {
+      error_printf( "could not lock tilemap" );
+      goto cleanup;
+   }
 
    /* Scroll the screen by one if the player goes off-screen. */
    if(
@@ -368,7 +409,7 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
          gstate->screen_scroll_ty = gstate->screen_scroll_y / TILE_H;
       }
 
-      tilemap_refresh_tiles( &(state->map) );
+      tilemap_refresh_tiles( map );
 
       /* Check if map scroll finished. */
       if(
@@ -389,18 +430,25 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
 
    /* Refresh the tilemap if a transition is in progress. */
    if( 0 < (state->transition & DSEKAI_TRANSITION_MASK_FRAME) ) {
-      tilemap_refresh_tiles( &(state->map) );
+      tilemap_refresh_tiles( map );
    }
+
+cleanup:
 
    if( NULL != gstate ) {
       assert( NULL != state );
       gstate = (struct TOPDOWN_STATE*)memory_unlock(
          state->engine_state_handle );
    }
+
+   if( NULL != map ) {
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
 }
 
 int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
+   struct TILEMAP* map = NULL;
 
    assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
    state->engine_state_handle = memory_alloc(
@@ -409,7 +457,11 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    /* Make sure the tilemap is drawn at least once behind any initial windows.
     */
    topdown_focus_player( state );
-   tilemap_refresh_tiles( &(state->map) );
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL != map ) {
+      tilemap_refresh_tiles( map );
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
    topdown_draw_tilemap( state );
 
    /* Show status window. */
@@ -417,11 +469,15 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
       WINDOW_ID_STATUS, 0, WINDOW_TYPE_WINDOW, 0,
       0, SCREEN_MAP_Y + SCREEN_MAP_H, STATUS_WINDOW_W, STATUS_WINDOW_H,
       GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
-      0, 0, NULL, state );
+      /* TODO: Provide the map if needed. */
+      0, 0, NULL, state, NULL );
 
    /* Force reset the weather to start the animation. */
-   tilemap_set_weather( 
-      &(state->map), (TILEMAP_FLAG_WEATHER_MASK & state->map.flags) );
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL != map ) {
+      tilemap_set_weather( map, (TILEMAP_FLAG_WEATHER_MASK & map->flags) );
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
 
    engines_set_transition(
       state, DSEKAI_TRANSITION_TYPE_CURTAIN, DSEKAI_TRANSITION_DIR_OPEN );
@@ -439,6 +495,12 @@ void topdown_shutdown( struct DSEKAI_STATE* state ) {
 int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
    struct CROP_PLOT* plot = NULL;
+   struct TILEMAP* map = NULL;
+
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == map ) {
+      goto cleanup;
+   }
 
    switch( in_char ) {
    case INPUT_KEY_UP:
@@ -447,7 +509,7 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
          state->editor.coords.y--;
       } else {
 #endif /* !NO_ENGINE_EDITOR */
-         engines_handle_movement( MOBILE_DIR_NORTH, state );
+         engines_handle_movement( MOBILE_DIR_NORTH, state, map );
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
@@ -459,7 +521,7 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
          state->editor.coords.x--;
       } else {
 #endif /* !NO_ENGINE_EDITOR */
-         engines_handle_movement( MOBILE_DIR_WEST, state );
+         engines_handle_movement( MOBILE_DIR_WEST, state, map );
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
@@ -471,7 +533,7 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
          state->editor.coords.y++;
       } else {
 #endif /* !NO_ENGINE_EDITOR */
-         engines_handle_movement( MOBILE_DIR_SOUTH, state );
+         engines_handle_movement( MOBILE_DIR_SOUTH, state, map );
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
@@ -483,7 +545,7 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
          state->editor.coords.x++;
       } else {
 #endif /* !NO_ENGINE_EDITOR */
-         engines_handle_movement( MOBILE_DIR_EAST, state );
+         engines_handle_movement( MOBILE_DIR_EAST, state, map );
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
@@ -492,12 +554,12 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
    case INPUT_KEY_OK:
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
-         tilemap_advance_tile_id( &(state->map),
+         tilemap_advance_tile_id( map,
             state->editor.coords.x,
             state->editor.coords.y );
          state->editor.flags |= EDITOR_FLAG_FORCE_FRAME;
       } else if( NULL != (plot = crop_find_plot(
-         &(state->map),
+         map,
          state->player.coords.x + gc_mobile_x_offsets[state->player.dir],
          state->player.coords.y + gc_mobile_y_offsets[state->player.dir],
          state
@@ -506,14 +568,14 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
 
          if( 0 == plot->crop_gid ) {
             window_prefab_system_dialog(
-               "There is no crop\ngrowing here!", state,
+               "There is no crop\ngrowing here!", state, map,
                WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
          } else if( CROP_STAGE_MAX > (CROP_FLAG_STAGE_MASK & plot->flags) ) {
             window_prefab_system_dialog(
-               "This crop is\nnot ready!", state,
+               "This crop is\nnot ready!", state, map,
                WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
          } else {
-            crop_harvest( &(state->player), plot, state );
+            crop_harvest( &(state->player), plot, state, map );
          }
 
       } else {
@@ -522,11 +584,17 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
          mobile_interact(
             &(state->player),
             mobile_get_facing( &(state->player), state ),
-            &(state->map) );
+            map );
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
       break;
+   }
+
+cleanup:
+
+   if( NULL != map ) {
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
    }
 
    return retval;

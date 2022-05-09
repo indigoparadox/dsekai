@@ -98,7 +98,8 @@ static void window_placement(
 
 static int16_t window_sizing(
    int16_t w_id, int16_t dimension, uint8_t w_h,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX], struct DSEKAI_STATE* state
+   struct WINDOW windows[DSEKAI_WINDOWS_MAX], struct DSEKAI_STATE* state,
+   struct TILEMAP* t
 ) {
    int16_t win_sz[2];
    int16_t retval = 0;
@@ -120,7 +121,7 @@ static int16_t window_sizing(
       retval = dimension;
 
    } else if(
-      gc_window_sz_callbacks[c->type]( w_id, windows, state, win_sz )
+      gc_window_sz_callbacks[c->type]( w_id, windows, state, t, win_sz )
    ) {
       c->coords[w_h] = win_sz[w_h - 2];
       debug_printf( 0, "window %d auto-size %d: %d",
@@ -165,7 +166,8 @@ static void window_draw_text(
 static int16_t window_draw_WINDOW(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state
+   struct DSEKAI_STATE* state,
+   struct TILEMAP* t
 ) {
    struct WINDOW_FRAME* frames = NULL;
    int16_t x = 0,
@@ -276,7 +278,7 @@ static int16_t window_draw_WINDOW(
       }
 
       blit_retval = gc_window_draw_callbacks[windows[i].type](
-         windows[i].id, windows, state );
+         windows[i].id, windows, state, t );
       if( !blit_retval ) {
          error_printf( "error drawing window children!" );
          goto cleanup;
@@ -297,7 +299,8 @@ cleanup:
 static int16_t window_draw_BUTTON(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state
+   struct DSEKAI_STATE* state,
+   struct TILEMAP* t
 ) {
    /* TODO */
    return 1;
@@ -306,14 +309,16 @@ static int16_t window_draw_BUTTON(
 static int16_t window_draw_CHECK(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state
+   struct DSEKAI_STATE* state,
+   struct TILEMAP* t
 ) {
    /* TODO */
    return 1;
 }
 
 static const char* window_get_text(
-   struct WINDOW* c, const struct DSEKAI_STATE* state, int16_t* sz_out
+   struct WINDOW* c, const struct DSEKAI_STATE* state,
+   const struct TILEMAP* t, int16_t* sz_out
 ) {
    const char* str_ptr;
 
@@ -328,7 +333,12 @@ static const char* window_get_text(
       WINDOW_FLAG_TEXT_TILEMAP == (WINDOW_FLAG_TEXT_TILEMAP & c->flags)
    ) {
       /* Get the string from the tilemap strpool. */
-      str_ptr = strpool_get( state->map.strpool, c->data.scalar, sz_out );
+      if( NULL == t ) {
+         error_printf( "no tilemap provided for strings" );
+         str_ptr = NULL;
+      } else {
+         str_ptr = strpool_get( t->strpool, c->data.scalar, sz_out );
+      }
 
    } else if( WINDOW_FLAG_TEXT_MENU == (WINDOW_FLAG_TEXT_MENU & c->flags) ) {
       /* Get the string from the global menu table. */
@@ -357,7 +367,8 @@ static const char* window_get_text(
 static int16_t window_draw_LABEL(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state
+   struct DSEKAI_STATE* state,
+   struct TILEMAP* t
 ) {
    int16_t str_sz = 0;
    const char* str_ptr;
@@ -369,7 +380,7 @@ static int16_t window_draw_LABEL(
 
    p = window_get( c->parent_id, windows );
 
-   str_ptr = window_get_text( window_get( w_id, windows ), state, &str_sz );
+   str_ptr = window_get_text( window_get( w_id, windows ), state, t, &str_sz );
 
    if( NULL == str_ptr ) {
       error_printf( "invalid string specified to control" );
@@ -384,7 +395,8 @@ static int16_t window_draw_LABEL(
 static int16_t window_draw_SPRITE(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state
+   struct DSEKAI_STATE* state,
+   struct TILEMAP* t
 ) {
    int16_t offset_sprite = 0,
       offset_x = 0,
@@ -442,6 +454,7 @@ static uint8_t window_sz_WINDOW(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
    struct DSEKAI_STATE* state,
+   struct TILEMAP* t,
    int16_t r[2]
 ) {
    /* TODO */
@@ -452,6 +465,7 @@ static uint8_t window_sz_BUTTON(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
    struct DSEKAI_STATE* state,
+   struct TILEMAP* t,
    int16_t r[2]
 ) {
    /* TODO */
@@ -462,6 +476,7 @@ static uint8_t window_sz_CHECK(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
    struct DSEKAI_STATE* state,
+   struct TILEMAP* t,
    int16_t r[2]
 ) {
    /* TODO */
@@ -472,6 +487,7 @@ static uint8_t window_sz_LABEL(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
    struct DSEKAI_STATE* state,
+   struct TILEMAP* t,
    int16_t r[2]
 ) {
    int16_t str_sz = 0;
@@ -482,7 +498,7 @@ static uint8_t window_sz_LABEL(
    c = window_get( w_id, windows );
    assert( NULL != c );
 
-   str_ptr = window_get_text( c, state, &str_sz );
+   str_ptr = window_get_text( c, state, t, &str_sz );
 
    if( NULL == str_ptr ) {
       error_printf( "invalid string specified to control" );
@@ -501,6 +517,7 @@ static uint8_t window_sz_SPRITE(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
    struct DSEKAI_STATE* state,
+   struct TILEMAP* t,
    int16_t r[2]
 ) {
    /* TODO: Verify sprite exists. */
@@ -550,7 +567,7 @@ void window_shutdown() {
    memory_free( g_frames_handle );
 }
 
-int16_t window_draw_all( struct DSEKAI_STATE* state ) {
+int16_t window_draw_all( struct DSEKAI_STATE* state, struct TILEMAP* t ) {
    int16_t i = 0,
       blit_retval = 1;
    struct WINDOW* windows = NULL;
@@ -576,7 +593,7 @@ int16_t window_draw_all( struct DSEKAI_STATE* state ) {
       assert( 0 == windows[i].coords[GUI_H] % PATTERN_H );
 
       blit_retval = gc_window_draw_callbacks[windows[i].type](
-         windows[i].id, windows, state );
+         windows[i].id, windows, state, t );
       if( !blit_retval ) {
          error_printf( "error drawing windows!" );
          goto cleanup;
@@ -597,7 +614,7 @@ int16_t window_push(
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, uint8_t render_flags,
    int32_t data_scalar, RESOURCE_ID data_res_id, const char* data_string,
-   struct DSEKAI_STATE* state
+   struct DSEKAI_STATE* state, struct TILEMAP* t
 ) {
    int16_t retval = 0;
    struct WINDOW* window_new = NULL,
@@ -658,8 +675,8 @@ int16_t window_push(
    window_new->parent_id = parent_id;
 
    /* X/Y sizing and placement. Sizing comes first, used for centering. */
-   window_sizing( id, w, GUI_W, windows, state );
-   window_sizing( id, h, GUI_H, windows, state );
+   window_sizing( id, w, GUI_W, windows, state, t );
+   window_sizing( id, h, GUI_H, windows, state, t );
    window_placement( window_new, parent, x, GUI_X );
    window_placement( window_new, parent, y, GUI_Y );
 

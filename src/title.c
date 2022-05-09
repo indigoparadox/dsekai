@@ -49,7 +49,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
       WINDOW_PLACEMENT_CENTER,
       SCREEN_H - (TILE_H * 5), TILE_H * 6, TILE_W * 3,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
-      0, 0, NULL, state );
+      0, 0, NULL, state, NULL );
 
    for( i = 0 ; TITLE_OPTIONS_COUNT > i ; i++ ) {
       if( gstate->option_high == i ) {
@@ -67,7 +67,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
          WINDOW_PLACEMENT_GRID, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
-         0, 0, gc_title_options[i], state );
+         0, 0, gc_title_options[i], state, NULL );
    }
 
    gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );

@@ -81,6 +81,7 @@ unilayer_main() {
    state->windows_handle = 
       memory_alloc( DSEKAI_WINDOWS_MAX, sizeof( struct WINDOW ) );
    unilayer_loop_set( engines_loop_iter, g_state_handle );
+   state->map_handle = memory_alloc( 1, sizeof( struct TILEMAP ) );
 
    /*
    state->warp_to[0] = 'f';
@@ -128,6 +129,9 @@ unilayer_main() {
    } */
    if( (MEMORY_HANDLE)NULL != state->windows_handle ) {
       memory_free( state->windows_handle );
+   }
+   if( (MEMORY_HANDLE)NULL != state->map_handle ) {
+      memory_free( state->map_handle );
    }
    state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
 

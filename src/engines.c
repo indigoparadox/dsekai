@@ -15,6 +15,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       map_retval = 0,
       i = 0;
    struct DSEKAI_STATE* state = NULL;
+   struct TILEMAP* map = NULL;
 #ifdef RESOURCE_FILE
    char map_load_path[RESOURCE_PATH_MAX];
 #else
@@ -22,6 +23,8 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 #endif /* RESOURCE_FILE */
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
+
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       mobile_deinit( &(state->mobiles[i]) );
@@ -45,7 +48,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    /* TODO: Clean up items held by NPC mobiles and items w/ no owners. */
    /* TODO: Preserve ownerless items in save for this map. */
 
-   tilemap_deinit( &(state->map) );
+   tilemap_deinit( map );
 
    /* Clean up existing engine-specific data. */
    if( (MEMORY_HANDLE)NULL != state->engine_state_handle ) {
@@ -79,13 +82,13 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       map_load_path,
       RESOURCE_PATH_MAX,
       ASSETS_PATH "m_%s.json", state->warp_to );
-   map_retval = tilemap_json_load( map_load_path, &(state->map) );
+   map_retval = tilemap_json_load( map_load_path, map );
 #  elif defined TILEMAP_FMT_ASN
    dio_snprintf(
       map_load_path,
       RESOURCE_PATH_MAX,
       ASSETS_PATH "m_%s.asn", state->warp_to );
-   map_retval = tilemap_asn_load( map_load_path, &(state->map) );
+   map_retval = tilemap_asn_load( map_load_path, map );
 #  else
 #     error "No loader defined!"
 #  endif
@@ -100,8 +103,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
          gc_map_names[i], state->warp_to, map_name_len
       ) ) {
          debug_printf( 1, "gc_map_%s vs %s", gc_map_names[i], state->warp_to );
-         memory_copy_ptr( (MEMORY_PTR)&(state->map),
-            (MEMORY_PTR)gc_map_structs[i],
+         memory_copy_ptr( (MEMORY_PTR)map, (MEMORY_PTR)gc_map_structs[i],
             sizeof( struct TILEMAP ) );
          map_retval = 1;
          break;
@@ -123,9 +125,13 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    /* Spawn mobiles. */
    memory_zero_ptr( (MEMORY_PTR)(state->mobiles),
       sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
-   mobile_spawns( state );
+   mobile_spawns( state, map );
 
 cleanup:
+
+   if( NULL != map ) {
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
    
    if( NULL != state ) {
       state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
@@ -136,6 +142,7 @@ cleanup:
 
 void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
    int8_t i = 0;
+   struct TILEMAP* map = NULL;
 
    mobile_state_animate( state );
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
@@ -156,9 +163,17 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
          /* Skip animating inactive mobiles. */
          continue;
       }
-      mobile_animate( &(state->mobiles[i]), &(state->map) );
+      map = memory_lock( state->map_handle );
+      if( NULL != map ) {
+         mobile_animate( &(state->mobiles[i]), map );
+         map = (struct TILEMAP*)memory_unlock( state->map_handle );
+      }
    }
-   mobile_animate( &(state->player), &(state->map) );
+   map = memory_lock( state->map_handle );
+   if( NULL != map ) {
+      mobile_animate( &(state->player), map );
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
 
    if(
       /* Pause crops if modal window is pending. */
@@ -173,7 +188,10 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
 
 }
 
-int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state ) {
+int16_t engines_handle_movement(
+   int8_t dir_move, struct DSEKAI_STATE* state, struct TILEMAP* map
+) {
+
    if( 0 < window_modal( state ) ) {
       return 1;
    }
@@ -187,7 +205,7 @@ int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state ) {
    state->player.dir = dir_move;
 
    if(
-      !tilemap_collide( &(state->player), dir_move, &(state->map) ) &&
+      !tilemap_collide( &(state->player), dir_move, map ) &&
       NULL == mobile_get_facing( &(state->player), state )
    ) {
       /* No blocking tiles or mobiles. */
@@ -200,6 +218,7 @@ int16_t engines_handle_movement( int8_t dir_move, struct DSEKAI_STATE* state ) {
 int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    uint8_t in_char = 0;
    struct DSEKAI_STATE* state = NULL;
+   struct TILEMAP* map = NULL;
    int16_t retval = 1;
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
@@ -243,7 +262,11 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       if( MENU_FLAG_DIRTY == (MENU_FLAG_DIRTY & state->menu.flags) ) {
          /* Repaint the screen in the background. */
          gc_engines_draw[state->engine_type]( state );
-         tilemap_refresh_tiles( &(state->map) );
+         map = (struct TILEMAP*)memory_lock( state->map_handle );
+         if( NULL != map ) {
+            tilemap_refresh_tiles( map );
+            map = (struct TILEMAP*)memory_unlock( state->map_handle );
+         }
 
          /* Show the new menu state. */
          gc_menu_renderers[state->menu.menu_id]( state );
@@ -257,7 +280,11 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       }
    }
 
-   window_draw_all( state );
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL != map ) {
+      window_draw_all( state, map );
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
    
    /* Draw foreground animations after anything else. */
    animate_frame( ANIMATE_FLAG_FG );
@@ -295,7 +322,11 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       /* Try to close any windows that are open. */
       debug_printf( 1, "speech window requests closed by user" );
       window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
-      tilemap_refresh_tiles( &(state->map) );
+      map = (struct TILEMAP*)memory_lock( state->map_handle );
+      if( NULL != map ) {
+         tilemap_refresh_tiles( map );
+      }
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
    }
 
    /* === Animation Phase === */

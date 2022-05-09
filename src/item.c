@@ -26,16 +26,22 @@ int8_t item_use_seed(
    uint8_t x = 0,
       y = 0;
    struct CROP_PLOT* plot = NULL;
+   struct TILEMAP* map = NULL;
 
    x = user->coords.x + gc_mobile_x_offsets[user->dir];
    y = user->coords.y + gc_mobile_y_offsets[user->dir];
 
    /* Get the plot in front of the user. */
-   plot = crop_find_plot( &(state->map), x, y, state );
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == map ) {
+      error_printf( "could not lock tilemap" );
+      goto cleanup;
+   }
+   plot = crop_find_plot( map, x, y, state );
    if( NULL == plot ) {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "The soil is\ntoo firm!", state,
+         "The soil is\ntoo firm!", state, map,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       error_printf( "could not find plot" );
@@ -43,13 +49,13 @@ int8_t item_use_seed(
       goto cleanup;
    }
 
-   if( 0 < crop_plant( e->data, plot, state ) ) {
+   if( 0 < crop_plant( e->data, plot, map ) ) {
       /* Planting was successful. */
       item_consume( e );
    } else {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "This won't\ngrow here!", state,
+         "This won't\ngrow here!", state, map,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       error_printf( "unable to plant seed" );
@@ -57,6 +63,10 @@ int8_t item_use_seed(
    }
 
 cleanup:
+
+   if( NULL != map ) {
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
 
    return retval;
 }
@@ -101,12 +111,20 @@ int8_t item_use_editor(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
 #ifndef NO_ENGINE_EDITOR
-   if( TILEMAP_FLAG_EDITABLE != (TILEMAP_FLAG_EDITABLE & state->map.flags) ) {
+   struct TILEMAP* map = NULL;
+
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == map ) {
+      error_printf( "could not lock tilemap" );
+      return -1;
+   }
+
+   if( TILEMAP_FLAG_EDITABLE != (TILEMAP_FLAG_EDITABLE & map->flags) ) {
 
       /* TODO: Display warning message on-screen. */
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "This map cannot\nbe edited!", state,
+         "This map cannot\nbe edited!", state, map,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       error_printf( "unable to edit current tilemap" );
@@ -119,6 +137,8 @@ int8_t item_use_editor(
       state->editor.coords.x = state->player.coords.x;
       state->editor.coords.y = state->player.coords.y;
    }
+
+   map = (struct TILEMAP*)memory_unlock( state->map_handle );
 #endif /* !NO_ENGINE_EDITOR */
 
    return -1;
@@ -145,9 +165,17 @@ int8_t item_use_hoe(
       crop_idx = -1,
       retval = -1;
    int16_t x = 0, y = 0;
+   struct TILEMAP* map = NULL;
 
    x = user->coords.x + gc_mobile_x_offsets[user->dir];
    y = user->coords.y + gc_mobile_y_offsets[user->dir];
+
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == map ) {
+      error_printf( "could not lock tilemap" );
+      retval = 0;
+      goto cleanup;
+   }
 
    for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
       /* Find an empty CROP_PLOT. */
@@ -162,7 +190,7 @@ int8_t item_use_hoe(
       /* Crop plot is not empty, but does it collide? */
       if(
          0 == memory_strncmp_ptr(
-            state->crops[i].map_name, state->map.name, TILEMAP_NAME_MAX ) &&
+            state->crops[i].map_name, map->name, TILEMAP_NAME_MAX ) &&
          x == state->crops[i].coords.x && y == state->crops[i].coords.y
       ) {
          retval = -1;
@@ -177,7 +205,7 @@ int8_t item_use_hoe(
    if( 0 > crop_idx ) {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "Too many crops\nalready planted!", state,
+         "Too many crops\nalready planted!", state, map,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       retval = 0;
@@ -187,7 +215,7 @@ int8_t item_use_hoe(
 
    /* Create crop plot. */
    memory_zero_ptr( &(state->crops[crop_idx]), sizeof( struct CROP_PLOT ) );
-   memory_strncpy_ptr( state->crops[crop_idx].map_name, state->map.name,
+   memory_strncpy_ptr( state->crops[crop_idx].map_name, map->name,
       TILEMAP_NAME_MAX );
    state->crops[crop_idx].coords.x = x;
    state->crops[crop_idx].coords.y = y;
@@ -198,6 +226,8 @@ int8_t item_use_hoe(
       state->crops[crop_idx].map_name );
 
 cleanup:
+
+   map = (struct TILEMAP*)memory_unlock( state->map_handle );
 
    return retval;
 }

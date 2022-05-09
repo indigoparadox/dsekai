@@ -149,6 +149,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    struct SCRIPT* script = NULL;
    struct SCRIPT_STEP* step = NULL;
    int16_t arg = 0;
+   struct TILEMAP* map = NULL;
 
    if(
       (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & m->flags)) ||
@@ -167,7 +168,13 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
       return;
    }
 
-   script = &(state->map.scripts[m->script_id]);
+   map = memory_lock( state->map_handle );
+   if( NULL == map ) {
+      error_printf( "could not lock tilemap" );
+      return;
+   }
+
+   script = &(map->scripts[m->script_id]);
    step = &(script->steps[m->script_pc]);
 
    if( SCRIPT_ARG_STACK == step->arg ) {
@@ -180,7 +187,9 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
       graphics_get_ms(), m->script_id, m->script_pc, step->action );
 
    m->script_pc = gc_script_handlers[step->action](
-      m->script_pc, script, &(state->map), m, NULL, &(m->coords), state, arg );
+      m->script_pc, script, map, m, NULL, &(m->coords), state, arg );
+
+   map = memory_unlock( state->map_handle );
 }
 
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
@@ -259,8 +268,6 @@ struct MOBILE* mobile_spawn_npc( struct DSEKAI_STATE* state, uint8_t player ) {
       }
    }
 
-   /* TODO: Assign mobile name from spawner? */
-
    mobile_out->hp = 100;
    mobile_out->mp = 100;
    mobile_out->steps_x = 0;
@@ -273,20 +280,20 @@ struct MOBILE* mobile_spawn_npc( struct DSEKAI_STATE* state, uint8_t player ) {
    return mobile_out;
 }
 
-void mobile_spawns( struct DSEKAI_STATE* state ) {
+void mobile_spawns( struct DSEKAI_STATE* state, struct TILEMAP* map ) {
    int8_t i = 0;
    uint8_t player = 0;
    struct MOBILE* mobile_iter = NULL;
-  
+
    for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
       /* If the spawner has no name, skip it. */
       if( 0 == memory_strnlen_ptr(
-         state->map.spawns[i].name, TILEMAP_SPAWN_NAME_SZ )
+         map->spawns[i].name, TILEMAP_SPAWN_NAME_SZ )
       ) {
          continue;
       }
 
-      if( 0 == memory_strncmp_ptr( "player", state->map.spawns[i].name, 6 ) ) {
+      if( 0 == memory_strncmp_ptr( "player", map->spawns[i].name, 6 ) ) {
          player = 1;
       } else {
          player = 0;
@@ -298,14 +305,13 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
       }
 
       /* Assign the rest of the properties from the spawner. */
-      mobile_iter->name = state->map.spawns[i].name;
-      mobile_iter->coords.x = state->map.spawns[i].coords.x;
-      mobile_iter->coords.y = state->map.spawns[i].coords.y;
-      mobile_iter->coords_prev.x = state->map.spawns[i].coords.x;
-      mobile_iter->coords_prev.y = state->map.spawns[i].coords.y;
-      mobile_iter->script_id = state->map.spawns[i].script_id;
-      resource_assign_id( mobile_iter->sprite, state->map.spawns[i].type );
+      mobile_iter->name = map->spawns[i].name;
+      mobile_iter->coords.x = map->spawns[i].coords.x;
+      mobile_iter->coords.y = map->spawns[i].coords.y;
+      mobile_iter->coords_prev.x = map->spawns[i].coords.x;
+      mobile_iter->coords_prev.y = map->spawns[i].coords.y;
+      mobile_iter->script_id = map->spawns[i].script_id;
+      resource_assign_id( mobile_iter->sprite, map->spawns[i].type );
    }
-
 }
 

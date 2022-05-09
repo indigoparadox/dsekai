@@ -94,25 +94,25 @@ void crop_grow( struct CROP_PLOT* plot, struct DSEKAI_STATE* state );
 void crop_grow_all( struct DSEKAI_STATE* state );
 
 struct CROP_PLOT* crop_find_plot(
-   struct TILEMAP* t, uint8_t x, uint8_t y, struct DSEKAI_STATE* state );
+   struct TILEMAP* t, uint8_t x, uint8_t y, const struct DSEKAI_STATE* state );
 
 /**
  * \brief Given a ::CROP_DEF::gid, plant on a plot at the given coordinates on
  *        the currently loaded ::TILEMAP.
  */
 int8_t crop_plant(
-   uint8_t crop_gid, struct CROP_PLOT* plot, struct DSEKAI_STATE* state
+   uint8_t crop_gid, struct CROP_PLOT* plot, struct TILEMAP* crop_def_map
 ) SECTION_CROP;
 
 int8_t crop_harvest(
    struct MOBILE* harvester, struct CROP_PLOT* plot,
-   struct DSEKAI_STATE* state
+   struct DSEKAI_STATE* state, struct TILEMAP* crop_def_map
 ) SECTION_CROP;
 
 /**
  * \brief Given a ::CROP_DEF::gid, find the index in ::TILEMAP::crop_defs.
  */
-int8_t crop_get_def_idx( uint8_t gid, struct DSEKAI_STATE* state );
+int8_t crop_get_def_idx( uint8_t gid, const struct TILEMAP* map );
 
 /*! \} */
 

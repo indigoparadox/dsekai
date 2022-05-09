@@ -207,7 +207,7 @@ SECTION_MOBILE;
  * \param state ::MEMORY_PTR to the current engine ::DSEKAI_STATE with a loaded
  *              ::TILEMAP on which to execute spawners.
  */
-void mobile_spawns( struct DSEKAI_STATE* state );
+void mobile_spawns( struct DSEKAI_STATE* state, struct TILEMAP* map );
 
 #ifdef MOBILE_C
 const int8_t gc_mobile_step_table_normal_pos[16] = {
