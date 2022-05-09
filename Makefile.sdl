@@ -15,6 +15,7 @@ BIN_SDL := $(BINDIR)/$(DSEKAI)
 
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
+   src/pov.c \
    unilayer/src/animate.c \
    unilayer/src/input/sdli.c \
    unilayer/src/graphics/sdlg.c \
@@ -52,15 +53,20 @@ LD_SDL := gcc
 
 # 4. Arguments
 
+ifeq ($(BUILD),RELEASE)
+   DEFINES_DEBUG :=
+else
+   # Assume debug build.
+   DEFINES_DEBUG := -DUSE_BACKTRACE
+endif
+
 DEFINES_SDL := \
    $(DEFINES_DSEKAI) \
    $(DEFINES_DEPTH) \
    $(DEFINES_RESOURCE) \
+   $(DEFINES_DEBUG) \
    -DPLATFORM_SDL \
-   -DNO_ENGINE_POV \
    -DUSE_SOFTWARE_TEXT \
-   -DUSE_BACKTRACE \
-   -DMEMORY_DEBUG_LOCKS \
    -DSCREEN_W=160 \
    -DSCREEN_H=160 \
    -DSCREEN_SCALE=$(SCREEN_SCALE)

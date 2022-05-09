@@ -73,6 +73,7 @@ int8_t g_pov_skybox_idx = 0;
 
 int16_t pov_setup( struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
+   struct TILEMAP* t = NULL;
    /*
    struct POV_STATE* gstate = NULL;
    */
@@ -96,7 +97,11 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
 
    state->flags |= DSEKAI_FLAG_BLANK_FRAME;
 
-   tilemap_refresh_tiles( &(state->map) );
+   t = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL != t ) {
+      tilemap_refresh_tiles( t );
+      t = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
 
    engines_set_transition(
       state, DSEKAI_TRANSITION_TYPE_CURTAIN, DSEKAI_TRANSITION_DIR_OPEN );
@@ -113,23 +118,30 @@ void pov_shutdown( struct DSEKAI_STATE* state ) {
 int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
    uint8_t recreate_clouds = 0;
+   struct TILEMAP* t = NULL;
    /*
    struct POV_STATE* gstate = NULL;
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
    */
 
+   t = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == t ) {
+      error_printf( "could not lock tilemap" );
+      goto cleanup;
+   }
+
    switch( in_char ) {
    case INPUT_KEY_UP:
-      engines_handle_movement( state->player.dir, state );
-      tilemap_refresh_tiles( &(state->map) );
+      engines_handle_movement( state->player.dir, state, t );
+      tilemap_refresh_tiles( t );
       /* gstate->dirty = 1; */
       break;
 
    case INPUT_KEY_LEFT:
-      /* engines_handle_movement( MOBILE_DIR_WEST, state ); */
+      /* engines_handle_movement( MOBILE_DIR_WEST, state, t ); */
       state->player.dir = gc_pov_dir_turn_left[state->player.dir];
-      tilemap_refresh_tiles( &(state->map) );
+      tilemap_refresh_tiles( t );
       if( 0 == state->player.dir || 1 == state->player.dir ) {
          recreate_clouds = 1;
       } else {
@@ -139,15 +151,15 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_DOWN:
-      engines_handle_movement( MOBILE_DIR_SOUTH, state );
-      tilemap_refresh_tiles( &(state->map) );
+      engines_handle_movement( MOBILE_DIR_SOUTH, state, t );
+      tilemap_refresh_tiles( t );
       /* gstate->dirty = 1; */
       break;
 
    case INPUT_KEY_RIGHT:
-      /* engines_handle_movement( MOBILE_DIR_EAST, state ); */
+      /* engines_handle_movement( MOBILE_DIR_EAST, state, t ); */
       state->player.dir = gc_pov_dir_turn_right[state->player.dir];
-      tilemap_refresh_tiles( &(state->map) );
+      tilemap_refresh_tiles( t );
       if( 2 == state->player.dir || 3 == state->player.dir ) {
          recreate_clouds = 1;
       } else {
@@ -161,7 +173,7 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
       mobile_interact(
          &(state->player),
          mobile_get_facing( &(state->player), state ),
-         &(state->map) );
+         t );
 #ifdef POV_DEBUG_INC
       gstate->inc++;
       debug_printf( 3, "inc: %d", gstate->inc );
@@ -186,6 +198,12 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
    /*
    gstate = (struct POV_STATE*)memory_unlock( state->engine_state_handle );
    */
+
+cleanup:
+   
+   if( NULL != t ) {
+      t = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
 
    return retval;
 }
@@ -418,8 +436,11 @@ void pov_draw( struct DSEKAI_STATE* state ) {
    int8_t tile_id = 0;
    struct POV_RAY ray;
    struct POV_STATE* gstate = NULL;
+   struct TILEMAP* t = NULL;
 
    gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
+
+   t = (struct TILEMAP*)memory_lock( state->map_handle );
 
    memory_zero_ptr( gstate->minimap, TILEMAP_TH * TILEMAP_TW );
 
@@ -466,13 +487,17 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       tile_id = pov_cast_ray(
          state->player.coords.x,
          state->player.coords.y,
-         x, &ray, &(state->map), gstate->minimap );
+         x, &ray, t, gstate->minimap );
       if( 0 > tile_id ) {
          /* Ray went off the map. */
          continue;
       }
 
-      pov_draw_wall_x( x, &ray, &(state->map), gstate );
+      pov_draw_wall_x( x, &ray, t, gstate );
+   }
+
+   if( NULL != t ) {
+      t = (struct TILEMAP*)memory_unlock( state->map_handle );
    }
 
    if( NULL != gstate ) {

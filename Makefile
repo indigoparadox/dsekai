@@ -135,13 +135,16 @@ ifeq ($(BUILD),RELEASE)
    SANITIZE := NO
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-release
 
+   CFLAGS_GCC_GENERIC += -Os
+   LDFLAGS_GCC_GENERIC := -Os
+
 else
 
    # Assume debug build.
 
-   CFLAGS_GCC_GENERIC += -Wall -Wno-missing-braces -Wno-char-subscripts -pg -g -Os
+   CFLAGS_GCC_GENERIC += -Wall -Wno-missing-braces -Wno-char-subscripts -pg -g
    DEFINES_DSEKAI += -DDEBUG_LOG -DDEBUG_THRESHOLD=$(DTHRESHOLD)
-   LDFLAGS_GCC_GENERIC := -g -pg -Os
+   LDFLAGS_GCC_GENERIC := -g -pg
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-debug
 
 endif
