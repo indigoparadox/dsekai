@@ -259,6 +259,8 @@ struct MOBILE* mobile_spawn_npc( struct DSEKAI_STATE* state, uint8_t player ) {
       }
    }
 
+   /* TODO: Assign mobile name from spawner? */
+
    mobile_out->hp = 100;
    mobile_out->mp = 100;
    mobile_out->steps_x = 0;
