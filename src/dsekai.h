@@ -49,8 +49,8 @@
 
  /* === Includes === */
 
-#include "config.h"
 #include <unilayer.h>
+#include "config.h"
 
 struct DSEKAI_STATE;
 

@@ -24,7 +24,11 @@
 #define PATTERN_H 16
 
 #ifndef ITEM_INVENTORY_MAX
-#define ITEM_INVENTORY_MAX 20
+#  ifdef PLATFORM_DOS
+#     define ITEM_INVENTORY_MAX 10
+#  else
+#     define ITEM_INVENTORY_MAX 20
+#  endif /* PLATFORM_DOS */
 #endif /* !ITEM_INVENTORY_MAX */
 
 #ifndef SCREEN_MAP_W
@@ -66,31 +70,55 @@
 #endif /* !ANI_SPRITE_COUNTDOWN_MAX */
 
 #ifndef DSEKAI_MOBILES_MAX
+#  ifdef PLATFORM_DOS
+#     define DSEKAI_MOBILES_MAX 10
+#  else
 /*! \brief Maximum count of ::MOBILE existing on a loaded ::TILEMAP. */
-#define DSEKAI_MOBILES_MAX 20
+#     define DSEKAI_MOBILES_MAX 20
+#  endif /* PLATFORM_DOS */
 #endif /* !MOBILES_MAX */
 
 #ifndef DSEKAI_ITEMS_MAX
+#  ifdef PLATFORM_DOS
+#     define DSEKAI_ITEMS_MAX 20
+#  else
 /*! \brief Maximum number of items existing in the world at any time. */
-#define DSEKAI_ITEMS_MAX 40
+#     define DSEKAI_ITEMS_MAX 40
+#  endif /* PLATFORM_DOS */
 #endif /* !DSEKAI_ITEMS_MAX */
 
 #ifndef TILEMAP_CROP_DEFS_MAX
-#define TILEMAP_CROP_DEFS_MAX 10
+#  ifdef PLATFORM_DOS
+#     define TILEMAP_CROP_DEFS_MAX 5
+#  else
+#     define TILEMAP_CROP_DEFS_MAX 10
+#  endif /* PLATFORM_DOS */
 #endif /* !TILEMAP_CROP_DEFS_MAX */
 
 #ifndef TILEMAP_ITEMS_MAX
-#define TILEMAP_ITEMS_MAX 20
+#  ifdef PLATFORM_DOS
+#     define TILEMAP_ITEMS_MAX 10
+#  else
+#     define TILEMAP_ITEMS_MAX 20
+#  endif /* PLATFORM_DOS */
 #endif /* !TILEMAP_ITEMS_MAX */
 
 #ifndef TILEMAP_SPAWNS_MAX
+#  ifdef PLATFORM_DOS
+#     define TILEMAP_SPAWNS_MAX 10
+#  else
 /*! \brief Maximum number of TILEMAP::spawns. */
-#define TILEMAP_SPAWNS_MAX 20
+#     define TILEMAP_SPAWNS_MAX 20
+#  endif /* PLATFORM_DOS */
 #endif /* !TILEMAP_SPAWNS_MAX */
 
 #ifndef DSEKAI_CROPS_MAX
+#  ifdef PLATFORM_DOS
+#     define DSEKAI_CROPS_MAX 15
+#  else
 /*! \brief Maximum number of crops growing in the world accross all maps. */
-#define DSEKAI_CROPS_MAX 40
+#     define DSEKAI_CROPS_MAX 40
+#  endif /* PLATFORM_DOS */
 #endif /* !DSEKAI_CROPS_MAX */
 
 #ifndef CROP_NAME_MAX
@@ -98,7 +126,7 @@
 #endif /* !CROP_NAME_MAX */
 
 #ifndef DSEKAI_WINDOWS_MAX
-#define DSEKAI_WINDOWS_MAX 30
+#define DSEKAI_WINDOWS_MAX 10
 #endif /* !DSEKAI_WINDOWS_MAX */
 
 #ifndef JSON_TOKENS_MAX
