@@ -32,9 +32,9 @@ MAP2ASN_C_FILES := \
    src/tilemap.c \
    src/mobile.c \
    src/script.c \
-   src/json.c \
+   unilayer/src/json.c \
    src/tmjson.c \
-   src/asn.c \
+   unilayer/src/asn.c \
    src/item.c \
    src/crop.c \
    src/strpool.c \
@@ -73,7 +73,7 @@ ifeq ($(DEPTH),VGA)
    GENDIR := $(GENDIR)-vga
    DEPDIR := $(DEPDIR)-vga
    OBJDIR := $(OBJDIR)-vga
-   DEFINES_DEPTH := -DDEPTH_VGA -DDEPTH_SPEC=\"16x16x16\"
+   DEFINES_DEPTH := -DDEPTH_VGA
 else ifeq ($(DEPTH),MONO)
    DEPTH_SPEC := 16x16x2
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-mono
@@ -81,12 +81,12 @@ else ifeq ($(DEPTH),MONO)
    GENDIR := $(GENDIR)-mono
    DEPDIR := $(DEPDIR)-mono
    OBJDIR := $(OBJDIR)-mono
-   DEFINES_DEPTH := -DDEPTH_MONO -DDEPTH_SPEC=\"16x16x2\"
+   DEFINES_DEPTH := -DDEPTH_MONO
 else
    DEPTH := CGA
    DEPTH_SPEC := 16x16x4
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-cga
-   DEFINES_DEPTH := -DDEPTH_CGA -DDEPTH_SPEC=\"16x16x4\"
+   DEFINES_DEPTH := -DDEPTH_CGA
 endif
 
 ifeq ($(FMT_ASN),TRUE)
@@ -115,7 +115,7 @@ DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\" -DDSEKAI_GIT_HASH=\"$(GIT_H
 ifeq ($(RESOURCE),FILE)
 
    DEFINES_RESOURCE := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETDIR)/\""
-   DSEKAI_C_FILES_RES := unilayer/src/resource/file.c src/json.c src/asn.c
+   DSEKAI_C_FILES_RES := unilayer/src/resource/file.c unilayer/src/json.c unilayer/src/asn.c
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-file
 
 else
@@ -194,7 +194,7 @@ HEADPACK_C_FILES := \
    src/tilemap.c \
    src/mobile.c \
    src/script.c \
-   src/json.c \
+   unilayer/src/json.c \
    src/item.c \
    src/crop.c \
    src/strpool.c

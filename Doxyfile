@@ -801,8 +801,8 @@ INPUT                  = \
    unilayer/src/resource.h \
    unilayer/src/resource/nullr.h \
    unilayer/src/dio.h \
-   tools/map2h.h \
-   tools/headpack.h \
+   unilayer/tools/unimake.h \
+   unilayer/tools/headpack.h \
    src \
    README.md
 

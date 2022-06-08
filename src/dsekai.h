@@ -62,10 +62,6 @@ struct DSEKAI_STATE;
 
 #include "strpool.h"
 
-#ifdef RESOURCE_FILE
-#include "json.h"
-#include "asn.h"
-#endif /* RESOURCE_FILE */
 #include "script.h"
 #include "item.h"
 #include "tilemap.h"
