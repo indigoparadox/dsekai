@@ -54,7 +54,7 @@ DEFINES_NDS := \
    -DSCREEN_H=192
 
 INCLUDES_NDS := \
-   -I unilayer/src \
+   $(INCLUDES_UNILAYER) \
    -I $(GENDIR_NDS) \
    -I $(DEVKITPRO)/libnds/include
 

@@ -72,7 +72,7 @@ DEFINES_WIN16 := \
    -DUSE_SOFTWARE_TEXT
 
 INCLUDES_WIN16 := \
-   -i=unilayer/src \
+   $(subst -I ,-i=,$(INCLUDES_UNILAYER)) \
    -i=$(GENDIR_WIN16) \
    -i=$(INCLUDE)/win
 

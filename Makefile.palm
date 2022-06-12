@@ -57,7 +57,7 @@ DEFINES_PALM := \
    -DUSE_SOFTWARE_LINES
 
 INCLUDES_PALM := \
-   -I unilayer/src \
+   $(INCLUDES_UNILAYER) \
    -I $(GENDIR_PALM) \
    -I /opt/palmdev/sdk-3.5/include \
    -I /opt/palmdev/sdk-3.5/include/Libraries/ \

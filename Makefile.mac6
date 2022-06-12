@@ -62,7 +62,7 @@ DEFINES_MAC6 := \
    -DSCREEN_H=480
 
 INCLUDES_MAC6 := \
-   -I unilayer/src \
+   $(INCLUDES_UNILAYER) \
    -I$(GENDIR_MAC6) \
    -I$(RETRO68_PREFIX)/multiversal/CIncludes
 

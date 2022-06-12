@@ -32,3 +32,4 @@ log*.txt
 packages
 pkgbuild
 rez.output.rsrc
+packages.iso

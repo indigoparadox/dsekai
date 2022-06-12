@@ -70,7 +70,7 @@ DEFINES_SDL := \
    -DSCREEN_SCALE=$(SCREEN_SCALE)
 
 INCLUDES_SDL := \
-   -I unilayer/src \
+   $(INCLUDES_UNILAYER) \
    -I $(GENDIR_SDL) 
 
 CFLAGS_SDL := $(shell pkg-config sdl2 --cflags) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_SDL) $(INCLUDES_SDL) -Werror

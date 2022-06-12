@@ -70,7 +70,7 @@ DEFINES_DOS := \
    -DUSE_LOOKUPS
 
 INCLUDES_DOS := \
-   -i=unilayer/src \
+   $(subst -I ,-i=,$(INCLUDES_UNILAYER)) \
    -i=$(GENDIR_DOS) 
 
 CFLAGS_DOS := -mm -os -hw -d0 -0 $(CFLAGS_OWC_GENERIC) $(DEFINES_DOS) $(INCLUDES_DOS) -we

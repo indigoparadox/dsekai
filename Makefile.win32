@@ -72,7 +72,7 @@ DEFINES_WIN32 := \
    -DUSE_SOFTWARE_TEXT
 
 INCLUDES_WIN32 := \
-   -i=unilayer/src \
+   $(subst -I ,-i=,$(INCLUDES_UNILAYER)) \
    -i=$(GENDIR_WIN32) \
    -i=$(INCLUDE)/nt
 
