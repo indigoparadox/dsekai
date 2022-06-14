@@ -5,6 +5,15 @@ if [ "$1" = "run" ]; then
    
    if [ "$PLAT_SPEC" = "sdl" ]; then
       cd pkgbuild/dsekai-sdl-*vga*-asn && ./dsekai
+   elif [ "$PLAT_SPEC" = "dos" ]; then
+      # This is complicated by FreeDOS for /D not finding wildcards...
+      # Requires a symlink "dsekai" to this directory in dosemu root.
+      if [ ! -L "dsdos" ]; then
+         ln -s pkgbuild/dsekai-dos-*-cga-*-asn/ dsdos
+      fi
+      echo "cd \\dsekai\\dsdos" > dsdos/dsdos.bat
+      echo "dsekai.exe" >> dsdos/dsdos.bat
+      dosemu -2 "dsekai\\dsdos\\dsdos.bat"
    elif [ "$PLAT_SPEC" = "win32" ]; then
       cd pkgbuild/dsekai-win32-*vga*-json && wine ./dsekai32.exe
    elif [ "$PLAT_SPEC" = "win16" ]; then

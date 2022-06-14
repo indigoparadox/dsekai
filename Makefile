@@ -455,5 +455,5 @@ $(MAP2ASN): $(MAP2ASN_C_FILES) | $(BINDIR)/$(STAMPFILE)
 # ====== Clean ======
 
 clean:
-	rm -rf data obj obj-* bin bin-* gen gen-* dep dep-* *.err .rsrc .finf gmon.out log*.txt packages pkgbuild
+	rm -rf data obj obj-* bin bin-* gen gen-* dep dep-* *.err .rsrc .finf gmon.out log*.txt packages pkgbuild dsdos prof_output unimake test_unilayer
 
