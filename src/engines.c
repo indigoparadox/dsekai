@@ -31,7 +31,8 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    }
 
    memory_zero_ptr(
-      &(state->mobiles), sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
+      (MEMORY_PTR)&(state->mobiles),
+      sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
 
    /* Set the player's new position. */
    state->player.coords.x = state->warp_to_x;
@@ -63,7 +64,8 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
 #ifndef NO_ENGINE_EDITOR
    /* Disable editor. */
-   memory_zero_ptr( &(state->editor), sizeof( struct EDITOR_STATE ) );
+   memory_zero_ptr(
+      (MEMORY_PTR)&(state->editor), sizeof( struct EDITOR_STATE ) );
 #endif /* !NO_ENGINE_EDITOR */
 
    /* Finished unloading old state, so get ready to load new state if needed. */
@@ -163,13 +165,13 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
          /* Skip animating inactive mobiles. */
          continue;
       }
-      map = memory_lock( state->map_handle );
+      map = (struct TILEMAP*)memory_lock( state->map_handle );
       if( NULL != map ) {
          mobile_animate( &(state->mobiles[i]), map );
          map = (struct TILEMAP*)memory_unlock( state->map_handle );
       }
    }
-   map = memory_lock( state->map_handle );
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
    if( NULL != map ) {
       mobile_animate( &(state->player), map );
       map = (struct TILEMAP*)memory_unlock( state->map_handle );
@@ -369,8 +371,8 @@ cleanup:
 
 void engines_exit_to_title( struct DSEKAI_STATE* state ) {
    state->engine_type_change = 0;
-   memory_zero_ptr( &(state->player), sizeof( struct MOBILE ) );
-   memory_zero_ptr( &(state->items), sizeof( struct ITEM ) *
+   memory_zero_ptr( (MEMORY_PTR)&(state->player), sizeof( struct MOBILE ) );
+   memory_zero_ptr( (MEMORY_PTR)&(state->items), sizeof( struct ITEM ) *
       DSEKAI_ITEMS_MAX );
 }
 

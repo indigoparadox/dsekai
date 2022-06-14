@@ -216,7 +216,8 @@ int8_t item_use_hoe(
    }
 
    /* Create crop plot. */
-   memory_zero_ptr( &(state->crops[crop_idx]), sizeof( struct CROP_PLOT ) );
+   memory_zero_ptr(
+      (MEMORY_PTR)&(state->crops[crop_idx]), sizeof( struct CROP_PLOT ) );
    memory_strncpy_ptr( state->crops[crop_idx].map_name, map->name,
       TILEMAP_NAME_MAX );
    state->crops[crop_idx].coords.x = x;
@@ -297,7 +298,9 @@ int8_t item_give_mobile(
          continue;
       }
 
-      memory_copy_ptr( &(state->items[i]), e, sizeof( struct ITEM ) );
+      memory_copy_ptr( 
+         (MEMORY_PTR)&(state->items[i]), (CONST_MEMORY_PTR)e,
+         sizeof( struct ITEM ) );
 
       state->items[i].owner = m_idx;
 

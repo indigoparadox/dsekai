@@ -1,6 +1,18 @@
 #!/bin/bash
 
-if [ "$1" = "RELEASE" ]; then
+if [ "$1" = "run" ]; then
+   PLAT_SPEC=$2
+   
+   if [ "$PLAT_SPEC" = "sdl" ]; then
+      cd pkgbuild/dsekai-sdl-*vga*-asn && ./dsekai
+   elif [ "$PLAT_SPEC" = "win32" ]; then
+      cd pkgbuild/dsekai-win32-*vga*-json && wine ./dsekai32.exe
+   elif [ "$PLAT_SPEC" = "win16" ]; then
+      cd pkgbuild/dsekai-win16-*vga*-asn && wine ./dsekai16.exe
+   fi
+   
+   exit
+elif [ "$1" = "RELEASE" ]; then
    BUILD=RELEASE
    PLAT_SPEC=$2
 else
@@ -37,9 +49,9 @@ if [ "$PLAT_SPEC" = "wasm" ] || [ -z "$PLAT_SPEC" ]; then
    make -f Makefile.wasm DTHRESHOLD=$DEBUG_THRESHOLD BUILD=$BUILD ARCFMT=ZIP pkg_wasm || exit
 fi
 
-#if [ "$PLAT_SPEC" = "mac" ] || [ -z "$PLAT_SPEC" ]; then
-#   make -f Makefile.mac6 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=MONO FMT_ASN=TRUE RESOURCE=FILE bin-file-mono-asn/dsekai.APPL || exit
-#fi
+if [ "$PLAT_SPEC" = "mac" ] || [ -z "$PLAT_SPEC" ]; then
+   make -f Makefile.mac6 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=MONO FMT_ASN=TRUE RESOURCE=FILE bin-file-mono-asn/dsekai.APPL || exit
+fi
 
 echo "All packages built OK!"
 

@@ -168,7 +168,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
       return;
    }
 
-   map = memory_lock( state->map_handle );
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
    if( NULL == map ) {
       error_printf( "could not lock tilemap" );
       return;
@@ -189,7 +189,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    m->script_pc = gc_script_handlers[step->action](
       m->script_pc, script, map, m, NULL, &(m->coords), state, arg );
 
-   map = memory_unlock( state->map_handle );
+   map = (struct TILEMAP*)memory_unlock( state->map_handle );
 }
 
 void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
