@@ -15,7 +15,6 @@ BIN_WIN16 := $(BINDIR)/$(DSEKAI)16.exe
 
 DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
-   unilayer/src/animate.c \
    unilayer/src/input/wini.c \
    unilayer/src/memory/winm.c \
    unilayer/src/graphics/wing.c
@@ -69,6 +68,7 @@ DEFINES_WIN16 := \
    $(DEFINES_DEPTH) \
    -DPLATFORM_WIN16 \
    -DNO_ENGINE_POV \
+   -DNO_ANIMATE \
    -DUSE_SOFTWARE_TEXT
 
 INCLUDES_WIN16 := \
