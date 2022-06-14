@@ -50,6 +50,16 @@ if [ "$1" = "run" ]; then
    fi
    
    exit
+elif [ "$1" = "prof" ]; then
+   PLAT_SPEC=$2
+   BUILD=DEBUG
+   DEBUG_THRESHOLD=1
+
+   if [ "$PLAT_SPEC" = "sdl" ]; then
+      gprof pkgbuild/dsekai-sdl-*-vga-*-asn/{dsekai,gmon.out} > prof_output_sdl
+   fi
+
+   exit
 elif [ "$1" = "RELEASE" ]; then
    BUILD=RELEASE
    PLAT_SPEC=$2
