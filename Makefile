@@ -89,6 +89,12 @@ else
    DEFINES_DEPTH := -DDEPTH_CGA
 endif
 
+ifeq ($(BUILD),RELEASE)
+   BINDIR := $(BINDIR)-release
+   DEPDIR := $(DEPDIR)-release
+   OBJDIR := $(OBJDIR)-release
+endif
+
 ifeq ($(FMT_ASN),TRUE)
    BINDIR := $(BINDIR)-asn
    GENDIR := $(GENDIR)-asn

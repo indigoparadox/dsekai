@@ -82,6 +82,10 @@ ifneq ($(RESOURCE),DEFAULT)
    CFLAGS_WIN32 += $(subst -I ,-I=,$(DEFINES_RESOURCE))
 endif
 
+ifneq ($(BUILD),RELEASE)
+   CFLAGS_WIN16 += -DLOG_TO_FILE
+endif
+
 LDFLAGS_WIN32 := -bcl=nt_win -zp=1 $(LDFLAGS_OWC_GENERIC)
 
 RCFLAGS_WIN32 := -r $(DEFINES_WIN32) -i=$(INCLUDE)win -bt=nt

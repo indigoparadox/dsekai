@@ -75,6 +75,10 @@ INCLUDES_DOS := \
 
 CFLAGS_DOS := -mm -os -hw -d0 -0 $(CFLAGS_OWC_GENERIC) $(DEFINES_DOS) $(INCLUDES_DOS) -we
 
+ifneq ($(BUILD),RELEASE)
+   CFLAGS_DOS := +DLOG_TO_FILE
+endif
+
 LDFLAGS_DOS := $(LDFLAGS_OWC_GENERIC)
 
 # 5. Targets

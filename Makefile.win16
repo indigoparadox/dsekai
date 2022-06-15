@@ -78,6 +78,10 @@ INCLUDES_WIN16 := \
 
 CFLAGS_WIN16 := -bt=windows -bw $(CFLAGS_OWC_GENERIC) -zp=1 $(DEFINES_WIN16) $(INCLUDES_WIN16)
 
+ifneq ($(BUILD),RELEASE)
+   CFLAGS_WIN16 += -DLOG_TO_FILE
+endif
+
 ifeq ($(FMT_JSON),TRUE)
    CFLAGS_WIN16 += -mh
 else

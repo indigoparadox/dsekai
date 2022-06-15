@@ -60,6 +60,10 @@ INCLUDES_NDS := \
 
 CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) $(INCLUDES_NDS) $(DEFINES_NDS)
 
+ifneq ($(BUILD),RELEASE)
+   CFLAGS_NDS += -DLOG_TO_FILE
+endif
+
 LIBS_NDS := -L$(DEVKITPRO)/libnds/lib -lnds9
 
 LDFLAGS_NDS := -specs=ds_arm9.specs $(ARCH_NDS) -Wl,-Map,$(OBJDIR_NDS)/$(DSEKAI).map

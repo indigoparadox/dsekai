@@ -581,9 +581,12 @@ cleanup:
 
 int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    const uint8_t* asn_buffer = NULL;
+   uint8_t tm_type = 0;
+   uint16_t tm_version = 0;
    int16_t retval = 1,
       idx = 0;
-   int32_t read_sz = 0;
+   int32_t read_sz = 0,
+      tm_sz = 0;
    RESOURCE_HANDLE asn_handle = (RESOURCE_HANDLE)0;
 
    memory_zero_ptr( (MEMORY_PTR)t, sizeof( struct TILEMAP ) );
@@ -603,19 +606,19 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
       goto cleanup;
    }
 
-   if( 0x30 == asn_buffer[0] ) {
+   read_sz = asn_read_meta_ptr( asn_buffer, idx, &tm_type, &tm_sz );
+   idx += read_sz;
+   if( 0x30 == tm_type ) {
       debug_printf( 3, "tilemap sequence found in resource" );
    } else {
       error_printf( "no tilemap sequence found! (found %d instead)",
-         asn_buffer[0] );
+         tm_type );
       goto cleanup;
    }
-   idx++;
 
-   idx += 3; /* Skip size bytes. */
-
-   idx += 2; /* Skip version tag. */
-   debug_printf( 3, "tilemap version %d", asn_buffer[idx++] );
+   read_sz = asn_read_int( (uint8_t*)&tm_version, 2, 0, asn_buffer, idx );
+   idx += read_sz;
+   debug_printf( 3, "tilemap version %d", tm_version );
 
    /* name */
    read_sz =
