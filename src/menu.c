@@ -6,6 +6,13 @@ RES_CONST char* gc_menu_msgs[] = {
    "no items"
 };
 
+RES_CONST char* gc_menu_item_sel_msgs[] = {
+   "use",
+   "craft",
+   "drop",
+   ""
+};
+
 void menu_renderer_main( struct DSEKAI_STATE* state ) {
    int8_t i = 1; /* Entry 0 is the main menu, itself. */
    GRAPHICS_COLOR color;
@@ -88,6 +95,42 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
    GRAPHICS_COLOR color;
    uint8_t flags = 0;
 
+   if( 0 != (MENU_FLAG_ITEM_OPEN_SEL_MASK & state->menu.flags) ) {
+      /* Render the implicit use/craft/drop menu. */
+      window_push(
+         MENU_WINDOW_ITEM_SEL_ID, 0, WINDOW_TYPE_WINDOW, 0,
+         SCREEN_MAP_X + (SCREEN_MAP_W / 2) + TILE_W,
+         SCREEN_MAP_Y + (SCREEN_MAP_H / 2),
+         (SCREEN_MAP_W / 2) - TILE_W,
+         SCREEN_MAP_H / 2,
+         WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
+         0, 0, NULL,
+         state, NULL );
+
+      /* This relies on the item_open_sel_mask being 0-3. */
+      for( i = 0 ; i < 4 ; i++ ) {
+         /* Flags start from 0x01, since 0x00 is menu closed. */
+         if( i == ((MENU_FLAG_ITEM_OPEN_SEL_MASK & state->menu.flags) - 1) ) {
+            color = WINDOW_PREFAB_DEFAULT_HL();
+            flags = 
+               GRAPHICS_STRING_FLAG_ALL_CAPS | GRAPHICS_STRING_FLAG_OUTLINE;
+         } else {
+            color = WINDOW_PREFAB_DEFAULT_FG();
+            flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
+         }
+
+         window_push(
+            WINDOW_ID_MENU_LABEL_ITEM_SEL_USE + i, MENU_WINDOW_ITEM_SEL_ID,
+            WINDOW_TYPE_LABEL,
+            WINDOW_FLAG_TEXT_PTR,
+            10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
+            WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
+            color, WINDOW_PREFAB_DEFAULT_BG(), flags,
+            0, 0, gc_menu_item_sel_msgs[i], state, NULL );
+      }
+   }
+
+
    window_push(
       MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW, 0,
       SCREEN_MAP_X,
@@ -108,6 +151,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       0, 0, NULL,
       state, NULL );
    
+   /*
    window_push(
       MENU_WINDOW_STATUS_ID, 0, WINDOW_TYPE_WINDOW, 0,
       SCREEN_MAP_X + (SCREEN_MAP_W / 2) + TILE_W,
@@ -117,6 +161,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, 0, NULL,
       state, NULL );
+   */
    
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
       /* Skip non-player-held or deleted items. */
@@ -147,7 +192,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          i, 0, NULL, state, NULL );
 
       window_push(
-         WINDOW_ID_MENU_LABEL_ITEM + 100 + i, MENU_WINDOW_ID,
+         WINDOW_ID_MENU_LABEL_ITEM + 50 + i, MENU_WINDOW_ID,
          WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_NUM,
          WINDOW_PLACEMENT_RIGHT_BOTTOM, WINDOW_PLACEMENT_GRID,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
@@ -171,11 +216,33 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
    }
 }
 
+static int8_t menu_handler_items_use(
+   struct ITEM* selected_item, struct DSEKAI_STATE* state
+) {
+   int8_t use_retval = 0;
+
+   use_retval = gc_item_use_cbs[selected_item->type](
+      selected_item, &(state->player), state );
+   if( 0 > use_retval ) {
+      menu_close( state );
+   }
+
+   return use_retval;
+}
+
+static int8_t menu_handler_items_drop(
+   struct ITEM* selected_item, struct DSEKAI_STATE* state
+) {
+
+   /* TODO: Drop the item on the map floor. */
+
+   return 0;
+}
+
 int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1,
       i = 0,
       player_item_count = 0;
-   int8_t use_retval = 0;
    struct ITEM* selected_item = NULL;
 
    /* Count player-owned items to enforce limits below. */
@@ -194,15 +261,62 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
 
    switch( in_char ) {
    case INPUT_KEY_UP:
-      if( 0 < state->menu.highlight_id ) {
+      /* Process the implicity use/craft/drop menu first if that's open. */
+      if(
+         MENU_FLAG_ITEM_OPEN_SEL_USE ==
+         (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
+      ) {
+         state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
+         state->menu.flags |= MENU_FLAG_ITEM_OPEN_SEL_DROP;
+
+      } else if(
+         MENU_FLAG_ITEM_OPEN_SEL_CRAFT ==
+         (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
+      ) {
+         state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
+         state->menu.flags |= MENU_FLAG_ITEM_OPEN_SEL_USE;
+
+      } else if(
+         MENU_FLAG_ITEM_OPEN_SEL_DROP ==
+         (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
+      ) {
+         state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
+         state->menu.flags |= MENU_FLAG_ITEM_OPEN_SEL_CRAFT;
+      
+      } else if( 0 < state->menu.highlight_id ) {
+         /* The use/craft/drop menu isn't open, so iterate items. */
          state->menu.highlight_id--;
       }
       break;
 
    case INPUT_KEY_DOWN:
-      if( state->menu.highlight_id + 1 < player_item_count ) {
+      /* Process the implicity use/craft/drop menu first if that's open. */
+      if(
+         MENU_FLAG_ITEM_OPEN_SEL_USE ==
+         (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
+      ) {
+         state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
+         state->menu.flags |= MENU_FLAG_ITEM_OPEN_SEL_CRAFT;
+
+      } else if(
+         MENU_FLAG_ITEM_OPEN_SEL_CRAFT ==
+         (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
+      ) {
+         state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
+         state->menu.flags |= MENU_FLAG_ITEM_OPEN_SEL_DROP;
+
+      } else if(
+         MENU_FLAG_ITEM_OPEN_SEL_DROP ==
+         (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
+      ) {
+         state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
+         state->menu.flags |= MENU_FLAG_ITEM_OPEN_SEL_USE;
+
+      } else if( state->menu.highlight_id + 1 < player_item_count ) {
+         /* The use/craft/drop menu isn't open, so iterate items. */
          state->menu.highlight_id++;
       }
+
       break;
 
    case INPUT_KEY_OK:
@@ -210,31 +324,62 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
          error_printf( "no item selected!" );
          break;
       }
+
+#if 0
       if(
          MENU_FLAG_ITEM_CRAFTABLE ==
          (state->menu.flags & MENU_FLAG_ITEM_CRAFTABLE)
       ) {
-         /* TODO: Open crafting menu. */
-      } else {
-         /* Use item. */
-         use_retval = gc_item_use_cbs[selected_item->type](
-            selected_item, &(state->player), state );
-         if( 0 > use_retval ) {
-            menu_close( state );
-         }
+         /* TODO */
       }
+#endif
+
+      if(
+         MENU_FLAG_ITEM_OPEN_SEL_USE ==
+         (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
+      ) {
+         menu_handler_items_use( selected_item, state );
+         state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
+
+      } else if(
+         MENU_FLAG_ITEM_OPEN_SEL_CRAFT ==
+         (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
+      ) {
+         /* TODO */
+         state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
+
+      } else if(
+         MENU_FLAG_ITEM_OPEN_SEL_DROP ==
+         (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
+      ) {
+         menu_handler_items_drop( selected_item, state );
+         state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
+
+      } else {
+         /* Open the implicit use/craft/drop menu. */
+         state->menu.flags |= MENU_FLAG_ITEM_OPEN_SEL_USE;
+      }
+
       break;
 
    case INPUT_KEY_QUIT:
-      state->menu.menu_id = 0;
-      state->menu.highlight_id = 1;
+      if( 0 != (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK) ) {
+         /* Close the implicit use/craft/drop menu. */
+         state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
+      } else {
+         /* Close the items menu. */
+         state->menu.menu_id = 0;
+         state->menu.highlight_id = 1;
+      }
       break;
    }
 
    /* Close all item menu windows to and refresh. */
    window_pop( MENU_WINDOW_ID, state );
    window_pop( MENU_WINDOW_INFO_ID, state );
-   window_pop( MENU_WINDOW_STATUS_ID, state );
+   /* window_pop( MENU_WINDOW_STATUS_ID, state ); */
+   window_pop( MENU_WINDOW_ITEM_SEL_ID, state );
+
    state->menu.flags |= MENU_FLAG_DIRTY;
 
    return retval;

@@ -53,14 +53,20 @@ MENU_TABLE( MENU_HANDLER_PROTOTYPES )
  * \brief MENU_STATE::flags indicating menu draw callback should be called
  *        again.
  */
-#define MENU_FLAG_DIRTY 0x01
+#define MENU_FLAG_DIRTY 0x80
 
 /**
  * \relates MENU_STATE
  * \brief MENU_STATE::flags indicating item menu should only show craftable
  *        items and return to craft menu when item is selected.
  */
-#define MENU_FLAG_ITEM_CRAFTABLE    0x02
+#define MENU_FLAG_ITEM_CRAFTABLE    0x40
+
+#define MENU_FLAG_ITEM_OPEN_SEL_USE 0x01
+#define MENU_FLAG_ITEM_OPEN_SEL_CRAFT  0x02
+#define MENU_FLAG_ITEM_OPEN_SEL_DROP   0x03
+
+#define MENU_FLAG_ITEM_OPEN_SEL_MASK   0x03
 
 struct MENU_STATE {
    /*! \brief Currently open menu as an index in the MENU_TABLE. */

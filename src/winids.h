@@ -9,10 +9,11 @@
 /*! \brief WINDOW::id that can safely be used by on-screen menus. */
 #define MENU_WINDOW_ID 786
 #define MENU_WINDOW_INFO_ID 787
-#define MENU_WINDOW_STATUS_ID 788
 #define MENU_WINDOW_CRAFT_ID 789
+#define MENU_WINDOW_ITEM_SEL_ID 790
 #define WINDOW_ID_MENU_LABEL_ITEM 300
 #define WINDOW_ID_TITLE_MENU  687
+#define WINDOW_ID_MENU_LABEL_ITEM_SEL_USE 500
 
 #endif /* WINIDS_H */
 

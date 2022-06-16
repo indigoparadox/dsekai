@@ -126,7 +126,7 @@
 #endif /* !CROP_NAME_MAX */
 
 #ifndef DSEKAI_WINDOWS_MAX
-#define DSEKAI_WINDOWS_MAX 10
+#define DSEKAI_WINDOWS_MAX 100
 #endif /* !DSEKAI_WINDOWS_MAX */
 
 #ifndef JSON_TOKENS_MAX
