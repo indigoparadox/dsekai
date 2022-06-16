@@ -17,7 +17,8 @@ DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
    unilayer/src/input/dosi.c \
    unilayer/src/graphics/dosg.c \
-   unilayer/src/memory/fakem.c
+   unilayer/src/memory/fakem.c \
+   unilayer/src/save/file.c
 
 DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -76,7 +77,7 @@ INCLUDES_DOS := \
 CFLAGS_DOS := -mm -os -hw -d0 -0 $(CFLAGS_OWC_GENERIC) $(DEFINES_DOS) $(INCLUDES_DOS) -we
 
 ifneq ($(BUILD),RELEASE)
-   CFLAGS_DOS := +DLOG_TO_FILE
+   CFLAGS_DOS += -DLOG_TO_FILE
 endif
 
 LDFLAGS_DOS := $(LDFLAGS_OWC_GENERIC)

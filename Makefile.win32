@@ -19,7 +19,8 @@ DSEKAI_C_FILES_WIN32_ONLY := \
    unilayer/src/animate.c \
    unilayer/src/input/wini.c \
    unilayer/src/memory/winm.c \
-   unilayer/src/graphics/wing.c
+   unilayer/src/graphics/wing.c \
+   unilayer/src/save/file.c
 
 ifeq ($(RESOURCE),DEFAULT)
    DSEKAI_C_FILES_WIN32_ONLY += unilayer/src/resource/winr.c

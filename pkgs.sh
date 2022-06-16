@@ -23,6 +23,10 @@ build_win32() {
    make -f Makefile.win32 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_JSON=TRUE BUILD=$BUILD ARCFMT=ZIP pkg_win32 || exit
 }
 
+build_xlib() {
+   make -f Makefile.xlib DTHRESHOLD=$DEBUG_THRESHOLD RESOURCE=FILE FMT_JSON=TRUE BUILD=$BUILD pkg_xlib || exit
+}
+
 do_run() {
    if [ "$PLAT_SPEC" = "sdl" ]; then
       if [ ! -d pkgbuild/dsekai-sdl-*-vga-*-asn ]; then
@@ -51,6 +55,11 @@ do_run() {
          build_win16
       fi
       cd pkgbuild/dsekai-win16-*-vga-*-asn && wine ./dsekai16.exe
+   elif [ "$PLAT_SPEC" = "xlib" ]; then
+      if [ ! -d pkgbuild/dsekai-xlib-*-cga-*-json ]; then
+         build_xlib
+      fi
+      cd pkgbuild/dsekai-xlib-*-cga-*-json && ./dsekaix
    fi
 }
 
@@ -64,7 +73,7 @@ do_build() {
    fi
 
    if [ "$PLAT_SPEC" = "xlib" ] || [ -z "$PLAT_SPEC" ]; then
-      make -f Makefile.xlib DTHRESHOLD=$DEBUG_THRESHOLD RESOURCE=FILE FMT_JSON=TRUE BUILD=$BUILD pkg_xlib || exit
+      build_xlib
    fi
 
    if [ "$PLAT_SPEC" = "dos" ] || [ -z "$PLAT_SPEC" ]; then

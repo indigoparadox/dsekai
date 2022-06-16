@@ -42,7 +42,9 @@ MAP2ASN_C_FILES := \
    unilayer/src/graphics.c \
    unilayer/src/graphics/nullg.c \
    unilayer/src/memory/fakem.c \
-   unilayer/src/dio.c
+   unilayer/src/dio.c \
+   unilayer/src/save/file.c \
+   src/tmasn.c
 
 ASSETDIR := assets
 ASSETPATH :=

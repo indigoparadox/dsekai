@@ -5,6 +5,8 @@
 #error Loading maps from ASN requires file resources!
 #endif /* !RESOURCE_FILE */
 
+#include "tmasn.h"
+
 static int16_t tilemap_asn_parse_tileset(
    struct TILEMAP* t, const uint8_t* asn_buffer
 ) {
@@ -705,5 +707,541 @@ cleanup:
    }
 
    return retval;
+}
+
+int32_t tilemap_asn_save( const char* save_name, struct TILEMAP* t ) {
+   MEMORY_HANDLE h_buffer = (MEMORY_HANDLE)NULL;
+   int16_t scripts_count = 0,
+      i = 0,
+      j = 0;
+   int32_t mark_seq_main = 0,
+      mark_seq_ts = 0,
+      mark_seq_spawn = 0,
+      mark_seq_spawn_coords = 0,
+      mark_seq_scripts = 0,
+      mark_seq_item = 0,
+      sz_idx = 0,
+      script_sz_idx = 0,
+      step_sz_idx = 0,
+      idx = 0;
+   uint8_t* buffer = NULL;
+
+   h_buffer = memory_alloc( TILEMAP_ASN_SAVE_BUFFER_INITIAL_SZ, 1 );
+
+   idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_main );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+   
+   /* version */
+   debug_printf( 3, "(offset 0x%02x) writing map version", idx );
+   idx = asn_write_int( &h_buffer, idx, 1 );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+
+   /* name */
+   debug_printf( 3, "(offset 0x%02x) writing map name", idx );
+   idx = asn_write_string( &h_buffer, idx, t->name, TILEMAP_NAME_MAX );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+
+#if 0
+   /* engine_type */
+   debug_printf( 3, "(offset 0x%02x) writing map engine type", idx );
+   idx = asn_write_int( &h_buffer, idx, t->engine_type );
+   assert( 0 <= idx );
+#endif
+
+   /* flags */
+   debug_printf( 3, "(offset 0x%02x) writing map flags", idx );
+   idx = asn_write_int( &h_buffer, idx, t->flags );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+
+   /* tileset */
+   debug_printf( 3, "(offset 0x%02x) writing map tilesets", idx );
+   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+   for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
+      if( 0 == memory_strnlen_ptr(
+         t->tileset[i].image, sizeof( RESOURCE_ID ) )
+      ) {
+         continue;
+      }
+
+      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_ts );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+   
+      /* image */
+      debug_printf( 3, "(offset 0x%02x) writing map tileset image", idx );
+      idx = asn_write_string(
+         &h_buffer, idx, t->tileset[i].image, RESOURCE_PATH_MAX );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* flags */
+      debug_printf( 3, "(offset 0x%02x) writing map tileset flags", idx );
+      idx = asn_write_int( &h_buffer, idx, t->tileset[i].flags );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_ts );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+   }
+   idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+
+   /* tiles */
+   debug_printf( 3, "(offset 0x%02x) writing map tiles", idx );
+   idx = asn_write_blob(
+      &h_buffer, idx, t->tiles, ((TILEMAP_TH * TILEMAP_TW) / 2) );
+
+   /* strings */
+   idx = asn_write_blob( &h_buffer, idx,
+      (unsigned char*)t->strpool, TILEMAP_STRPOOL_SZ );
+#if 0
+   for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
+      if( 0 == strlen( t->strings[i] ) ) {
+         continue;
+      }
+
+      debug_printf( 3, "(offset 0x%02x) writing map string", idx );
+      idx = asn_write_string( &h_buffer, idx,
+         t->strings[i], DIALOG_TEXT_SZ );
+      assert( 0 <= idx );
+   }
+#endif
+
+   /* spawns */
+   debug_printf( 3, "(offset 0x%02x) writing map spawns", idx );
+   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+   for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
+      if( 0 == memory_strnlen_ptr(
+         t->spawns[i].name, TILEMAP_SPAWN_NAME_SZ
+      ) ) {
+         continue;
+      }
+
+      debug_printf( 3, "(offset 0x%02x) writing map spawn", idx );
+      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_spawn );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* name */
+      debug_printf( 3, "(offset 0x%02x) writing map spawn name", idx );
+      idx = asn_write_string(
+         &h_buffer, idx, t->spawns[i].name, TILEMAP_SPAWN_NAME_SZ );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* coords */
+      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_spawn_coords );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* coords.x */
+      debug_printf( 3, "(offset 0x%02x) writing map spawn coords x", idx );
+      idx = asn_write_int( &h_buffer, idx, t->spawns[i].coords.x );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* coords.y */
+      debug_printf( 3, "(offset 0x%02x) writing map spawn coords y", idx );
+      idx = asn_write_int( &h_buffer, idx, t->spawns[i].coords.y );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_spawn_coords );
+
+      /* type */
+      debug_printf( 3, "(offset 0x%02x) writing map spawn type", idx );
+      idx = asn_write_string(
+         &h_buffer, idx, t->spawns[i].type, RESOURCE_PATH_MAX );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* script_id */
+      debug_printf( 3, "(offset 0x%02x) writing map spawn script ID", idx );
+      idx = asn_write_int( &h_buffer, idx, t->spawns[i].script_id );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_spawn );
+   }
+   idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+
+   /* scripts */
+   for(
+      scripts_count = 0 ; TILEMAP_SCRIPTS_MAX > scripts_count ; scripts_count++
+   ) {
+      if( 0 == t->scripts[scripts_count].steps[0].action ) {
+         break;
+      }
+   }
+
+   idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_scripts );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+   for( i = 0 ; scripts_count > i ; i++ ) {
+      idx = asn_write_seq_start( &h_buffer, idx, &script_sz_idx );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* steps */
+      for( j = 0 ; SCRIPT_STEPS_MAX > j ; j++ ) {
+         if( 0 == t->scripts[i].steps[j].action ) {
+            break;
+         }
+
+         idx = asn_write_seq_start( &h_buffer, idx, &step_sz_idx );
+         if( 0 > idx ) {
+            error_printf( "error" );
+            idx = -1;
+            goto cleanup;
+         }
+
+         /* action */
+         debug_printf(
+            3, "(offset 0x%02x) writing map spawn script step action", idx );
+         idx = asn_write_int( &h_buffer, idx, t->scripts[i].steps[j].action );
+         if( 0 > idx ) {
+            error_printf( "error" );
+            idx = -1;
+            goto cleanup;
+         }
+
+         /* arg */
+         debug_printf(
+            3, "(offset 0x%02x) writing map spawn script step arg", idx );
+         idx = asn_write_int( &h_buffer, idx, t->scripts[i].steps[j].arg );
+         if( 0 > idx ) {
+            error_printf( "error" );
+            idx = -1;
+            goto cleanup;
+         }
+
+         idx = asn_write_seq_end( &h_buffer, idx, &step_sz_idx );
+         if( 0 > idx ) {
+            error_printf( "error" );
+            idx = -1;
+            goto cleanup;
+         }
+      }
+      idx = asn_write_seq_end( &h_buffer, idx, &script_sz_idx );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+   }
+   idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_scripts );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+
+   /* items */
+   debug_printf( 3, "(offset 0x%02x) writing map items", idx );
+   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+   for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
+      if( ITEM_FLAG_ACTIVE != (t->items[i].flags & ITEM_FLAG_ACTIVE) ) {
+         continue;
+      }
+
+      debug_printf( 3, "(offset 0x%02x) writing map item", idx );
+      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_item );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* index */
+      debug_printf( 3, "(offset 0x%02x) writing item index", idx );
+      idx = asn_write_int( &h_buffer, idx, i );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* sprite */
+      debug_printf( 3, "(offset 0x%02x) writing item sprite path", idx );
+      idx = asn_write_string(
+         &h_buffer, idx, t->items[i].sprite, RESOURCE_PATH_MAX );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* name */
+      debug_printf( 3, "(offset 0x%02x) writing item name", idx );
+      idx = asn_write_string( &h_buffer, idx, t->items[i].name, ITEM_NAME_SZ );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* type */
+      debug_printf( 3, "(offset 0x%02x) writing item type", idx );
+      idx = asn_write_int( &h_buffer, idx, t->items[i].type );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* owner */
+      debug_printf( 3, "(offset 0x%02x) writing item owner", idx );
+      idx = asn_write_int( &h_buffer, idx, t->items[i].owner );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+ 
+      /* gid */
+      debug_printf( 3, "(offset 0x%02x) writing item gid", idx );
+      idx = asn_write_int( &h_buffer, idx, t->items[i].gid );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* data */
+      debug_printf( 3, "(offset 0x%02x) writing item data", idx );
+      idx = asn_write_int( &h_buffer, idx, t->items[i].data );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* count */
+      debug_printf( 3, "(offset 0x%02x) writing item count", idx );
+      idx = asn_write_int( &h_buffer, idx, t->items[i].count );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* flags */
+      debug_printf( 3, "(offset 0x%02x) writing item flags", idx );
+      idx = asn_write_int( &h_buffer, idx, t->items[i].flags );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_item );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+   }
+   idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
+
+   /* crop defs */
+   debug_printf( 3, "(offset 0x%02x) writing map crop defs", idx );
+   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+   for( i = 0 ; TILEMAP_CROP_DEFS_MAX > i ; i++ ) {
+      if(
+         CROP_DEF_FLAG_ACTIVE != (t->crop_defs[i].flags & CROP_DEF_FLAG_ACTIVE)
+      ) {
+         continue;
+      }
+
+      debug_printf( 3, "(offset 0x%02x) writing map crop def", idx );
+      /* Reuse mark_seq_item for crop def since it's not used in this scope. */
+      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_item );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* index */
+      debug_printf( 3, "(offset 0x%02x) writing crop def index", idx );
+      idx = asn_write_int( &h_buffer, idx, i );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* sprite */
+      debug_printf( 3, "(offset 0x%02x) writing crop def sprite path", idx );
+      idx = asn_write_string(
+         &h_buffer, idx, t->crop_defs[i].sprite, RESOURCE_PATH_MAX );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* name */
+      debug_printf( 3, "(offset 0x%02x) writing crop def name", idx );
+      idx = asn_write_string(
+         &h_buffer, idx, t->crop_defs[i].name, CROP_NAME_MAX );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* gid */
+      debug_printf( 3, "(offset 0x%02x) writing crop def gid", idx );
+      idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].gid );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* flags */
+      debug_printf( 3, "(offset 0x%02x) writing crop def flags", idx );
+      idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].flags );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* cycle */
+      debug_printf( 3, "(offset 0x%02x) writing crop def cycle", idx );
+      idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].cycle );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* produce gid */
+      debug_printf( 3, "(offset 0x%02x) writing crop produce gid", idx );
+      idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].produce_gid );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_item );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+   }
+   idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
+
+   /* End the main sequence. */
+   idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_main );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+
+   buffer = memory_lock( h_buffer );
+
+   /* Write the ASN map file to disk. */
+   save_write( save_name, buffer, idx );
+
+   buffer = memory_unlock( h_buffer );
+
+cleanup:
+
+   if( (MEMORY_HANDLE)NULL != h_buffer ) {
+      memory_free( h_buffer );
+   }
+
+   return idx;
 }
 

@@ -17,7 +17,8 @@ DSEKAI_C_FILES_WIN16_ONLY := \
    src/main.c \
    unilayer/src/input/wini.c \
    unilayer/src/memory/winm.c \
-   unilayer/src/graphics/wing.c
+   unilayer/src/graphics/wing.c \
+   unilayer/src/save/file.c
 
 ifeq ($(RESOURCE),DEFAULT)
    DSEKAI_C_FILES_WIN16_ONLY += unilayer/src/resource/winr.c

@@ -19,7 +19,8 @@ DSEKAI_C_FILES_SDL_ONLY := \
    unilayer/src/animate.c \
    unilayer/src/input/sdli.c \
    unilayer/src/graphics/sdlg.c \
-   unilayer/src/memory/fakem.c
+   unilayer/src/memory/fakem.c \
+   unilayer/src/save/file.c
 
 DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \

@@ -23,7 +23,12 @@
 /*! \brief Read size returned when there was a parsing error. */
 #define TILEMAP_ASN_ERROR_READ -1
 
+#define TILEMAP_ASN_ERROR_WRITE -1
+
+#define TILEMAP_ASN_SAVE_BUFFER_INITIAL_SZ 2048
+
 int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t );
+int32_t tilemap_asn_save( const char* save_name, struct TILEMAP* t );
 
 /*! \} */
 

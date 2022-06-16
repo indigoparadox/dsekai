@@ -19,7 +19,8 @@ DSEKAI_C_FILES_XLIB_ONLY := \
    unilayer/src/animate.c \
    unilayer/src/input/xi.c \
    unilayer/src/graphics/xg.c \
-   unilayer/src/memory/fakem.c
+   unilayer/src/memory/fakem.c \
+   unilayer/src/save/file.c
 
 DSEKAI_O_FILES_XLIB := \
    $(addprefix $(OBJDIR_XLIB)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
