@@ -251,6 +251,12 @@ struct DSEKAI_STATE {
 };
 
 /**
+ * \brief Handle transition to a new ::TILEMAP.
+ * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
+ */
+int16_t engines_warp_loop( MEMORY_HANDLE state_handle );
+
+/**
  * \brief Do generic mobile animation and execute their scripts.
  * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
  */

@@ -235,20 +235,6 @@ cleanup:
    return retval;
 }
 
-void item_draw( const struct ITEM* i, int16_t screen_x, int16_t screen_y ) {
-   /*
-   int16_t x_offset = 0,
-      y_offset = 0;
-
-   graphics_blit_sprite_at(
-      i->sprite,
-      0, 0,
-      (i->coords.x * SPRITE_W) - screen_x,
-      (i->coords.y * SPRITE_H) - screen_y,
-      SPRITE_W, SPRITE_H);
-   */
-}
-
 int8_t item_give_mobile(
    struct ITEM* e, struct MOBILE* m, struct DSEKAI_STATE* state
 ) {
@@ -309,5 +295,51 @@ int8_t item_give_mobile(
    }
 
    return 1;
+}
+
+int8_t item_drop( struct ITEM* item, struct DSEKAI_STATE* state ) {
+
+   if( ITEM_OWNER_NONE == item->owner ) {
+      return 0;
+   }
+
+   /* Set the item's new map coordinates based on previous owner. */
+   if( ITEM_OWNER_PLAYER == item->owner ) {
+      item->x = state->player.coords.x;
+      item->y = state->player.coords.y;
+   } else if( 0 <= item->owner && DSEKAI_MOBILES_MAX > item->owner ) {
+      item->x = state->mobiles[item->owner].coords.x;
+      item->y = state->mobiles[item->owner].coords.y;
+   }
+
+   debug_printf( 2, "dropped item at %d, %d", item->x, item->y );
+
+   item->owner = ITEM_OWNER_NONE;
+
+   return 1;
+}
+
+int8_t item_pickup_xy(
+   uint8_t x, uint8_t y, int8_t owner, struct DSEKAI_STATE* state
+) {
+   int8_t i = 0;
+
+   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      if( ITEM_OWNER_NONE != state->items[i].owner ) {
+         /* Skip owned items. */
+         continue;
+      }
+
+      if( x == state->items[i].x && y == state->items[i].y ) {
+         debug_printf( 2, "assigned owner %d to item %d at %d, %d",
+            owner, i, x, y );
+         state->items[i].owner = owner;
+         break;
+      }
+   }
+
+   /* Didn't pick anything up. */
+
+   return i;
 }
 

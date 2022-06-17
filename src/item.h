@@ -26,15 +26,6 @@
  */
 #define ITEM_OWNER_PLAYER -2
 
-/**
- * \relates ITEM
- * \brief ITEM::owner value indicating item is a "meta" item handed out by a
- *        script.
- *
- * See \ref scripting_commands_h for more information.
- */
-#define ITEM_OWNER_META -3
-
 #define ITEM_ERROR_INV_FULL -1
 #define ITEM_ERROR_DUPLICATE -2
 
@@ -50,8 +41,6 @@
  */
 #define item_true_gid( item ) ((uint32_t*)&((*item).type))
 
-void item_draw( const struct ITEM*, int16_t, int16_t );
-
 /**
  * \param e ::MEMORY_PTR to the template to give copy of to the ::MOBILE.
  * \param m ::MEMORY_PTR to the ::MOBILE to receive new ::ITEM.
@@ -61,6 +50,23 @@ void item_draw( const struct ITEM*, int16_t, int16_t );
 int8_t item_give_mobile(
    struct ITEM* e, struct MOBILE* m, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
+
+/**
+ * \brief Drop am item on the map floor where its owner is standing.
+ * \param e ::MEMORY_PTR to the item to drop.
+ * \return 1 if give was successful, or error code otherwise.
+ */
+int8_t item_drop( struct ITEM* e, struct DSEKAI_STATE* state );
+
+/**
+ * \brief Pick up an item at the given x, y tile coordinates on the current
+ *        DSEKAI_STATE::map_handle.
+ * \param owner ITEM::owner to assign to the item if found.
+ * \return Index of picked up item, or ::DSEKAI_ITEMS_MAX if no item was
+ *         picked up.
+ */
+int8_t item_pickup_xy(
+   uint8_t x, uint8_t y, int8_t owner, struct DSEKAI_STATE* state );
 
 /**
  * \return 1 if the item was used successfully or 0 otherwise. -1 if the item

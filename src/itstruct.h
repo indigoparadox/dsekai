@@ -42,11 +42,8 @@ struct ITEM {
     * If the owner is ::ITEM_OWNER_PLAYER, this item is in the player's
     * inventory.
     *
-    * If the owner is ::ITEM_OWNER_META, this item has no owner, but is not
-    * visible on the map (e.g. it is waiting to be handed out by a script).
-    *
     * Items without ::MOBILE owners are garbage-collected when the map changes.
-    * See engines_change_map() for more information.
+    * See engines_warp_loop() for more information.
     */
    int8_t owner;
    /**
@@ -67,9 +64,12 @@ struct ITEM {
    uint8_t count;
    /*! \brief System flags pertaining to this item. */
    uint8_t flags;
-   /*! \brief If ITEM::owner is ::ITEM_OWNER_NONE, the coords of this item on
+   /*! \brief If ITEM::owner is ::ITEM_OWNER_NONE, the X coord of this item on
     *         the ::TILEMAP. */
-   /* struct TILEMAP_COORDS coords; */
+   uint8_t x;
+   /*! \brief If ITEM::owner is ::ITEM_OWNER_NONE, the Y coord of this item on
+    *         the ::TILEMAP. */
+   uint8_t y;
 };
 
 /*! \} */

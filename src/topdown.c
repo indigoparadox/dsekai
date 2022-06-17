@@ -164,6 +164,8 @@ static void topdown_draw_crops(
       return;
    }
 
+   /* TODO: Use tile dirty bit to avoid redraw unless crop sprite changes. */
+
    /* Draw crops/plots. */
    for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
       plot = &(state->crops[i]);
@@ -182,14 +184,6 @@ static void topdown_draw_crops(
       ) {
          continue;
       }
-
-      /*
-      debug_printf( 1, "%d, %d is between %d, %d and %d, %d",
-         plot->coords.x, plot->coords.y,
-         gstate->screen_scroll_tx, gstate->screen_scroll_ty,
-         gstate->screen_scroll_tx + SCREEN_TW,
-         gstate->screen_scroll_ty + SCREEN_TH );
-      */
 
       plot_px =
          SCREEN_MAP_X + ((plot->coords.x * TILE_W) - gstate->screen_scroll_x);
@@ -288,6 +282,30 @@ static void topdown_draw_mobile(
       m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
 }
 
+void topdown_draw_items(
+   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate
+) {
+   int8_t i = 0;
+   uint16_t item_px = 0,
+      item_py = 0;
+
+   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      if( ITEM_OWNER_NONE != state->items[i].owner ) {
+         continue;
+      }
+
+      item_px = SCREEN_MAP_X + ((state->items[i].x * TILE_W) -
+            gstate->screen_scroll_x);
+      item_py = SCREEN_MAP_Y + ((state->items[i].y * TILE_H) -
+            gstate->screen_scroll_y);
+
+      graphics_blit_sprite_at(
+         state->items[i].sprite, 0, 0,
+         item_px, item_py, SPRITE_W, SPRITE_H );
+
+   }
+}
+
 void topdown_draw( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
    int8_t i = 0;
@@ -296,8 +314,13 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
 
+   /* Draw crops. */
    topdown_draw_crops( state, gstate );
 
+   /* Draw items without owners. */
+   topdown_draw_items( state, gstate );
+
+   /* Draw mobiles. */
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       topdown_draw_mobile( state, gstate, &(state->mobiles[i]) );
    }
@@ -580,6 +603,12 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
 
       } else {
 #endif /* !NO_ENGINE_EDITOR */
+         /* Try to pickup items laying on the ground. */
+         /* TODO: Differentiate pickup and interact. */
+         item_pickup_xy(
+            state->player.coords.x, state->player.coords.y,
+            ITEM_OWNER_PLAYER, state );
+
          /* Try to interact with facing mobile. */
          mobile_interact(
             &(state->player),

@@ -176,12 +176,19 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       if( state->menu.highlight_id == player_item_idx ) {
          color = WINDOW_PREFAB_DEFAULT_HL();
          flags = GRAPHICS_STRING_FLAG_ALL_CAPS | GRAPHICS_STRING_FLAG_OUTLINE;
+
+         /* Show item icon in info window. */
+         window_push(
+            MENU_WINDOW_ITEM_ICON, MENU_WINDOW_INFO_ID, WINDOW_TYPE_SPRITE,
+            0,
+            WINDOW_PLACEMENT_CENTER, 6,
+            WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
+            WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(),
+            0, 0, state->items[i].sprite, NULL, state, NULL ); 
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
          flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
       }
-
-      /* TODO: Draw icons for item types/flags. */
 
       window_push(
          WINDOW_ID_MENU_LABEL_ITEM + i, MENU_WINDOW_ID,
@@ -228,15 +235,6 @@ static int8_t menu_handler_items_use(
    }
 
    return use_retval;
-}
-
-static int8_t menu_handler_items_drop(
-   struct ITEM* selected_item, struct DSEKAI_STATE* state
-) {
-
-   /* TODO: Drop the item on the map floor. */
-
-   return 0;
 }
 
 int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
@@ -352,7 +350,7 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
          MENU_FLAG_ITEM_OPEN_SEL_DROP ==
          (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
       ) {
-         menu_handler_items_drop( selected_item, state );
+         item_drop( selected_item, state );
          state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
 
       } else {
