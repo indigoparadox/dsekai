@@ -15,19 +15,34 @@
 #define ITEM_TABLE( f ) f( none, 0 ) f( seed, 10 ) f( food, 10 ) f( shovel, 1 ) f( editor, 1 ) f( material, 10 ) f( watercan, 1 ) f( hoe, 1 )
 
 /**
- * \relates ITEM
+ * \addtogroup dsekai_items_owners Item Owner ID
+ * \brief Item ownership by a ::MOBILE.
+ * \{
+ */
+
+/**
  * \brief ITEM::owner value indicating no owner.
  */
 #define ITEM_OWNER_NONE -1
 
 /**
- * \relates ITEM
  * \brief ITEM::owner value indicating item is in player inventory.
  */
 #define ITEM_OWNER_PLAYER -2
 
+/*! \} */ /* dsekai_items_owners */
+
+/**
+ * \addtogroup dsekai_items_errors Item Errors
+ * \{
+ */
+
 #define ITEM_ERROR_INV_FULL -1
 #define ITEM_ERROR_DUPLICATE -2
+#define ITEM_ERROR_MISSING_TEMPLATE -3
+#define ITEM_ERROR_NOT_FOUND -4
+
+/*! \} */ /* dsekai_items_errors */
 
 /**
  * \relates ITEM
@@ -42,13 +57,41 @@
 #define item_true_gid( item ) ((uint32_t*)&((*item).type))
 
 /**
- * \param e ::MEMORY_PTR to the template to give copy of to the ::MOBILE.
- * \param m ::MEMORY_PTR to the ::MOBILE to receive new ::ITEM.
- * \return 1 if give was successful, or error code otherwise.
+ * \brief Determine if/where item with the given ITEM::gid exists in the
+ *        inventory of an \ref dsekai_items_owners.
+ * \param template_gid ITEM::gid of the definition in TILEMAP::items.
+ * \param owner_id \ref dsekai_items_owners of the sought item.
+ * \return Index of the item in DSEKAI_STATE::items if it exists or
+ *         ::ITEM_ERROR_NOT_FOUND if not.
+ */
+int8_t item_exists_in_inventory(
+   int16_t template_gid, int8_t owner_id, struct DSEKAI_STATE* state
+) SECTION_ITEM;
+
+int8_t item_decr_or_delete(
+   int16_t template_gid, int8_t owner_id,
+   struct TILEMAP* t, struct DSEKAI_STATE* state
+) SECTION_ITEM;
+
+/**
+ * \brief Create an item in DSEKAI_STATE::items from a template in
+ *        TILEMAP::items.
+ * \param m \ref dsekai_items_owners to give the item to.
+ * \return Index of the new item or stack added to in DSEKAI_STATE::items.
+ */
+int8_t item_stack_or_add(
+   int16_t template_gid, int8_t owner_id,
+   struct TILEMAP* t, struct DSEKAI_STATE* state
+) SECTION_ITEM;
+
+/**
+ * \param m \ref dsekai_items_owners to give the item to.
+ * \return New item index in DSEKAI_STATE::items if give was successful,
+ *         or error code otherwise.
  */
 
 int8_t item_give_mobile(
-   struct ITEM* e, struct MOBILE* m, struct DSEKAI_STATE* state
+   int8_t e_idx, int8_t m_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
 /**
@@ -57,18 +100,20 @@ int8_t item_give_mobile(
  * \return 1 if give was successful, or error code otherwise.
  */
 int8_t item_drop(
-   struct ITEM* item, struct TILEMAP* t, struct DSEKAI_STATE* state );
+   struct ITEM* item, struct TILEMAP* t, struct DSEKAI_STATE* state
+) SECTION_ITEM;
 
 /**
  * \brief Pick up an item at the given x, y tile coordinates on the current
  *        DSEKAI_STATE::map_handle.
- * \param owner ITEM::owner to assign to the item if found.
+ * \param owner \ref dsekai_items_owners to give the item to if found.
  * \return Index of picked up item, or ::DSEKAI_ITEMS_MAX if no item was
  *         picked up.
  */
 int8_t item_pickup_xy(
    uint8_t x, uint8_t y, int8_t owner, struct TILEMAP* t,
-   struct DSEKAI_STATE* state );
+   struct DSEKAI_STATE* state
+) SECTION_ITEM;
 
 /**
  * \return 1 if the item was used successfully or 0 otherwise. -1 if the item

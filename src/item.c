@@ -2,16 +2,6 @@
 #define ITEM_C
 #include "dsekai.h"
 
-static void item_consume( struct ITEM* e ) {
-   if( 1 < e->count ) {
-      /* Reduce the item's count. */
-      e->count--;
-   } else {
-      /* Delete the item. */
-      e->flags &= ~ITEM_FLAG_ACTIVE;
-   }
-}
-
 int8_t item_use_none(
    struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
 ) {
@@ -51,7 +41,8 @@ int8_t item_use_seed(
 
    if( 0 < crop_plant( e->data, plot, map ) ) {
       /* Planting was successful. */
-      item_consume( e );
+      /* TODO: Adapt to item_decr_or_delete() */
+      /* item_consume( e ); */
    } else {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
@@ -77,7 +68,8 @@ int8_t item_use_food(
    int8_t anim_idx = 0;
    char num_str[10];
 
-   item_consume( e );
+   /* TODO: Adapt to item_decr_or_delete() */
+   /* item_consume( e ); */
 
    user->hp += e->data;
 
@@ -237,66 +229,159 @@ cleanup:
    return retval;
 }
 
-int8_t item_give_mobile(
-   struct ITEM* e, struct MOBILE* m, struct DSEKAI_STATE* state
+int8_t item_exists_in_inventory(
+   int16_t template_gid, int8_t owner_id, struct DSEKAI_STATE* state
 ) {
-   int8_t m_idx = ITEM_OWNER_PLAYER,
-      i = 0;
-
-   /* TODO: Check for full inventory. */
-
-   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & e->flags) );
-
-   /* Translate MEMORY_PTR to mobile index. Default to player on failure. */
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      if( m == &(state->mobiles[i]) ) {
-         m_idx = i;
-         break;
-      }
-   }
+   int8_t i = 0;
 
    /* Determine if the recipient has one of these already. */
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
       if(
          ITEM_FLAG_ACTIVE == (state->items[i].flags & ITEM_FLAG_ACTIVE) &&
-         state->items[i].gid == e->gid &&
-         state->items[i].owner == m_idx
+         state->items[i].gid == template_gid &&
+         state->items[i].owner == owner_id
       ) {
-         /* Found a dupe. */
-         if( gc_items_max[e->type] > state->items[i].count + e->count ) {
-            state->items[i].count++;
-            debug_printf( 3, "adding item %d to mobile %d stack (%d)",
-               e->gid, m_idx, state->items[i].count );
-            return 1;
-         } else {
-            debug_printf( 3, "unable to give item %d to mobile %d: duplicate",
-               e->gid, m_idx );
-            return ITEM_ERROR_DUPLICATE;
+         debug_printf(
+            2, "item gid %d exists in owner %d inventory at index: %d",
+            template_gid, owner_id, i );
+         return i;
+      }
+   }
+
+   debug_printf( 2, "item gid %d does not exist in owner %d inventory!",
+      template_gid, owner_id );
+ 
+   return ITEM_ERROR_NOT_FOUND;
+}
+
+int8_t item_decr_or_delete(
+   int16_t template_gid, int8_t owner_id,
+   struct TILEMAP* t, struct DSEKAI_STATE* state
+) {
+   struct ITEM* e = NULL;
+   int8_t e_idx = ITEM_ERROR_NOT_FOUND;
+
+   e_idx = item_exists_in_inventory( template_gid, owner_id, state );
+   if( 0 > e_idx ) {
+      goto cleanup;
+   }
+   e = &(state->items[e_idx]);
+
+   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & e->flags) );
+
+   if( 1 < e->count ) {
+      /* Reduce the item's count. */
+      e->count--;
+   } else {
+      /* Delete the item. */
+      e->flags &= ~ITEM_FLAG_ACTIVE;
+      e_idx = ITEM_ERROR_NOT_FOUND;
+   }
+
+cleanup:
+   return e_idx;
+}
+
+int8_t item_stack_or_add(
+   int16_t template_gid, int8_t owner_id,
+   struct TILEMAP* t, struct DSEKAI_STATE* state
+) {
+   int8_t e_idx = 0,
+      i = 0;
+   struct ITEM* e_def = NULL;
+
+   /* Find the item definition with the given GID in tilemap item templates. */
+   for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
+      if(
+         t->items[i].gid == template_gid &&
+         ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & t->items[i].flags)
+      ) {
+         e_def = &(t->items[i]);
+         debug_printf( 2, "found item with gid %d and owner %d at index: %d",
+            template_gid, owner_id, i );
+         break;
+      }
+   }
+
+   if( NULL == e_def ) {
+      error_printf( "could not find item with gid: %d", template_gid );
+      e_idx = ITEM_ERROR_MISSING_TEMPLATE;
+      goto cleanup;
+   }
+
+   /* Determine if we're stacking or adding. */
+   e_idx = item_exists_in_inventory( template_gid, owner_id, state );
+
+   if( 0 <= e_idx ) {
+      /* Found a dupe (stacking). */
+      if( gc_items_max[e_def->type] >= state->items[e_idx].count + 1 ) {
+         state->items[e_idx].count++;
+         debug_printf( 2, "adding item %d to mobile %d stack (%d)",
+            template_gid, owner_id, state->items[e_idx].count );
+      } else {
+         error_printf( "unable to give item %d to mobile %d: duplicate",
+            template_gid, owner_id );
+         e_idx = ITEM_ERROR_DUPLICATE;
+      }
+
+   } else {
+      /* Create item from template. */
+      /* TODO: Check for full inventory vs ITEM_INVENTORY_MAX. */
+      for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+         if( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & state->items[i].flags) ) {
+            /* Skip active items. */
+            continue;
          }
+
+         debug_printf(
+            2, "creating item with gid %d and owner %d at index: %d",
+            e_def->gid, owner_id, i );
+
+         memory_copy_ptr( 
+            (MEMORY_PTR)&(state->items[i]), (CONST_MEMORY_PTR)e_def,
+            sizeof( struct ITEM ) );
+
+         state->items[i].owner = owner_id;
+         e_idx = i;
+
+         /* Found and created the item, so quit. */
+         break;
       }
    }
 
-   debug_printf( 3, "giving item %s (%d) to mobile %d",
-      e->name, e->gid, m_idx );
+cleanup:
 
-   /* Create item from template. */
-   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
-      if( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & state->items[i].flags) ) {
-         /* Skip active items. */
-         continue;
-      }
-
-      memory_copy_ptr( 
-         (MEMORY_PTR)&(state->items[i]), (CONST_MEMORY_PTR)e,
-         sizeof( struct ITEM ) );
-
-      state->items[i].owner = m_idx;
-
-      /* Found and created the item, so quit. */
-      break;
+   if( 0 > e_idx ) {
+      error_printf( "unable to give item!" );
    }
 
-   return 1;
+   return e_idx;
+}
+
+int8_t item_give_mobile(
+   int8_t e_idx, int8_t owner_id, struct TILEMAP* t, struct DSEKAI_STATE* state
+) {
+   int8_t e_dest_idx = 0;
+   struct ITEM* e = NULL;
+
+   assert( DSEKAI_ITEMS_MAX > e_idx );
+   assert( 0 <= e_idx );
+
+   e = &(state->items[e_idx]);
+
+   debug_printf( 2, "giving item at index %d to owner: %d",
+      e_idx, owner_id );
+
+   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & e->flags) );
+
+   /* TODO: Check for full inventory vs ITEM_INVENTORY_MAX. */
+
+   item_stack_or_add( e->gid, owner_id, t, state );
+
+   /* Since give was successful, remove former owner's copy. */
+   item_decr_or_delete( e->gid, e->owner, t, state );
+
+   return e_dest_idx;
 }
 
 int8_t item_drop(

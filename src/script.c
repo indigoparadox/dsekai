@@ -365,16 +365,20 @@ uint16_t script_handle_ITEM_GIVE(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   int8_t i = 0;
+   int8_t e_idx = 0;
 
-   for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
-      if( t->items[i].gid == arg ) {
-         item_give_mobile( &(t->items[i]), &(state->player), state );
-         return pc + 1;
-      }
+   /* TODO: Split out command to add item to this entity's inventory,
+      *       then this "give" can be finite/fail.
+      */
+   /* TODO: Rework hook API to pass actor/actee IDs so we can pass that
+      *       as the owner to item_create_from_template().
+      */
+   e_idx = item_stack_or_add( arg, 0, t, state );
+   if( 0 <= e_idx ) {
+      item_give_mobile( e_idx, ITEM_OWNER_PLAYER, t, state );
+   } else {
+      error_printf( "unable to give: invalid item GID: %d", arg );
    }
-   
-   error_printf( "unable to give: invalid item GID: %d", arg );
 
    return pc + 1;
 }

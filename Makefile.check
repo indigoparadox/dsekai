@@ -52,7 +52,7 @@ DEFINES_CHECK := \
    -DSCREEN_SCALE=$(SCREEN_SCALE)
 
 INCLUDES_CHECK := \
-   -I unilayer \
+   $(UNLAYER_INCLUDES) \
    -I $(GENDIR_CHECK) 
 
 CFLAGS_CHECK := $(shell pkg-config check --cflags) -g $(CFLAGS_GCC_GENERIC) $(DEFINES_CHECK) $(INCLUDES_CHECK)

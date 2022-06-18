@@ -104,8 +104,13 @@ int8_t crop_plant(
    uint8_t crop_gid, struct CROP_PLOT* plot, struct TILEMAP* crop_def_map
 ) SECTION_CROP;
 
+/**
+ * \brief Harvest the given ::CROP_PLOT, giving the produce to the specified
+ *        \ref dsekai_items_owners.
+ * \param harvester_id \ref dsekai_items_owners to give the harvest to.
+ */
 int8_t crop_harvest(
-   struct MOBILE* harvester, struct CROP_PLOT* plot,
+   int8_t harvester_id, struct CROP_PLOT* plot,
    struct DSEKAI_STATE* state, struct TILEMAP* crop_def_map
 ) SECTION_CROP;
 

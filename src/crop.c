@@ -96,13 +96,13 @@ cleanup:
 }
 
 int8_t crop_harvest(
-   struct MOBILE* harvester, struct CROP_PLOT* plot, struct DSEKAI_STATE* state,
+   int8_t harvester_id, struct CROP_PLOT* plot, struct DSEKAI_STATE* state,
    struct TILEMAP* crop_def_map
 ) {
    struct CROP_DEF* crop_def = NULL;
    int8_t i = 0,
+      produce_id = -1,
       retval = 1;
-   struct ITEM* harvest = NULL;
 
    assert( 0 < plot->crop_gid );
    assert( CROP_STAGE_MAX == (CROP_FLAG_STAGE_MASK & plot->flags) );
@@ -119,10 +119,11 @@ int8_t crop_harvest(
    /* Find the harvested item definition. */
    for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
       if( crop_def_map->items[i].gid == crop_def->produce_gid ) {
-         harvest = &(crop_def_map->items[i]);
+         produce_id = i;
+         break;
       }
    }
-   if( NULL == harvest ) {
+   if( 0 > produce_id ) {
       retval = CROP_ERROR_PRODUCE_NOT_FOUND;
       error_printf( "unable to give: invalid produce gid: %d",
          crop_def->produce_gid );
@@ -133,7 +134,7 @@ int8_t crop_harvest(
       plot->coords.x, plot->coords.y, plot->map_name );
 
    /* Give the harvested crop to the harvester. */
-   item_give_mobile( harvest, harvester, state );
+   item_stack_or_add( produce_id, harvester_id, crop_def_map, state );
 
    /* Update the plot status to reflect harvest. */
    plot->flags &= ~CROP_FLAG_STAGE_MASK;

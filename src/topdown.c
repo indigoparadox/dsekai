@@ -625,7 +625,7 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
                "This crop is\nnot ready!", state, map,
                WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
          } else {
-            crop_harvest( &(state->player), plot, state, map );
+            crop_harvest( ITEM_OWNER_PLAYER, plot, state, map );
          }
 
       } else {
