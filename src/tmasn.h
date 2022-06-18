@@ -28,7 +28,8 @@
 #define TILEMAP_ASN_SAVE_BUFFER_INITIAL_SZ 2048
 
 int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t );
-int32_t tilemap_asn_save( const char* save_name, struct TILEMAP* t );
+int32_t tilemap_asn_save(
+   MEMORY_HANDLE h_buffer, int32_t idx, struct TILEMAP* t );
 
 /*! \} */
 

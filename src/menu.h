@@ -13,7 +13,7 @@
  * \brief Defines the top-level menu items and callbacks used to handle each
  *        submenu.
  */
-#define MENU_TABLE( f ) f( 0, main ) f( 1, items ) f( 2, craft ) f( 3, quit )
+#define MENU_TABLE( f ) f( 0, main ) f( 1, items ) f( 2, craft ) f( 3, save ) f( 4, quit )
 
 /**
  * \brief Maximum length of a menu item's display text.

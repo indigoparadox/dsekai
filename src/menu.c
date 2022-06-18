@@ -415,6 +415,22 @@ int16_t menu_handler_craft( char in_char, struct DSEKAI_STATE* state ) {
    return 1;
 }
 
+void menu_renderer_save( struct DSEKAI_STATE* state ) {
+
+#ifdef TILEMAP_FMT_ASN
+
+   /* TODO: Enter name for save. */
+   engines_asn_save( "save.asn", state );
+
+#endif /* TILEMAP_FMT_ASN */
+
+   menu_close( state );
+}
+
+int16_t menu_handler_save( char in_char, struct DSEKAI_STATE* state ) {
+   return 1;
+}
+
 void menu_renderer_quit( struct DSEKAI_STATE* state ) {
    /* Nothing to render. */
 }

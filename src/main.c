@@ -98,7 +98,7 @@ unilayer_main() {
 
 #ifndef PLATFORM_WASM
 
-   while( g_running ) {
+   while( 0 < g_running ) {
       unilayer_loop_iter();
 
 #ifdef USE_SOFT_ASSERT

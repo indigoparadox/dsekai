@@ -709,8 +709,9 @@ cleanup:
    return retval;
 }
 
-int32_t tilemap_asn_save( const char* save_name, struct TILEMAP* t ) {
-   MEMORY_HANDLE h_buffer = (MEMORY_HANDLE)NULL;
+int32_t tilemap_asn_save(
+   MEMORY_HANDLE h_buffer, int32_t idx, struct TILEMAP* t
+) {
    int16_t scripts_count = 0,
       i = 0,
       j = 0;
@@ -722,11 +723,7 @@ int32_t tilemap_asn_save( const char* save_name, struct TILEMAP* t ) {
       mark_seq_item = 0,
       sz_idx = 0,
       script_sz_idx = 0,
-      step_sz_idx = 0,
-      idx = 0;
-   uint8_t* buffer = NULL;
-
-   h_buffer = memory_alloc( TILEMAP_ASN_SAVE_BUFFER_INITIAL_SZ, 1 );
+      step_sz_idx = 0;
 
    idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_main );
    if( 0 > idx ) {
@@ -1229,18 +1226,7 @@ int32_t tilemap_asn_save( const char* save_name, struct TILEMAP* t ) {
       goto cleanup;
    }
 
-   buffer = memory_lock( h_buffer );
-
-   /* Write the ASN map file to disk. */
-   save_write( save_name, buffer, idx );
-
-   buffer = memory_unlock( h_buffer );
-
 cleanup:
-
-   if( (MEMORY_HANDLE)NULL != h_buffer ) {
-      memory_free( h_buffer );
-   }
 
    return idx;
 }

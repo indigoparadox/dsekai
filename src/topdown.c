@@ -496,6 +496,11 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
    state->engine_state_handle = memory_alloc(
          sizeof( struct TOPDOWN_STATE ), 1 );
+   if( (MEMORY_HANDLE)NULL == state->engine_state_handle ) {
+      error_printf( "unable to allocate engine state!" );
+      retval = DSEKAI_ERROR_ALLOCATE;
+      goto cleanup;
+   }
 
    /* Make sure the tilemap is drawn at least once behind any initial windows.
     */
@@ -526,6 +531,8 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
       state, DSEKAI_TRANSITION_TYPE_CURTAIN, DSEKAI_TRANSITION_DIR_OPEN );
 
    state->engine_state = ENGINE_STATE_RUNNING;
+
+cleanup:
    
    return retval;
 }

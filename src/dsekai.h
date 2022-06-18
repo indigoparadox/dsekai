@@ -12,6 +12,8 @@
  *  be placed in this file.
  */
 
+#define DSEKAI_ERROR_ALLOCATE -128
+
 /**
  * \relates ANIMATION
  * \brief Indicates that an animation is behind tiles.
@@ -79,6 +81,7 @@ struct DSEKAI_STATE;
 
 #ifdef TILEMAP_FMT_ASN
 #include "tmasn.h"
+#include "engasn.h"
 #endif /* TILEMAP_FMT_ASN */
 
 #ifdef TILEMAP_FMT_BIN
