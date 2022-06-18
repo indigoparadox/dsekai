@@ -224,12 +224,17 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
 }
 
 static int8_t menu_handler_items_use(
-   struct ITEM* selected_item, struct DSEKAI_STATE* state
+   int8_t selected_item_idx, struct DSEKAI_STATE* state
 ) {
    int8_t use_retval = 0;
+   uint8_t item_type = 0;
 
-   use_retval = gc_item_use_cbs[selected_item->type](
-      selected_item, &(state->player), state );
+   assert( 0 <= selected_item_idx );
+   assert( DSEKAI_ITEMS_MAX > selected_item_idx );
+   item_type = state->items[selected_item_idx].type;
+
+   use_retval = gc_item_use_cbs[item_type](
+      selected_item_idx, ITEM_OWNER_PLAYER, state );
    if( 0 > use_retval ) {
       menu_close( state );
    }
@@ -239,9 +244,9 @@ static int8_t menu_handler_items_use(
 
 int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1,
-      i = 0,
+      i = 0;
+   int8_t selected_item_idx = ITEM_ERROR_NOT_FOUND,
       player_item_count = 0;
-   struct ITEM* selected_item = NULL;
    struct TILEMAP* t = NULL;
 
    /* Count player-owned items to enforce limits below. */
@@ -252,7 +257,8 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
       ) {
          if( player_item_count == state->menu.highlight_id ) {
             /* This is the currently selected item. */
-            selected_item = &(state->items[i]);
+            assert( ITEM_ERROR_NOT_FOUND == selected_item_idx );
+            selected_item_idx = i;
          }
          player_item_count++;
       }
@@ -319,7 +325,7 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_OK:
-      if( NULL == selected_item ) {
+      if( ITEM_ERROR_NOT_FOUND == selected_item_idx ) {
          error_printf( "no item selected!" );
          break;
       }
@@ -337,7 +343,7 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
          MENU_FLAG_ITEM_OPEN_SEL_USE ==
          (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
       ) {
-         menu_handler_items_use( selected_item, state );
+         menu_handler_items_use( selected_item_idx, state );
          state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
 
       } else if(
@@ -357,7 +363,7 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
             retval = 0;
             goto cleanup;
          }
-         item_drop( selected_item, t, state );
+         item_drop( selected_item_idx, t, state );
          t = (struct TILEMAP*)memory_unlock( state->map_handle );
          state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
 

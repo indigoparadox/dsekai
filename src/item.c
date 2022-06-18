@@ -3,35 +3,49 @@
 #include "dsekai.h"
 
 int8_t item_use_none(
-   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
 ) {
    error_printf( "attempted to use invalid item" );
    return 0;
 }
 
 int8_t item_use_seed(
-   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
 ) {
    int8_t retval = -1;
    uint8_t x = 0,
       y = 0;
    struct CROP_PLOT* plot = NULL;
-   struct TILEMAP* map = NULL;
+   struct TILEMAP* t = NULL;
+   struct MOBILE* user = NULL;
+   struct ITEM* e = NULL;
+
+   if( 0 <= owner_id ) {
+      user = &(state->mobiles[owner_id]);
+   } else if( ITEM_OWNER_PLAYER == owner_id ) {
+      user = &(state->player);
+   }
+   assert( NULL != user );
+
+   assert( e_idx < DSEKAI_ITEMS_MAX );
+   assert( 0 <= e_idx );
+   e = &(state->items[e_idx]);
+   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & e->flags) );
 
    x = user->coords.x + gc_mobile_x_offsets[user->dir];
    y = user->coords.y + gc_mobile_y_offsets[user->dir];
 
    /* Get the plot in front of the user. */
-   map = (struct TILEMAP*)memory_lock( state->map_handle );
-   if( NULL == map ) {
+   t = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == t ) {
       error_printf( "could not lock tilemap" );
       goto cleanup;
    }
-   plot = crop_find_plot( map, x, y, state );
+   plot = crop_find_plot( t, x, y, state );
    if( NULL == plot ) {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "The soil is\ntoo firm!", state, map,
+         "The soil is\ntoo firm!", state, t,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       error_printf( "could not find plot" );
@@ -39,14 +53,13 @@ int8_t item_use_seed(
       goto cleanup;
    }
 
-   if( 0 < crop_plant( e->data, plot, map ) ) {
+   if( 0 < crop_plant( e->data, plot, t ) ) {
       /* Planting was successful. */
-      /* TODO: Adapt to item_decr_or_delete() */
-      /* item_consume( e ); */
+      item_decr_or_delete( e->gid, e->owner, state );
    } else {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "This won't\ngrow here!", state, map,
+         "This won't\ngrow here!", state, t,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       error_printf( "unable to plant seed" );
@@ -55,21 +68,34 @@ int8_t item_use_seed(
 
 cleanup:
 
-   if( NULL != map ) {
-      map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   if( NULL != t ) {
+      t = (struct TILEMAP*)memory_unlock( state->map_handle );
    }
 
    return retval;
 }
 
 int8_t item_use_food(
-   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
 ) {
    int8_t anim_idx = 0;
    char num_str[10];
+   struct MOBILE* user = NULL;
+   struct ITEM* e = NULL;
 
-   /* TODO: Adapt to item_decr_or_delete() */
-   /* item_consume( e ); */
+   if( 0 <= owner_id ) {
+      user = &(state->mobiles[owner_id]);
+   } else if( ITEM_OWNER_PLAYER == owner_id ) {
+      user = &(state->player);
+   }
+   assert( NULL != user );
+
+   assert( e_idx < DSEKAI_ITEMS_MAX );
+   assert( 0 <= e_idx );
+   e = &(state->items[e_idx]);
+   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & e->flags) );
+
+   item_decr_or_delete( e->gid, e->owner, state );
 
    user->hp += e->data;
 
@@ -95,30 +121,30 @@ int8_t item_use_food(
 }
 
 int8_t item_use_shovel(
-   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
 ) {
    /* TODO: Implement digging. */
    return 0;
 }
 
 int8_t item_use_editor(
-   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
 ) {
 #ifndef NO_ENGINE_EDITOR
-   struct TILEMAP* map = NULL;
+   struct TILEMAP* t = NULL;
 
-   map = (struct TILEMAP*)memory_lock( state->map_handle );
-   if( NULL == map ) {
+   t = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == t ) {
       error_printf( "could not lock tilemap" );
       return -1;
    }
 
-   if( TILEMAP_FLAG_EDITABLE != (TILEMAP_FLAG_EDITABLE & map->flags) ) {
+   if( TILEMAP_FLAG_EDITABLE != (TILEMAP_FLAG_EDITABLE & t->flags) ) {
 
       /* TODO: Display warning message on-screen. */
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "This map cannot\nbe edited!", state, map,
+         "This map cannot\nbe edited!", state, t,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       error_printf( "unable to edit current tilemap" );
@@ -132,42 +158,56 @@ int8_t item_use_editor(
       state->editor.coords.y = state->player.coords.y;
    }
 
-   map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   t = (struct TILEMAP*)memory_unlock( state->map_handle );
 #endif /* !NO_ENGINE_EDITOR */
 
    return -1;
 }
 
 int8_t item_use_material(
-   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
 ) {
    /* TODO: Warn that materials cannot be used directly. */
    return 0;
 }
 
 int8_t item_use_watercan(
-   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
 ) {
    /* TODO: Check for CROP_PLOTs that can be watered. */
    return 0;
 }
 
 int8_t item_use_hoe(
-   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state
+   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
 ) {
    int8_t i = 0,
       crop_idx = -1,
       retval = -1;
    int16_t x = 0, y = 0;
-   struct TILEMAP* map = NULL;
+   struct TILEMAP* t = NULL;
+   struct MOBILE* user = NULL;
+   struct ITEM* e = NULL;
+
+   if( 0 <= owner_id ) {
+      user = &(state->mobiles[owner_id]);
+   } else if( ITEM_OWNER_PLAYER == owner_id ) {
+      user = &(state->player);
+   }
+   assert( NULL != user );
+
+   assert( e_idx < DSEKAI_ITEMS_MAX );
+   assert( 0 <= e_idx );
+   e = &(state->items[e_idx]);
+   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & e->flags) );
 
    x = user->coords.x + gc_mobile_x_offsets[user->dir];
    y = user->coords.y + gc_mobile_y_offsets[user->dir];
 
    /* TODO: Move this to crop.c. */
 
-   map = (struct TILEMAP*)memory_lock( state->map_handle );
-   if( NULL == map ) {
+   t = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == t ) {
       error_printf( "could not lock tilemap" );
       retval = 0;
       goto cleanup;
@@ -186,7 +226,7 @@ int8_t item_use_hoe(
       /* Crop plot is not empty, but does it collide? */
       if(
          0 == memory_strncmp_ptr(
-            state->crops[i].map_name, map->name, TILEMAP_NAME_MAX ) &&
+            state->crops[i].map_name, t->name, TILEMAP_NAME_MAX ) &&
          x == state->crops[i].coords.x && y == state->crops[i].coords.y
       ) {
          retval = -1;
@@ -201,7 +241,7 @@ int8_t item_use_hoe(
    if( 0 > crop_idx ) {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "Too many crops\nalready planted!", state, map,
+         "Too many crops\nalready planted!", state, t,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       retval = 0;
@@ -212,7 +252,7 @@ int8_t item_use_hoe(
    /* Create crop plot. */
    memory_zero_ptr(
       (MEMORY_PTR)&(state->crops[crop_idx]), sizeof( struct CROP_PLOT ) );
-   memory_strncpy_ptr( state->crops[crop_idx].map_name, map->name,
+   memory_strncpy_ptr( state->crops[crop_idx].map_name, t->name,
       TILEMAP_NAME_MAX );
    state->crops[crop_idx].coords.x = x;
    state->crops[crop_idx].coords.y = y;
@@ -224,7 +264,7 @@ int8_t item_use_hoe(
 
 cleanup:
 
-   map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   t = (struct TILEMAP*)memory_unlock( state->map_handle );
 
    return retval;
 }
@@ -255,8 +295,7 @@ int8_t item_exists_in_inventory(
 }
 
 int8_t item_decr_or_delete(
-   int16_t template_gid, int8_t owner_id,
-   struct TILEMAP* t, struct DSEKAI_STATE* state
+   int16_t template_gid, int8_t owner_id, struct DSEKAI_STATE* state
 ) {
    struct ITEM* e = NULL;
    int8_t e_idx = ITEM_ERROR_NOT_FOUND;
@@ -379,33 +418,39 @@ int8_t item_give_mobile(
    item_stack_or_add( e->gid, owner_id, t, state );
 
    /* Since give was successful, remove former owner's copy. */
-   item_decr_or_delete( e->gid, e->owner, t, state );
+   item_decr_or_delete( e->gid, e->owner, state );
 
    return e_dest_idx;
 }
 
 int8_t item_drop(
-   struct ITEM* item, struct TILEMAP* t, struct DSEKAI_STATE* state
+   int8_t e_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
 ) {
+   struct ITEM* e = NULL;
 
-   if( ITEM_OWNER_NONE == item->owner ) {
+   assert( DSEKAI_ITEMS_MAX > e_idx );
+   assert( 0 <= e_idx );
+   e = &(state->items[e_idx]);
+   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & e->flags) );
+
+   if( ITEM_OWNER_NONE == e->owner ) {
       return 0;
    }
 
    /* Set the item's new map coordinates based on previous owner. */
-   if( ITEM_OWNER_PLAYER == item->owner ) {
-      item->x = state->player.coords.x;
-      item->y = state->player.coords.y;
-   } else if( 0 <= item->owner && DSEKAI_MOBILES_MAX > item->owner ) {
-      item->x = state->mobiles[item->owner].coords.x;
-      item->y = state->mobiles[item->owner].coords.y;
+   if( ITEM_OWNER_PLAYER == e->owner ) {
+      e->x = state->player.coords.x;
+      e->y = state->player.coords.y;
+   } else if( 0 <= e->owner && DSEKAI_MOBILES_MAX > e->owner ) {
+      e->x = state->mobiles[e->owner].coords.x;
+      e->y = state->mobiles[e->owner].coords.y;
    }
 
-   debug_printf( 2, "dropped item at %d, %d", item->x, item->y );
+   debug_printf( 2, "dropped item at %d, %d", e->x, e->y );
 
-   item->owner = ITEM_OWNER_NONE;
+   e->owner = ITEM_OWNER_NONE;
 
-   memory_strncpy_ptr( item->map_name, t->name, TILEMAP_NAME_MAX );
+   memory_strncpy_ptr( e->map_name, t->name, TILEMAP_NAME_MAX );
 
 #if 0
    /* Set tile as dirty. */
@@ -459,4 +504,16 @@ int8_t item_pickup_xy(
 
    return i;
 }
+
+/*
+void item_cleanup_orphans( struct DSEKAI_STATE* ) {
+   int8_t i = 0;
+
+   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      if(
+         ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & state->items[i].flags) &&
+         0 <= state->items[i].owner
+   }
+}
+*/
 

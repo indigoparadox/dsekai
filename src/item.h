@@ -69,8 +69,7 @@ int8_t item_exists_in_inventory(
 ) SECTION_ITEM;
 
 int8_t item_decr_or_delete(
-   int16_t template_gid, int8_t owner_id,
-   struct TILEMAP* t, struct DSEKAI_STATE* state
+   int16_t template_gid, int8_t owner_id, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
 /**
@@ -100,7 +99,7 @@ int8_t item_give_mobile(
  * \return 1 if give was successful, or error code otherwise.
  */
 int8_t item_drop(
-   struct ITEM* item, struct TILEMAP* t, struct DSEKAI_STATE* state
+   int8_t e_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
 /**
@@ -120,9 +119,9 @@ int8_t item_pickup_xy(
  *         was used and the menu should be closed.
  */
 typedef int8_t (*ITEM_USE_CB)(
-   struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state );
+   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state );
 
-#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( struct ITEM* e, struct MOBILE* user, struct DSEKAI_STATE* state ) SECTION_ITEM;
+#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
 ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
 
