@@ -84,13 +84,6 @@ unilayer_main() {
    state->engine_state = ENGINE_STATE_OPENING;
    state->menu.menu_id = -1;
    state->menu.highlight_id = -1;
-   state->windows_handle = 
-      memory_alloc( DSEKAI_WINDOWS_MAX, sizeof( struct WINDOW ) );
-   if( (MEMORY_HANDLE)NULL == state->windows_handle ) {
-      error_printf( "unable to allocate graphical windows!" );
-      retval = 1;
-      goto exit;
-   }
    state->map_handle = memory_alloc( 1, sizeof( struct TILEMAP ) );
    if( (MEMORY_HANDLE)NULL == state->map_handle ) {
       error_printf( "unable to allocate tilemap!" );
@@ -146,13 +139,6 @@ unilayer_main() {
       error_printf( "unable to lock state" );
       retval = 1;
       goto exit;
-   }
-   /* while( state->windows_count > 0 ) {
-      window_pop( 0, state );
-   } */
-   /* TODO: Verify all windows have closed/freed their resources. */
-   if( (MEMORY_HANDLE)NULL != state->windows_handle ) {
-      memory_free( state->windows_handle );
    }
    if( (MEMORY_HANDLE)NULL != state->map_handle ) {
       memory_free( state->map_handle );

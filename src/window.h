@@ -202,12 +202,10 @@ struct WINDOW {
  * \image html windowsp.png
  * \param dialog Index of the string to display from TILEMAP::strpool.
  * \param sprite RESOURCE_ID of the GRAPHICS_BITMAP to display in this window.
- * \param state Current global ::DSEKAI_STATE.
- * \param state ::MEMORY_PTR to the global engine ::DSEKAI_STATE.
  */
-#define window_prefab_dialog( dialog, sprite, dir_flag, state, t, fg, bg ) window_push( WINDOW_ID_SCRIPT_SPEAK, 0, WINDOW_TYPE_WINDOW, WINDOW_FLAG_MODAL, SCREEN_MAP_X, WINDOW_PLACEMENT_CENTER, SCREEN_MAP_W, 64, fg, bg, 0, 0, 0, NULL, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 1, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_LABEL, 0, WINDOW_PLACEMENT_CENTER, 30, WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER, fg, bg, GRAPHICS_STRING_FLAG_FONT_SCRIPT, 0, 0, dialog, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 2, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_SPRITE, dir_flag | WINDOW_FLAG_SPRITE_BORDER_SINGLE, WINDOW_PLACEMENT_CENTER, 6, WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, fg, bg, 0, 0, sprite, NULL, state, t ); 
+#define window_prefab_dialog( dialog, sprite, dir_flag, fg, bg ) window_push( WINDOW_ID_SCRIPT_SPEAK, 0, WINDOW_TYPE_WINDOW, WINDOW_FLAG_MODAL, SCREEN_MAP_X, WINDOW_PLACEMENT_CENTER, SCREEN_MAP_W, 64, fg, bg, 0, 0, 0, NULL ); window_push( WINDOW_ID_SCRIPT_SPEAK + 1, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_LABEL, 0, WINDOW_PLACEMENT_CENTER, 30, WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER, fg, bg, GRAPHICS_STRING_FLAG_FONT_SCRIPT, 0, 0, dialog ); window_push( WINDOW_ID_SCRIPT_SPEAK + 2, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_SPRITE, dir_flag | WINDOW_FLAG_SPRITE_BORDER_SINGLE, WINDOW_PLACEMENT_CENTER, 6, WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, fg, bg, 0, 0, sprite, NULL ); 
 
-#define window_prefab_system_dialog( dialog, state, t, fg, bg ) window_push( WINDOW_ID_SCRIPT_SPEAK, 0, WINDOW_TYPE_WINDOW, WINDOW_FLAG_MODAL, SCREEN_MAP_X, WINDOW_PLACEMENT_CENTER, SCREEN_MAP_W, 64, fg, bg, 0, 0, 0, NULL, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 1, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_LABEL, 0, WINDOW_PLACEMENT_CENTER, 30, WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER, fg, bg, 0, 0, 0, dialog, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 2, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_SPRITE, MOBILE_DIR_SOUTH | WINDOW_FLAG_SPRITE_BORDER_SINGLE, WINDOW_PLACEMENT_CENTER, 6, WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, fg, bg, 0, 0, state->player.sprite, NULL, state, t ); 
+#define window_prefab_system_dialog( dialog, fg, bg ) window_push( WINDOW_ID_SCRIPT_SPEAK, 0, WINDOW_TYPE_WINDOW, WINDOW_FLAG_MODAL, SCREEN_MAP_X, WINDOW_PLACEMENT_CENTER, SCREEN_MAP_W, 64, fg, bg, 0, 0, 0, NULL ); window_push( WINDOW_ID_SCRIPT_SPEAK + 1, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_LABEL, 0, WINDOW_PLACEMENT_CENTER, 30, WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER, fg, bg, 0, 0, 0, dialog ); window_push( WINDOW_ID_SCRIPT_SPEAK + 2, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_SPRITE, MOBILE_DIR_SOUTH | WINDOW_FLAG_SPRITE_BORDER_SINGLE, WINDOW_PLACEMENT_CENTER, 6, WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, fg, bg, 0, 0, state->player.sprite, NULL ); 
 
 /**
  * \brief Global initialization for the window subsystem. Runs at startup.
@@ -219,7 +217,7 @@ void window_init();
  */
 void window_shutdown();
 
-int16_t window_draw_all( struct DSEKAI_STATE* state, struct TILEMAP* t );
+int16_t window_draw_all();
 
 /**
  * \brief Push a new window onto the global window stack.
@@ -231,51 +229,45 @@ int16_t window_draw_all( struct DSEKAI_STATE* state, struct TILEMAP* t );
  * \param h The height of the window in pixels.
  * \param frame_idx The index of the window frame to use.
  * \param windows Locked ::MEMORY_PTR to the global window list.
- * \param state ::MEMORY_PTR to the global engine ::DSEKAI_STATE.
  */
 int16_t window_push(
    uint16_t id, uint16_t parent_id, uint8_t type, uint8_t flags,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, uint8_t render_flags,
-   int32_t data_scalar, RESOURCE_ID data_res_id, const char* data_string,
-   struct DSEKAI_STATE* state, struct TILEMAP* t );
+   int32_t data_scalar, RESOURCE_ID data_res_id, const char* data_string );
 
 /**
  * \brief Destroy the top-most onscreen WINDOW with the given WINDOW::id.
  * \param id WINDOW::id to search for and eliminate.
  * \param windows Locked ::MEMORY_PTR to the global window list.
  */
-void window_pop( uint16_t id, struct DSEKAI_STATE* state );
+void window_pop( uint16_t id );
 
-void window_refresh( uint16_t w_id, struct DSEKAI_STATE* state );
+void window_refresh( uint16_t w_id );
 
 /**
  * \brief Determine if there is a WINDOW_FLAG_MODAL WINDOW on-screen.
  * \param windows Locked ::MEMORY_PTR to the global window list.
  * \return 0 if no modal windows showing, 1+ otherwise.
  */
-int16_t window_modal( struct DSEKAI_STATE* state );
+int16_t window_modal();
 
 #define WINDOW_CB_TABLE( f ) f( 0, LABEL ) f( 1, BUTTON ) f( 2, CHECK ) f( 3, SPRITE ) f( 4, WINDOW )
 
-typedef int16_t (*WINDOW_CB_DRAW)(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX] );
+typedef int16_t (*WINDOW_CB_DRAW)( uint16_t w_id, struct WINDOW* windows );
 
 /**
  * \return 1 if successful and 0 otherwise.
  */
 typedef uint8_t (*WINDOW_CB_SZ)(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   int16_t r[2] );
+   uint16_t w_id, struct WINDOW* windows, int16_t r[2] );
 
 
 
 #ifdef WINDOW_C
 
 static MEMORY_HANDLE g_frames_handle = NULL;
-static char g_window_num_buf[WINDOW_NUM_BUFFER_SZ] = "";
+static MEMORY_HANDLE g_windows_handle = NULL;
 
 static const int16_t gc_window_screen_coords[4] = {
    0, 0, SCREEN_MAP_W, SCREEN_MAP_H
@@ -285,11 +277,11 @@ static int16_t g_window_screen_grid[4] = {
    0, 0, 0, 0
 };
 
-#define WINDOW_CB_DRAW_TABLE_PROTOTYPES( idx, name ) static int16_t window_draw_ ## name( uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX] );
+#define WINDOW_CB_DRAW_TABLE_PROTOTYPES( idx, name ) static int16_t window_draw_ ## name( uint16_t w_id, struct WINDOW* windows );
 
 WINDOW_CB_TABLE( WINDOW_CB_DRAW_TABLE_PROTOTYPES );
 
-#define WINDOW_CB_SZ_TABLE_PROTOTYPES( idx, name ) static uint8_t window_sz_ ## name( uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX], int16_t r[2] );
+#define WINDOW_CB_SZ_TABLE_PROTOTYPES( idx, name ) static uint8_t window_sz_ ## name( uint16_t w_id, struct WINDOW* windows, int16_t r[2] );
 
 WINDOW_CB_TABLE( WINDOW_CB_SZ_TABLE_PROTOTYPES );
 

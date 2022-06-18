@@ -533,8 +533,7 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
       WINDOW_ID_STATUS, 0, WINDOW_TYPE_WINDOW, 0,
       0, SCREEN_MAP_Y + SCREEN_MAP_H, STATUS_WINDOW_W, STATUS_WINDOW_H,
       GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
-      /* TODO: Provide the map if needed. */
-      0, 0, NULL, state, NULL );
+      0, 0, NULL );
 
    /* Force reset the weather to start the animation. */
    map = (struct TILEMAP*)memory_lock( state->map_handle );
@@ -555,7 +554,7 @@ cleanup:
 
 void topdown_shutdown( struct DSEKAI_STATE* state ) {
    debug_printf( 3, "shutting down topdown engine..." );
-   window_pop( WINDOW_ID_STATUS, state );
+   window_pop( WINDOW_ID_STATUS );
 }
 
 int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
@@ -634,11 +633,11 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
 
          if( 0 == plot->crop_gid ) {
             window_prefab_system_dialog(
-               "There is no crop\ngrowing here!", state, map,
+               "There is no crop\ngrowing here!",
                WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
          } else if( CROP_STAGE_MAX > (CROP_FLAG_STAGE_MASK & plot->flags) ) {
             window_prefab_system_dialog(
-               "This crop is\nnot ready!", state, map,
+               "This crop is\nnot ready!",
                WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
          } else {
             crop_harvest( ITEM_OWNER_PLAYER, plot, state, map );

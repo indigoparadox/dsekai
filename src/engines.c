@@ -282,11 +282,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       }
    }
 
-   map = (struct TILEMAP*)memory_lock( state->map_handle );
-   if( NULL != map ) {
-      window_draw_all( state, map );
-      map = (struct TILEMAP*)memory_unlock( state->map_handle );
-   }
+   window_draw_all();
    
    /* Draw foreground animations after anything else. */
    animate_frame( ANIMATE_FLAG_FG );
@@ -323,7 +319,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    } else if( INPUT_KEY_OK == in_char ) {
       /* Try to close any windows that are open. */
       debug_printf( 1, "speech window requests closed by user" );
-      window_pop( WINDOW_ID_SCRIPT_SPEAK, state );
+      window_pop( WINDOW_ID_SCRIPT_SPEAK );
       map = (struct TILEMAP*)memory_lock( state->map_handle );
       if( NULL != map ) {
          tilemap_refresh_tiles( map );

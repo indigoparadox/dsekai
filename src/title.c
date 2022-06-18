@@ -49,7 +49,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
       WINDOW_PLACEMENT_CENTER,
       SCREEN_H - (TILE_H * 5), TILE_H * 6, TILE_W * 3,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
-      0, 0, NULL, state, NULL );
+      0, 0, NULL );
 
    for( i = 0 ; TITLE_OPTIONS_COUNT > i ; i++ ) {
       if( gstate->option_high == i ) {
@@ -67,7 +67,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
          WINDOW_PLACEMENT_GRID, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
-         0, 0, gc_title_options[i], state, NULL );
+         0, 0, gc_title_options[i] );
    }
 
    gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
@@ -188,7 +188,7 @@ void title_draw( struct DSEKAI_STATE* state ) {
          SPRITE_W, SPRITE_H );
    }
 
-   window_refresh( WINDOW_ID_TITLE_MENU, state );
+   window_refresh( WINDOW_ID_TITLE_MENU );
 
 #endif /* !NO_TITLE */
 
@@ -212,7 +212,7 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
    case INPUT_KEY_UP:
       if( 0 < gstate->option_high ) {
          gstate->option_high--;
-         window_pop( WINDOW_ID_TITLE_MENU, state );
+         window_pop( WINDOW_ID_TITLE_MENU );
          redraw_menu = 1;
       }
       break;
@@ -220,14 +220,14 @@ int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
    case INPUT_KEY_DOWN:
       if( TITLE_OPTIONS_COUNT > gstate->option_high + 1 ) {
          gstate->option_high++;
-         window_pop( WINDOW_ID_TITLE_MENU, state );
+         window_pop( WINDOW_ID_TITLE_MENU );
          redraw_menu = 1;
       }
       break;
 
    case INPUT_KEY_OK:
 
-      window_pop( WINDOW_ID_TITLE_MENU, state );
+      window_pop( WINDOW_ID_TITLE_MENU );
 
 #ifdef NO_ENGINE_POV
       if( 1 == gstate->option_high ) {

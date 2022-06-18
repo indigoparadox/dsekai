@@ -4,17 +4,6 @@
 
 /* === Static Utility Functions === */
 
-static void window_print_all( struct WINDOW* windows ) {
-   /*
-   int16_t i = 0;
-
-   for( i = 1 ; DSEKAI_WINDOWS_MAX > i ; i++ ) {
-      debug_printf( 1, "windows[%d] id: %d parent: %d flags: %u",
-         i, windows[i].id, windows[i].parent_id, windows[i].flags );
-   }
-   */
-}
-
 static struct WINDOW* window_get( uint16_t id, struct WINDOW* windows ) {
    int16_t i = 0;
 
@@ -98,7 +87,7 @@ static void window_placement(
 
 static int16_t window_sizing(
    int16_t w_id, int16_t dimension, uint8_t w_h,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX]
+   struct WINDOW* windows
 ) {
    int16_t win_sz[2];
    int16_t retval = 0;
@@ -162,9 +151,7 @@ static void window_draw_text(
 
 /* === Drawing Callbacks === */
 
-static int16_t window_draw_WINDOW(
-   uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX]
-) {
+static int16_t window_draw_WINDOW( uint16_t w_id, struct WINDOW* windows ) {
    struct WINDOW_FRAME* frames = NULL;
    int16_t x = 0,
       y = 0,
@@ -292,17 +279,12 @@ cleanup:
    return blit_retval;
 }
 
-static int16_t window_draw_BUTTON(
-   uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX]
-) {
+static int16_t window_draw_BUTTON( uint16_t w_id, struct WINDOW* windows ) {
    /* TODO */
    return 1;
 }
 
-static int16_t window_draw_CHECK(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX]
-) {
+static int16_t window_draw_CHECK( uint16_t w_id, struct WINDOW* windows ) {
    /* TODO */
    return 1;
 }
@@ -324,17 +306,14 @@ int16_t window_get_text(
    } else if( WINDOW_FLAG_TEXT_NUM == (WINDOW_FLAG_TEXT_NUM & c->flags) ) {
       sz_out = dio_itoa(
          buffer, buffer_sz, c->data.scalar, 10 );
-      str_ptr = g_window_num_buf;
-      debug_printf( 0, "text num: %s (%d)", str_ptr, sz_out );
+      debug_printf( 0, "text num: %s (%d)", buffer, sz_out );
    
    }
 
    return sz_out;
 }
 
-static int16_t window_draw_LABEL(
-   uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX]
-) {
+static int16_t window_draw_LABEL( uint16_t w_id, struct WINDOW* windows ) {
    int16_t str_sz = 0;
    char str_ptr[WINDOW_STRING_SZ_MAX] = { 0 };
    struct WINDOW* c = NULL,
@@ -353,9 +332,7 @@ static int16_t window_draw_LABEL(
    return 1;
 }
 
-static int16_t window_draw_SPRITE(
-   uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX]
-) {
+static int16_t window_draw_SPRITE( uint16_t w_id, struct WINDOW* windows ) {
    int16_t offset_sprite = 0,
       offset_x = 0,
       offset_y = 0;
@@ -409,36 +386,28 @@ static int16_t window_draw_SPRITE(
 /* === Sizing Callbacks === */
 
 static uint8_t window_sz_WINDOW(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   int16_t r[2]
+   uint16_t w_id, struct WINDOW* windows, int16_t r[2]
 ) {
    /* TODO */
    return 0;
 }
 
 static uint8_t window_sz_BUTTON(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   int16_t r[2]
+   uint16_t w_id, struct WINDOW* windows, int16_t r[2]
 ) {
    /* TODO */
    return 0;
 }
 
 static uint8_t window_sz_CHECK(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   int16_t r[2]
+   uint16_t w_id, struct WINDOW* windows, int16_t r[2]
 ) {
    /* TODO */
    return 0;
 }
 
 static uint8_t window_sz_LABEL(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   int16_t r[2]
+   uint16_t w_id, struct WINDOW* windows, int16_t r[2]
 ) {
    int16_t str_sz = 0;
    struct GRAPHICS_RECT sz;
@@ -458,9 +427,7 @@ static uint8_t window_sz_LABEL(
 }
 
 static uint8_t window_sz_SPRITE(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   int16_t r[2]
+   uint16_t w_id, struct WINDOW* windows, int16_t r[2]
 ) {
    /* TODO: Verify sprite exists. */
    r[0] = SPRITE_W + 4; /* For border. */
@@ -474,7 +441,13 @@ void window_init() {
    struct WINDOW_FRAME* frames = NULL;
 
    debug_printf( 1, "initalizing windowing system..." );
+
+   g_windows_handle =
+      memory_alloc( sizeof( struct WINDOW ), DSEKAI_WINDOWS_MAX );
+   assert( (MEMORY_HANDLE)NULL != g_windows_handle );
+
    g_frames_handle = memory_alloc( sizeof( struct WINDOW_FRAME ), 1 );
+   assert( (MEMORY_HANDLE)NULL != g_frames_handle );
    frames = (struct WINDOW_FRAME*)memory_lock( g_frames_handle );
    /* memory_copy_ptr(
       (MEMORY_PTR)frames, (MEMORY_PTR)&gc_frame_cm_checker,
@@ -506,20 +479,22 @@ void window_init() {
 }
 
 void window_shutdown() {
+   /* TODO: Verify all windows have closed/freed their resources. */
+   memory_free( g_windows_handle );
    memory_free( g_frames_handle );
 }
 
-int16_t window_draw_all( struct DSEKAI_STATE* state, struct TILEMAP* t ) {
+int16_t window_draw_all() {
    int16_t i = 0,
       blit_retval = 1;
    struct WINDOW* windows = NULL;
 
-   windows = (struct WINDOW*)memory_lock( state->windows_handle );
+   windows = (struct WINDOW*)memory_lock( g_windows_handle );
    assert( NULL != windows );
 
    debug_printf( 0, "starting window drawing..." );
 
-   for( i = DSEKAI_WINDOWS_MAX - 1; 1 <= i ; i-- ) {
+   for( i = DSEKAI_WINDOWS_MAX - 1; 1 /* TODO */ <= i ; i-- ) {
       /* Only draw active windows. Those windows will recurse to draw their
        * children.
        */
@@ -534,6 +509,7 @@ int16_t window_draw_all( struct DSEKAI_STATE* state, struct TILEMAP* t ) {
       assert( 0 == windows[i].coords[GUI_W] % PATTERN_W );
       assert( 0 == windows[i].coords[GUI_H] % PATTERN_H );
 
+      assert( NULL != windows );
       blit_retval = gc_window_draw_callbacks[windows[i].type](
          windows[i].id, windows );
       if( !blit_retval ) {
@@ -546,7 +522,9 @@ int16_t window_draw_all( struct DSEKAI_STATE* state, struct TILEMAP* t ) {
 
 cleanup:
 
-   windows = (struct WINDOW*)memory_unlock( state->windows_handle );
+   if( NULL != windows ) {
+      windows = (struct WINDOW*)memory_unlock( g_windows_handle );
+   }
 
    return blit_retval;
 }
@@ -555,17 +533,16 @@ int16_t window_push(
    uint16_t id, uint16_t parent_id, uint8_t type, uint8_t flags,
    int16_t x, int16_t y, int16_t w, int16_t h,
    GRAPHICS_COLOR fg, GRAPHICS_COLOR bg, uint8_t render_flags,
-   int32_t data_scalar, RESOURCE_ID data_res_id, const char* data_string,
-   struct DSEKAI_STATE* state, struct TILEMAP* t
+   int32_t data_scalar, RESOURCE_ID data_res_id, const char* data_string
 ) {
    int16_t retval = 0,
       string_sz = 0;
    struct WINDOW* window_new = NULL,
-      * parent = NULL;
-   struct WINDOW* windows = NULL;
+      * parent = NULL,
+      * windows = NULL;
    char* str_ptr = NULL;
 
-   windows = (struct WINDOW*)memory_lock( state->windows_handle );
+   windows = (struct WINDOW*)memory_lock( g_windows_handle );
    assert( NULL != windows );
 
    assert( 0 != id );
@@ -644,23 +621,21 @@ int16_t window_push(
 
 cleanup:
 
-   windows = (struct WINDOW*)memory_unlock( state->windows_handle );
+   windows = (struct WINDOW*)memory_unlock( g_windows_handle );
 
    return retval;
 }
 
-void window_pop( uint16_t id, struct DSEKAI_STATE* state ) {
+void window_pop( uint16_t id ) {
    int16_t i = 0,
       id_recurse = 0;
    struct WINDOW* window_out = NULL;
    struct WINDOW* windows = NULL;
 
-   windows = (struct WINDOW*)memory_lock( state->windows_handle );
+   windows = (struct WINDOW*)memory_lock( g_windows_handle );
    assert( NULL != windows );
 
-   window_print_all( windows );
-
-   debug_printf( 1, "popping window %u...", id );
+   debug_printf( 0, "popping window %u...", id );
 
    /* Deactivate any children of the window. */
    for( i = 1 ; DSEKAI_WINDOWS_MAX > i ; i++ ) {
@@ -670,9 +645,9 @@ void window_pop( uint16_t id, struct DSEKAI_STATE* state ) {
       ) {
          /* Unlock handle before recursing. */
          id_recurse = windows[i].id;
-         windows = (struct WINDOW*)memory_unlock( state->windows_handle );
-         window_pop( id_recurse, state );
-         windows = (struct WINDOW*)memory_lock( state->windows_handle );
+         windows = (struct WINDOW*)memory_unlock( g_windows_handle );
+         window_pop( id_recurse );
+         windows = (struct WINDOW*)memory_lock( g_windows_handle );
          assert( NULL != windows );
       }
    }
@@ -691,16 +666,14 @@ void window_pop( uint16_t id, struct DSEKAI_STATE* state ) {
 
    debug_printf( 0, "window %d popped", id );
 
-   window_print_all( windows );
-
-   windows = (struct WINDOW*)memory_unlock( state->windows_handle );
+   windows = (struct WINDOW*)memory_unlock( g_windows_handle );
 }
 
-void window_refresh( uint16_t w_id, struct DSEKAI_STATE* state ) {
+void window_refresh( uint16_t w_id ) {
    struct WINDOW* windows = NULL,
       * w = NULL;
 
-   windows = (struct WINDOW*)memory_lock( state->windows_handle );
+   windows = (struct WINDOW*)memory_lock( g_windows_handle );
    assert( NULL != windows );
 
    w = window_get( w_id, windows );
@@ -708,15 +681,15 @@ void window_refresh( uint16_t w_id, struct DSEKAI_STATE* state ) {
       w->flags |= WINDOW_FLAG_DIRTY;
    }
 
-   windows = (struct WINDOW*)memory_unlock( state->windows_handle );
+   windows = (struct WINDOW*)memory_unlock( g_windows_handle );
 }
 
-int16_t window_modal( struct DSEKAI_STATE* state ) {
+int16_t window_modal() {
    int i = 0;
    int16_t modal = 0;
    struct WINDOW* windows = NULL;
 
-   windows = (struct WINDOW*)memory_lock( state->windows_handle );
+   windows = (struct WINDOW*)memory_lock( g_windows_handle );
    assert( NULL != windows );
 
    for( i = 1 ; DSEKAI_WINDOWS_MAX > i ; i++ ) {
@@ -728,7 +701,7 @@ int16_t window_modal( struct DSEKAI_STATE* state ) {
       }
    }
 
-   windows = (struct WINDOW*)memory_unlock( state->windows_handle );
+   windows = (struct WINDOW*)memory_unlock( g_windows_handle );
 
    return modal;
 }

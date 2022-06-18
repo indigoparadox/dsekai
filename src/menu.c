@@ -23,7 +23,7 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
       0,
       SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
-      0, 0, NULL, state, NULL );
+      0, 0, NULL );
    
    while( '\0' != gc_menu_tokens[i][0] ) {
       if( state->menu.highlight_id == i ) {
@@ -39,7 +39,7 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
-         0, 0, gc_menu_tokens[i], state, NULL );
+         0, 0, gc_menu_tokens[i] );
       i++;
    }  
 }
@@ -80,7 +80,7 @@ int16_t menu_handler_main( char in_char, struct DSEKAI_STATE* state ) {
       goto skip_refresh;
    }
 
-   window_pop( MENU_WINDOW_ID, state );
+   window_pop( MENU_WINDOW_ID );
    state->menu.flags |= MENU_FLAG_DIRTY;
 
 skip_refresh:
@@ -107,8 +107,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          (SCREEN_MAP_W / 2) - TILE_W,
          SCREEN_MAP_H / 2,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
-         0, 0, NULL,
-         state, NULL );
+         0, 0, NULL );
 
       /* This relies on the item_open_sel_mask being 0-3. */
       for( i = 0 ; i < 4 ; i++ ) {
@@ -128,7 +127,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
             10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
             WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
             color, WINDOW_PREFAB_DEFAULT_BG(), flags,
-            0, 0, gc_menu_item_sel_msgs[i], state, NULL );
+            0, 0, gc_menu_item_sel_msgs[i] );
       }
    }
 
@@ -139,8 +138,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       (SCREEN_MAP_W / 2) + TILE_W,
       SCREEN_MAP_H,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
-      0, 0, NULL,
-      state, NULL );
+      0, 0, NULL );
 
    window_push(
       MENU_WINDOW_INFO_ID, 0, WINDOW_TYPE_WINDOW, 0,
@@ -149,8 +147,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       (SCREEN_MAP_W / 2) - TILE_W,
       SCREEN_MAP_H / 2,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
-      0, 0, NULL,
-      state, NULL );
+      0, 0, NULL );
    
    /*
    window_push(
@@ -188,7 +185,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
             WINDOW_PLACEMENT_CENTER, 6,
             WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
             WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(),
-            0, 0, items[i].sprite, NULL, state, NULL );
+            0, 0, items[i].sprite, NULL );
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
          flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
@@ -202,7 +199,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(),
          flags | GRAPHICS_STRING_FLAG_ALL_CAPS,
-         0, 0, items[i].name, state, NULL );
+         0, 0, items[i].name );
 
       /* item count. */
       window_push(
@@ -211,7 +208,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_PLACEMENT_RIGHT_BOTTOM, WINDOW_PLACEMENT_GRID,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
-         items[i].count, 0, NULL, state, NULL );
+         items[i].count, 0, NULL );
 
       player_item_idx++;
    }  
@@ -403,10 +400,10 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
    }
 
    /* Close all item menu windows to and refresh. */
-   window_pop( MENU_WINDOW_ID, state );
-   window_pop( MENU_WINDOW_INFO_ID, state );
-   /* window_pop( MENU_WINDOW_STATUS_ID, state ); */
-   window_pop( MENU_WINDOW_ITEM_SEL_ID, state );
+   window_pop( MENU_WINDOW_ID );
+   window_pop( MENU_WINDOW_INFO_ID );
+   /* window_pop( MENU_WINDOW_STATUS_ID ); */
+   window_pop( MENU_WINDOW_ITEM_SEL_ID );
 
    state->menu.flags |= MENU_FLAG_DIRTY;
 
@@ -424,8 +421,7 @@ void menu_renderer_craft( struct DSEKAI_STATE* state ) {
       SCREEN_MAP_W / 2,
       SCREEN_MAP_H / 2,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
-      0, 0, NULL,
-      state, NULL );
+      0, 0, NULL );
 
 }
 
@@ -479,7 +475,7 @@ void menu_close( struct DSEKAI_STATE* state ) {
    struct TILEMAP* map = NULL;
 
    debug_printf( 3, "closing menu..." );
-   window_pop( MENU_WINDOW_ID, state );
+   window_pop( MENU_WINDOW_ID );
    state->menu.menu_id = -1;
    state->menu.highlight_id = -1;
    map = (struct TILEMAP*)memory_lock( state->map_handle );

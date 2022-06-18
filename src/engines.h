@@ -238,13 +238,6 @@ struct DSEKAI_STATE {
    uint16_t ani_sprite_x;
 
    /**
-    * \brief Contains ::WINDOW structs currently on-screen.
-    *
-    * \attention This field should not be serialized!
-    */
-   MEMORY_HANDLE windows_handle;
-
-   /**
     * \brief When holding a valid string, triggers the map change process.
     *
     * \attention This field should not be serialized!

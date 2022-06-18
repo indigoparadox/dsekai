@@ -43,7 +43,7 @@ int8_t item_use_seed(
    if( NULL == plot ) {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "The soil is\ntoo firm!", state, t,
+         "The soil is\ntoo firm!",
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       error_printf( "could not find plot" );
@@ -57,7 +57,7 @@ int8_t item_use_seed(
    } else {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "This won't\ngrow here!", state, t,
+         "This won't\ngrow here!",
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       error_printf( "unable to plant seed" );
@@ -138,7 +138,7 @@ int8_t item_use_editor(
       /* TODO: Display warning message on-screen. */
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "This map cannot\nbe edited!", state, t,
+         "This map cannot\nbe edited!",
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       error_printf( "unable to edit current tilemap" );
@@ -225,7 +225,7 @@ int8_t item_use_hoe(
    if( 0 > crop_idx ) {
 #ifdef SCREEN_W
       window_prefab_system_dialog(
-         "Too many crops\nalready planted!", state, t,
+         "Too many crops\nalready planted!",
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCREEN_W */
       retval = ITEM_USED_FAILED;
