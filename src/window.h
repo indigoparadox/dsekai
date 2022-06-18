@@ -14,7 +14,7 @@ union CONTROL_DATA {
    int32_t scalar;
    /*! \brief Identifier for an asset (e.g. for CONTROL_TYPE_SPRITE). */
    RESOURCE_ID res_id;
-   char* string;
+   MEMORY_HANDLE string;
    int16_t grid[4];
 };
 
@@ -124,27 +124,15 @@ struct WINDOW {
  * \brief WINDOW::flags indicating control option has been selected.
  */
 #define WINDOW_FLAG_CHECKED       0x10
-/**
- * \brief WINDOW::flags for WINDOW_TYPE_LABEL indicating text comes from
- *        ::TILEMAP:strpool.
- */
-#define WINDOW_FLAG_TEXT_TILEMAP   0x10
-/**
- * \brief WINDOW::flags for WINDOW_TYPE_LABEL indicating text comes from
- *        ::gc_menu_tokens.
- */
-#define WINDOW_FLAG_TEXT_MENU      0x20
-/**
- * \brief WINDOW::flags for WINDOW_TYPE_LABEL indicating text comes from
- *        the name of an item in ::DSEKAI_STATE:items.
- */
-#define WINDOW_FLAG_TEXT_ITEM      0x40
+
 /**
  * \brief WINDOW::flags for WINDOW_TYPE_LABEL indicating text is a number.
  */
-#define WINDOW_FLAG_TEXT_NUM       0x80
+#define WINDOW_FLAG_TEXT_NUM        0x10
 
-#define WINDOW_FLAG_TEXT_PTR (WINDOW_FLAG_TEXT_TILEMAP | WINDOW_FLAG_TEXT_MENU | WINDOW_FLAG_TEXT_MENU | WINDOW_FLAG_TEXT_ITEM)      
+#define WINDOW_FLAG_TEXT_PTR        0x20
+
+#define WINDOW_FLAG_TEXT_MASK       0x30
 
 #define WINDOW_FLAG_SPRITE_DIR_MASK 0x30
 
@@ -156,6 +144,8 @@ struct WINDOW {
 #define WINDOW_FLAG_SPRITE_BORDER_SINGLE  0x40
 
 /*! \} */
+
+#define WINDOW_STRING_SZ_MAX 100
 
 /**
  * \addtogroup dsekai_gui_controls_placement GUI Control Placement
@@ -215,9 +205,9 @@ struct WINDOW {
  * \param state Current global ::DSEKAI_STATE.
  * \param state ::MEMORY_PTR to the global engine ::DSEKAI_STATE.
  */
-#define window_prefab_dialog( dialog, sprite, dir_flag, state, t, fg, bg ) window_push( WINDOW_ID_SCRIPT_SPEAK, 0, WINDOW_TYPE_WINDOW, WINDOW_FLAG_MODAL, SCREEN_MAP_X, WINDOW_PLACEMENT_CENTER, SCREEN_MAP_W, 64, fg, bg, 0, 0, 0, NULL, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 1, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_TILEMAP, WINDOW_PLACEMENT_CENTER, 30, WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER, fg, bg, GRAPHICS_STRING_FLAG_FONT_SCRIPT, dialog, 0, NULL, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 2, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_SPRITE, dir_flag | WINDOW_FLAG_SPRITE_BORDER_SINGLE, WINDOW_PLACEMENT_CENTER, 6, WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, fg, bg, 0, 0, sprite, NULL, state, t ); 
+#define window_prefab_dialog( dialog, sprite, dir_flag, state, t, fg, bg ) window_push( WINDOW_ID_SCRIPT_SPEAK, 0, WINDOW_TYPE_WINDOW, WINDOW_FLAG_MODAL, SCREEN_MAP_X, WINDOW_PLACEMENT_CENTER, SCREEN_MAP_W, 64, fg, bg, 0, 0, 0, NULL, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 1, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_LABEL, 0, WINDOW_PLACEMENT_CENTER, 30, WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER, fg, bg, GRAPHICS_STRING_FLAG_FONT_SCRIPT, 0, 0, dialog, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 2, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_SPRITE, dir_flag | WINDOW_FLAG_SPRITE_BORDER_SINGLE, WINDOW_PLACEMENT_CENTER, 6, WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, fg, bg, 0, 0, sprite, NULL, state, t ); 
 
-#define window_prefab_system_dialog( dialog, state, t, fg, bg ) window_push( WINDOW_ID_SCRIPT_SPEAK, 0, WINDOW_TYPE_WINDOW, WINDOW_FLAG_MODAL, SCREEN_MAP_X, WINDOW_PLACEMENT_CENTER, SCREEN_MAP_W, 64, fg, bg, 0, 0, 0, NULL, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 1, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_PTR, WINDOW_PLACEMENT_CENTER, 30, WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER, fg, bg, 0, 0, 0, dialog, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 2, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_SPRITE, MOBILE_DIR_SOUTH | WINDOW_FLAG_SPRITE_BORDER_SINGLE, WINDOW_PLACEMENT_CENTER, 6, WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, fg, bg, 0, 0, state->player.sprite, NULL, state, t ); 
+#define window_prefab_system_dialog( dialog, state, t, fg, bg ) window_push( WINDOW_ID_SCRIPT_SPEAK, 0, WINDOW_TYPE_WINDOW, WINDOW_FLAG_MODAL, SCREEN_MAP_X, WINDOW_PLACEMENT_CENTER, SCREEN_MAP_W, 64, fg, bg, 0, 0, 0, NULL, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 1, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_LABEL, 0, WINDOW_PLACEMENT_CENTER, 30, WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER, fg, bg, 0, 0, 0, dialog, state, t ); window_push( WINDOW_ID_SCRIPT_SPEAK + 2, WINDOW_ID_SCRIPT_SPEAK, WINDOW_TYPE_SPRITE, MOBILE_DIR_SOUTH | WINDOW_FLAG_SPRITE_BORDER_SINGLE, WINDOW_PLACEMENT_CENTER, 6, WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, fg, bg, 0, 0, state->player.sprite, NULL, state, t ); 
 
 /**
  * \brief Global initialization for the window subsystem. Runs at startup.
@@ -270,9 +260,7 @@ int16_t window_modal( struct DSEKAI_STATE* state );
 
 typedef int16_t (*WINDOW_CB_DRAW)(
    uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t );
+   struct WINDOW windows[DSEKAI_WINDOWS_MAX] );
 
 /**
  * \return 1 if successful and 0 otherwise.
@@ -280,8 +268,6 @@ typedef int16_t (*WINDOW_CB_DRAW)(
 typedef uint8_t (*WINDOW_CB_SZ)(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t,
    int16_t r[2] );
 
 
@@ -299,11 +285,11 @@ static int16_t g_window_screen_grid[4] = {
    0, 0, 0, 0
 };
 
-#define WINDOW_CB_DRAW_TABLE_PROTOTYPES( idx, name ) static int16_t window_draw_ ## name( uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX], struct DSEKAI_STATE* state, struct TILEMAP* t );
+#define WINDOW_CB_DRAW_TABLE_PROTOTYPES( idx, name ) static int16_t window_draw_ ## name( uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX] );
 
 WINDOW_CB_TABLE( WINDOW_CB_DRAW_TABLE_PROTOTYPES );
 
-#define WINDOW_CB_SZ_TABLE_PROTOTYPES( idx, name ) static uint8_t window_sz_ ## name( uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX], struct DSEKAI_STATE* state, struct TILEMAP* t, int16_t r[2] );
+#define WINDOW_CB_SZ_TABLE_PROTOTYPES( idx, name ) static uint8_t window_sz_ ## name( uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX], int16_t r[2] );
 
 WINDOW_CB_TABLE( WINDOW_CB_SZ_TABLE_PROTOTYPES );
 

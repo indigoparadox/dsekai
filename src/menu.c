@@ -35,8 +35,7 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
       }
 
       window_push(
-         WINDOW_ID_MENU_LABEL_ITEM + i, MENU_WINDOW_ID, WINDOW_TYPE_LABEL,
-         WINDOW_FLAG_TEXT_PTR,
+         WINDOW_ID_MENU_LABEL_ITEM + i, MENU_WINDOW_ID, WINDOW_TYPE_LABEL, 0,
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
@@ -94,6 +93,10 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       player_item_idx = 0;
    GRAPHICS_COLOR color;
    uint8_t flags = 0;
+   struct ITEM* items = NULL;
+
+   items = (struct ITEM*)memory_lock( state->items_handle );
+   assert( NULL != items );
 
    if( 0 != (MENU_FLAG_ITEM_OPEN_SEL_MASK & state->menu.flags) ) {
       /* Render the implicit use/craft/drop menu. */
@@ -121,15 +124,13 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
 
          window_push(
             WINDOW_ID_MENU_LABEL_ITEM_SEL_USE + i, MENU_WINDOW_ITEM_SEL_ID,
-            WINDOW_TYPE_LABEL,
-            WINDOW_FLAG_TEXT_PTR,
+            WINDOW_TYPE_LABEL, 0,
             10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
             WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
             color, WINDOW_PREFAB_DEFAULT_BG(), flags,
             0, 0, gc_menu_item_sel_msgs[i], state, NULL );
       }
    }
-
 
    window_push(
       MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW, 0,
@@ -169,9 +170,8 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
        *       items input handler.
        */
       if(
-         ITEM_FLAG_ACTIVE != 
-            (ITEM_FLAG_ACTIVE & item_get_flags( i, state ) ) ||
-         ITEM_OWNER_PLAYER != item_get_owner( i, state )
+         ITEM_FLAG_ACTIVE != (ITEM_FLAG_ACTIVE & items[i].flags) ||
+         ITEM_OWNER_PLAYER != items[i].owner
       ) {
          continue;
       }
@@ -179,38 +179,39 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       /* Highlight selected item. */
       if( state->menu.highlight_id == player_item_idx ) {
          color = WINDOW_PREFAB_DEFAULT_HL();
-         flags = GRAPHICS_STRING_FLAG_ALL_CAPS | GRAPHICS_STRING_FLAG_OUTLINE;
+         flags = GRAPHICS_STRING_FLAG_OUTLINE;
 
          /* Show item icon in info window. */
-         /* FIXME
          window_push(
             MENU_WINDOW_ITEM_ICON, MENU_WINDOW_INFO_ID, WINDOW_TYPE_SPRITE,
             0,
             WINDOW_PLACEMENT_CENTER, 6,
             WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
             WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(),
-            0, 0, items[i].sprite, NULL, state, NULL ); */
+            0, 0, items[i].sprite, NULL, state, NULL );
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
          flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
       }
 
+      /* item name */
       window_push(
          WINDOW_ID_MENU_LABEL_ITEM + i, MENU_WINDOW_ID,
-         WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_ITEM,
+         WINDOW_TYPE_LABEL, 0,
          10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
-         color, WINDOW_PREFAB_DEFAULT_BG(), flags,
-         i, 0, NULL, state, NULL );
+         color, WINDOW_PREFAB_DEFAULT_BG(),
+         flags | GRAPHICS_STRING_FLAG_ALL_CAPS,
+         0, 0, items[i].name, state, NULL );
 
-      /* FIXME 
+      /* item count. */
       window_push(
          WINDOW_ID_MENU_LABEL_ITEM + 50 + i, MENU_WINDOW_ID,
-         WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_NUM,
+         WINDOW_TYPE_LABEL, 0,
          WINDOW_PLACEMENT_RIGHT_BOTTOM, WINDOW_PLACEMENT_GRID,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
-         color, WINDOW_PREFAB_DEFAULT_BG(), 0,
-         items[i].count, 0, NULL, state, NULL ); */
+         color, WINDOW_PREFAB_DEFAULT_BG(), flags,
+         items[i].count, 0, NULL, state, NULL );
 
       player_item_idx++;
    }  
@@ -228,6 +229,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          0, 0, gc_menu_msgs[0], MENU_WINDOW_ID, state ); */
    }
 
+   items = (struct ITEM*)memory_unlock( state->items_handle );
 }
 
 static int8_t menu_handler_items_use(

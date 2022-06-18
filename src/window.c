@@ -98,8 +98,7 @@ static void window_placement(
 
 static int16_t window_sizing(
    int16_t w_id, int16_t dimension, uint8_t w_h,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX], struct DSEKAI_STATE* state,
-   struct TILEMAP* t
+   struct WINDOW windows[DSEKAI_WINDOWS_MAX]
 ) {
    int16_t win_sz[2];
    int16_t retval = 0;
@@ -121,7 +120,7 @@ static int16_t window_sizing(
       retval = dimension;
 
    } else if(
-      gc_window_sz_callbacks[c->type]( w_id, windows, state, t, win_sz )
+      gc_window_sz_callbacks[c->type]( w_id, windows, win_sz )
    ) {
       c->coords[w_h] = win_sz[w_h - 2];
       debug_printf( 0, "window %d auto-size %d: %d",
@@ -164,10 +163,7 @@ static void window_draw_text(
 /* === Drawing Callbacks === */
 
 static int16_t window_draw_WINDOW(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t
+   uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX]
 ) {
    struct WINDOW_FRAME* frames = NULL;
    int16_t x = 0,
@@ -278,7 +274,7 @@ static int16_t window_draw_WINDOW(
       }
 
       blit_retval = gc_window_draw_callbacks[windows[i].type](
-         windows[i].id, windows, state, t );
+         windows[i].id, windows );
       if( !blit_retval ) {
          error_printf( "error drawing window children!" );
          goto cleanup;
@@ -297,10 +293,7 @@ cleanup:
 }
 
 static int16_t window_draw_BUTTON(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t
+   uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX]
 ) {
    /* TODO */
    return 1;
@@ -308,74 +301,42 @@ static int16_t window_draw_BUTTON(
 
 static int16_t window_draw_CHECK(
    uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t
+   struct WINDOW windows[DSEKAI_WINDOWS_MAX]
 ) {
    /* TODO */
    return 1;
 }
 
-static const char* window_get_text(
-   struct WINDOW* c, const struct DSEKAI_STATE* state,
-   const struct TILEMAP* t, int16_t* sz_out
+int16_t window_get_text(
+   struct WINDOW* c, char* buffer, uint16_t buffer_sz
 ) {
-   const char* str_ptr;
-   struct ITEM* items = NULL;
+   char* str_ptr = NULL;
+   int16_t sz_out = 0;
 
    if( WINDOW_FLAG_TEXT_PTR == (WINDOW_FLAG_TEXT_PTR & c->flags) ) {
       /* Get the string from a directly passed pointer. */
-      str_ptr = (const char*)(c->data.string);
-      /* TODO: Sane maximum length default. */
-      *sz_out = memory_strnlen_ptr( str_ptr, 100 );
-      debug_printf( 0, "text str: %s", str_ptr );
-
-   } else if(
-      WINDOW_FLAG_TEXT_TILEMAP == (WINDOW_FLAG_TEXT_TILEMAP & c->flags)
-   ) {
-      /* Get the string from the tilemap strpool. */
-      if( NULL == t ) {
-         error_printf( "no tilemap provided for strings" );
-         str_ptr = NULL;
-      } else {
-         str_ptr = strpool_get( t->strpool, c->data.scalar, sz_out );
-      }
-
-   } else if( WINDOW_FLAG_TEXT_MENU == (WINDOW_FLAG_TEXT_MENU & c->flags) ) {
-      /* Get the string from the global menu table. */
-      str_ptr = gc_menu_tokens[c->data.scalar];
-      *sz_out = 
-         memory_strnlen_ptr( gc_menu_tokens[c->data.scalar], MENU_TEXT_SZ );
-   
-   } else if( WINDOW_FLAG_TEXT_ITEM == (WINDOW_FLAG_TEXT_ITEM & c->flags) ) {
-      /* Get the string from the player items list. */
-      items = (struct ITEM*)memory_lock( state->items_handle );
-      assert( NULL != items );
-      str_ptr = items[(0xff & c->data.scalar)].name;
-      items = (struct ITEM*)memory_unlock( state->items_handle );
-      *sz_out = memory_strnlen_ptr( str_ptr, ITEM_NAME_SZ );
+      str_ptr = (char*)memory_lock( c->data.string );
+      sz_out = memory_strnlen_ptr( str_ptr, buffer_sz - 1 );
+      debug_printf( 0, "text str: %s (%d)", str_ptr, sz_out );
+      memory_strncpy_ptr( buffer, str_ptr, sz_out );
+      str_ptr = (char*)memory_unlock( c->data.string );
 
    } else if( WINDOW_FLAG_TEXT_NUM == (WINDOW_FLAG_TEXT_NUM & c->flags) ) {
-      *sz_out = dio_itoa(
-         g_window_num_buf, WINDOW_NUM_BUFFER_SZ, c->data.scalar, 10 );
+      sz_out = dio_itoa(
+         buffer, buffer_sz, c->data.scalar, 10 );
       str_ptr = g_window_num_buf;
-      debug_printf( 0, "text num: %s (%d)", str_ptr, *sz_out );
+      debug_printf( 0, "text num: %s (%d)", str_ptr, sz_out );
    
-   } else {
-      str_ptr = NULL;
    }
 
-   return str_ptr;
+   return sz_out;
 }
 
 static int16_t window_draw_LABEL(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t
+   uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX]
 ) {
    int16_t str_sz = 0;
-   const char* str_ptr;
+   char str_ptr[WINDOW_STRING_SZ_MAX] = { 0 };
    struct WINDOW* c = NULL,
       * p = NULL;
 
@@ -384,12 +345,8 @@ static int16_t window_draw_LABEL(
 
    p = window_get( c->parent_id, windows );
 
-   str_ptr = window_get_text( window_get( w_id, windows ), state, t, &str_sz );
-
-   if( NULL == str_ptr ) {
-      error_printf( "invalid string specified to control" );
-      return 0;
-   }
+   str_sz = window_get_text(
+      window_get( w_id, windows ), str_ptr, WINDOW_STRING_SZ_MAX );
 
    window_draw_text( c, p, str_ptr, str_sz );
 
@@ -397,10 +354,7 @@ static int16_t window_draw_LABEL(
 }
 
 static int16_t window_draw_SPRITE(
-   uint16_t w_id,
-   struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t
+   uint16_t w_id, struct WINDOW windows[DSEKAI_WINDOWS_MAX]
 ) {
    int16_t offset_sprite = 0,
       offset_x = 0,
@@ -457,8 +411,6 @@ static int16_t window_draw_SPRITE(
 static uint8_t window_sz_WINDOW(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t,
    int16_t r[2]
 ) {
    /* TODO */
@@ -468,8 +420,6 @@ static uint8_t window_sz_WINDOW(
 static uint8_t window_sz_BUTTON(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t,
    int16_t r[2]
 ) {
    /* TODO */
@@ -479,8 +429,6 @@ static uint8_t window_sz_BUTTON(
 static uint8_t window_sz_CHECK(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t,
    int16_t r[2]
 ) {
    /* TODO */
@@ -490,25 +438,17 @@ static uint8_t window_sz_CHECK(
 static uint8_t window_sz_LABEL(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t,
    int16_t r[2]
 ) {
    int16_t str_sz = 0;
-   const char* str_ptr;
    struct GRAPHICS_RECT sz;
    struct WINDOW* c = NULL;
+   char str_ptr[WINDOW_STRING_SZ_MAX] = { 0 };
 
    c = window_get( w_id, windows );
    assert( NULL != c );
 
-   str_ptr = window_get_text( c, state, t, &str_sz );
-
-   if( NULL == str_ptr ) {
-      error_printf( "invalid string specified to control" );
-      return 0;
-   }
-
+   str_sz = window_get_text( c, str_ptr, WINDOW_STRING_SZ_MAX );
    graphics_string_sz( str_ptr, str_sz, 0, &sz );
 
    r[0] = sz.w;
@@ -520,8 +460,6 @@ static uint8_t window_sz_LABEL(
 static uint8_t window_sz_SPRITE(
    uint16_t w_id,
    struct WINDOW windows[DSEKAI_WINDOWS_MAX],
-   struct DSEKAI_STATE* state,
-   struct TILEMAP* t,
    int16_t r[2]
 ) {
    /* TODO: Verify sprite exists. */
@@ -597,7 +535,7 @@ int16_t window_draw_all( struct DSEKAI_STATE* state, struct TILEMAP* t ) {
       assert( 0 == windows[i].coords[GUI_H] % PATTERN_H );
 
       blit_retval = gc_window_draw_callbacks[windows[i].type](
-         windows[i].id, windows, state, t );
+         windows[i].id, windows );
       if( !blit_retval ) {
          error_printf( "error drawing windows!" );
          goto cleanup;
@@ -620,10 +558,12 @@ int16_t window_push(
    int32_t data_scalar, RESOURCE_ID data_res_id, const char* data_string,
    struct DSEKAI_STATE* state, struct TILEMAP* t
 ) {
-   int16_t retval = 0;
+   int16_t retval = 0,
+      string_sz = 0;
    struct WINDOW* window_new = NULL,
       * parent = NULL;
    struct WINDOW* windows = NULL;
+   char* str_ptr = NULL;
 
    windows = (struct WINDOW*)memory_lock( state->windows_handle );
    assert( NULL != windows );
@@ -663,9 +603,27 @@ int16_t window_push(
 
    /* Sizing callbacks below might need these. */
    if( NULL != data_string ) {
-      window_new->data.string = (char*)data_string;
+      string_sz = memory_strnlen_ptr( data_string, WINDOW_STRING_SZ_MAX );
+      
+      /* Allocate new string handle. */
+      window_new->data.string = memory_alloc( 1, string_sz + 1 );
+      assert( NULL != window_new->data.string );
+
+      /* Copy incoming string into handle. */
+      str_ptr = (char*)memory_lock( window_new->data.string );
+      assert( NULL != str_ptr );
+      memory_strncpy_ptr( str_ptr, data_string, string_sz );
+      str_ptr = (char*)memory_unlock( window_new->data.string );
+
+      /* Ensure flag consistency. */
+      flags &= ~WINDOW_FLAG_TEXT_MASK;
+      flags |= WINDOW_FLAG_TEXT_PTR;
    } else if( 0 != data_scalar ) {
       window_new->data.scalar = data_scalar;
+
+      /* Ensure flag consistency. */
+      flags &= ~WINDOW_FLAG_TEXT_MASK;
+      flags |= WINDOW_FLAG_TEXT_NUM;
    } else if( !resource_compare_id( 0, data_res_id ) ) {
       resource_assign_id( window_new->data.res_id, data_res_id );
    }
@@ -679,8 +637,8 @@ int16_t window_push(
    window_new->parent_id = parent_id;
 
    /* X/Y sizing and placement. Sizing comes first, used for centering. */
-   window_sizing( id, w, GUI_W, windows, state, t );
-   window_sizing( id, h, GUI_H, windows, state, t );
+   window_sizing( id, w, GUI_W, windows );
+   window_sizing( id, h, GUI_H, windows );
    window_placement( window_new, parent, x, GUI_X );
    window_placement( window_new, parent, y, GUI_Y );
 
@@ -722,6 +680,12 @@ void window_pop( uint16_t id, struct DSEKAI_STATE* state ) {
    /* Deactivate the window, itself. */
    window_out = window_get( id, windows );
    if( NULL != window_out ) {
+      if(
+         WINDOW_FLAG_TEXT_PTR == (WINDOW_FLAG_TEXT_PTR & window_out->flags)
+      ) {
+         memory_free( window_out->data.string );
+         window_out->data.string = (MEMORY_HANDLE)NULL;
+      }
       window_out->flags &= ~WINDOW_FLAG_ACTIVE;
    }
 

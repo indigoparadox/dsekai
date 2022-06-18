@@ -150,6 +150,7 @@ unilayer_main() {
    /* while( state->windows_count > 0 ) {
       window_pop( 0, state );
    } */
+   /* TODO: Verify all windows have closed/freed their resources. */
    if( (MEMORY_HANDLE)NULL != state->windows_handle ) {
       memory_free( state->windows_handle );
    }
