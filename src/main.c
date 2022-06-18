@@ -39,6 +39,9 @@ unilayer_main() {
    assert( sizeof( struct DSEKAI_STATE ) < 16384 );
    size_printf( 3, "tilemap", sizeof( struct TILEMAP ) );
    assert( sizeof( struct TILEMAP ) < 16384 );
+   size_printf( 3, "items",
+      sizeof( struct ITEM ) * DSEKAI_ITEMS_MAX );
+   assert( sizeof( struct TILEMAP ) < 16384 );
 
 #ifndef NO_ANIMATE
    size_printf( 3, "animations cache",
