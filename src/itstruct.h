@@ -12,8 +12,20 @@
  *  \brief Structs pertaining to inventory objects.
  */
 
+/**
+ * \addtogroup dsekai_items_flags Item Flags
+ * \brief Flags which affect an individual ::ITEM.
+ * \{
+ */
+
+/**
+ * \brief ITEM::flags bit indicating item exists in the world (and is not
+ *        just a free slot in DSEKAI_STATE::items.
+ */
 #define ITEM_FLAG_ACTIVE      0x01
 #define ITEM_FLAG_CRAFTABLE   0x02
+
+/*! \} */ /* dsekai_items_flags */
 
 /**
  * \relates ITEM_NAME
@@ -62,7 +74,7 @@ struct ITEM {
    uint8_t data; 
    /*! \brief This struct represents this many of this item in a "stack." */
    uint8_t count;
-   /*! \brief System flags pertaining to this item. */
+   /*! \brief \ref dsekai_items_flags pertaining to this item. */
    uint8_t flags;
    /*! \brief If ITEM::owner is ::ITEM_OWNER_NONE, the X coord of this item on
     *         the ::TILEMAP. */

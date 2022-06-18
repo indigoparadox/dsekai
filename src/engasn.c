@@ -27,7 +27,7 @@ int32_t engines_asn_save( const char* save_name, struct DSEKAI_STATE* state ) {
 
    /* version */
    debug_printf( 3, "(offset 0x%02x) writing engine version", idx );
-   idx = asn_write_int( &h_buffer, idx, 1 );
+   idx = asn_write_int( &h_buffer, idx, state->version );
    if( 0 > idx ) {
       error_printf( "error" );
       idx = -1;

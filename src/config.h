@@ -24,11 +24,7 @@
 #define PATTERN_H 16
 
 #ifndef ITEM_INVENTORY_MAX
-#  ifdef PLATFORM_DOS
-#     define ITEM_INVENTORY_MAX 10
-#  else
-#     define ITEM_INVENTORY_MAX 20
-#  endif /* PLATFORM_DOS */
+#define ITEM_INVENTORY_MAX 20
 #endif /* !ITEM_INVENTORY_MAX */
 
 #ifndef SCREEN_MAP_W
@@ -70,21 +66,13 @@
 #endif /* !ANI_SPRITE_COUNTDOWN_MAX */
 
 #ifndef DSEKAI_MOBILES_MAX
-#  ifdef PLATFORM_DOS
-#     define DSEKAI_MOBILES_MAX 10
-#  else
 /*! \brief Maximum count of ::MOBILE existing on a loaded ::TILEMAP. */
-#     define DSEKAI_MOBILES_MAX 20
-#  endif /* PLATFORM_DOS */
+#  define DSEKAI_MOBILES_MAX 20
 #endif /* !MOBILES_MAX */
 
 #ifndef DSEKAI_ITEMS_MAX
-#  ifdef PLATFORM_DOS
-#     define DSEKAI_ITEMS_MAX 20
-#  else
 /*! \brief Maximum number of items existing in the world at any time. */
-#     define DSEKAI_ITEMS_MAX 40
-#  endif /* PLATFORM_DOS */
+#  define DSEKAI_ITEMS_MAX 40
 #endif /* !DSEKAI_ITEMS_MAX */
 
 #ifndef TILEMAP_CROP_DEFS_MAX
@@ -96,11 +84,7 @@
 #endif /* !TILEMAP_CROP_DEFS_MAX */
 
 #ifndef TILEMAP_ITEMS_MAX
-#  ifdef PLATFORM_DOS
-#     define TILEMAP_ITEMS_MAX 10
-#  else
-#     define TILEMAP_ITEMS_MAX 20
-#  endif /* PLATFORM_DOS */
+#  define TILEMAP_ITEMS_MAX 20
 #endif /* !TILEMAP_ITEMS_MAX */
 
 #ifndef TILEMAP_SPAWNS_MAX

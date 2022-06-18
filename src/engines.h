@@ -49,7 +49,7 @@
 #define DSEKAI_TRANSITION_TYPE_CURTAIN    0x00
 #define DSEKAI_TRANSITION_TYPE_ZOOM       0x10
 
-/*! \} */
+/*! \} */ /* dsekai_engines_transitions */
 
 #ifndef ENGINES_TOKENS_ONLY
 
@@ -138,11 +138,9 @@ struct EDITOR_STATE {
    uint8_t flags;
 };
 
-/*! \} */
+/*! \} */ /* dsekai_engines_specific_struct */
 
 #endif /* !NO_ENGINE_EDITOR */
-
-/*! \} */
 
 /**
  * \relates DSEKAI_STATE
@@ -172,22 +170,37 @@ struct EDITOR_STATE {
  */
 #define ENGINE_STATE_RUNNING 2
 
-/*! \brief General/shared state of the running engine in memory. */
+/**
+ * \brief General/shared state of the running engine in memory.
+ *
+ * \attention engines_asn_save() and engines_asn_load() MUST be updated
+ *            manually when changes are made to this struct in order to
+ *            serialize properly.
+ */
 struct DSEKAI_STATE {
+   uint8_t version;
+
    /**
     * \brief Array consisting of all items in the current game world.
     *
-    * Items in this array are considered to "exist" when the first character
-    * of ITEM::name is not NULL or '\0'. Items with no name may be replaced by
-    * new items.
+    * Items in this array are considered to "exist" when the ITEM::flags
+    * field has the ::ITEM_FLAG_ACTIVE bit set. Inactive items may be replaced
+    * by new items.
     */
    struct ITEM items[DSEKAI_ITEMS_MAX];
 
    MEMORY_HANDLE map_handle;
 
-   /*! \brief Engine type tilemap is supposed to be used with. */
+   /**
+    * \brief Engine type tilemap is supposed to be used with.
+    */
    uint8_t engine_type;
 
+   /**
+    * \brief Engine type set to be changed to with engines_warp_loop().
+    *
+    * \attention This field should not be serialized!
+    */
    uint8_t engine_type_change;
 
    /**
@@ -197,32 +210,57 @@ struct DSEKAI_STATE {
     * ::MOBILE_FLAG_ACTIVE is enabled in their MOBILE::flags.
     */
    struct MOBILE mobiles[DSEKAI_MOBILES_MAX];
-   /*! \brief Currently active player MOBILE. Stays between maps. */
+   /**
+    * \brief Currently active player MOBILE. Stays between maps.
+    *
+    * This is kept separately from DSEKAI_STATE::mobiles because... TODO
+    */
    struct MOBILE player;
 
-   /*!
+   /**
     * \brief Contains the currently loaded \ref dsekai_engines_specific_struct.
     */
    MEMORY_HANDLE engine_state_handle;
 
-   uint8_t input_blocked_countdown;
-
-   /*! \brief The number of loops until DSEKAI_STATE::ani_sprite_countdown
+   /** \brief The number of loops until DSEKAI_STATE::ani_sprite_countdown
     *         changes.
+    *
+    * \attention This field should not be serialized!
     */
    uint8_t ani_sprite_countdown;
-   /*! \brief The horizontal offset of all on-screen ::MOBILE sprites in pixels.
+
+   /**
+    * \brief The horizontal offset of all on-screen ::MOBILE sprites on their
+    *        spritesheets in pixels.
+    *
+    * \attention This field should not be serialized!
     */
    uint16_t ani_sprite_x;
 
-   /*! \brief Contains ::WINDOW structs currently on-screen. */
+   /**
+    * \brief Contains ::WINDOW structs currently on-screen.
+    *
+    * \attention This field should not be serialized!
+    */
    MEMORY_HANDLE windows_handle;
 
-   /*! \brief When holding a valid string, triggers the map change process. */
+   /**
+    * \brief When holding a valid string, triggers the map change process.
+    *
+    * \attention This field should not be serialized!
+    */
    char warp_to[TILEMAP_NAME_MAX];
-   /*! \brief Sets the player MOBILE::coords horizontal on map change. */
+   /**
+    * \brief Sets the player MOBILE::coords horizontal on map change.
+    *
+    * \attention This field should not be serialized!
+    */
    uint8_t warp_to_x;
-   /*! \brief Sets the player MOBILE::coords vertical on map change. */
+   /**
+    * \brief Sets the player MOBILE::coords vertical on map change.
+    *
+    * \attention This field should not be serialized!
+    */
    uint8_t warp_to_y;
 
    /*! \brief Current engine state (see below in struct reference). */
@@ -231,14 +269,23 @@ struct DSEKAI_STATE {
    /*! \brief Global boolean values dictating engine state and behavior. */
    uint8_t flags;
 
+   /**
+    * \brief The current frame of the playing \ref dsekai_engines_transitions.
+    *
+    * If set to 0, then no transition is currently playing.
+    *
+    * If a transition is currently playing, then input and scripts are blocked.
+    *
+    * \attention This field should not be serialized!
+    */
    uint8_t transition;
 
-   /*!
-   * \brief Array of all crops growing on all maps.
-   * 
-   * This is kept as part of the state so that crops can continue growing in
-   * the background.
-   */
+   /**
+    * \brief Array of all crops growing on all maps.
+    * 
+    * This is kept as part of the state so that crops can continue growing in
+    * the background.
+    */
    struct CROP_PLOT crops[DSEKAI_CROPS_MAX];
 
 #ifndef NO_ENGINE_EDITOR
@@ -419,7 +466,7 @@ extern RES_CONST ENGINES_DRAW gc_engines_draw[];
 
 #endif /* ENGINES_C */
 
-/*! \} */
+/*! \} */ /* dsekai_engines_types_sect */
 
 /*! \} */
 

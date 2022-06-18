@@ -36,11 +36,14 @@ unilayer_main() {
    error_printf( "error test" );
 
    size_printf( 3, "state", sizeof( struct DSEKAI_STATE ) );
+   assert( sizeof( struct DSEKAI_STATE ) < 16384 );
    size_printf( 3, "tilemap", sizeof( struct TILEMAP ) );
+   assert( sizeof( struct TILEMAP ) < 16384 );
 
 #ifndef NO_ANIMATE
    size_printf( 3, "animations cache",
       sizeof( struct ANIMATION ) * ANIMATE_ANIMATIONS_MAX );
+   assert( sizeof( struct ANIMATION ) * ANIMATE_ANIMATIONS_MAX < 16384 );
 #endif /* !NO_ANIMATE */
 
    /* Initialize subsystems. */
@@ -74,6 +77,7 @@ unilayer_main() {
    }
 
    state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
+   state->version = 1;
    state->engine_state = ENGINE_STATE_OPENING;
    state->menu.menu_id = -1;
    state->menu.highlight_id = -1;
