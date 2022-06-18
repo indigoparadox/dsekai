@@ -56,7 +56,8 @@ int8_t item_give_mobile(
  * \param e ::MEMORY_PTR to the item to drop.
  * \return 1 if give was successful, or error code otherwise.
  */
-int8_t item_drop( struct ITEM* e, struct DSEKAI_STATE* state );
+int8_t item_drop(
+   struct ITEM* item, struct TILEMAP* t, struct DSEKAI_STATE* state );
 
 /**
  * \brief Pick up an item at the given x, y tile coordinates on the current
@@ -66,7 +67,8 @@ int8_t item_drop( struct ITEM* e, struct DSEKAI_STATE* state );
  *         picked up.
  */
 int8_t item_pickup_xy(
-   uint8_t x, uint8_t y, int8_t owner, struct DSEKAI_STATE* state );
+   uint8_t x, uint8_t y, int8_t owner, struct TILEMAP* t,
+   struct DSEKAI_STATE* state );
 
 /**
  * \return 1 if the item was used successfully or 0 otherwise. -1 if the item

@@ -24,8 +24,6 @@
 #define TILEMAP_TW 40
 /*! \brief Maximum TILEMAP height in tiles. */
 #define TILEMAP_TH 40
-/*! \brief TILEMAP::name maxium length. */
-#define TILEMAP_NAME_MAX 8
 /*! \brief TILEMAP::tileset maximum length. */
 #define TILEMAP_TILESETS_MAX 12
 #define TILEMAP_SPAWN_NAME_SZ 12

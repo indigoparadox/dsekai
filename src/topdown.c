@@ -54,8 +54,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
             && x == state->editor.coords.x && y == state->editor.coords.y &&
             0 == state->ani_sprite_x
          ) {
-            map->tiles_flags[(y * TILEMAP_TW) + x] |=
-               TILEMAP_TILE_FLAG_DIRTY;
+            tilemap_set_dirty( x, y, map );
             
             /* If we're not forcing the frame, black out the block.
              * If we ARE, then just draw as usual after marking dirty above. */
@@ -93,20 +92,14 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
                (g_animations[i].y - SCREEN_MAP_Y) + g_animations[i].h
                   > tile_py
             ) {
-               map->tiles_flags[(y * TILEMAP_TW) + x] |=
-                  TILEMAP_TILE_FLAG_DIRTY;
+               tilemap_set_dirty( x, y, map );
             }
          }
 #endif /* !NO_ANIMATE */
 
-#ifndef IGNORE_DIRTY
-         if(
-            !(map->tiles_flags[(y * TILEMAP_TW) + x] &
-               TILEMAP_TILE_FLAG_DIRTY)
-         ) {
+         if( !tilemap_is_dirty( x, y, map ) ) {
             continue;
          }
-#endif /* !IGNORE_DIRTY */
 
          /* Sanity checks. */
          assert( y < TILEMAP_TH );
@@ -114,8 +107,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          assert( y >= 0 );
          assert( x >= 0 );
 
-         map->tiles_flags[(y * TILEMAP_TW) + x] &=
-            ~TILEMAP_TILE_FLAG_DIRTY;
+         tilemap_unset_dirty( x, y, map );
 
          /* Grab the left byte if even or the right if odd. */
          tile_id = tilemap_get_tile_id( map, x, y );
@@ -175,7 +167,9 @@ static void topdown_draw_crops(
          /* Crop is on a different TILEMAP. */
          0 != memory_strncmp_ptr(
             plot->map_name, map->name,
-            memory_strnlen_ptr( plot->map_name, CROP_NAME_MAX ) ) ||
+            memory_strnlen_ptr( plot->map_name, TILEMAP_NAME_MAX ) ) ||
+         /* Crop tile is not dirty. */
+         /* !tilemap_is_dirty( plot->coords.x, plot->coords.y, map ) || */
          /* Crop is off-screen. */
          plot->coords.x < gstate->screen_scroll_tx ||
             plot->coords.y < gstate->screen_scroll_ty ||
@@ -288,9 +282,33 @@ void topdown_draw_items(
    int8_t i = 0;
    uint16_t item_px = 0,
       item_py = 0;
+   struct TILEMAP* map = NULL;
+
+   map = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL == map ) {
+      error_printf( "could not lock tilemap" );
+      return;
+   }
 
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
-      if( ITEM_OWNER_NONE != state->items[i].owner ) {
+      if(
+         /* Item is inactive. */
+         !(state->items[i].flags & ITEM_FLAG_ACTIVE) ||
+         /* Item is owned. */
+         ITEM_OWNER_NONE != state->items[i].owner ||
+         /* Item is on a different TILEMAP. */
+         0 != memory_strncmp_ptr(
+            state->items[i].map_name, map->name,
+            memory_strnlen_ptr(
+               state->items[i].map_name, TILEMAP_NAME_MAX ) ) ||
+         /* Item tile is not dirty. */
+         /* !tilemap_is_dirty( state->items[i].y, state->items[i].x, map ) || */
+         /* Item is off-screen. */
+         state->items[i].x < gstate->screen_scroll_tx ||
+            state->items[i].y < gstate->screen_scroll_ty ||
+            state->items[i].x >= gstate->screen_scroll_tx + SCREEN_TW ||
+            state->items[i].y >= gstate->screen_scroll_ty + SCREEN_TH
+      ) {
          continue;
       }
 
@@ -304,6 +322,8 @@ void topdown_draw_items(
          item_px, item_py, SPRITE_W, SPRITE_H );
 
    }
+
+   map = (struct TILEMAP*)memory_unlock( state->map_handle );
 }
 
 void topdown_draw( struct DSEKAI_STATE* state ) {
@@ -607,7 +627,7 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
          /* TODO: Differentiate pickup and interact. */
          item_pickup_xy(
             state->player.coords.x, state->player.coords.y,
-            ITEM_OWNER_PLAYER, state );
+            ITEM_OWNER_PLAYER, map, state );
 
          /* Try to interact with facing mobile. */
          mobile_interact(

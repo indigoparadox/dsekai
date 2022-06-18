@@ -13,6 +13,15 @@ void crop_grow( struct CROP_PLOT* plot, struct DSEKAI_STATE* state ) {
       plot->next_at_ticks = graphics_get_ms() + plot->cycle;
       debug_printf( 1, "crop gid: %d grew to stage: %d, next stage at: %d",
          plot->crop_gid, crop_stage, plot->next_at_ticks );
+
+#if 0
+      /* Don't bother checking the current tilemap; dirty is harmless. */
+      t = (struct TILEMAP*)memory_lock( state->map_handle );
+      if( NULL != t ) {
+         tilemap_set_dirty( plot->coords.x, plot->coords.y, t );
+         t = (struct TILEMAP*)memory_unlock( state->map_handle );
+      }
+#endif
    }
 }
 

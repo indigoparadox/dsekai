@@ -242,6 +242,7 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
       i = 0,
       player_item_count = 0;
    struct ITEM* selected_item = NULL;
+   struct TILEMAP* t = NULL;
 
    /* Count player-owned items to enforce limits below. */
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
@@ -350,7 +351,14 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
          MENU_FLAG_ITEM_OPEN_SEL_DROP ==
          (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
       ) {
-         item_drop( selected_item, state );
+         t = (struct TILEMAP*)memory_lock( state->map_handle );
+         if( NULL == t ) {
+            error_printf( "could not lock tilemap for dropping!" );
+            retval = 0;
+            goto cleanup;
+         }
+         item_drop( selected_item, t, state );
+         t = (struct TILEMAP*)memory_unlock( state->map_handle );
          state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
 
       } else {
@@ -379,6 +387,8 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
    window_pop( MENU_WINDOW_ITEM_SEL_ID, state );
 
    state->menu.flags |= MENU_FLAG_DIRTY;
+
+cleanup:
 
    return retval;
 }

@@ -70,6 +70,7 @@ struct ITEM {
    /*! \brief If ITEM::owner is ::ITEM_OWNER_NONE, the Y coord of this item on
     *         the ::TILEMAP. */
    uint8_t y;
+   char map_name[TILEMAP_NAME_MAX];
 };
 
 /*! \} */

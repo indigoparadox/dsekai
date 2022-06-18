@@ -137,6 +137,11 @@
 #define JSON_PATH_SZ 255
 #endif /* !JSON_PATH_SZ */
 
+#ifndef TILEMAP_NAME_MAX
+/*! \brief TILEMAP::name maxium length. */
+#define TILEMAP_NAME_MAX 8
+#endif /* !TILEMAP_NAME_MAX */
+
 #if 0
 #ifndef DIALOG_TEXT_SZ
 #define DIALOG_TEXT_SZ 128

@@ -172,6 +172,8 @@ int8_t item_use_hoe(
    x = user->coords.x + gc_mobile_x_offsets[user->dir];
    y = user->coords.y + gc_mobile_y_offsets[user->dir];
 
+   /* TODO: Move this to crop.c. */
+
    map = (struct TILEMAP*)memory_lock( state->map_handle );
    if( NULL == map ) {
       error_printf( "could not lock tilemap" );
@@ -297,7 +299,9 @@ int8_t item_give_mobile(
    return 1;
 }
 
-int8_t item_drop( struct ITEM* item, struct DSEKAI_STATE* state ) {
+int8_t item_drop(
+   struct ITEM* item, struct TILEMAP* t, struct DSEKAI_STATE* state
+) {
 
    if( ITEM_OWNER_NONE == item->owner ) {
       return 0;
@@ -316,17 +320,36 @@ int8_t item_drop( struct ITEM* item, struct DSEKAI_STATE* state ) {
 
    item->owner = ITEM_OWNER_NONE;
 
+   memory_strncpy_ptr( item->map_name, t->name, TILEMAP_NAME_MAX );
+
+#if 0
+   /* Set tile as dirty. */
+   t = (struct TILEMAP*)memory_lock( state->map_handle );
+   if( NULL != t ) {
+      tilemap_set_dirty( item->x, item->y, t );
+      t = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
+#endif
+
    return 1;
 }
 
 int8_t item_pickup_xy(
-   uint8_t x, uint8_t y, int8_t owner, struct DSEKAI_STATE* state
+   uint8_t x, uint8_t y, int8_t owner, struct TILEMAP* t,
+   struct DSEKAI_STATE* state
 ) {
    int8_t i = 0;
 
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
-      if( ITEM_OWNER_NONE != state->items[i].owner ) {
+      if(
+         /* Skip inactive items. */
+         !(ITEM_FLAG_ACTIVE & state->items[i].flags) ||
          /* Skip owned items. */
+         ITEM_OWNER_NONE != state->items[i].owner ||
+         /* Skip items on other maps. */
+         0 != memory_strncmp_ptr(
+            state->items[i].map_name, t->name, TILEMAP_NAME_MAX )
+      ) {
          continue;
       }
 
@@ -334,6 +357,15 @@ int8_t item_pickup_xy(
          debug_printf( 2, "assigned owner %d to item %d at %d, %d",
             owner, i, x, y );
          state->items[i].owner = owner;
+
+#if 0
+         /* Set tile as dirty. */
+         t = (struct TILEMAP*)memory_lock( state->map_handle );
+         if( NULL != t ) {
+            tilemap_set_dirty( plot->coords.x, plot->coords.y, t );
+            t = (struct TILEMAP*)memory_unlock( state->map_handle );
+         }
+#endif
          break;
       }
    }

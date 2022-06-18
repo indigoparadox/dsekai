@@ -63,6 +63,16 @@
  */
 #define tilemap_get_tile_id( t, x, y ) (((t)->tiles[((y * TILEMAP_TW) + x) / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
 
+#ifndef IGNORE_DIRTY
+
+#define tilemap_is_dirty( x, y, map ) (((map)->tiles_flags[((y) * TILEMAP_TW) + (x)] & TILEMAP_TILE_FLAG_DIRTY))
+
+#define tilemap_set_dirty( x, y, map ) (map)->tiles_flags[(y * TILEMAP_TW) + x] |= TILEMAP_TILE_FLAG_DIRTY;
+
+#define tilemap_unset_dirty( x, y, map ) (map)->tiles_flags[(y * TILEMAP_TW) + x] &= ~TILEMAP_TILE_FLAG_DIRTY;
+
+#endif /* !IGNORE_DIRTY */
+
 uint16_t tilemap_fix_asset_path(
    char* path_in, uint16_t path_in_sz, const char* map_path );
 
