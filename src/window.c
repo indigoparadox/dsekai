@@ -321,6 +321,7 @@ static const char* window_get_text(
    const struct TILEMAP* t, int16_t* sz_out
 ) {
    const char* str_ptr;
+   struct ITEM* items = NULL;
 
    if( WINDOW_FLAG_TEXT_PTR == (WINDOW_FLAG_TEXT_PTR & c->flags) ) {
       /* Get the string from a directly passed pointer. */
@@ -348,7 +349,10 @@ static const char* window_get_text(
    
    } else if( WINDOW_FLAG_TEXT_ITEM == (WINDOW_FLAG_TEXT_ITEM & c->flags) ) {
       /* Get the string from the player items list. */
-      str_ptr = state->items[(0xff & c->data.scalar)].name;
+      items = (struct ITEM*)memory_lock( state->items_handle );
+      assert( NULL != items );
+      str_ptr = items[(0xff & c->data.scalar)].name;
+      items = (struct ITEM*)memory_unlock( state->items_handle );
       *sz_out = memory_strnlen_ptr( str_ptr, ITEM_NAME_SZ );
 
    } else if( WINDOW_FLAG_TEXT_NUM == (WINDOW_FLAG_TEXT_NUM & c->flags) ) {

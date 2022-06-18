@@ -58,6 +58,7 @@ ifeq ($(BUILD),RELEASE)
    DEFINES_DEBUG :=
 else
    # Assume debug build.
+   #DEFINES_DEBUG := -DUSE_BACKTRACE -DMEMORY_DEBUG_LOCKS
    DEFINES_DEBUG := -DUSE_BACKTRACE
 endif
 

@@ -283,47 +283,63 @@ void topdown_draw_items(
    uint16_t item_px = 0,
       item_py = 0;
    struct TILEMAP* map = NULL;
+   struct ITEM* items = NULL;
+
+   items = (struct ITEM*)memory_lock( state->items_handle );
+   assert( NULL != items );
+   if( NULL == items ) {
+      error_printf( "could not lock items" );
+      goto cleanup;
+   }
 
    map = (struct TILEMAP*)memory_lock( state->map_handle );
    if( NULL == map ) {
       error_printf( "could not lock tilemap" );
-      return;
+      goto cleanup;
    }
 
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
       if(
          /* Item is inactive. */
-         !(state->items[i].flags & ITEM_FLAG_ACTIVE) ||
+         !(items[i].flags & ITEM_FLAG_ACTIVE) ||
          /* Item is owned. */
-         ITEM_OWNER_NONE != state->items[i].owner ||
+         ITEM_OWNER_NONE != items[i].owner ||
          /* Item is on a different TILEMAP. */
          0 != memory_strncmp_ptr(
-            state->items[i].map_name, map->name,
+            items[i].map_name, map->name,
             memory_strnlen_ptr(
-               state->items[i].map_name, TILEMAP_NAME_MAX ) ) ||
+               items[i].map_name, TILEMAP_NAME_MAX ) ) ||
          /* Item tile is not dirty. */
-         /* !tilemap_is_dirty( state->items[i].y, state->items[i].x, map ) || */
+         /* !tilemap_is_dirty( items[i].y, items[i].x, map ) || */
          /* Item is off-screen. */
-         state->items[i].x < gstate->screen_scroll_tx ||
-            state->items[i].y < gstate->screen_scroll_ty ||
-            state->items[i].x >= gstate->screen_scroll_tx + SCREEN_TW ||
-            state->items[i].y >= gstate->screen_scroll_ty + SCREEN_TH
+         items[i].x < gstate->screen_scroll_tx ||
+            items[i].y < gstate->screen_scroll_ty ||
+            items[i].x >= gstate->screen_scroll_tx + SCREEN_TW ||
+            items[i].y >= gstate->screen_scroll_ty + SCREEN_TH
       ) {
          continue;
       }
 
-      item_px = SCREEN_MAP_X + ((state->items[i].x * TILE_W) -
+      item_px = SCREEN_MAP_X + ((items[i].x * TILE_W) -
             gstate->screen_scroll_x);
-      item_py = SCREEN_MAP_Y + ((state->items[i].y * TILE_H) -
+      item_py = SCREEN_MAP_Y + ((items[i].y * TILE_H) -
             gstate->screen_scroll_y);
 
       graphics_blit_sprite_at(
-         state->items[i].sprite, 0, 0,
+         items[i].sprite, 0, 0,
          item_px, item_py, SPRITE_W, SPRITE_H );
 
    }
 
-   map = (struct TILEMAP*)memory_unlock( state->map_handle );
+cleanup:
+
+   if( NULL != map ) {
+      map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
+   
+   if( NULL != items ) {
+      items = (struct ITEM*)memory_unlock( state->items_handle );
+   }
 }
 
 void topdown_draw( struct DSEKAI_STATE* state ) {

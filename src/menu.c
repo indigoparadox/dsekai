@@ -165,9 +165,13 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
    
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
       /* Skip non-player-held or deleted items. */
+      /* TODO: Maybe consolidate this with the section to breakout in the
+       *       items input handler.
+       */
       if(
-         ITEM_OWNER_PLAYER != state->items[i].owner ||
-         ITEM_FLAG_ACTIVE != (ITEM_FLAG_ACTIVE & state->items[i].flags)
+         ITEM_FLAG_ACTIVE != 
+            (ITEM_FLAG_ACTIVE & item_get_flags( i, state ) ) ||
+         ITEM_OWNER_PLAYER != item_get_owner( i, state )
       ) {
          continue;
       }
@@ -178,13 +182,14 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          flags = GRAPHICS_STRING_FLAG_ALL_CAPS | GRAPHICS_STRING_FLAG_OUTLINE;
 
          /* Show item icon in info window. */
+         /* FIXME
          window_push(
             MENU_WINDOW_ITEM_ICON, MENU_WINDOW_INFO_ID, WINDOW_TYPE_SPRITE,
             0,
             WINDOW_PLACEMENT_CENTER, 6,
             WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
             WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(),
-            0, 0, state->items[i].sprite, NULL, state, NULL ); 
+            0, 0, items[i].sprite, NULL, state, NULL ); */
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
          flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
@@ -198,13 +203,14 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
          i, 0, NULL, state, NULL );
 
+      /* FIXME 
       window_push(
          WINDOW_ID_MENU_LABEL_ITEM + 50 + i, MENU_WINDOW_ID,
          WINDOW_TYPE_LABEL, WINDOW_FLAG_TEXT_NUM,
          WINDOW_PLACEMENT_RIGHT_BOTTOM, WINDOW_PLACEMENT_GRID,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(), 0,
-         state->items[i].count, 0, NULL, state, NULL );
+         items[i].count, 0, NULL, state, NULL ); */
 
       player_item_idx++;
    }  
@@ -221,6 +227,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          GRAPHICS_STRING_FLAG_ALL_CAPS,
          0, 0, gc_menu_msgs[0], MENU_WINDOW_ID, state ); */
    }
+
 }
 
 static int8_t menu_handler_items_use(
@@ -229,13 +236,11 @@ static int8_t menu_handler_items_use(
    int8_t use_retval = 0;
    uint8_t item_type = 0;
 
-   assert( 0 <= selected_item_idx );
-   assert( DSEKAI_ITEMS_MAX > selected_item_idx );
-   item_type = state->items[selected_item_idx].type;
+   item_type = item_get_type( selected_item_idx, state );
 
    use_retval = gc_item_use_cbs[item_type](
       selected_item_idx, ITEM_OWNER_PLAYER, state );
-   if( 0 > use_retval ) {
+   if( ITEM_USED_SUCCESSFUL_SILENT != use_retval ) {
       menu_close( state );
    }
 
@@ -248,12 +253,19 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
    int8_t selected_item_idx = ITEM_ERROR_NOT_FOUND,
       player_item_count = 0;
    struct TILEMAP* t = NULL;
+   struct ITEM* items = NULL;
+
+   /* TODO: Break this first part out into its own function. */
+
+   /* Handle locking. */
+   items = (struct ITEM*)memory_lock( state->items_handle );
+   assert( NULL != items );
 
    /* Count player-owned items to enforce limits below. */
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
       if(
-         ITEM_OWNER_PLAYER == state->items[i].owner &&
-         ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & state->items[i].flags)
+         ITEM_OWNER_PLAYER == items[i].owner &&
+         ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & items[i].flags)
       ) {
          if( player_item_count == state->menu.highlight_id ) {
             /* This is the currently selected item. */
@@ -263,6 +275,8 @@ int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
          player_item_count++;
       }
    }
+
+   items = (struct ITEM*)memory_unlock( state->items_handle );
 
    switch( in_char ) {
    case INPUT_KEY_UP:

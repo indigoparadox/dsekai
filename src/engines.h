@@ -187,7 +187,7 @@ struct DSEKAI_STATE {
     * field has the ::ITEM_FLAG_ACTIVE bit set. Inactive items may be replaced
     * by new items.
     */
-   struct ITEM items[DSEKAI_ITEMS_MAX];
+   MEMORY_HANDLE items_handle;
 
    MEMORY_HANDLE map_handle;
 

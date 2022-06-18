@@ -44,6 +44,10 @@
 
 /*! \} */ /* dsekai_items_errors */
 
+#define ITEM_USED_SUCCESSFUL -1
+#define ITEM_USED_FAILED 0
+#define ITEM_USED_SUCCESSFUL_SILENT 1
+
 /**
  * \relates ITEM
  * \brief Get the "true GID" of an item.
@@ -55,6 +59,14 @@
  * ITEM::type.
  */
 #define item_true_gid( item ) ((uint32_t*)&((*item).type))
+
+uint8_t item_get_data( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
+
+uint8_t item_get_type( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
+
+uint8_t item_get_flags( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
+
+int8_t item_get_owner( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
 /**
  * \brief Determine if/where item with the given ITEM::gid exists in the
@@ -68,9 +80,7 @@ int8_t item_exists_in_inventory(
    int16_t template_gid, int8_t owner_id, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
-int8_t item_decr_or_delete(
-   int16_t template_gid, int8_t owner_id, struct DSEKAI_STATE* state
-) SECTION_ITEM;
+int8_t item_decr_or_delete( int8_t e_idx, struct DSEKAI_STATE* state );
 
 /**
  * \brief Create an item in DSEKAI_STATE::items from a template in

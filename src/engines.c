@@ -372,8 +372,10 @@ cleanup:
 void engines_exit_to_title( struct DSEKAI_STATE* state ) {
    state->engine_type_change = 0;
    memory_zero_ptr( (MEMORY_PTR)&(state->player), sizeof( struct MOBILE ) );
-   memory_zero_ptr( (MEMORY_PTR)&(state->items), sizeof( struct ITEM ) *
-      DSEKAI_ITEMS_MAX );
+   memory_free( state->items_handle );
+   state->items_handle =
+      memory_alloc( DSEKAI_ITEMS_MAX, sizeof( struct ITEM ) );
+   assert( NULL != state->items_handle );
 }
 
 #endif /* !NO_TITLE */

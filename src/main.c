@@ -71,7 +71,7 @@ unilayer_main() {
 
    g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
    if( (MEMORY_HANDLE)NULL == g_state_handle ) {
-      error_printf( "unable to allocate state" );
+      error_printf( "unable to allocate state!" );
       retval = 1;
       goto exit;
    }
@@ -83,8 +83,25 @@ unilayer_main() {
    state->menu.highlight_id = -1;
    state->windows_handle = 
       memory_alloc( DSEKAI_WINDOWS_MAX, sizeof( struct WINDOW ) );
-   unilayer_loop_set( engines_loop_iter, g_state_handle );
+   if( (MEMORY_HANDLE)NULL == state->windows_handle ) {
+      error_printf( "unable to allocate graphical windows!" );
+      retval = 1;
+      goto exit;
+   }
    state->map_handle = memory_alloc( 1, sizeof( struct TILEMAP ) );
+   if( (MEMORY_HANDLE)NULL == state->map_handle ) {
+      error_printf( "unable to allocate tilemap!" );
+      retval = 1;
+      goto exit;
+   }
+   state->items_handle =
+      memory_alloc( DSEKAI_ITEMS_MAX, sizeof( struct ITEM ) );
+   if( (MEMORY_HANDLE)NULL == state->items_handle ) {
+      error_printf( "unable to allocate items!" );
+      retval = 1;
+      goto exit;
+   }
+   unilayer_loop_set( engines_loop_iter, g_state_handle );
 
    /*
    state->warp_to[0] = 'f';
