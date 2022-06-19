@@ -266,8 +266,8 @@ typedef uint8_t (*WINDOW_CB_SZ)(
 
 #ifdef WINDOW_C
 
-static MEMORY_HANDLE g_frames_handle = NULL;
-static MEMORY_HANDLE g_windows_handle = NULL;
+static MEMORY_HANDLE g_frames_handle = (MEMORY_HANDLE)NULL;
+static MEMORY_HANDLE g_windows_handle = (MEMORY_HANDLE)NULL;
 
 static const int16_t gc_window_screen_coords[4] = {
    0, 0, SCREEN_MAP_W, SCREEN_MAP_H

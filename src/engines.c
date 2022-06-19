@@ -55,7 +55,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    if( (MEMORY_HANDLE)NULL != state->engine_state_handle ) {
       debug_printf( 2, "cleaning up engine-specific state" );
       memory_free( state->engine_state_handle );
-      state->engine_state_handle = NULL;
+      state->engine_state_handle = (MEMORY_HANDLE)NULL;
    }
 
    graphics_clear_cache();
@@ -371,7 +371,7 @@ void engines_exit_to_title( struct DSEKAI_STATE* state ) {
    memory_free( state->items_handle );
    state->items_handle =
       memory_alloc( DSEKAI_ITEMS_MAX, sizeof( struct ITEM ) );
-   assert( NULL != state->items_handle );
+   assert( (MEMORY_HANDLE)NULL != state->items_handle );
 }
 
 #endif /* !NO_TITLE */

@@ -584,7 +584,7 @@ int16_t window_push(
       
       /* Allocate new string handle. */
       window_new->data.string = memory_alloc( 1, string_sz + 1 );
-      assert( NULL != window_new->data.string );
+      assert( (MEMORY_HANDLE)NULL != window_new->data.string );
 
       /* Copy incoming string into handle. */
       str_ptr = (char*)memory_lock( window_new->data.string );

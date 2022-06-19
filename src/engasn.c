@@ -11,7 +11,7 @@ int32_t engines_asn_save( const char* save_name, struct DSEKAI_STATE* state ) {
 
    /* Allocate save buffer. */
    h_buffer = memory_alloc( TILEMAP_ASN_SAVE_BUFFER_INITIAL_SZ, 1 );
-   if( NULL == h_buffer ) {
+   if( (MEMORY_HANDLE)NULL == h_buffer ) {
       idx = DSEKAI_ERROR_ALLOCATE;
       error_printf( "could not allocate h_buffer!" );
       goto cleanup;
