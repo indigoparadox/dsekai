@@ -13,7 +13,7 @@ DSEKAI_C_FILES := \
    src/tilemap.c \
    src/mobile.c \
    src/item.c \
-   src/window.c \
+   unilayer/src/window.c \
    src/script.c \
    src/engines.c \
    src/topdown.c \

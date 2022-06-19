@@ -20,8 +20,6 @@
 
 #define SPRITE_H 16
 #define SPRITE_W 16
-#define PATTERN_W 16
-#define PATTERN_H 16
 
 #ifndef ITEM_INVENTORY_MAX
 #define ITEM_INVENTORY_MAX 20
@@ -108,10 +106,6 @@
 #ifndef CROP_NAME_MAX
 #define CROP_NAME_MAX 8
 #endif /* !CROP_NAME_MAX */
-
-#ifndef DSEKAI_WINDOWS_MAX
-#define DSEKAI_WINDOWS_MAX 100
-#endif /* !DSEKAI_WINDOWS_MAX */
 
 #ifndef JSON_TOKENS_MAX
 #define JSON_TOKENS_MAX 4096

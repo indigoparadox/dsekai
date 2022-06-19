@@ -188,7 +188,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
             0, 0, items[i].sprite, NULL );
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
-         flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
+         flags = 0;
       }
 
       /* item name */
