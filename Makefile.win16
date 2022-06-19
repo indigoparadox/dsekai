@@ -70,32 +70,30 @@ DEFINES_WIN16 := \
    -DPLATFORM_WIN16 \
    -DNO_ENGINE_POV \
    -DNO_ANIMATE \
-   -DUSE_SOFTWARE_TEXT
+   -DUSE_SOFTWARE_TEXT \
+   -DWINM_MOVEABLE
+   #-DWIN16_FAKE_DS
 
 INCLUDES_WIN16 := \
    $(subst -I ,-i=,$(INCLUDES_UNILAYER)) \
    -i=$(GENDIR_WIN16) \
    -i=$(INCLUDE)/win
 
-CFLAGS_WIN16 := -bt=windows -bw $(CFLAGS_OWC_GENERIC) -zp=1 $(DEFINES_WIN16) $(INCLUDES_WIN16)
+CFLAGS_WIN16 := -bt=windows -bw -ml $(CFLAGS_OWC_GENERIC) -zp=1 $(DEFINES_WIN16) $(INCLUDES_WIN16)
+
+LDFLAGS_WIN16 := -l=windows -ml $(LDFLAGS_OWC_GENERIC)
+
+RCFLAGS_WIN16 := -r $(DEFINES_WIN16) -i=$(INCLUDE)win
 
 ifneq ($(BUILD),RELEASE)
+   # Debug build.
    CFLAGS_WIN16 += -DLOG_TO_FILE
-endif
-
-ifeq ($(FMT_JSON),TRUE)
-   CFLAGS_WIN16 += -mh
-else
-   CFLAGS_WIN16 += -mm
+   LDFLAGS_WIN16 += -en -d3
 endif
 
 ifneq ($(RESOURCE),DEFAULT)
    CFLAGS_WIN16 += $(subst -I ,-I=,$(DEFINES_RESOURCE))
 endif
-
-LDFLAGS_WIN16 := -l=windows -zp=1 $(LDFLAGS_OWC_GENERIC)
-
-RCFLAGS_WIN16 := -r $(DEFINES_WIN16) -i=$(INCLUDE)win
 
 ifeq ($(RESOURCE),DEFAULT)
    RCFLAGS_WIN16 += -DRESOURCE_WIN

@@ -20,6 +20,8 @@ unilayer_main() {
    struct DSEKAI_STATE* state = NULL;
    int16_t retval = 0;
 
+   memory_init();
+
    platform_init( icon_dsekai );
 
    assert( 0 == TILEMAP_TW % 4 );
@@ -72,6 +74,7 @@ unilayer_main() {
 
    /* Setup the engine state. */
 
+   debug_printf( 1, "allocating state..." );
    g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
    if( (MEMORY_HANDLE)NULL == g_state_handle ) {
       error_printf( "unable to allocate state!" );
