@@ -70,7 +70,11 @@
 
 #ifndef DSEKAI_ITEMS_MAX
 /*! \brief Maximum number of items existing in the world at any time. */
-#  define DSEKAI_ITEMS_MAX 100
+#  ifdef PLATFORM_DOS
+#     define DSEKAI_ITEMS_MAX 50
+#  else
+#     define DSEKAI_ITEMS_MAX 100
+#  endif /* PLATFORM_DOS */
 #endif /* !DSEKAI_ITEMS_MAX */
 
 #ifndef TILEMAP_CROP_DEFS_MAX
