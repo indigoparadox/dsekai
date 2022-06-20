@@ -65,7 +65,7 @@ unilayer_main() {
       goto exit;
    }
 
-   window_init();
+   window_init( SCREEN_MAP_W, SCREEN_MAP_H );
    if( !script_init() ) {
       error_printf( "unable to initialize scripts" );
       retval = 1;
