@@ -83,6 +83,7 @@ struct MOBILE {
    int16_t script_id;
    /*! \brief Position in currently executing behavior script. */
    int16_t script_pc;
+   int8_t script_interact_count;
    /*! \brief Local stack used to store state for this mobile's ::SCRIPT.
     *
     *  This should only be manipulated by mobile_stack_push() and

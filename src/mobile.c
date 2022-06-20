@@ -139,7 +139,7 @@ struct MOBILE* mobile_interact(
    /* Set actee's pc to the GOTO for interaction and make actee active NOW. */
    actee->script_pc = script_goto_label(
       actee->script_pc, &(t->scripts[actee->script_id]),
-      SCRIPT_ACTION_INTERACT, 0 );
+      SCRIPT_ACTION_INTERACT, actee->script_interact_count );
    actee->script_next_ms = graphics_get_ms();
 
    return actee;
@@ -179,6 +179,11 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
    if( SCRIPT_ARG_STACK == step->arg ) {
       arg = mobile_stack_pop( m );
+      m->script_interact_count++;
+   } else if( SCRIPT_ARG_STACK_RC == step->arg ) {
+      arg = mobile_stack_pop( m );
+   } else if( SCRIPT_ARG_RANDOM == step->arg ) {
+      /* TODO */
    } else {
       arg = step->arg;
    }

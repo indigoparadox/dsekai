@@ -21,9 +21,16 @@ struct TILEMAP;
 #define SCRIPT_GLOBALS_MAX 20
 /*! \brief Maximum depth of available local stack for each ::SCRIPT. */
 #define SCRIPT_STACK_DEPTH 10
-/*! \brief Value of script arg to indicate real arg should be popped from stack.
+/**
+ * \brief Value of script arg to indicate real arg should be popped from stack.
  */
 #define SCRIPT_ARG_STACK 32767
+/**
+ * \brief Same as ::SCRIPT_ARG_STACK, but don't increment the
+ *        MOBILE::script_interact_count, so the next interaction calls the
+ *        same i(n).
+ */
+#define SCRIPT_ARG_STACK_RC 32765
 #define SCRIPT_ARG_RANDOM 32766
 /*! \brief Maximum length of a script in text form. */
 #define SCRIPT_STR_MAX 1024

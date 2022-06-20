@@ -47,7 +47,10 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    } */
 
    /* TODO: Clean up items held by NPC mobiles and items w/ no owners. */
+   
    /* TODO: Preserve ownerless items in save for this map. */
+
+   /* TODO: Preserve mobile script states in save for this map. */
 
    tilemap_deinit( map );
 

@@ -435,12 +435,12 @@
         {
          "name":"script_0",
          "type":"string",
-         "value":"t0f2r1s1r1s3f3l1s1l1s3g0i0p0h1234x32767"
+         "value":"t0f2r1s1r1s3f3l1s1l1s3g0i0p0h1234x32767i1p8x32766"
         }, 
         {
          "name":"script_1",
          "type":"string",
-         "value":"t0s5g0i0p2x32767"
+         "value":"t0s5g0i0p2x32766"
         }, 
         {
          "name":"script_2",
@@ -450,12 +450,12 @@
         {
          "name":"script_3",
          "type":"string",
-         "value":"t0f2s5g0i0v14v38w4x32767"
+         "value":"t0f2s5g0i0v14v38w4x32766"
         }, 
         {
          "name":"script_4",
          "type":"string",
-         "value":"t0f2s5g0i0v5v1w5x32767"
+         "value":"t0f2s5g0i0v5v1w5x32766"
         }, 
         {
          "name":"script_5",
@@ -465,7 +465,7 @@
         {
          "name":"script_6",
          "type":"string",
-         "value":"t0s5g0i0p7h1237x32767"
+         "value":"t0s5g0i0p7h1237x32767i1p8x32766"
         }, 
         {
          "name":"string_0",
@@ -506,6 +506,11 @@
          "name":"string_7",
          "type":"string",
          "value":"You'll need this hoe\nto till soil."
+        }, 
+        {
+         "name":"string_8",
+         "type":"string",
+         "value":"Do your best!"
         }, 
         {
          "name":"weather",

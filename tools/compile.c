@@ -39,7 +39,6 @@ const char gc_sc_bytes[] = {
 struct COMPILE_INST {
    uint16_t op;
    int16_t parm;
-   char label[TOKEN_ITER_SZ_MAX + 1];
 };
 
 struct COMPILE_STATE {
@@ -48,7 +47,7 @@ struct COMPILE_STATE {
    size_t token_iter_sz;
    struct COMPILE_INST inst[INST_SZ_MAX + 1];
    size_t inst_sz;
-   int16_t last_label;
+   int16_t last_start;
 };
 
 void compare_case( char* token, size_t token_sz ) {
@@ -96,22 +95,6 @@ int16_t parm_dir( char* token, size_t token_sz ) {
    return -1;   
 }
 
-int16_t parm_label(
-   char* token, size_t token_sz, struct COMPILE_INST* labels, size_t labels_sz
-) {
-   int16_t i = 0;
-
-   compare_case( token, token_sz );
-
-   for( i =  0 ; labels_sz > i ; i++ ) {
-      if( 0 == strncmp( token, labels[i].label, token_sz ) ) {
-         return i;
-      }
-   }
-
-   return -1;   
-}
-
 void reset_token( struct COMPILE_STATE* s ) {
    s->token_iter_sz = 0;
    s->token_iter[s->token_iter_sz] = '\0';
@@ -123,11 +106,19 @@ void parse( char c, struct COMPILE_STATE* s ) {
    switch( c ) {
 
    case ':':
-      strncpy( s->inst[s->inst_sz].label, s->token_iter, s->token_iter_sz );
-      compare_case( s->inst[s->inst_sz].label, s->token_iter_sz );
-      s->inst[s->inst_sz].op = 7; /* START */
-      s->inst[s->inst_sz].parm = s->last_label++;
-      d_printf( "l: %s\n", s->inst[s->inst_sz].label );
+      /* Make sure this is an instruction that can be a label. */
+      assert( 7 == s->inst[s->inst_sz].op || 1 == s->inst[s->inst_sz].op );
+
+      s->inst[s->inst_sz].parm = atoi( s->token_iter );
+         
+      d_printf( "l: %d\n", s->inst[s->inst_sz].parm );
+
+      if( 7 == s->inst[s->inst_sz].op ) {
+         /* Only increment start count if this is a START. */
+         /* (Multiple INTERACTs don't make sense. */
+         s->inst[s->inst_sz].parm = s->last_start++;
+      }
+
       s->inst_sz++;
       reset_token( s );
       break;
@@ -148,17 +139,13 @@ void parse( char c, struct COMPILE_STATE* s ) {
             /* FACE */
             parm_tmp = parm_dir( s->token_iter, s->token_iter_sz );
             assert( 0 <= parm_tmp );
-         } else if( 8 == s->inst[s->inst_sz].op ) {
-            /* GOTO */
-            parm_tmp = parm_label(
-               s->token_iter, s->token_iter_sz, s->inst, s->inst_sz );
-            assert( 0 <= parm_tmp );
          } else {
             parm_tmp = atoi( s->token_iter );
          }
          s->inst[s->inst_sz].parm = parm_tmp;
          d_printf( "parm: %d\n", s->inst[s->inst_sz].parm );
          s->inst_sz++;
+      
       } else {
          compare_inst(
             s->token_iter, s->token_iter_sz, &(s->inst[s->inst_sz]) );
@@ -207,11 +194,6 @@ int main( int argc, char** argv ) {
    for( i = 0 ; in_sz > i ; i++ ) {
       parse( in_bytes[i], &s );
    }
-
-   /* Add final RETURN. */
-   s.inst[s.inst_sz].op = 10;
-   s.inst[s.inst_sz].parm = 32767;
-   s.inst_sz++;
 
    /* Display bytes. */
    d_printf( "\n" );
