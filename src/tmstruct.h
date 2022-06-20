@@ -61,7 +61,9 @@ struct TILEMAP_SPAWN {
    /* TODO: Allow multiple spawns from single spawner. */
    /*! \brief Tile-based coordinates at which to spawn. */
    struct TILEMAP_COORDS coords;
-   /*! \brief RESOURCE_ID for the MOBILE::sprite on a spawned MOBILE. */
+   /**
+    * \brief RESOURCE_ID for the MOBILE::sprite on a spawned MOBILE.
+    */
    RESOURCE_ID type;
    /*! \brief Index of TILEMAP::scripts attached to mobiles spawned. */
    int16_t script_id;
@@ -76,6 +78,8 @@ struct TILEMAP {
    char name[TILEMAP_NAME_MAX];
    /*! \brief Current \ref dsekai_tilemaps_flags. */
    uint8_t flags;
+   /*! \brief Universally unique ID for this tilemap. */
+   uint16_t gid;
    /*! \brief Array of prototype tiles all map tiles are based on. */
    struct TILESET_TILE tileset[TILEMAP_TILESETS_MAX];
    /*! \brief Array of 4-bit numbers representing tiles composing the map. */

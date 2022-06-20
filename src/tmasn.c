@@ -618,9 +618,23 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
       goto cleanup;
    }
 
+   /* version */
    read_sz = asn_read_int( (uint8_t*)&tm_version, 2, 0, asn_buffer, idx );
-   idx += read_sz;
+   if( 0 >= read_sz ) {
+      retval = read_sz;
+      goto cleanup;
+   }
    debug_printf( 3, "tilemap version %d", tm_version );
+   idx += read_sz;
+
+   /* gid */
+   read_sz = asn_read_int( (uint8_t*)&(t->gid), 2, 0, asn_buffer, idx );
+   if( 0 >= read_sz ) {
+      retval = read_sz;
+      goto cleanup;
+   }
+   debug_printf( 3, "tilemap gid %d", t->gid );
+   idx += read_sz;
 
    /* name */
    read_sz =
@@ -735,6 +749,15 @@ int32_t tilemap_asn_save(
    /* version */
    debug_printf( 3, "(offset 0x%02x) writing map version", idx );
    idx = asn_write_int( &h_buffer, idx, 1 );
+   if( 0 > idx ) {
+      error_printf( "error" );
+      idx = -1;
+      goto cleanup;
+   }
+
+   /* version */
+   debug_printf( 3, "(offset 0x%02x) writing map gid", idx );
+   idx = asn_write_int( &h_buffer, idx, t->gid );
    if( 0 > idx ) {
       error_printf( "error" );
       idx = -1;

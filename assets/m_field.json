@@ -428,6 +428,11 @@
          "value":"topdown"
         }, 
         {
+         "name":"gid",
+         "type":"int",
+         "value":1001
+        }, 
+        {
          "name":"name",
          "type":"string",
          "value":"field"
@@ -518,7 +523,7 @@
          "value":"clear"
         }],
  "renderorder":"right-down",
- "tiledversion":"1.8.4",
+ "tiledversion":"1.8.5",
  "tileheight":16,
  "tilesets":[
         {

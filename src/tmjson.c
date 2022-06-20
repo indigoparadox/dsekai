@@ -576,12 +576,17 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
 
    debug_printf( 1, "getting tilemap name and tileset path" );
 
+   t->gid = json_int_from_path(
+      TILEMAP_JPATH_GID, JSON_PATH_SZ, tokens, tok_parsed, json_buffer );
+
    json_str_from_path(
       TILEMAP_JPATH_PROP_NAME, sizeof( TILEMAP_JPATH_PROP_NAME ),
       t->name, TILEMAP_NAME_MAX, tokens, tok_parsed, json_buffer );
 
    tilemap_json_parse_flags(
       t, json_buffer, json_buffer_sz, tokens, tok_parsed );
+
+   debug_printf( 2, "tilemap %s (%d) flags: %02x", t->name, t->gid, t->flags );
 
    ts_name_sz = tilemap_fix_asset_path(
       ts_name, RESOURCE_PATH_MAX, id );

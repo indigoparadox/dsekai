@@ -42,6 +42,8 @@
 #define TILEMAP_JPATH_SCRIPT "/properties/[name=script_%d]/value"
 /*! \brief JSON path to string definition. */
 #define TILEMAP_JPATH_STRING "/properties/[name=string_%d]/value"
+/*! \brief JSON path to TILEMAP::gid. */
+#define TILEMAP_JPATH_GID "/properties/[name=gid]/value"
 /*! \brief JSON path to tileset source in map data. */
 #define TILEMAP_JPATH_TS_SRC     "/tilesets/0/source"
 /*! \brief JSON path to terrain tile TILEMAP::tileset index in map data. */

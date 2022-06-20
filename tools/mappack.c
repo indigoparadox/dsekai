@@ -51,6 +51,9 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
    /* flags */
    fprintf( header_file, "   %d,\n", t.flags );
 
+   /* gid */
+   fprintf( header_file, "   %d,\n", t.gid );
+
    /* tileset */
    fprintf( header_file, "   /* tileset */\n" );
    fprintf( header_file, "   {\n" );

@@ -14,6 +14,23 @@
  */
 
 /**
+ * \addtogroup dsekai_mobiles_spritesheets_sect Mobile Spritesheets
+ * \{
+ * \page dsekai_mobiles_spritesheets
+ * 
+ * Spritesheets for mobiles are divided up as follows:
+ *
+ * |      | 16px                       | 16px
+ * |------|----------------------------|----------------------------
+ * | 16px | ::MOBILE_DIR_SOUTH Frame 1 | ::MOBILE_DIR_SOUTH Frame 2
+ * | 16px | ::MOBILE_DIR_NORTH Frame 1 | ::MOBILE_DIR_NORTH Frame 2
+ * | 16px | ::MOBILE_DIR_EAST Frame 1  | ::MOBILE_DIR_EAST Frame 2
+ * | 16px | ::MOBILE_DIR_WEST Frame 1  | ::MOBILE_DIR_WEST Frame 2
+ *
+ * \}
+ */
+
+/**
  * \relates MOBILE
  * \brief Bitmask denoting half of MOBILE::mp_hp devoted to MP.
  */
@@ -31,16 +48,31 @@
  */
 #define mobile_incr_hp( m, v ) (m)->mp_hp = (((m)->mp_hp & MOBILE_MP_MASK) | ((((m)->mp_hp & MOBILE_HP_MASK) + (v)) & MOBILE_HP_MASK))
 
+/**
+ * \addtogroup dsekai_mobile_flags Mobile Object Flags
+ * \brief Flags controlling ::MOBILE object behavior.
+ * \{
+ */
+
+/**
+ * \brief Bitmask defining bits used to indicate the number of times this
+ *        ::MOBILE has been interacte with, for ::SCRIPT purposes.
+ */
 #define MOBILE_ICOUNT_MASK 0xf000
 
 #define mobile_get_icount( m ) (((m)->flags & MOBILE_ICOUNT_MASK) >> 12)
 
+/**
+ * \brief Increment ::MOBILE_ICOUNT_MASK by a given value.
+ * \param m Locked ::MEMORY_PTR to ::MOBILE to modify.
+ * \param v Value to increment counter by.
+ */
 #define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | (mobile_get_icount( m ) + (((v) << 12) & MOBILE_ICOUNT_MASK)))
 
 /**
-   * \brief Which of the \ref dsekai_mobiles_directions this mobile is
-   *        currently facing.
-   */
+ * \brief Bitmask defining bits used to indicate which of the
+ *        \ref dsekai_mobiles_directions a mobile is currently facing.
+ */
 #define MOBILE_DIR_MASK 0x0007
 
 #define mobile_get_dir( m ) ((m)->flags & MOBILE_DIR_MASK)
@@ -52,6 +84,10 @@
  * \brief MOBILE::flags indicating that this mobile is extant and active.
  */
 #define MOBILE_FLAG_ACTIVE 0x010
+
+/*! \} */
+
+#define mobile_get_sprite( m ) ((m)->sprite)
 
 /**
  * \relates MOBILE
@@ -66,8 +102,14 @@
 /*! \brief A moving/interactive object in the world. */
 struct MOBILE {
    char* name;
-   /*! \brief Flags affecting this mobile's display and behavior. */
+   /**
+    * \brief \ref dsekai_mobile_flags affecting this mobile's display and
+    *        behavior.
+    */
    uint16_t flags;
+   /**
+    * \brief GID of the spawner that spawned this mobile.
+    */
    uint16_t spawner_id;
    /**
     * \brief This mobile's combined magic points and hit points.
@@ -101,21 +143,6 @@ struct MOBILE {
     * animations over the mobile.
     */
    int16_t screen_py;
-   /*! \brief Currently loaded spritesheet.
-    *
-    * Spritesheets for mobiles are divided up as follows:
-    *
-    * |      | 16px                       | 16px
-    * |------|----------------------------|----------------------------
-    * | 16px | ::MOBILE_DIR_SOUTH Frame 1 | ::MOBILE_DIR_SOUTH Frame 2
-    * |------|----------------------------|----------------------------
-    * | 16px | ::MOBILE_DIR_NORTH Frame 1 | ::MOBILE_DIR_NORTH Frame 2
-    * |------|----------------------------|----------------------------
-    * | 16px | ::MOBILE_DIR_EAST Frame 1  | ::MOBILE_DIR_EAST Frame 2
-    * |------|----------------------------|----------------------------
-    * | 16px | ::MOBILE_DIR_WEST Frame 1  | ::MOBILE_DIR_WEST Frame 2
-    *
-    */
    RESOURCE_ID sprite;
    /*! \brief Current tile on which this mobile is located. */
    struct TILEMAP_COORDS coords;
