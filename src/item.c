@@ -30,8 +30,8 @@ int8_t item_use_seed(
 
    crop_gid = item_get_data( e_idx, state );
 
-   x = user->coords.x + gc_mobile_x_offsets[user->dir];
-   y = user->coords.y + gc_mobile_y_offsets[user->dir];
+   x = user->coords.x + gc_mobile_x_offsets[mobile_get_dir( user )];
+   y = user->coords.y + gc_mobile_y_offsets[mobile_get_dir( user )];
 
    /* Get the plot in front of the user. */
    t = (struct TILEMAP*)memory_lock( state->map_handle );
@@ -191,8 +191,8 @@ int8_t item_use_hoe(
    }
    assert( NULL != user );
 
-   x = user->coords.x + gc_mobile_x_offsets[user->dir];
-   y = user->coords.y + gc_mobile_y_offsets[user->dir];
+   x = user->coords.x + gc_mobile_x_offsets[mobile_get_dir( user )];
+   y = user->coords.y + gc_mobile_y_offsets[mobile_get_dir( user )];
 
    /* TODO: Move this to crop.c. */
 

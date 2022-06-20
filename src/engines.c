@@ -207,7 +207,7 @@ int16_t engines_handle_movement(
       return 1;
    }
    
-   state->player.dir = dir_move;
+   mobile_set_dir( &(state->player), dir_move );
 
    if(
       !tilemap_collide( &(state->player), dir_move, map ) &&

@@ -104,7 +104,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[0].coords_prev.y = 2;
    state->mobiles[0].script_id = -1;
    state->mobiles[0].flags = MOBILE_FLAG_ACTIVE;
-   state->mobiles[0].dir = 2;
+   mobile_set_dir( &(state->mobiles[0]), 2 );
    state->mobiles[0].mp_hp = 100;
    resource_assign_id( state->mobiles[0].sprite, s_world );
 
@@ -114,7 +114,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[1].coords_prev.y = 2;
    state->mobiles[1].script_id = -1;
    state->mobiles[1].flags = MOBILE_FLAG_ACTIVE;
-   state->mobiles[1].dir = 0;
+   mobile_set_dir( &(state->mobiles[1]), 0 );
    state->mobiles[1].mp_hp = 100;
    resource_assign_id( state->mobiles[1].sprite, s_world );
 
@@ -124,7 +124,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[2].coords_prev.y = 3;
    state->mobiles[2].script_id = -1;
    state->mobiles[2].flags = MOBILE_FLAG_ACTIVE;
-   state->mobiles[2].dir = 3;
+   mobile_set_dir( &(state->mobiles[2]), 3 );
    state->mobiles[2].mp_hp = 100;
    resource_assign_id( state->mobiles[2].sprite, s_world );
 
@@ -134,7 +134,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[3].coords_prev.y = 3;
    state->mobiles[3].script_id = -1;
    state->mobiles[3].flags = MOBILE_FLAG_ACTIVE;
-   state->mobiles[3].dir = 1;
+   mobile_set_dir( &(state->mobiles[3]), 1 );
    state->mobiles[3].mp_hp = 100;
    resource_assign_id( state->mobiles[3].sprite, s_world );
 
@@ -182,7 +182,7 @@ void title_draw( struct DSEKAI_STATE* state ) {
       graphics_blit_sprite_at(
          state->mobiles[i].sprite,
          state->ani_sprite_x,
-         state->mobiles[i].dir * SPRITE_H,
+         mobile_get_dir( &(state->mobiles[i]) ) * SPRITE_H,
          (state->mobiles[i].coords.x * SPRITE_W),
          (state->mobiles[i].coords.y * SPRITE_H),
          SPRITE_W, SPRITE_H );

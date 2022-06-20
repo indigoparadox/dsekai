@@ -28,7 +28,7 @@ struct MOBILE* mobile_get_facing(
 ) {
    int8_t i = 0;
 
-   assert( 4 > m->dir );
+   assert( 4 > mobile_get_dir( m ) );
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       if( &(state->mobiles[i]) == m ) {
@@ -42,9 +42,9 @@ struct MOBILE* mobile_get_facing(
                (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
             ) && (
                state->mobiles[i].coords.x ==
-                  m->coords.x + gc_mobile_x_offsets[m->dir] &&
+                  m->coords.x + gc_mobile_x_offsets[mobile_get_dir( m )] &&
                state->mobiles[i].coords.y ==
-                  m->coords.y + gc_mobile_y_offsets[m->dir]
+                  m->coords.y + gc_mobile_y_offsets[mobile_get_dir( m )]
          )
       ) {
          return &(state->mobiles[i]);
@@ -54,9 +54,9 @@ struct MOBILE* mobile_get_facing(
    if(
       m != &(state->player) &&
       state->player.coords.x ==
-         m->coords.x + gc_mobile_x_offsets[m->dir] &&
+         m->coords.x + gc_mobile_x_offsets[mobile_get_dir( m )] &&
       state->player.coords.y ==
-         m->coords.y + gc_mobile_y_offsets[m->dir]
+         m->coords.y + gc_mobile_y_offsets[mobile_get_dir( m )]
    ) {
       return &(state->player);
    }
@@ -136,10 +136,13 @@ struct MOBILE* mobile_interact(
    /* Push actee previous PC for return. */
    mobile_stack_push( actee, actee->script_pc );
 
+   debug_printf( 1, "mobile interacted at icount: %d",
+      mobile_get_icount( actee ) );
+
    /* Set actee's pc to the GOTO for interaction and make actee active NOW. */
    actee->script_pc = script_goto_label(
       actee->script_pc, &(t->scripts[actee->script_id]),
-      SCRIPT_ACTION_INTERACT, (actee->flags & MOBILE_ICOUNT_MASK) );
+      SCRIPT_ACTION_INTERACT, mobile_get_icount( actee ) );
    actee->script_wait_frames = 0;
 
    return actee;

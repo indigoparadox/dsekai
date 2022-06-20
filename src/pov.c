@@ -133,16 +133,20 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
 
    switch( in_char ) {
    case INPUT_KEY_UP:
-      engines_handle_movement( state->player.dir, state, t );
+      engines_handle_movement( mobile_get_dir( &(state->player) ), state, t );
       tilemap_refresh_tiles( t );
       /* gstate->dirty = 1; */
       break;
 
    case INPUT_KEY_LEFT:
       /* engines_handle_movement( MOBILE_DIR_WEST, state, t ); */
-      state->player.dir = gc_pov_dir_turn_left[state->player.dir];
+      mobile_set_dir( &(state->player),
+         gc_pov_dir_turn_left[mobile_get_dir( &(state->player) )] );
       tilemap_refresh_tiles( t );
-      if( 0 == state->player.dir || 1 == state->player.dir ) {
+      if(
+         0 == mobile_get_dir( &(state->player) ) ||
+         1 == mobile_get_dir( &(state->player) )
+      ) {
          recreate_clouds = 1;
       } else {
          recreate_clouds = 2;
@@ -158,9 +162,13 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
 
    case INPUT_KEY_RIGHT:
       /* engines_handle_movement( MOBILE_DIR_EAST, state, t ); */
-      state->player.dir = gc_pov_dir_turn_right[state->player.dir];
+      mobile_set_dir( &(state->player),
+         gc_pov_dir_turn_right[mobile_get_dir( &(state->player) )] );
       tilemap_refresh_tiles( t );
-      if( 2 == state->player.dir || 3 == state->player.dir ) {
+      if(
+         2 == mobile_get_dir( &(state->player) ) ||
+         3 == mobile_get_dir( &(state->player) )
+      ) {
          recreate_clouds = 1;
       } else {
          recreate_clouds = 2;
@@ -427,7 +435,7 @@ void pov_draw_minimap( uint8_t* minimap, struct MOBILE* player ) {
       GRAPHICS_COLOR_MAGENTA );
 
    graphics_char_at(
-      gc_pov_compass[player->dir], MINIMAP_X - 12, MINIMAP_Y,
+      gc_pov_compass[mobile_get_dir( player )], MINIMAP_X - 12, MINIMAP_Y,
       GRAPHICS_COLOR_WHITE, 0 );
 }
 
@@ -450,10 +458,10 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       memory_zero_ptr( &ray, sizeof( struct POV_RAY ) );
       /* Setup ray direction and position. */
       ray.camera_x = 2 * x / (double)SCREEN_MAP_W - 1;
-      ray.dir_x = gc_pov_dir_x[state->player.dir] + 
-         gc_pov_plane_x[state->player.dir] * ray.camera_x;
-      ray.dir_y = gc_pov_dir_y[state->player.dir] +
-         gc_pov_plane_y[state->player.dir] * ray.camera_x;
+      ray.dir_x = gc_pov_dir_x[mobile_get_dir( &(state->player) )] + 
+         gc_pov_plane_x[mobile_get_dir( &(state->player) )] * ray.camera_x;
+      ray.dir_y = gc_pov_dir_y[mobile_get_dir( &(state->player) )] +
+         gc_pov_plane_y[mobile_get_dir( &(state->player) )] * ray.camera_x;
       ray.map_tx = state->player.coords.x;
       ray.map_ty = state->player.coords.y;
 

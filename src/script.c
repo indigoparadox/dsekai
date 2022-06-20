@@ -199,7 +199,8 @@ uint16_t script_handle_SPEAK(
    
    str_ptr = strpool_get( t->strpool, arg, NULL );
 
-   window_prefab_dialog( str_ptr, actor->sprite, (actor->dir << 4),
+   window_prefab_dialog(
+      str_ptr, actor->sprite, (mobile_get_dir( actor ) << 4),
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCRIPT_HAS_GFX */
    return pc + 1;
@@ -210,7 +211,7 @@ uint16_t script_handle_FACE(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   actor->dir = arg;
+   mobile_set_dir( actor, arg );
    return pc + 1;
 }
 

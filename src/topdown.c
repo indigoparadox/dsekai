@@ -272,7 +272,7 @@ static void topdown_draw_mobile(
 
    /* Blit the mobile's current sprite/frame. */
    graphics_blit_sprite_at(
-      m->sprite, state->ani_sprite_x, m->dir * SPRITE_H,
+      m->sprite, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
       m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
 }
 
@@ -625,8 +625,10 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
          state->editor.flags |= EDITOR_FLAG_FORCE_FRAME;
       } else if( NULL != (plot = crop_find_plot(
          map,
-         state->player.coords.x + gc_mobile_x_offsets[state->player.dir],
-         state->player.coords.y + gc_mobile_y_offsets[state->player.dir],
+         state->player.coords.x +
+            gc_mobile_x_offsets[mobile_get_dir( &(state->player) )],
+         state->player.coords.y +
+            gc_mobile_y_offsets[mobile_get_dir( &(state->player) )],
          state
       )) ) {
          /* Try to harvest facing crop plot. */

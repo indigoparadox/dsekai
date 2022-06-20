@@ -31,9 +31,21 @@
  */
 #define mobile_incr_hp( m, v ) (m)->mp_hp = (((m)->mp_hp & MOBILE_MP_MASK) | ((((m)->mp_hp & MOBILE_HP_MASK) + (v)) & MOBILE_HP_MASK))
 
-#define MOBILE_ICOUNT_MASK 0x000f
+#define MOBILE_ICOUNT_MASK 0xf000
 
-#define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | ((((m)->flags & MOBILE_ICOUNT_MASK) + (v)) & MOBILE_ICOUNT_MASK))
+#define mobile_get_icount( m ) (((m)->flags & MOBILE_ICOUNT_MASK) >> 12)
+
+#define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | (mobile_get_icount( m ) + (((v) << 12) & MOBILE_ICOUNT_MASK)))
+
+/**
+   * \brief Which of the \ref dsekai_mobiles_directions this mobile is
+   *        currently facing.
+   */
+#define MOBILE_DIR_MASK 0x0007
+
+#define mobile_get_dir( m ) ((m)->flags & MOBILE_DIR_MASK)
+
+#define mobile_set_dir( m, v ) (m)->flags = (((m)->flags & ~MOBILE_DIR_MASK) | ((v) & MOBILE_DIR_MASK))
 
 /**
  * \relates MOBILE
@@ -54,13 +66,9 @@
 /*! \brief A moving/interactive object in the world. */
 struct MOBILE {
    char* name;
-   /**
-    * \brief Which of the \ref dsekai_mobiles_directions this mobile is
-    *        currently facing.
-    */
-   uint8_t dir;
    /*! \brief Flags affecting this mobile's display and behavior. */
    uint16_t flags;
+   uint16_t spawner_id;
    /**
     * \brief This mobile's combined magic points and hit points.
     * 
@@ -200,15 +208,6 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t );
  * \param t ::MEMORY_PTR to a ::MOBILE to deinitialize.
  */
 void mobile_deinit( struct MOBILE* ) SECTION_MOBILE;
-
-/**
- * \relates MOBILE
- * \brief Get the MOBILE being faced by a given MOBILE if there is one.
- * \param m ::MEMORY_PTR to a MOBILE on which to center the search.
- * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
- * \return ::MEMORY_PTR to MOBILE being faced if one found, or NULL otherwise.
- */
-struct MOBILE* mobile_get_dir( struct MOBILE* m, struct DSEKAI_STATE* state );
 
 /**
  * \relates MOBILE
