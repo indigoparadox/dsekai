@@ -26,8 +26,8 @@ const char gc_sc_bytes[] = {
    '\0'
 };
 
-#define CS_INST      0
-#define CS_PARM      1
+#define CS_NONE      0
+#define CS_COMMENT   1
 
 #define TOKEN_ITER_SZ_MAX 255
 #define INST_SZ_MAX 255
@@ -42,7 +42,7 @@ struct COMPILE_INST {
 };
 
 struct COMPILE_STATE {
-   uint8_t state;
+   uint8_t flags;
    char token_iter[TOKEN_ITER_SZ_MAX + 1];
    size_t token_iter_sz;
    struct COMPILE_INST inst[INST_SZ_MAX + 1];
@@ -123,9 +123,26 @@ void parse( char c, struct COMPILE_STATE* s ) {
       reset_token( s );
       break;
 
+   case '#':
+   case ';':
+      s->flags |= CS_COMMENT;
+      break;
+
    case '\r':
    case '\n':
+      if( CS_COMMENT == (CS_COMMENT & s->flags) ) {
+         /* Get out of comment in new line. */
+         s->flags &= ~CS_COMMENT;
+         reset_token( s );
+         break;
+      }
+
    case ' ':
+      if( CS_COMMENT == (CS_COMMENT & s->flags) ) {
+         reset_token( s );
+         break;
+      }
+
       /* Do nothing if token buffer empty. */
       if( 0 == s->token_iter_sz ) {
          break;
@@ -154,6 +171,9 @@ void parse( char c, struct COMPILE_STATE* s ) {
       break;
 
    default:
+      if( CS_COMMENT == (CS_COMMENT & s->flags) ) {
+         break;
+      }
       /* Reset token buffer. */
       s->token_iter[s->token_iter_sz++] = c;
       s->token_iter[s->token_iter_sz] = '\0';
