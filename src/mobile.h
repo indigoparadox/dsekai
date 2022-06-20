@@ -15,9 +15,31 @@
 
 /**
  * \relates MOBILE
+ * \brief Bitmask denoting half of MOBILE::mp_hp devoted to MP.
+ */
+#define MOBILE_HP_MASK 0x00ff
+
+/**
+ * \relates MOBILE
+ * \brief Bitmask denoting half of MOBILE::mp_hp devoted to HP.
+ */
+#define MOBILE_MP_MASK 0xff00
+
+/**
+ * \relates MOBILE
+ * \brief Increment just the HP half of MOBILE::mp_hp.
+ */
+#define mobile_incr_hp( m, v ) (m)->mp_hp = (((m)->mp_hp & MOBILE_MP_MASK) | ((((m)->mp_hp & MOBILE_HP_MASK) + (v)) & MOBILE_HP_MASK))
+
+#define MOBILE_ICOUNT_MASK 0x000f
+
+#define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | ((((m)->flags & MOBILE_ICOUNT_MASK) + (v)) & MOBILE_ICOUNT_MASK))
+
+/**
+ * \relates MOBILE
  * \brief MOBILE::flags indicating that this mobile is extant and active.
  */
-#define MOBILE_FLAG_ACTIVE 0x01
+#define MOBILE_FLAG_ACTIVE 0x010
 
 /**
  * \relates MOBILE
@@ -38,9 +60,16 @@ struct MOBILE {
     */
    uint8_t dir;
    /*! \brief Flags affecting this mobile's display and behavior. */
-   uint8_t flags;
+   uint16_t flags;
    /**
-    * \brief This mobile's hit points. Death occurs at zero.
+    * \brief This mobile's combined magic points and hit points.
+    * 
+    * This value is combined to save space despite expected 16-bit struct
+    * alignment.
+    *
+    * Use mobile_incr_hp() to modify.
+    *
+    * Death occurs when the HP half reaches 0.
     *
     * This value should be set to ::MOBILE_HP_DEATH on this mobile's death
     * blow. From there, the engine will increment it up to its final value,
@@ -49,11 +78,20 @@ struct MOBILE {
     * This allows for a relatively simple "blinking" death animation to occur
     * by hiding frames for mobiles on negative even HP values.
     */
-   int8_t hp;
-   int8_t mp;
-   /*! \brief Current on-screen pixel left of sprite. -1 if off-screen. */
+   int16_t mp_hp;
+   /**
+    * \brief Current on-screen pixel left of sprite. -1 if off-screen.
+    *
+    * This may vary, depending on the engine type, but is also used to place
+    * animations over the mobile.
+    */
    int16_t screen_px;
-   /*! \brief Current on-screen pixel top of sprite. -1 if off-screen. */
+   /**
+    * \brief Current on-screen pixel left of sprite. -1 if off-screen.
+    *
+    * This may vary, depending on the engine type, but is also used to place
+    * animations over the mobile.
+    */
    int16_t screen_py;
    /*! \brief Currently loaded spritesheet.
     *
@@ -75,24 +113,21 @@ struct MOBILE {
    struct TILEMAP_COORDS coords;
    /*! \brief Previous tile, if this mobile is currently moving. */
    struct TILEMAP_COORDS coords_prev;
-   /*! \brief Number of steps remaining on X axis in current walk animation. */
-   uint8_t steps_x;
-   /*! \brief Number of steps remaining on Y axis in current walk animation. */
-   uint8_t steps_y;
+   /*! \brief Number of steps remaining in current walk animation. */
+   uint16_t steps_x;
+   uint16_t steps_y;
    /*! \brief Index currently executing behavior script in TILEMAP::scripts. */
    int16_t script_id;
    /*! \brief Position in currently executing behavior script. */
    int16_t script_pc;
-   int8_t script_interact_count;
    /*! \brief Local stack used to store state for this mobile's ::SCRIPT.
     *
     *  This should only be manipulated by mobile_stack_push() and
     *  mobile_stack_pop().
     */
    int8_t script_stack[SCRIPT_STACK_DEPTH];
-   /*! \brief Delay script until this result from graphics_get_ms(). */
-   uint32_t script_next_ms;
-   uint32_t spawned_ms;
+   /*! \brief Delay script for this many frames. */
+   uint16_t script_wait_frames;
 };
 
 /**

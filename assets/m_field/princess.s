@@ -2,14 +2,14 @@
 start 0:
    face        east
    walk_east   1
-   sleep       1
-   walk_east   1
    sleep       3
+   walk_east   1
+   sleep       9
    face        west
    walk_west   1
-   sleep       1
-   walk_west   1
    sleep       3
+   walk_west   1
+   sleep       9
    goto        0 ; Infinite loop.
 
 interact 0:

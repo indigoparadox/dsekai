@@ -94,7 +94,9 @@ int8_t item_use_food(
    item_decr_or_delete( e_idx, state );
 
    /* TODO: Different types of food for different stats? */
-   user->hp += food_val;
+   debug_printf( 1, "mobile %s mp/hp was: %d", user->name, user->mp_hp );
+   mobile_incr_hp( user, food_val );
+   debug_printf( 1, "mobile %s mp/hp now: %d", user->name, user->mp_hp );
 
    dio_snprintf( num_str, 10, "+%d", food_val );
 

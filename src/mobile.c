@@ -117,7 +117,7 @@ struct MOBILE* mobile_interact(
    if( 
       NULL == actee ||
       (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & actee->flags)) ||
-      0 >= actee->hp ||
+      0 >= (actee->mp_hp & MOBILE_HP_MASK) ||
       0 > actee->script_id ||
       actee->script_id >= TILEMAP_SCRIPTS_MAX
    ) {
@@ -139,8 +139,8 @@ struct MOBILE* mobile_interact(
    /* Set actee's pc to the GOTO for interaction and make actee active NOW. */
    actee->script_pc = script_goto_label(
       actee->script_pc, &(t->scripts[actee->script_id]),
-      SCRIPT_ACTION_INTERACT, actee->script_interact_count );
-   actee->script_next_ms = graphics_get_ms();
+      SCRIPT_ACTION_INTERACT, (actee->flags & MOBILE_ICOUNT_MASK) );
+   actee->script_wait_frames = 0;
 
    return actee;
 }
@@ -160,10 +160,11 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
       return;
    }
 
-   if( graphics_get_ms() < m->script_next_ms ) {
+   if( 0 < m->script_wait_frames ) {
+      m->script_wait_frames--;
       debug_printf( 0,
-         "mobile \"%s\" sleeping: %u waiting for %u", m->name,
-         graphics_get_ms(), m->script_next_ms );
+         "mobile \"%s\" sleeping: waiting for %d more frames", m->name,
+         m->script_wait_frames );
       /* Mobile still sleeping. */
       return;
    }
@@ -179,7 +180,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
    if( SCRIPT_ARG_STACK == step->arg ) {
       arg = mobile_stack_pop( m );
-      m->script_interact_count++;
+      mobile_incr_icount( m, 1 );
    } else if( SCRIPT_ARG_STACK_RC == step->arg ) {
       arg = mobile_stack_pop( m );
    } else if( SCRIPT_ARG_RANDOM == step->arg ) {
@@ -227,12 +228,13 @@ void mobile_animate( struct MOBILE* m, struct TILEMAP* t ) {
       }
    }
 
-   /* Use negative HP for blinking effect on death, or remove if we're up to -1.
+   /* Use negative HP for blinking effect on death, or remove if we're up to 
+    * -1.
     */
-   if( -1 == m->hp ) {
+   if( -1 == m->mp_hp ) {
       m->flags &= ~MOBILE_FLAG_ACTIVE;
-   } else if( 0 > m->hp ) {
-      m->hp++;
+   } else if( 0 > m->mp_hp ) {
+      m->mp_hp++;
    }
 }
 
@@ -273,14 +275,12 @@ struct MOBILE* mobile_spawn_npc( struct DSEKAI_STATE* state, uint8_t player ) {
       }
    }
 
-   mobile_out->hp = 100;
-   mobile_out->mp = 100;
+   mobile_out->mp_hp = 100;
    mobile_out->steps_x = 0;
    mobile_out->steps_y = 0;
    mobile_out->script_pc = 0;
-   mobile_out->script_next_ms = graphics_get_ms();
+   mobile_out->script_wait_frames = 0;
    mobile_out->flags = MOBILE_FLAG_ACTIVE;
-   mobile_out->spawned_ms = graphics_get_ms();
    
    return mobile_out;
 }

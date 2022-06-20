@@ -234,7 +234,7 @@ static void topdown_draw_mobile(
       /* Don't draw inactive mobiles. */
       (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & m->flags)) ||
       /* Pre-death blinking effect (skip negative even frames). */
-      (0 > m->hp && 0 == m->hp % 2)
+      (0 > m->mp_hp && 0 == m->mp_hp % 2)
    ) {
       return;
    }

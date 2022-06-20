@@ -132,7 +132,7 @@ uint16_t script_handle_SLEEP(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   actor->script_next_ms = graphics_get_ms() + (arg * 1000);
+   actor->script_wait_frames = arg;
    return pc + 1;
 }
 
@@ -403,7 +403,7 @@ uint16_t script_handle_DIE(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    /* Trigger pre-death blinking effect. */
-   actor->hp = -10;
+   actor->mp_hp = -10;
 
    return pc + 1;
 }

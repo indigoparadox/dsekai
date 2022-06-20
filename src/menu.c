@@ -504,27 +504,6 @@ void menu_close( struct DSEKAI_STATE* state ) {
       state->crops[i].next_at_ticks += open_ms_diff;
    }
 
-   /* Bump up all mobile script waits to compensate for menu time. */
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      if(
-         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags) ||
-         0 > state->mobiles[i].script_id ||
-         state->mobiles[i].script_id >= TILEMAP_SCRIPTS_MAX
-      ) {
-         /* Mobile inactive or invalid script. */
-         continue;
-      }
-
-      debug_printf( 1,
-         "mobile %s next script step bumped up %d ms from %d to %d",
-         state->mobiles[i].name,
-         open_ms_diff,
-         state->mobiles[i].script_next_ms,
-         state->mobiles[i].script_next_ms + open_ms_diff );
-
-      state->mobiles[i].script_next_ms += open_ms_diff;
-   }
-
    animate_resume( ANIMATE_FLAG_SCRIPT );
    animate_resume( ANIMATE_FLAG_WEATHER );
 }
