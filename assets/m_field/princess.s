@@ -15,9 +15,9 @@ start 0:
 interact 0:
    speak       0 ; "Try planting this in soil."
    item_give   1234 ; Turnip seed.
-   return      32767
+   return      STACK
 
 interact 1:
    speak       8 ; "Do your best!"
-   return      32766
+   return      STACK_RC
 

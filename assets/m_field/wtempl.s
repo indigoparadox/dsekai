@@ -1,0 +1,12 @@
+
+start 0:
+   face     east
+   sleep    5
+   goto     0
+
+interact 0:
+   push     14 ; x
+   push     38 ; y
+   warp     4 ; templ
+   return   STACK_RC
+

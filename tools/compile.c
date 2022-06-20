@@ -26,6 +26,10 @@ const char gc_sc_bytes[] = {
    '\0'
 };
 
+uint8_t g_flags = 0;
+
+#define CS_FLAG_VERBOSE 1
+
 #define CS_NONE      0
 #define CS_COMMENT   1
 
@@ -34,7 +38,7 @@ const char gc_sc_bytes[] = {
 
 #define char_alpha( c ) (96 < c && 123 > c)
 
-#define d_printf( ... ) printf( __VA_ARGS__ )
+#define d_printf( ... ) if( CS_FLAG_VERBOSE == (CS_FLAG_VERBOSE & g_flags) ) { printf( __VA_ARGS__ ); }
 
 struct COMPILE_INST {
    uint16_t op;
@@ -156,6 +160,23 @@ void parse( char c, struct COMPILE_STATE* s ) {
             /* FACE */
             parm_tmp = parm_dir( s->token_iter, s->token_iter_sz );
             assert( 0 <= parm_tmp );
+
+         } else if( 10 == s->inst[s->inst_sz].op ) {
+            /* RETURN */
+            compare_case( s->token_iter, s->token_iter_sz );
+
+            if(
+               0 == strncmp( "STACK_RC", s->token_iter, 8 )
+            ) {
+               parm_tmp = SCRIPT_ARG_STACK_RC;
+            } else if(
+               0 == strncmp( "STACK", s->token_iter, 5 )
+            ) {
+               parm_tmp = SCRIPT_ARG_STACK;
+            } else {
+               parm_tmp = atoi( s->token_iter );
+            }
+
          } else {
             parm_tmp = atoi( s->token_iter );
          }
@@ -189,11 +210,21 @@ int main( int argc, char** argv ) {
       i = 0;
    uint8_t* in_bytes = NULL;
    struct COMPILE_STATE s;
+   char* filename = NULL;
 
-   assert( 2 == argc );
+   for( i = 1 ; argc > i ; i++ ) {
+      if( 0 == strncmp( "-v", argv[i], 2 ) ) {
+         g_flags |= CS_FLAG_VERBOSE;
+      } else {
+         assert( NULL == filename );
+         filename = argv[i];
+      }
+   }
+
+   assert( NULL != filename );
 
    /* Open file. */
-   in_file = fopen( argv[1], "r" );
+   in_file = fopen( filename, "r" );
    assert( NULL != in_file );
 
    /* Get size. */
