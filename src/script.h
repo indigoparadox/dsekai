@@ -31,6 +31,8 @@ struct TILEMAP;
 /* TODO: This is a valid stack value. */
 #define SCRIPT_ERROR_OVERFLOW -1
 
+#ifndef NO_SCRIPT_PROTOTYPES
+
 /**
  * \brief Callback to execute a behavior action. Step in a script.
  * \param pc Current program counter for this mobile.
@@ -47,7 +49,11 @@ typedef uint16_t (*SCRIPT_CB)(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg );
 
+#endif /* !NO_SCRIPT_PROTOTYPES */
+
+#ifndef NO_SCRIPT_STRUCT
 #include "scstruct.h"
+#endif /* !NO_SCRIPT_STRUCT */
 
 /**
  * \addtogroup scripting_commands_sect Scripting Commands
@@ -68,6 +74,8 @@ typedef uint16_t (*SCRIPT_CB)(
  * \param f Macro to execute on the function callback definition.
  */
 #define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) f( 1, INTERACT, 'i' ) f( 2, WALK_NORTH, 'u' ) f( 3, WALK_SOUTH, 'd' ) f( 4, WALK_EAST, 'r' ) f( 5, WALK_WEST, 'l' ) f( 6, SLEEP, 's' ) f( 7, START, 't' ) f( 8, GOTO, 'g' ) f( 9, SPEAK, 'p' ) f( 10, RETURN, 'x' ) f( 11, FACE, 'f' ) f( 12, GLOBAL_SET, 'b' ) f( 13, GLOBAL_GET, 'a' ) f( 14, WARP, 'w' ) f( 15, ANIMATE, 'n' ) f( 16, PUSH, 'v' ) f( 17, POP, '^' ) f( 18, EQUAL_JUMP, '=' ) f( 19, GREATER_JUMP, '>' ) f( 20, LESSER_JUMP, '<' ) f( 21, ADD, '+' ) f( 22, SUBTRACT, '-' ) f( 23, ITEM_GIVE, 'h' ) f( 24, ITEM_TAKE, 'k' ) f( 25, DIE, 'z' )
+
+#ifndef NO_SCRIPT_PROTOTYPES
 
 /*! \brief Define prototypes for the script action callbacks. */
 #define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct SCRIPT*, struct TILEMAP*, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, struct DSEKAI_STATE*, int16_t );
@@ -109,6 +117,10 @@ void script_shutdown() SECTION_SCRIPT;
 uint16_t script_goto_label(
    uint16_t pc, struct SCRIPT* script, uint16_t label_type, uint16_t label_id );
 
+#endif /* !NO_SCRIPT_PROTOTYPES */
+
+#ifndef NO_SCRIPT_TABLES
+
 #ifdef SCRIPT_C
 
 /* === If we're being called inside script.c === */
@@ -141,6 +153,8 @@ SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS )
 
 extern RES_CONST SCRIPT_CB gc_script_handlers[];
 #endif /* !SCRIPT_C */
+
+#endif /* !NO_SCRIPT_TABLES */
 
 /*! \} */
 
