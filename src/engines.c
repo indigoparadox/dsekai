@@ -131,6 +131,21 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
 #endif /* RESOURCE_FILE */
 
+   /* Preload tilemap tileset tiles into graphics cache. */
+   for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
+      if(
+         TILEMAP_TILESET_FLAG_LOADED !=
+         (map->tileset[i].flags & TILEMAP_TILESET_FLAG_LOADED)
+      ) {
+         continue;
+      }
+
+      debug_printf( 2, "preloading tile %d image...", i );
+
+      map->tileset[i].image_id = graphics_cache_load_bitmap(
+         map->tileset[i].image );
+   }
+
    if( 0 >= map_retval ) {
       /* Handle failure to find map. */
       error_printf(

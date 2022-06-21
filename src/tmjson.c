@@ -108,10 +108,10 @@ static int16_t tilemap_json_parse_tileset(
 
       if( 0 < tile_filename_sz ) {
          debug_printf(
-            2, "assigning tile path: %s, %s\n", tile_json_path, tile_filename );
+            2, "assigning tile path: %s, %s\n",
+            tile_json_path, tile_filename );
          resource_assign_id( t->tileset[i].image, tile_filename );
-         t->tileset[i].image_id = graphics_cache_load_bitmap(
-            t->tileset[i].image );
+         t->tileset[i].image_id = -1;
 
          /* Load tile flags. */
          dio_snprintf(

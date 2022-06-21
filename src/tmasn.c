@@ -39,11 +39,9 @@ static int16_t tilemap_asn_parse_tileset(
       if( 0 == read_sz ) {
          goto cleanup;
       }
-      t->tileset[tile_idx].image_id = graphics_cache_load_bitmap(
-         t->tileset[tile_idx].image );
-      assert( 0 <= t->tileset[tile_idx].image_id );
-      debug_printf( 3, "tile resource: %s (%d)",
+      debug_printf( 2, "tile resource: %s (%d)",
          t->tileset[tile_idx].image, read_sz );
+      t->tileset[tile_idx].image_id = -1;
       total_read_sz += read_sz; /* tile image and header */
 
       /* flags */
