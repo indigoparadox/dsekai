@@ -16,6 +16,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       i = 0;
    struct DSEKAI_STATE* state = NULL;
    struct TILEMAP* map = NULL;
+   struct ITEM* items = NULL;
 #ifdef RESOURCE_FILE
    char map_load_path[RESOURCE_PATH_MAX];
 #else
@@ -61,9 +62,22 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       state->engine_state_handle = (MEMORY_HANDLE)NULL;
    }
 
+   animate_stop_all();
+
    graphics_clear_cache();
 
-   animate_stop_all();
+   /* Reload player sprite since cache is gone. */
+   state->player.sprite_id =
+      graphics_cache_load_bitmap( state->player_sprite );
+
+   /* Reset item sprite IDs since cache is gone. */
+   items = (struct ITEM*)memory_lock( state->items_handle );
+   assert( NULL != items );
+   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      items[i].sprite_id = graphics_cache_load_bitmap(
+         items[i].sprite );
+   }
+   items = (struct ITEM*)memory_unlock( state->items_handle );
 
 #ifndef NO_ENGINE_EDITOR
    /* Disable editor. */

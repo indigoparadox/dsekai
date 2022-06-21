@@ -199,48 +199,51 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
    }
    fprintf( header_file, "   },\n" );
 
-   /* items */
-   fprintf( header_file, "   /* items */\n" );
+   /* item_defs */
+   fprintf( header_file, "   /* item_defs */\n" );
    fprintf( header_file, "   {\n" );
    for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
       fprintf( header_file, "      {\n" );
       fprintf( header_file, "         /* sprite */\n" );
 
-      if( '\0' != t.items[i].sprite[0] ) {
+      if( '\0' != t.item_defs[i].sprite[0] ) {
          ts_basename_idx = dio_basename(
-            t.items[i].sprite, strlen( t.items[i].sprite ) );
+            t.item_defs[i].sprite, strlen( t.item_defs[i].sprite ) );
 
          /* Blank out the filename extension. */
-         t.items[i].sprite[strlen( t.items[i].sprite ) - 4] = '\0';
+         t.item_defs[i].sprite[strlen( t.item_defs[i].sprite ) - 4] = '\0';
 
          /* items[i].sprite */
          /* Let the preprocessor figure it out. */
          fprintf( header_file, "         %s,\n",
-            &(t.items[i].sprite[ts_basename_idx]) );
+            &(t.item_defs[i].sprite[ts_basename_idx]) );
       } else {
          fprintf( header_file, "         0,\n" );
       }
 
+      fprintf( header_file, "         /* sprite_id */\n" );
+      fprintf( header_file, "         -1,\n" );
+
       fprintf( header_file, "         /* name */\n" );
-      fprintf( header_file, "         \"%s\",\n", t.items[i].name );
+      fprintf( header_file, "         \"%s\",\n", t.item_defs[i].name );
 
       fprintf( header_file, "         /* type */\n" );
-      fprintf( header_file, "         %d,\n", t.items[i].type );
+      fprintf( header_file, "         %d,\n", t.item_defs[i].type );
 
       fprintf( header_file, "         /* owner */\n" );
-      fprintf( header_file, "         %d,\n", t.items[i].owner );
+      fprintf( header_file, "         %d,\n", t.item_defs[i].owner );
 
       fprintf( header_file, "         /* gid */\n" );
-      fprintf( header_file, "         %d,\n", t.items[i].gid );
+      fprintf( header_file, "         %d,\n", t.item_defs[i].gid );
 
       fprintf( header_file, "         /* data */\n" );
-      fprintf( header_file, "         %d,\n", t.items[i].data );
+      fprintf( header_file, "         %d,\n", t.item_defs[i].data );
 
       fprintf( header_file, "         /* count */\n" );
-      fprintf( header_file, "         %d,\n", t.items[i].count );
+      fprintf( header_file, "         %d,\n", t.item_defs[i].count );
 
       fprintf( header_file, "         /* flags */\n" );
-      fprintf( header_file, "         %d,\n", t.items[i].flags );
+      fprintf( header_file, "         %d,\n", t.item_defs[i].flags );
 
       fprintf( header_file, "      },\n" );
    }
@@ -267,6 +270,9 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
       } else {
          fprintf( header_file, "         0,\n" );
       }
+
+      fprintf( header_file, "         /* sprite_id */\n" );
+      fprintf( header_file, "         -1,\n" );
 
       fprintf( header_file, "         /* name */\n" );
       fprintf( header_file, "         \"%s\",\n", t.crop_defs[i].name );

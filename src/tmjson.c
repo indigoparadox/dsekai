@@ -110,6 +110,8 @@ static int16_t tilemap_json_parse_tileset(
          debug_printf(
             2, "assigning tile path: %s, %s\n", tile_json_path, tile_filename );
          resource_assign_id( t->tileset[i].image, tile_filename );
+         t->tileset[i].image_id = graphics_cache_load_bitmap(
+            t->tileset[i].image );
 
          /* Load tile flags. */
          dio_snprintf(
@@ -367,7 +369,7 @@ int16_t tilemap_json_parse_items(
             type_buffer, gc_items_types[j], type_buffer_sz )
          ) {
             debug_printf( 1, "item is type: %s (%d)", gc_items_types[j], j );
-            t->items[i].type = j;
+            t->item_defs[i].type = j;
             break;
          }
       }
@@ -376,14 +378,14 @@ int16_t tilemap_json_parse_items(
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_NAME, i );
       name_buffer_sz = json_str_from_path(
          iter_path, JSON_PATH_SZ,
-         t->items[i].name, ITEM_NAME_SZ,
+         t->item_defs[i].name, ITEM_NAME_SZ,
          &(tokens[0]), tokens_sz, json_buffer );
       if( 0 >= name_buffer_sz ) {
          error_printf( "invalid item returned (loaded %d)", i );
          break;
       }
       
-      debug_printf( 1, "found item: %s", t->items[i].name );
+      debug_printf( 1, "found item: %s", t->item_defs[i].name );
 
 #ifndef NO_FIX_ASSET_PATH
       sprite_buffer_sz = tilemap_fix_asset_path(
@@ -401,16 +403,16 @@ int16_t tilemap_json_parse_items(
          error_printf( "invalid item sprite returned (loaded %d)", i );
          break;
       }
-      resource_assign_id( t->items[i].sprite, sprite_buffer );
+      resource_assign_id( t->item_defs[i].sprite, sprite_buffer );
 
       /* gid */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_GID, i );
-      t->items[i].gid = json_int_from_path(
+      t->item_defs[i].gid = json_int_from_path(
          iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
 
       /* data */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_DATA, i );
-      t->items[i].data = json_int_from_path(
+      t->item_defs[i].data = json_int_from_path(
          iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
 
       /* craftable  */
@@ -421,18 +423,18 @@ int16_t tilemap_json_parse_items(
          iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer
       ) ) {
          debug_printf( 1, "item %d is craftable", i );
-         t->items[i].flags |= ITEM_FLAG_CRAFTABLE;
+         t->item_defs[i].flags |= ITEM_FLAG_CRAFTABLE;
       } else {
          debug_printf( 1, "item %d is NOT craftable", i );
-         t->items[i].flags &= ~ITEM_FLAG_CRAFTABLE;
+         t->item_defs[i].flags &= ~ITEM_FLAG_CRAFTABLE;
       }
 
       /* active */
-      t->items[i].flags |= ITEM_FLAG_ACTIVE;
+      t->item_defs[i].flags |= ITEM_FLAG_ACTIVE;
 
       /* count */
       /* TODO: Parse count from map. */
-      t->items[i].count = 1;
+      t->item_defs[i].count = 1;
    }
 
    return i;
@@ -486,6 +488,7 @@ int16_t tilemap_json_parse_crop_defs(
          break;
       }
       resource_assign_id( t->crop_defs[i].sprite, sprite_buffer );
+      t->crop_defs[i].sprite_id = -1;
 
       /* gid */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_GID, i );

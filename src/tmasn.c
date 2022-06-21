@@ -39,6 +39,9 @@ static int16_t tilemap_asn_parse_tileset(
       if( 0 == read_sz ) {
          goto cleanup;
       }
+      t->tileset[tile_idx].image_id = graphics_cache_load_bitmap(
+         t->tileset[tile_idx].image );
+      assert( 0 <= t->tileset[tile_idx].image_id );
       debug_printf( 3, "tile resource: %s (%d)",
          t->tileset[tile_idx].image, read_sz );
       total_read_sz += read_sz; /* tile image and header */
@@ -270,18 +273,18 @@ static int16_t tilemap_asn_parse_items(
       total_read_sz += read_sz;
 
       /* sprite */
-      read_sz = asn_read_string( t->items[item_idx].sprite,
+      read_sz = asn_read_string( t->item_defs[item_idx].sprite,
          RESOURCE_PATH_MAX, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
       debug_printf( 2, "item %d sprite: %s (%d)",
-         item_idx, t->items[item_idx].sprite, read_sz );
+         item_idx, t->item_defs[item_idx].sprite, read_sz );
       total_read_sz += read_sz; /* item sprite and header */
 
       /* name */
-      read_sz = asn_read_string( t->items[item_idx].name,
+      read_sz = asn_read_string( t->item_defs[item_idx].name,
             ITEM_NAME_SZ, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          error_printf( "error reading item name" );
@@ -289,24 +292,24 @@ static int16_t tilemap_asn_parse_items(
          goto cleanup;
       }
       debug_printf( 2, "item %d name: %s (%d)",
-         item_idx, t->items[item_idx].name, read_sz );
+         item_idx, t->item_defs[item_idx].name, read_sz );
       total_read_sz += read_sz; /* item name and header */
 
       /* type */
       read_sz = asn_read_int(
-         &(t->items[item_idx].type), 1, 0, asn_buffer, total_read_sz );
+         &(t->item_defs[item_idx].type), 1, 0, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          error_printf( "error reading item type" );
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
       debug_printf( 2, "item %d type: %d (%d)",
-         item_idx, t->items[item_idx].type, read_sz );
+         item_idx, t->item_defs[item_idx].type, read_sz );
       total_read_sz += read_sz;
 
       /* owner */
       read_sz = asn_read_int(
-         (uint8_t*)&(t->items[item_idx].owner), 1, 0,
+         (uint8_t*)&(t->item_defs[item_idx].owner), 1, 0,
          asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          error_printf( "error reading item owner" );
@@ -314,55 +317,55 @@ static int16_t tilemap_asn_parse_items(
          goto cleanup;
       }
       debug_printf( 2, "item %d owner: %d (%d)",
-         item_idx, t->items[item_idx].owner, read_sz );
+         item_idx, t->item_defs[item_idx].owner, read_sz );
       total_read_sz += read_sz;
 
       /* gid */
       read_sz = asn_read_int(
-         (uint8_t*)&(t->items[item_idx].gid), 2, 0, asn_buffer, total_read_sz );
+         (uint8_t*)&(t->item_defs[item_idx].gid), 2, 0, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          error_printf( "error reading item gid" );
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
       debug_printf( 2, "item %d gid: %d (%d)",
-         item_idx, t->items[item_idx].gid, read_sz );
+         item_idx, t->item_defs[item_idx].gid, read_sz );
       total_read_sz += read_sz;
 
       /* data */
       read_sz = asn_read_int(
-         &(t->items[item_idx].data), 1, 0, asn_buffer, total_read_sz );
+         &(t->item_defs[item_idx].data), 1, 0, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          error_printf( "error reading item data" );
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
       debug_printf( 2, "item %d data: %d (%d)",
-         item_idx, t->items[item_idx].data, read_sz );
+         item_idx, t->item_defs[item_idx].data, read_sz );
       total_read_sz += read_sz;
 
       /* count */
       read_sz = asn_read_int(
-         &(t->items[item_idx].count), 1, 0, asn_buffer, total_read_sz );
+         &(t->item_defs[item_idx].count), 1, 0, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          error_printf( "error reading item count" );
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
       debug_printf( 2, "item %d count: %d (%d)",
-         item_idx, t->items[item_idx].count, read_sz );
+         item_idx, t->item_defs[item_idx].count, read_sz );
       total_read_sz += read_sz;
 
       /* flags */
       read_sz = asn_read_int(
-         &(t->items[item_idx].flags), 1, 0, asn_buffer, total_read_sz );
+         &(t->item_defs[item_idx].flags), 1, 0, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          error_printf( "error reading item flags" );
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
       debug_printf( 2, "item %d flags: %d (%d)",
-         item_idx, t->items[item_idx].flags, read_sz );
+         item_idx, t->item_defs[item_idx].flags, read_sz );
       total_read_sz += read_sz;
 
    }
@@ -419,6 +422,7 @@ static int16_t tilemap_asn_parse_crop_defs(
       debug_printf( 2, "crop def %d sprite: %s (%d)",
          crop_idx, t->crop_defs[crop_idx].sprite, read_sz );
       total_read_sz += read_sz; /* crop def sprite and header */
+      t->crop_defs[crop_idx].sprite_id = -1;
 
       /* name */
       read_sz = asn_read_string( t->crop_defs[crop_idx].name,
@@ -1040,7 +1044,7 @@ int32_t tilemap_asn_save(
       goto cleanup;
    }
    for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
-      if( ITEM_FLAG_ACTIVE != (t->items[i].flags & ITEM_FLAG_ACTIVE) ) {
+      if( ITEM_FLAG_ACTIVE != (t->item_defs[i].flags & ITEM_FLAG_ACTIVE) ) {
          continue;
       }
 
@@ -1064,7 +1068,7 @@ int32_t tilemap_asn_save(
       /* sprite */
       debug_printf( 3, "(offset 0x%02x) writing item sprite path", idx );
       idx = asn_write_string(
-         &h_buffer, idx, t->items[i].sprite, RESOURCE_PATH_MAX );
+         &h_buffer, idx, t->item_defs[i].sprite, RESOURCE_PATH_MAX );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;
@@ -1073,7 +1077,7 @@ int32_t tilemap_asn_save(
 
       /* name */
       debug_printf( 3, "(offset 0x%02x) writing item name", idx );
-      idx = asn_write_string( &h_buffer, idx, t->items[i].name, ITEM_NAME_SZ );
+      idx = asn_write_string( &h_buffer, idx, t->item_defs[i].name, ITEM_NAME_SZ );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;
@@ -1082,7 +1086,7 @@ int32_t tilemap_asn_save(
 
       /* type */
       debug_printf( 3, "(offset 0x%02x) writing item type", idx );
-      idx = asn_write_int( &h_buffer, idx, t->items[i].type );
+      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].type );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;
@@ -1091,7 +1095,7 @@ int32_t tilemap_asn_save(
 
       /* owner */
       debug_printf( 3, "(offset 0x%02x) writing item owner", idx );
-      idx = asn_write_int( &h_buffer, idx, t->items[i].owner );
+      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].owner );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;
@@ -1100,7 +1104,7 @@ int32_t tilemap_asn_save(
  
       /* gid */
       debug_printf( 3, "(offset 0x%02x) writing item gid", idx );
-      idx = asn_write_int( &h_buffer, idx, t->items[i].gid );
+      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].gid );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;
@@ -1109,7 +1113,7 @@ int32_t tilemap_asn_save(
 
       /* data */
       debug_printf( 3, "(offset 0x%02x) writing item data", idx );
-      idx = asn_write_int( &h_buffer, idx, t->items[i].data );
+      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].data );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;
@@ -1118,7 +1122,7 @@ int32_t tilemap_asn_save(
 
       /* count */
       debug_printf( 3, "(offset 0x%02x) writing item count", idx );
-      idx = asn_write_int( &h_buffer, idx, t->items[i].count );
+      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].count );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;
@@ -1127,7 +1131,7 @@ int32_t tilemap_asn_save(
 
       /* flags */
       debug_printf( 3, "(offset 0x%02x) writing item flags", idx );
-      idx = asn_write_int( &h_buffer, idx, t->items[i].flags );
+      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].flags );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;

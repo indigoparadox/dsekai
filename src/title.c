@@ -49,7 +49,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
       WINDOW_PLACEMENT_CENTER,
       SCREEN_H - (TILE_H * 5), TILE_H * 6, TILE_W * 3,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
-      0, 0, NULL );
+      0, NULL );
 
    for( i = 0 ; TITLE_OPTIONS_COUNT > i ; i++ ) {
       if( gstate->option_high == i ) {
@@ -67,7 +67,7 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
          WINDOW_PLACEMENT_GRID, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
-         0, 0, gc_title_options[i] );
+         0, gc_title_options[i] );
    }
 
    gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
@@ -106,7 +106,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[0].flags = MOBILE_FLAG_ACTIVE;
    mobile_set_dir( &(state->mobiles[0]), 2 );
    state->mobiles[0].mp_hp = 100;
-   resource_assign_id( state->mobiles[0].sprite, s_world );
+   state->mobiles[0].sprite_id = graphics_cache_load_bitmap( s_world );
 
    state->mobiles[1].coords.x = 5;
    state->mobiles[1].coords.y = 2;
@@ -116,7 +116,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[1].flags = MOBILE_FLAG_ACTIVE;
    mobile_set_dir( &(state->mobiles[1]), 0 );
    state->mobiles[1].mp_hp = 100;
-   resource_assign_id( state->mobiles[1].sprite, s_world );
+   state->mobiles[1].sprite_id = graphics_cache_load_bitmap( s_world );
 
    state->mobiles[2].coords.x = 4;
    state->mobiles[2].coords.y = 3;
@@ -126,7 +126,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[2].flags = MOBILE_FLAG_ACTIVE;
    mobile_set_dir( &(state->mobiles[2]), 3 );
    state->mobiles[2].mp_hp = 100;
-   resource_assign_id( state->mobiles[2].sprite, s_world );
+   state->mobiles[2].sprite_id = graphics_cache_load_bitmap( s_world );
 
    state->mobiles[3].coords.x = 5;
    state->mobiles[3].coords.y = 3;
@@ -136,7 +136,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[3].flags = MOBILE_FLAG_ACTIVE;
    mobile_set_dir( &(state->mobiles[3]), 1 );
    state->mobiles[3].mp_hp = 100;
-   resource_assign_id( state->mobiles[3].sprite, s_world );
+   state->mobiles[3].sprite_id = graphics_cache_load_bitmap( s_world );
 
    graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
 
@@ -178,9 +178,11 @@ void title_draw( struct DSEKAI_STATE* state ) {
          continue;
       }
 
+      assert( 0 <= state->mobiles[i].sprite_id );
+
       /* Draw current mobile sprite/frame. */
       graphics_blit_sprite_at(
-         state->mobiles[i].sprite,
+         state->mobiles[i].sprite_id,
          state->ani_sprite_x,
          mobile_get_dir( &(state->mobiles[i]) ) * SPRITE_H,
          (state->mobiles[i].coords.x * SPRITE_W),

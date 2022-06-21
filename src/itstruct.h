@@ -38,8 +38,10 @@
  *
  * See ::DSEKAI_STATE for context on how items are stored.
  */
+/* TODO: Consolidate some of these byte-sized fields. */
 struct ITEM {
    RESOURCE_ID sprite;
+   int16_t sprite_id;
    /*! \brief Meaningful name of this tiem. */
    char name[ITEM_NAME_SZ + 1]; /* +1 for NULL. */
    /*! \brief Engine-defined functionality of this item. */

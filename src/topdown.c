@@ -119,7 +119,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
 
          /* Blit the tile. */
          graphics_blit_tile_at(
-            map->tileset[tile_id].image,
+            map->tileset[tile_id].image_id,
             0, 0,
             SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
             TILE_W, TILE_H );
@@ -144,11 +144,12 @@ static void topdown_draw_crops(
    int8_t i = 0,
       crop_idx = 0;
    struct CROP_PLOT* plot = NULL;
-   RESOURCE_ID plot_gfx;
+   int16_t plot_gfx;
    uint16_t plot_px = 0,
       plot_py = 0;
    uint8_t crop_stage = 0;
    struct TILEMAP* map = NULL;
+   struct CROP_DEF* crop_def = NULL;
 
    map = (struct TILEMAP*)memory_lock( state->map_handle );
    if( NULL == map ) {
@@ -185,10 +186,13 @@ static void topdown_draw_crops(
          SCREEN_MAP_Y + ((plot->coords.y * TILE_H) - gstate->screen_scroll_y);
 
 #ifdef RESOURCE_FILE
-      resource_assign_id( plot_gfx, ASSETS_PATH DEPTH_SPEC "/i_plot.bmp" );
+      plot_gfx = 
+         graphics_cache_load_bitmap( ASSETS_PATH DEPTH_SPEC "/i_plot.bmp" );
 #else
-      resource_assign_id( plot_gfx, i_plot );
+      plot_gfx = graphics_cache_load_bitmap( i_plot );
 #endif /* RESOURCE_FILE */
+
+      assert( 0 < plot_gfx );
 
       graphics_blit_sprite_at(
          plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
@@ -201,22 +205,28 @@ static void topdown_draw_crops(
          continue;
       }
 
+      /* Make sure crop spritesheet is loaded. */
+      crop_def = &(map->crop_defs[crop_idx]);
+      if( 0 > crop_def->sprite_id ) {
+         crop_def->sprite_id = graphics_cache_load_bitmap( crop_def->sprite );
+      }
+
       crop_stage = (plot->flags & CROP_FLAG_STAGE_MASK);
 
       if( 0 < crop_stage ) {
          /* Crop has germinated. */
          graphics_blit_sprite_at(
-            map->crop_defs[crop_idx].sprite,
+            crop_def->sprite_id,
             (crop_stage - 1) * TILE_W, 0,
             plot_px, plot_py, TILE_W, TILE_H );
 
       } else {
          /* Crop is still seeds. */
 #ifdef RESOURCE_FILE
-         resource_assign_id(
-            plot_gfx, ASSETS_PATH DEPTH_SPEC "/i_seed.bmp" );
+         plot_gfx = graphics_cache_load_bitmap(
+            ASSETS_PATH DEPTH_SPEC "/i_seed.bmp" );
 #else
-         resource_assign_id( plot_gfx, i_seed );
+         plot_gfx = graphics_cache_load_bitmap( i_seed );
 #endif /* RESOURCE_FILE */
          graphics_blit_sprite_at(
             plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
@@ -270,9 +280,11 @@ static void topdown_draw_mobile(
       m->screen_py -= SPRITE_H - m->steps_y;
    }
 
+   assert( 0 <= m->sprite_id );
+
    /* Blit the mobile's current sprite/frame. */
    graphics_blit_sprite_at(
-      m->sprite, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
+      m->sprite_id, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
       m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
 }
 
@@ -326,7 +338,7 @@ void topdown_draw_items(
             gstate->screen_scroll_y);
 
       graphics_blit_sprite_at(
-         items[i].sprite, 0, 0,
+         items[i].sprite_id, 0, 0,
          item_px, item_py, SPRITE_W, SPRITE_H );
 
    }
@@ -533,7 +545,7 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
       WINDOW_ID_STATUS, 0, WINDOW_TYPE_WINDOW, 0,
       0, SCREEN_MAP_Y + SCREEN_MAP_H, STATUS_WINDOW_W, STATUS_WINDOW_H,
       GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
-      0, 0, NULL );
+      0, NULL );
 
    /* Force reset the weather to start the animation. */
    map = (struct TILEMAP*)memory_lock( state->map_handle );

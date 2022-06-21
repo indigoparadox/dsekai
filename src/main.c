@@ -67,7 +67,12 @@ unilayer_main() {
       goto exit;
    }
 
-   window_init( SCREEN_MAP_W, SCREEN_MAP_H );
+   if( !window_init( SCREEN_MAP_W, SCREEN_MAP_H ) ) {
+      retval = 1;
+      error_printf( "unable to initialize GUI" );
+      goto exit;
+   }
+
    if( !script_init() ) {
       error_printf( "unable to initialize scripts" );
       retval = 1;

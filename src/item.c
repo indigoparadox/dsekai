@@ -402,10 +402,10 @@ int8_t item_stack_or_add(
    /* Find the item definition with the given GID in tilemap item templates. */
    for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
       if(
-         t->items[i].gid == template_gid &&
-         ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & t->items[i].flags)
+         t->item_defs[i].gid == template_gid &&
+         ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & t->item_defs[i].flags)
       ) {
-         e_def = &(t->items[i]);
+         e_def = &(t->item_defs[i]);
          debug_printf( 2, "found item with gid %d and owner %d at index: %d",
             template_gid, owner_id, i );
          break;
@@ -454,6 +454,7 @@ int8_t item_stack_or_add(
             sizeof( struct ITEM ) );
 
          items[i].owner = owner_id;
+         items[i].sprite_id = -1;
          e_idx = i;
 
          /* Found and created the item, so quit. */

@@ -391,7 +391,7 @@ void pov_draw_wall_x(
       }
 
       graphics_blit_tile_at(
-         t->tileset[ray->tile_id].image,
+         t->tileset[ray->tile_id].image_id,
          tex_x, tex_y,
          x, y,
          1, 1 );

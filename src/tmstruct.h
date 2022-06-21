@@ -48,6 +48,7 @@ struct TILESET_TILE {
    RESOURCE_ID image;
    /*! \brief Flags indicating behavior for this tile. */
    uint8_t flags;
+   uint16_t image_id;
 };
 
 /*! \brief Defines a spawner to create mobiles in the world.
@@ -64,6 +65,7 @@ struct TILEMAP_SPAWN {
    /**
     * \brief RESOURCE_ID for the MOBILE::sprite on a spawned MOBILE.
     */
+   /* TODO: Change this to "sprite" for consistency. */
    RESOURCE_ID type;
    /*! \brief Index of TILEMAP::scripts attached to mobiles spawned. */
    int16_t script_id;
@@ -93,7 +95,7 @@ struct TILEMAP {
    /* \brief Scripts available to attach to any MOBILE. */
    struct SCRIPT scripts[TILEMAP_SCRIPTS_MAX];
    /*! \brief Items able to be collected on this map. */
-   struct ITEM items[TILEMAP_ITEMS_MAX];
+   struct ITEM item_defs[TILEMAP_ITEMS_MAX];
    /*! \brief Crops able to be grown on this map. */
    struct CROP_DEF crop_defs[TILEMAP_CROP_DEFS_MAX];
 };

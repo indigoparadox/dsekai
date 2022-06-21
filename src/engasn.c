@@ -33,6 +33,8 @@ int32_t engines_asn_save( const char* save_name, struct DSEKAI_STATE* state ) {
       idx = -1;
       goto cleanup;
    }
+
+   /* TODO: Serialize graphics cache index > resource_id mappings. */
    
    /* map */
    t = (struct TILEMAP*)memory_lock( state->map_handle );

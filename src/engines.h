@@ -274,6 +274,14 @@ struct DSEKAI_STATE {
    uint8_t transition;
 
    /**
+    * \brief Resource ID for the player sprite.
+    *
+    * This is necessary since the player is spawned in the first map, but
+    * travels to other maps (unlike other mobiles).
+    */
+   RESOURCE_ID player_sprite;
+
+   /**
     * \brief Array of all crops growing on all maps.
     * 
     * This is kept as part of the state so that crops can continue growing in

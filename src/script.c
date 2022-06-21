@@ -196,11 +196,16 @@ uint16_t script_handle_SPEAK(
 ) {
 #if defined( DEPTH_VGA ) || defined( DEPTH_CGA ) || defined( DEPTH_MONO )
    const char* str_ptr = NULL;
+   uint8_t dir_flag = 0;
    
    str_ptr = strpool_get( t->strpool, arg, NULL );
 
+   /* Translate mobile dir flag into window dir flag. */
+   dir_flag = mobile_get_dir( actor );
+   dir_flag <<= 4;
+
    window_prefab_dialog(
-      str_ptr, mobile_get_sprite( actor ), (mobile_get_dir( actor ) << 4),
+      str_ptr, mobile_get_sprite( actor ), dir_flag,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* SCRIPT_HAS_GFX */
    return pc + 1;

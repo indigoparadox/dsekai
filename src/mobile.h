@@ -87,7 +87,7 @@
 
 /*! \} */
 
-#define mobile_get_sprite( m ) ((m)->sprite)
+#define mobile_get_sprite( m ) ((m)->sprite_id)
 
 /**
  * \relates MOBILE
@@ -143,7 +143,7 @@ struct MOBILE {
     * animations over the mobile.
     */
    int16_t screen_py;
-   RESOURCE_ID sprite;
+   int16_t sprite_id;
    /*! \brief Current tile on which this mobile is located. */
    struct TILEMAP_COORDS coords;
    /*! \brief Previous tile, if this mobile is currently moving. */
