@@ -369,7 +369,7 @@ int16_t tilemap_json_parse_items(
             type_buffer, gc_items_types[j], type_buffer_sz )
          ) {
             debug_printf( 1, "item is type: %s (%d)", gc_items_types[j], j );
-            t->item_defs[i].type = j;
+            item_set_type_flag( &(t->item_defs[i]), j );
             break;
          }
       }
@@ -431,10 +431,6 @@ int16_t tilemap_json_parse_items(
 
       /* active */
       t->item_defs[i].flags |= ITEM_FLAG_ACTIVE;
-
-      /* count */
-      /* TODO: Parse count from map. */
-      t->item_defs[i].count = 1;
    }
 
    return i;

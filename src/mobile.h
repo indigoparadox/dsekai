@@ -46,7 +46,7 @@
  * \relates MOBILE
  * \brief Increment just the HP half of MOBILE::mp_hp.
  */
-#define mobile_incr_hp( m, v ) (m)->mp_hp = (((m)->mp_hp & MOBILE_MP_MASK) | ((((m)->mp_hp & MOBILE_HP_MASK) + (v)) & MOBILE_HP_MASK))
+#define mobile_incr_hp( m, v ) (m)->mp_hp = (((m)->mp_hp & MOBILE_MP_MASK) | (((((m)->mp_hp & MOBILE_HP_MASK) + (v)) & MOBILE_HP_MASK) & MOBILE_HP_MASK))
 
 /**
  * \addtogroup dsekai_mobile_flags Mobile Object Flags
@@ -67,7 +67,7 @@
  * \param m Locked ::MEMORY_PTR to ::MOBILE to modify.
  * \param v Value to increment counter by.
  */
-#define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | (mobile_get_icount( m ) + (((v) << 12) & MOBILE_ICOUNT_MASK)))
+#define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | ((mobile_get_icount( m ) + (((v) << 12) & MOBILE_ICOUNT_MASK)) & MOBILE_ICOUNT_MASK))
 
 /**
  * \brief Bitmask defining bits used to indicate which of the

@@ -211,8 +211,7 @@ int8_t item_use_hoe(
 
       /* Crop plot is not empty, but does it collide? */
       if(
-         0 == memory_strncmp_ptr(
-            state->crops[i].map_name, t->name, TILEMAP_NAME_MAX ) &&
+         state->crops[i].map_gid == t->gid &&
          x == state->crops[i].coords.x && y == state->crops[i].coords.y
       ) {
          retval = ITEM_USED_SUCCESSFUL;
@@ -238,15 +237,14 @@ int8_t item_use_hoe(
    /* Create crop plot. */
    memory_zero_ptr(
       (MEMORY_PTR)&(state->crops[crop_idx]), sizeof( struct CROP_PLOT ) );
-   memory_strncpy_ptr( state->crops[crop_idx].map_name, t->name,
-      TILEMAP_NAME_MAX );
+   state->crops[crop_idx].map_gid = t->gid;
    state->crops[crop_idx].coords.x = x;
    state->crops[crop_idx].coords.y = y;
    state->crops[crop_idx].flags |= CROP_FLAG_ACTIVE;
-   debug_printf( 2, "created crop plot %d at %d, %d on map %s",
+   debug_printf( 2, "created crop plot %d at %d, %d on map %d",
       crop_idx,
       state->crops[crop_idx].coords.x, state->crops[crop_idx].coords.y,
-      state->crops[crop_idx].map_name );
+      state->crops[crop_idx].map_gid );
 
 cleanup:
 
@@ -275,6 +273,7 @@ uint8_t item_get_data( int8_t e_idx, struct DSEKAI_STATE* state ) {
    return data_out;
 }
 
+/* TODO: Refactor out. */
 uint8_t item_get_type( int8_t e_idx, struct DSEKAI_STATE* state ) {
    uint8_t type_out = 0;
    struct ITEM* items = NULL;
@@ -288,7 +287,7 @@ uint8_t item_get_type( int8_t e_idx, struct DSEKAI_STATE* state ) {
    
    assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & items[e_idx].flags) );
 
-   type_out = items[e_idx].type;
+   type_out = item_get_type_flag( &(items[e_idx]) );
 
    items = (struct ITEM*)memory_unlock( state->items_handle );
 
@@ -376,9 +375,9 @@ int8_t item_decr_or_delete( int8_t e_idx, struct DSEKAI_STATE* state ) {
    assert( NULL != items );
    assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & items[e_idx].flags) );
 
-   if( 1 < items[e_idx].count ) {
+   if( 1 < item_get_count_flag( &(items[e_idx]) ) ) {
       /* Reduce the item's count. */
-      items[e_idx].count--;
+      item_incr_count( &(items[e_idx]), -1 );
    } else {
       /* Delete the item. */
       items[e_idx].flags &= ~ITEM_FLAG_ACTIVE;
@@ -426,13 +425,18 @@ int8_t item_stack_or_add(
    
    if( 0 <= e_idx ) {
       /* Found a dupe (stacking). */
-      if( gc_items_max[e_def->type] >= items[e_idx].count + 1 ) {
-         items[e_idx].count++;
+      if(
+         gc_items_max[item_get_type_flag( e_def )] >=
+         item_get_count_flag( &(items[e_idx]) ) + 1
+      ) {
          debug_printf( 2, "adding item %d to mobile %d stack (%d)",
-            template_gid, owner_id, items[e_idx].count );
+            template_gid, owner_id, item_get_count_flag( &(items[e_idx]) ) );
       } else {
-         error_printf( "unable to give item %d to mobile %d: duplicate",
-            template_gid, owner_id );
+         error_printf(
+            "unable to give item %d type %d to mobile %d: duplicate (max %d)",
+            template_gid, item_get_type_flag( e_def ),
+            owner_id, gc_items_max[item_get_type_flag( e_def )]
+         );
          e_idx = ITEM_ERROR_DUPLICATE;
       }
 
@@ -461,6 +465,11 @@ int8_t item_stack_or_add(
          break;
       }
    }
+
+   assert( 0 <= e_idx );
+
+   /* Defs start with count of 0, or we found the e_idx above. */
+   item_incr_count( &(items[e_idx]), 1 );
 
 cleanup:
 
@@ -532,8 +541,7 @@ int8_t item_drop(
    debug_printf( 2, "dropped item at %d, %d", e->x, e->y );
 
    e->owner = ITEM_OWNER_NONE;
-
-   memory_strncpy_ptr( e->map_name, t->name, TILEMAP_NAME_MAX );
+   e->map_gid = t->gid;
 
 #if 0
    /* Set tile as dirty. */
@@ -570,8 +578,7 @@ int8_t item_pickup_xy(
          /* Skip owned items. */
          ITEM_OWNER_NONE != items[i].owner ||
          /* Skip items on other maps. */
-         0 != memory_strncmp_ptr(
-            items[i].map_name, t->name, TILEMAP_NAME_MAX )
+         items[i].map_gid != t->gid
       ) {
          continue;
       }

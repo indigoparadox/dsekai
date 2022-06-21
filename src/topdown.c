@@ -166,9 +166,7 @@ static void topdown_draw_crops(
          /* Crop plot is inactive. */
          CROP_FLAG_ACTIVE != (plot->flags & CROP_FLAG_ACTIVE) ||
          /* Crop is on a different TILEMAP. */
-         0 != memory_strncmp_ptr(
-            plot->map_name, map->name,
-            memory_strnlen_ptr( plot->map_name, TILEMAP_NAME_MAX ) ) ||
+         plot->map_gid != map->gid ||
          /* Crop tile is not dirty. */
          /* !tilemap_is_dirty( plot->coords.x, plot->coords.y, map ) || */
          /* Crop is off-screen. */
@@ -317,10 +315,7 @@ void topdown_draw_items(
          /* Item is owned. */
          ITEM_OWNER_NONE != items[i].owner ||
          /* Item is on a different TILEMAP. */
-         0 != memory_strncmp_ptr(
-            items[i].map_name, map->name,
-            memory_strnlen_ptr(
-               items[i].map_name, TILEMAP_NAME_MAX ) ) ||
+         items[i].map_gid != map->gid ||
          /* Item tile is not dirty. */
          /* !tilemap_is_dirty( items[i].y, items[i].x, map ) || */
          /* Item is off-screen. */

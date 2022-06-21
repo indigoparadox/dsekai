@@ -57,9 +57,9 @@
 
 struct CROP_PLOT {
    /**
-    * \brief Name of the ::TILEMAP on which this crop is growing.
+    * \brief TILEMAP::gid of the tilemap on which this crop is growing.
     */
-   char map_name[TILEMAP_NAME_MAX];
+   uint16_t map_gid;
    /**
     * \brief Compared to GIDs in TILEMAP::crop_defs to find crop details.
     */

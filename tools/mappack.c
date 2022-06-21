@@ -227,9 +227,6 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
       fprintf( header_file, "         /* name */\n" );
       fprintf( header_file, "         \"%s\",\n", t.item_defs[i].name );
 
-      fprintf( header_file, "         /* type */\n" );
-      fprintf( header_file, "         %d,\n", t.item_defs[i].type );
-
       fprintf( header_file, "         /* owner */\n" );
       fprintf( header_file, "         %d,\n", t.item_defs[i].owner );
 
@@ -238,9 +235,6 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
 
       fprintf( header_file, "         /* data */\n" );
       fprintf( header_file, "         %d,\n", t.item_defs[i].data );
-
-      fprintf( header_file, "         /* count */\n" );
-      fprintf( header_file, "         %d,\n", t.item_defs[i].count );
 
       fprintf( header_file, "         /* flags */\n" );
       fprintf( header_file, "         %d,\n", t.item_defs[i].flags );

@@ -37,14 +37,14 @@ unilayer_main() {
 
    error_printf( "error test" );
 
-   size_printf( 3, "mobile", sizeof( struct MOBILE ) );
-
    size_printf( 3, "state", sizeof( struct DSEKAI_STATE ) );
    assert( sizeof( struct DSEKAI_STATE ) < 16384 );
    size_printf( 3, "tilemap", sizeof( struct TILEMAP ) );
    assert( sizeof( struct TILEMAP ) < 16384 );
-   size_printf( 3, "items",
-      sizeof( struct ITEM ) * DSEKAI_ITEMS_MAX );
+   
+   size_multi_printf(
+      3, "mobile", sizeof( struct MOBILE ), DSEKAI_MOBILES_MAX );
+   size_multi_printf( 3, "item", sizeof( struct ITEM ), DSEKAI_ITEMS_MAX );
    assert( sizeof( struct TILEMAP ) < 16384 );
 
 #ifndef NO_ANIMATE

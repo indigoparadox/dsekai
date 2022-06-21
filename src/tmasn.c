@@ -293,18 +293,6 @@ static int16_t tilemap_asn_parse_items(
          item_idx, t->item_defs[item_idx].name, read_sz );
       total_read_sz += read_sz; /* item name and header */
 
-      /* type */
-      read_sz = asn_read_int(
-         &(t->item_defs[item_idx].type), 1, 0, asn_buffer, total_read_sz );
-      if( 0 >= read_sz ) {
-         error_printf( "error reading item type" );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
-      debug_printf( 2, "item %d type: %d (%d)",
-         item_idx, t->item_defs[item_idx].type, read_sz );
-      total_read_sz += read_sz;
-
       /* owner */
       read_sz = asn_read_int(
          (uint8_t*)&(t->item_defs[item_idx].owner), 1, 0,
@@ -342,21 +330,10 @@ static int16_t tilemap_asn_parse_items(
          item_idx, t->item_defs[item_idx].data, read_sz );
       total_read_sz += read_sz;
 
-      /* count */
-      read_sz = asn_read_int(
-         &(t->item_defs[item_idx].count), 1, 0, asn_buffer, total_read_sz );
-      if( 0 >= read_sz ) {
-         error_printf( "error reading item count" );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
-      debug_printf( 2, "item %d count: %d (%d)",
-         item_idx, t->item_defs[item_idx].count, read_sz );
-      total_read_sz += read_sz;
-
       /* flags */
       read_sz = asn_read_int(
-         &(t->item_defs[item_idx].flags), 1, 0, asn_buffer, total_read_sz );
+        (uint8_t*)&(t->item_defs[item_idx].flags), 2, 0,
+        asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          error_printf( "error reading item flags" );
          total_read_sz = TILEMAP_ASN_ERROR_READ;
@@ -1082,15 +1059,6 @@ int32_t tilemap_asn_save(
          goto cleanup;
       }
 
-      /* type */
-      debug_printf( 3, "(offset 0x%02x) writing item type", idx );
-      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].type );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
-
       /* owner */
       debug_printf( 3, "(offset 0x%02x) writing item owner", idx );
       idx = asn_write_int( &h_buffer, idx, t->item_defs[i].owner );
@@ -1112,15 +1080,6 @@ int32_t tilemap_asn_save(
       /* data */
       debug_printf( 3, "(offset 0x%02x) writing item data", idx );
       idx = asn_write_int( &h_buffer, idx, t->item_defs[i].data );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
-
-      /* count */
-      debug_printf( 3, "(offset 0x%02x) writing item count", idx );
-      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].count );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;

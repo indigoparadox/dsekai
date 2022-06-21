@@ -51,8 +51,7 @@ struct CROP_PLOT* crop_find_plot(
    for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
       if(
          CROP_FLAG_ACTIVE != (CROP_FLAG_ACTIVE & state->crops[i].flags) ||
-         0 != memory_strncmp_ptr(
-            state->crops[i].map_name, t->name, TILEMAP_NAME_MAX ) ||
+         state->crops[i].map_gid != t->gid ||
          x != state->crops[i].coords.x || y != state->crops[i].coords.y
       ) {
          continue;
@@ -81,14 +80,16 @@ int8_t crop_plant(
    }
    crop_def = &(crop_def_map->crop_defs[i]);
 
+   /* TODO: Make sure another crop isn't already growing here! */
+
    /* Plant the crop. */
    plot->crop_gid = crop_gid;
    plot->next_at_ticks = graphics_get_ms() + crop_def->cycle;
    plot->cycle = crop_def->cycle;
 
-   debug_printf( 1, "planted crop: %d at: %d, %d on map %s, next stage at: %d",
+   debug_printf( 1, "planted crop: %d at: %d, %d on map %d, next stage at: %d",
       plot->crop_gid, plot->coords.x, plot->coords.y,
-      plot->map_name, plot->next_at_ticks );
+      plot->map_gid, plot->next_at_ticks );
 
 cleanup:
 
@@ -115,8 +116,8 @@ int8_t crop_harvest(
    }
    crop_def = &(crop_def_map->crop_defs[i]);
 
-   debug_printf( 1, "harvesting plot at: %d, %d on map: %s",
-      plot->coords.x, plot->coords.y, plot->map_name );
+   debug_printf( 1, "harvesting plot at: %d, %d on map: %d",
+      plot->coords.x, plot->coords.y, plot->map_gid );
 
    /* Give the harvested crop to the harvester. */
    item_stack_or_add(

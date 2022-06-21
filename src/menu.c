@@ -215,7 +215,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_PLACEMENT_RIGHT_BOTTOM, WINDOW_PLACEMENT_GRID,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
-         items[i].count, NULL );
+         item_get_count_flag( &(items[i]) ), NULL );
 
       player_item_idx++;
    }  

@@ -48,18 +48,6 @@
 #define ITEM_USED_FAILED 0
 #define ITEM_USED_SUCCESSFUL_SILENT 1
 
-/**
- * \relates ITEM
- * \brief Get the "true GID" of an item.
- * \param item
- *
- * The "true GID" of an item is its ITEM::type and ITEM::owner combined with
- * its ITEM::gid. Because of this, it is legal to have two items with the
- * same ITEM::gid in the world if they have a different ITEM::owner or
- * ITEM::type.
- */
-#define item_true_gid( item ) ((uint32_t*)&((*item).type))
-
 uint8_t item_get_data( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
 uint8_t item_get_type( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
