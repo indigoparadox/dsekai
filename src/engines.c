@@ -4,11 +4,6 @@
 
 #include "tmjson.h"
 #include "tmasn.h"
-#ifndef RESOURCE_FILE
-extern RES_CONST char gc_map_names[][TILEMAP_NAME_MAX];
-extern RES_CONST struct TILEMAP* gc_map_structs[];
-extern RES_CONST uint8_t gc_map_count;
-#endif /* !RESOURCE_FILE */
 
 int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    int16_t retval = 1,
@@ -17,11 +12,6 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    struct DSEKAI_STATE* state = NULL;
    struct TILEMAP* map = NULL;
    struct ITEM* items = NULL;
-#ifdef RESOURCE_FILE
-   char map_load_path[RESOURCE_PATH_MAX];
-#else
-   int8_t map_name_len = 0;
-#endif /* RESOURCE_FILE */
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
 
@@ -94,57 +84,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       goto cleanup;
    }
 
-#ifdef RESOURCE_FILE
-#  ifdef TILEMAP_FMT_JSON
-   memory_zero_ptr( (MEMORY_PTR)map_load_path, TILEMAP_NAME_MAX );
-   dio_snprintf(
-      map_load_path,
-      RESOURCE_PATH_MAX,
-      ASSETS_PATH "m_%s.json", state->warp_to );
-   map_retval = tilemap_json_load( map_load_path, map );
-#  elif defined TILEMAP_FMT_ASN
-   dio_snprintf(
-      map_load_path,
-      RESOURCE_PATH_MAX,
-      ASSETS_PATH "m_%s.asn", state->warp_to );
-   map_retval = tilemap_asn_load( map_load_path, map );
-#  else
-#     error "No loader defined!"
-#  endif
-
-#else
-   map_name_len = memory_strnlen_ptr( state->warp_to, TILEMAP_NAME_MAX );
-   debug_printf( 2, "attempting to open tilemap: %s (%d chars)",
-      state->warp_to, map_name_len );
-   debug_printf( 1, "looping through %d tilemaps...", gc_map_count );
-   for( i = 0 ; gc_map_count > i ; i++ ) {
-      if( 0 == memory_strncmp_ptr(
-         gc_map_names[i], state->warp_to, map_name_len
-      ) ) {
-         debug_printf( 1, "gc_map_%s vs %s", gc_map_names[i], state->warp_to );
-         memory_copy_ptr( (MEMORY_PTR)map, (MEMORY_PTR)gc_map_structs[i],
-            sizeof( struct TILEMAP ) );
-         map_retval = 1;
-         break;
-      }
-   }
-
-#endif /* RESOURCE_FILE */
-
-   /* Preload tilemap tileset tiles into graphics cache. */
-   for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
-      if(
-         TILEMAP_TILESET_FLAG_LOADED !=
-         (map->tileset[i].flags & TILEMAP_TILESET_FLAG_LOADED)
-      ) {
-         continue;
-      }
-
-      debug_printf( 2, "preloading tile %d image...", i );
-
-      map->tileset[i].image_id = graphics_cache_load_bitmap(
-         map->tileset[i].image );
-   }
+   map_retval = tilemap_load( state->warp_to, map );
 
    if( 0 >= map_retval ) {
       /* Handle failure to find map. */

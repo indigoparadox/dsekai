@@ -117,8 +117,6 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
             continue;
          }
          
-         assert( 0 <= map->tileset[tile_id].image_id );
-
          /* Blit the tile. */
          graphics_blit_tile_at(
             map->tileset[tile_id].image_id,

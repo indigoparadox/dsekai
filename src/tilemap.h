@@ -34,20 +34,20 @@
  * \relates ::TILESET_TILE
  * \brief TILESET_TILE::flags bit flag indicating tile will block movement.
  */
-#define TILEMAP_TILESET_FLAG_BLOCK  0x01
+#define TILESET_FLAG_BLOCK  0x01
 
 /**
  * \relates ::TILESET_TILE
  * \brief TILESET_TILE::flags bit flag indicating player is allowed to grow a
  *        ::CROP_PLOT on this tile.
  */
-#define TILEMAP_TILESET_FLAG_FARMABLE 0x02
+#define TILESET_FLAG_FARMABLE 0x02
 
 /**
  * \relates ::TILESET_TILE
  * \brief TILESET_TILE::flags bit flag indicating tile is not empty.
  */
-#define TILEMAP_TILESET_FLAG_LOADED 0x80
+#define TILESET_FLAG_ACTIVE 0x80
 
 /**
  * \relates ::TILEMAP
@@ -73,8 +73,18 @@
 
 #endif /* !IGNORE_DIRTY */
 
+#ifdef RESOURCE_FILE
+
 uint16_t tilemap_fix_asset_path(
    char* path_in, uint16_t path_in_sz, const char* map_path );
+
+#endif /* RESOURCE_FILE */
+
+/**
+ * \brief Load tilemap with map_name into the given ::TILEMAP and prepare it
+ *        for running in the engine.
+ */
+int16_t tilemap_load( const char* map_name, struct TILEMAP* t );
 
 /**
  * \relates TILEMAP

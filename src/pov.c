@@ -276,8 +276,8 @@ static int8_t pov_cast_ray(
          wall_hit = 2;
 
       } else if(
-         TILEMAP_TILESET_FLAG_BLOCK ==
-         (t->tileset[ray->tile_id].flags & TILEMAP_TILESET_FLAG_BLOCK)
+         TILESET_FLAG_BLOCK ==
+         (t->tileset[ray->tile_id].flags & TILESET_FLAG_BLOCK)
       ) {
 #if 0
          if(

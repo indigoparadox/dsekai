@@ -122,7 +122,7 @@ static int16_t tilemap_json_parse_tileset(
             2, "tile flags: %s, %d\n", tile_json_path, t->tileset[i].flags );
             resource_assign_id( t->tileset[i].image, tile_filename );
 
-         t->tileset[i].flags |= TILEMAP_TILESET_FLAG_LOADED;
+         t->tileset[i].flags |= TILESET_FLAG_ACTIVE;
       }
 
       i++;
