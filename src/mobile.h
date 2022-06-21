@@ -31,22 +31,83 @@
  */
 
 /**
- * \relates MOBILE
+ * \addtogroup dsekai_mobiles_mp_hp_sect Mobile MP/HP
+ * \brief Details of how the MOBILE::mp_hp field works.
+ * \{
+ *
+ * \page dsekai_mobiles_mp_hp
+ * \{
+ *
+ * \section dsekai_mobiles_mp_hp_access Access and Modification
+ * These fields are combined to save space in an expected 16-bit struct
+ * alignment.
+ *
+ * Use mobile_incr_hp() to modify.
+ *
+ * \section dsekai_mobiles_mp_hp_death Death Handling
+ * Death occurs when the HP half reaches 0.
+ *
+ * This value should be set to ::MOBILE_HP_DEATH on this mobile's death
+ * blow. From there, the engine will increment it up to its final value,
+ * -1, where the mobile will be deleted.
+ *
+ * This allows for a relatively simple "blinking" death animation to occur
+ * by hiding frames for mobiles on negative even HP values.
+ * \}
+ */
+
+/**
  * \brief Bitmask denoting half of MOBILE::mp_hp devoted to MP.
  */
 #define MOBILE_HP_MASK 0x00ff
 
 /**
- * \relates MOBILE
  * \brief Bitmask denoting half of MOBILE::mp_hp devoted to HP.
  */
 #define MOBILE_MP_MASK 0xff00
+
+/**
+ * \brief Value to set MOBILE::hp to on death but before deactivation.
+ */
+#define MOBILE_HP_DEATH -10
 
 /**
  * \relates MOBILE
  * \brief Increment just the HP half of MOBILE::mp_hp.
  */
 #define mobile_incr_hp( m, v ) (m)->mp_hp = (((m)->mp_hp & MOBILE_MP_MASK) | (((((m)->mp_hp & MOBILE_HP_MASK) + (v)) & MOBILE_HP_MASK) & MOBILE_HP_MASK))
+
+/*! \} */
+
+/**
+ * \relates MOBILE
+ * \brief Get the \ref dsekai_mobiles_directions the mobile is facing.
+ */
+#define mobile_get_dir( m ) ((m)->flags & MOBILE_DIR_MASK)
+
+/**
+ * \relates MOBILE
+ * \brief Set ::MOBILE_DIR_MASK in MOBILE::flags to the specified
+ *        \ref dsekai_mobiles_directions.
+ * \param m Locked ::MEMORY_PTR to ::MOBILE to modify.
+ * \param v \ref dsekai_mobiles_directions to set the mobile facing.
+ */
+#define mobile_set_dir( m, v ) (m)->flags = (((m)->flags & ~MOBILE_DIR_MASK) | ((v) & MOBILE_DIR_MASK))
+
+/**
+ * \relates MOBILE
+ * \brief Get the current interaction count of the specified ::MOBILE.
+ * \param m Locked ::MEMORY_PTR to ::MOBILE to query.
+ */
+#define mobile_get_icount( m ) (((m)->flags & MOBILE_ICOUNT_MASK) >> 12)
+
+/**
+ * \relates MOBILE
+ * \brief Increment ::MOBILE_ICOUNT_MASK by a given value.
+ * \param m Locked ::MEMORY_PTR to ::MOBILE to modify.
+ * \param v Value to increment counter by.
+ */
+#define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | ((mobile_get_icount( m ) + (((v) << 12) & MOBILE_ICOUNT_MASK)) & MOBILE_ICOUNT_MASK))
 
 /**
  * \addtogroup dsekai_mobile_flags Mobile Object Flags
@@ -56,18 +117,9 @@
 
 /**
  * \brief Bitmask defining bits used to indicate the number of times this
- *        ::MOBILE has been interacte with, for ::SCRIPT purposes.
+ *        ::MOBILE has been interacted with, for ::SCRIPT purposes.
  */
 #define MOBILE_ICOUNT_MASK 0xf000
-
-#define mobile_get_icount( m ) (((m)->flags & MOBILE_ICOUNT_MASK) >> 12)
-
-/**
- * \brief Increment ::MOBILE_ICOUNT_MASK by a given value.
- * \param m Locked ::MEMORY_PTR to ::MOBILE to modify.
- * \param v Value to increment counter by.
- */
-#define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | ((mobile_get_icount( m ) + (((v) << 12) & MOBILE_ICOUNT_MASK)) & MOBILE_ICOUNT_MASK))
 
 /**
  * \brief Bitmask defining bits used to indicate which of the
@@ -75,12 +127,7 @@
  */
 #define MOBILE_DIR_MASK 0x0007
 
-#define mobile_get_dir( m ) ((m)->flags & MOBILE_DIR_MASK)
-
-#define mobile_set_dir( m, v ) (m)->flags = (((m)->flags & ~MOBILE_DIR_MASK) | ((v) & MOBILE_DIR_MASK))
-
 /**
- * \relates MOBILE
  * \brief MOBILE::flags indicating that this mobile is extant and active.
  */
 #define MOBILE_FLAG_ACTIVE 0x010
@@ -89,15 +136,11 @@
 
 #define mobile_get_sprite( m ) ((m)->sprite_id)
 
-/**
- * \relates MOBILE
- * \brief Value to set MOBILE::hp to on death but before deactivation.
- */
-#define MOBILE_HP_DEATH -10
-
 /* TODO: Give mobiles unique IDs. */
 
 /* TODO: Log when spawned, with name of spawner and unique ID spawned. */
+
+/* TODO: Combine steps_x and steps_y? */
 
 /*! \brief A moving/interactive object in the world. */
 struct MOBILE {
@@ -112,21 +155,7 @@ struct MOBILE {
     */
    uint16_t spawner_id;
    /**
-    * \brief This mobile's combined magic points and hit points.
-    * 
-    * This value is combined to save space despite expected 16-bit struct
-    * alignment.
-    *
-    * Use mobile_incr_hp() to modify.
-    *
-    * Death occurs when the HP half reaches 0.
-    *
-    * This value should be set to ::MOBILE_HP_DEATH on this mobile's death
-    * blow. From there, the engine will increment it up to its final value,
-    * -1, where the mobile will be deleted.
-    *
-    * This allows for a relatively simple "blinking" death animation to occur
-    * by hiding frames for mobiles on negative even HP values.
+    * \brief The combined \ref dsekai_mobiles_mp_hp field.
     */
    int16_t mp_hp;
    /**
@@ -143,14 +172,25 @@ struct MOBILE {
     * animations over the mobile.
     */
    int16_t screen_py;
+   /**
+    * \brief Index of the mobile's \ref dsekai_mobiles_spritesheets_sect
+    *        loaded in the \ref unilayer_graphics_cache.
+    */
    int16_t sprite_id;
    /*! \brief Current tile on which this mobile is located. */
    struct TILEMAP_COORDS coords;
    /*! \brief Previous tile, if this mobile is currently moving. */
    struct TILEMAP_COORDS coords_prev;
-   /*! \brief Number of steps remaining in current walk animation. */
-   uint16_t steps_x;
-   uint16_t steps_y;
+   /**
+    * \brief Number of steps remaining in current walk animation.
+    * \deprecated To be combined with MOBILE::steps_y.
+    */
+   uint8_t steps_x;
+   /**
+    * \brief Number of steps remaining in current walk animation.
+    * \deprecated To be combined with MOBILE::steps_x.
+    */
+   uint8_t steps_y;
    /*! \brief Index currently executing behavior script in TILEMAP::scripts. */
    int16_t script_id;
    /*! \brief Position in currently executing behavior script. */
@@ -289,9 +329,9 @@ const int8_t gc_mobile_x_offsets[4] = {
 #else
 /*! \brief Lookup table for next walking offset based on current offset. */
 extern const int8_t gc_mobile_step_table_normal_pos[16];
-/*! \brief Lookup table for vertical offset based on MOBILE::dir. */
+/*! \brief Lookup table for vertical offset based on mobile_get_dir(). */
 extern const int8_t gc_mobile_y_offsets[4];
-/*! \brief Lookup table for horizontal offset based on MOBILE::dir. */
+/*! \brief Lookup table for horizontal offset based on mobile_get_dir(). */
 extern const int8_t gc_mobile_x_offsets[4];
 #endif /* MOBILE_C */
 
