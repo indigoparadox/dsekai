@@ -20,8 +20,6 @@ unilayer_main() {
    struct DSEKAI_STATE* state = NULL;
    int16_t retval = 0;
 
-   memory_init();
-
    platform_init( icon_dsekai );
 
    assert( 0 == TILEMAP_TW % 4 );
@@ -54,6 +52,12 @@ unilayer_main() {
 #endif /* !NO_ANIMATE */
 
    /* Initialize subsystems. */
+
+   if( !memory_init() ) {
+      error_printf( "unable to initialize memory" );
+      retval = 1;
+      goto exit;
+   }
 
    if( !graphics_init() ) {
       error_printf( "unable to initialize graphics" );

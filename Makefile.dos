@@ -17,7 +17,7 @@ DSEKAI_C_FILES_DOS_ONLY := \
    src/main.c \
    unilayer/src/input/dosi.c \
    unilayer/src/graphics/dosg.c \
-   unilayer/src/memory/fakem.c \
+   unilayer/src/memory/dosm.c \
    unilayer/src/save/file.c
 
 DSEKAI_O_FILES_DOS := \
@@ -75,7 +75,7 @@ INCLUDES_DOS := \
    -i=$(GENDIR_DOS) 
 
 # If we don't use the large memory model, we can't load assets reliably.
-CFLAGS_DOS := -ml -os -hw -d0 -0 $(CFLAGS_OWC_GENERIC) $(DEFINES_DOS) $(INCLUDES_DOS) -we
+CFLAGS_DOS := -mm -os -hw -d0 -0 $(CFLAGS_OWC_GENERIC) $(DEFINES_DOS) $(INCLUDES_DOS) -we
 
 ifneq ($(BUILD),RELEASE)
    CFLAGS_DOS += -DLOG_TO_FILE

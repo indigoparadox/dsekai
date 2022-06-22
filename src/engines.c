@@ -101,6 +101,8 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
    mobile_spawns( state, map );
 
+   memory_debug_dump();
+
 cleanup:
 
    if( NULL != map ) {
