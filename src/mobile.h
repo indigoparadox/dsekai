@@ -127,10 +127,20 @@
  */
 #define MOBILE_DIR_MASK 0x0007
 
+#define MOBILE_TYPE_NORMAL 0x0000
+
+#define MOBILE_TYPE_SPECIAL   0x0008
+
+#define MOBILE_TYPE_RES1 0x0010
+
+#define MOBILE_TYPE_RES2 0x0018
+
+#define MOBILE_TYPE_MASK 0x0018
+
 /**
  * \brief MOBILE::flags indicating that this mobile is extant and active.
  */
-#define MOBILE_FLAG_ACTIVE 0x010
+#define MOBILE_FLAG_ACTIVE 0x0100
 
 /*! \} */
 

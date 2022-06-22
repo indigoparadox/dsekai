@@ -320,6 +320,7 @@ void mobile_spawns( struct DSEKAI_STATE* state, struct TILEMAP* map ) {
       mobile_iter->coords_prev.x = map->spawns[i].coords.x;
       mobile_iter->coords_prev.y = map->spawns[i].coords.y;
       mobile_iter->script_id = map->spawns[i].script_id;
+      mobile_iter->flags |= map->spawns[i].flags;
       mobile_iter->sprite_id =
          graphics_cache_load_bitmap( map->spawns[i].type );
    }

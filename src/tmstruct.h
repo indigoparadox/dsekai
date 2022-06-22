@@ -67,6 +67,7 @@ struct TILEMAP_SPAWN {
     */
    /* TODO: Change this to "sprite" for consistency. */
    RESOURCE_ID type;
+   uint16_t flags;
    /*! \brief Index of TILEMAP::scripts attached to mobiles spawned. */
    int16_t script_id;
 };

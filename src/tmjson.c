@@ -17,6 +17,7 @@ static int16_t tilemap_json_parse_spawn(
    int16_t spawn_buffer_sz = 0,
       x_px_in = 0,
       y_px_in = 0;
+   uint8_t mobile_type = 0;
 
    /* Prepend asset path. */
 
@@ -62,12 +63,28 @@ static int16_t tilemap_json_parse_spawn(
       iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
    spawn->coords.y = y_px_in / TILE_H;
 
+   debug_printf( 1, "spawn \"%s\" coords: %d, %d",
+      spawn->name, spawn->coords.x, spawn->coords.y );
+
    /* Parse Script */
    spawn->script_id = -1;
    dio_snprintf(
       iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_SCRIPT, spawn_idx );
    spawn->script_id = json_int_from_path(
       iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+
+   /* Parse Type (part of Flags) */
+   dio_snprintf(
+      iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_TYPE_FLAG, spawn_idx );
+   mobile_type = json_int_from_path(
+      iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+   if( 1 == mobile_type ) {
+      debug_printf( 1, "spawn \"%s\" mobile type: %d",
+         spawn->name, mobile_type );
+      spawn->flags |= ((mobile_type << 3) & MOBILE_TYPE_MASK);
+   }
+
+   debug_printf( 1, "spawn \"%s\" flags: 0x%04x", spawn->name, spawn->flags );
 
    if( 0 > spawn->script_id || spawn->script_id  >= TILEMAP_SCRIPTS_MAX ) {
       error_printf( "spawn \"%s\" uses invalid script ID: %d",

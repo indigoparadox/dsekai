@@ -138,6 +138,10 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
          fprintf( header_file, "         0, /* not found */\n" );
       }
 
+      /* flags */
+      fprintf( header_file, "         /* flags */\n" );
+      fprintf( header_file, "         %d,\n", t.spawns[i].flags );
+
       /* script */
       fprintf( header_file, "         /* script_id */\n" );
       fprintf( header_file, "         %d\n", t.spawns[i].script_id );

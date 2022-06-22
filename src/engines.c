@@ -17,6 +17,8 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
    map = (struct TILEMAP*)memory_lock( state->map_handle );
 
+   /* TODO: Preserve mobiles with type 1. */
+
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       mobile_deinit( &(state->mobiles[i]) );
    }

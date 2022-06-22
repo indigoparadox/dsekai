@@ -215,6 +215,18 @@ static int16_t tilemap_asn_parse_spawns(
          t->spawns[spawn_idx].type, read_sz );
       total_read_sz += read_sz; /* spawn name and header */
 
+      /* flags */
+      read_sz = asn_read_int(
+         (uint8_t*)&(t->spawns[spawn_idx].flags), 2, 0,
+         asn_buffer, total_read_sz );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading spawn flags" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "spawn flags: %04x", t->spawns[spawn_idx].flags );
+      total_read_sz += read_sz;
+
       /* script_id */
       total_read_sz += 2; /* script_id header */
       t->spawns[spawn_idx].script_id = asn_buffer[total_read_sz];
@@ -909,6 +921,15 @@ int32_t tilemap_asn_save(
       debug_printf( 3, "(offset 0x%02x) writing map spawn type", idx );
       idx = asn_write_string(
          &h_buffer, idx, t->spawns[i].type, RESOURCE_PATH_MAX );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
+      /* flags */
+      debug_printf( 3, "(offset 0x%02x) writing map spawn flags", idx );
+      idx = asn_write_int( &h_buffer, idx, t->spawns[i].flags );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;

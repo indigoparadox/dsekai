@@ -103,6 +103,11 @@
                          "name":"script",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"type",
+                         "type":"int",
+                         "value":1
                         }],
                  "rotation":0,
                  "type":"16x16x4\/s_pncess.bmp",
@@ -171,6 +176,11 @@
                          "name":"script",
                          "type":"int",
                          "value":6
+                        }, 
+                        {
+                         "name":"type",
+                         "type":"int",
+                         "value":1
                         }],
                  "rotation":0,
                  "type":"16x16x4\/s_maid.bmp",
