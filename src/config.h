@@ -8,30 +8,35 @@
  * \{
  */
 
-/*! \file config.h
- *  \brief Configuration settings defined at compile time.
- */
-
 /*! \addtogroup dsekai_engines_config DSekai Engines Configuration
  *  \brief Compile-time options defining engine behaviors.
+ *  \note These may be overridden by passing a -D argument to the compiler.
  *
  * \{
+ */
+
+/*! \file config.h
+ *  \brief Configuration settings defined at compile time.
  */
 
 #define SPRITE_H 16
 #define SPRITE_W 16
 
-#ifndef ITEM_INVENTORY_MAX
-#define ITEM_INVENTORY_MAX 20
-#endif /* !ITEM_INVENTORY_MAX */
-
 #ifndef SCREEN_MAP_W
-/*! \brief Width of the overview or viewport area in pixels. */
+/**
+ * \brief Width of the overview or viewport area in pixels.
+ * \attention Changing this value may break compatibility with tilemaps!
+ *            Please use caution.
+ */
 #define SCREEN_MAP_W (160)
 #endif /* !SCREEN_MAP_W */
 
 #ifndef SCREEN_MAP_H
-/*! \brief Height of the overview or viewport area in pixels. */
+/**
+ * \brief Height of the overview or viewport area in pixels.
+ * \attention Changing this value may break compatibility with tilemaps!
+ *            Please use caution.
+ */
 #define SCREEN_MAP_H (160 - 32)
 #endif /* !SCREEN_MAP_H */
 
@@ -44,9 +49,6 @@
 /*! \brief Top offset of the overview or viewport area in pixels. */
 #define SCREEN_MAP_Y (0)
 #endif /* !SCREEN_MAP_Y */
-
-#define WINDOW_STRINGS_MAX 5
-#define WINDOW_STRING_LEN_MAX 64
 
 #ifndef STATUS_WINDOW_W
 /*! \brief Width in pixels of the status ::WINDOW. */
@@ -63,49 +65,88 @@
 #define ANI_SPRITE_COUNTDOWN_MAX 10
 #endif /* !ANI_SPRITE_COUNTDOWN_MAX */
 
+/*! \} */ /* dsekai_engines */
+
+/*! \} */ /* dsekai_engines_config */
+
+/**
+ * \addtogroup dsekai_mobiles
+ * \{
+ */
+
 #ifndef DSEKAI_MOBILES_MAX
-/*! \brief Maximum count of ::MOBILE existing on a loaded ::TILEMAP. */
+/**
+ * \brief Maximum count of DSEKAI_STATE::mobile.
+ * \note This may be overridden by passing a -D argument to the compiler.
+ * \attention Changing this value may break compatibility with tilemaps or
+ *            saves! Please use caution.
+ */
 #  define DSEKAI_MOBILES_MAX 200
 #endif /* !MOBILES_MAX */
 
+/*! \} */ /* dsekai_mobiles */
+
+/**
+ * \addtogroup dsekai_items
+ * \{
+ */
+
+#ifndef ITEM_INVENTORY_MAX
+/**
+ * \brief Maximum number of items in a single ::MOBILE inventory.
+ * \note This may be overridden by passing a -D argument to the compiler.
+ * \attention Changing this value may break compatibility with tilemaps or
+ *            saves! Please use caution.
+ */
+#define ITEM_INVENTORY_MAX 20
+#endif /* !ITEM_INVENTORY_MAX */
+
 #ifndef DSEKAI_ITEMS_MAX
-/*! \brief Maximum number of items existing in the world at any time. */
+/**
+ * \brief Maximum number of items existing in the world at any time.
+ * \note This may be overridden by passing a -D argument to the compiler.
+ * \attention Changing this value may break compatibility with tilemaps or
+ *            saves! Please use caution.
+ */
 #  define DSEKAI_ITEMS_MAX 200
 #endif /* !DSEKAI_ITEMS_MAX */
 
+/*! \} */ /* dsekai_items */
+
+/**
+ * \addtogroup dsekai_tilemaps
+ * \{
+ */
+
 #ifndef TILEMAP_CROP_DEFS_MAX
-#  ifdef PLATFORM_DOS
-#     define TILEMAP_CROP_DEFS_MAX 5
-#  else
-#     define TILEMAP_CROP_DEFS_MAX 10
-#  endif /* PLATFORM_DOS */
+/**
+ * \brief Maximum count of TILEMAP::crop_defs.
+ * \note This may be overridden by passing a -D argument to the compiler.
+ * \attention Changing this value may break compatibility with tilemaps or
+ *            saves! Please use caution.
+ */
+#  define TILEMAP_CROP_DEFS_MAX 10
 #endif /* !TILEMAP_CROP_DEFS_MAX */
 
 #ifndef TILEMAP_ITEMS_MAX
+/**
+ * \brief Maximum count of TILEMAP::item_defs.
+ * \note This may be overridden by passing a -D argument to the compiler.
+ * \attention Changing this value may break compatibility with tilemaps or
+ *            saves! Please use caution.
+ */
 #  define TILEMAP_ITEMS_MAX 20
 #endif /* !TILEMAP_ITEMS_MAX */
 
 #ifndef TILEMAP_SPAWNS_MAX
-#  ifdef PLATFORM_DOS
-#     define TILEMAP_SPAWNS_MAX 10
-#  else
-/*! \brief Maximum number of TILEMAP::spawns. */
-#     define TILEMAP_SPAWNS_MAX 20
-#  endif /* PLATFORM_DOS */
+/**
+ * \brief Maximum count of TILEMAP::spawns.
+ * \note This may be overridden by passing a -D argument to the compiler.
+ * \attention Changing this value may break compatibility with tilemaps or
+ *            saves! Please use caution.
+ */
+#  define TILEMAP_SPAWNS_MAX 20
 #endif /* !TILEMAP_SPAWNS_MAX */
-
-#ifndef DSEKAI_CROPS_MAX
-#  ifdef PLATFORM_DOS
-#     define DSEKAI_CROPS_MAX 15
-#  else
-/*! \brief Maximum number of crops growing in the world accross all maps. */
-#     define DSEKAI_CROPS_MAX 40
-#  endif /* PLATFORM_DOS */
-#endif /* !DSEKAI_CROPS_MAX */
-
-#ifndef CROP_NAME_MAX
-#define CROP_NAME_MAX 8
-#endif /* !CROP_NAME_MAX */
 
 #ifndef JSON_TOKENS_MAX
 #define JSON_TOKENS_MAX 4096
@@ -116,20 +157,43 @@
 #endif /* !JSON_PATH_SZ */
 
 #ifndef TILEMAP_NAME_MAX
-/*! \brief TILEMAP::name maxium length. */
+/**
+ * \brief Maximum size of TILEMAP::name.
+ * \note This may be overridden by passing a -D argument to the compiler.
+ * \attention Changing this value may break compatibility with tilemaps or
+ *            saves! Please use caution.
+ */
 #define TILEMAP_NAME_MAX 8
 #endif /* !TILEMAP_NAME_MAX */
 
-#if 0
-#ifndef DIALOG_TEXT_SZ
-#define DIALOG_TEXT_SZ 128
-#endif /* !DIALOG_TEXT_SZ */
-typedef char DIALOG_TEXT[DIALOG_TEXT_SZ];
-#endif
+/*! \} */ /* dsekai_tilemaps */
 
-/*! \} */
+/**
+ * \addtogroup dsekai_crops
+ * \{
+ */
 
-/*! \} */
+#ifndef DSEKAI_CROPS_MAX
+/**
+ * \brief Maximum count of DSEKAI_STATE::crops.
+ * \note This may be overridden by passing a -D argument to the compiler.
+ * \attention Changing this value may break compatibility with tilemaps or
+ *            saves! Please use caution.
+ */
+#  define DSEKAI_CROPS_MAX 40
+#endif /* !DSEKAI_CROPS_MAX */
+
+#ifndef CROP_NAME_MAX
+/**
+ * \brief Maximum size of CROP_DEF::name.
+ * \note This may be overridden by passing a -D argument to the compiler.
+ * \attention Changing this value may break compatibility with tilemaps or
+ *            saves! Please use caution.
+ */
+#define CROP_NAME_MAX 8
+#endif /* !CROP_NAME_MAX */
+
+/*! \} */ /* dsekai_crops */
 
 #endif /* !DSEKAI_CONFIG_H */
 

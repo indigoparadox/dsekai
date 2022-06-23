@@ -203,16 +203,16 @@ static int16_t tilemap_asn_parse_spawns(
       debug_printf( 2, "spawn Y: %d", t->spawns[spawn_idx].coords.y );
       total_read_sz += read_sz;
 
-      /* type */
-      read_sz = asn_read_string( t->spawns[spawn_idx].type,
+      /* sprite */
+      read_sz = asn_read_string( t->spawns[spawn_idx].sprite,
             RESOURCE_PATH_MAX, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          error_printf( "error reading spawn type" );
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
-      debug_printf( 2, "spawn type: %s (%d)",
-         t->spawns[spawn_idx].type, read_sz );
+      debug_printf( 2, "spawn sprite: %s (%d)",
+         t->spawns[spawn_idx].sprite, read_sz );
       total_read_sz += read_sz; /* spawn name and header */
 
       /* flags */
@@ -929,10 +929,10 @@ int32_t tilemap_asn_save(
 
       idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_spawn_coords );
 
-      /* type */
-      debug_printf( 3, "(offset 0x%02x) writing map spawn type", idx );
+      /* sprite */
+      debug_printf( 3, "(offset 0x%02x) writing map spawn sprite", idx );
       idx = asn_write_string(
-         &h_buffer, idx, t->spawns[i].type, RESOURCE_PATH_MAX );
+         &h_buffer, idx, t->spawns[i].sprite, RESOURCE_PATH_MAX );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;

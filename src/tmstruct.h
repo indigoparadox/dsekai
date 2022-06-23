@@ -55,6 +55,8 @@ struct TILESET_TILE {
    uint16_t image_id;
 };
 
+/* TODO: Move spawner to mostruct.h for consistency. */
+/* TODO: Change name to TILEMAP_SPAWNER. */
 /*! \brief Defines a spawner to create mobiles in the world.
  *
  *  Modifications to this struct should also be reflected in tools/map2h.c.
@@ -69,8 +71,7 @@ struct TILEMAP_SPAWN {
    /**
     * \brief RESOURCE_ID for the MOBILE::sprite on a spawned MOBILE.
     */
-   /* TODO: Change this to "sprite" for consistency. */
-   RESOURCE_ID type;
+   RESOURCE_ID sprite;
    /*! \brief \ref dsekai_mobile_flags to pass to spawned MOBILE::flags. */
    uint16_t flags;
    /**

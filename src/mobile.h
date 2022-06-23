@@ -110,7 +110,7 @@
 #define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | ((mobile_get_icount( m ) + (((v) << 12) & MOBILE_ICOUNT_MASK)) & MOBILE_ICOUNT_MASK))
 
 /**
- * \addtogroup dsekai_mobile_flags Mobile Object Flags
+ * \addtogroup dsekai_mobiles_flags Mobile Object Flags
  * \brief Flags controlling ::MOBILE object behavior.
  * \{
  */
@@ -128,7 +128,7 @@
 #define MOBILE_DIR_MASK 0x0007
 
 /**
- * \addtogroup dsekai_mobile_flags_type Mobile Object Type Flags
+ * \addtogroup dsekai_mobiles_flags_type Mobile Object Type Flags
  * \brief Types instructing the engine how to handle a ::MOBILE.
  * \{
  */
@@ -152,7 +152,7 @@
 /*! \} */
 
 /**
- * \brief Bitmask defining bits used to indicate \ref dsekai_mobile_flags_type.
+ * \brief Bitmask defining bits used to indicate \ref dsekai_mobiles_flags_type.
  */
 #define MOBILE_TYPE_MASK 0x0018
 
@@ -184,7 +184,7 @@
 struct MOBILE {
    char* name;
    /**
-    * \brief \ref dsekai_mobile_flags affecting this mobile's display and
+    * \brief \ref dsekai_mobiles_flags affecting this mobile's display and
     *        behavior.
     */
    uint16_t flags;
@@ -263,7 +263,7 @@ struct MOBILE {
 /*! \brief MOBILE::dir indicating left direction for movement/animation. */
 #define MOBILE_DIR_WEST    3
 
-/*! \} */
+/*! \} */ /* dsekai_mobiles_directions */
 
 /**
  * \brief Have the given MOBILE attempt to begin walking movement/animation.
@@ -340,7 +340,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state );
  * \brief Allocate a mobile or select player mobile slot and initialize it
  *        with configuration generic to ALL mobiles.
  * \param state Locked ::MEMORY_PTR to current engine ::DSEKAI_STATE.
- * \param flags \ref dsekai_mobile_flags applying to the spawned ::MOBILE.
+ * \param flags \ref dsekai_mobiles_flags applying to the spawned ::MOBILE.
  */
 struct MOBILE* mobile_spawn_single(
    uint16_t flags, struct DSEKAI_STATE* state ) SECTION_MOBILE;
@@ -377,7 +377,7 @@ extern const int8_t gc_mobile_y_offsets[4];
 extern const int8_t gc_mobile_x_offsets[4];
 #endif /* MOBILE_C */
 
-/*! \} */
+/*! \} */ /* dsekai_mobiles */
 
 #endif /* MOBILE_H */
 

@@ -28,7 +28,8 @@ static int16_t tilemap_json_parse_spawn(
 
    /* Parse Sprite */
 
-   dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_TYPE, spawn_idx );
+   dio_snprintf(
+      iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_SPRITE, spawn_idx );
    spawn_buffer_sz = json_str_from_path(
       iter_path, JSON_PATH_SZ,
       &(spawn_buffer[spawn_buffer_sz]),
@@ -40,7 +41,7 @@ static int16_t tilemap_json_parse_spawn(
       return 0;
    }
 
-   resource_assign_id( spawn->type, spawn_buffer );
+   resource_assign_id( spawn->sprite, spawn_buffer );
 
    /* Parse Name */
    dio_snprintf(
@@ -109,7 +110,7 @@ static int16_t tilemap_json_parse_spawn(
    }
 
    debug_printf( 2, "%s spawn at %d, %d (script %d)",
-      spawn->type, spawn->coords.x, spawn->coords.y, spawn->script_id );
+      spawn->sprite, spawn->coords.x, spawn->coords.y, spawn->script_id );
 
    return 1;
 }

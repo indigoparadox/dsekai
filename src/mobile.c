@@ -336,7 +336,7 @@ int16_t mobile_spawner_match(
          /* This mobile was spawned already, so update volatile stuff
             * and move on.
             */
-         mobiles[i].sprite_id = graphics_cache_load_bitmap( spawner->type );
+         mobiles[i].sprite_id = graphics_cache_load_bitmap( spawner->sprite );
          mobiles[i].name = spawner->name;
          goto cleanup;
       }
@@ -396,10 +396,10 @@ void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
          mobile_iter->map_gid = t->gid;
       } else {
          /* Save player sprite for tilemap transitions. */
-         resource_assign_id( state->player_sprite, t->spawns[i].type );
+         resource_assign_id( state->player_sprite, t->spawns[i].sprite );
       }
       mobile_iter->sprite_id =
-         graphics_cache_load_bitmap( t->spawns[i].type );
+         graphics_cache_load_bitmap( t->spawns[i].sprite );
    }
 }
 
