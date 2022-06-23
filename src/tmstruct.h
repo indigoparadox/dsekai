@@ -92,7 +92,12 @@ struct TILEMAP {
    char name[TILEMAP_NAME_MAX];
    /*! \brief Current \ref dsekai_tilemaps_flags. */
    uint8_t flags;
-   /*! \brief Universally unique ID for this tilemap. */
+   /**
+    * \brief Globally unique ID for this tilemap.
+    *
+    * \attention This should not be set to ::MOBILE_MAP_GID_ALL, or weird
+    *            things will happen!
+    */
    uint16_t gid;
    /*! \brief Array of prototype tiles all map tiles are based on. */
    struct TILESET_TILE tileset[TILEMAP_TILESETS_MAX];

@@ -646,7 +646,7 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
          /* Try to interact with facing mobile. */
          mobile_interact(
             &(state->player),
-            mobile_get_facing( &(state->player), state ),
+            mobile_get_facing( &(state->player), map, state ),
             map );
 #ifndef NO_ENGINE_EDITOR
       }

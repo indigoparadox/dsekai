@@ -17,7 +17,7 @@ static int16_t tilemap_json_parse_spawn(
    int16_t spawn_buffer_sz = 0,
       x_px_in = 0,
       y_px_in = 0;
-   uint8_t mobile_type = 0;
+   uint8_t mobile_flag = 0;
 
    /* Prepend asset path. */
 
@@ -76,12 +76,23 @@ static int16_t tilemap_json_parse_spawn(
    /* Parse Type (part of Flags) */
    dio_snprintf(
       iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_TYPE_FLAG, spawn_idx );
-   mobile_type = json_int_from_path(
+   mobile_flag = json_int_from_path(
       iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
-   if( 1 == mobile_type ) {
+   if( 1 == mobile_flag ) {
       debug_printf( 1, "spawn \"%s\" mobile type: %d",
-         spawn->name, mobile_type );
-      spawn->flags |= ((mobile_type << 3) & MOBILE_TYPE_MASK);
+         spawn->name, mobile_flag );
+      spawn->flags |= ((mobile_flag << 3) & MOBILE_TYPE_MASK);
+   }
+
+   /* Parse Player (part of Flags) */
+   dio_snprintf(
+      iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_PLAYER_FLAG, spawn_idx );
+   mobile_flag = json_int_from_path(
+      iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+   if( 1 == mobile_flag ) {
+      debug_printf( 1, "spawn \"%s\" mobile player: %d",
+         spawn->name, mobile_flag );
+      spawn->flags |= MOBILE_FLAG_PLAYER;
    }
 
    /* Parse GID */

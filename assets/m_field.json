@@ -70,6 +70,12 @@
                  "height":10,
                  "id":5,
                  "name":"player",
+                 "properties":[
+                        {
+                         "name":"player",
+                         "type":"int",
+                         "value":1
+                        }],
                  "rotation":0,
                  "type":"16x16x4\/s_robe.bmp",
                  "visible":true,

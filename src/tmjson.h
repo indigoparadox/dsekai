@@ -70,6 +70,7 @@
 #define TILEMAP_JPATH_MOB_SCRIPT "/layers/[name=mobiles]/objects/%d/properties/[name=script]/value"
 /*! \brief JSON path to mobile type. */
 #define TILEMAP_JPATH_MOB_TYPE_FLAG "/layers/[name=mobiles]/objects/%d/properties/[name=type]/value"
+#define TILEMAP_JPATH_MOB_PLAYER_FLAG "/layers/[name=mobiles]/objects/%d/properties/[name=player]/value"
 /*! \brief JSON path to TILESET_TILE::image. */
 #define TILEMAP_JPATH_TS_TILE "/tiles/%d/image"
 /*! \brief JSON path to TILESET_TILE::flags. */

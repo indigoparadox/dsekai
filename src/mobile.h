@@ -282,7 +282,7 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
  * \return ::MEMORY_PTR to the colliding mobile in ms.
  */
 struct MOBILE* mobile_get_facing(
-   struct MOBILE* m, struct DSEKAI_STATE* state );
+   struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state );
 
 /**
  * \brief Force a ::MOBILE to jump to the SCRIPT_ACTION_INTERACT in its
@@ -343,7 +343,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state );
  * \param flags \ref dsekai_mobile_flags applying to the spawned ::MOBILE.
  */
 struct MOBILE* mobile_spawn_single(
-   struct DSEKAI_STATE* state, uint16_t flags ) SECTION_MOBILE;
+   uint16_t flags, struct DSEKAI_STATE* state ) SECTION_MOBILE;
 
 /**
  * \brief Spawn from ::TILEMAP::spawners according to spawner rules.
@@ -351,7 +351,7 @@ struct MOBILE* mobile_spawn_single(
  * \param t Locked ::MEMORY_PTR to ::TILEMAP on which to execute spawners.
  */
 void mobile_spawns(
-   struct DSEKAI_STATE* state, struct TILEMAP* t ) SECTION_MOBILE;
+   struct TILEMAP* t, struct DSEKAI_STATE* state ) SECTION_MOBILE;
 
 #ifdef MOBILE_C
 const int8_t gc_mobile_step_table_normal_pos[16] = {

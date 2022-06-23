@@ -126,7 +126,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    memory_zero_ptr( state->warp_to, TILEMAP_NAME_MAX );
 
    /* Spawn mobiles. */
-   mobile_spawns( state, t );
+   mobile_spawns( t, state );
 
    memory_debug_dump();
 
@@ -202,7 +202,7 @@ int16_t engines_handle_movement(
 
    if(
       !tilemap_collide( &(state->player), dir_move, t ) &&
-      NULL == mobile_get_facing( &(state->player), state )
+      NULL == mobile_get_facing( &(state->player), t, state )
    ) {
       /* No blocking tiles or mobiles. */
       mobile_walk_start( &(state->player), dir_move );
