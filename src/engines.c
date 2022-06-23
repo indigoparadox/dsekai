@@ -14,6 +14,8 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    struct ITEM* items = NULL;
    struct GRAPHICS_RECT loading_sz = { 0, 0, 0, 0 };
 
+   debug_printf( 1, "starting warp..." );
+
    /* On-screen loading indicator. */
    graphics_string_sz( "Loading...", 10, 0, &loading_sz );
    graphics_string_at(
@@ -26,15 +28,31 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
    t = (struct TILEMAP*)memory_lock( state->map_handle );
 
-   /* TODO: Preserve mobiles with type 1. */
-
+   /* Unload irrelevant mobiles. */
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+      if(
+         MOBILE_FLAG_ACTIVE != (state->mobiles[i].flags & MOBILE_FLAG_ACTIVE)
+      ) {
+         continue;
+      }
+
+      if( 
+         /* Not warping to title. */
+         '\0' != state->warp_to[0] &&
+         /* Don't de-init special mobiles. */
+         MOBILE_TYPE_SPECIAL ==
+            (MOBILE_TYPE_MASK & state->mobiles[i].flags)
+      ) {
+         /* Preserve mobiles with type 1. */
+         debug_printf( 1, "preserving tilemap %u special mobile %u",
+            state->mobiles[i].map_gid, state->mobiles[i].spawner_gid );
+         state->mobiles[i].sprite_id = -1;
+         state->mobiles[i].name = NULL;
+         continue;
+      }
+
       mobile_deinit( &(state->mobiles[i]) );
    }
-
-   memory_zero_ptr(
-      (MEMORY_PTR)&(state->mobiles),
-      sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
 
    /* Set the player's new position. */
    state->player.coords.x = state->warp_to_x;
@@ -108,11 +126,11 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    memory_zero_ptr( state->warp_to, TILEMAP_NAME_MAX );
 
    /* Spawn mobiles. */
-   memory_zero_ptr( (MEMORY_PTR)(state->mobiles),
-      sizeof( struct MOBILE ) * DSEKAI_MOBILES_MAX );
    mobile_spawns( state, t );
 
    memory_debug_dump();
+
+   debug_printf( 1, "warp complete!" );
 
 cleanup:
 
@@ -129,7 +147,6 @@ cleanup:
 
 void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
    int8_t i = 0;
-   struct TILEMAP* t = NULL;
 
    mobile_state_animate( state );
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
@@ -150,17 +167,9 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
          /* Skip animating inactive mobiles. */
          continue;
       }
-      t = (struct TILEMAP*)memory_lock( state->map_handle );
-      if( NULL != t ) {
-         mobile_animate( &(state->mobiles[i]), t );
-         t = (struct TILEMAP*)memory_unlock( state->map_handle );
-      }
+      mobile_animate( &(state->mobiles[i]), state );
    }
-   t = (struct TILEMAP*)memory_lock( state->map_handle );
-   if( NULL != t ) {
-      mobile_animate( &(state->player), t );
-      t = (struct TILEMAP*)memory_unlock( state->map_handle );
-   }
+   mobile_animate( &(state->player), state );
 
    if(
       /* Pause crops if modal window is pending. */

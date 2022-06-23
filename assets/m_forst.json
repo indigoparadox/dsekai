@@ -64,6 +64,11 @@
                  "name":"wfield",
                  "properties":[
                         {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1001
+                        }, 
+                        {
                          "name":"script",
                          "type":"int",
                          "value":0

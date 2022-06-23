@@ -48,6 +48,10 @@ struct TILESET_TILE {
    RESOURCE_ID image;
    /*! \brief Flags indicating behavior for this tile. */
    uint8_t flags;
+   /**
+    * \brief Index of the tile image loaded in the
+    *        \ref unilayer_graphics_cache.
+    */
    uint16_t image_id;
 };
 
@@ -67,7 +71,14 @@ struct TILEMAP_SPAWN {
     */
    /* TODO: Change this to "sprite" for consistency. */
    RESOURCE_ID type;
+   /*! \brief \ref dsekai_mobile_flags to pass to spawned MOBILE::flags. */
    uint16_t flags;
+   /**
+    * \brief Unique identifying number for this spawner loaded from tilemap.
+    *
+    * Passed to MOBILE::spawner_gid on spawned ::MOBILE objects.
+    */
+   uint16_t gid;
    /*! \brief Index of TILEMAP::scripts attached to mobiles spawned. */
    int16_t script_id;
 };

@@ -7,7 +7,10 @@
  *              what is currently on-screen.
  */
 static
-void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
+void topdown_draw_tilemap(
+   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate,
+   struct TILEMAP* t
+) {
    int16_t x = 0,
       y = 0,
       i = 0;
@@ -17,20 +20,6 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
       tile_py = 0, /* Tile on-screen Y in pixels. */
       viewport_tx2 = 0,
       viewport_ty2 = 0;
-   struct TOPDOWN_STATE* gstate = NULL;
-   struct TILEMAP* map = NULL;
-
-   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
-   if( NULL == gstate ) {
-      error_printf( "could not lock gstate" );
-      goto cleanup;
-   }
-
-   map = (struct TILEMAP*)memory_lock( state->map_handle );
-   if( NULL == map ) {
-      error_printf( "could not lock tilemap" );
-      goto cleanup;
-   }
 
    /* Tile-indexed rectangle of on-screen tiles. */
    viewport_tx2 = gstate->screen_scroll_tx + SCREEN_TW;
@@ -54,7 +43,7 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
             && x == state->editor.coords.x && y == state->editor.coords.y &&
             0 == state->ani_sprite_x
          ) {
-            tilemap_set_dirty( x, y, map );
+            tilemap_set_dirty( x, y, t );
             
             /* If we're not forcing the frame, black out the block.
              * If we ARE, then just draw as usual after marking dirty above. */
@@ -92,12 +81,12 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
                (g_animations[i].y - SCREEN_MAP_Y) + g_animations[i].h
                   > tile_py
             ) {
-               tilemap_set_dirty( x, y, map );
+               tilemap_set_dirty( x, y, t );
             }
          }
 #endif /* !NO_ANIMATE */
 
-         if( !tilemap_is_dirty( x, y, map ) ) {
+         if( !tilemap_is_dirty( x, y, t ) ) {
             continue;
          }
 
@@ -107,10 +96,10 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          assert( y >= 0 );
          assert( x >= 0 );
 
-         tilemap_unset_dirty( x, y, map );
+         tilemap_unset_dirty( x, y, t );
 
          /* Grab the left byte if even or the right if odd. */
-         tile_id = tilemap_get_tile_id( map, x, y );
+         tile_id = tilemap_get_tile_id( t, x, y );
 
          if( tile_id >= TILEMAP_TILESETS_MAX ) {
             error_printf( "invalid tile id: %d", tile_id );
@@ -119,27 +108,17 @@ void topdown_draw_tilemap( struct DSEKAI_STATE* state ) {
          
          /* Blit the tile. */
          graphics_blit_tile_at(
-            map->tileset[tile_id].image_id,
+            t->tileset[tile_id].image_id,
             0, 0,
             SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
             TILE_W, TILE_H );
       }
    }
-
-cleanup:
-
-   if( NULL != map ) {
-      map = (struct TILEMAP*)memory_unlock( state->map_handle );
-   }
-
-   if( NULL != gstate ) {
-      gstate =
-         (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
-   }
 }
 
 static void topdown_draw_crops(
-   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate
+   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate,
+   struct TILEMAP* t
 ) {
    int8_t i = 0,
       crop_idx = 0;
@@ -148,14 +127,7 @@ static void topdown_draw_crops(
    uint16_t plot_px = 0,
       plot_py = 0;
    uint8_t crop_stage = 0;
-   struct TILEMAP* map = NULL;
    struct CROP_DEF* crop_def = NULL;
-
-   map = (struct TILEMAP*)memory_lock( state->map_handle );
-   if( NULL == map ) {
-      error_printf( "could not lock tilemap" );
-      return;
-   }
 
    /* TODO: Use tile dirty bit to avoid redraw unless crop sprite changes. */
 
@@ -166,7 +138,7 @@ static void topdown_draw_crops(
          /* Crop plot is inactive. */
          CROP_FLAG_ACTIVE != (plot->flags & CROP_FLAG_ACTIVE) ||
          /* Crop is on a different TILEMAP. */
-         plot->map_gid != map->gid ||
+         plot->map_gid != t->gid ||
          /* Crop tile is not dirty. */
          /* !tilemap_is_dirty( plot->coords.x, plot->coords.y, map ) || */
          /* Crop is off-screen. */
@@ -198,13 +170,13 @@ static void topdown_draw_crops(
       /* Skip drawing crop if it hasn't germinated. */
       if(
          0 == plot->crop_gid ||
-         0 > (crop_idx = crop_get_def_idx( plot->crop_gid, map ))
+         0 > (crop_idx = crop_get_def_idx( plot->crop_gid, t ))
       ) {
          continue;
       }
 
       /* Make sure crop spritesheet is loaded. */
-      crop_def = &(map->crop_defs[crop_idx]);
+      crop_def = &(t->crop_defs[crop_idx]);
       if( 0 > crop_def->sprite_id ) {
          crop_def->sprite_id = graphics_cache_load_bitmap( crop_def->sprite );
       }
@@ -230,17 +202,18 @@ static void topdown_draw_crops(
             plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
       }
    }
-
-   map = (struct TILEMAP*)memory_unlock( state->map_handle );
 }
 
 static void topdown_draw_mobile(
-   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate, struct MOBILE* m
+   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate,
+   struct MOBILE* m, struct TILEMAP* t
 ) {
 
    if(
       /* Don't draw inactive mobiles. */
       (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & m->flags)) ||
+      /* Don't draw mobiles from other tilemaps. */
+      (MOBILE_MAP_GID_ALL != m->map_gid && m->map_gid != t->gid) ||
       /* Pre-death blinking effect (skip negative even frames). */
       (0 > m->mp_hp && 0 == m->mp_hp % 2)
    ) {
@@ -287,24 +260,18 @@ static void topdown_draw_mobile(
 }
 
 void topdown_draw_items(
-   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate
+   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate,
+   struct TILEMAP* t
 ) {
    int8_t i = 0;
    uint16_t item_px = 0,
       item_py = 0;
-   struct TILEMAP* map = NULL;
    struct ITEM* items = NULL;
 
    items = (struct ITEM*)memory_lock( state->items_handle );
    assert( NULL != items );
    if( NULL == items ) {
       error_printf( "could not lock items" );
-      goto cleanup;
-   }
-
-   map = (struct TILEMAP*)memory_lock( state->map_handle );
-   if( NULL == map ) {
-      error_printf( "could not lock tilemap" );
       goto cleanup;
    }
 
@@ -315,7 +282,7 @@ void topdown_draw_items(
          /* Item is owned. */
          ITEM_OWNER_NONE != items[i].owner ||
          /* Item is on a different TILEMAP. */
-         items[i].map_gid != map->gid ||
+         items[i].map_gid != t->gid ||
          /* Item tile is not dirty. */
          /* !tilemap_is_dirty( items[i].y, items[i].x, map ) || */
          /* Item is off-screen. */
@@ -340,10 +307,6 @@ void topdown_draw_items(
 
 cleanup:
 
-   if( NULL != map ) {
-      map = (struct TILEMAP*)memory_unlock( state->map_handle );
-   }
-   
    if( NULL != items ) {
       items = (struct ITEM*)memory_unlock( state->items_handle );
    }
@@ -352,32 +315,41 @@ cleanup:
 void topdown_draw( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
    int8_t i = 0;
-
-   topdown_draw_tilemap( state );
+   struct TILEMAP* t = NULL;
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
 
+   t = (struct TILEMAP*)memory_lock( state->map_handle );
+
+   topdown_draw_tilemap( state, gstate, t );
+
    /* Draw crops. */
-   topdown_draw_crops( state, gstate );
+   topdown_draw_crops( state, gstate, t );
 
    /* Draw items without owners. */
-   topdown_draw_items( state, gstate );
+   topdown_draw_items( state, gstate, t );
 
    /* Draw mobiles. */
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      topdown_draw_mobile( state, gstate, &(state->mobiles[i]) );
+      topdown_draw_mobile( state, gstate, &(state->mobiles[i]), t );
    }
-   topdown_draw_mobile( state, gstate, &(state->player) );
+   topdown_draw_mobile( state, gstate, &(state->player), t );
 
-   gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
+   if( NULL != t ) {
+      t = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
+
+   if( NULL != gstate ) {
+      gstate =
+         (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
+   }
 }
 
-void topdown_focus_player( struct DSEKAI_STATE* state ) {
-   struct TOPDOWN_STATE* gstate = NULL;
+static void topdown_focus_player(
+   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate
+) {
    int16_t player_x_px = 0,
       player_y_px = 0;
-
-   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
 
    player_x_px = state->player.coords.x * TILE_W;
    player_y_px = state->player.coords.y * TILE_H;
@@ -394,8 +366,6 @@ void topdown_focus_player( struct DSEKAI_STATE* state ) {
       state->player.coords.x,
       state->player.coords.y,
       player_x_px, player_y_px );
-
-   gstate = (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
 }
 
 void topdown_animate( struct DSEKAI_STATE* state ) {
@@ -515,6 +485,9 @@ cleanup:
 int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
    struct TILEMAP* map = NULL;
+   struct TOPDOWN_STATE* gstate = NULL;
+
+   debug_printf( 1, "setting up topdown engine..." );
 
    assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
    state->engine_state_handle = memory_alloc(
@@ -525,15 +498,18 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
       goto cleanup;
    }
 
+   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
+   assert( NULL != gstate );
+
    /* Make sure the tilemap is drawn at least once behind any initial windows.
     */
-   topdown_focus_player( state );
+   topdown_focus_player( state, gstate );
    map = (struct TILEMAP*)memory_lock( state->map_handle );
    if( NULL != map ) {
       tilemap_refresh_tiles( map );
+      topdown_draw_tilemap( state, gstate, map );
       map = (struct TILEMAP*)memory_unlock( state->map_handle );
    }
-   topdown_draw_tilemap( state );
 
    /* Show status window. */
    window_push(
@@ -554,7 +530,14 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
 
    state->engine_state = ENGINE_STATE_RUNNING;
 
+   debug_printf( 1, "topdown engine setup complete!" );
+
 cleanup:
+
+   if( NULL != gstate ) {
+      gstate =
+         (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
+   }
    
    return retval;
 }

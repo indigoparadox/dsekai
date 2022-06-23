@@ -83,6 +83,11 @@
                  "name":"wtempl",
                  "properties":[
                         {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1001
+                        }, 
+                        {
                          "name":"script",
                          "type":"int",
                          "value":3
@@ -99,6 +104,11 @@
                  "id":6,
                  "name":"princess",
                  "properties":[
+                        {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1002
+                        }, 
                         {
                          "name":"script",
                          "type":"int",
@@ -122,6 +132,11 @@
                  "name":"fountain",
                  "properties":[
                         {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1007
+                        }, 
+                        {
                          "name":"script",
                          "type":"int",
                          "value":1
@@ -138,6 +153,11 @@
                  "id":9,
                  "name":"tree",
                  "properties":[
+                        {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1005
+                        }, 
                         {
                          "name":"script",
                          "type":"int",
@@ -156,6 +176,11 @@
                  "name":"wforst",
                  "properties":[
                         {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1006
+                        }, 
+                        {
                          "name":"script",
                          "type":"int",
                          "value":4
@@ -172,6 +197,11 @@
                  "id":13,
                  "name":"maid",
                  "properties":[
+                        {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1003
+                        }, 
                         {
                          "name":"script",
                          "type":"int",
@@ -194,6 +224,11 @@
                  "id":13,
                  "name":"chest",
                  "properties":[
+                        {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1004
+                        }, 
                         {
                          "name":"script",
                          "type":"int",

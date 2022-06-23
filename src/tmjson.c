@@ -84,7 +84,13 @@ static int16_t tilemap_json_parse_spawn(
       spawn->flags |= ((mobile_type << 3) & MOBILE_TYPE_MASK);
    }
 
-   debug_printf( 1, "spawn \"%s\" flags: 0x%04x", spawn->name, spawn->flags );
+   /* Parse GID */
+   dio_snprintf(
+      iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_GID, spawn_idx );
+   spawn->gid = json_int_from_path(
+      iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+
+   debug_printf( 1, "spawn %d flags: 0x%04x", spawn->gid, spawn->flags );
 
    if( 0 > spawn->script_id || spawn->script_id  >= TILEMAP_SCRIPTS_MAX ) {
       error_printf( "spawn \"%s\" uses invalid script ID: %d",

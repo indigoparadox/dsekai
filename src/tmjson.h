@@ -64,6 +64,8 @@
 #define TILEMAP_JPATH_MOB_NAME   "/layers/[name=mobiles]/objects/%d/name"
 /*! \brief JSON path to TILEMAP_SPAWN::type. */
 #define TILEMAP_JPATH_MOB_TYPE   "/layers/[name=mobiles]/objects/%d/type"
+/*! \brief JSON path to TILEMAP_SPAWN::gid. */
+#define TILEMAP_JPATH_MOB_GID   "/layers/[name=mobiles]/objects/%d/properties/[name=gid]/value"
 /*! \brief JSON path to mobile script index. */
 #define TILEMAP_JPATH_MOB_SCRIPT "/layers/[name=mobiles]/objects/%d/properties/[name=script]/value"
 /*! \brief JSON path to mobile type. */

@@ -127,14 +127,33 @@
  */
 #define MOBILE_DIR_MASK 0x0007
 
+/**
+ * \addtogroup dsekai_mobile_flags_type Mobile Object Type Flags
+ * \brief Types instructing the engine how to handle a ::MOBILE.
+ * \{
+ */
+
+/**
+ * \brief MOBILE::flags indicating single-map lifecycle for this mobile.
+ */
 #define MOBILE_TYPE_NORMAL 0x0000
 
+/**
+ * \brief MOBILE::flags indicating that this mobile persists between tilemaps.
+ */
 #define MOBILE_TYPE_SPECIAL   0x0008
 
+/*! \brief Reserved for future use. */
 #define MOBILE_TYPE_RES1 0x0010
 
+/*! \brief Reserved for future use. */
 #define MOBILE_TYPE_RES2 0x0018
 
+/*! \} */
+
+/**
+ * \brief Bitmask defining bits used to indicate \ref dsekai_mobile_flags_type.
+ */
 #define MOBILE_TYPE_MASK 0x0018
 
 /**
@@ -142,13 +161,22 @@
  */
 #define MOBILE_FLAG_ACTIVE 0x0100
 
+/**
+ * \brief MOBILE::flags indicating that this is a player ::MOBILE.
+ */
+#define MOBILE_FLAG_PLAYER 0x0200
+
 /*! \} */
 
+/**
+ * \related MOBILE
+ * \brief MOBILE::map_gid value indicating mobile is present on all tilemaps.
+ *
+ * This is generally only used for the player.
+ */
+#define MOBILE_MAP_GID_ALL 65535
+
 #define mobile_get_sprite( m ) ((m)->sprite_id)
-
-/* TODO: Give mobiles unique IDs. */
-
-/* TODO: Log when spawned, with name of spawner and unique ID spawned. */
 
 /* TODO: Combine steps_x and steps_y? */
 
@@ -161,9 +189,13 @@ struct MOBILE {
     */
    uint16_t flags;
    /**
-    * \brief GID of the spawner that spawned this mobile.
+    * \brief TILEMAP_SPAWN::gid of the spawner that spawned this mobile.
     */
-   uint16_t spawner_id;
+   uint16_t spawner_gid;
+   /**
+    * \brief TILEMAP::gid of the tilemap this mobile was spawned on.
+    */
+   uint16_t map_gid;
    /**
     * \brief The combined \ref dsekai_mobiles_mp_hp field.
     */
@@ -268,7 +300,7 @@ struct MOBILE* mobile_interact(
 
 /**
  * \brief Map ::MOBILE animation frames to a number of real frames elapsed.
- * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
+ * \param state Locked ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  */
 void mobile_state_animate( struct DSEKAI_STATE* state );
 
@@ -276,9 +308,9 @@ void mobile_state_animate( struct DSEKAI_STATE* state );
  * \relates MOBILE
  * \brief Perform animation frame for the given MOBILE.
  * \param m ::MEMORY_PTR to MOBILE to animate.
- * \param t ::MEMORY_PTR to TILEMAP on which MOBILE is located.
+ * \param state Locked ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  */
-void mobile_animate( struct MOBILE* m, struct TILEMAP* t );
+void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state );
 
 /**
  * \brief Prepare a ::MOBILE for deallocation.
@@ -307,19 +339,26 @@ int8_t mobile_stack_pop( struct MOBILE* m ) SECTION_MOBILE;
  * \brief Execute the next available ::SCRIPT_STEP in the currently running
  *        ::SCRIPT on a MOBILE.
  * \param m ::MEMORY_PTR to the MOBILE running the desired ::SCRIPT.
- * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
+ * \param state Locked ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  */
 void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state );
 
-struct MOBILE* mobile_spawn_npc( struct DSEKAI_STATE* state, uint8_t player )
-SECTION_MOBILE;
+/**
+ * \brief Allocate a mobile or select player mobile slot and initialize it
+ *        with configuration generic to ALL mobiles.
+ * \param state Locked ::MEMORY_PTR to current engine ::DSEKAI_STATE.
+ * \param flags \ref dsekai_mobile_flags applying to the spawned ::MOBILE.
+ */
+struct MOBILE* mobile_spawn_single(
+   struct DSEKAI_STATE* state, uint16_t flags ) SECTION_MOBILE;
 
 /**
  * \brief Spawn from ::TILEMAP::spawners according to spawner rules.
- * \param state ::MEMORY_PTR to the current engine ::DSEKAI_STATE with a loaded
- *              ::TILEMAP on which to execute spawners.
+ * \param state Locked ::MEMORY_PTR to the current engine ::DSEKAI_STATE.
+ * \param t Locked ::MEMORY_PTR to ::TILEMAP on which to execute spawners.
  */
-void mobile_spawns( struct DSEKAI_STATE* state, struct TILEMAP* map );
+void mobile_spawns(
+   struct DSEKAI_STATE* state, struct TILEMAP* t ) SECTION_MOBILE;
 
 #ifdef MOBILE_C
 const int8_t gc_mobile_step_table_normal_pos[16] = {

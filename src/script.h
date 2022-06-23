@@ -32,6 +32,7 @@ struct TILEMAP;
  */
 #define SCRIPT_ARG_STACK_RC 32765
 #define SCRIPT_ARG_RANDOM 32766
+#define SCRIPT_ARG_FOLLOW_PLAYER 32764
 /*! \brief Maximum length of a script in text form. */
 #define SCRIPT_STR_MAX 1024
 
@@ -74,6 +75,10 @@ typedef uint16_t (*SCRIPT_CB)(
  * ::ITEM_OWNER_META to the actee.
  *
  * \}
+ */
+
+/* TODO: Condense all walk instructions into one that pulls direction off the
+ *       stack, to facilitate SCRIPT_ARG_FOLLOW_PLAYER.
  */
 
 /**

@@ -423,22 +423,15 @@ int8_t item_stack_or_add(
    items = (struct ITEM*)memory_lock( state->items_handle );
    assert( NULL != items );
    
-   if( 0 <= e_idx ) {
+   if(
       /* Found a dupe (stacking). */
-      if(
-         gc_items_max[item_get_type_flag( e_def )] >=
+      0 <= e_idx &&
+      /* Room on a stack. */
+      gc_items_max[item_get_type_flag( e_def )] >=
          item_get_count_flag( &(items[e_idx]) ) + 1
-      ) {
-         debug_printf( 2, "adding item %d to mobile %d stack (%d)",
-            template_gid, owner_id, item_get_count_flag( &(items[e_idx]) ) );
-      } else {
-         error_printf(
-            "unable to give item %d type %d to mobile %d: duplicate (max %d)",
-            template_gid, item_get_type_flag( e_def ),
-            owner_id, gc_items_max[item_get_type_flag( e_def )]
-         );
-         e_idx = ITEM_ERROR_DUPLICATE;
-      }
+   ) {
+      debug_printf( 2, "adding item %d to mobile %d stack (%d)",
+         template_gid, owner_id, item_get_count_flag( &(items[e_idx]) ) );
 
    } else {
       /* Create item from template. */
@@ -465,8 +458,6 @@ int8_t item_stack_or_add(
          break;
       }
    }
-
-   assert( 0 <= e_idx );
 
    /* Defs start with count of 0, or we found the e_idx above. */
    item_incr_count( &(items[e_idx]), 1 );
