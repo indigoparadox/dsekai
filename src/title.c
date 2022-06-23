@@ -161,7 +161,7 @@ void title_draw( struct DSEKAI_STATE* state ) {
 
 #ifndef NO_TITLE
 
-   int8_t i = 0;
+   int16_t i = 0;
 
    /* graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK ); */
 

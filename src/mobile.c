@@ -26,7 +26,7 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
 struct MOBILE* mobile_get_facing(
    struct MOBILE* m, struct DSEKAI_STATE* state
 ) {
-   int8_t i = 0;
+   int16_t i = 0;
 
    assert( 4 > mobile_get_dir( m ) );
 
@@ -79,7 +79,7 @@ void mobile_state_animate( struct DSEKAI_STATE* state ) {
 }
 
 void mobile_stack_push( struct MOBILE* m, int8_t v ) {
-   uint8_t i = 0;
+   int16_t i = 0;
 
    /* Shift the stack values out of the way for a new one. */
    for( i = SCRIPT_STACK_DEPTH - 1 ; 0 < i ; i-- ) {
@@ -93,7 +93,7 @@ void mobile_stack_push( struct MOBILE* m, int8_t v ) {
 }
 
 int8_t mobile_stack_pop( struct MOBILE* m ) {
-   uint8_t i = 0;
+   int16_t i = 0;
    int8_t retval = 0;
 
    retval = m->script_stack[0];
@@ -266,7 +266,7 @@ void mobile_deinit( struct MOBILE* m ) {
 struct MOBILE* mobile_spawn_single(
    struct DSEKAI_STATE* state, uint16_t flags
 ) {
-   int8_t i = 0;
+   int16_t i = 0;
    struct MOBILE* mobile_out = NULL;
 
    if( MOBILE_FLAG_PLAYER == (MOBILE_FLAG_PLAYER * flags) ) {

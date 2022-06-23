@@ -89,7 +89,7 @@ skip_refresh:
 }
 
 void menu_renderer_items( struct DSEKAI_STATE* state ) {
-   int8_t i = 0,
+   int16_t i = 0,
       player_item_idx = 0;
    GRAPHICS_COLOR color;
    uint8_t flags = 0;
@@ -237,7 +237,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
 }
 
 static int8_t menu_handler_items_use(
-   int8_t selected_item_idx, struct DSEKAI_STATE* state
+   int16_t selected_item_idx, struct DSEKAI_STATE* state
 ) {
    int8_t use_retval = 0;
    uint8_t item_type = 0;
@@ -256,7 +256,7 @@ static int8_t menu_handler_items_use(
 int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
    int16_t retval = 1,
       i = 0;
-   int8_t selected_item_idx = ITEM_ERROR_NOT_FOUND,
+   int16_t selected_item_idx = ITEM_ERROR_NOT_FOUND,
       player_item_count = 0;
    struct TILEMAP* t = NULL;
    struct ITEM* items = NULL;

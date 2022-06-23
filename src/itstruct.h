@@ -69,7 +69,7 @@ struct ITEM {
     * Items without ::MOBILE owners are garbage-collected when the map changes.
     * See engines_warp_loop() for more information.
     */
-   int8_t owner;
+   int16_t owner;
    /**
     * \brief Arbitrary portion of the GID of the item.
     */

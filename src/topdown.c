@@ -120,7 +120,7 @@ static void topdown_draw_crops(
    struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate,
    struct TILEMAP* t
 ) {
-   int8_t i = 0,
+   int16_t i = 0,
       crop_idx = 0;
    struct CROP_PLOT* plot = NULL;
    int16_t plot_gfx;
@@ -263,7 +263,7 @@ void topdown_draw_items(
    struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate,
    struct TILEMAP* t
 ) {
-   int8_t i = 0;
+   int16_t i = 0;
    uint16_t item_px = 0,
       item_py = 0;
    struct ITEM* items = NULL;
@@ -314,7 +314,7 @@ cleanup:
 
 void topdown_draw( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
-   int8_t i = 0;
+   int16_t i = 0;
    struct TILEMAP* t = NULL;
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );

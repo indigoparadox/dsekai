@@ -48,13 +48,17 @@
 #define ITEM_USED_FAILED 0
 #define ITEM_USED_SUCCESSFUL_SILENT 1
 
-uint8_t item_get_data( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
+uint8_t item_get_data(
+   int16_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
-uint8_t item_get_type( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
+uint8_t item_get_type(
+   int16_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
-uint8_t item_get_flags( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
+uint16_t item_get_flags(
+   int16_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
-int8_t item_get_owner( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
+int16_t item_get_owner(
+   int16_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
 /**
  * \brief Determine if/where item with the given ITEM::gid exists in the
@@ -64,11 +68,11 @@ int8_t item_get_owner( int8_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
  * \return Index of the item in DSEKAI_STATE::items if it exists or
  *         ::ITEM_ERROR_NOT_FOUND if not.
  */
-int8_t item_exists_in_inventory(
-   int16_t template_gid, int8_t owner_id, struct DSEKAI_STATE* state
+int16_t item_exists_in_inventory(
+   int16_t template_gid, int16_t owner_id, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
-int8_t item_decr_or_delete( int8_t e_idx, struct DSEKAI_STATE* state );
+int16_t item_decr_or_delete( int16_t e_idx, struct DSEKAI_STATE* state );
 
 /**
  * \brief Create an item in DSEKAI_STATE::items from a template in
@@ -76,8 +80,8 @@ int8_t item_decr_or_delete( int8_t e_idx, struct DSEKAI_STATE* state );
  * \param m \ref dsekai_items_owners to give the item to.
  * \return Index of the new item or stack added to in DSEKAI_STATE::items.
  */
-int8_t item_stack_or_add(
-   int16_t template_gid, int8_t owner_id,
+int16_t item_stack_or_add(
+   int16_t template_gid, int16_t owner_id,
    struct TILEMAP* t, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
@@ -87,8 +91,8 @@ int8_t item_stack_or_add(
  *         or error code otherwise.
  */
 
-int8_t item_give_mobile(
-   int8_t e_idx, int8_t m_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
+int16_t item_give_mobile(
+   int16_t e_idx, int16_t m_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
 /**
@@ -97,7 +101,7 @@ int8_t item_give_mobile(
  * \return 1 if give was successful, or error code otherwise.
  */
 int8_t item_drop(
-   int8_t e_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
+   int16_t e_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
 /**
@@ -107,8 +111,8 @@ int8_t item_drop(
  * \return Index of picked up item, or ::DSEKAI_ITEMS_MAX if no item was
  *         picked up.
  */
-int8_t item_pickup_xy(
-   uint8_t x, uint8_t y, int8_t owner, struct TILEMAP* t,
+int16_t item_pickup_xy(
+   uint8_t x, uint8_t y, int16_t owner, struct TILEMAP* t,
    struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
@@ -117,15 +121,17 @@ int8_t item_pickup_xy(
  *         was used and the menu should be closed.
  */
 typedef int8_t (*ITEM_USE_CB)(
-   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state );
+   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state );
 
-#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state ) SECTION_ITEM;
+#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
 ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
 
 #ifdef ITEM_C
 
 #  define ITEM_TABLE_MAX( type, max ) max,
+
+/* TODO: Custom item types with scripts. */
 
 RES_CONST uint8_t gc_items_max[] = {
    ITEM_TABLE( ITEM_TABLE_MAX )

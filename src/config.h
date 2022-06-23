@@ -65,16 +65,12 @@
 
 #ifndef DSEKAI_MOBILES_MAX
 /*! \brief Maximum count of ::MOBILE existing on a loaded ::TILEMAP. */
-#  define DSEKAI_MOBILES_MAX 20
+#  define DSEKAI_MOBILES_MAX 200
 #endif /* !MOBILES_MAX */
 
 #ifndef DSEKAI_ITEMS_MAX
 /*! \brief Maximum number of items existing in the world at any time. */
-#  ifdef PLATFORM_DOS
-#     define DSEKAI_ITEMS_MAX 50
-#  else
-#     define DSEKAI_ITEMS_MAX 100
-#  endif /* PLATFORM_DOS */
+#  define DSEKAI_ITEMS_MAX 200
 #endif /* !DSEKAI_ITEMS_MAX */
 
 #ifndef TILEMAP_CROP_DEFS_MAX

@@ -3,14 +3,14 @@
 #include "dsekai.h"
 
 int8_t item_use_none(
-   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
 ) {
    error_printf( "attempted to use invalid item" );
    return 0;
 }
 
 int8_t item_use_seed(
-   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
 ) {
    int8_t retval = -1;
    uint8_t x = 0,
@@ -74,7 +74,7 @@ cleanup:
 }
 
 int8_t item_use_food(
-   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
 ) {
    int8_t anim_idx = 0;
    char num_str[10];
@@ -120,14 +120,14 @@ int8_t item_use_food(
 }
 
 int8_t item_use_shovel(
-   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
 ) {
    /* TODO: Implement digging. */
    return ITEM_USED_FAILED;
 }
 
 int8_t item_use_editor(
-   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
 ) {
 #ifndef NO_ENGINE_EDITOR
    struct TILEMAP* t = NULL;
@@ -161,26 +161,27 @@ int8_t item_use_editor(
 }
 
 int8_t item_use_material(
-   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
 ) {
    /* TODO: Warn that materials cannot be used directly. */
    return 0;
 }
 
 int8_t item_use_watercan(
-   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
 ) {
    /* TODO: Check for CROP_PLOTs that can be watered. */
    return 0;
 }
 
 int8_t item_use_hoe(
-   int8_t e_idx, int8_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
 ) {
-   int8_t i = 0,
-      crop_idx = -1,
-      retval = ITEM_USED_SUCCESSFUL;
-   int16_t x = 0, y = 0;
+   int8_t retval = ITEM_USED_SUCCESSFUL;
+   int16_t x = 0,
+      y = 0,
+      i = 0,
+      crop_idx = -1;
    struct TILEMAP* t = NULL;
    struct MOBILE* user = NULL;
 
@@ -253,7 +254,7 @@ cleanup:
    return retval;
 }
 
-uint8_t item_get_data( int8_t e_idx, struct DSEKAI_STATE* state ) {
+uint8_t item_get_data( int16_t e_idx, struct DSEKAI_STATE* state ) {
    uint8_t data_out = 0;
    struct ITEM* items = NULL;
 
@@ -274,7 +275,7 @@ uint8_t item_get_data( int8_t e_idx, struct DSEKAI_STATE* state ) {
 }
 
 /* TODO: Refactor out. */
-uint8_t item_get_type( int8_t e_idx, struct DSEKAI_STATE* state ) {
+uint8_t item_get_type( int16_t e_idx, struct DSEKAI_STATE* state ) {
    uint8_t type_out = 0;
    struct ITEM* items = NULL;
 
@@ -294,7 +295,7 @@ uint8_t item_get_type( int8_t e_idx, struct DSEKAI_STATE* state ) {
    return type_out;
 }
 
-uint8_t item_get_flags( int8_t e_idx, struct DSEKAI_STATE* state ) {
+uint16_t item_get_flags( int16_t e_idx, struct DSEKAI_STATE* state ) {
    uint8_t flags_out = 0;
    struct ITEM* items = NULL;
 
@@ -312,7 +313,7 @@ uint8_t item_get_flags( int8_t e_idx, struct DSEKAI_STATE* state ) {
    return flags_out;
 }
 
-int8_t item_get_owner( int8_t e_idx, struct DSEKAI_STATE* state ) {
+int16_t item_get_owner( int16_t e_idx, struct DSEKAI_STATE* state ) {
    int8_t owner_out = 0;
    struct ITEM* items = NULL;
 
@@ -332,10 +333,10 @@ int8_t item_get_owner( int8_t e_idx, struct DSEKAI_STATE* state ) {
    return owner_out;
 }
 
-int8_t item_exists_in_inventory(
-   int16_t template_gid, int8_t owner_id, struct DSEKAI_STATE* state
+int16_t item_exists_in_inventory(
+   int16_t template_gid, int16_t owner_id, struct DSEKAI_STATE* state
 ) {
-   int8_t i = 0;
+   int16_t i = 0;
    struct ITEM* items = NULL;
 
    items = (struct ITEM*)memory_lock( state->items_handle );
@@ -368,7 +369,7 @@ cleanup:
    return i;
 }
 
-int8_t item_decr_or_delete( int8_t e_idx, struct DSEKAI_STATE* state ) {
+int16_t item_decr_or_delete( int16_t e_idx, struct DSEKAI_STATE* state ) {
    struct ITEM* items = NULL;
 
    items = (struct ITEM*)memory_lock( state->items_handle );
@@ -389,11 +390,11 @@ int8_t item_decr_or_delete( int8_t e_idx, struct DSEKAI_STATE* state ) {
    return e_idx;
 }
 
-int8_t item_stack_or_add(
-   int16_t template_gid, int8_t owner_id,
+int16_t item_stack_or_add(
+   int16_t template_gid, int16_t owner_id,
    struct TILEMAP* t, struct DSEKAI_STATE* state
 ) {
-   int8_t e_idx = 0,
+   int16_t e_idx = 0,
       i = 0;
    struct ITEM* e_def = NULL,
       * items = NULL;
@@ -475,10 +476,10 @@ cleanup:
    return e_idx;
 }
 
-int8_t item_give_mobile(
-   int8_t e_idx, int8_t owner_id, struct TILEMAP* t, struct DSEKAI_STATE* state
+int16_t item_give_mobile(
+   int16_t e_idx, int16_t owner_id, struct TILEMAP* t, struct DSEKAI_STATE* state
 ) {
-   int8_t e_dest_idx = 0;
+   int16_t e_dest_idx = 0;
    int16_t e_gid = 0;
    struct ITEM* items = NULL;
 
@@ -503,7 +504,7 @@ int8_t item_give_mobile(
 }
 
 int8_t item_drop(
-   int8_t e_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
+   int16_t e_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
 ) {
    struct ITEM* e = NULL,
       * items = NULL;
@@ -552,11 +553,11 @@ cleanup:
    return e_idx;
 }
 
-int8_t item_pickup_xy(
-   uint8_t x, uint8_t y, int8_t owner, struct TILEMAP* t,
+int16_t item_pickup_xy(
+   uint8_t x, uint8_t y, int16_t owner, struct TILEMAP* t,
    struct DSEKAI_STATE* state
 ) {
-   int8_t i = 0;
+   int16_t i = 0;
    struct ITEM* items = NULL;
 
    items = (struct ITEM*)memory_lock( state->items_handle );
@@ -600,7 +601,7 @@ int8_t item_pickup_xy(
 
 /*
 void item_cleanup_orphans( struct DSEKAI_STATE* ) {
-   int8_t i = 0;
+   int16_t i = 0;
 
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
       if(

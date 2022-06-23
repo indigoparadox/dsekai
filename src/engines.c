@@ -146,7 +146,7 @@ cleanup:
 }
 
 void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
-   int8_t i = 0;
+   int16_t i = 0;
 
    mobile_state_animate( state );
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
