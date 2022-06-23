@@ -54,11 +54,22 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       mobile_deinit( &(state->mobiles[i]) );
    }
 
-   /* Set the player's new position. */
-   state->player.coords.x = state->warp_to_x;
-   state->player.coords.y = state->warp_to_y;
-   state->player.coords_prev.x = state->warp_to_x;
-   state->player.coords_prev.y = state->warp_to_y;
+   /* Unload irrelevant items. */
+   items = (struct ITEM*)memory_lock( state->items_handle );
+   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      if(
+         /* Item is inactive. */
+         ITEM_FLAG_ACTIVE != (ITEM_FLAG_ACTIVE & items[i].flags) ||
+         /* Item owned by "special" owner. */
+         0 > items[i].owner
+      ) {
+         continue;
+      }
+      debug_printf( 1, "unloading item %d owned by %d",
+         items[i].gid, items[i].owner );
+      memory_zero_ptr( &(items[i]), sizeof( struct ITEM ) );
+   }
+   items = (struct ITEM*)memory_unlock( state->items_handle );
 
    /* Close any open windows (e.g. player state). */
    /* TODO: Clean up open windows lingering after engine cleanup. */
@@ -66,8 +77,12 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       window_pop( 0, state );
    } */
 
-   /* TODO: Clean up items held by NPC mobiles and items w/ no owners. */
-   
+   /* Set the player's new position. */
+   state->player.coords.x = state->warp_to_x;
+   state->player.coords.y = state->warp_to_y;
+   state->player.coords_prev.x = state->warp_to_x;
+   state->player.coords_prev.y = state->warp_to_y;
+
    /* TODO: Preserve ownerless items in save for this map. */
 
    /* TODO: Preserve mobile script states in save for this map. */
@@ -104,7 +119,8 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       (MEMORY_PTR)&(state->editor), sizeof( struct EDITOR_STATE ) );
 #endif /* !NO_ENGINE_EDITOR */
 
-   /* Finished unloading old state, so get ready to load new state if needed. */
+   /* Finished unloading old state, so get ready to load new state if needed. 
+    */
 
    state->engine_type = state->engine_type_change;
    state->engine_state = ENGINE_STATE_OPENING;

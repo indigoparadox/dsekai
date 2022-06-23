@@ -43,7 +43,8 @@ unilayer_main() {
    size_multi_printf(
       3, "mobile", sizeof( struct MOBILE ), DSEKAI_MOBILES_MAX );
    size_multi_printf( 3, "item", sizeof( struct ITEM ), DSEKAI_ITEMS_MAX );
-   size_multi_printf( 3, "crop", sizeof( struct CROP ), DSEKAI_CROPS_MAX );
+   size_multi_printf(
+      3, "crop", sizeof( struct CROP_PLOT ), DSEKAI_CROPS_MAX );
    assert( sizeof( struct TILEMAP ) < 16384 );
 
 #ifndef NO_ANIMATE
