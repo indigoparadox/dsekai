@@ -241,8 +241,11 @@ static int8_t menu_handler_items_use(
 ) {
    int8_t use_retval = 0;
    uint8_t item_type = 0;
+   struct ITEM* items = NULL;
 
-   item_type = item_get_type( selected_item_idx, state );
+   items = (struct ITEM*)memory_lock( state->items_handle );
+   item_type = item_get_type_flag( &(items[selected_item_idx]) );
+   items = (struct ITEM*)memory_unlock( state->items_handle );
 
    use_retval = gc_item_use_cbs[item_type](
       selected_item_idx, ITEM_OWNER_PLAYER, state );

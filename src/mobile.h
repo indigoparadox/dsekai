@@ -266,7 +266,6 @@ struct MOBILE {
 /*! \} */
 
 /**
- * \relates MOBILE
  * \brief Have the given MOBILE attempt to begin walking movement/animation.
  * \param m ::MEMORY_PTR to MOBILE that should attempt moving.
  * \param dir Index of direction offsets in ::gc_mobile_x_offsets.
@@ -277,7 +276,6 @@ struct MOBILE {
 uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
 
 /**
- * \relates MOBILE
  * \brief Get a ::MEMORY_PTR to the mobile m is currently facing.
  * \param m MOBILE to center the check around.
  * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
@@ -287,7 +285,6 @@ struct MOBILE* mobile_get_facing(
    struct MOBILE* m, struct DSEKAI_STATE* state );
 
 /**
- * \relates MOBILE
  * \brief Force a ::MOBILE to jump to the SCRIPT_ACTION_INTERACT in its
  *        ::SCRIPT.
  * \param actor ::MEMORY_PTR to the MOBILE sending the interact call.
@@ -305,7 +302,6 @@ struct MOBILE* mobile_interact(
 void mobile_state_animate( struct DSEKAI_STATE* state );
 
 /**
- * \relates MOBILE
  * \brief Perform animation frame for the given MOBILE.
  * \param m ::MEMORY_PTR to MOBILE to animate.
  * \param state Locked ::MEMORY_PTR to current engine ::DSEKAI_STATE.
@@ -319,7 +315,6 @@ void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state );
 void mobile_deinit( struct MOBILE* ) SECTION_MOBILE;
 
 /**
- * \relates MOBILE
  * \brief Push a value onto MOBILE::script_stack.
  * \param m ::MEMORY_PTR to ::MOBILE on which to push to ::MOBILE::script_stack.
  * \param v Value to push onto the stack.
@@ -327,7 +322,6 @@ void mobile_deinit( struct MOBILE* ) SECTION_MOBILE;
 void mobile_stack_push( struct MOBILE* m, int8_t v ) SECTION_MOBILE;
 
 /**
- * \relates MOBILE
  * \brief Pop a value from a MOBILE::script_stack.
  * \param m ::MEMORY_PTR to ::MOBILE from which to pop ::MOBILE::script_stack.
  * \return The value popped.
@@ -335,7 +329,6 @@ void mobile_stack_push( struct MOBILE* m, int8_t v ) SECTION_MOBILE;
 int8_t mobile_stack_pop( struct MOBILE* m ) SECTION_MOBILE;
 
 /**
- * \relates MOBILE
  * \brief Execute the next available ::SCRIPT_STEP in the currently running
  *        ::SCRIPT on a MOBILE.
  * \param m ::MEMORY_PTR to the MOBILE running the desired ::SCRIPT.

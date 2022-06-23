@@ -189,6 +189,9 @@ struct DSEKAI_STATE {
     */
    MEMORY_HANDLE items_handle;
 
+   /**
+    * \brief Currently loaded ::TILEMAP.
+    */
    MEMORY_HANDLE map_handle;
 
    /**

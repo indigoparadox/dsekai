@@ -19,6 +19,7 @@ int8_t item_use_seed(
    struct CROP_PLOT* plot = NULL;
    struct TILEMAP* t = NULL;
    struct MOBILE* user = NULL;
+   struct ITEM* items = NULL;
 
    /* Owner check. */
    if( 0 <= owner_id ) {
@@ -28,7 +29,10 @@ int8_t item_use_seed(
    }
    assert( NULL != user );
 
-   crop_gid = item_get_data( e_idx, state );
+   items = (struct ITEM*)memory_lock( state->items_handle );
+   assert( NULL != items );
+   crop_gid = items[e_idx].data;
+   items = (struct ITEM*)memory_unlock( state->items_handle );
 
    x = user->coords.x + gc_mobile_x_offsets[mobile_get_dir( user )];
    y = user->coords.y + gc_mobile_y_offsets[mobile_get_dir( user )];
@@ -80,6 +84,7 @@ int8_t item_use_food(
    char num_str[10];
    struct MOBILE* user = NULL;
    uint8_t food_val = 0;
+   struct ITEM* items = NULL;
 
    /* Owner check. */
    if( 0 <= owner_id ) {
@@ -89,7 +94,10 @@ int8_t item_use_food(
    }
    assert( NULL != user );
 
-   food_val = item_get_data( e_idx, state );
+   items = (struct ITEM*)memory_lock( state->items_handle );
+   assert( NULL != items );
+   food_val = items[e_idx].data;
+   items = (struct ITEM*)memory_unlock( state->items_handle );
 
    item_decr_or_delete( e_idx, state );
 
@@ -252,85 +260,6 @@ cleanup:
    t = (struct TILEMAP*)memory_unlock( state->map_handle );
 
    return retval;
-}
-
-uint8_t item_get_data( int16_t e_idx, struct DSEKAI_STATE* state ) {
-   uint8_t data_out = 0;
-   struct ITEM* items = NULL;
-
-   assert( e_idx < DSEKAI_ITEMS_MAX );
-   assert( 0 <= e_idx );
-
-   /* Handle locking. */
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
-   
-   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & items[e_idx].flags) );
-
-   data_out = items[e_idx].data;
-
-   items = (struct ITEM*)memory_unlock( state->items_handle );
-
-   return data_out;
-}
-
-/* TODO: Refactor out. */
-uint8_t item_get_type( int16_t e_idx, struct DSEKAI_STATE* state ) {
-   uint8_t type_out = 0;
-   struct ITEM* items = NULL;
-
-   assert( e_idx < DSEKAI_ITEMS_MAX );
-   assert( 0 <= e_idx );
-
-   /* Handle locking. */
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
-   
-   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & items[e_idx].flags) );
-
-   type_out = item_get_type_flag( &(items[e_idx]) );
-
-   items = (struct ITEM*)memory_unlock( state->items_handle );
-
-   return type_out;
-}
-
-uint16_t item_get_flags( int16_t e_idx, struct DSEKAI_STATE* state ) {
-   uint8_t flags_out = 0;
-   struct ITEM* items = NULL;
-
-   assert( e_idx < DSEKAI_ITEMS_MAX );
-   assert( 0 <= e_idx );
-
-   /* Handle locking. */
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
-   
-   flags_out = items[e_idx].flags;
-
-   items = (struct ITEM*)memory_unlock( state->items_handle );
-
-   return flags_out;
-}
-
-int16_t item_get_owner( int16_t e_idx, struct DSEKAI_STATE* state ) {
-   int8_t owner_out = 0;
-   struct ITEM* items = NULL;
-
-   assert( e_idx < DSEKAI_ITEMS_MAX );
-   assert( 0 <= e_idx );
-
-   /* Handle locking. */
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
-   
-   assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & items[e_idx].flags) );
-
-   owner_out = items[e_idx].owner;
-
-   items = (struct ITEM*)memory_unlock( state->items_handle );
-
-   return owner_out;
 }
 
 int16_t item_exists_in_inventory(
