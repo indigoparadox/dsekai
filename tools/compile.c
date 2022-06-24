@@ -26,6 +26,10 @@ const char gc_sc_bytes[] = {
    '\0'
 };
 
+#define SCRIPT_CB_TABLE_CONSTS( idx, name, c ) RES_CONST uint16_t SCRIPT_ACTION_ ## name = idx;
+
+SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS );
+
 uint8_t g_flags = 0;
 
 #define CS_FLAG_VERBOSE 1
@@ -76,24 +80,40 @@ void compare_inst( char* token, size_t token_sz, struct COMPILE_INST* s ) {
       if( 0 == strncmp( token, gc_sc_tokens[i], token_sz ) ) {
          s->op = i;
          d_printf( "inst: %s\n", gc_sc_tokens[i] );
-         break;
+         return;
       }
       i++;
    }
+
+   s->op = 0;
 }
 
-int16_t parm_dir( char* token, size_t token_sz ) {
+int16_t parm_special( char* token, size_t token_sz ) {
 
    compare_case( token, token_sz );
 
-   if( 0 == strncmp( token, "SOUTH", token_sz ) ) {
+   if( 0 == strncmp(        "SOUTH",   token, 5 ) ) {
       return 0;
-   } else if( 0 == strncmp( token, "NORTH", token_sz ) ) {
+   } else if( 0 == strncmp( "NORTH",   token, 5 ) ) {
       return 1;
-   } else if( 0 == strncmp( token, "EAST", token_sz ) ) {
+   } else if( 0 == strncmp( "EAST",    token, 4 ) ) {
       return 2;
-   } else if( 0 == strncmp( token, "WEST", token_sz ) ) {
+   } else if( 0 == strncmp( "WEST",    token, 4 ) ) {
       return 3;
+   } else if( 0 == strncmp( "STACK_E_I", token, 9 ) ) {
+      return SCRIPT_ARG_STACK_E_I;
+   } else if( 0 == strncmp( "STACK_I", token, 7 ) ) {
+      return SCRIPT_ARG_STACK_I;
+   } else if( 0 == strncmp( "STACK_P", token, 7 ) ) {
+      return SCRIPT_ARG_STACK_P;
+   } else if( 0 == strncmp( "STACK_E", token, 7 ) ) {
+      return SCRIPT_ARG_STACK_E;
+   } else if( 0 == strncmp( "STACK",   token, 5 ) ) {
+      return SCRIPT_ARG_STACK;
+   } else if( 0 == strncmp( "RANDOM",  token, 6 ) ) {
+      return SCRIPT_ARG_RANDOM;
+   } else if( 0 == strncmp( "FOLLOW",  token, 6 ) ) {
+      return SCRIPT_ARG_FOLLOW;
    }
 
    return -1;   
@@ -110,12 +130,19 @@ void parse( char c, struct COMPILE_STATE* s ) {
    switch( c ) {
 
    case ':':
-      /* Make sure this is an instruction that can be a label. */
-      assert( 7 == s->inst[s->inst_sz].op || 1 == s->inst[s->inst_sz].op );
-
+      if( CS_COMMENT == (CS_COMMENT & s->flags) ) {
+         /* Colons happen in comments sometimes. */
+         break;
+      }
       s->inst[s->inst_sz].parm = atoi( s->token_iter );
          
-      d_printf( "l: %d\n", s->inst[s->inst_sz].parm );
+      d_printf( "op: %d, l: %d\n",
+         s->inst[s->inst_sz].op, s->inst[s->inst_sz].parm );
+
+      /* Make sure this is an instruction that can be a label. */
+      assert(
+         SCRIPT_ACTION_START == s->inst[s->inst_sz].op ||
+         SCRIPT_ACTION_INTERACT == s->inst[s->inst_sz].op );
 
       if( 7 == s->inst[s->inst_sz].op ) {
          /* Only increment start count if this is a START. */
@@ -156,29 +183,11 @@ void parse( char c, struct COMPILE_STATE* s ) {
       d_printf( "t: %s\n", s->token_iter );
       if( 0 < s->inst[s->inst_sz].op ) {
          /* Set parm and advance instruction. */
-         if( SCRIPT_ACTION_FACE == s->inst[s->inst_sz].op ) {
-            parm_tmp = parm_dir( s->token_iter, s->token_iter_sz );
-            assert( 0 <= parm_tmp );
+         
+         parm_tmp = parm_special( s->token_iter, s->token_iter_sz );
 
-         } else if( SCRIPT_ACTION_PUSH == s->inst[s->inst_sz].op ) {
-            /* TODO: Handle possible direction or random. */
-
-         } else if( SCRIPT_ACTION_RETURN == s->inst[s->inst_sz].op ) {
-            compare_case( s->token_iter, s->token_iter_sz );
-
-            if(
-               0 == strncmp( "STACK_RC", s->token_iter, 8 )
-            ) {
-               parm_tmp = SCRIPT_ARG_STACK_RC;
-            } else if(
-               0 == strncmp( "STACK", s->token_iter, 5 )
-            ) {
-               parm_tmp = SCRIPT_ARG_STACK;
-            } else {
-               parm_tmp = atoi( s->token_iter );
-            }
-
-         } else {
+         /* All special parms are positive, so negative means failure. */
+         if( 0 > parm_tmp ) {
             parm_tmp = atoi( s->token_iter );
          }
          s->inst[s->inst_sz].parm = parm_tmp;
@@ -186,6 +195,7 @@ void parse( char c, struct COMPILE_STATE* s ) {
          s->inst_sz++;
       
       } else {
+         /* Read instruction. */
          compare_inst(
             s->token_iter, s->token_iter_sz, &(s->inst[s->inst_sz]) );
       }
@@ -253,8 +263,6 @@ int main( int argc, char** argv ) {
       printf( "%c%d", gc_sc_bytes[s.inst[i].op], s.inst[i].parm );
    }
    printf( "\n" );
-
-cleanup:
 
    fclose( in_file );
 

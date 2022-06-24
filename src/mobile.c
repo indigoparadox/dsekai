@@ -122,7 +122,8 @@ struct MOBILE* mobile_interact(
       (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & actee->flags)) ||
       0 >= (actee->mp_hp & MOBILE_HP_MASK) ||
       0 > actee->script_id ||
-      actee->script_id >= TILEMAP_SCRIPTS_MAX
+      actee->script_id >= TILEMAP_SCRIPTS_MAX ||
+      (MOBILE_FLAG_DISABLED == (MOBILE_FLAG_DISABLED & actee->flags))
    ) {
       /* Inactive mobile or invalid script. */
       return NULL;
@@ -133,7 +134,7 @@ struct MOBILE* mobile_interact(
       actor->coords.x != actor->coords_prev.x
    ) {
       /* Reject interactions while walking so we don't break script sync. */
-      return 0;
+      return NULL;
    }
 
    /* Push actee previous PC for return. */

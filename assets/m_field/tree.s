@@ -6,7 +6,8 @@ start 0:
 
 interact 0:
    speak       3 ; "Found a fruit!"
-   item_give   1235 ; Apple
+   give        1235 ; Apple
+   pop         0 ; Items pushed. TODO: GOTO if failed.
    die         0
-   return      STACK ; No RC as a buffer against dupe if there's a bug.
+   return      stack_i ; No RC as a buffer against dupe if there's a bug.
 

@@ -285,7 +285,7 @@ uint16_t script_handle_EQJMP(
    val1 = mobile_stack_pop( actor );
    val2 = mobile_stack_pop( actor );
 
-   if( val1 == val2 )
+   if( val1 == val2 ) {
       /* TRUE */
       mobile_stack_push( actor, pc + 1 );
       return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
@@ -308,7 +308,7 @@ uint16_t script_handle_GTJMP(
 
    mobile_stack_push( actor, pc + 1 );
 
-   if( val1 > val2 )
+   if( val1 > val2 ) {
       /* TRUE */
       mobile_stack_push( actor, pc + 1 );
       return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
@@ -323,13 +323,11 @@ uint16_t script_handle_ADD(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   int8_t val1 = 0,
-      val2 = 0;
+   int8_t stack_val = 0;
 
-   val2 = mobile_stack_pop( actor );
-   val1 = mobile_stack_pop( actor );
+   stack_val = mobile_stack_pop( actor );
 
-   mobile_stack_push( actor, val1 + val2 );
+   mobile_stack_push( actor, stack_val + arg );
 
    return pc + 1;
 }
@@ -339,13 +337,11 @@ uint16_t script_handle_SUB(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   int8_t val1 = 0,
-      val2 = 0;
+   int8_t stack_val = 0;
 
-   val1 = mobile_stack_pop( actor );
-   val2 = mobile_stack_pop( actor );
+   stack_val = mobile_stack_pop( actor );
 
-   mobile_stack_push( actor, val1 - val2 );
+   mobile_stack_push( actor, stack_val - arg );
 
    return pc + 1;
 }
@@ -376,7 +372,8 @@ uint16_t script_handle_GIVE(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   int8_t e_idx = 0;
+   int16_t e_idx = 0;
+   int8_t items_pushed = 1;
 
    /* TODO: Split out command to add item to this entity's inventory,
       *       then this "give" can be finite/fail.
@@ -385,13 +382,19 @@ uint16_t script_handle_GIVE(
       *       as the owner to item_create_from_template().
       */
    e_idx = item_stack_or_add( arg, 0, t, state );
-   if( 0 <= e_idx ) {
-      item_give_mobile( e_idx, ITEM_OWNER_PLAYER, t, state );
-   } else {
+   if( 0 > e_idx ) {
       error_printf( "unable to give: invalid item GID: %d", arg );
+      items_pushed = 0;
    }
 
-   /* TODO: Push number given onto the stack. */
+   e_idx = item_give_mobile( e_idx, ITEM_OWNER_PLAYER, t, state );
+   if( 0 > e_idx ) {
+      error_printf( "unable to give: error %d", e_idx );
+      items_pushed = 0;
+   }
+
+   /* Push number given onto the stack. */
+   mobile_stack_push( actor, items_pushed );
 
    return pc + 1;
 }
@@ -402,6 +405,7 @@ uint16_t script_handle_TAKE(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    /* TODO: Push onto the stack how many taken. */
+   mobile_stack_push( actor, 0 );
 
    return pc + 1;
 }
@@ -414,6 +418,23 @@ uint16_t script_handle_DIE(
    /* Trigger pre-death blinking effect. */
    actor->mp_hp = -10;
 
+   return pc + 1;
+}
+
+uint16_t script_handle_DISABLE(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+   if( 0 == arg ) {
+      debug_printf( 1, "enabling mobile %u:%u",
+         actor->map_gid, actor->spawner_gid );
+      actor->flags &= ~MOBILE_FLAG_DISABLED;
+   } else {
+      debug_printf( 1, "disabling mobile %u:%u",
+         actor->map_gid, actor->spawner_gid );
+      actor->flags |= MOBILE_FLAG_DISABLED;
+   }
    return pc + 1;
 }
 

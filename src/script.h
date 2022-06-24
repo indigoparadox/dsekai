@@ -17,27 +17,43 @@ struct MOBILE;
 struct SCRIPT;
 struct TILEMAP;
 
-/*! \brief Maximum number of global script flags available. */
-#define SCRIPT_GLOBALS_MAX 20
-/*! \brief Maximum depth of available local stack for each ::SCRIPT. */
-#define SCRIPT_STACK_DEPTH 10
+/**
+ * \addtogroup script_args Script Instruction Arguments
+ * \brief Immediate arguments for script instructions.
+ * \{
+ */
+
 /**
  * \brief Next instruction should pop its arg from stack, and then push
  *        it back when it's done.
  */
 #define SCRIPT_ARG_STACK_P 32763
+
 /**
  * \brief Next instruction should pop its arg from stack, and then call
  *        ::mobile_incr_icount to increment interaction count.
  */
 #define SCRIPT_ARG_STACK_I 32767
+
 /**
  * \brief Next instruction should pop its arg from stack.
  */
 #define SCRIPT_ARG_STACK 32765
 #define SCRIPT_ARG_RANDOM 32766
-#define SCRIPT_ARG_FOLLOW_PLAYER 32764
-#define SCRIPT_ARG_MAX 32762
+#define SCRIPT_ARG_FOLLOW 32764
+
+/**
+ * \brief The maximum script argument guaranteed to be taken literally.
+ *        Numbers above this may be interpreted as special instructions.
+ */
+#define SCRIPT_ARG_MAX 32750
+
+/*! \} */
+
+/*! \brief Maximum number of global script flags available. */
+#define SCRIPT_GLOBALS_MAX 20
+/*! \brief Maximum depth of available local stack for each ::SCRIPT. */
+#define SCRIPT_STACK_DEPTH 10
 /*! \brief Maximum length of a script in text form. */
 #define SCRIPT_STR_MAX 1024
 
@@ -83,6 +99,8 @@ typedef uint16_t (*SCRIPT_CB)(
  * \{
  */
 
+#define SCRIPT_CB_TABLE_23( f ) f( 23, DISABLE, 'd' )
+
 /**
  * \brief \b WARP: Warp to a tilemap identified by the string at the arg index
  *        in current TILEMAP::strpool.
@@ -91,7 +109,7 @@ typedef uint16_t (*SCRIPT_CB)(
  * - Index of a string containing the name of the ::TILEMAP to warp to in
  *   the currently loaded TILEMAP::strpool.
  */
-#define SCRIPT_CB_TABLE_22( f ) f( 22, WARP,    'w' )
+#define SCRIPT_CB_TABLE_22( f ) f( 22, WARP,    'w' ) SCRIPT_CB_TABLE_23( f )
 #define SCRIPT_CB_TABLE_21( f ) f( 21, ANIM,    'n' ) SCRIPT_CB_TABLE_22( f )
 #define SCRIPT_CB_TABLE_20( f ) f( 20, PUSH,    'v' ) SCRIPT_CB_TABLE_21( f )
 #define SCRIPT_CB_TABLE_19( f ) f( 19, POP,     '^' ) SCRIPT_CB_TABLE_20( f )
@@ -157,8 +175,8 @@ typedef uint16_t (*SCRIPT_CB)(
 #define SCRIPT_CB_TABLE_16( f ) f( 16, LTJMP,   '<' ) SCRIPT_CB_TABLE_17( f )
 
 /**
- * \brief \b ADD: Add the last value pushed to the stack to the value
- *        pushed before it, and push the result back onto the stack.
+ * \brief \b ADD: Add the argument to the last value pushed to the stack,
+ *        and push the result back onto the stack.
  *
  * \b Stack \b Values \b Popped
  * - Value to add.
@@ -166,23 +184,21 @@ typedef uint16_t (*SCRIPT_CB)(
  *
  * \b Stack \b Values \b Pushed
  * - Subtraction result.
- *
- * \todo TODO: Work out accepting immediate arguments.
  */
 #define SCRIPT_CB_TABLE_15( f ) f( 15, ADD,     '+' ) SCRIPT_CB_TABLE_16( f )
 
 /**
- * \brief \b SUB: Subtract the last value pushed to the stack from the value
- *        pushed before it, and push the result back onto the stack.
+ * \brief \b SUB: Subtract the argument from the last value pushed to the
+ *        stack, and push the result back onto the stack.
+ *
+ * \b Arguments
+ * - Value to subtract.
  *
  * \b Stack \b Values \b Popped
- * - Value to subtract.
  * - Value to subtract from.
  *
  * \b Stack \b Values \b Pushed
  * - Subtraction result.
- *
- * \todo TODO: Work out accepting immediate arguments.
  */
 #define SCRIPT_CB_TABLE_14( f ) f( 14, SUB,     '-' ) SCRIPT_CB_TABLE_15( f )
 

@@ -166,6 +166,11 @@
  */
 #define MOBILE_FLAG_PLAYER 0x0200
 
+/**
+ * \brief MOBILE::flags indicating this mobile is not responding to interation.
+ */
+#define MOBILE_FLAG_DISABLED 0x0400
+
 /*! \} */
 
 /**
