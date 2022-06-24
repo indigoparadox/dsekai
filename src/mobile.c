@@ -91,7 +91,8 @@ void mobile_stack_push( struct MOBILE* m, int8_t v ) {
    /* Push the value. */
    m->script_stack[0] = v;
 
-   debug_printf( 0, "mobile %u:%u pushed: %d", m->map_gid, m->spawner_gid, v );
+   debug_printf( 1, "mobile %u:%u \"%s\" pushed: %d",
+      m->map_gid, m->spawner_gid, m->name, v );
 }
 
 int8_t mobile_stack_pop( struct MOBILE* m ) {
@@ -107,8 +108,8 @@ int8_t mobile_stack_pop( struct MOBILE* m ) {
    /* Zero out the former deepest stack slot. */
    m->script_stack[SCRIPT_STACK_DEPTH - 1] = 0;
 
-   debug_printf( 0, "mobile %u:%u popped: %d",
-      m->map_gid, m->spawner_gid, retval );
+   debug_printf( 1, "mobile %u:%u \"%s\" popped: %d",
+      m->map_gid, m->spawner_gid, m->name, retval );
 
    return retval;
 }
@@ -204,8 +205,9 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
       arg = step->arg;
    }
 
-   debug_printf( 0, "%u ms: script_exec: script %d, step %d (%d)",
-      graphics_get_ms(), m->script_id, m->script_pc, step->action );
+   debug_printf( 1, "mobile %u:%u \"%s\" script_exec: script %d, step %d (%d)",
+      m->map_gid, m->spawner_gid, m->name,
+      m->script_id, m->script_pc, step->action );
 
    m->script_pc = gc_script_handlers[step->action](
       m->script_pc, script, t, m, NULL, &(m->coords), state, arg );

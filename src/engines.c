@@ -173,17 +173,13 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
          DSEKAI_FLAG_INPUT_BLOCKED !=
             (DSEKAI_FLAG_INPUT_BLOCKED & state->flags) &&
          /* Pause scripts if menu is open. */
-         0 > state->menu.menu_id
+         0 > state->menu.menu_id &&
+         /* Don't execute/animate inactive mobiles. */
+         MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
       ) {
          mobile_execute( &(state->mobiles[i]), state );
+         mobile_animate( &(state->mobiles[i]), state );
       }
-      if(
-         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
-      ) {
-         /* Skip animating inactive mobiles. */
-         continue;
-      }
-      mobile_animate( &(state->mobiles[i]), state );
    }
    mobile_animate( &(state->player), state );
 

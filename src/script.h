@@ -108,9 +108,6 @@ typedef uint16_t (*SCRIPT_CB)(
  *
  * This is useful immediately after an interaction label to ensure further
  * interactions will not interrupt this interaction until it is complete.
- *
- * \todo TODO: An errant stack value will creep in between enable and return
- *       sometimes. Figure this out.
  */
 #define SCRIPT_CB_TABLE_23( f ) f( 23, DISABLE, 'd' )
 
