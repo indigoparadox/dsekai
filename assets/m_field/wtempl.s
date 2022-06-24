@@ -5,8 +5,10 @@ start 0:
    goto     0
 
 interact 0:
+   disable  1
    push     14 ; x
    push     38 ; y
    warp     4 ; templ
-   return   STACK_RC
+   disable  0
+   return   stack
 

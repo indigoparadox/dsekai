@@ -5,6 +5,7 @@ start 0:
    goto        0
 
 interact 0:
+   disable     1
    speak       6 ; "Found an editor!"
    give        1236 ; Editor
    pop         0 ; Items pushed. TODO: GOTO if failed.

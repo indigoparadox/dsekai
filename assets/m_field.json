@@ -496,32 +496,32 @@
         {
          "name":"script_1",
          "type":"string",
-         "value":"t0s5g0i0p2x32765"
+         "value":"t0s5g0i0d1p2x32765"
         }, 
         {
          "name":"script_2",
          "type":"string",
-         "value":"t0f1s5g0i0p3h1235z0x32767"
+         "value":"t0f1s5g0i0d1p3h1235z0x32767"
         }, 
         {
          "name":"script_3",
          "type":"string",
-         "value":"t0f2s5g0i0v14v38w4x32765"
+         "value":"t0f2s5g0i0d1v14v38w4x32765"
         }, 
         {
          "name":"script_4",
          "type":"string",
-         "value":"t0f2s5g0i0v5v1w5x32765"
+         "value":"t0f2s5g0i0d1v5v1w5x32765"
         }, 
         {
          "name":"script_5",
          "type":"string",
-         "value":"t0f3s5g0i0p6h1236z0x32767"
+         "value":"t0f3s5g0i0d1p6h1236z0x32767"
         }, 
         {
          "name":"script_6",
          "type":"string",
-         "value":"t0s5g0i0p7h1237x32767i1p8x32765"
+         "value":"t0s5g0i0d1p7h1237d0x32767i1d1p8d0x32765"
         }, 
         {
          "name":"string_0",
