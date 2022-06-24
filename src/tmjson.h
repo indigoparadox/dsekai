@@ -38,7 +38,16 @@
  * \{
  */
 
-/*! \brief JSON path to script definition. */
+/**
+ * \brief JSON path to script definition.
+ *
+ * Scripts are stored in map properties as "script_n", where n represents the
+ * index of the script as referred to by MOBILE::script_id.
+ *
+ * Scripts are stored as sequences of a single character (shorthand for a
+ * statement) followed by a number (an argument). They must be parsed by
+ * ::script_parse_str.
+ */
 #define TILEMAP_JPATH_SCRIPT "/properties/[name=script_%d]/value"
 /*! \brief JSON path to string definition. */
 #define TILEMAP_JPATH_STRING "/properties/[name=string_%d]/value"

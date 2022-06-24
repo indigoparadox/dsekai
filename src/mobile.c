@@ -91,7 +91,7 @@ void mobile_stack_push( struct MOBILE* m, int8_t v ) {
    /* Push the value. */
    m->script_stack[0] = v;
 
-   debug_printf( 0, "mobile pushed: %d", v );
+   debug_printf( 0, "mobile %u:%u pushed: %d", m->map_gid, m->spawner_gid, v );
 }
 
 int8_t mobile_stack_pop( struct MOBILE* m ) {
@@ -107,7 +107,8 @@ int8_t mobile_stack_pop( struct MOBILE* m ) {
    /* Zero out the former deepest stack slot. */
    m->script_stack[SCRIPT_STACK_DEPTH - 1] = 0;
 
-   debug_printf( 0, "mobile popped: %d", retval );
+   debug_printf( 0, "mobile %u:%u popped: %d",
+      m->map_gid, m->spawner_gid, retval );
 
    return retval;
 }
@@ -154,6 +155,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    struct SCRIPT* script = NULL;
    struct SCRIPT_STEP* step = NULL;
    int16_t arg = 0;
+   uint8_t push_arg_after = 0;
    struct TILEMAP* t = NULL;
 
    /* Lock tilemap. */
@@ -187,13 +189,16 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    script = &(t->scripts[m->script_id]);
    step = &(script->steps[m->script_pc]);
 
-   if( SCRIPT_ARG_STACK == step->arg ) {
+   if( SCRIPT_ARG_STACK_I == step->arg ) {
       arg = mobile_stack_pop( m );
       mobile_incr_icount( m, 1 );
-   } else if( SCRIPT_ARG_STACK_RC == step->arg ) {
+   } else if( SCRIPT_ARG_STACK == step->arg ) {
       arg = mobile_stack_pop( m );
+   } else if( SCRIPT_ARG_STACK_P == step->arg ) {
+      arg = mobile_stack_pop( m );
+      push_arg_after = 1;
    } else if( SCRIPT_ARG_RANDOM == step->arg ) {
-      /* TODO: Step in random direction. */
+      arg = graphics_get_random( 0, SCRIPT_STACK_MAX );
    } else {
       arg = step->arg;
    }
@@ -203,6 +208,10 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
    m->script_pc = gc_script_handlers[step->action](
       m->script_pc, script, t, m, NULL, &(m->coords), state, arg );
+
+   if( push_arg_after ) {
+      mobile_stack_push( m, arg );
+   }
 
 cleanup:
    if( NULL != t ) {

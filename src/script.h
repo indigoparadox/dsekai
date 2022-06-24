@@ -22,19 +22,26 @@ struct TILEMAP;
 /*! \brief Maximum depth of available local stack for each ::SCRIPT. */
 #define SCRIPT_STACK_DEPTH 10
 /**
- * \brief Value of script arg to indicate real arg should be popped from stack.
+ * \brief Next instruction should pop its arg from stack, and then push
+ *        it back when it's done.
  */
-#define SCRIPT_ARG_STACK 32767
+#define SCRIPT_ARG_STACK_P 32763
 /**
- * \brief Same as ::SCRIPT_ARG_STACK, but don't increment the
- *        MOBILE::script_interact_count, so the next interaction calls the
- *        same i(n).
+ * \brief Next instruction should pop its arg from stack, and then call
+ *        ::mobile_incr_icount to increment interaction count.
  */
-#define SCRIPT_ARG_STACK_RC 32765
+#define SCRIPT_ARG_STACK_I 32767
+/**
+ * \brief Next instruction should pop its arg from stack.
+ */
+#define SCRIPT_ARG_STACK 32765
 #define SCRIPT_ARG_RANDOM 32766
 #define SCRIPT_ARG_FOLLOW_PLAYER 32764
+#define SCRIPT_ARG_MAX 32762
 /*! \brief Maximum length of a script in text form. */
 #define SCRIPT_STR_MAX 1024
+
+#define SCRIPT_STACK_MAX 127
 
 /* TODO: This is a valid stack value. */
 #define SCRIPT_ERROR_OVERFLOW -1
@@ -64,28 +71,296 @@ typedef uint16_t (*SCRIPT_CB)(
 #endif /* !NO_SCRIPT_STRUCT */
 
 /**
- * \addtogroup scripting_commands_sect Scripting Commands
- * \{
- * \page scripting_commands Scripting Commands
+ * \addtogroup scripting_instructions_sect Scripting Instructions
+ * \brief Overview of the mobile scripting language.
+ *
+ * All statements take a single numerical argument.
  * 
- * \section scripting_commands_i INTERACT (i)
+ * Args can range from 0 to ::SCRIPT_ARG_MAX. See \ref scripting_args for more
+ * information on special arguments.
  *
- * \section scripting_commands_h GIVE (i)
- * Give a "copy" of the item with the GID specified by arg and the owner
- * ::ITEM_OWNER_META to the actee.
- *
- * \}
- */
-
-/* TODO: Condense all walk instructions into one that pulls direction off the
- *       stack, to facilitate SCRIPT_ARG_FOLLOW_PLAYER.
+ * Items on the stack can range from 0 to ::SCRIPT_STACK_MAX.
+ * \{
  */
 
 /**
- * \brief Define the script action callback table.
- * \param f Macro to execute on the function callback definition.
+ * \brief \b WARP: Warp to a tilemap identified by the string at the arg index
+ *        in current TILEMAP::strpool.
+ *
+ * \b Arguments
+ * - Index of a string containing the name of the ::TILEMAP to warp to in
+ *   the currently loaded TILEMAP::strpool.
  */
-#define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) f( 1, INTERACT, 'i' ) f( 2, WALK_NORTH, 'u' ) f( 3, WALK_SOUTH, 'd' ) f( 4, WALK_EAST, 'r' ) f( 5, WALK_WEST, 'l' ) f( 6, SLEEP, 's' ) f( 7, START, 't' ) f( 8, GOTO, 'g' ) f( 9, SPEAK, 'p' ) f( 10, RETURN, 'x' ) f( 11, FACE, 'f' ) f( 12, GLOBAL_SET, 'b' ) f( 13, GLOBAL_GET, 'a' ) f( 14, WARP, 'w' ) f( 15, ANIMATE, 'n' ) f( 16, PUSH, 'v' ) f( 17, POP, '^' ) f( 18, EQUAL_JUMP, '=' ) f( 19, GREATER_JUMP, '>' ) f( 20, LESSER_JUMP, '<' ) f( 21, ADD, '+' ) f( 22, SUBTRACT, '-' ) f( 23, ITEM_GIVE, 'h' ) f( 24, ITEM_TAKE, 'k' ) f( 25, DIE, 'z' )
+#define SCRIPT_CB_TABLE_22( f ) f( 22, WARP,    'w' )
+#define SCRIPT_CB_TABLE_21( f ) f( 21, ANIM,    'n' ) SCRIPT_CB_TABLE_22( f )
+#define SCRIPT_CB_TABLE_20( f ) f( 20, PUSH,    'v' ) SCRIPT_CB_TABLE_21( f )
+#define SCRIPT_CB_TABLE_19( f ) f( 19, POP,     '^' ) SCRIPT_CB_TABLE_20( f )
+
+/**
+ * \brief \b EQJMP: Move script execution to a label defined by \b START if
+ *        the last value pushed to the stack is \b EQUAL \b TO the value
+ *        pushed to the stack before it.
+ *
+ * \b Arguments
+ * - The index of the label as defined by a \b START instruction in the same
+ *   script to jump to if the condition is \b TRUE.
+ *
+ * \b Stack \b Values \b Pushed
+ * - MOBILE::script_pc of next instruction to execute otherwise.
+ *
+ * \attention If (and only if) the condition is true and the jump is performed,
+ *            this instruction will automatically push the index of the next
+ *            instruction that would have otherwise been executed to the
+ *            stack, so that it may be returned to with \b RETURN and 
+ *            e.g. ::SCRIPT_ARG_STACK.
+ */
+#define SCRIPT_CB_TABLE_18( f ) f( 18, EQJMP,   '=' ) SCRIPT_CB_TABLE_19( f )
+
+/**
+ * \brief \b GTJMP: Move script execution to a label defined by \b START if
+ *        the last value pushed to the stack is \b GREATER \b THAN the value
+ *        pushed to the stack before it.
+ *
+ * \b Arguments
+ * - The index of the label as defined by a \b START instruction in the same
+ *   script to jump to if the condition is \b TRUE.
+ *
+ * \b Stack \b Values \b Pushed
+ * - MOBILE::script_pc of next instruction to execute otherwise.
+ *
+ * \attention If (and only if) the condition is true and the jump is performed,
+ *            this instruction will automatically push the index of the next
+ *            instruction that would have otherwise been executed to the
+ *            stack, so that it may be returned to with \b RETURN and 
+ *            e.g. ::SCRIPT_ARG_STACK.
+ */
+#define SCRIPT_CB_TABLE_17( f ) f( 17, GTJMP,   '>' ) SCRIPT_CB_TABLE_18( f )
+
+/**
+ * \brief \b LTJMP: Move script execution to a label defined by \b START if
+ *        the last value pushed to the stack is \b LESS \b THAN the value
+ *        pushed to the stack before it.
+ *
+ * \b Arguments
+ * - The index of the label as defined by a \b START instruction in the same
+ *   script to jump to if the condition is \b TRUE.
+ *
+ * \b Stack \b Values \b Pushed
+ * - MOBILE::script_pc of next instruction to execute otherwise.
+ *
+ * \attention If (and only if) the condition is true and the jump is performed,
+ *            this instruction will automatically push the index of the next
+ *            instruction that would have otherwise been executed to the
+ *            stack, so that it may be returned to with \b RETURN and 
+ *            e.g. ::SCRIPT_ARG_STACK.
+ */
+#define SCRIPT_CB_TABLE_16( f ) f( 16, LTJMP,   '<' ) SCRIPT_CB_TABLE_17( f )
+
+/**
+ * \brief \b ADD: Add the last value pushed to the stack to the value
+ *        pushed before it, and push the result back onto the stack.
+ *
+ * \b Stack \b Values \b Popped
+ * - Value to add.
+ * - Value to add to.
+ *
+ * \b Stack \b Values \b Pushed
+ * - Subtraction result.
+ *
+ * \todo TODO: Work out accepting immediate arguments.
+ */
+#define SCRIPT_CB_TABLE_15( f ) f( 15, ADD,     '+' ) SCRIPT_CB_TABLE_16( f )
+
+/**
+ * \brief \b SUB: Subtract the last value pushed to the stack from the value
+ *        pushed before it, and push the result back onto the stack.
+ *
+ * \b Stack \b Values \b Popped
+ * - Value to subtract.
+ * - Value to subtract from.
+ *
+ * \b Stack \b Values \b Pushed
+ * - Subtraction result.
+ *
+ * \todo TODO: Work out accepting immediate arguments.
+ */
+#define SCRIPT_CB_TABLE_14( f ) f( 14, SUB,     '-' ) SCRIPT_CB_TABLE_15( f )
+
+/*
+ * \brief \b GIVE: Give an ::ITEM to DSEKAI_STATE::player based on ITEM::gid
+ *        from TILEMAP::item_defs.
+ *
+ * \b Arguments
+ * - ITEM::gid to give from TILEMAP::item_defs.
+ *
+ * \todo TODO: Push number given to stack if successful.
+ */
+#define SCRIPT_CB_TABLE_13( f ) f( 13, GIVE,    'h' ) SCRIPT_CB_TABLE_14( f )
+
+/**
+ * \brief \b TAKE: Give an ::ITEM to DSEKAI_STATE::player based on ITEM::gid
+ *        from TILEMAP::item_defs.
+ *
+ * \b Arguments
+ * - ITEM::gid to take from player inventory.
+ *
+ * \attention: If the ::MOBILE executing this script is ::MOBILE_TYPE_SPECIAL,
+ *             the item will remain in this mobile's inventory forever,
+ *             wasting the limited resources of the engine. Try to only take
+ *             if the item will be given back or if the mobile is disposable.
+ *
+ * \todo TODO: Push number taken to stack if successful.
+ */
+#define SCRIPT_CB_TABLE_12( f ) f( 12, TAKE,    'k' ) SCRIPT_CB_TABLE_13( f ) 
+
+/**
+ * \brief \b DIE: Trigger death animation for ::MOBILE running this script
+ *        and then vanish, becoming inactive.
+ *
+ * See \ref dsekai_mobiles_mp_hp_sect for more information on mobile death.
+ */
+#define SCRIPT_CB_TABLE_11( f ) f( 11, DIE,     'z' ) SCRIPT_CB_TABLE_12( f )
+
+/**
+ * \brief \b GGET: Push a value from the global table at onto stack.
+ *
+ * \b Arguments
+ * - Index of the value to push in ::g_script_globals.
+ *
+ * \b Stack \b Values \b Pushed
+ * - Value of ::g_script_globals at the index specified.
+ */
+#define SCRIPT_CB_TABLE_10( f ) f( 10, GGET,    'a' ) SCRIPT_CB_TABLE_11( f )
+
+/**
+ * \brief \b GSET: Pop a value from the stack into the global table.
+ *
+ * \b Arguments
+ * - Index of the value to pop to in ::g_script_globals.
+ *
+ * \b Stack \b Values \b Popped
+ * - Value to insert into ::g_script_globals at the index specified.
+ */
+#define SCRIPT_CB_TABLE_9( f ) f( 9,   GSET,    'b' ) SCRIPT_CB_TABLE_10( f )
+
+/**
+ * \brief \b FACE: Set the actor face one of the
+ *        \ref dsekai_mobiles_directions.
+ *
+ * \b Arguments
+ * - One of the \ref dsekai_mobiles_directions.
+ *
+ * \note If the argument supplied is greater than 3, it will be divided by
+ *       4 and the remainder will be interpreted as the direction to face.
+ */
+#define SCRIPT_CB_TABLE_8( f ) f( 8,   FACE,    'f' ) SCRIPT_CB_TABLE_9( f )
+
+/**
+ * \brief \b RETURN: Return from an interaction subroutine to the main script.
+ *
+ * \b Arguments
+ * - The instruction index to return to.
+ * 
+ * It is common to use this with ::SCRIPT_ARG_STACK_I, which uses the
+ * instruction number automatically pushed to the stack on interaction, and
+ * then increments the interaction count. This is not necessary, however, and
+ * more creative uses may be devised.
+ *
+ * \note This instruction returns to an individual instruction index in the
+ *       sequence of the script by setting MOBILE::script_pc directly,
+ *       \b NOT by a label defined by \b START.
+ */
+#define SCRIPT_CB_TABLE_7( f ) f( 7,   RETURN,  'x' ) SCRIPT_CB_TABLE_8( f )
+
+/**
+ * \brief \b SPEAK: Display a dialog window with the actor's MOBILE::sprite_id
+ *        and a line of text from TILEMAP::strpool.
+ *
+ * \b Arguments
+ * - String index in TILEMAP::strpool to display.
+ */
+#define SCRIPT_CB_TABLE_6( f ) f( 6,   SPEAK,   'p' ) SCRIPT_CB_TABLE_7( f )
+
+/**
+ * \brief \b GOTO: Move script execution to a label defined by \b START.
+ *
+ * \b Arguments
+ * - The index of the label as defined by a \b START instruction in the same
+ *   script to jump to.
+ *
+ * \b Stack \b Values \b Pushed
+ * - MOBILE::script_pc of next instruction to execute otherwise.
+ *
+ * \attention This instruction will automatically push the index of the next
+ *            instruction that would have otherwise been executed to the
+ *            stack, so that it may be returned to with \b RETURN and 
+ *            e.g. ::SCRIPT_ARG_STACK.
+ */
+#define SCRIPT_CB_TABLE_5( f ) f( 5,   GOTO,    'g' ) SCRIPT_CB_TABLE_6( f )
+
+/**
+ * \brief \b START: Define a label index that can be jumped to.
+ *
+ * \b Arguments
+ * - Index number for this label.
+ *
+ * Labelled indexes defined with \b START may be jumped to later by \b GOTO
+ * or \b JMP instructions.
+ */
+#define SCRIPT_CB_TABLE_4( f ) f( 4,   START,   't' ) SCRIPT_CB_TABLE_5( f )
+
+/**
+ * \brief \b SLEEP: Don't do anything for \a arg number of frames.
+ *
+ * \b Arguments
+ * - Number of frames to sleep. This may vary in terms of precise timing by
+ *   platform.
+ */
+#define SCRIPT_CB_TABLE_3( f ) f( 3,   SLEEP,   's' ) SCRIPT_CB_TABLE_4( f )
+
+/**
+ * \brief \b WALK: The actor walks in the direction specified on the stack.
+ *
+ * \b Arguments
+ * - Number of steps to walk.
+ *
+ * \b Stack Values Popped
+ * - One of the \ref dsekai_mobiles_directions.
+ *
+ * \note If the direction popped is greater than 3, it will be divided by
+ *       4 and the remainder will be interpreted as the direction to walk.
+ */
+#define SCRIPT_CB_TABLE_2( f ) f( 2,   WALK,    'u' ) SCRIPT_CB_TABLE_3( f )
+
+/**
+ * \brief \b INTERACT: Define an interaction callback label.
+ *
+ * \b Arguments
+ * - Index of the interaction callback label to define.
+ *
+ * This statement does nothing by itself, but it defines a point in the code
+ * that will be jumped to when a player interacts with the ::MOBILE running
+ * this ::SCRIPT.
+ *
+ * The index of the interaction callback that will be called is determined
+ * by the ::MOBILE_ICOUNT_MASK portion of MOBILE::flags, and may be from
+ * 0 through 9. This allows a mobile to "say" one thing on first interaction
+ * and then different things on subsequent interactions.
+ *
+ * \attention On interaction, the script execution engine will automatically
+ *            push the index of the next instruction that would have otherwise
+ *            been executed to the stack, so that it may be returned to with
+ *            \b RETURN and ::SCRIPT_ARG_STACK or ::SCRIPT_ARG_STACK_I.
+ */
+#define SCRIPT_CB_TABLE_1( f ) f( 1,   INTERACT,'i' ) SCRIPT_CB_TABLE_2( f )
+
+/**
+ * \brief \b NOOP: Not a valid instruction. Beginning of the script callback
+ *        table, used to implement script parsing.
+ */
+#define SCRIPT_CB_TABLE( f ) f( 0, NOOP, '\0' ) SCRIPT_CB_TABLE_1( f )
+
+/*! \} */
 
 #ifndef NO_SCRIPT_PROTOTYPES
 

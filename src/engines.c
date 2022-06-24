@@ -292,6 +292,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       }
    }
 
+   /* TODO: Pause weather animations before drawing dialogs. */
+
    window_draw_all();
    
    /* Draw foreground animations after anything else. */

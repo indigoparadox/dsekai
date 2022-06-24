@@ -49,10 +49,13 @@ uint16_t script_handle_INTERACT(
    return pc + 1;
 }
 
-static uint16_t script_handle_WALK_generic(
-   uint16_t pc, struct MOBILE* actor, struct TILEMAP* t, uint8_t dir
+uint16_t script_handle_WALK(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
 ) {
-   /* TODO: Handle blockage. */
+   int8_t dir_raw = 0,
+      dir = 0;
 
    if(
       /* Actor is currently walking. */
@@ -74,57 +77,38 @@ static uint16_t script_handle_WALK_generic(
    ) {
       /* Actor is already walking, don't start or advance PC. */   
 
-   } else if(
-      tilemap_collide( actor, dir, t )
-      /* TODO: Need access to mobiles list. */
-      /* ||
-      mobile_collide(
-         &(mobiles[state->player_idx]),
-         MOBILE_DIR_EAST, mobiles, state->mobiles_count ) */
-   ) {
-      /* Actor would collide. */
-
    } else {
-      debug_printf( 1, "scripted mobile starting walking" );
-      /* actor->dir = dir; */
+      /* Start trying to walk. */
+      dir_raw = mobile_stack_pop( actor );
+      dir = dir_raw % 4;
+
+      debug_printf( 1, "popped %d, became %d", dir_raw, dir );
+
+      if(
+         tilemap_collide( actor, dir, t )
+      ) {
+         /* Actor would collide. */
+         mobile_stack_push( actor, dir_raw );
+         return pc + 1;
+      }
+
+      /* TODO: Handle mobile blockage. Need access to mobiles list. */
+      /* 
+      if(
+         mobile_collide(
+            &(mobiles[state->player_idx]),
+            MOBILE_DIR_EAST, mobiles, state->mobiles_count )
+      ) {
+         mobile_stack_push( actor, dir_raw );
+         return pc;
+      */
+
+      debug_printf( 1, "scripted mobile %u:%u starting walking in dir %d",
+         actor->map_gid, actor->spawner_gid, dir );
       mobile_walk_start( actor, dir );
    }
 
    return pc;
-}
-
-uint16_t script_handle_WALK_NORTH(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
-   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
-) {
-   return script_handle_WALK_generic( pc, actor, t, MOBILE_DIR_NORTH );
-}
-
-uint16_t script_handle_WALK_SOUTH(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
-   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
-) {
-   return script_handle_WALK_generic( pc, actor, t, MOBILE_DIR_SOUTH );
-}
-
-uint16_t script_handle_WALK_EAST(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
-   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
-) {
-   debug_printf( 0, "script: walk east" );
-   return script_handle_WALK_generic( pc, actor, t, MOBILE_DIR_EAST );
-}
-
-uint16_t script_handle_WALK_WEST(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
-   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
-) {
-   debug_printf( 0, "script: walk west" );
-   return script_handle_WALK_generic( pc, actor, t, MOBILE_DIR_WEST );
 }
 
 uint16_t script_handle_SLEEP(
@@ -150,7 +134,7 @@ uint16_t script_handle_GOTO(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   mobile_stack_push( actor, pc );
+   mobile_stack_push( actor, pc + 1 );
    return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
 }
 
@@ -167,7 +151,7 @@ uint16_t script_handle_RETURN(
    return pc;
 }
 
-uint16_t script_handle_GLOBAL_GET(
+uint16_t script_handle_GGET(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
@@ -178,7 +162,7 @@ uint16_t script_handle_GLOBAL_GET(
    return pc + 1;
 }
 
-uint16_t script_handle_GLOBAL_SET(
+uint16_t script_handle_GSET(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
@@ -216,7 +200,7 @@ uint16_t script_handle_FACE(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
-   mobile_set_dir( actor, arg );
+   mobile_set_dir( actor, (arg % 4) );
    return pc + 1;
 }
 
@@ -245,7 +229,7 @@ uint16_t script_handle_WARP(
    return pc;
 }
 
-uint16_t script_handle_ANIMATE(
+uint16_t script_handle_ANIM(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
@@ -290,7 +274,7 @@ uint16_t script_handle_POP(
    return pc + 1;
 }
 
-uint16_t script_handle_EQUAL_JUMP(
+uint16_t script_handle_EQJMP(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
@@ -298,15 +282,20 @@ uint16_t script_handle_EQUAL_JUMP(
    int8_t val1 = 0,
       val2 = 0;
 
-   val2 = mobile_stack_pop( actor );
    val1 = mobile_stack_pop( actor );
+   val2 = mobile_stack_pop( actor );
 
-   return val1 == val2 ? 
-      script_goto_label( pc, script, SCRIPT_ACTION_START, arg ) : /* TRUE */
-      pc + 1;                                                     /* FALSE */
+   if( val1 == val2 )
+      /* TRUE */
+      mobile_stack_push( actor, pc + 1 );
+      return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
+   } else {
+      /* FALSE */
+      return pc + 1;
+   }
 }
 
-uint16_t script_handle_GREATER_JUMP(
+uint16_t script_handle_GTJMP(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
@@ -317,9 +306,16 @@ uint16_t script_handle_GREATER_JUMP(
    val2 = mobile_stack_pop( actor );
    val1 = mobile_stack_pop( actor );
 
-   return val1 > val2 ? 
-      script_goto_label( pc, script, SCRIPT_ACTION_START, arg ) : /* TRUE */
-      pc + 1;                                                     /* FALSE */
+   mobile_stack_push( actor, pc + 1 );
+
+   if( val1 > val2 )
+      /* TRUE */
+      mobile_stack_push( actor, pc + 1 );
+      return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
+   } else {
+      /* FALSE */
+      return pc + 1;
+   }
 }
 
 uint16_t script_handle_ADD(
@@ -338,7 +334,7 @@ uint16_t script_handle_ADD(
    return pc + 1;
 }
 
-uint16_t script_handle_SUBTRACT(
+uint16_t script_handle_SUB(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
@@ -346,15 +342,15 @@ uint16_t script_handle_SUBTRACT(
    int8_t val1 = 0,
       val2 = 0;
 
-   val2 = mobile_stack_pop( actor );
    val1 = mobile_stack_pop( actor );
+   val2 = mobile_stack_pop( actor );
 
    mobile_stack_push( actor, val1 - val2 );
 
    return pc + 1;
 }
 
-uint16_t script_handle_LESSER_JUMP(
+uint16_t script_handle_LTJMP(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
@@ -362,15 +358,20 @@ uint16_t script_handle_LESSER_JUMP(
    int8_t val1 = 0,
       val2 = 0;
 
-   val2 = mobile_stack_pop( actor );
    val1 = mobile_stack_pop( actor );
+   val2 = mobile_stack_pop( actor );
 
-   return val1 < val2 ? 
-      script_goto_label( pc, script, SCRIPT_ACTION_START, arg ) : /* TRUE */
-      pc + 1;                                                     /* FALSE */
+   if( val1 < val2 ) {
+      /* TRUE */
+      mobile_stack_push( actor, pc + 1 );
+      return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
+   } else {
+      /* FALSE */
+      return pc + 1;
+   }
 }
 
-uint16_t script_handle_ITEM_GIVE(
+uint16_t script_handle_GIVE(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
@@ -390,10 +391,12 @@ uint16_t script_handle_ITEM_GIVE(
       error_printf( "unable to give: invalid item GID: %d", arg );
    }
 
+   /* TODO: Push number given onto the stack. */
+
    return pc + 1;
 }
 
-uint16_t script_handle_ITEM_TAKE(
+uint16_t script_handle_TAKE(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg

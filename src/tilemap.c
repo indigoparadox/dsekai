@@ -156,6 +156,8 @@ uint8_t tilemap_collide(
    int16_t x = 0, y = 0;
    uint8_t collide_out = 0;
 
+   assert( dir < 4 );
+
    x = m->coords.x + gc_mobile_x_offsets[dir];
    y = m->coords.y + gc_mobile_y_offsets[dir];
 

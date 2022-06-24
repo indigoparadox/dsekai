@@ -156,13 +156,14 @@ void parse( char c, struct COMPILE_STATE* s ) {
       d_printf( "t: %s\n", s->token_iter );
       if( 0 < s->inst[s->inst_sz].op ) {
          /* Set parm and advance instruction. */
-         if( 11 == s->inst[s->inst_sz].op ) {
-            /* FACE */
+         if( SCRIPT_ACTION_FACE == s->inst[s->inst_sz].op ) {
             parm_tmp = parm_dir( s->token_iter, s->token_iter_sz );
             assert( 0 <= parm_tmp );
 
-         } else if( 10 == s->inst[s->inst_sz].op ) {
-            /* RETURN */
+         } else if( SCRIPT_ACTION_PUSH == s->inst[s->inst_sz].op ) {
+            /* TODO: Handle possible direction or random. */
+
+         } else if( SCRIPT_ACTION_RETURN == s->inst[s->inst_sz].op ) {
             compare_case( s->token_iter, s->token_iter_sz );
 
             if(

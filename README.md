@@ -159,38 +159,7 @@ TBA
 
 ## Scripting
 
-Scripts are stored in the [map](#mapping) files, under custom properties for the whole map labelled as "script_n", where n represents the index of the script as referred to by a mobile's script property.
-
-Scripts are stored as sequences of a single character (shorthand for a statement) followed by a number (an argument).
-
-Below is a brief overview of the mobile scripting language. All statements take
-a single numerical (may be multiple digits) argument.
-
-Args can range from 0-32766. If a command is given with an arg of 32767, it will pop the topmost value from the stack and use that.
-
-| Statement  | Char | Argument  | Explanation
-|------------|------|-----------|-------------
-| INTERACT   | i    |           | Jump to this step on player interaction.
-| WALK_NORTH | u    | Steps     | Walk Steps north (up).
-| WALK_SOUTH | d    | Steps     | Walk Steps south (down).
-| WALK_EAST  | r    | Steps     | Walk Steps east (right).
-| WALK_WEST  | l    | Steps     | Walk Steps west (left).
-| SLEEP      | s    | Seconds   | Don't do anything for Seconds.
-| START      | t    | Label_Num | Define a label index to jump to.
-| GOTO       | g    | Label_Num | Jump to a defined label index.
-| SPEAK      | p    | Text_Id   | Display Text_Id from the tilemap string table.
-| RETURN     | x    | PC        | Set the PC to arg PC.
-| FACE       | f    | Direction | Face in direction indicated by index.
-| GLOBAL_GET | a    | Index     | Push global table at Index onto stack.
-| GLOBAL_SET | b    | Index     | Pop stack topmost into global table at Index.
-| WARP       | w    | Text_Id   | Warp to a map identified by string at Text_Id.
-
-| Direction | Index |
-|-----------|-------|
-| SOUTH     | 0     |
-| NORTH     | 1     |
-| EAST      | 2     |
-| WEST      | 3     |
+Information on scripting including detailed instruction reference has been [moved into the documentation](https://indigoparadox.github.io/dsekai/group__scripting__instructions__sect.html).
 
 # Tools
 
