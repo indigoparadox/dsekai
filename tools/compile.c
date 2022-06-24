@@ -100,14 +100,10 @@ int16_t parm_special( char* token, size_t token_sz ) {
       return 2;
    } else if( 0 == strncmp( "WEST",    token, 4 ) ) {
       return 3;
-   } else if( 0 == strncmp( "STACK_E_I", token, 9 ) ) {
-      return SCRIPT_ARG_STACK_E_I;
    } else if( 0 == strncmp( "STACK_I", token, 7 ) ) {
       return SCRIPT_ARG_STACK_I;
    } else if( 0 == strncmp( "STACK_P", token, 7 ) ) {
       return SCRIPT_ARG_STACK_P;
-   } else if( 0 == strncmp( "STACK_E", token, 7 ) ) {
-      return SCRIPT_ARG_STACK_E;
    } else if( 0 == strncmp( "STACK",   token, 5 ) ) {
       return SCRIPT_ARG_STACK;
    } else if( 0 == strncmp( "RANDOM",  token, 6 ) ) {

@@ -99,6 +99,19 @@ typedef uint16_t (*SCRIPT_CB)(
  * \{
  */
 
+/**
+ * \brief \b DISABLE: Disable interaction with the ::MOBILE running this
+ *        script, while still executing script instructions.
+ *
+ * \b Arguments
+ * - 0 To enable (disable disabled) or 1 to disable interaction.
+ *
+ * This is useful immediately after an interaction label to ensure further
+ * interactions will not interrupt this interaction until it is complete.
+ *
+ * \todo TODO: An errant stack value will creep in between enable and return
+ *       sometimes. Figure this out.
+ */
 #define SCRIPT_CB_TABLE_23( f ) f( 23, DISABLE, 'd' )
 
 /**
@@ -178,12 +191,14 @@ typedef uint16_t (*SCRIPT_CB)(
  * \brief \b ADD: Add the argument to the last value pushed to the stack,
  *        and push the result back onto the stack.
  *
- * \b Stack \b Values \b Popped
+ * \b Arguments
  * - Value to add.
+ *
+ * \b Stack \b Values \b Popped
  * - Value to add to.
  *
  * \b Stack \b Values \b Pushed
- * - Subtraction result.
+ * - Addition result.
  */
 #define SCRIPT_CB_TABLE_15( f ) f( 15, ADD,     '+' ) SCRIPT_CB_TABLE_16( f )
 
@@ -202,14 +217,12 @@ typedef uint16_t (*SCRIPT_CB)(
  */
 #define SCRIPT_CB_TABLE_14( f ) f( 14, SUB,     '-' ) SCRIPT_CB_TABLE_15( f )
 
-/*
+/**
  * \brief \b GIVE: Give an ::ITEM to DSEKAI_STATE::player based on ITEM::gid
  *        from TILEMAP::item_defs.
  *
  * \b Arguments
  * - ITEM::gid to give from TILEMAP::item_defs.
- *
- * \todo TODO: Push number given to stack if successful.
  */
 #define SCRIPT_CB_TABLE_13( f ) f( 13, GIVE,    'h' ) SCRIPT_CB_TABLE_14( f )
 
@@ -224,8 +237,6 @@ typedef uint16_t (*SCRIPT_CB)(
  *             the item will remain in this mobile's inventory forever,
  *             wasting the limited resources of the engine. Try to only take
  *             if the item will be given back or if the mobile is disposable.
- *
- * \todo TODO: Push number taken to stack if successful.
  */
 #define SCRIPT_CB_TABLE_12( f ) f( 12, TAKE,    'k' ) SCRIPT_CB_TABLE_13( f ) 
 
