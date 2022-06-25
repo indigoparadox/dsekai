@@ -91,8 +91,10 @@ void mobile_stack_push( struct MOBILE* m, int8_t v ) {
    /* Push the value. */
    m->script_stack[0] = v;
 
+#ifdef SCRIPT_TRACE
    debug_printf( 1, "mobile %u:%u \"%s\" pushed: %d",
       m->map_gid, m->spawner_gid, m->name, v );
+#endif /* SCRIPT_TRACE */
 }
 
 int8_t mobile_stack_pop( struct MOBILE* m ) {
@@ -108,8 +110,10 @@ int8_t mobile_stack_pop( struct MOBILE* m ) {
    /* Zero out the former deepest stack slot. */
    m->script_stack[SCRIPT_STACK_DEPTH - 1] = 0;
 
+#ifdef SCRIPT_TRACE
    debug_printf( 1, "mobile %u:%u \"%s\" popped: %d",
       m->map_gid, m->spawner_gid, m->name, retval );
+#endif /* SCRIPT_TRACE */
 
    return retval;
 }
@@ -183,9 +187,11 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    /* Check for sleeping. */
    if( 0 < m->script_wait_frames ) {
       m->script_wait_frames--;
-      debug_printf( 0,
-         "mobile \"%s\" sleeping: waiting for %d more frames", m->name,
-         m->script_wait_frames );
+#ifdef SCRIPT_TRACE
+      debug_printf( 1,
+         "mobile %u:%u \"%s\" sleeping: waiting for %d more frames",
+         m->map_gid, m->spawner_gid, m->name, m->script_wait_frames );
+#endif /* SCRIPT_TRACE */
       /* Mobile still sleeping. */
       goto cleanup;
    }
@@ -203,13 +209,24 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
       push_arg_after = 1;
    } else if( SCRIPT_ARG_RANDOM == step->arg ) {
       arg = graphics_get_random( 0, SCRIPT_STACK_MAX );
+   } else if( SCRIPT_ARG_FOLLOW == step->arg ) {
+      arg = mobile_pathfind(
+         m, state->player.coords.x, state->player.coords.y, t, state );
+      if( MOBILE_ERROR_BLOCKED == arg ) {
+#ifdef SCRIPT_TRACE
+         debug_printf( 1, "mobile %u:%u \"%s\" pathfinding blocked",
+            m->map_gid, m->spawner_gid, m->name );
+#endif /* SCRIPT_TRACE */
+      }
    } else {
       arg = step->arg;
    }
 
+#ifdef SCRIPT_TRACE
    debug_printf( 1, "mobile %u:%u \"%s\" script_exec: script %d, step %d (%d)",
       m->map_gid, m->spawner_gid, m->name,
       m->script_id, m->script_pc, step->action );
+#endif /* SCRIPT_TRACE */
 
    m->script_pc = gc_script_handlers[step->action](
       m->script_pc, script, t, m, NULL, &(m->coords), state, arg );
@@ -415,5 +432,13 @@ void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
       mobile_iter->sprite_id =
          graphics_cache_load_bitmap( t->spawns[i].sprite );
    }
+}
+
+int8_t mobile_pathfind(
+   struct MOBILE* m, uint8_t x_tgt, uint8_t y_tgt, struct TILEMAP* t,
+   struct DSEKAI_STATE* state
+) {
+   /* TODO: Implement pathfinding. */
+   return MOBILE_ERROR_BLOCKED;
 }
 

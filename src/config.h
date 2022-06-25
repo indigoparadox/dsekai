@@ -15,6 +15,22 @@
  * \{
  */
 
+/**
+ * \page dsekai_engines_config_defines Compiler Definitions
+ *
+ * These definitions can be enabled with -D flags to the compiler in order
+ * to change dsekai's behavior:
+ * 
+ * | Define | Description
+ * |--------|------------
+ * | SCRIPT_TRACE | Enables detailed script engine execution trace output.
+ * | MEMORY_FAKE_TRACE_LOCKS | Enables detailed memory lock trace output.
+ * | WINDOW_TRACE | Enables detailed GUI-related trace output.
+ *
+ * \note \b TRACE definitions also required DEBUG_THRESHOLD to be set to 1 or
+ *       lower.
+ */
+
 /*! \file config.h
  *  \brief Configuration settings defined at compile time.
  */

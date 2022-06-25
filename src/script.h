@@ -20,26 +20,44 @@ struct TILEMAP;
 /**
  * \addtogroup script_args Script Instruction Arguments
  * \brief Immediate arguments for script instructions.
+ *
+ * These can be provided as arguments to instructions instead of literal
+ * values and will then pass the true values indicated in their definitions
+ * to the instruction, instead.
  * \{
  */
 
 /**
- * \brief Next instruction should pop its arg from stack, and then push
- *        it back when it's done.
+ * \brief \b STACK_P: Argument indicating the instruction should pop its arg
+ *        from MOBILE::script_stack, and then push it back when it's done.
  */
 #define SCRIPT_ARG_STACK_P 32763
 
 /**
- * \brief Next instruction should pop its arg from stack, and then call
- *        ::mobile_incr_icount to increment interaction count.
+ * \brief \b STACK_I: Argument indicating the instruction should pop its arg
+ *        from MOBILE::script_stack, and then call mobile_incr_icount() to
+ *        increment interaction count in MOBILE::flags on the actor.
  */
 #define SCRIPT_ARG_STACK_I 32767
 
 /**
- * \brief Next instruction should pop its arg from stack.
+ * \brief \b STACK: Argument indicating the instruction should pop its arg
+ *        from MOBILE::script_stack.
  */
 #define SCRIPT_ARG_STACK 32765
+
+/**
+ * \brief \b RANDOM: Argument indicating the instruction should use
+ *        graphics_get_random() as its argument.
+ */
 #define SCRIPT_ARG_RANDOM 32766
+
+/**
+ * \brief \b FOLLOW: Argument indicating the \b WALK (::SCRIPT_CB_TABLE_2)
+ *        instruction or \b FACE (::SCRIPT_CB_TABLE_8) instruction should
+ *        use the direction which will bring it closer to the player 
+ *        mobile determined by mobile_pathfind().
+ */
 #define SCRIPT_ARG_FOLLOW 32764
 
 /**

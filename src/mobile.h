@@ -149,7 +149,7 @@
 /*! \brief Reserved for future use. */
 #define MOBILE_TYPE_RES2 0x0018
 
-/*! \} */
+/*! \} */ /* dsekai_mobiles_flags_type */
 
 /**
  * \brief Bitmask defining bits used to indicate \ref dsekai_mobiles_flags_type.
@@ -171,7 +171,7 @@
  */
 #define MOBILE_FLAG_DISABLED 0x0400
 
-/*! \} */
+/*! \} */ /* dsekai_mobiles_flags */
 
 /**
  * \related MOBILE
@@ -182,6 +182,19 @@
 #define MOBILE_MAP_GID_ALL 65535
 
 #define mobile_get_sprite( m ) ((m)->sprite_id)
+
+/**
+ * \addtogroup dsekai_mobiles_errors Mobile-Related Errors
+ * \brief Error codes for ::MOBILE-related functions.
+ * \{
+ */
+
+/**
+ * \brief Error code indicating ::MOBILE path is blocked.
+ */
+#define MOBILE_ERROR_BLOCKED -1
+
+/*! \} */ /* dsekai_mobiles_errors */
 
 /* TODO: Combine steps_x and steps_y? */
 
@@ -360,6 +373,23 @@ struct MOBILE* mobile_spawn_single(
  */
 void mobile_spawns(
    struct TILEMAP* t, struct DSEKAI_STATE* state ) SECTION_MOBILE;
+
+/**
+ * \brief Find a path from ::MOBILE m to the given tilemap coordinates and
+ *        return the \ref dsekai_mobiles_directions to take the next step in
+ *        said path.
+ * \param m ::MOBILE to start the path from.
+ * \param x_tgt Destination target X coordinate tilemap tile.
+ * \param y_tgt Destination target Y coordinate tilemap tile.
+ * \param t Locked ::MEMORY_PTR to ::TILEMAP on which to pathfind.
+ * \param state Locked ::MEMORY_PTR to the current engine ::DSEKAI_STATE.
+ * \return \ref dsekai_mobiles_directions to the next step in the path or
+ *         ::MOBILE_ERROR_BLOCKED if blocked.
+ * \todo This is not yet implemented.
+ */
+int8_t mobile_pathfind(
+   struct MOBILE* m, uint8_t x_tgt, uint8_t y_tgt, struct TILEMAP* t,
+   struct DSEKAI_STATE* state );
 
 #ifdef MOBILE_C
 const int8_t gc_mobile_step_table_normal_pos[16] = {
