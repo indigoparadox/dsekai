@@ -88,26 +88,22 @@ uint16_t script_handle_WALK(
       debug_printf( 1, "mobile %u:%u \"%s\" popped %d, became %d",
          actor->map_gid, actor->spawner_gid, actor->name, dir_raw, dir );
 
+      /* Handle terrain blockage by skipping. */
       if(
          tilemap_collide( actor, dir, t )
       ) {
          /* Actor would collide. */
          debug_printf( 1, "mobile %u:%u \"%s\" collided with terrain",
             actor->map_gid, actor->spawner_gid, actor->name );
-         /* mobile_stack_push( actor, dir_raw ); */
          return pc + 1;
       }
 
-      /* TODO: Handle mobile blockage. Need access to mobiles list. */
-      /* 
-      if(
-         mobile_collide(
-            &(mobiles[state->player_idx]),
-            MOBILE_DIR_EAST, mobiles, state->mobiles_count )
-      ) {
+      /* Handle mobile blockage by retrying later. */
+      if( NULL != mobile_get_facing( actor, t, state ) ) {
+         /* Actor would collide, but maybe mobile will move later? */
          mobile_stack_push( actor, dir_raw );
          return pc;
-      */
+      }
 
       debug_printf( 1, "mobile %u:%u \"%s\" starting walking in dir %d",
          actor->map_gid, actor->spawner_gid, actor->name, dir );

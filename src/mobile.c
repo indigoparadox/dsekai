@@ -118,6 +118,8 @@ struct MOBILE* mobile_interact(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t
 ) {
 
+   /* TODO: Block more than one interaction per instruction cycle. */
+
    if( 
       NULL == actee ||
       (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & actee->flags)) ||
