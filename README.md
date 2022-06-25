@@ -7,7 +7,6 @@
   * [Roadmap](#roadmap)
   * [Documentation](#documentation)
 * [Building](#building)
-  * [Options](#options)
   * [Datafiles](#datafiles)
   * [Platforms](#platforms)
 * [Modding](#modding)
@@ -64,28 +63,9 @@ For MS-DOS, the INCLUDE environment variable must be set to the location of the 
 
 The script pkgs.sh in the root directory should build the recommended set of packages if the proper compilers are installed.
 
-## Options
-
-The following options may be specified to make in order control the final output:
-
-| Variable   | Options | Explanation
-|------------|---------|-------------
-| RESOURCE   | FILE       | Store assets as files in the filesystem.
-|            | **HEADER** | Store assets embedded in the binary.
-| BUILD      | **DEBUG**  | Build a debug binary, with symbols and profiling.
-|            | RELEASE    | Build an optimized release binary.
-| ASSETPATH  |            | Specify path to load assets at runtime. Defaults to ./assets
-| DTHRESHOLD |            | Specify the log level from 0-3 (0 being most verbose).
-| SANITIZE   | NO         | Disable leak and UB sanitizers for gcc targets.
-| FMT\_JSON  | **TRUE**   | Use JSON format for maps.
-| FMT\_ASN   | TRUE       | Use ASN.1 for maps. Required for low-memory targets.
-| DEPTH      | **CGA**    | Use 4-color graphics.
-|            | VGA        | Use 16-color graphics.
-|            | MONO       | Use monochrome graphics.
-
 ## Datafiles
 
-This engine should be capable of retrieving assets (levels, graphics, etc) from different locations, depending on how it was [built](#options). Aside from loading directly from the filesystem, it should be able to use OS-level resources embedded in the binary. On platforms without this facility, a rough approximation of this is emulated using [object embedding](headpack).
+This engine should be capable of retrieving assets (levels, graphics, etc) from different locations, depending on how it was built (e.g. ASN.1 vs JSON maps support). Aside from loading directly from the filesystem, it should be able to use OS-level resources embedded in the binary. On platforms without this facility, a rough approximation of this is emulated using [object embedding](headpack).
 
 ## Platforms
 
@@ -117,7 +97,7 @@ The following platforms are planned to be supported but not yet functional:
 | WebASM    | bin/dsekai.js    | [emscripten](https://github.com/emscripten-core/emscripten)
 | \*Curses  | bin/dsekait      | NCurses
 
- * + Platforms marked with + [**require** FMT_ASN if RESOURCE=FILE](#options).
+ * + Platforms marked with + do not support JSON tilemaps directly.
  * \* Platforms marked with \* are currently broken.
 
 Just using "make" will attempt to build all currently working targets with OS-level resources and statically compiled maps.
