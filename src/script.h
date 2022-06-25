@@ -52,11 +52,11 @@ struct TILEMAP;
 
 /*! \brief Maximum number of global script flags available. */
 #define SCRIPT_GLOBALS_MAX 20
-/*! \brief Maximum depth of available local stack for each ::SCRIPT. */
-#define SCRIPT_STACK_DEPTH 10
+
 /*! \brief Maximum length of a script in text form. */
 #define SCRIPT_STR_MAX 1024
 
+/*! \brief Maximum value an item stored on MOBILE::script_stack. */
 #define SCRIPT_STACK_MAX 127
 
 /* TODO: This is a valid stack value. */
@@ -95,7 +95,11 @@ typedef uint16_t (*SCRIPT_CB)(
  * Args can range from 0 to ::SCRIPT_ARG_MAX. See \ref scripting_args for more
  * information on special arguments.
  *
- * Items on the stack can range from 0 to ::SCRIPT_STACK_MAX.
+ * A script executed by a ::MOBILE also has access to MOBILE::script_stack,
+ * which can hold up to ::SCRIPT_STACK_DEPTH items.
+ *
+ * Items on MOBILE::script_stack can range from 0 to ::SCRIPT_STACK_MAX in
+ * value.
  * \{
  */
 
@@ -126,8 +130,8 @@ typedef uint16_t (*SCRIPT_CB)(
 
 /**
  * \brief \b EQJMP: Move script execution to a label defined by \b START if
- *        the last value pushed to the stack is \b EQUAL \b TO the value
- *        pushed to the stack before it.
+ *        the last value pushed to MOBILE::script_stack is \b EQUAL \b TO the
+ *        value pushed before it.
  *
  * \b Arguments
  * - The index of the label as defined by a \b START instruction in the same
@@ -138,16 +142,16 @@ typedef uint16_t (*SCRIPT_CB)(
  *
  * \attention If (and only if) the condition is true and the jump is performed,
  *            this instruction will automatically push the index of the next
- *            instruction that would have otherwise been executed to the
- *            stack, so that it may be returned to with \b RETURN and 
- *            e.g. ::SCRIPT_ARG_STACK.
+ *            instruction that would have otherwise been executed to
+ *            MOBILE::script_stack, so that it may be returned to with
+ *            \b RETURN and e.g. ::SCRIPT_ARG_STACK.
  */
 #define SCRIPT_CB_TABLE_18( f ) f( 18, EQJMP,   '=' ) SCRIPT_CB_TABLE_19( f )
 
 /**
  * \brief \b GTJMP: Move script execution to a label defined by \b START if
- *        the last value pushed to the stack is \b GREATER \b THAN the value
- *        pushed to the stack before it.
+ *        the last value pushed to MOBILE::script_stack is \b GREATER \b THAN
+ *        the value pushed before it.
  *
  * \b Arguments
  * - The index of the label as defined by a \b START instruction in the same
@@ -159,15 +163,15 @@ typedef uint16_t (*SCRIPT_CB)(
  * \attention If (and only if) the condition is true and the jump is performed,
  *            this instruction will automatically push the index of the next
  *            instruction that would have otherwise been executed to the
- *            stack, so that it may be returned to with \b RETURN and 
- *            e.g. ::SCRIPT_ARG_STACK.
+ *            MOBILE::script_stack, so that it may be returned to with
+ *            \b RETURN and e.g. ::SCRIPT_ARG_STACK.
  */
 #define SCRIPT_CB_TABLE_17( f ) f( 17, GTJMP,   '>' ) SCRIPT_CB_TABLE_18( f )
 
 /**
  * \brief \b LTJMP: Move script execution to a label defined by \b START if
- *        the last value pushed to the stack is \b LESS \b THAN the value
- *        pushed to the stack before it.
+ *        the last value pushed to MOBILE::script_stack is \b LESS \b THAN the
+ *        value pushed before it.
  *
  * \b Arguments
  * - The index of the label as defined by a \b START instruction in the same
@@ -179,8 +183,8 @@ typedef uint16_t (*SCRIPT_CB)(
  * \attention If (and only if) the condition is true and the jump is performed,
  *            this instruction will automatically push the index of the next
  *            instruction that would have otherwise been executed to the
- *            stack, so that it may be returned to with \b RETURN and 
- *            e.g. ::SCRIPT_ARG_STACK.
+ *            MOBILE::script_stack, so that it may be returned to with
+ *            \b RETURN and e.g. ::SCRIPT_ARG_STACK.
  */
 #define SCRIPT_CB_TABLE_16( f ) f( 16, LTJMP,   '<' ) SCRIPT_CB_TABLE_17( f )
 
@@ -246,21 +250,28 @@ typedef uint16_t (*SCRIPT_CB)(
 #define SCRIPT_CB_TABLE_11( f ) f( 11, DIE,     'z' ) SCRIPT_CB_TABLE_12( f )
 
 /**
- * \brief \b GGET: Push a value from the global table at onto stack.
+ * \brief \b GGET: Push a copy of a value from the global table at onto
+ *        MOBILE::script_stack.
  *
  * \b Arguments
- * - Index of the value to push in ::g_script_globals.
+ * - Index of the value to push in ::g_script_globals (up to
+ *   ::SCRIPT_GLOBALS_MAX).
  *
  * \b Stack \b Values \b Pushed
  * - Value of ::g_script_globals at the index specified.
+ *
+ * \note After being pushed, the value will still remain in its index in
+ *       ::g_script_globals, as well.
  */
 #define SCRIPT_CB_TABLE_10( f ) f( 10, GGET,    'a' ) SCRIPT_CB_TABLE_11( f )
 
 /**
- * \brief \b GSET: Pop a value from the stack into the global table.
+ * \brief \b GSET: Pop a value from MOBILE::script_stack into the global table,
+ *        overriding any previous value at that index.
  *
  * \b Arguments
- * - Index of the value to pop to in ::g_script_globals.
+ * - Index of the value to pop to in ::g_script_globals (up to
+ *   ::SCRIPT_GLOBALS_MAX).
  *
  * \b Stack \b Values \b Popped
  * - Value to insert into ::g_script_globals at the index specified.
@@ -268,7 +279,7 @@ typedef uint16_t (*SCRIPT_CB)(
 #define SCRIPT_CB_TABLE_9( f ) f( 9,   GSET,    'b' ) SCRIPT_CB_TABLE_10( f )
 
 /**
- * \brief \b FACE: Set the actor face one of the
+ * \brief \b FACE: Set the actor to face one of the
  *        \ref dsekai_mobiles_directions.
  *
  * \b Arguments
@@ -351,6 +362,14 @@ typedef uint16_t (*SCRIPT_CB)(
  * \b Stack Values Popped
  * - One of the \ref dsekai_mobiles_directions.
  *
+ * \note \b WALK will be blocked if tilemap terrain or another mobile is in
+ *       the way. If blocked by a mobile, the \b WALK will retry until it is
+ *       successful (on the assumption the mobile will move). Terrain doesn't
+ *       move, so terrain blockages will just be ignored/skipped and execution
+ *       will continue.
+ * 
+ * ---
+ *
  * \note If the direction popped is greater than 3, it will be divided by
  *       4 and the remainder will be interpreted as the direction to walk.
  */
@@ -373,7 +392,8 @@ typedef uint16_t (*SCRIPT_CB)(
  *
  * \attention On interaction, the script execution engine will automatically
  *            push the index of the next instruction that would have otherwise
- *            been executed to the stack, so that it may be returned to with
+ *            been executed to MOBILE::script_stack, so that it may be
+ *            returned to with
  *            \b RETURN and ::SCRIPT_ARG_STACK or ::SCRIPT_ARG_STACK_I.
  */
 #define SCRIPT_CB_TABLE_1( f ) f( 1,   INTERACT,'i' ) SCRIPT_CB_TABLE_2( f )

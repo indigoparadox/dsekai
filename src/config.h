@@ -84,6 +84,19 @@
 #  define DSEKAI_MOBILES_MAX 200
 #endif /* !MOBILES_MAX */
 
+#ifndef SCRIPT_STACK_DEPTH
+/**
+ * \brief Maximum depth of available local stack for each ::MOBILE executing
+ *        a script. Each stack is individual to that particular mobile. When
+ *        this depth is exceeded, old excess items will be discarded off the
+ *        bottom.
+ * \note This may be overridden by passing a -D argument to the compiler.
+ * \attention Changing this value may break compatibility with tilemaps or
+ *            saves! Please use caution.
+ */
+#  define SCRIPT_STACK_DEPTH 10
+#endif /* !SCRIPT_STACK_DEPTH */
+
 /*! \} */ /* dsekai_mobiles */
 
 /**

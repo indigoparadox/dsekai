@@ -161,6 +161,10 @@ TBA
 
 Information on scripting including detailed instruction reference has been [moved into the documentation](https://indigoparadox.github.io/dsekai/group__scripting__instructions__sect.html).
 
+For the time being, the script compiler can be compiled by using ``make bin/compile``, and then running ``bin/compile <path-to-script.s>`` to generate bytecode output that can be pasted into tilemaps.
+
+See ``assets/m\_field`` for some example scripts.
+
 # Tools
 
 Included in the tools/ subdirectory are a few tools required for preprocessing and compiling. These include tools for preprocessing resources from easier-to-edit formats to more compact formats for resource-limited platforms, as well as tools for packing up resources as part of compilation.

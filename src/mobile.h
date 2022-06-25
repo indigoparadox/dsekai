@@ -242,10 +242,13 @@ struct MOBILE {
    int16_t script_id;
    /*! \brief Position in currently executing behavior script. */
    int16_t script_pc;
-   /*! \brief Local stack used to store state for this mobile's ::SCRIPT.
+   /**
+    * \brief Local stack used to store state for this mobile's ::SCRIPT.
     *
-    *  This should only be manipulated by mobile_stack_push() and
-    *  mobile_stack_pop().
+    * This should only be manipulated directly via mobile_stack_push() and
+    * mobile_stack_pop().
+    *
+    * Values stored on the stack can go up to ::SCRIPT_STACK_MAX.
     */
    int8_t script_stack[SCRIPT_STACK_DEPTH];
    /*! \brief Delay script for this many frames. */
