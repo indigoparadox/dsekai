@@ -151,6 +151,9 @@ struct MOBILE* mobile_interact(
    step = &(script->steps[actee->script_pc]);
 
    /* Rule out special circumstances. */
+   /* TODO: Is this a bit too severe for blocking ALL interaction during
+    *       WALK?
+    */
    if(
       /* Special case: Actor is executing a multi-cycle WALK instruction. */
       SCRIPT_ACTION_WALK == step->action ||

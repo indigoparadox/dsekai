@@ -163,14 +163,14 @@ uint16_t script_handle_RETURN(
    if( 0 <= arg && SCRIPT_STEPS_MAX > arg ) {
       debug_printf( 1, "mobile %u:%u \"%s\" at pc %d, returning to pc %d",
          actor->map_gid, actor->spawner_gid, actor->name,
-         actor->script_pc, arg );
+         pc, arg );
       return arg;
    }
    /* Freeze. */
    error_printf(
       "mobile %u:%u \"%s\" script frozen at pc %d: invalid return pc %d",
       actor->map_gid, actor->spawner_gid, actor->name,
-      actor->script_pc, arg );
+      pc, arg );
    return pc;
 }
 
@@ -454,8 +454,10 @@ uint16_t script_handle_DISABLE(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    if( 0 == arg ) {
+#ifdef SCRIPT_TRACE
       debug_printf( 1, "mobile %u:%u \"%s\" enabling interaction",
          actor->map_gid, actor->spawner_gid, actor->name );
+#endif /* SCRIPT_TRACE */
       actor->flags &= ~MOBILE_FLAG_DISABLED;
    } else {
 #ifdef SCRIPT_TRACE
