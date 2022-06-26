@@ -121,40 +121,82 @@ int8_t mobile_stack_pop( struct MOBILE* m ) {
 struct MOBILE* mobile_interact(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t
 ) {
+   struct SCRIPT* script = NULL;
+   struct SCRIPT_STEP* step = NULL;
 
-   /* TODO: Block more than one interaction per instruction cycle. */
-
+   /* Rule out invalid mobile or script. */
    if( 
+      /* No interactee. */
       NULL == actee ||
+      /* Inactive mobile slot. */
       (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & actee->flags)) ||
+      /* Dead interactee. */
       0 >= (actee->mp_hp & MOBILE_HP_MASK) ||
+      /* No actee script. */
       0 > actee->script_id ||
+      /* Actee interaction disabled. */
+      (MOBILE_FLAG_DISABLED == (MOBILE_FLAG_DISABLED & actee->flags)) ||
+      /* Invalid actee script. */
       actee->script_id >= TILEMAP_SCRIPTS_MAX ||
-      (MOBILE_FLAG_DISABLED == (MOBILE_FLAG_DISABLED & actee->flags))
+      /* Invalid actee script previous PC. */
+      1 > actee->script_pc ||
+      /* Invalid actee script PC. */
+      SCRIPT_STEPS_MAX <= actee->script_pc
+   ) {
+      return NULL;
+   }
+
+   /* Grab the current script step to check for special cases. */
+   script = &(t->scripts[actee->script_id]);
+   step = &(script->steps[actee->script_pc]);
+
+   /* Rule out special circumstances. */
+   if(
+      /* Special case: Actor is executing a multi-cycle WALK instruction. */
+      SCRIPT_ACTION_WALK == step->action ||
+      /* Actee is walking. */
+      actor->coords.y != actor->coords_prev.y ||
+      /* Actee is walking. */
+      actor->coords.x != actor->coords_prev.x
+   ) {
+      return NULL;
+   }
+
+   /* Grab the previous script step to check for special cases. */
+   script = &(t->scripts[actee->script_id]);
+   step = &(script->steps[actee->script_pc - 1]);
+
+   /* Rule out special circumstances. */
+   if(
+      /* Special case: Previous step was a DISABLE 0. */
+      (SCRIPT_ACTION_DISABLE == step->action && 0 == step->arg) ||
    ) {
       /* Inactive mobile or invalid script. */
       return NULL;
    }
 
-   if(
-      actor->coords.y != actor->coords_prev.y ||
-      actor->coords.x != actor->coords_prev.x
-   ) {
-      /* Reject interactions while walking so we don't break script sync. */
-      return NULL;
-   }
+#ifdef SCRIPT_TRACE
+   debug_printf( 1, "mobile %u:%u \"%s\" interacted at pc %d, icount %d",
+      actee->map_gid, actee->spawner_gid, actee->name,
+      actee->script_pc, mobile_get_icount( actee ) );
+#endif /* SCRIPT_TRACE */
 
    /* Push actee previous PC for return. */
    mobile_stack_push( actee, actee->script_pc );
-
-   debug_printf( 1, "mobile interacted at icount: %d",
-      mobile_get_icount( actee ) );
 
    /* Set actee's pc to the GOTO for interaction and make actee active NOW. */
    actee->script_pc = script_goto_label(
       actee->script_pc, &(t->scripts[actee->script_id]),
       SCRIPT_ACTION_INTERACT, mobile_get_icount( actee ) );
    actee->script_wait_frames = 0;
+
+   /* Lock so that the actee can't be double-interacted with. */
+   actee->flags |= MOBILE_FLAG_DISABLED;
+
+#ifdef SCRIPT_TRACE
+   debug_printf( 1, "mobile %u:%u \"%s\" interaction disabled",
+      actee->map_gid, actee->spawner_gid, actee->name );
+#endif /* SCRIPT_TRACE */
 
    return actee;
 }
@@ -199,17 +241,27 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    script = &(t->scripts[m->script_id]);
    step = &(script->steps[m->script_pc]);
 
+   /* Arg processing. */
    if( SCRIPT_ARG_STACK_I == step->arg ) {
+      /* Stack arg with interaction count. */
       arg = mobile_stack_pop( m );
       mobile_incr_icount( m, 1 );
+
    } else if( SCRIPT_ARG_STACK == step->arg ) {
+      /* Stack arg. */
       arg = mobile_stack_pop( m );
+
    } else if( SCRIPT_ARG_STACK_P == step->arg ) {
+      /* Stack arg w/ passthrough. */
       arg = mobile_stack_pop( m );
       push_arg_after = 1;
+
    } else if( SCRIPT_ARG_RANDOM == step->arg ) {
+      /* Random arg. */
       arg = graphics_get_random( 0, SCRIPT_STACK_MAX );
+
    } else if( SCRIPT_ARG_FOLLOW == step->arg ) {
+      /* Pathfinding dir arg. */
       arg = mobile_pathfind(
          m, state->player.coords.x, state->player.coords.y, t, state );
       if( MOBILE_ERROR_BLOCKED == arg ) {
@@ -219,6 +271,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 #endif /* SCRIPT_TRACE */
       }
    } else {
+      /* Literal/immediate arg. */
       arg = step->arg;
    }
 
@@ -228,9 +281,11 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
       m->script_id, m->script_pc, step->action );
 #endif /* SCRIPT_TRACE */
 
+   /* Execute script action callback. */
    m->script_pc = gc_script_handlers[step->action](
       m->script_pc, script, t, m, NULL, &(m->coords), state, arg );
 
+   /* Complete stack arg passthrough. */
    if( push_arg_after ) {
       mobile_stack_push( m, arg );
    }

@@ -5,7 +5,6 @@ start 0:
    goto     0
 
 interact 0:
-   disable     1
    speak       3 ; "Found a fruit!"
    give        1235 ; Apple
    pop         0 ; Items pushed. TODO: GOTO if failed.

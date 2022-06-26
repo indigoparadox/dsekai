@@ -116,13 +116,14 @@
  */
 
 /**
- * \brief Bitmask defining bits used to indicate the number of times this
- *        ::MOBILE has been interacted with, for ::SCRIPT purposes.
+ * \brief Bitmask defining bits in MOBILE::flags used to indicate the number
+ *        of \ref scripting_interactions this mobile has had. Please see
+ *        that section for details.
  */
 #define MOBILE_ICOUNT_MASK 0xf000
 
 /**
- * \brief Bitmask defining bits used to indicate which of the
+ * \brief Bitmask defining bits in MOBILE::flags used to indicate which of the
  *        \ref dsekai_mobiles_directions a mobile is currently facing.
  */
 #define MOBILE_DIR_MASK 0x0007
@@ -152,7 +153,8 @@
 /*! \} */ /* dsekai_mobiles_flags_type */
 
 /**
- * \brief Bitmask defining bits used to indicate \ref dsekai_mobiles_flags_type.
+ * \brief Bitmask defining bits in MOBILE::flags used to indicate
+ *        \ref dsekai_mobiles_flags_type.
  */
 #define MOBILE_TYPE_MASK 0x0018
 

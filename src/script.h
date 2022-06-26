@@ -105,6 +105,45 @@ typedef uint16_t (*SCRIPT_CB)(
 #endif /* !NO_SCRIPT_STRUCT */
 
 /**
+ * \addtogroup scripting_interactions Scripting Interactions
+ * \brief Details on scripting interactions with ::MOBILE actors.
+ *
+ * Interactions allow scripted mobiles to respond to player behavior. An
+ * interaction occurs when a player faces a scripted mobile and presses
+ * the OK button. This causes the script that mobile, or "actor", is running
+ * to jump to an interaction callback defined by the \b INTERACT
+ * (::SCRIPT_CB_TABLE_1) instruction in that mobile's script.
+ *
+ * The index of the interaction callback that will be called is determined
+ * by the ::MOBILE_ICOUNT_MASK portion of MOBILE::flags, and may be from
+ * 0 through 9. This allows a mobile to "say" one thing on first interaction
+ * and then different things on subsequent interactions.
+ *
+ * \attention On interaction, the script execution engine will automatically
+ *            push the index of the next instruction that would have otherwise
+ *            been executed to MOBILE::script_stack, so that it may be
+ *            returned to with
+ *            \b RETURN and ::SCRIPT_ARG_STACK or ::SCRIPT_ARG_STACK_I.
+ *
+ * Interactions are automatically disabled when an interaction occurs. They
+ * can be re-enabled by calling the \b DISABLE (::SCRIPT_CB_TABLE_23)
+ * instructions with the arg 0. This is typically done before calling
+ * \b RETURN (::SCRIPT_CB_TABLE_7) to return to the main subroutine.
+ *
+ * \attention Interactions will \b NOT be processed when the last instruction
+ *            executed was a \b DISABLE (::SCRIPT_CB_TABLE_23) with an arg 0.
+ *            This gives the engine the chance to get from re-enabling
+ *            interactions to a potential \b RETURN (::SCRIPT_CB_TABLE_7)
+ *            instruction without another interaction occurring.
+ *
+ * \todo Expand interactions to respond to e.g. combat actions or item use.
+ *
+ * \{
+ */
+
+/*! \} */
+
+/**
  * \addtogroup scripting_instructions_sect Scripting Instructions
  * \brief Overview of the mobile scripting language.
  *
@@ -122,14 +161,11 @@ typedef uint16_t (*SCRIPT_CB)(
  */
 
 /**
- * \brief \b DISABLE: Disable interaction with the ::MOBILE running this
- *        script, while still executing script instructions.
+ * \brief \b DISABLE: Disable \ref scripting_interactions with the ::MOBILE
+ *        running this script, while still executing script instructions.
  *
  * \b Arguments
  * - 0 To enable (disable disabled) or 1 to disable interaction.
- *
- * This is useful immediately after an interaction label to ensure further
- * interactions will not interrupt this interaction until it is complete.
  */
 #define SCRIPT_CB_TABLE_23( f ) f( 23, DISABLE, 'd' )
 
@@ -388,31 +424,29 @@ typedef uint16_t (*SCRIPT_CB)(
  * 
  * ---
  *
+ * \attention \b WALK is a multi-cycle instruction (to allow for the walking
+ *            animation to complete. The direction will not be removed from
+ *            the stack until walking is complete. Also,
+ *            \ref scripting_interactions with a walking mobile are disabled 
+ *            while that mobile is in motion.
+ *
  * \note If the direction popped is greater than 3, it will be divided by
  *       4 and the remainder will be interpreted as the direction to walk.
  */
 #define SCRIPT_CB_TABLE_2( f ) f( 2,   WALK,    'u' ) SCRIPT_CB_TABLE_3( f )
 
 /**
- * \brief \b INTERACT: Define an interaction callback label.
+ * \brief \b INTERACT: Define a \ref scripting_interactions callback label.
  *
  * \b Arguments
- * - Index of the interaction callback label to define.
+ * - Index of the \ref scripting_interactions callback label to define.
  *
  * This statement does nothing by itself, but it defines a point in the code
  * that will be jumped to when a player interacts with the ::MOBILE running
  * this ::SCRIPT.
  *
- * The index of the interaction callback that will be called is determined
- * by the ::MOBILE_ICOUNT_MASK portion of MOBILE::flags, and may be from
- * 0 through 9. This allows a mobile to "say" one thing on first interaction
- * and then different things on subsequent interactions.
- *
- * \attention On interaction, the script execution engine will automatically
- *            push the index of the next instruction that would have otherwise
- *            been executed to MOBILE::script_stack, so that it may be
- *            returned to with
- *            \b RETURN and ::SCRIPT_ARG_STACK or ::SCRIPT_ARG_STACK_I.
+ * Please see the section on \ref scripting_interactions for details on
+ * this instruction.
  */
 #define SCRIPT_CB_TABLE_1( f ) f( 1,   INTERACT,'i' ) SCRIPT_CB_TABLE_2( f )
 

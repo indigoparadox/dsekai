@@ -69,6 +69,10 @@ uint16_t script_handle_WALK(
       debug_printf( 1, "mobile %u:%u \"%s\" done walking",
          actor->map_gid, actor->spawner_gid, actor->name );
 #endif /* SCRIPT_TRACE */
+
+      /* Pop the dir, since the walk is complete. */
+      mobile_stack_pop( actor );
+
       /* PC only incremends when walk is complete, so that this check
        * continues until next step.
        */
@@ -98,7 +102,7 @@ uint16_t script_handle_WALK(
       if(
          tilemap_collide( actor, dir, t )
       ) {
-         /* Actor would collide. */
+         /* Actor would collide, so just skip this walk attempt. */
 #ifdef SCRIPT_TRACE
          debug_printf( 1, "mobile %u:%u \"%s\" collided with terrain",
             actor->map_gid, actor->spawner_gid, actor->name );
@@ -106,18 +110,19 @@ uint16_t script_handle_WALK(
          return pc + 1;
       }
 
-      /* Handle mobile blockage by retrying later. */
-      if( NULL != mobile_get_facing( actor, t, state ) ) {
-         /* Actor would collide, but maybe mobile will move later? */
-         mobile_stack_push( actor, dir_raw );
-         return pc;
+      /* If actor would collide with a mobile, don't try to walk, but keep
+       * the PC the same and push the dir back to retry later.
+       */
+      if( NULL == mobile_get_facing( actor, t, state ) ) {
+#ifdef SCRIPT_TRACE
+         debug_printf( 1, "mobile %u:%u \"%s\" starting walking in dir %d",
+            actor->map_gid, actor->spawner_gid, actor->name, dir );
+#endif /* SCRIPT_TRACE */
+         mobile_walk_start( actor, dir );
       }
 
-#ifdef SCRIPT_TRACE
-      debug_printf( 1, "mobile %u:%u \"%s\" starting walking in dir %d",
-         actor->map_gid, actor->spawner_gid, actor->name, dir );
-#endif /* SCRIPT_TRACE */
-      mobile_walk_start( actor, dir );
+      /* Push the dir back until walk is complete. */
+      mobile_stack_push( actor, dir_raw );
    }
 
    return pc;
@@ -156,10 +161,16 @@ uint16_t script_handle_RETURN(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    if( 0 <= arg && SCRIPT_STEPS_MAX > arg ) {
+      debug_printf( 1, "mobile %u:%u \"%s\" at pc %d, returning to pc %d",
+         actor->map_gid, actor->spawner_gid, actor->name,
+         actor->script_pc, arg );
       return arg;
    }
    /* Freeze. */
-   error_printf( "script frozen due to invalid return pc" );
+   error_printf(
+      "mobile %u:%u \"%s\" script frozen at pc %d: invalid return pc %d",
+      actor->map_gid, actor->spawner_gid, actor->name,
+      actor->script_pc, arg );
    return pc;
 }
 
@@ -443,10 +454,8 @@ uint16_t script_handle_DISABLE(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    if( 0 == arg ) {
-#ifdef SCRIPT_TRACE
       debug_printf( 1, "mobile %u:%u \"%s\" enabling interaction",
          actor->map_gid, actor->spawner_gid, actor->name );
-#endif /* SCRIPT_TRACE */
       actor->flags &= ~MOBILE_FLAG_DISABLED;
    } else {
 #ifdef SCRIPT_TRACE

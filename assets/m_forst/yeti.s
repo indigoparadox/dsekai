@@ -8,5 +8,6 @@ start 0:
 
 interact 0:
    speak       1 ; Not yeti...
+   disable     0
    return      stack
 

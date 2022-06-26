@@ -4,7 +4,6 @@ start 0:
    goto     0
 
 interact 0:
-   disable  1
    speak    7 ; "You'll need this hoe to till soil."
    give     1237 ; Hoe
    pop      0 ; Items pushed. TODO: GOTO if failed.
@@ -12,7 +11,6 @@ interact 0:
    return   stack_i
 
 interact 1:
-   disable  1
    speak    8 ; "Do your best!"
    disable  0
    return   stack
