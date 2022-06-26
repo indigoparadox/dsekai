@@ -169,7 +169,7 @@ struct MOBILE* mobile_interact(
    /* Rule out special circumstances. */
    if(
       /* Special case: Previous step was a DISABLE 0. */
-      (SCRIPT_ACTION_DISABLE == step->action && 0 == step->arg) ||
+      (SCRIPT_ACTION_DISABLE == step->action && 0 == step->arg)
    ) {
       /* Inactive mobile or invalid script. */
       return NULL;
