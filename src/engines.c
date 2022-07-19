@@ -67,7 +67,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       }
       debug_printf( 1, "unloading item %d owned by %d",
          items[i].gid, items[i].owner );
-      memory_zero_ptr( &(items[i]), sizeof( struct ITEM ) );
+      memory_zero_ptr( (MEMORY_PTR)&(items[i]), sizeof( struct ITEM ) );
    }
    items = (struct ITEM*)memory_unlock( state->items_handle );
 
