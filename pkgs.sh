@@ -27,6 +27,10 @@ build_xlib() {
    make -f Makefile.xlib DTHRESHOLD=$DEBUG_THRESHOLD RESOURCE=FILE FMT_JSON=TRUE BUILD=$BUILD pkg_xlib || exit
 }
 
+build_mac6() {
+   make -f Makefile.mac6 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=MONO FMT_ASN=TRUE RESOURCE=FILE BUILD=$BUILD pkg_mac6 || exit
+}
+
 do_run() {
    if [ "$PLAT_SPEC" = "sdl" ]; then
       if [ ! -d pkgbuild/dsekai-sdl-*-vga-*-asn ]; then
@@ -94,7 +98,7 @@ do_build() {
    fi
 
    if [ "$PLAT_SPEC" = "mac" ] || [ -z "$PLAT_SPEC" ]; then
-      make -f Makefile.mac6 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=MONO FMT_ASN=TRUE RESOURCE=FILE bin-file-mono-asn/dsekai.APPL || exit
+      build_mac6
    fi
 
    echo "All packages built OK!"

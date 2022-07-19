@@ -90,6 +90,12 @@ res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
+pkg_bin := $(BINDIR)/$(DSEKAI).APPL
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs :=
+$(eval $(PKG_RULE))
+
 #$(GENDIR_MAC6)/%.pict: $(ASSETDIR)/%.bmp | $(GENDIR_MAC6)/$(STAMPFILE)
 #	$(IMAGEMAGICK) $< $@
 
