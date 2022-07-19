@@ -102,6 +102,16 @@ do_build() {
 
 while [ "$1" ]; do
    case "$1" in
+      "-h"|"--help")
+         echo "usage: $0 [-r] [prof|run] [platspec]"
+         echo
+         echo "-r       - Build RELEASE-mode binaries."
+         echo "run      - Command: Run build binary for platspec."
+         echo "prof     - Command: Build profile data from run."
+         echo "platspec - Platform specifier."
+         exit 1
+         ;;
+
       "-r"|"--release")
          BUILD=RELEASE
          DEBUG_THRESHOLD=
