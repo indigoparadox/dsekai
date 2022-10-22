@@ -318,7 +318,11 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state );
  * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
  * \return 1 if engine should continue executing or 0 if it should quit.
  */
+#ifdef PLATFORM_WASM
+void engines_loop_iter( void* state_handle );
+#else
 int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
+#endif /* PLATFORM_WASM */
 
 /**
  * \brief Handle generic player movement commmand.

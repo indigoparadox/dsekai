@@ -168,7 +168,7 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       if(
          /* Pause scripts if modal window is pending. */
-         0 >= window_modal( state ) &&
+         0 >= window_modal() &&
          /* Pause scripts if screen is scrolling. */
          DSEKAI_FLAG_INPUT_BLOCKED !=
             (DSEKAI_FLAG_INPUT_BLOCKED & state->flags) &&
@@ -185,7 +185,7 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
 
    if(
       /* Pause crops if modal window is pending. */
-      0 >= window_modal( state ) &&
+      0 >= window_modal() &&
       /* Pause crops if screen is scrolling. */
       DSEKAI_FLAG_INPUT_BLOCKED != (DSEKAI_FLAG_INPUT_BLOCKED & state->flags) &&
       /* Pause crops if menu is open. */
@@ -200,7 +200,7 @@ int16_t engines_handle_movement(
    int8_t dir_move, struct DSEKAI_STATE* state, struct TILEMAP* t
 ) {
 
-   if( 0 < window_modal( state ) ) {
+   if( 0 < window_modal() ) {
       return 1;
    }
 
@@ -223,7 +223,12 @@ int16_t engines_handle_movement(
    return dir_move;
 }
 
+#ifdef PLATFORM_WASM
+void engines_loop_iter( void* state_handle_p ) {
+   MEMORY_HANDLE state_handle = (MEMORY_HANDLE)state_handle_p;
+#else
 int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
+#endif /* PLATFORM_WASM */
    uint8_t in_char = 0;
    struct DSEKAI_STATE* state = NULL;
    struct TILEMAP* t = NULL;
@@ -283,7 +288,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    } else {
       /* Draw the engine. */
-      if( 0 >= window_modal( state ) ) {
+      if( 0 >= window_modal() ) {
          gc_engines_draw[state->engine_type]( state );
       }
    }
@@ -311,7 +316,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       /* Only open the menu if no modal windows are open and it's not
       *  blocked.
       */
-      0 >= window_modal( state ) &&
+      0 >= window_modal() &&
       INPUT_KEY_QUIT == in_char &&
       DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
    ) {
@@ -321,7 +326,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
          menu_open( state );
       }
 
-   } else if( 0 >= window_modal( state ) && 0 != in_char ) {
+   } else if( 0 >= window_modal() && 0 != in_char ) {
       retval = gc_engines_input[state->engine_type]( in_char, state );
 
    } else if( INPUT_KEY_OK == in_char ) {
@@ -368,7 +373,9 @@ cleanup:
 
    graphics_flip();
 
+#ifndef PLATFORM_WASM
    return retval;
+#endif /* !PLATFORM_WASM */
 }
 
 #ifndef NO_TITLE
