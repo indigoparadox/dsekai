@@ -64,6 +64,8 @@ do_run() {
          build_xlib
       fi
       cd pkgbuild/dsekai-xlib-*-cga-*-json && ./dsekaix
+   elif [ "$PLAT_SPEC" = "wasm" ]; then
+      cd pkgbuild/dsekai-wasm-*-vga-* && python -m http.server
    fi
 }
 

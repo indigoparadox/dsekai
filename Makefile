@@ -300,16 +300,6 @@ define RESEXT_H_RULE
 		$(MD) $$(dir $$@)
 		cp $$< $$@
 
-   $(GENDIR)/$(platform)/%.wasm: %.wasm | \
-   $(GENDIR)/$(platform)/$(STAMPFILE)
-		$(MD) $$(dir $$@)
-		cp $$< $$@
-
-   $(GENDIR)/$(platform)/%.js: %.js | \
-   $(GENDIR)/$(platform)/$(STAMPFILE)
-		$(MD) $$(dir $$@)
-		cp $$< $$@
-
    # Preprocess JSON maps/tilesets for depth path.
    $(GENDIR)/$(platform)/$(ASSETDIR)/t2_%.json: $(ASSETDIR)/t2_%.json \
    | $(GENDIR)/$(platform)/$(STAMPFILE)
@@ -425,27 +415,28 @@ define PKG_RULE
 		$(MD) $$(dir $$@)
 		cp $$< $$@
 
+# Copy binary (strip if release).
 ifeq ($(BUILD),RELEASE)
    $$(PKGBUILD)/$$(notdir $(pkg_bin)): $(pkg_bin)
 		$(MD) $$(dir $$@)
-		cp $$^ $$@
+		cp $$^ $$(PKGBUILD)
 		$(pkg_strip) $$@
 else
    $$(PKGBUILD)/$$(notdir $(pkg_bin)): $(pkg_bin)
 		$(MD) $$(dir $$@)
-		cp $$^ $$@
+		cp $$^ $$(PKGBUILD)
 endif
 
    $(ROOT)/$(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS).tar.gz: \
    $$(addprefix $$(PKGBUILD)/,$(pkg_reqs)) \
-   $$(PKGBUILD)/$(notdir $(pkg_bin)) \
+   $$(addprefix $$(PKGBUILD)/,$(notdir $(pkg_bin))) \
    $$(PKGBUILD)/README.md \
    | $(PKGDIR)/$(STAMPFILE)
 		cd pkgbuild && $(TAR) -cvf - $(pkg_name)$(PKG_OUT_FLAGS) | $(GZIP) > $$@
 
    $(ROOT)/$(PKGDIR)/$(pkg_name)$(PKG_OUT_FLAGS).zip: \
    $$(addprefix $$(PKGBUILD)/,$(pkg_reqs)) \
-   $$(PKGBUILD)/$(notdir $(pkg_bin)) \
+   $$(addprefix $$(PKGBUILD)/,$(notdir $(pkg_bin))) \
    $$(PKGBUILD)/README.md \
    | $(PKGDIR)/$(STAMPFILE)
 		cd pkgbuild && $(ZIP) -r $$@ $(pkg_name)$(PKG_OUT_FLAGS)

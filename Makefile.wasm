@@ -59,23 +59,27 @@ endif
 
 # 5. Targets
 
+# 5a. Packages
+
 platform := wasm
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
-pkg_bin := $(BIN_WASM)
-pkg_strip := echo
-pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
-pkg_reqs := \
+pkg_bin := $(BIN_WASM) \
    $(BINDIR)/$(DSEKAI).wasm \
    $(BINDIR)/$(DSEKAI).js
+pkg_strip := echo
+pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
+pkg_reqs := 
 $(eval $(PKG_RULE))
+
+
+# 5b. Binaries
 
 $(BIN_WASM) $(BINDIR)/$(DSEKAI).wasm $(BINDIR)/$(DSEKAI).js: \
 $(DSEKAI_O_FILES_WASM) | $(BINDIR)/$(STAMPFILE)
 	$(LD_WASM) -o $(BIN_WASM) $^ $(LDFLAGS_WASM)
-
 
 $(OBJDIR_WASM)/%.o: %.c $(RESEXT_H) | $(DSEKAI_ASSETS_MAPS_JSON)
 	$(MD) $(dir $@)
