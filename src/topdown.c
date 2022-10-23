@@ -1,6 +1,9 @@
 
 #include "dsekai.h"
 
+#define PROFILE_FIELDS( f ) f( draw_mobiles ) f( draw_tilemap ) f( draw_items ) f( animate )
+#include "profiler.h"
+
 /**
  * \brief Draw currently on-screen portion of a TILEMAP.
  * \param state ::MEMORY_PTR to the current engine state, used to determine
@@ -20,6 +23,8 @@ void topdown_draw_tilemap(
       tile_py = 0, /* Tile on-screen Y in pixels. */
       viewport_tx2 = 0,
       viewport_ty2 = 0;
+
+   profiler_set();
 
    /* Tile-indexed rectangle of on-screen tiles. */
    viewport_tx2 = gstate->screen_scroll_tx + SCREEN_TW;
@@ -114,6 +119,8 @@ void topdown_draw_tilemap(
             TILE_W, TILE_H );
       }
    }
+
+   profiler_incr( draw_tilemap );
 }
 
 static void topdown_draw_crops(
@@ -209,6 +216,8 @@ static void topdown_draw_mobile(
    struct MOBILE* m, struct TILEMAP* t
 ) {
 
+   profiler_set();
+
    if(
       /* Don't draw inactive mobiles. */
       (MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & m->flags)) ||
@@ -217,7 +226,7 @@ static void topdown_draw_mobile(
       /* Pre-death blinking effect (skip negative even frames). */
       (0 > m->mp_hp && 0 == m->mp_hp % 2)
    ) {
-      return;
+      goto cleanup;
    }
 
    if(
@@ -229,7 +238,7 @@ static void topdown_draw_mobile(
       /* Mobile is off-screen. */
       m->screen_px = -1;
       m->screen_py = -1;
-      return;
+      goto cleanup;
    }
 
    m->screen_px = 
@@ -257,6 +266,9 @@ static void topdown_draw_mobile(
    graphics_blit_sprite_at(
       m->sprite_id, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
       m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
+
+cleanup:
+   profiler_incr( draw_mobiles );
 }
 
 void topdown_draw_items(
@@ -267,6 +279,8 @@ void topdown_draw_items(
    uint16_t item_px = 0,
       item_py = 0;
    struct ITEM* items = NULL;
+
+   profiler_set();
 
    items = (struct ITEM*)memory_lock( state->items_handle );
    assert( NULL != items );
@@ -310,6 +324,8 @@ cleanup:
    if( NULL != items ) {
       items = (struct ITEM*)memory_unlock( state->items_handle );
    }
+
+   profiler_incr( draw_items );
 }
 
 void topdown_draw( struct DSEKAI_STATE* state ) {
@@ -371,6 +387,8 @@ static void topdown_focus_player(
 void topdown_animate( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
    struct TILEMAP* map = NULL;
+
+   profiler_set();
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
    if( NULL == gstate ) {
@@ -480,6 +498,8 @@ cleanup:
    if( NULL != map ) {
       map = (struct TILEMAP*)memory_unlock( state->map_handle );
    }
+
+   profiler_incr( animate );
 }
 
 int16_t topdown_setup( struct DSEKAI_STATE* state ) {
@@ -488,6 +508,8 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
 
    debug_printf( 1, "setting up topdown engine..." );
+
+   profiler_init();
 
    assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
    state->engine_state_handle = memory_alloc(
@@ -545,6 +567,7 @@ cleanup:
 void topdown_shutdown( struct DSEKAI_STATE* state ) {
    debug_printf( 3, "shutting down topdown engine..." );
    window_pop( WINDOW_ID_STATUS );
+   profiler_print( "TOPDOWN" );
 }
 
 int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
