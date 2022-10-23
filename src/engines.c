@@ -5,6 +5,36 @@
 #include "tmjson.h"
 #include "tmasn.h"
 
+#ifdef DSEKAI_PROFILER
+
+#define PROFILE_FIELDS( f ) f( draw_animate ) f( draw_engine ) f( draw_menu ) f( draw_windows ) f( animate_engine ) f( animate_mobiles )
+
+#define PROFILE_FIELDS_STRUCT( field ) int32_t field;
+
+struct DSEKAI_PROFILE {
+PROFILE_FIELDS( PROFILE_FIELDS_STRUCT );
+};
+
+struct DSEKAI_PROFILE profile;
+int32_t profile_diff = 0;
+
+#  define profiler_init() memory_zero_ptr( &profile, sizeof( struct DSEKAI_PROFILE ) )
+#  define profiler_set() profile_diff = graphics_get_ms(); if( 0 > profile_diff ) { error_printf( "error setting profiler!" ); }
+#  define profiler_incr( field ) if( 0 <= profile_diff ) { profile.field += (graphics_get_ms() - profile_diff); }
+
+#define PROFILE_FIELDS_PRINTF( field ) debug_printf( 3, #field ": %d", profile.field );
+
+#  define profiler_print() debug_printf( 3, "=== PROFILER RESULTS ===" ); PROFILE_FIELDS( PROFILE_FIELDS_PRINTF ); debug_printf( 3, "=== END PROFILER RESULTS ===" );
+
+#else
+
+#  define profiler_print()
+#  define profiler_init()
+#  define profiler_set()
+#  define profiler_incr( field )
+
+#endif /* DSEKAI_PROFILER */
+
 int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    int16_t retval = 1,
       map_retval = 0,
@@ -13,6 +43,8 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    struct TILEMAP* t = NULL;
    struct ITEM* items = NULL;
    struct GRAPHICS_RECT loading_sz = { 0, 0, 0, 0 };
+
+   profiler_print();
 
    debug_printf( 1, "starting warp..." );
 
@@ -150,6 +182,8 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
 cleanup:
 
+   profiler_init();
+
    if( NULL != t ) {
       t = (struct TILEMAP*)memory_unlock( state->map_handle );
    }
@@ -258,6 +292,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    /* === Drawing Phase === */
 
+   profiler_set();
+
    /* Blank out canvas if required. */
    if(
       0 > state->menu.menu_id &&
@@ -269,6 +305,9 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    /* Draw background animations before anything else. */
    animate_frame( ANIMATE_FLAG_BG );
+
+   profiler_incr( draw_animate );
+   profiler_set();
 
    if( 0 <= state->menu.menu_id ) {
       /* Draw the menu. */
@@ -286,19 +325,30 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
          state->menu.flags &= ~MENU_FLAG_DIRTY;
       }
 
+      profiler_incr( draw_menu );
+      profiler_set();
+
    } else {
       /* Draw the engine. */
       if( 0 >= window_modal() ) {
          gc_engines_draw[state->engine_type]( state );
       }
+
+      profiler_incr( draw_engine );
+      profiler_set();
    }
 
    /* TODO: Pause weather animations before drawing dialogs. */
 
    window_draw_all();
+
+   profiler_incr( draw_windows );
+   profiler_set();
    
    /* Draw foreground animations after anything else. */
    animate_frame( ANIMATE_FLAG_FG );
+
+   profiler_incr( draw_animate );
 
    /* === Input Phase === */
 
@@ -342,11 +392,18 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    /* === Animation Phase === */
 
+   profiler_set();
+
    engines_animate_mobiles( state );
+
+   profiler_incr( animate_mobiles );
+   profiler_set();
 
    gc_engines_animate[state->engine_type]( state );
 
    graphics_loop_end();
+
+   profiler_incr( animate_engine );
 
 cleanup:
 
