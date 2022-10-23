@@ -165,8 +165,8 @@ unilayer_main() {
 
    window_shutdown();
    script_shutdown();
-   graphics_shutdown();
    input_shutdown();
+   graphics_shutdown();
 
    logging_shutdown();
  
