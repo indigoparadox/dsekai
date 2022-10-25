@@ -80,7 +80,11 @@ cleanup:
 int8_t item_use_food(
    int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
 ) {
+#if defined( DEPTH_VGA ) || defined( DEPTH_CGA )
+#ifndef NO_ANIMATE
    int8_t anim_idx = 0;
+#endif /* !NO_ANIMATE */
+#endif /* DEPTH_VGA || DEPTH_CGA */
    char num_str[10];
    struct MOBILE* user = NULL;
    uint8_t food_val = 0;

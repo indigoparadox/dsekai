@@ -110,6 +110,8 @@ void topdown_draw_tilemap(
             error_printf( "invalid tile id: %d", tile_id );
             continue;
          }
+
+         /* debug_printf( 3, "redraw tile %d, %d", tile_px, tile_py ); */
          
          /* Blit the tile. */
          graphics_blit_tile_at(

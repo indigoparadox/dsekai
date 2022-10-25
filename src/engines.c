@@ -5,7 +5,7 @@
 #include "tmjson.h"
 #include "tmasn.h"
 
-#define PROFILE_FIELDS( f ) f( draw_animate ) f( draw_engine ) f( draw_menu ) f( draw_windows ) f( animate_engine ) f( animate_mobiles ) f( script_mobiles )
+#define PROFILE_FIELDS( f ) f( draw_animate ) f( draw_engine ) f( draw_menu ) f( draw_windows ) f( animate_engine ) f( animate_mobiles ) f( script_mobiles ) f( grow_crops )
 #include "profiler.h"
 
 int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
@@ -172,40 +172,32 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
    int16_t i = 0;
 
    mobile_state_animate( state );
+   profiler_set();
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       if(
-         /* Pause scripts if modal window is pending. */
-         0 >= window_modal() &&
-         /* Pause scripts if screen is scrolling. */
-         DSEKAI_FLAG_INPUT_BLOCKED !=
-            (DSEKAI_FLAG_INPUT_BLOCKED & state->flags) &&
-         /* Pause scripts if menu is open. */
-         0 > state->menu.menu_id &&
-         /* Don't execute/animate inactive mobiles. */
-         MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
+         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
       ) {
-         profiler_set();
-         mobile_execute( &(state->mobiles[i]), state );
-         profiler_incr( script_mobiles );
-         profiler_set();
-         mobile_animate( &(state->mobiles[i]), state );
-         profiler_incr( animate_mobiles );
+         continue;
       }
+      mobile_execute( &(state->mobiles[i]), state );
    }
+   profiler_incr( script_mobiles );
+
    profiler_set();
+   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+      if(
+         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
+      ) {
+         continue;
+      }
+      mobile_animate( &(state->mobiles[i]), state );
+   }
    mobile_animate( &(state->player), state );
    profiler_incr( animate_mobiles );
 
-   if(
-      /* Pause crops if modal window is pending. */
-      0 >= window_modal() &&
-      /* Pause crops if screen is scrolling. */
-      DSEKAI_FLAG_INPUT_BLOCKED != (DSEKAI_FLAG_INPUT_BLOCKED & state->flags) &&
-      /* Pause crops if menu is open. */
-      0 > state->menu.menu_id
-   ) {
-      crop_grow_all( state );
-   }
+   profiler_set();
+   crop_grow_all( state );
+   profiler_incr( grow_crops );
 
 }
 
@@ -371,8 +363,9 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    /* === Animation Phase === */
 
-   engines_animate_mobiles( state );
-
+   if( engines_active( state ) ) {
+      engines_animate_mobiles( state );
+   }
    profiler_set();
    gc_engines_animate[state->engine_type]( state );
    profiler_incr( animate_engine );
