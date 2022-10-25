@@ -1,7 +1,9 @@
 
 # vi:syntax=make
 
-include Makefile
+ifneq ($(CALLER),MASTER)
+   include Makefile.inc
+endif
 
 # 1. Directories
 
@@ -54,7 +56,7 @@ ifeq ($(FMT_JSON),TRUE)
       $(DSEKAI_ASSETS_TILESETS_JSON)
 endif
 
-RESEXT_H := $(GENDIR_WIN16)/resext.h
+RESEXT_H_WIN16 := $(GENDIR_WIN16)/resext.h
 
 # 3. Programs
 
@@ -102,6 +104,7 @@ endif
 # 5. Targets
 
 platform := win16
+platform_upper := WIN16
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
@@ -124,11 +127,11 @@ $(DSEKAI_O_FILES_WIN16) $(OBJDIR_WIN16)/win.res | $(BINDIR)/$(STAMPFILE)
 $(OBJDIR_WIN16)/win.res: $(WIN16_RES_FILES) | $(OBJDIR_WIN16)/$(STAMPFILE)
 	$(RC_WIN16) $(RCFLAGS_WIN16) $< -fo=$@
 
-$(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win.res $(RESEXT_H)
+$(OBJDIR_WIN16)/%.o: %.c $(OBJDIR_WIN16)/win.res $(RESEXT_H_WIN16)
 	$(MD) $(dir $@)
 	$(CC_WIN16) $(CFLAGS_WIN16) -fo=$@ $(<:%.c=%)
 
-#$(DEPDIR_WIN16)/%.d: %.c $(RESEXT_H)
+#$(DEPDIR_WIN16)/%.d: %.c $(RESEXT_H_WIN16)
 #	$(MD) $(dir $@)
 #	$(HOST_CC) $(subst -i=,-I ,$(INCLUDES_WIN16)) $(DEFINES_WIN16) -MM $< \
 #      -MT $(subst .c,.o,$(addprefix $(DEPDIR_WIN32)/,$<)) -MF $@

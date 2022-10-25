@@ -1,7 +1,9 @@
 
 # vi:syntax=make
 
-include Makefile
+ifneq ($(CALLER),MASTER)
+   include Makefile.inc
+endif
 
 # 1. Directories
 
@@ -27,7 +29,7 @@ DSEKAI_O_FILES_SDL := \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_SDL_ONLY))) \
    $(addprefix $(OBJDIR_SDL)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
-RESEXT_H := $(GENDIR_SDL)/resext.h
+RESEXT_H_SDL := $(GENDIR_SDL)/resext.h
 
 # 1a. Packaging Manifest
 
@@ -82,6 +84,7 @@ LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GC
 # 5. Targets
 
 platform := sdl
+platform_upper := SDL
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
@@ -95,11 +98,11 @@ $(eval $(PKG_RULE))
 $(BIN_SDL): $(DSEKAI_O_FILES_SDL) | $(BINDIR)/$(STAMPFILE)
 	$(LD_SDL) -o $@ $^ $(LDFLAGS_SDL)
 
-$(OBJDIR_SDL)/%.o: %.c $(RESEXT_H) | $(DSEKAI_ASSETS_MAPS_JSON)
+$(OBJDIR_SDL)/%.o: %.c $(RESEXT_H_SDL) | $(DSEKAI_ASSETS_MAPS_JSON)
 	$(MD) $(dir $@)
 	$(CC_SDL) $(CFLAGS_SDL) -c -o $@ $(<:%.o=%)
 
-$(DEPDIR_SDL)/%.d: %.c $(RESEXT_H)
+$(DEPDIR_SDL)/%.d: %.c $(RESEXT_H_SDL)
 	$(MD) $(dir $@)
 	$(CC_SDL) $(CFLAGS_SDL) -MM $< \
       -MT $(subst .c,.o,$(addprefix $(DEPDIR_SDL)/,$<)) -MF $@

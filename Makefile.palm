@@ -1,10 +1,16 @@
 
 # vi:syntax=make
 
-include Makefile
+ifneq ($(CALLER),MASTER)
+   include Makefile.inc
+endif
 
 ifneq ($(DEPTH),MONO)
 $(error palm target must be built with MONO DEPTH)
+endif
+
+ifneq ($(RESOURCE),DEFAULT)
+$(error palm target must be built with DEFAULT RESOURCE)
 endif
 
 # 1. Directories
@@ -28,7 +34,7 @@ DSEKAI_O_FILES_PALM := \
    $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
    $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_PALM_ONLY)))
 
-RESEXT_H := $(GENDIR_PALM)/resext.h
+RESEXT_H_PALM := $(GENDIR_PALM)/resext.h
 
 MULIPALM_LD := $(GENDIR_PALM)/mulipalm.ld
 MULIPALM_DEF := src/mulipalm.def
@@ -81,6 +87,7 @@ APPID := DSEK
 # 5. Targets
 
 platform := palm
+platform_upper := PALM
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
@@ -120,7 +127,7 @@ $(BINDIR)/$(STAMPFILE)
 	$(BUILDPRC) -o $@ $(MULIPALM_DEF) $(OBJDIR_PALM)/$(DSEKAI) $(OBJDIR_PALM)/*.bin
 endif
 
-$(OBJDIR_PALM)/%.o: %.c $(GENDIR_PALM)/palmd.rcp $(RESEXT_H)
+$(OBJDIR_PALM)/%.o: %.c $(GENDIR_PALM)/palmd.rcp $(RESEXT_H_PALM)
 	$(MD) $(dir $@)
 	$(CC_PALM) $(CFLAGS_PALM) -c -o $@ $(<:%.o=%)
 

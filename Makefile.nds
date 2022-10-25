@@ -1,5 +1,9 @@
 
-include Makefile
+# vi:syntax=make
+
+ifneq ($(CALLER),MASTER)
+   include Makefile.inc
+endif
 
 # 1. Directories
 
@@ -29,7 +33,7 @@ DSEKAI_O_FILES_NDS := \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY))) \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
-RESEXT_H := $(GENDIR_NDS)/resext.h
+RESEXT_H_NDS := $(GENDIR_NDS)/resext.h
 
 # 3. Programs
 
@@ -73,6 +77,7 @@ $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 # 5. Targets
 
 platform := nds
+platform_upper := NDS
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
@@ -92,7 +97,7 @@ $(GENDIR_NDS)/$(DSEKAI)-1.bmp: $(ASSETDIR)/$(DSEKAI).ico
 $(OBJDIR_NDS)/$(DSEKAI).elf: $(DSEKAI_O_FILES_NDS)
 	$(LD_NDS) $(LDFLAGS_NDS) $^ $(LIBS_NDS) -o $@
 
-$(OBJDIR_NDS)/%.o: %.c $(RESEXT_H) | $(BINDIR)/$(STAMPFILE)
+$(OBJDIR_NDS)/%.o: %.c $(RESEXT_H_NDS) | $(BINDIR)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CC_NDS) $(CFLAGS_NDS) -c -o $@ $(<:%.o=%)
 

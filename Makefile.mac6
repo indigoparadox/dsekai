@@ -1,7 +1,10 @@
 
 # vi:syntax=make
 
-include Makefile
+ifneq ($(CALLER),MASTER)
+   include Makefile.inc
+endif
+
 
 ifneq ($(DEPTH),MONO)
 $(error mac6 target must be built with MONO DEPTH)
@@ -42,7 +45,7 @@ DSEKAI_O_FILES_MAC6 := \
    $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES_MAC6_ONLY))) \
    $(addprefix $(OBJDIR_MAC6)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
-RESEXT_H := $(GENDIR_MAC6)/resext.h
+RESEXT_H_MAC6 := $(GENDIR_MAC6)/resext.h
 
 # 3. Programs
 
@@ -86,6 +89,7 @@ LDFLAGS_MAC6 := -lRetroConsole $(LDFLAGS_GCC_GENERIC)
 #      -lh $(GENDIR_MAC6)/resext.h
 
 platform := mac6
+platform_upper := MAC6
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
@@ -118,7 +122,7 @@ $(BIN_MAC6): $(OBJDIR_MAC6)/$(DSEKAI).code.bin $(BINDIR)/$(STAMPFILE)
       --cc $(BINDIR)/$(DSEKAI).APPL \
       --cc $(BINDIR)/$(DSEKAI).dsk
 
-$(OBJDIR_MAC6)/%.o: %.c $(RESEXT_H)
+$(OBJDIR_MAC6)/%.o: %.c $(RESEXT_H_MAC6)
 	$(MD) $(dir $@)
 	$(CC_MAC6) $(CFLAGS_MAC6) -c -o $@ $(<:%.o=%)
 

@@ -4,11 +4,12 @@ PLATFORMS="dos win16 win32 sdl xlib wasm mac"
 BUILD=DEBUG
 DEBUG_THRESHOLD=1
 ACTION=BUILD
+PKG_ISO=0
+GIT_HASH="`git rev-parse --short HEAD`"
 
 build_sdl() {
    make -f Makefile.sdl DTHRESHOLD=$DEBUG_THRESHOLD BUILD=$BUILD pkg_sdl || exit
    make -f Makefile.sdl DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD pkg_sdl || exit
-   make -f Makefile.sdl DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_JSON=TRUE BUILD=$BUILD pkg_sdl || exit
 }
 
 build_dos() {
@@ -20,11 +21,11 @@ build_win16() {
 }
 
 build_win32() {
-   make -f Makefile.win32 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_JSON=TRUE BUILD=$BUILD ARCFMT=ZIP pkg_win32 || exit
+   make -f Makefile.win32 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD ARCFMT=ZIP pkg_win32 || exit
 }
 
 build_xlib() {
-   make -f Makefile.xlib DTHRESHOLD=$DEBUG_THRESHOLD RESOURCE=FILE FMT_JSON=TRUE BUILD=$BUILD pkg_xlib || exit
+   make -f Makefile.xlib DTHRESHOLD=$DEBUG_THRESHOLD RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD pkg_xlib || exit
 }
 
 build_mac6() {
@@ -50,20 +51,20 @@ do_run() {
       echo "dsekai.exe" >> dsdos/dsdos.bat
       dosemu -2 "dsekai\\dsdos\\dsdos.bat"
    elif [ "$PLAT_SPEC" = "win32" ]; then
-      if [ ! -d pkgbuild/dsekai-win32-*-vga-*-json ]; then
+      if [ ! -d pkgbuild/dsekai-win32-*-vga-*-asn ]; then
          build_win32
       fi
-      cd pkgbuild/dsekai-win32-*-vga-*-json && wine ./dsekai32.exe
+      cd pkgbuild/dsekai-win32-*-vga-*-asn && wine ./dsekai32.exe
    elif [ "$PLAT_SPEC" = "win16" ]; then
       if [ ! -d pkgbuild/dsekai-win16-*-vga-*-asn ]; then
          build_win16
       fi
       cd pkgbuild/dsekai-win16-*-vga-*-asn && wine ./dsekai16.exe
    elif [ "$PLAT_SPEC" = "xlib" ]; then
-      if [ ! -d pkgbuild/dsekai-xlib-*-cga-*-json ]; then
+      if [ ! -d pkgbuild/dsekai-xlib-*-cga-*-asn ]; then
          build_xlib
       fi
-      cd pkgbuild/dsekai-xlib-*-cga-*-json && ./dsekaix
+      cd pkgbuild/dsekai-xlib-*-cga-*-asn && ./dsekaix
    elif [ "$PLAT_SPEC" = "wasm" ]; then
       cd pkgbuild/dsekai-wasm-*-vga-* && python -m http.server
    fi
@@ -123,6 +124,10 @@ while [ "$1" ]; do
          DEBUG_THRESHOLD=
          ;;
 
+      "-i"|"--iso")
+         PKG_ISO=1
+         ;;
+
       *)
          if [ "prof" = "$1" ]; then
             ACTION=PROFILE
@@ -155,6 +160,10 @@ if [ "$ACTION" = "PROFILE" ]; then
 
 elif [ "$ACTION" = "BUILD" ]; then
    do_build
+
+   if [ $PKG_ISO -eq 1 ]; then
+      mkisofs -r -J -V "DSEKAI_$GIT_HASH" -o dsekai.iso packages
+   fi
 
 elif [ "$ACTION" = "RUN" ]; then
    do_run
