@@ -1,10 +1,12 @@
 
-.PHONY: clean
-
-# TODO: Make these overridable!
 CALLER=MASTER
-RESOURCE=FILE
-FMT_ASN=TRUE
+# Build file resources by default, otherwise use win/palm resources.
+ifneq ($(RESOURCE),DEFAULT)
+   RESOURCE=FILE
+endif
+ifneq ($(FMT_JSON),TRUE)
+   FMT_ASN=TRUE
+endif
 
 # Figure out what packages we can build based on platform limitations.
 
@@ -40,6 +42,8 @@ else
       BUILD_PKG_ALL += pkg_wasm
    endif
 endif
+
+.PHONY: clean $(BUILD_PKG_ALL)
 
 all: $(BUILD_PKG_ALL)
 

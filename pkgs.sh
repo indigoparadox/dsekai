@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PLATFORMS="dos win16 win32 sdl xlib wasm mac"
+PLATFORMS="dos win16 win32 sdl xlib wasm mac palm"
 BUILD=DEBUG
 DEBUG_THRESHOLD=1
 ACTION=BUILD

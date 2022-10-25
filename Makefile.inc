@@ -130,6 +130,8 @@ ifeq ($(RESOURCE),FILE)
 
 else
 
+   # Specify "DEFAULT" here because some platforms (e.g. win/palm) use their
+   # own resource format rather than headers.
    RESOURCE := DEFAULT
    DEFINES_RESOURCE := -DRESOURCE_HEADER
    DSEKAI_C_FILES_RES := unilayer/src/resource/header.c
@@ -247,8 +249,10 @@ LOOKUPS := $(BINDIR)/lookups
 MAP2ASN := $(BINDIR)/map2asn
 COMPILE := $(BINDIR)/compile
 
+DEFINES_MAP2ASN := -DNO_RESEXT -DDEBUG_THRESHOLD=1 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG -DDISABLE_WEATHER_EFFECTS -DNO_GUI -DNO_DEBUG_LINE_NUMBER -DNO_ANIMATE
+
 CFLAGS_LOOKUPS := -g $(INCLUDES_UNILAYER)
-CFLAGS_MAP2ASN := -g $(INCLUDES_UNILAYER) -DNO_RESEXT -DDEBUG_THRESHOLD=1 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG $(FLAGS_GCC_SANITIZE) -DDISABLE_WEATHER_EFFECTS -DNO_GUI -DPLATFORM_NULL
+CFLAGS_MAP2ASN := -g $(INCLUDES_UNILAYER) $(FLAGS_GCC_SANITIZE) $(DEFINES_MAP2ASN) -DPLATFORM_NULL
 CFLAGS_COMPILE := -g -Werror -Wall
 
 $(BIN_CHECK): LDFLAGS := $(shell pkg-config check --libs) -g $(LDFLAGS_GCC_GENERIC)
@@ -321,7 +325,7 @@ define RESEXT_H_RULE
 
    res_maps := $(addprefix $(GENDIR)/$(platform)/,$(DSEKAI_ASSETS_MAPS_JSON))
 
-   ifeq ($$(RESOURCE),DEFAULT)
+   ifeq ($$(RESOURCE),HEADER)
 
       # Header was specified explicitly.
 
@@ -408,6 +412,14 @@ endef
 
 define PKG_RULE
    PKGBUILD_$(platform_upper) := pkgbuild/$(pkg_name)$(PKG_OUT_FLAGS)
+
+   $$(PKGBUILD_$(platform_upper))/convert%: $(CONVERT)%
+		$(MD) $$(dir $$@)
+		cp $$< $$@
+
+   $$(PKGBUILD_$(platform_upper))/map2asn%: $(MAP2ASN)%
+		$(MD) $$(dir $$@)
+		cp $$< $$@
 
    $$(PKGBUILD_$(platform_upper))/%: $(GENDIR)/$(platform)/%
 		$(MD) $$(dir $$@)

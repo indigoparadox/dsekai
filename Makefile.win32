@@ -11,6 +11,9 @@ OBJDIR_WIN32 := $(OBJDIR)/win32
 DEPDIR_WIN32 := $(DEPDIR)/win32
 GENDIR_WIN32 := $(GENDIR)/win32
 
+CONVERT_OBJDIR_WIN32 := $(OBJDIR)/convert/win32
+MAP2ASN_OBJDIR_WIN32 := $(OBJDIR)/map2asn/win32
+
 # 2. Files
 
 BIN_WIN32 := $(BINDIR)/$(DSEKAI)32.exe
@@ -39,6 +42,16 @@ ifeq ($(RESOURCE),DEFAULT)
    WIN32_RES_FILES += $(GENDIR_WIN32)/win.rc
 endif
 WIN32_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
+
+# 2b. Utilities
+
+# Rough hack: replace "fake" with "win" to use the correct memory module.
+
+CONVERT_O_FILES_WIN32 := \
+   $(addprefix $(CONVERT_OBJDIR_WIN32)/,$(subst .c,.o,$(subst fake,win,$(CONVERT_C_FILES))))
+
+MAP2ASN_O_FILES_WIN32 := \
+   $(addprefix $(MAP2ASN_OBJDIR_WIN32)/,$(subst .c,.o,$(subst fake,win,$(MAP2ASN_C_FILES))))
 
 # 1a. Packaging Manifest
 
@@ -79,7 +92,9 @@ INCLUDES_WIN32 := \
    -i=$(GENDIR_WIN32) \
    -i=$(INCLUDE)/nt
 
-CFLAGS_WIN32 := -bt=nt -3 $(CFLAGS_OWC_GENERIC) -zp=1 $(DEFINES_WIN32) $(INCLUDES_WIN32)
+CFLAGS_WIN32_BASIC := -bt=nt -3 -zp=1
+
+CFLAGS_WIN32 := $(CFLAGS_WIN32_BASIC) $(CFLAGS_OWC_GENERIC) $(DEFINES_WIN32) $(INCLUDES_WIN32)
 
 ifneq ($(RESOURCE),DEFAULT)
    CFLAGS_WIN32 += $(subst -I ,-I=,$(DEFINES_RESOURCE))
@@ -97,6 +112,10 @@ ifeq ($(RESOURCE),DEFAULT)
    RCFLAGS_WIN32 += -DRESOURCE_WIN
 endif
 
+# 4b. Utilities
+
+CFLAGS_UTILITY_WIN32 := $(CFLAGS_WIN32_BASIC) $(DEFINES_MAP2ASN) $(INCLUDES_WIN32) -DPLATFORM_WIN32
+
 # 5. Targets
 
 platform := win32
@@ -105,7 +124,7 @@ res_gfx := $(DSEKAI_ASSETS_BITMAPS)
 res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
-pkg_bin := $(BIN_WIN32)
+pkg_bin := $(BIN_WIN32) $(BINDIR)/conv32.exe $(BINDIR)/mapasn32.exe
 pkg_strip := echo
 pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
 pkg_reqs := $(WIN32_MANIFEST)
@@ -129,4 +148,19 @@ $(OBJDIR_WIN32)/%.o: %.c $(OBJDIR_WIN32)/win.res $(RESEXT_H_WIN32)
 
 #include $(subst $(OBJDIR)/,$(DEPDIR)/,$(DSEKAI_O_FILES_WIN32:.o=.d))
 
+# 5b. Windows Utilities
+
+$(CONVERT_OBJDIR_WIN32)/%.o: %.c
+	$(MD) $(dir $@)
+	$(CC_WIN32) $(CFLAGS_UTILITY_WIN32) -fo=$@ $(<:%.c=%)
+
+$(BINDIR)/conv32.exe: $(CONVERT_O_FILES_WIN32)
+	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
+
+$(MAP2ASN_OBJDIR_WIN32)/%.o: %.c
+	$(MD) $(dir $@)
+	$(CC_WIN32) $(CFLAGS_UTILITY_WIN32) -fo=$@ $(<:%.c=%)
+
+$(BINDIR)/mapasn32.exe: $(MAP2ASN_O_FILES_WIN32)
+	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
 

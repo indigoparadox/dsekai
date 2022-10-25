@@ -202,6 +202,7 @@ uint16_t script_handle_SPEAK(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
 #if defined( DEPTH_VGA ) || defined( DEPTH_CGA ) || defined( DEPTH_MONO )
+#ifndef NO_GUI
    const char* str_ptr = NULL;
    uint8_t dir_flag = 0;
    
@@ -214,6 +215,7 @@ uint16_t script_handle_SPEAK(
    window_prefab_dialog(
       str_ptr, mobile_get_sprite( actor ), dir_flag,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
+#endif /* !NO_GUI */
 #endif /* SCRIPT_HAS_GFX */
    return pc + 1;
 }
