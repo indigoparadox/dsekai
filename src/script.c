@@ -506,7 +506,7 @@ void script_cmp_action( char* token, size_t token_sz, struct SCRIPT_STEP* s ) {
    while( NULL != gc_sc_tokens[i] ) {
       if( 0 == memory_strncmp_ptr( token, gc_sc_tokens[i], token_sz ) ) {
          s->action = i;
-         debug_printf( 1, "action: %s\n", gc_sc_tokens[i] );
+         debug_printf( 1, " action: %s\n", gc_sc_tokens[i] );
          return;
       }
       i++;
@@ -557,23 +557,23 @@ void script_parse_src( char c, struct SCRIPT_COMPILE_STATE* s ) {
          /* Colons happen in comments sometimes. */
          break;
       }
-      s->action[s->action_sz].arg = atoi( s->token_iter );
+      s->steps[s->steps_sz].arg = atoi( s->token_iter );
          
       debug_printf( 1, " action: %d, l: %d\n",
-         s->action[s->action_sz].action, s->action[s->action_sz].arg );
+         s->steps[s->steps_sz].action, s->steps[s->steps_sz].arg );
 
       /* Make sure this is an instruction that can be a label. */
       assert(
-         SCRIPT_ACTION_START == s->action[s->action_sz].action ||
-         SCRIPT_ACTION_INTERACT == s->action[s->action_sz].action );
+         SCRIPT_ACTION_START == s->steps[s->steps_sz].action ||
+         SCRIPT_ACTION_INTERACT == s->steps[s->steps_sz].action );
 
-      if( 7 == s->action[s->action_sz].action ) {
+      if( 7 == s->steps[s->steps_sz].action ) {
          /* Only increment start count if this is a START. */
          /* (Multiple INTERACTs don't make sense. */
-         s->action[s->action_sz].arg = s->last_start++;
+         s->steps[s->steps_sz].arg = s->last_start++;
       }
 
-      s->action_sz++;
+      s->steps_sz++;
       script_reset_token( s );
       break;
 
@@ -603,8 +603,8 @@ void script_parse_src( char c, struct SCRIPT_COMPILE_STATE* s ) {
       }
 
       /* Process token. */
-      debug_printf( 1, " token: %s\n", s->token_iter );
-      if( 0 < s->action[s->action_sz].action ) {
+      debug_printf( 1, "token: %s\n", s->token_iter );
+      if( 0 < s->steps[s->steps_sz].action ) {
          /* Set arg and advance instruction. */
          
          arg_tmp = script_arg_special( s->token_iter, s->token_iter_sz );
@@ -613,14 +613,14 @@ void script_parse_src( char c, struct SCRIPT_COMPILE_STATE* s ) {
          if( 0 > arg_tmp ) {
             arg_tmp = atoi( s->token_iter );
          }
-         s->action[s->action_sz].arg = arg_tmp;
-         debug_printf( 1, " arg: %d\n", s->action[s->action_sz].arg );
-         s->action_sz++;
+         s->steps[s->steps_sz].arg = arg_tmp;
+         debug_printf( 1, " arg: %d\n", s->steps[s->steps_sz].arg );
+         s->steps_sz++;
       
       } else {
          /* Read instruction. */
          script_cmp_action(
-            s->token_iter, s->token_iter_sz, &(s->action[s->action_sz]) );
+            s->token_iter, s->token_iter_sz, &(s->steps[s->steps_sz]) );
       }
       script_reset_token( s );
       break;
@@ -637,6 +637,8 @@ void script_parse_src( char c, struct SCRIPT_COMPILE_STATE* s ) {
 }
 
 #endif /* !NO_SCRIPT_COMPILER */
+
+#if 0
 
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;
 
@@ -691,6 +693,8 @@ uint16_t script_parse_str(
 
    return script->steps_count;
 }
+
+#endif
 
 uint8_t script_init() {
    memory_zero_ptr( (MEMORY_PTR)&g_script_globals, sizeof( g_script_globals ) );

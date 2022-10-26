@@ -71,9 +71,6 @@ struct TILEMAP;
 /*! \brief Maximum number of global script flags available. */
 #define SCRIPT_GLOBALS_MAX 20
 
-/*! \brief Maximum length of a script in text form. */
-#define SCRIPT_STR_MAX 1024
-
 /*! \brief Maximum value an item stored on MOBILE::script_stack. */
 #define SCRIPT_STACK_MAX 127
 

@@ -124,6 +124,11 @@
 #define SCRIPT_STEPS_MAX 128
 #endif /* !SCRIPT_STEPS_MAX */
 
+#ifndef SCRIPT_STR_MAX
+/*! \brief Maximum length of a script in text form. */
+#define SCRIPT_STR_MAX 4096
+#endif /* !SCRIPT_STR_MAX */
+
 /*! \} */ /* scripting */
 
 /**

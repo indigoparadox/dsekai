@@ -22,6 +22,7 @@ int main( int argc, char** argv ) {
       i = 0;
    uint8_t* in_bytes = NULL;
    struct SCRIPT_COMPILE_STATE s;
+   struct SCRIPT_STEP steps[SCRIPT_STEPS_MAX];
    char* filename = NULL;
 
    /* TODO: Use unilayer functions! */
@@ -59,6 +60,8 @@ int main( int argc, char** argv ) {
 
    /* Parse. */
    memset( &s, '\0', sizeof( struct SCRIPT_COMPILE_STATE ) );
+   memset( &steps, '\0', sizeof( struct SCRIPT_STEP ) * SCRIPT_STEPS_MAX );
+   s.steps = steps;
 
    for( i = 0 ; in_sz > i ; i++ ) {
       script_parse_src( in_bytes[i], &s );
@@ -66,8 +69,8 @@ int main( int argc, char** argv ) {
 
    /* Display bytes. */
    printf( "\n" );
-   for( i = 0 ; s.action_sz > i ; i++ ) {
-      printf( "%c%d", gc_sc_bytes[s.action[i].action], s.action[i].arg );
+   for( i = 0 ; s.steps_sz > i ; i++ ) {
+      printf( "%c%d", gc_sc_bytes[s.steps[i].action], s.steps[i].arg );
    }
    printf( "\n" );
 

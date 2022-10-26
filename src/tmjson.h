@@ -72,7 +72,7 @@
 /*! \brief JSON path to mobile name. */
 #define TILEMAP_JPATH_MOB_NAME   "/layers/[name=mobiles]/objects/%d/name"
 /*! \brief JSON path to TILEMAP_SPAWN::type. */
-#define TILEMAP_JPATH_MOB_SPRITE   "/layers/[name=mobiles]/objects/%d/type"
+#define TILEMAP_JPATH_MOB_SPRITE   "/layers/[name=mobiles]/objects/%d/class"
 /*! \brief JSON path to TILEMAP_SPAWN::gid. */
 #define TILEMAP_JPATH_MOB_GID   "/layers/[name=mobiles]/objects/%d/properties/[name=gid]/value"
 /*! \brief JSON path to mobile script index. */
@@ -86,7 +86,7 @@
 #define TILEMAP_JPATH_TS_FLAGS "/tiles/%d/properties/[name=flags]/value"
 #define TILEMAP_JPATH_ITEM_GID "/layers/[name=items]/objects/%d/properties/[name=gid]/value"
 #define TILEMAP_JPATH_ITEM_NAME "/layers/[name=items]/objects/%d/name"
-#define TILEMAP_JPATH_ITEM_TYPE "/layers/[name=items]/objects/%d/type"
+#define TILEMAP_JPATH_ITEM_TYPE "/layers/[name=items]/objects/%d/class"
 #define TILEMAP_JPATH_ITEM_SPRITE "/layers/[name=items]/objects/%d/properties/[name=sprite]/value"
 #define TILEMAP_JPATH_ITEM_DATA "/layers/[name=items]/objects/%d/properties/[name=data]/value"
 #define TILEMAP_JPATH_ITEM_CRAFTABLE "/layers/[name=items]/objects/%d/properties/[name=craftable]/value"

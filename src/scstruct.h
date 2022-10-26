@@ -50,8 +50,8 @@ struct SCRIPT_COMPILE_STATE {
    uint8_t flags;
    char token_iter[SCRIPT_TOKEN_ITER_SZ_MAX + 1];
    size_t token_iter_sz;
-   struct SCRIPT_STEP action[SCRIPT_STEPS_MAX];
-   size_t action_sz;
+   struct SCRIPT_STEP* steps;
+   size_t steps_sz;
    int16_t last_start;
 };
 

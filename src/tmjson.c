@@ -12,8 +12,8 @@ static int16_t tilemap_json_parse_spawn(
    const RESOURCE_ID map_path
 ) {
    struct TILEMAP_SPAWN* spawn = (struct TILEMAP_SPAWN*)&(t->spawns[spawn_idx]);
-   char spawn_buffer[RESOURCE_PATH_MAX];
-   char iter_path[JSON_PATH_SZ];
+   char spawn_buffer[RESOURCE_PATH_MAX + 1] = { 0 };
+   char iter_path[JSON_PATH_SZ] = { 0 };
    int16_t spawn_buffer_sz = 0,
       x_px_in = 0,
       y_px_in = 0;
@@ -123,7 +123,7 @@ static int16_t tilemap_json_parse_tileset(
 ) {
    int16_t i = 0,
       tile_filename_sz = 0;
-   char tile_filename[RESOURCE_PATH_MAX],
+   char tile_filename[RESOURCE_PATH_MAX + 1] = { 0 },
       tile_json_path[JSON_PATH_SZ];
 
    do {
@@ -204,34 +204,85 @@ static int8_t tilemap_json_tile(
 
 static void tilemap_json_parse_scripts(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
-   struct jsmntok* tokens, uint16_t tokens_sz
+   struct jsmntok* tokens, uint16_t tokens_sz, const RESOURCE_ID map_path
 ) {
    char iter_path[JSON_PATH_SZ];
    int16_t i = 0,
+      j = 0,
       script_buffer_sz = 0,
+      script_path_sz = 0,
       loaded = 0;
-   char script_buffer[SCRIPT_STR_MAX];
+   char* script_buffer = NULL;
+   char script_path[RESOURCE_PATH_MAX + 1] = { 0 };
+   struct SCRIPT_COMPILE_STATE s;
+   RESOURCE_HANDLE script_buffer_h = (RESOURCE_HANDLE)0;
 
    /* TODO: Call the compiler from here with a path from the tilemap. */
-   
+
    /* Load scripts.*/
    debug_printf( 2, "loading scripts" ); 
    for( i = 0 ; TILEMAP_SCRIPTS_MAX > i ; i++ ) {
-      memory_zero_ptr( script_buffer, SCRIPT_STR_MAX );
+      memory_zero_ptr( script_path, RESOURCE_PATH_MAX + 1 );
+      memory_zero_ptr( &s, sizeof( struct SCRIPT_COMPILE_STATE ) );
+      memory_zero_ptr(
+         &(t->scripts[i]), sizeof( struct SCRIPT_STEP ) * SCRIPT_STEPS_MAX );
+
+#ifndef NO_FIX_ASSET_PATH
+      script_path_sz = tilemap_fix_asset_path(
+         script_path, RESOURCE_PATH_MAX, map_path );
+#endif /* NO_FIX_ASSET_PATH */
+
+      /* Grab the script file path from the tilemap. */
       dio_snprintf(
          iter_path, JSON_PATH_SZ, TILEMAP_JPATH_SCRIPT, i );
-      script_buffer[0] = '\0';
-      script_buffer_sz = json_str_from_path(
+      script_path_sz = json_str_from_path(
          iter_path, JSON_PATH_SZ,
-         script_buffer, SCRIPT_STR_MAX,
+         &(script_path[script_path_sz]), RESOURCE_PATH_MAX - script_path_sz,
          &(tokens[0]), tokens_sz, json_buffer );
-      if( 0 >= script_buffer_sz ) {
-         error_printf( "invalid script returned (loaded %d)", loaded );
-         break;
+      if( 0 >= script_path_sz ) {
+         error_printf( "invalid script path returned (loaded %d)", loaded );
+         goto cleanup;
       }
+
+      debug_printf( 1, "opening script %s...", script_path );
+      script_buffer_h = resource_get_handle( script_path );
+      if( (RESOURCE_HANDLE)0 == script_buffer_h ) {
+         error_printf( "could not get handle for %s!", script_path );
+         goto cleanup;
+      }
+
+      debug_printf( 2, "compiling script %s...", script_path );
+
+      script_buffer_sz = memory_sz( script_buffer_h );
+      script_buffer = memory_lock( script_buffer_h );
+      assert( NULL != script_buffer );
+      s.steps = t->scripts[i].steps;
+
+      for( j = 0 ; script_buffer_sz > j ; j++ ) {
+         script_parse_src( script_buffer[j], &s );
+      }
+
+      t->scripts[i].steps_count = s.steps_sz;
+
+      script_buffer = memory_unlock( script_buffer_h );
+
+      /*
       script_parse_str( i, script_buffer, script_buffer_sz, &(t->scripts[i]) );
+      */
+
       loaded++;
    }
+
+cleanup:
+
+   if( NULL != script_buffer ) {
+      script_buffer = memory_unlock( script_buffer_h );
+   }
+
+   if( (RESOURCE_HANDLE)0 != script_buffer_h ) {
+      memory_free( script_buffer_h );
+   }
+
 }
 
 static void tilemap_json_parse_strings(
@@ -383,7 +434,7 @@ int16_t tilemap_json_parse_items(
       sprite_buffer_sz = 0,
       type_buffer_sz = 0,
       name_buffer_sz = 0;
-   char sprite_buffer[RESOURCE_PATH_MAX],
+   char sprite_buffer[RESOURCE_PATH_MAX + 1] = { 0 },
       type_buffer[ITEM_NAME_SZ + 1];
    
    /* Load items.*/
@@ -483,7 +534,7 @@ int16_t tilemap_json_parse_crop_defs(
    int16_t i = 0,
       sprite_buffer_sz = 0,
       name_buffer_sz = 0;
-   char sprite_buffer[RESOURCE_PATH_MAX];
+   char sprite_buffer[RESOURCE_PATH_MAX + 1] = { 0 };
    
    /* Load crop definitions.*/
    debug_printf( 2, "loading crop definitions" ); 
@@ -624,6 +675,7 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
 
    debug_printf( 2, "tilemap %s (%d) flags: %02x", t->name, t->gid, t->flags );
 
+   /* XXX: Is fix_asset_path being used correctly here? */
    ts_name_sz = tilemap_fix_asset_path(
       ts_name, RESOURCE_PATH_MAX, id );
    ts_name_sz += json_str_from_path(
@@ -686,7 +738,7 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
       t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
 
    tilemap_json_parse_scripts(
-      t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
+      t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX, id );
 
 cleanup:
 

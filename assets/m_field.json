@@ -67,6 +67,7 @@
          "name":"mobiles",
          "objects":[
                 {
+                 "class":"16x16x4\/s_robe.bmp",
                  "height":10,
                  "id":5,
                  "name":"player",
@@ -77,13 +78,13 @@
                          "value":1
                         }],
                  "rotation":0,
-                 "type":"16x16x4\/s_robe.bmp",
                  "visible":true,
                  "width":12.5,
                  "x":104,
                  "y":88.5
                 }, 
                 {
+                 "class":"16x16x4\/s_fount.bmp",
                  "height":13,
                  "id":11,
                  "name":"wtempl",
@@ -99,13 +100,13 @@
                          "value":3
                         }],
                  "rotation":0,
-                 "type":"16x16x4\/s_fount.bmp",
                  "visible":true,
                  "width":12.5,
                  "x":65.5,
                  "y":3
                 }, 
                 {
+                 "class":"16x16x4\/s_pncess.bmp",
                  "height":0,
                  "id":6,
                  "name":"princess",
@@ -126,13 +127,13 @@
                          "value":1
                         }],
                  "rotation":0,
-                 "type":"16x16x4\/s_pncess.bmp",
                  "visible":true,
                  "width":0,
                  "x":46,
                  "y":45
                 }, 
                 {
+                 "class":"16x16x4\/s_fount.bmp",
                  "height":0,
                  "id":7,
                  "name":"fountain",
@@ -148,13 +149,13 @@
                          "value":1
                         }],
                  "rotation":0,
-                 "type":"16x16x4\/s_fount.bmp",
                  "visible":true,
                  "width":0,
                  "x":78.5,
                  "y":215
                 }, 
                 {
+                 "class":"16x16x4\/s_fount.bmp",
                  "height":13,
                  "id":9,
                  "name":"tree",
@@ -170,13 +171,13 @@
                          "value":2
                         }],
                  "rotation":0,
-                 "type":"16x16x4\/s_fount.bmp",
                  "visible":true,
                  "width":11,
                  "x":257.5,
                  "y":83.5
                 }, 
                 {
+                 "class":"16x16x4\/s_fount.bmp",
                  "height":11.5,
                  "id":12,
                  "name":"wforst",
@@ -192,13 +193,13 @@
                          "value":4
                         }],
                  "rotation":0,
-                 "type":"16x16x4\/s_fount.bmp",
                  "visible":true,
                  "width":12,
                  "x":81.5,
                  "y":243.5
                 }, 
                 {
+                 "class":"16x16x4\/s_maid.bmp",
                  "height":11.5,
                  "id":13,
                  "name":"maid",
@@ -219,13 +220,13 @@
                          "value":1
                         }],
                  "rotation":0,
-                 "type":"16x16x4\/s_maid.bmp",
                  "visible":true,
                  "width":10.5,
                  "x":62.5,
                  "y":58
                 }, 
                 {
+                 "class":"16x16x4\/s_fount.bmp",
                  "height":11.5,
                  "id":13,
                  "name":"chest",
@@ -241,7 +242,6 @@
                          "value":5
                         }],
                  "rotation":0,
-                 "type":"16x16x4\/s_fount.bmp",
                  "visible":true,
                  "width":10.5,
                  "x":117,
@@ -259,6 +259,7 @@
          "name":"crops",
          "objects":[
                 {
+                 "class":"",
                  "height":12.5,
                  "id":18,
                  "name":"turnip",
@@ -289,7 +290,6 @@
                          "value":"16x16x4\/c_turnip.bmp"
                         }],
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":11.5,
                  "x":12.5,
@@ -307,6 +307,7 @@
          "name":"items",
          "objects":[
                 {
+                 "class":"seed",
                  "height":12,
                  "id":14,
                  "name":"tseed",
@@ -327,13 +328,13 @@
                          "value":"16x16x4\/i_seed.bmp"
                         }],
                  "rotation":0,
-                 "type":"seed",
                  "visible":true,
                  "width":18.5,
                  "x":9.5,
                  "y":-43
                 }, 
                 {
+                 "class":"food",
                  "height":12,
                  "id":15,
                  "name":"apple",
@@ -354,13 +355,13 @@
                          "value":"16x16x4\/i_apple.bmp"
                         }],
                  "rotation":0,
-                 "type":"food",
                  "visible":true,
                  "width":13.5,
                  "x":48.5,
                  "y":-41.5
                 }, 
                 {
+                 "class":"editor",
                  "height":10.5,
                  "id":16,
                  "name":"editor",
@@ -381,13 +382,13 @@
                          "value":"16x16x4\/i_hammer.bmp"
                         }],
                  "rotation":0,
-                 "type":"editor",
                  "visible":true,
                  "width":14.5,
                  "x":79,
                  "y":-43
                 }, 
                 {
+                 "class":"hoe",
                  "height":10.5,
                  "id":16,
                  "name":"hoe",
@@ -408,13 +409,13 @@
                          "value":"16x16x4\/i_hoe.bmp"
                         }],
                  "rotation":0,
-                 "type":"hoe",
                  "visible":true,
                  "width":14.5,
                  "x":100.5,
                  "y":-42.5
                 }, 
                 {
+                 "class":"food",
                  "height":14.5,
                  "id":19,
                  "name":"turnip",
@@ -435,7 +436,6 @@
                          "value":"16x16x4\/i_turnip.bmp"
                         }],
                  "rotation":0,
-                 "type":"food",
                  "visible":true,
                  "width":15.5,
                  "x":127.5,
@@ -453,11 +453,11 @@
          "name":"resources",
          "objects":[
                 {
+                 "class":"",
                  "height":0,
                  "id":17,
                  "name":"",
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":0,
                  "x":215,
@@ -491,37 +491,37 @@
         {
          "name":"script_0",
          "type":"string",
-         "value":"t0f2v2u1s3v2u1s9f3v3u1s3v3u1s9g0i0p0h1234^0d0x32767i1p8d0x32765"
+         "value":"m_field\/princess.s"
         }, 
         {
          "name":"script_1",
          "type":"string",
-         "value":"t0s5g0i0p2d0x32765"
+         "value":"m_field\/fountain.s"
         }, 
         {
          "name":"script_2",
          "type":"string",
-         "value":"t0f1s5g0i0p3h1235z0x32767"
+         "value":"m_field\/tree.s"
         }, 
         {
          "name":"script_3",
          "type":"string",
-         "value":"t0f2s5g0i0v14v38w4d0x32765"
+         "value":"m_field\/wtempl.s"
         }, 
         {
          "name":"script_4",
          "type":"string",
-         "value":"t0f2s5g0i0v5v1w5d0x32765"
+         "value":"m_field\/wforst.s"
         }, 
         {
          "name":"script_5",
          "type":"string",
-         "value":"t0f3s5g0i0p6h1236z0x32767"
+         "value":"m_field\/chest.s"
         }, 
         {
          "name":"script_6",
          "type":"string",
-         "value":"t0s5g0i0p7h1237d0x32767i1p8d0x32765"
+         "value":"m_field\/maid.s"
         }, 
         {
          "name":"string_0",
@@ -574,7 +574,7 @@
          "value":"clear"
         }],
  "renderorder":"right-down",
- "tiledversion":"1.8.5",
+ "tiledversion":"1.9.2",
  "tileheight":16,
  "tilesets":[
         {
@@ -583,6 +583,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":"1.8",
+ "version":"1.9",
  "width":40
 }
