@@ -107,7 +107,6 @@ endif
 platform := win16
 platform_upper := WIN16
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_WIN16)

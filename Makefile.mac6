@@ -91,7 +91,6 @@ LDFLAGS_MAC6 := -lRetroConsole $(LDFLAGS_GCC_GENERIC)
 platform := mac6
 platform_upper := MAC6
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BINDIR)/$(DSEKAI).APPL

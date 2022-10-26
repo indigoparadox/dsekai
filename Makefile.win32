@@ -121,7 +121,6 @@ CFLAGS_UTILITY_WIN32 := $(CFLAGS_WIN32_BASIC) $(DEFINES_MAP2ASN) $(INCLUDES_WIN3
 platform := win32
 platform_upper := WIN32
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_WIN32) $(BINDIR)/conv32.exe $(BINDIR)/mapasn32.exe

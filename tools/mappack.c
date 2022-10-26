@@ -301,7 +301,7 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
 
 cleanup:
 
-   return 0;
+   return retval;
 }
 
 int mappack_index( const char* paths_in[], int paths_in_sz, FILE* header ) {

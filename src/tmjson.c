@@ -202,7 +202,7 @@ static int8_t tilemap_json_tile(
    return tile_id_in;
 }
 
-static void tilemap_json_parse_scripts(
+static int16_t tilemap_json_parse_scripts(
    struct TILEMAP* t, char* json_buffer, uint16_t json_buffer_sz,
    struct jsmntok* tokens, uint16_t tokens_sz, const RESOURCE_ID map_path
 ) {
@@ -216,8 +216,6 @@ static void tilemap_json_parse_scripts(
    char script_path[RESOURCE_PATH_MAX + 1] = { 0 };
    struct SCRIPT_COMPILE_STATE s;
    RESOURCE_HANDLE script_buffer_h = (RESOURCE_HANDLE)0;
-
-   /* TODO: Call the compiler from here with a path from the tilemap. */
 
    /* Load scripts.*/
    debug_printf( 2, "loading scripts" ); 
@@ -248,10 +246,11 @@ static void tilemap_json_parse_scripts(
       script_buffer_h = resource_get_handle( script_path );
       if( (RESOURCE_HANDLE)0 == script_buffer_h ) {
          error_printf( "could not get handle for %s!", script_path );
+         loaded = -1;
          goto cleanup;
       }
 
-      debug_printf( 2, "compiling script %s...", script_path );
+      debug_printf( 2, "compiling script #%d: %s...", i, script_path );
 
       script_buffer_sz = memory_sz( script_buffer_h );
       script_buffer = memory_lock( script_buffer_h );
@@ -262,9 +261,12 @@ static void tilemap_json_parse_scripts(
          script_parse_src( script_buffer[j], &s );
       }
 
+      debug_printf( 1, "script #%d is %d steps long", i, s.steps_sz );
       t->scripts[i].steps_count = s.steps_sz;
 
       script_buffer = memory_unlock( script_buffer_h );
+      memory_free( script_buffer_h );
+      script_buffer_h = (RESOURCE_HANDLE)0;
 
       /*
       script_parse_str( i, script_buffer, script_buffer_sz, &(t->scripts[i]) );
@@ -283,6 +285,7 @@ cleanup:
       memory_free( script_buffer_h );
    }
 
+   return loaded;
 }
 
 static void tilemap_json_parse_strings(
@@ -737,8 +740,13 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
    tilemap_json_parse_strings(
       t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX );
 
-   tilemap_json_parse_scripts(
-      t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX, id );
+   if( 0 > tilemap_json_parse_scripts(
+      t, json_buffer, json_buffer_sz, tokens, JSON_TOKENS_MAX, id )
+   ) {
+      error_printf( "error parsing tilemap scripts!" );
+      retval = 0;
+      goto cleanup;
+   }
 
 cleanup:
 

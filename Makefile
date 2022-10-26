@@ -3,9 +3,9 @@ CALLER=MASTER
 # Build file resources by default, otherwise use win/palm resources.
 ifneq ($(RESOURCE),DEFAULT)
    RESOURCE=FILE
-endif
 ifneq ($(FMT_JSON),TRUE)
    FMT_ASN=TRUE
+endif
 endif
 
 # Figure out what packages we can build based on platform limitations.

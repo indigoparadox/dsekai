@@ -514,7 +514,7 @@ static int32_t tilemap_asn_parse_scripts(
       goto cleanup;
    }
    debug_printf(
-      1, "all scripts sequence is %d bytes long...", all_scripts_seq_sz );
+      1, "all scripts sequence is %d bytes long", all_scripts_seq_sz );
 
    while( total_read_sz < all_scripts_seq_sz ) {
       debug_printf( 1, "script idx: %d", script_idx );
@@ -690,6 +690,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    idx += read_sz;
 
    /* scripts */
+   debug_printf( 1, "scripts sequence at %d", idx );
    read_sz = tilemap_asn_parse_scripts( t, &(asn_buffer[idx]) );
    if( 0 >= read_sz ) {
       retval = read_sz;

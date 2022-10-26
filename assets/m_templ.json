@@ -59,6 +59,7 @@
          "name":"mobiles",
          "objects":[
                 {
+                 "class":"16x16x4\/s_fount.bmp",
                  "height":8,
                  "id":1,
                  "name":"tfield",
@@ -69,7 +70,6 @@
                          "value":0
                         }],
                  "rotation":0,
-                 "type":"16x16x4\/s_fount.bmp",
                  "visible":true,
                  "width":8.25000000000003,
                  "x":227.789835074578,
@@ -108,7 +108,7 @@
         {
          "name":"script_0",
          "type":"string",
-         "value":"t0f2s5g0i0v4v1w0x32767"
+         "value":"m_templ\/wfield.s"
         }, 
         {
          "name":"string_0",
@@ -121,7 +121,7 @@
          "value":"clear"
         }],
  "renderorder":"right-down",
- "tiledversion":"1.8.5",
+ "tiledversion":"1.9.2",
  "tileheight":16,
  "tilesets":[
         {
@@ -130,6 +130,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":"1.8",
+ "version":"1.9",
  "width":40
 }

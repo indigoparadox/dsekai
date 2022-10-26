@@ -603,7 +603,7 @@ void script_parse_src( char c, struct SCRIPT_COMPILE_STATE* s ) {
       }
 
       /* Process token. */
-      debug_printf( 1, "token: %s\n", s->token_iter );
+      debug_printf( 1, "token #%d: %s\n", s->steps_sz, s->token_iter );
       if( 0 < s->steps[s->steps_sz].action ) {
          /* Set arg and advance instruction. */
          

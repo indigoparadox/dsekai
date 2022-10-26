@@ -46,7 +46,8 @@ endif
 ifeq ($(FMT_JSON),TRUE)
    SDL_MANIFEST += \
       $(DSEKAI_ASSETS_MAPS_JSON) \
-      $(DSEKAI_ASSETS_TILESETS_JSON)
+      $(DSEKAI_ASSETS_TILESETS_JSON) \
+      $(DSEKAI_ASSETS_SCRIPTS)
 endif
 
 # 3. Programs
@@ -86,7 +87,6 @@ LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GC
 platform := sdl
 platform_upper := SDL
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_SDL) $(CONVERT) $(MAP2ASN)

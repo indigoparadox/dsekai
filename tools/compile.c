@@ -5,9 +5,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-/* TODO: Work this compiler into src/script.c so it can be called by tmjson.c!
- */
-
 #include "../src/dsekai.h"
 
 uint8_t g_flags = 0;

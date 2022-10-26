@@ -70,7 +70,6 @@ endif
 platform := wasm
 platform_upper := WASM
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_WASM) \

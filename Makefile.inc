@@ -227,6 +227,7 @@ DSEKAI_ASSETS_BITMAPS := \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/p_*.bmp) \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/i_*.bmp) \
    $(wildcard $(ASSETDIR)/$(DEPTH_SPEC)/c_*.bmp)
+DSEKAI_ASSETS_SCRIPTS := $(wildcard $(ASSETDIR)/*/*.s)
 
 DSEKAI_ASSETS_MAPS_JSON := \
    $(ASSETDIR)/m_field.json \
@@ -308,6 +309,10 @@ define RESEXT_H_RULE
 		$(MD) $$(dir $$@)
 		cp $$< $$@
 
+   $(GENDIR)/$(platform)/$(ASSETDIR)/%.s: $(ASSETDIR)/%.s
+		$(MD) $$(dir $$@)
+		cp $$< $$@
+
    # Preprocess JSON maps/tilesets for depth path.
    $(GENDIR)/$(platform)/$(ASSETDIR)/t2_%.json: $(ASSETDIR)/t2_%.json \
    | $(GENDIR)/$(platform)/$(STAMPFILE)
@@ -325,6 +330,7 @@ define RESEXT_H_RULE
    $(GENDIR)/$(platform)/$(ASSETDIR)/m_%.asn: \
    $(GENDIR)/$(platform)/$(ASSETDIR)/m_%.json \
    $(GENDIR)/$(platform)/$(ASSETDIR)/t2_%.json \
+   $(addprefix $(GENDIR)/$(platform)/,$(DSEKAI_ASSETS_SCRIPTS)) \
    | $(MAP2ASN)
 		cd $(GENDIR)/$(platform) && ../../$(MAP2ASN) \
          $$(subst $(GENDIR)/$(platform)/,,$$<) ../../$$@
@@ -336,7 +342,8 @@ define RESEXT_H_RULE
       # Header was specified explicitly.
 
       $(GENDIR)/$(platform)/resemb.h: $(res_gfx) $$(res_maps) | \
-      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
+      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK) \
+      $(addprefix $(GENDIR)/$(platform)/,$(DSEKAI_ASSETS_SCRIPTS))
 			$(HEADPACK) $$@ $$^
 
       $$(RESEXT_H_$(platform_upper)): $(GENDIR)/$(platform)/resemb.h
@@ -370,7 +377,8 @@ define RESEXT_H_RULE
       # Embed maps in preparsed structs.
 
       $(GENDIR)/$(platform)/resemb.h: $$(res_maps) | \
-      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
+      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK) \
+      $(addprefix $(GENDIR)/$(platform)/,$(DSEKAI_ASSETS_SCRIPTS))
 			$(HEADPACK) $$@ $$^
 
       $$(RESEXT_H_$(platform_upper)): \
@@ -393,7 +401,8 @@ define RESEXT_H_RULE
       # Embed maps in preparsed structs.
 
       $(GENDIR)/$(platform)/resemb.h: $$(res_maps) | \
-      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
+      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK) \
+      $(addprefix $(GENDIR)/$(platform)/,$(DSEKAI_ASSETS_SCRIPTS))
 			$(HEADPACK) $$@ $$^
 
       $$(RESEXT_H_$(platform_upper)): \
@@ -406,7 +415,8 @@ define RESEXT_H_RULE
       # For all other platforms, default to header.
 
       $(GENDIR)/$(platform)/resemb.h: $(res_gfx) $$(res_maps) | \
-      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK)
+      $(GENDIR)/$(platform)/$(STAMPFILE) $(HEADPACK) \
+      $(addprefix $(GENDIR)/$(platform)/,$(DSEKAI_ASSETS_SCRIPTS))
 			$(HEADPACK) $$@ $$^
 
       $$(RESEXT_H_$(platform_upper)): $(GENDIR)/$(platform)/resemb.h

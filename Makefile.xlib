@@ -84,7 +84,6 @@ LDFLAGS_XLIB := -lX11 -lm $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 platform := xlib
 platform_upper := XLIB
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_XLIB) $(CONVERT) $(MAP2ASN)

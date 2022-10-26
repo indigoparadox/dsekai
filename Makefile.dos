@@ -132,7 +132,6 @@ else
    # Assume CGA by default.
    res_gfx := $(subst .bmp,.cga,$(subst $(ASSETDIR)/,$(GENDIR_DOS)/,$(DSEKAI_ASSETS_BITMAPS)))
 endif
-res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 # DOS utilities give stack overflow right now.
