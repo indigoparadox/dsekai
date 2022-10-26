@@ -10,6 +10,16 @@
 #define SCRIPT_HAS_GFX
 #endif /* SCREEN_W && SCREEN_H */
 
+#ifdef NO_SCRIPT_HANDLERS
+
+/* Create stubs for all handlers. */
+
+#define SCRIPT_CB_TABLE_STUBS( idx, name, c ) uint16_t script_handle_ ## name( uint16_t pc, struct SCRIPT* script, struct TILEMAP* t, struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile, struct DSEKAI_STATE* state, int16_t arg ) { return pc; }
+
+SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_STUBS )
+
+#else
+
 uint16_t script_handle_NOOP(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
@@ -470,6 +480,8 @@ uint16_t script_handle_DISABLE(
    }
    return pc + 1;
 }
+
+#endif /* NO_SCRIPT_HANDLERS */
 
 #define SCRIPT_CB_TABLE_PARSE( idx, name, c ) case c: script->steps[script->steps_count].action = idx; c_idx++; break;
 

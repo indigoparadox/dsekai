@@ -131,5 +131,52 @@ void tilemap_deinit( struct TILEMAP* ) SECTION_TILEMAP;
 
 /*! \} */
 
+#  ifdef TILEMAP_C
+
+#     ifdef RESOURCE_FILE
+
+#        include "tmjson.h"
+#        include "tmasn.h"
+
+/* Get the real path to the tileset (it's JSON so assume file paths). */
+/* Resource IDs would be using pre-parsed maps. */
+
+uint16_t tilemap_fix_asset_path(
+   char* path_in, uint16_t path_in_sz, const char* map_path
+) {
+   uint16_t path_sz_out = 0,
+      map_path_sz = 0;
+
+   map_path_sz = memory_strnlen_ptr( map_path, RESOURCE_PATH_MAX );
+   path_sz_out = dio_char_idx_r( map_path, map_path_sz, PLATFORM_DIR_SEP );
+   if(
+      /* Found a map path. */
+      0 < path_sz_out &&
+      /* Map path fits in buffer with filename, separator, and NULL. */
+      path_in_sz > path_sz_out + 2
+   ) {
+      /* Prepend map directory to tileset name. */
+      memory_strncpy_ptr( path_in, map_path, path_sz_out );
+
+      /* Append path separator. */
+      path_in[path_sz_out++] = PLATFORM_DIR_SEP;
+
+      /* Add (temporary) NULL terminator. */
+      path_in[path_sz_out] = '\0';
+
+      debug_printf( 2, "map directory: %s", path_in );
+
+   } else {
+      error_printf( "unable to fit map path into buffer!" );
+      path_sz_out = 0;
+   }
+
+   return path_sz_out;
+}
+
+#     endif /* RESOURCE_FILE */
+
+#  endif /* TILEMAP_C */
+
 #endif /* TILEMAP_H */
 

@@ -29,14 +29,10 @@ LOOKUPS_C_FILES := \
 
 MAP2ASN_C_FILES := \
    tools/map2asn.c \
-   src/tilemap.c \
-   src/mobile.c \
    src/script.c \
    unilayer/src/json.c \
    src/tmjson.c \
    unilayer/src/asn.c \
-   src/item.c \
-   src/crop.c \
    src/strpool.c \
    unilayer/src/resource/file.c \
    unilayer/src/graphics.c \
@@ -249,7 +245,7 @@ LOOKUPS := $(BINDIR)/lookups
 MAP2ASN := $(BINDIR)/map2asn
 COMPILE := $(BINDIR)/compile
 
-DEFINES_MAP2ASN := -DNO_RESEXT -DDEBUG_THRESHOLD=1 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG -DDISABLE_WEATHER_EFFECTS -DNO_GUI -DNO_DEBUG_LINE_NUMBER -DNO_ANIMATE
+DEFINES_MAP2ASN := -DNO_RESEXT -DDEBUG_THRESHOLD=1 -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETPATH)\"" -DDEBUG_LOG -DDISABLE_WEATHER_EFFECTS -DNO_GUI -DNO_DEBUG_LINE_NUMBER -DNO_ANIMATE -DNO_SCRIPT_HANDLERS -DNO_ITEM_HANDLERS
 
 CFLAGS_LOOKUPS := -g $(INCLUDES_UNILAYER)
 CFLAGS_MAP2ASN := -g $(INCLUDES_UNILAYER) $(FLAGS_GCC_SANITIZE) $(DEFINES_MAP2ASN) -DPLATFORM_NULL

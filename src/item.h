@@ -209,6 +209,16 @@ RES_CONST ITEM_USE_CB gc_item_use_cbs[] = {
    ITEM_TABLE( ITEM_TABLE_USE_CBS )
 };
 
+#  ifdef NO_ITEM_HANDLERS
+
+#     define ITEM_TABLE_USE_CB_STUBS( type, max ) int8_t item_use_ ## type( int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state ) { return 0; }
+
+ITEM_TABLE( ITEM_TABLE_USE_CB_STUBS );
+
+ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
+
+#  endif /* NO_ITEM_HANDLERS */
+
 #else
 
 /**

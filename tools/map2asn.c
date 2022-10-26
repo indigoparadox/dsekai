@@ -6,6 +6,10 @@
 
 #define ENGINES_TOKENS_ONLY
 #define ENGINES_C
+#define ITEM_C
+#define CROP_C
+#define MOBILE_C
+#define TILEMAP_C
 #include "../src/dsekai.h"
 
 #include "../src/tmjson.h"
@@ -25,7 +29,13 @@ int main( int argc, char* argv[] ) {
    MEMORY_HANDLE h_buffer = (MEMORY_HANDLE)NULL;
    uint8_t* buffer = NULL;
 
-   assert( 1 < argc );
+   if( 3 > argc ) {
+      fprintf( stderr, "usage:\n\n" );
+      fprintf( stderr, "%s <in_json> <out_asn>\n\n", argv[0] );
+      fprintf( stderr, "in_json - JSON tilemap file to convert to ASN.1.\n" );
+      fprintf( stderr, "out_asn - ASN.1 filename to create.\n" );
+      return 1;
+   }
 
    retval = tilemap_json_load( argv[1], &t );
    if( !retval ) {

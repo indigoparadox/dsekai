@@ -135,8 +135,8 @@ res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
 # DOS utilities give stack overflow right now.
-#pkg_bin := $(BIN_DOS) $(BINDIR)/convert.exe $(BINDIR)/map2asn.exe
-pkg_bin := $(BIN_DOS)
+pkg_bin := $(BIN_DOS) $(BINDIR)/convert.exe $(BINDIR)/map2asn.exe
+#pkg_bin := $(BIN_DOS)
 pkg_strip := echo
 pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
 pkg_reqs := $(DOS_MANIFEST)
