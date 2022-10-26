@@ -36,6 +36,7 @@ Features that are planned include:
 * Item usage and crafting.
 * Minimal resource use (shooting for <500k RAM).
 * Multi-height raycasting POV support.
+* Compile script source files as part of JSON loading.
 
 Ideally, this engine will compile with legacy compilers as a general rule. For this reason, the following rules/limitations should be observed within the codebase:
 

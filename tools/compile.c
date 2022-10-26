@@ -5,6 +5,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+/* TODO: Work this compiler into src/script.c so it can be called by tmjson.c!
+ */
+
 #define RES_CONST const
 #define NO_SCRIPT_STRUCT
 #define NO_SCRIPT_PROTOTYPES
