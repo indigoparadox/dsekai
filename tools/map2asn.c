@@ -23,21 +23,36 @@ void buffer_assign_short( uint8_t* buffer, uint16_t n ) {
 int main( int argc, char* argv[] ) {
    FILE* map_file = NULL,
       * asn_file = NULL;
-   struct TILEMAP t;
+   struct TILEMAP* t = NULL;
    int retval = 0,
       idx = 0;
-   MEMORY_HANDLE h_buffer = (MEMORY_HANDLE)NULL;
+   MEMORY_HANDLE h_buffer = (MEMORY_HANDLE)NULL,
+      h_t = (MEMORY_HANDLE)NULL;
    uint8_t* buffer = NULL;
 
+   debug_printf( 3, "map2asn compiled " __DATE__ __TIME__ );
+   debug_printf( 3, "git hash: " GIT_HASH );
+
    if( 3 > argc ) {
-      fprintf( stderr, "usage:\n\n" );
-      fprintf( stderr, "%s <in_json> <out_asn>\n\n", argv[0] );
-      fprintf( stderr, "in_json - JSON tilemap file to convert to ASN.1.\n" );
-      fprintf( stderr, "out_asn - ASN.1 filename to create.\n" );
-      return 1;
+      error_printf( "usage:" );
+      error_printf( "%s <in_json> <out_asn>", argv[0] );
+      error_printf( "in_json - JSON tilemap file to convert to ASN.1." );
+      error_printf( "out_asn - ASN.1 filename to create." );
+      retval = 1;
+      goto cleanup;
    }
 
-   retval = tilemap_json_load( argv[1], &t );
+   h_t = memory_alloc( sizeof( struct TILEMAP ), 1 );
+   if( (MEMORY_HANDLE)NULL == h_t ) {
+      error_printf( "could not allocate tilemap!" );
+      retval = 1;
+      goto cleanup;
+   }
+
+   t = memory_lock( h_t );
+   assert( NULL != t );
+
+   retval = tilemap_json_load( argv[1], t );
    if( !retval ) {
       retval = 1;
       goto cleanup;
@@ -46,7 +61,7 @@ int main( int argc, char* argv[] ) {
 
    h_buffer = memory_alloc( TILEMAP_ASN_SAVE_BUFFER_INITIAL_SZ, 1 );
 
-   idx = tilemap_asn_save( h_buffer, 0, &t );
+   idx = tilemap_asn_save( h_buffer, 0, t );
    if( 0 > idx ) {
       error_printf( "could not write tilemap!" );
       goto cleanup;
@@ -57,11 +72,21 @@ int main( int argc, char* argv[] ) {
    /* Write the ASN map file to disk. */
    save_write( argv[2], buffer, idx );
 
-   buffer = memory_unlock( h_buffer );
-
    debug_printf( 3, "%d bytes written", idx );
 
 cleanup:
+
+   if( NULL != t ) {
+      t = memory_unlock( h_t );
+   }
+
+   if( (MEMORY_HANDLE)NULL != h_t ) {
+      memory_free( h_t );
+   }
+
+   if( NULL != buffer ) {
+      buffer = memory_unlock( h_buffer );
+   }
 
    if( (MEMORY_HANDLE)NULL != h_buffer ) {
       memory_free( h_buffer );
