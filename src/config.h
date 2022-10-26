@@ -116,6 +116,17 @@
 /*! \} */ /* dsekai_mobiles */
 
 /**
+ * \addtogroup scripting
+ */
+
+#ifndef SCRIPT_STEPS_MAX
+/*! \brief Maximum number of steps in an individual script. */
+#define SCRIPT_STEPS_MAX 128
+#endif /* !SCRIPT_STEPS_MAX */
+
+/*! \} */ /* scripting */
+
+/**
  * \addtogroup dsekai_items
  * \{
  */
@@ -184,6 +195,10 @@
 #ifndef JSON_PATH_SZ
 #define JSON_PATH_SZ 255
 #endif /* !JSON_PATH_SZ */
+
+#ifndef TILEMAP_STRPOOL_SZ
+#define TILEMAP_STRPOOL_SZ 1024
+#endif /* !TILEMAP_STRPOOL_SZ */
 
 #ifndef TILEMAP_NAME_MAX
 /**

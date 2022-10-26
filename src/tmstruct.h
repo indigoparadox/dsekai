@@ -32,7 +32,6 @@
 /*! \brief Screen height in tiles. */
 #define SCREEN_TH (SCREEN_MAP_H / TILE_H)
 #define TILEMAP_TS ((TILEMAP_TH * TILEMAP_TW) / 2)
-#define TILEMAP_STRPOOL_SZ 1024
 
 /*! \brief X/Y coordinates of a tile on the current map. */
 struct TILEMAP_COORDS {
