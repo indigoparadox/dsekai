@@ -171,6 +171,10 @@ cleanup:
 void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
    int16_t i = 0;
 
+   /* TODO: Implement ratio to only animate/execute every X calls, in order
+    *       to improve input handling responsiveness.
+    */
+
    mobile_state_animate( state );
    profiler_set();
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {

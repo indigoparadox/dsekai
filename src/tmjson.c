@@ -211,6 +211,8 @@ static void tilemap_json_parse_scripts(
       script_buffer_sz = 0,
       loaded = 0;
    char script_buffer[SCRIPT_STR_MAX];
+
+   /* TODO: Call the compiler from here with a path from the tilemap. */
    
    /* Load scripts.*/
    debug_printf( 2, "loading scripts" ); 

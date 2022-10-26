@@ -646,6 +646,10 @@ uint16_t script_parse_str(
 ) {
    int16_t c_idx = 0;
 
+   /* TODO: Link compiler directly to JSON parser and ultimately remove this
+    *       function entirely!
+    */
+
    debug_printf( 2, "parsing script %d: %s", script_idx, script_txt );
 
    for( ; script_txt_sz > c_idx ; ) {
