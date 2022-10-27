@@ -24,6 +24,9 @@ int main( int argc, char** argv ) {
 
    /* TODO: Use unilayer functions! */
 
+   debug_printf( 3, "compile compiled " __DATE__ __TIME__ );
+   debug_printf( 3, "git hash: " GIT_HASH );
+
    for( i = 1 ; argc > i ; i++ ) {
       if( 0 == strncmp( "-v", argv[i], 2 ) ) {
          g_flags |= CS_FLAG_VERBOSE;
@@ -34,8 +37,8 @@ int main( int argc, char** argv ) {
    }
 
    if( NULL == filename ) {
-      debug_printf( 3, "usage:" );
-      debug_printf( 3, "%s <in_script>", argv[0] );
+      error_printf( "usage:" );
+      error_printf( "%s <in_script>", argv[0] );
       goto cleanup;
    }
 

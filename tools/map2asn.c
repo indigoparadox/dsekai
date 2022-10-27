@@ -1,9 +1,4 @@
 
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-
 #define ENGINES_TOKENS_ONLY
 #define ENGINES_C
 #define ITEM_C

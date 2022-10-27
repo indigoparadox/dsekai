@@ -160,6 +160,6 @@ $(MAP2ASN_OBJDIR_WIN32)/%.o: %.c
 	$(MD) $(dir $@)
 	$(CC_WIN32) $(CFLAGS_UTILITY_WIN32) -fo=$@ $(<:%.c=%)
 
-$(BINDIR)/mapasn32.exe: $(MAP2ASN_O_FILES_WIN32)
+$(BINDIR)/mapasn32.exe: $(MAP2ASN_O_FILES_WIN32) | $(BINDIR)/$(STAMPFILE)
 	$(LD_WIN32) $(LDFLAGS_WIN32) -fe=$@ $^
 

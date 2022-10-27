@@ -200,6 +200,6 @@ $(MAP2ASN_OBJDIR_DOS)/%.o: %.c
 	$(MD) $(dir $@)
 	$(CC_DOS) $(CFLAGS_UTILITY_DOS) -fo=$@ $(<:%.c=%)
 
-$(BINDIR)/map2asn.exe: $(MAP2ASN_O_FILES_DOS)
+$(BINDIR)/map2asn.exe: $(MAP2ASN_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE)
 	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
 
