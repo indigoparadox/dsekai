@@ -14,17 +14,54 @@
 #define MAPPACK_TYPE_SZ 7
 
 #define FILE_EXT_LEN 4
+#define FILE_PREFIX_OFFSET 2
 
 #define BIN_BUFFER_SZ 1024
+
+int mappack_strip_ext( char* path ) {
+   int16_t path_len = 0,
+      basename_idx = 0;
+
+   path_len = memory_strnlen_ptr( path, RESOURCE_PATH_MAX );
+
+   if( 0 >= path_len ) {
+      goto cleanup;
+   }
+
+   debug_printf( 2, "trimming asset path %s (%d chars)...", path, path_len );
+
+   /* Remove the file extension if applicable. */
+   if( FILE_EXT_LEN >= path_len || '.' != path[path_len - FILE_EXT_LEN] ) {
+      goto cleanup;
+   }
+
+   debug_printf( 2, "removing file extension %s...",
+      &(path[path_len - FILE_EXT_LEN]) );
+
+   /* Blank out the filename extension. */
+   path[path_len - FILE_EXT_LEN] = '\0';
+   path_len -= FILE_EXT_LEN;
+
+   if( 0 >= path_len ) {
+      goto cleanup;
+   }
+
+   /* Show the short asset path (also determined below). */
+   basename_idx = dio_basename( path, path_len );
+   debug_printf( 2, "short asset path is: %s", &(path[basename_idx]) );
+
+cleanup:
+   return path_len;
+}
+
 int mappack_write( const char* map_json_path, FILE* header_file ) {
    int16_t
       i = 0,
       j = 0,
       res_basename_idx = 0,
-      ts_basename_idx = 0,
+      basename_idx = 0,
       path_iter_fname_idx = 0,
-      image_path_len = 0,
-      sprite_path_len = 0;
+      asset_path_len = 0;
    int retval = 0;
    struct TILEMAP t;
 
@@ -56,32 +93,18 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
    fprintf( header_file, "   /* tileset */\n" );
    fprintf( header_file, "   {\n" );
    for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
-      image_path_len =
-         memory_strnlen_ptr( t.tileset[i].image, RESOURCE_PATH_MAX );
-
-      /* Remove the file extension if applicable. */
-      if(
-         FILE_EXT_LEN < image_path_len &&
-         '.' == t.tileset[i].image[image_path_len - FILE_EXT_LEN]
-      ) {
-         debug_printf( 3, "removing file extension %s...",
-            &(t.tileset[i].image[image_path_len - FILE_EXT_LEN]) );
-         ts_basename_idx = dio_basename(
-            t.tileset[i].image, image_path_len );
-
-         /* Blank out the filename extension. */
-         t.tileset[i].image[image_path_len - FILE_EXT_LEN] = '\0';
-         image_path_len -= FILE_EXT_LEN;
-      }
 
       fprintf( header_file, "      {\n" );
 
-      if( 0 < image_path_len  ) {
+      asset_path_len = mappack_strip_ext( t.tileset[i].image );
+      basename_idx = dio_basename( t.tileset[i].image, asset_path_len );
+
+      if( 0 < asset_path_len  ) {
          /* tileset[i].image */
          fprintf( header_file, "         /* image */\n" );
          /* Let the preprocessor figure it out. */
          fprintf( header_file, "         %s,\n",
-            &(t.tileset[i].image[ts_basename_idx]) );
+            &(t.tileset[i].image[basename_idx]) );
 
          /* tileset[i].flags */
          fprintf( header_file, "         /* flags */\n" );
@@ -120,26 +143,11 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
    fprintf( header_file, "   /* spawns */\n" );
    fprintf( header_file, "   {\n" );
    for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
-      printf( "%s\n", t.spawns[i].sprite );
-      sprite_path_len =
-         memory_strnlen_ptr( t.spawns[i].sprite, RESOURCE_PATH_MAX );
-
-      /* Remove the file extension if applicable. */
-      if(
-         FILE_EXT_LEN < sprite_path_len &&
-         '.' == t.spawns[i].sprite[sprite_path_len - FILE_EXT_LEN]
-      ) {
-         debug_printf( 3, "removing file extension %s...",
-            &(t.spawns[i].sprite[sprite_path_len - FILE_EXT_LEN]) );
-         ts_basename_idx = dio_basename(
-            t.spawns[i].sprite, sprite_path_len );
-
-         /* Blank out the filename extension. */
-         t.spawns[i].sprite[sprite_path_len - FILE_EXT_LEN] = '\0';
-         sprite_path_len -= FILE_EXT_LEN;
-      }
 
       fprintf( header_file, "      {\n" );
+
+      asset_path_len = mappack_strip_ext( t.spawns[i].sprite );
+      basename_idx = dio_basename( t.spawns[i].sprite, asset_path_len );
 
       /* name */
       fprintf( header_file, "         /* name */\n" );
@@ -151,11 +159,11 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
          t.spawns[i].coords.x, t.spawns[i].coords.y );
 
       /* type */
-      if( 0 < sprite_path_len ) {
+      if( 0 < asset_path_len ) {
          fprintf( header_file, "         /* type */\n" );
          /* Let the preprocessor figure it out. */
          fprintf( header_file, "         %s,\n",
-            &(t.spawns[i].sprite[ts_basename_idx]) );
+            &(t.spawns[i].sprite[basename_idx]) );
       } else {
          fprintf( header_file, "         0, /* not found */\n" );
       }
@@ -182,24 +190,6 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
       fprintf( header_file, "0x%02x, ", (unsigned char)(t.strpool[i] & 0xff) );
    }
    fprintf( header_file, "   },\n" );
-
-#if 0
-   /* strings */
-   fprintf( header_file, "   /* strings */\n" );
-   fprintf( header_file, "   {\n" );
-   for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
-      fprintf( header_file, "      \"" );
-      for( j = 0 ; strlen( t.strings[i] ) > j ; j++ ) {
-         if( '\n' == t.strings[i][j] ) {
-            fprintf( header_file, "\\n" );
-         } else {
-            fprintf( header_file, "%c", t.strings[i][j] );
-         }
-      }
-      fprintf( header_file, "\",\n" );
-   }
-   fprintf( header_file, "   },\n" );
-#endif
 
    /* scripts */
    fprintf( header_file, "   /* scripts */\n" );
@@ -236,17 +226,14 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
       fprintf( header_file, "      {\n" );
       fprintf( header_file, "         /* sprite */\n" );
 
-      if( '\0' != t.item_defs[i].sprite[0] ) {
-         ts_basename_idx = dio_basename(
-            t.item_defs[i].sprite, strlen( t.item_defs[i].sprite ) );
+      asset_path_len = mappack_strip_ext( t.item_defs[i].sprite );
+      basename_idx = dio_basename( t.item_defs[i].sprite, asset_path_len );
 
-         /* Blank out the filename extension. */
-         t.item_defs[i].sprite[strlen( t.item_defs[i].sprite ) - 4] = '\0';
-
+      if( 0 < asset_path_len ) {
          /* items[i].sprite */
          /* Let the preprocessor figure it out. */
          fprintf( header_file, "         %s,\n",
-            &(t.item_defs[i].sprite[ts_basename_idx]) );
+            &(t.item_defs[i].sprite[basename_idx]) );
       } else {
          fprintf( header_file, "         0,\n" );
       }
@@ -280,17 +267,13 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
       fprintf( header_file, "      {\n" );
       fprintf( header_file, "         /* sprite */\n" );
 
-      if( '\0' != t.crop_defs[i].sprite[0] ) {
-         ts_basename_idx = dio_basename(
-            t.crop_defs[i].sprite, strlen( t.crop_defs[i].sprite ) );
+      asset_path_len = mappack_strip_ext( t.crop_defs[i].sprite );
+      basename_idx = dio_basename( t.crop_defs[i].sprite, asset_path_len );
 
-         /* Blank out the filename extension. */
-         t.crop_defs[i].sprite[strlen( t.crop_defs[i].sprite ) - 4] = '\0';
-
-         /* items[i].sprite */
+      if( 0 < asset_path_len ) {
          /* Let the preprocessor figure it out. */
          fprintf( header_file, "         %s,\n",
-            &(t.crop_defs[i].sprite[ts_basename_idx]) );
+            &(t.crop_defs[i].sprite[basename_idx]) );
       } else {
          fprintf( header_file, "         0,\n" );
       }
@@ -327,9 +310,10 @@ cleanup:
 }
 
 int mappack_index( const char* paths_in[], int paths_in_sz, FILE* header ) {
-   int map_count = 0,
+   int16_t map_count = 0,
       path_iter_fname_idx = 0,
       path_iter_sz = 0,
+      map_name_sz = 0,
       i = 0,
       retval = 0;
    struct HEADPACK_DEF* writer_def = NULL;
@@ -337,7 +321,7 @@ int mappack_index( const char* paths_in[], int paths_in_sz, FILE* header ) {
 
    fprintf( header, "RES_CONST char gc_map_names[][TILEMAP_NAME_MAX] = {\n" );
    for( i = 0 ; paths_in_sz > i ; i++ ) {
-      path_iter_sz = strlen( paths_in[i] );
+      path_iter_sz = memory_strnlen_ptr( paths_in[i], RESOURCE_PATH_MAX );
       path_iter_fname_idx = dio_basename( paths_in[i], path_iter_sz );
 
       writer_def =
@@ -355,10 +339,18 @@ int mappack_index( const char* paths_in[], int paths_in_sz, FILE* header ) {
       /* This is a map struct, so use its name. */
       /* Create a copy without the file extension. */
       memory_zero_ptr( name_buffer, TILEMAP_NAME_MAX );
+      map_name_sz =
+         path_iter_sz - path_iter_fname_idx -
+         FILE_PREFIX_OFFSET - FILE_EXT_LEN - 1;
+      debug_printf( 2, "copying input path (%d chars): %s",
+         path_iter_sz - path_iter_fname_idx - FILE_PREFIX_OFFSET,
+         &(paths_in[i][path_iter_fname_idx + FILE_PREFIX_OFFSET]) );
       memory_strncpy_ptr(
          name_buffer,
-         &(paths_in[i][path_iter_fname_idx + 2]),
-         strlen( &(paths_in[i][path_iter_fname_idx + 2]) ) - 5 );
+         &(paths_in[i][path_iter_fname_idx + FILE_PREFIX_OFFSET]),
+         map_name_sz );
+      debug_printf( 2, "trimmed copied path (%d chars): %s",
+         map_name_sz, name_buffer );
 
       fprintf( header, "   \"%s\",\n", name_buffer );
    }
@@ -366,7 +358,7 @@ int mappack_index( const char* paths_in[], int paths_in_sz, FILE* header ) {
 
    fprintf( header, "RES_CONST struct TILEMAP* gc_map_structs[] = {\n" );
    for( i = 0 ; paths_in_sz > i ; i++ ) {
-      path_iter_sz = strlen( paths_in[i] );
+      path_iter_sz = memory_strnlen_ptr( paths_in[i], RESOURCE_PATH_MAX );
       path_iter_fname_idx = dio_basename( paths_in[i], path_iter_sz );
 
       writer_def =
@@ -383,10 +375,19 @@ int mappack_index( const char* paths_in[], int paths_in_sz, FILE* header ) {
 
       /* Create a copy without the file extension. */
       memory_zero_ptr( name_buffer, TILEMAP_NAME_MAX );
+      map_name_sz =
+         path_iter_sz - path_iter_fname_idx -
+         FILE_PREFIX_OFFSET - FILE_EXT_LEN - 1;
+      debug_printf( 2, "copying input path (%d chars): %s",
+         path_iter_sz - path_iter_fname_idx - FILE_PREFIX_OFFSET,
+         &(paths_in[i][path_iter_fname_idx + FILE_PREFIX_OFFSET]) );
       memory_strncpy_ptr(
          name_buffer,
-         &(paths_in[i][path_iter_fname_idx + 2]),
-         strlen( &(paths_in[i][path_iter_fname_idx + 2]) ) - 5 );
+         &(paths_in[i][path_iter_fname_idx + FILE_PREFIX_OFFSET]),
+         map_name_sz );
+      debug_printf( 2, "trimmed copied path (%d chars): %s",
+         map_name_sz, name_buffer );
+
 
       fprintf( header, "   &gc_map_%s,\n", name_buffer );
    }
