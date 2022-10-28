@@ -35,6 +35,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
    /* Unload irrelevant mobiles. */
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+      mobile_break_if_last( state->mobiles, i );
       if(
          MOBILE_FLAG_ACTIVE != (state->mobiles[i].flags & MOBILE_FLAG_ACTIVE)
       ) {
@@ -56,7 +57,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
          continue;
       }
 
-      mobile_deinit( &(state->mobiles[i]) );
+      mobile_deactivate( &(state->mobiles[i]), state );
    }
 
    /* Unload irrelevant items. */
@@ -178,6 +179,7 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
    mobile_state_animate( state );
    profiler_set();
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+      mobile_break_if_last( state->mobiles, i );
       if(
          MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
       ) {
@@ -189,6 +191,7 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
 
    profiler_set();
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+      mobile_break_if_last( state->mobiles, i );
       if(
          MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
       ) {
@@ -287,6 +290,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    if( 0 <= state->menu.menu_id ) {
       /* Draw the menu. */
       if( MENU_FLAG_DIRTY == (MENU_FLAG_DIRTY & state->menu.flags) ) {
+#ifndef NO_DRAW_ENGINE_BEHIND_MENU
          /* Repaint the screen in the background. */
          gc_engines_draw[state->engine_type]( state );
          t = (struct TILEMAP*)memory_lock( state->map_handle );
@@ -294,6 +298,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
             tilemap_refresh_tiles( t );
             t = (struct TILEMAP*)memory_unlock( state->map_handle );
          }
+#endif /* !NO_DRAW_ENGINE_BEHIND_MENU */
 
          /* Show the new menu state. */
          gc_menu_renderers[state->menu.menu_id]( state );

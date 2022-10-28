@@ -103,7 +103,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[0].coords_prev.x = 3;
    state->mobiles[0].coords_prev.y = 2;
    state->mobiles[0].script_id = -1;
-   state->mobiles[0].flags = MOBILE_FLAG_ACTIVE;
+   state->mobiles[0].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[0]), 2 );
    state->mobiles[0].mp_hp = 100;
    state->mobiles[0].sprite_id = graphics_cache_load_bitmap( s_world );
@@ -113,7 +113,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[1].coords_prev.x = 3;
    state->mobiles[1].coords_prev.y = 2;
    state->mobiles[1].script_id = -1;
-   state->mobiles[1].flags = MOBILE_FLAG_ACTIVE;
+   state->mobiles[1].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[1]), 0 );
    state->mobiles[1].mp_hp = 100;
    state->mobiles[1].sprite_id = graphics_cache_load_bitmap( s_world );
@@ -123,7 +123,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[2].coords_prev.x = 4;
    state->mobiles[2].coords_prev.y = 3;
    state->mobiles[2].script_id = -1;
-   state->mobiles[2].flags = MOBILE_FLAG_ACTIVE;
+   state->mobiles[2].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[2]), 3 );
    state->mobiles[2].mp_hp = 100;
    state->mobiles[2].sprite_id = graphics_cache_load_bitmap( s_world );
@@ -133,7 +133,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[3].coords_prev.x = 5;
    state->mobiles[3].coords_prev.y = 3;
    state->mobiles[3].script_id = -1;
-   state->mobiles[3].flags = MOBILE_FLAG_ACTIVE;
+   state->mobiles[3].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[3]), 1 );
    state->mobiles[3].mp_hp = 100;
    state->mobiles[3].sprite_id = graphics_cache_load_bitmap( s_world );
@@ -176,6 +176,12 @@ void title_draw( struct DSEKAI_STATE* state ) {
          MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
       ) {
          continue;
+      }
+      if(
+         MOBILE_FLAG_NOT_LAST !=
+            (MOBILE_FLAG_NOT_LAST & state->mobiles[i].flags)
+      ) {
+         break;
       }
 
       assert( 0 <= state->mobiles[i].sprite_id );

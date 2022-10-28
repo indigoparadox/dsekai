@@ -165,6 +165,10 @@ else
 
 endif
 
+ifneq ($(FPS),)
+   DEFINES_DSEKAI += -DFPS=$(FPS)
+endif
+
 ifeq ($(SANITIZE),NO)
    FLAGS_GCC_SANITIZE := 
 else

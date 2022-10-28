@@ -38,6 +38,8 @@ struct MOBILE* mobile_get_facing(
          continue;
       }
 
+      mobile_break_if_last( state->mobiles, i );
+
       if(
          MOBILE_FLAG_ACTIVE ==
             (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags) &&
@@ -299,6 +301,17 @@ cleanup:
    }
 }
 
+void mobile_deactivate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
+   
+   debug_printf( 1, "de-initializing mobile tilemap: %d spawner: %d",
+      m->map_gid, m->spawner_gid );
+
+   /* Zero out the mobile to avoid weirdness later, but keep
+    * MOBILE_FLAG_NOT_LAST flag. */
+   memory_zero_ptr( (MEMORY_PTR)m, sizeof( struct MOBILE ) );
+   m->flags |= MOBILE_FLAG_NOT_LAST;
+}
+
 void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    struct TILEMAP* t = NULL;
 
@@ -338,20 +351,10 @@ void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
     * -1.
     */
    if( -1 == m->mp_hp ) {
-      m->flags &= ~MOBILE_FLAG_ACTIVE;
+      mobile_deactivate( m, state );
    } else if( 0 > m->mp_hp ) {
       m->mp_hp++;
    }
-}
-
-void mobile_deinit( struct MOBILE* m ) {
-   if( NULL == m ) {
-      return;
-   }
-
-   debug_printf( 1, "de-initializing mobile tilemap: %d spawner: %d",
-      m->map_gid, m->spawner_gid );
-   memory_zero_ptr( (MEMORY_PTR)m, sizeof( struct MOBILE ) );
 }
 
 struct MOBILE* mobile_spawn_single(
@@ -394,7 +397,10 @@ struct MOBILE* mobile_spawn_single(
    mobile_out->steps_y = 0;
    mobile_out->script_pc = 0;
    mobile_out->script_wait_frames = 0;
-   mobile_out->flags = MOBILE_FLAG_ACTIVE;
+   if( MOBILE_FLAG_NOT_LAST == (MOBILE_FLAG_NOT_LAST & mobile_out->flags) ) {
+      debug_printf( 1, "reusing non-last mobile slot %d", i );
+   }
+   mobile_out->flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_out->map_gid = MOBILE_MAP_GID_ALL;
    
    return mobile_out;
@@ -408,6 +414,7 @@ int16_t mobile_spawner_match(
    /* See if the mobile was spawned on a previous visit to this tilemap. */
    debug_printf( 1, "search tilemap %d, spawner %d", t->gid, spawner->gid );
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+      mobile_break_if_last( mobiles, i );
       if(
          MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & mobiles[i].flags)
       ) {

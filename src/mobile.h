@@ -173,6 +173,15 @@
  */
 #define MOBILE_FLAG_DISABLED 0x0400
 
+/**
+ * \brief MOBILE::flags indicating this mobile is not the last used mobile slot.
+ *
+ * This is an optimization measure: The allocation always sets this bit,
+ * dying doesn't unset it, reallocation can use mobile slots with this bit set,
+ * and iteration loops can break early when they no longer see it.
+ */
+#define MOBILE_FLAG_NOT_LAST 0x0800
+
 /*! \} */ /* dsekai_mobiles_flags */
 
 /**
@@ -184,6 +193,8 @@
 #define MOBILE_MAP_GID_ALL 65535
 
 #define mobile_get_sprite( m ) ((m)->sprite_id)
+
+#define mobile_break_if_last( mobiles, i ) if( MOBILE_FLAG_NOT_LAST != (MOBILE_FLAG_NOT_LAST & mobiles[i].flags) ) { debug_printf( 0, "breaking early on mobile %d!", i ); break; }
 
 /**
  * \addtogroup dsekai_mobiles_errors Mobile-Related Errors
@@ -334,8 +345,11 @@ void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state );
 /**
  * \brief Prepare a ::MOBILE for deallocation.
  * \param t ::MEMORY_PTR to a ::MOBILE to deinitialize.
+ * \param state Locked ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  */
-void mobile_deinit( struct MOBILE* ) SECTION_MOBILE;
+void mobile_deactivate(
+   struct MOBILE* m, struct DSEKAI_STATE* state
+) SECTION_MOBILE;
 
 /**
  * \brief Push a value onto MOBILE::script_stack.
