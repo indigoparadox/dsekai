@@ -310,7 +310,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    } else {
       /* Draw the engine. */
-      if( 0 >= window_modal() ) {
+      if( 0 == window_modal() ) {
          gc_engines_draw[state->engine_type]( state );
       }
 
@@ -346,7 +346,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       /* Only open the menu if no modal windows are open and it's not
       *  blocked.
       */
-      0 >= window_modal() &&
+      0 == window_modal() &&
       INPUT_KEY_QUIT == in_char &&
       DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
    ) {
@@ -356,7 +356,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
          menu_open( state );
       }
 
-   } else if( 0 >= window_modal() && 0 != in_char ) {
+   } else if( 0 == window_modal() && 0 != in_char ) {
       retval = gc_engines_input[state->engine_type]( in_char, state );
 
    } else if( INPUT_KEY_OK == in_char ) {

@@ -370,7 +370,7 @@ void engines_draw_transition( struct DSEKAI_STATE* state );
 /* \brief Pause scripts if modal window is pending, screen is scrolling, menu
  *        is open, etc.
  */
-#define engines_active( state ) (0 >= window_modal() && DSEKAI_FLAG_INPUT_BLOCKED != (DSEKAI_FLAG_INPUT_BLOCKED & (state)->flags) && 0 > (state)->menu.menu_id)
+#define engines_active( state ) (0 == window_modal() && DSEKAI_FLAG_INPUT_BLOCKED != (DSEKAI_FLAG_INPUT_BLOCKED & (state)->flags) && 0 > (state)->menu.menu_id)
 
 /**
  * \brief Sets up the current engine (allocates specific state, etc).
