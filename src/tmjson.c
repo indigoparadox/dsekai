@@ -521,7 +521,7 @@ int16_t tilemap_json_parse_items(
       }
 
       /* active */
-      t->item_defs[i].flags |= ITEM_FLAG_ACTIVE;
+      t->item_defs[i].flags |= ITEM_FLAG_ACTIVE | ITEM_FLAG_NOT_LAST;
    }
 
    return i;

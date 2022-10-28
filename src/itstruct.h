@@ -26,6 +26,15 @@
 #define ITEM_FLAG_CRAFTABLE   0x2000
 
 /**
+ * \brief ITEM::flags indicating this item is not the last used item slot.
+ *
+ * This is an optimization measure: The allocation always sets this bit,
+ * dying doesn't unset it, reallocation can use item slots with this bit set,
+ * and iteration loops can break early when they no longer see it.
+ */
+#define ITEM_FLAG_NOT_LAST    0x4000
+
+/**
  * \brief Bitmask for ITEM::flags indicating that item's
  *        \ref dsekai_items_use.
  */

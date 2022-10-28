@@ -285,6 +285,7 @@ int16_t item_exists_in_inventory(
 
    /* Determine if the recipient has one of these already. */
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      item_break_if_last( items, i );
       if(
          ITEM_FLAG_ACTIVE == (items[i].flags & ITEM_FLAG_ACTIVE) &&
          items[i].gid == template_gid &&
@@ -342,6 +343,7 @@ int16_t item_stack_or_add(
 
    /* Find the item definition with the given GID in tilemap item templates. */
    for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
+      item_break_if_last( t->item_defs, i );
       if(
          t->item_defs[i].gid == template_gid &&
          ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & t->item_defs[i].flags)
@@ -379,6 +381,9 @@ int16_t item_stack_or_add(
       /* Create item from template. */
       /* TODO: Check for full inventory vs ITEM_INVENTORY_MAX. */
       for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+         /* Do NOT break on last item here, since we're just looking for a
+          * free slot!
+          */
          if( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & items[i].flags) ) {
             /* Skip active items. */
             continue;
@@ -505,6 +510,7 @@ int16_t item_pickup_xy(
    assert( NULL != items );
 
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      item_break_if_last( items, i );
       if(
          /* Skip inactive items. */
          !(ITEM_FLAG_ACTIVE & items[i].flags) ||

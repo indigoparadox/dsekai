@@ -71,6 +71,8 @@
 
 /*! \} */ /* dsekai_items_flags */
 
+#define item_break_if_last( items, i ) if( ITEM_FLAG_NOT_LAST != (ITEM_FLAG_NOT_LAST & items[i].flags) ) { debug_printf( 1, "breaking early on item %d!", i ); break; }
+
 /**
  * \brief Determine if/where item with the given ITEM::gid exists in the
  *        inventory of an \ref dsekai_items_owners.

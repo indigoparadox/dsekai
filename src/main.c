@@ -35,6 +35,8 @@ unilayer_main() {
 
    error_printf( "error test" );
 
+   engines_draw_loading_screen();
+
    size_printf( 3, "state", sizeof( struct DSEKAI_STATE ) );
    assert( sizeof( struct DSEKAI_STATE ) < 16384 );
    size_printf( 3, "tilemap", sizeof( struct TILEMAP ) );

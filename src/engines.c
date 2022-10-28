@@ -8,18 +8,8 @@
 #define PROFILE_FIELDS( f ) f( draw_animate ) f( draw_engine ) f( draw_menu ) f( draw_windows ) f( animate_engine ) f( animate_mobiles ) f( script_mobiles ) f( grow_crops )
 #include "profiler.h"
 
-int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
-   int16_t retval = 1,
-      map_retval = 0,
-      i = 0;
-   struct DSEKAI_STATE* state = NULL;
-   struct TILEMAP* t = NULL;
-   struct ITEM* items = NULL;
+void engines_draw_loading_screen() {
    struct GRAPHICS_RECT loading_sz = { 0, 0, 0, 0 };
-
-   profiler_print( "ENGINE" );
-
-   debug_printf( 1, "starting warp..." );
 
    /* On-screen loading indicator. */
    graphics_string_sz( "Loading...", 10, 0, &loading_sz );
@@ -28,9 +18,23 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
       (SCREEN_MAP_W / 2) - (loading_sz.w / 2),
       (SCREEN_MAP_H / 2) - (loading_sz.h / 2),
       GRAPHICS_COLOR_WHITE, 0 );
+}
+
+int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
+   int16_t retval = 1,
+      map_retval = 0,
+      i = 0;
+   struct DSEKAI_STATE* state = NULL;
+   struct TILEMAP* t = NULL;
+   struct ITEM* items = NULL;
+
+   profiler_print( "ENGINE" );
+
+   debug_printf( 1, "starting warp..." );
+
+   engines_draw_loading_screen();
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
-
    t = (struct TILEMAP*)memory_lock( state->map_handle );
 
    /* Unload irrelevant mobiles. */

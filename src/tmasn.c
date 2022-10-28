@@ -1062,6 +1062,7 @@ int32_t tilemap_asn_save(
       goto cleanup;
    }
    for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
+      item_break_if_last( t->item_defs, i );
       if( ITEM_FLAG_ACTIVE != (t->item_defs[i].flags & ITEM_FLAG_ACTIVE) ) {
          continue;
       }

@@ -302,6 +302,11 @@ struct DSEKAI_STATE {
 };
 
 /**
+ * \brief Draw a simple loading screen.
+ */
+void engines_draw_loading_screen();
+
+/**
  * \brief Handle transition to a new ::TILEMAP.
  * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
  */

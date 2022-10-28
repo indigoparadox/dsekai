@@ -4,10 +4,7 @@
 
 uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
 
-   if(
-      m->coords.y != m->coords_prev.y ||
-      m->coords.x != m->coords_prev.x
-   ) {
+   if( mobile_is_walking( m ) ) {
       /* We're already walking! */
       return 0;
    }

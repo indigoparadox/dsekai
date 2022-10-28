@@ -299,6 +299,8 @@ struct MOBILE {
 
 /*! \} */ /* dsekai_mobiles_directions */
 
+#define mobile_is_walking( m ) ((m)->coords.y != (m)->coords_prev.y || (m)->coords.x != (m)->coords_prev.x)
+
 /**
  * \brief Have the given MOBILE attempt to begin walking movement/animation.
  * \param m ::MEMORY_PTR to MOBILE that should attempt moving.
