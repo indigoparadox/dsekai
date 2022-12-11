@@ -9,20 +9,26 @@ ROOT := $(shell pwd)
 
 STAMPFILE := .stamp
 
-DSEKAI_C_FILES := \
+DSEKAI_C_FILES_ENGINES := \
+   src/topdown.c \
+   src/title.c
+
+DSEKAI_C_FILES_SUPPORT := \
    src/tilemap.c \
    src/mobile.c \
    src/item.c \
    unilayer/src/window.c \
    src/script.c \
    src/engines.c \
-   src/topdown.c \
-   src/title.c \
    src/menu.c \
    src/crop.c \
    src/strpool.c \
    unilayer/src/graphics.c \
    unilayer/src/dio.c
+
+DSEKAI_C_FILES := \
+   $(DSEKAI_C_FILES_ENGINES) \
+   $(DSEKAI_C_FILES_SUPPORT)
 
 LOOKUPS_C_FILES := \
    tools/lookups.c

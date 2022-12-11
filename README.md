@@ -103,6 +103,14 @@ The following platforms are planned to be supported but not yet functional:
 
 Just using "make" will attempt to build all currently working targets with OS-level resources and statically compiled maps.
 
+## Platform-Specific Notes
+
+### MS-DOS
+
+dsekai is being written to support MS-DOS in real mode on an 8086. This means that it only uses conventional memory. This leads to some technical considerations:
+
+* dsekai uses overlays to page unused engines to disk during execution. The engine .ovl files must be kept with the dsekai.exe file for it to work properly! Please see the Makefile.dos for more information.
+
 # Mechanics
 
 ## Items

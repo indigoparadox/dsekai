@@ -31,10 +31,14 @@ DSEKAI_C_FILES_DOS_ONLY := \
    unilayer/src/memory/dosm.c \
    unilayer/src/save/file.c
 
+# This includes ALL object files, including engines and unilayer.
+# These are further subdivided in the rule to generate the .lnk script, below.
 DSEKAI_O_FILES_DOS := \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_DOS_ONLY))) \
    $(addprefix $(OBJDIR_DOS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+
+DSEKAI_OVERLAYS_DOS := $(foreach f,$(DSEKAI_C_FILES_ENGINES),$(subst src/,$(BINDIR)/,$(subst .c,.ovl,$f)))
 
 # 2b. Utilities
 
@@ -71,6 +75,7 @@ RESEXT_H_DOS := $(GENDIR_DOS)/resext.h
 
 CC_DOS := wcc
 LD_DOS := wcl
+WLINK := wlink
 
 # 4. Arguments
 
@@ -106,7 +111,7 @@ INCLUDES_DOS := \
    $(subst -I ,-i=,$(INCLUDES_UNILAYER)) \
    -i=$(GENDIR_DOS) 
 
-CFLAGS_DOS_BASIC := -os -hw -d0 -0 $(CFLAGS_OWC_GENERIC) -we
+CFLAGS_DOS_BASIC := -os -hw -d0 -0 $(CFLAGS_OWC_GENERIC) -wo -we
 
 # If we don't use the large memory model, we can't load assets reliably.
 CFLAGS_DOS := -mm $(CFLAGS_DOS_BASIC) $(DEFINES_DOS) $(INCLUDES_DOS)
@@ -136,7 +141,7 @@ endif
 $(eval $(RESEXT_H_RULE))
 
 # DOS utilities give stack overflow right now.
-pkg_bin := $(BIN_DOS) $(BINDIR)/convert.exe $(BINDIR)/map2asn.exe
+pkg_bin := $(BIN_DOS) $(DSEKAI_OVERLAYS_DOS) $(BINDIR)/convert.exe $(BINDIR)/map2asn.exe
 #pkg_bin := $(BIN_DOS)
 pkg_strip := echo
 pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
@@ -174,8 +179,26 @@ $(GENDIR_DOS)/%.vga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bmp -oc cga -ob 4 -if $< -of $@ -og
 
-$(BIN_DOS): $(DSEKAI_O_FILES_DOS) | $(BINDIR)/$(STAMPFILE)
-	$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
+$(BIN_DOS) $(DSEKAI_OVERLAYS_DOS): $(DSEKAI_O_FILES_DOS) | $(OBJDIR_DOS)/dsekai.lnk $(BINDIR)/$(STAMPFILE)
+	#$(LD_DOS) $(LDFLAGS_DOS) -fe=$@ $^
+	cd $(OBJDIR_DOS) && $(WLINK) $(LDFLAGS_DOS) @dsekai && cp -v dsekai.exe *.ovl ../../$(BINDIR)
+
+# Create a linker script to handle overlays and other tricks.
+$(OBJDIR_DOS)/dsekai.lnk: $(DSEKAI_O_FILES_DOS)
+	echo system dos > $@
+	echo option map >> $@
+	echo name dsekai >> $@
+	echo $(foreach f,$(DSEKAI_C_FILES_SUPPORT),file $(subst .c,,$f)\\n) >> $@
+	echo $(foreach f,$(DSEKAI_C_FILES_DOS_ONLY),file $(subst .c,,$f)\\n) >> $@
+	echo $(foreach f,$(DSEKAI_C_FILES_RES),file $(subst .c,,$f)\\n) >> $@
+	# Begin the engine overlay area.
+	echo begin >> $@
+	# New engine overlays go here. e.g. if the new engine is src/topdown.c, it
+	# should be added without extension below as src/topdown. The "into x" part
+	# creates a new overlay "library" for it to be inserted into (e.g. ovltopdn
+	# creates ovltopdn.ovl next to dsekai.exe that must be kept with it!)
+	echo $(foreach f,$(DSEKAI_C_FILES_ENGINES),section into $(subst src/,,$(subst .c,,$f)) file $(subst .c,,$f)\\n) >> $@
+	echo end >> $@
 
 $(OBJDIR_DOS)/%.o: %.c $(RESEXT_H_DOS)
 	$(MD) $(dir $@)
