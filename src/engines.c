@@ -248,7 +248,9 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    uint8_t in_char = 0;
    struct DSEKAI_STATE* state = NULL;
    struct TILEMAP* t = NULL;
-   int16_t retval = 1;
+   int16_t retval = 1,
+      click_x = 0,
+      click_y = 0;
 
    state = (struct DSEKAI_STATE*)memory_lock( state_handle );
    if( NULL == state ) {
@@ -336,14 +338,17 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    /* === Input Phase === */
 
-   in_char = input_poll();
+   in_char = input_poll( &click_x, &click_y );
 #ifndef NO_TRANSITIONS
    if( 0 < (state->transition & DSEKAI_TRANSITION_MASK_FRAME) ) {
       engines_draw_transition( state );
    } else
 #endif /* !NO_TRANSITIONS */
 
-   if( 0 <= state->menu.menu_id && 0 != in_char ) {
+   if( INPUT_CLICK == in_char ) {
+      debug_printf( 3, "click x: %d, y: %d", click_x, click_y );
+
+   } else if( 0 <= state->menu.menu_id && 0 != in_char ) {
       retval = gc_menu_handlers[state->menu.menu_id]( in_char, state );
    
    } else if(
