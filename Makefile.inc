@@ -135,7 +135,7 @@ DEFINES_DSEKAI := -DUNILAYER_PROJECT_NAME=\"dsekai\" -DDSEKAI_GIT_HASH=\"$(GIT_H
 ifeq ($(RESOURCE),FILE)
 
    DEFINES_RESOURCE := -DRESOURCE_FILE -DASSETS_PATH="\"$(ASSETDIR)/\""
-   DSEKAI_C_FILES_RES := unilayer/src/resource/file.c unilayer/src/json.c unilayer/src/asn.c
+   DSEKAI_C_FILES_RES := unilayer/src/resource/file.c
    PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-file
 
 else
@@ -192,13 +192,13 @@ ifeq ($(RESOURCE),FILE)
    ifeq ($(FMT_ASN),TRUE)
       DEFINES_DSEKAI += -DTILEMAP_FMT_ASN
       TILEMAP_FMTS += BIN
-      DSEKAI_C_FILES_RES += src/tmasn.c src/engasn.c
+      DSEKAI_C_FILES_RES += src/tmasn.c src/engasn.c unilayer/src/asn.c
       PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-asn
    endif
 
    ifeq ($(FMT_JSON),TRUE)
       DEFINES_DSEKAI += -DTILEMAP_FMT_JSON
-      DSEKAI_C_FILES_RES += src/tmjson.c
+      DSEKAI_C_FILES_RES += src/tmjson.c unilayer/src/json.c
       TILEMAP_FMTS += JSON
       PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-json
    endif
