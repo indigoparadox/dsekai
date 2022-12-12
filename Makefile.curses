@@ -1,9 +1,17 @@
 
+# vi:syntax=make
+
+ifneq ($(CALLER),MASTER)
+   include Makefile.inc
+endif
+
 # 1. Directories
 
 OBJDIR_CURSES := $(OBJDIR)/curses
 DEPDIR_CURSES := $(DEPDIR)/curses
 GENDIR_CURSES := $(GENDIR)/curses
+
+RESEXT_H_CURSES := $(GENDIR_CURSES)/resext.h
 
 # 2. Files
 
@@ -11,10 +19,10 @@ BIN_CURSES := $(BINDIR)/$(DSEKAI)t
 
 DSEKAI_C_FILES_CURSES_ONLY := \
    src/main.c \
-   unilayer/input/cursesi.c \
-   unilayer/graphics/cursesg.c \
-   unilayer/memory/fakem.c \
-   src/json.o
+   unilayer/src/input/cursesi.c \
+   unilayer/src/graphics/cursesg.c \
+   unilayer/src/memory/fakem.c \
+   unilayer/src/save/file.c
 
 DSEKAI_O_FILES_CURSES := \
    $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -28,21 +36,42 @@ LD_CURSES := gcc
 
 # 4. Arguments
 
-CFLAGS_CURSES := $(shell pkg-config ncurses --cflags) -g -DSCREEN_W=160 -DSCREEN_H=160 -std=c89 -DPLATFORM_CURSES $(CFLAGS_GCC_GENERIC) $(DEFINES_RESOURCE) $(DEFINES_DSEKAI) $(DEFINES_DEPTH)
+DEFINES_CURSES := \
+   $(DEFINES_DSEKAI) \
+   $(DEFINES_DEPTH) \
+   $(DEFINES_RESOURCE) \
+   -DNO_ENGINE_POV \
+   -DNO_TRANSITIONS \
+   -DNO_ANIMATE \
+   -DNO_DRAW_ENGINE_BEHIND_MENU \
+   -DDISABLE_WEATHER_EFFECTS \
+   -DPLATFORM_CURSES
 
-LDFLAGS_CURSES := $(shell pkg-config ncurses --libs) $(LDFLAGS_GCC_GENERIC)
+INCLUDES_CURSES := \
+   $(INCLUDES_UNILAYER) \
+   -I $(GENDIR_CURSES)
+
+CFLAGS_CURSES := $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_CURSES) $(INCLUDES_CURSES)
+
+LDFLAGS_CURSES := $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE)
 
 # 5. Targets
 
 platform := curses
+platform_upper := CURSES
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-res_maps := $(DSEKAI_ASSETS_MAPS_JSON)
 $(eval $(RESEXT_H_RULE))
 
-$(BIN_CURSES): $(DSEKAI_O_FILES_CURSES) | $(BINDIR)/$(STAMPFILE)
+pkg_bin := $(BIN_CURSES) $(CONVERT) $(MAP2ASN)
+pkg_strip := strip
+pkg_name := $(DSEKAI)-$(platform)-$(PKGOS)-$(GIT_HASH)
+pkg_reqs := $(CURSES_MANIFEST)
+$(eval $(PKG_RULE))
+
+$(BIN_CURSES): $(DSEKAI_O_FILES_CURSES) | $(BINDIR)/$(STAMPFILE) $(RESEXT_H_CURSES)
 	$(LD_CURSES) -o $@ $^ $(LDFLAGS_CURSES)
 
-$(OBJDIR_CURSES)/%.o: %.c $(GENDIR_CURSES)/resext.h | $(DSEKAI_ASSETS_MAPS_JSON)
+$(OBJDIR_CURSES)/%.o: %.c $(RESEXT_H_CURSES)
 	$(MD) $(dir $@)
 	$(CC_CURSES) $(CFLAGS_CURSES) -c -o $@ $(<:%.o=%)
 

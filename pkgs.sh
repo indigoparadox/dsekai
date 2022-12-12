@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PLATFORMS="dos win16 win32 sdl xlib wasm mac palm"
+PLATFORMS="dos win16 win32 sdl xlib curses wasm mac palm"
 BUILD=DEBUG
 DEBUG_THRESHOLD=1
 ACTION=BUILD
@@ -26,6 +26,10 @@ build_win32() {
 
 build_xlib() {
    make -f Makefile.xlib DTHRESHOLD=$DEBUG_THRESHOLD RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD pkg_xlib || exit
+}
+
+build_curses() {
+   make -f Makefile.curses DTHRESHOLD=$DEBUG_THRESHOLD RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD pkg_curses || exit
 }
 
 build_mac6() {
@@ -65,6 +69,11 @@ do_run() {
          build_xlib
       fi
       cd pkgbuild/dsekai-xlib-*-cga-*-asn && ./dsekaix
+   elif [ "$PLAT_SPEC" = "curses" ]; then
+      if [ ! -d pkgbuild/dsekai-curses-*-asn ]; then
+         build_curses
+      fi
+      cd pkgbuild/dsekai-curses-*-asn && ./dsekaix
    elif [ "$PLAT_SPEC" = "wasm" ]; then
       cd pkgbuild/dsekai-wasm-*-vga-* && python -m http.server
    fi
@@ -81,6 +90,10 @@ do_build() {
 
    if [ "$PLAT_SPEC" = "xlib" ] || [ -z "$PLAT_SPEC" ]; then
       build_xlib
+   fi
+
+   if [ "$PLAT_SPEC" = "curses" ] || [ -z "$PLAT_SPEC" ]; then
+      build_curses
    fi
 
    if [ "$PLAT_SPEC" = "dos" ] || [ -z "$PLAT_SPEC" ]; then
