@@ -16,10 +16,6 @@
 
 /*! \brief Maximum number of SCRIPT structs attached to a tilemap. */
 #define TILEMAP_SCRIPTS_MAX 8
-/*! \brief TILESET_TILE width in pixels. */
-#define TILE_W 16
-/*! \brief TILESET_TILE height in pixels. */
-#define TILE_H 16
 /*! \brief Maximum TILEMAP width in tiles. */
 #define TILEMAP_TW 40
 /*! \brief Maximum TILEMAP height in tiles. */

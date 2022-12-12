@@ -163,6 +163,16 @@
  * \{
  */
 
+#ifndef TILE_W
+/*! \brief TILESET_TILE width in pixels. */
+#  define TILE_W 16
+#endif /* !TILE_W */
+
+#ifndef TILE_H
+/*! \brief TILESET_TILE height in pixels. */
+#  define TILE_H 16
+#endif /* TILE_H */
+
 #ifndef TILEMAP_CROP_DEFS_MAX
 /**
  * \brief Maximum count of TILEMAP::crop_defs.
