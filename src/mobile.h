@@ -255,6 +255,9 @@ struct MOBILE {
    struct TILEMAP_COORDS coords_prev;
    /**
     * \brief Number of steps remaining in current walk animation.
+    *
+    * This is set to SPRITE_W to start and then incrementally determined using
+    * the table ::gc_mobile_step_table_normal_pos on each tick.
     */
    uint8_t steps_remaining;
    /*! \brief Index currently executing behavior script in TILEMAP::scripts. */
@@ -301,6 +304,9 @@ struct MOBILE {
  *
  * This may fail if the mobile is already walking, or is blocked from moving
  * in that direction by a map obstacle or other mobile.
+ *
+ * This uses MOBILE::steps_remaining and ::gc_mobile_step_table_normal_pos to
+ * track walking accross ticks.
  */
 uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
 
@@ -421,7 +427,9 @@ const int8_t gc_mobile_x_offsets[4] = {
 };
 #else
 #  ifndef NO_SMOOTH_WALK
-/*! \brief Lookup table for next walking offset based on current offset. */
+/*! \brief Lookup table for next walking offset to assign to
+ *         MOBILE::steps_remaining based on current offset.
+ */
 extern const int8_t gc_mobile_step_table_normal_pos[16];
 #  endif /* !NO_SMOOTH_WALK */
 /*! \brief Lookup table for vertical offset based on mobile_get_dir(). */
