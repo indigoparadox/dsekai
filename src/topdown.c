@@ -91,9 +91,11 @@ void topdown_draw_tilemap(
          }
 #endif /* !NO_ANIMATE */
 
+#ifndef NO_DIRTY_TILES
          if( !tilemap_is_dirty( x, y, t ) ) {
             continue;
          }
+#endif /* !NO_DIRTY_TILES */
 
          /* Sanity checks. */
          assert( y < TILEMAP_TH );
@@ -114,11 +116,19 @@ void topdown_draw_tilemap(
          /* debug_printf( 3, "redraw tile %d, %d", tile_px, tile_py ); */
          
          /* Blit the tile. */
+#ifdef GFX_ASCII
+         graphics_blit_tile_at(
+            t->tileset[tile_id].ascii,
+            0, 0,
+            SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
+            TILE_W, TILE_H );
+#else
          graphics_blit_tile_at(
             t->tileset[tile_id].image_id,
             0, 0,
             SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
             TILE_W, TILE_H );
+#endif /* GFX_ASCII */
       }
    }
 
@@ -265,9 +275,15 @@ static void topdown_draw_mobile(
    assert( 0 <= m->sprite_id );
 
    /* Blit the mobile's current sprite/frame. */
+#ifdef GFX_ASCII
+   graphics_blit_sprite_at(
+      m->ascii, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
+      m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
+#else
    graphics_blit_sprite_at(
       m->sprite_id, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
       m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
+#endif /* GFX_ASCII */
 
 cleanup:
    profiler_incr( draw_mobiles );

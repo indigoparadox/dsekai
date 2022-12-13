@@ -29,6 +29,20 @@ DSEKAI_O_FILES_CURSES := \
    $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES_CURSES_ONLY))) \
    $(addprefix $(OBJDIR_CURSES)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
+# 1a. Packaging Manifest
+
+CURSES_MANIFEST :=
+ifeq ($(FMT_ASN),TRUE)
+   CURSES_MANIFEST += $(subst .json,.asn,$(DSEKAI_ASSETS_MAPS_JSON))
+endif
+
+ifeq ($(FMT_JSON),TRUE)
+   CURSES_MANIFEST += \
+      $(DSEKAI_ASSETS_MAPS_JSON) \
+      $(DSEKAI_ASSETS_TILESETS_JSON) \
+      $(DSEKAI_ASSETS_SCRIPTS)
+endif
+
 # 3. Programs
 
 CC_CURSES := gcc
@@ -48,6 +62,7 @@ DEFINES_CURSES := \
    -DNO_DRAW_ENGINE_BEHIND_MENU \
    -DNO_GFX_CACHE \
    -DNO_SMOOTH_WALK \
+   -DNO_DIRTY_TILES \
    -DDISABLE_WEATHER_EFFECTS \
    -DPLATFORM_CURSES
 
@@ -75,7 +90,7 @@ $(eval $(PKG_RULE))
 $(BIN_CURSES): $(DSEKAI_O_FILES_CURSES) | $(BINDIR)/$(STAMPFILE) $(RESEXT_H_CURSES)
 	$(LD_CURSES) -o $@ $^ $(LDFLAGS_CURSES)
 
-$(OBJDIR_CURSES)/%.o: %.c $(RESEXT_H_CURSES)
+$(OBJDIR_CURSES)/%.o: %.c $(RESEXT_H_CURSES) | $(DSEKAI_ASSETS_MAPS_JSON)
 	$(MD) $(dir $@)
 	$(CC_CURSES) $(CFLAGS_CURSES) -c -o $@ $(<:%.o=%)
 

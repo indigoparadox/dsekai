@@ -35,8 +35,13 @@
  *  \brief Configuration settings defined at compile time.
  */
 
+#ifndef SPRITE_H
 #define SPRITE_H 16
+#endif /* !SPRITE_H */
+
+#ifndef SPRITE_W
 #define SPRITE_W 16
+#endif /* !SPRITE_W */
 
 #ifndef STATUS_WINDOW_W
 /*! \brief Width in pixels of the status ::WINDOW. */

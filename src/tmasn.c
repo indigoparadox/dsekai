@@ -44,6 +44,16 @@ static int16_t tilemap_asn_parse_tileset(
       t->tileset[tile_idx].image_id = -1;
       total_read_sz += read_sz; /* tile image and header */
 
+      /* ascii */
+      read_sz = asn_read_int(
+         &(t->tileset[tile_idx].ascii), 1, 0, asn_buffer, total_read_sz );
+      if( 0 == read_sz ) {
+         goto cleanup;
+      }
+      debug_printf( 2, "tile ASCII: %d", t->tileset[tile_idx].ascii );
+      total_read_sz += read_sz;
+
+
       /* flags */
       read_sz = asn_read_int(
          &(t->tileset[tile_idx].flags), 1, 0, asn_buffer, total_read_sz );
@@ -837,8 +847,17 @@ int32_t tilemap_asn_save(
          goto cleanup;
       }
 
+      /* ascii */
+      debug_printf( 2, "(offset 0x%02x) writing map tileset ASCII", idx );
+      idx = asn_write_int( &h_buffer, idx, t->tileset[i].ascii );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
       /* flags */
-       debug_printf( 2, "(offset 0x%02x) writing map tileset flags", idx );
+      debug_printf( 2, "(offset 0x%02x) writing map tileset flags", idx );
       idx = asn_write_int( &h_buffer, idx, t->tileset[i].flags );
       if( 0 > idx ) {
          error_printf( "error" );

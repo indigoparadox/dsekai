@@ -12,7 +12,7 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
    m->coords.x += gc_mobile_x_offsets[dir];
    m->coords.y += gc_mobile_y_offsets[dir];
 #ifdef NO_SMOOTH_WALK
-   m->steps_remaining = 1; /* Just take one "step" on next tick. */
+   m->steps_remaining = 0; /* Just take one "step" on next tick. */
 #else
    /* Use lookup table to determine first step size. */
    m->steps_remaining = gc_mobile_step_table_normal_pos[SPRITE_W - 1];
@@ -484,6 +484,7 @@ void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
       mobile_iter->coords_prev.x = t->spawns[i].coords.x;
       mobile_iter->coords_prev.y = t->spawns[i].coords.y;
       mobile_iter->script_id = t->spawns[i].script_id;
+      mobile_iter->ascii = t->spawns[i].ascii;
       mobile_iter->flags |= t->spawns[i].flags;
       mobile_iter->spawner_gid = t->spawns[i].gid;
       if( MOBILE_FLAG_PLAYER != (t->spawns[i].flags & MOBILE_FLAG_PLAYER) ) {

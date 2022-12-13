@@ -15,9 +15,11 @@ static int16_t tilemap_json_parse_spawn(
    char spawn_buffer[RESOURCE_PATH_MAX + 1] = { 0 };
    char iter_path[JSON_PATH_SZ] = { 0 };
    int16_t spawn_buffer_sz = 0,
+      ascii_buffer_sz = 0,
       x_px_in = 0,
       y_px_in = 0;
    uint8_t mobile_flag = 0;
+   char ascii_buffer[2] = { 0 };
 
    /* Prepend asset path. */
 
@@ -46,13 +48,11 @@ static int16_t tilemap_json_parse_spawn(
    /* Parse ASCII */
    dio_snprintf(
       iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_ASCII, spawn_idx );
-   spawn_buffer_sz = json_str_from_path(
-      iter_path, JSON_PATH_SZ,
-      &(spawn_buffer[spawn_buffer_sz]),
-      RESOURCE_PATH_MAX - spawn_buffer_sz,
+   ascii_buffer_sz = json_str_from_path(
+      iter_path, JSON_PATH_SZ, ascii_buffer, 2,
       tokens, tokens_sz, json_buffer );
-   if( 0 < spawn_buffer_sz ) {
-      spawn->ascii = spawn_buffer[0];
+   if( 0 < ascii_buffer_sz ) {
+      spawn->ascii = ascii_buffer[0];
       debug_printf( 2, "mobile ASCII: %c", spawn->ascii );
    }
 
@@ -135,9 +135,11 @@ static int16_t tilemap_json_parse_tileset(
    const RESOURCE_ID map_path
 ) {
    int16_t i = 0,
-      tile_filename_sz = 0;
+      tile_filename_sz = 0,
+      tile_ascii_sz = 0;
    char tile_filename[RESOURCE_PATH_MAX + 1] = { 0 },
-      tile_json_path[JSON_PATH_SZ];
+      tile_json_path[JSON_PATH_SZ] = { 0 },
+      tile_ascii[2] = { 0 };
 
    do {
 #ifndef NO_FIX_ASSET_PATH
@@ -160,6 +162,17 @@ static int16_t tilemap_json_parse_tileset(
             tile_json_path, tile_filename );
          resource_assign_id( t->tileset[i].image, tile_filename );
          t->tileset[i].image_id = -1;
+
+         /* Parse ASCII */
+         dio_snprintf(
+            tile_json_path, JSON_PATH_SZ, TILEMAP_JPATH_TS_ASCII, i );
+         tile_ascii_sz = json_str_from_path(
+            tile_json_path, JSON_PATH_SZ, tile_ascii, 2,
+            tokens, tokens_sz, json_buffer );
+         if( 0 < tile_ascii_sz ) {
+            t->tileset[i].ascii = tile_ascii[0];
+            debug_printf( 2, "tile ASCII: %c", t->tileset[i].ascii );
+         }
 
          /* Load tile flags. */
          dio_snprintf(

@@ -274,6 +274,8 @@ uint16_t script_handle_ANIM(
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
    struct DSEKAI_STATE* state, int16_t arg
 ) {
+#ifdef SCRIPT_HAS_GFX
+#  ifndef NO_ANIMATE
    int16_t a_x = 0,
       a_y = 0,
       a_w = 0,
@@ -284,11 +286,11 @@ uint16_t script_handle_ANIM(
    a_y = mobile_stack_pop( actor ) * TILE_H;
    a_x = mobile_stack_pop( actor ) * TILE_W;
 
-#ifdef SCRIPT_HAS_GFX
    animate_create(
       arg, ANIMATE_FLAG_SCRIPT | ANIMATE_FLAG_FG,
       SCREEN_MAP_X + a_x, SCREEN_MAP_Y + a_y, a_w, a_h
    );
+#  endif /* !NO_ANIMATE */
 #endif /* SCRIPT_HAS_GFX */
 
    return pc + 1;

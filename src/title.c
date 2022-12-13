@@ -107,6 +107,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    mobile_set_dir( &(state->mobiles[0]), 2 );
    state->mobiles[0].mp_hp = 100;
    state->mobiles[0].sprite_id = graphics_cache_load_bitmap( s_world );
+   state->mobiles[0].ascii = '/';
 
    state->mobiles[1].coords.x = 5;
    state->mobiles[1].coords.y = 2;
@@ -117,6 +118,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    mobile_set_dir( &(state->mobiles[1]), 0 );
    state->mobiles[1].mp_hp = 100;
    state->mobiles[1].sprite_id = graphics_cache_load_bitmap( s_world );
+   state->mobiles[1].ascii = '\\';
 
    state->mobiles[2].coords.x = 4;
    state->mobiles[2].coords.y = 3;
@@ -127,6 +129,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    mobile_set_dir( &(state->mobiles[2]), 3 );
    state->mobiles[2].mp_hp = 100;
    state->mobiles[2].sprite_id = graphics_cache_load_bitmap( s_world );
+   state->mobiles[2].ascii = '\\';
 
    state->mobiles[3].coords.x = 5;
    state->mobiles[3].coords.y = 3;
@@ -137,6 +140,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    mobile_set_dir( &(state->mobiles[3]), 1 );
    state->mobiles[3].mp_hp = 100;
    state->mobiles[3].sprite_id = graphics_cache_load_bitmap( s_world );
+   state->mobiles[3].ascii = '/';
 
    graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
 
@@ -187,6 +191,15 @@ void title_draw( struct DSEKAI_STATE* state ) {
       assert( 0 <= state->mobiles[i].sprite_id );
 
       /* Draw current mobile sprite/frame. */
+#ifdef PLATFORM_CURSES
+      graphics_blit_sprite_at(
+         state->mobiles[i].ascii,
+         state->ani_sprite_x,
+         mobile_get_dir( &(state->mobiles[i]) ) * SPRITE_H,
+         (state->mobiles[i].coords.x * SPRITE_W),
+         (state->mobiles[i].coords.y * SPRITE_H),
+         SPRITE_W, SPRITE_H );
+#else
       graphics_blit_sprite_at(
          state->mobiles[i].sprite_id,
          state->ani_sprite_x,
@@ -194,6 +207,7 @@ void title_draw( struct DSEKAI_STATE* state ) {
          (state->mobiles[i].coords.x * SPRITE_W),
          (state->mobiles[i].coords.y * SPRITE_H),
          SPRITE_W, SPRITE_H );
+#endif /* PLATFORM_CURSES */
    }
 
    window_refresh( WINDOW_ID_TITLE_MENU );
