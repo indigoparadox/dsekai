@@ -12,15 +12,13 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
    m->coords.x += gc_mobile_x_offsets[dir];
    m->coords.y += gc_mobile_y_offsets[dir];
 #ifdef NO_SMOOTH_WALK
-   m->steps_x = 1;
-   m->steps_y = 1;
+   m->steps_remaining = 1; /* Just take one "step" on next tick. */
 #else
-   m->steps_x = gc_mobile_step_table_normal_pos[SPRITE_W - 1];
-   m->steps_y = gc_mobile_step_table_normal_pos[SPRITE_H - 1];
+   /* Use lookup table to determine first step size. */
+   m->steps_remaining = gc_mobile_step_table_normal_pos[SPRITE_W - 1];
 #endif /* NO_SMOOTH_WALK */
 
-   assert( SPRITE_W > m->steps_x );
-   assert( SPRITE_H > m->steps_y );
+   assert( SPRITE_W > m->steps_remaining && SPRITE_H > m->steps_remaining );
 
    return 1;
 }
@@ -317,20 +315,17 @@ void mobile_deactivate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    struct TILEMAP* t = NULL;
 
-   assert( SPRITE_W > m->steps_x );
-   assert( SPRITE_H > m->steps_y );
+   assert( SPRITE_W > m->steps_remaining && SPRITE_H > m->steps_remaining );
 
 #ifdef NO_SMOOTH_WALK
-   m->steps_x = 0;
-   m->steps_y = 0;
+   /* We're taking our single "step." */
+   m->steps_remaining = 0;
 #else
    /* If the mobile is walking, advance its steps. */
-   m->steps_x = gc_mobile_step_table_normal_pos[m->steps_x];
-   m->steps_y = gc_mobile_step_table_normal_pos[m->steps_y];
+   m->steps_remaining = gc_mobile_step_table_normal_pos[m->steps_remaining];
 #endif /* NO_SMOOTH_WALK */
 
-   assert( SPRITE_W > m->steps_x );
-   assert( SPRITE_H > m->steps_y );
+   assert( SPRITE_W > m->steps_remaining && SPRITE_H > m->steps_remaining );
 
    /* TODO: Can we move this out? */
    t = (struct TILEMAP*)memory_lock( state->map_handle );
@@ -346,10 +341,8 @@ void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
       m->coords.x != m->coords_prev.x ||
       m->coords.y != m->coords_prev.y
    ) {
-      if( 0 == m->steps_x ) {
+      if( 0 == m->steps_remaining ) {
          m->coords_prev.x = m->coords.x;
-      }
-      if( 0 == m->steps_y ) {
          m->coords_prev.y = m->coords.y;
       }
    }
@@ -400,8 +393,7 @@ struct MOBILE* mobile_spawn_single(
    }
 
    mobile_out->mp_hp = 100;
-   mobile_out->steps_x = 0;
-   mobile_out->steps_y = 0;
+   mobile_out->steps_remaining = 0;
    mobile_out->script_pc = 0;
    mobile_out->script_wait_frames = 0;
    if( MOBILE_FLAG_NOT_LAST == (MOBILE_FLAG_NOT_LAST & mobile_out->flags) ) {

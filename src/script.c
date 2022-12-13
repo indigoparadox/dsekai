@@ -73,8 +73,7 @@ uint16_t script_handle_WALK(
          actor->coords.x != actor->coords_prev.x)
 #ifndef NO_SMOOTH_WALK
       /* Actor will be done walking on next tick. */
-      && (0 == gc_mobile_step_table_normal_pos[actor->steps_x] &&
-         0 == gc_mobile_step_table_normal_pos[actor->steps_y])
+      && (0 == gc_mobile_step_table_normal_pos[actor->steps_remaining])
 #endif /* !NO_SMOOTH_WALK */
    ) {
 #ifdef SCRIPT_TRACE

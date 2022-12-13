@@ -250,16 +250,16 @@ static void topdown_draw_mobile(
 
    /* Figure out direction to offset steps in. */
    if( m->coords_prev.x > m->coords.x ) {
-      m->screen_px += SPRITE_W - m->steps_x;
+      m->screen_px += SPRITE_W - m->steps_remaining;
    
    } else if( m->coords_prev.x < m->coords.x ) {
-      m->screen_px -= SPRITE_W - m->steps_x;
+      m->screen_px -= SPRITE_W - m->steps_remaining;
 
    } else if( m->coords_prev.y > m->coords.y ) {
-      m->screen_py += SPRITE_H - m->steps_y;
+      m->screen_py += SPRITE_H - m->steps_remaining;
    
    } else if( m->coords_prev.y < m->coords.y ) {
-      m->screen_py -= SPRITE_H - m->steps_y;
+      m->screen_py -= SPRITE_H - m->steps_remaining;
    }
 
    assert( 0 <= m->sprite_id );
@@ -477,8 +477,7 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
             state->player.coords.x;
          state->player.coords_prev.y =
             state->player.coords.y;
-         state->player.steps_x = 0;
-         state->player.steps_y = 0;
+         state->player.steps_remaining = 0;
       }
    } else {
       state->flags &= ~DSEKAI_FLAG_INPUT_BLOCKED;

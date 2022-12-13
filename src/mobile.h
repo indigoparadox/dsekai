@@ -209,8 +209,6 @@
 
 /*! \} */ /* dsekai_mobiles_errors */
 
-/* TODO: Combine steps_x and steps_y? */
-
 /*! \brief A moving/interactive object in the world. */
 struct MOBILE {
    char* name;
@@ -257,14 +255,8 @@ struct MOBILE {
    struct TILEMAP_COORDS coords_prev;
    /**
     * \brief Number of steps remaining in current walk animation.
-    * \deprecated To be combined with MOBILE::steps_y.
     */
-   uint8_t steps_x;
-   /**
-    * \brief Number of steps remaining in current walk animation.
-    * \deprecated To be combined with MOBILE::steps_x.
-    */
-   uint8_t steps_y;
+   uint8_t steps_remaining;
    /*! \brief Index currently executing behavior script in TILEMAP::scripts. */
    int16_t script_id;
    /*! \brief Position in currently executing behavior script. */
