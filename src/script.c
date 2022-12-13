@@ -70,10 +70,12 @@ uint16_t script_handle_WALK(
    if(
       /* Actor is currently walking. */
       (actor->coords.y != actor->coords_prev.y ||
-         actor->coords.x != actor->coords_prev.x) &&
+         actor->coords.x != actor->coords_prev.x)
+#ifndef NO_SMOOTH_WALK
       /* Actor will be done walking on next tick. */
-      (0 == gc_mobile_step_table_normal_pos[actor->steps_x] &&
+      && (0 == gc_mobile_step_table_normal_pos[actor->steps_x] &&
          0 == gc_mobile_step_table_normal_pos[actor->steps_y])
+#endif /* !NO_SMOOTH_WALK */
    ) {
 #ifdef SCRIPT_TRACE
       debug_printf( 1, "mobile %u:%u \"%s\" done walking",

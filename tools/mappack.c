@@ -168,6 +168,14 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
          fprintf( header_file, "         0, /* not found */\n" );
       }
 
+      /* ascii */
+      fprintf( header_file, "         /* ascii */\n" );
+      if( 0 != t.spawns[i].ascii ) {
+         fprintf( header_file, "         '%c',\n", t.spawns[i].ascii );
+      } else {
+         fprintf( header_file, "         '0',\n" );
+      }
+
       /* flags */
       fprintf( header_file, "         /* flags */\n" );
       fprintf( header_file, "         %d,\n", t.spawns[i].flags );

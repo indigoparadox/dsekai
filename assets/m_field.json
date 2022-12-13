@@ -73,6 +73,11 @@
                  "name":"player",
                  "properties":[
                         {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"@"
+                        }, 
+                        {
                          "name":"player",
                          "type":"int",
                          "value":1
@@ -89,6 +94,11 @@
                  "id":11,
                  "name":"wtempl",
                  "properties":[
+                        {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"d"
+                        }, 
                         {
                          "name":"gid",
                          "type":"int",
@@ -111,6 +121,11 @@
                  "id":6,
                  "name":"princess",
                  "properties":[
+                        {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"p"
+                        }, 
                         {
                          "name":"gid",
                          "type":"int",
@@ -139,6 +154,11 @@
                  "name":"fountain",
                  "properties":[
                         {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"f"
+                        }, 
+                        {
                          "name":"gid",
                          "type":"int",
                          "value":1007
@@ -160,6 +180,11 @@
                  "id":9,
                  "name":"tree",
                  "properties":[
+                        {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"t"
+                        }, 
                         {
                          "name":"gid",
                          "type":"int",
@@ -183,6 +208,11 @@
                  "name":"wforst",
                  "properties":[
                         {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"d"
+                        }, 
+                        {
                          "name":"gid",
                          "type":"int",
                          "value":1006
@@ -204,6 +234,11 @@
                  "id":13,
                  "name":"maid",
                  "properties":[
+                        {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"m"
+                        }, 
                         {
                          "name":"gid",
                          "type":"int",
@@ -231,6 +266,11 @@
                  "id":13,
                  "name":"chest",
                  "properties":[
+                        {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"c"
+                        }, 
                         {
                          "name":"gid",
                          "type":"int",

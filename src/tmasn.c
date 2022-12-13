@@ -215,6 +215,18 @@ static int16_t tilemap_asn_parse_spawns(
          t->spawns[spawn_idx].sprite, read_sz );
       total_read_sz += read_sz; /* spawn name and header */
 
+      /* ascii */
+      read_sz = asn_read_int(
+         &(t->spawns[spawn_idx].ascii), 1, 0, asn_buffer, total_read_sz );
+      if( 0 >= read_sz ) {
+         error_printf( "error reading spawn ASCII" );
+         total_read_sz = TILEMAP_ASN_ERROR_READ;
+         goto cleanup;
+      }
+      debug_printf( 2, "spawn ASCII: %c (%d)",
+         t->spawns[spawn_idx].ascii, read_sz );
+      total_read_sz += read_sz;
+
       /* flags */
       read_sz = asn_read_int(
          (uint8_t*)&(t->spawns[spawn_idx].flags), 2, 0,
@@ -614,7 +626,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    read_sz = asn_read_meta_ptr( asn_buffer, idx, &tm_type, &tm_sz );
    idx += read_sz;
    if( 0x30 == tm_type ) {
-      debug_printf( 3, "tilemap sequence found in resource" );
+       debug_printf( 2, "tilemap sequence found in resource" );
    } else {
       error_printf( "no tilemap sequence found! (found %d instead)",
          tm_type );
@@ -627,7 +639,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
       retval = read_sz;
       goto cleanup;
    }
-   debug_printf( 3, "tilemap version %d", tm_version );
+    debug_printf( 2, "tilemap version %d", tm_version );
    idx += read_sz;
 
    /* gid */
@@ -636,7 +648,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
       retval = read_sz;
       goto cleanup;
    }
-   debug_printf( 3, "tilemap gid %d", t->gid );
+    debug_printf( 2, "tilemap gid %d", t->gid );
    idx += read_sz;
 
    /* name */
@@ -646,7 +658,7 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
       retval = read_sz;
       goto cleanup;
    }
-   debug_printf( 3, "tilemap name: %s (%d)", t->name, read_sz );
+    debug_printf( 2, "tilemap name: %s (%d)", t->name, read_sz );
    idx += read_sz;
 
    /* flags */
@@ -751,7 +763,7 @@ int32_t tilemap_asn_save(
    }
    
    /* version */
-   debug_printf( 3, "(offset 0x%02x) writing map version", idx );
+    debug_printf( 2, "(offset 0x%02x) writing map version", idx );
    idx = asn_write_int( &h_buffer, idx, 1 );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -760,7 +772,7 @@ int32_t tilemap_asn_save(
    }
 
    /* version */
-   debug_printf( 3, "(offset 0x%02x) writing map gid", idx );
+    debug_printf( 2, "(offset 0x%02x) writing map gid", idx );
    idx = asn_write_int( &h_buffer, idx, t->gid );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -769,7 +781,7 @@ int32_t tilemap_asn_save(
    }
 
    /* name */
-   debug_printf( 3, "(offset 0x%02x) writing map name", idx );
+    debug_printf( 2, "(offset 0x%02x) writing map name", idx );
    idx = asn_write_string( &h_buffer, idx, t->name, TILEMAP_NAME_MAX );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -779,13 +791,13 @@ int32_t tilemap_asn_save(
 
 #if 0
    /* engine_type */
-   debug_printf( 3, "(offset 0x%02x) writing map engine type", idx );
+    debug_printf( 2, "(offset 0x%02x) writing map engine type", idx );
    idx = asn_write_int( &h_buffer, idx, t->engine_type );
    assert( 0 <= idx );
 #endif
 
    /* flags */
-   debug_printf( 3, "(offset 0x%02x) writing map flags", idx );
+   debug_printf( 2, "(offset 0x%02x) writing map flags", idx );
    idx = asn_write_int( &h_buffer, idx, t->flags );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -794,7 +806,7 @@ int32_t tilemap_asn_save(
    }
 
    /* tileset */
-   debug_printf( 3, "(offset 0x%02x) writing map tilesets", idx );
+   debug_printf( 2, "(offset 0x%02x) writing map tilesets", idx );
    idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -816,7 +828,7 @@ int32_t tilemap_asn_save(
       }
    
       /* image */
-      debug_printf( 3, "(offset 0x%02x) writing map tileset image", idx );
+       debug_printf( 2, "(offset 0x%02x) writing map tileset image", idx );
       idx = asn_write_string(
          &h_buffer, idx, t->tileset[i].image, RESOURCE_PATH_MAX );
       if( 0 > idx ) {
@@ -826,7 +838,7 @@ int32_t tilemap_asn_save(
       }
 
       /* flags */
-      debug_printf( 3, "(offset 0x%02x) writing map tileset flags", idx );
+       debug_printf( 2, "(offset 0x%02x) writing map tileset flags", idx );
       idx = asn_write_int( &h_buffer, idx, t->tileset[i].flags );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -849,7 +861,7 @@ int32_t tilemap_asn_save(
    }
 
    /* tiles */
-   debug_printf( 3, "(offset 0x%02x) writing map tiles", idx );
+   debug_printf( 2, "(offset 0x%02x) writing map tiles", idx );
    idx = asn_write_blob(
       &h_buffer, idx, t->tiles, ((TILEMAP_TH * TILEMAP_TW) / 2) );
 
@@ -862,7 +874,7 @@ int32_t tilemap_asn_save(
          continue;
       }
 
-      debug_printf( 3, "(offset 0x%02x) writing map string", idx );
+       debug_printf( 2, "(offset 0x%02x) writing map string", idx );
       idx = asn_write_string( &h_buffer, idx,
          t->strings[i], DIALOG_TEXT_SZ );
       assert( 0 <= idx );
@@ -870,7 +882,7 @@ int32_t tilemap_asn_save(
 #endif
 
    /* spawns */
-   debug_printf( 3, "(offset 0x%02x) writing map spawns", idx );
+   debug_printf( 2, "(offset 0x%02x) writing map spawns", idx );
    idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -884,7 +896,7 @@ int32_t tilemap_asn_save(
          continue;
       }
 
-      debug_printf( 3, "(offset 0x%02x) writing map spawn", idx );
+      debug_printf( 2, "(offset 0x%02x) writing map spawn", idx );
       idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_spawn );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -893,7 +905,7 @@ int32_t tilemap_asn_save(
       }
 
       /* name */
-      debug_printf( 3, "(offset 0x%02x) writing map spawn name", idx );
+      debug_printf( 2, "(offset 0x%02x) writing map spawn name", idx );
       idx = asn_write_string(
          &h_buffer, idx, t->spawns[i].name, TILEMAP_SPAWN_NAME_SZ );
       if( 0 > idx ) {
@@ -911,7 +923,7 @@ int32_t tilemap_asn_save(
       }
 
       /* coords.x */
-      debug_printf( 3, "(offset 0x%02x) writing map spawn coords x", idx );
+      debug_printf( 2, "(offset 0x%02x) writing map spawn coords x", idx );
       idx = asn_write_int( &h_buffer, idx, t->spawns[i].coords.x );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -920,7 +932,7 @@ int32_t tilemap_asn_save(
       }
 
       /* coords.y */
-      debug_printf( 3, "(offset 0x%02x) writing map spawn coords y", idx );
+      debug_printf( 2, "(offset 0x%02x) writing map spawn coords y", idx );
       idx = asn_write_int( &h_buffer, idx, t->spawns[i].coords.y );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -931,7 +943,7 @@ int32_t tilemap_asn_save(
       idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_spawn_coords );
 
       /* sprite */
-      debug_printf( 3, "(offset 0x%02x) writing map spawn sprite", idx );
+      debug_printf( 2, "(offset 0x%02x) writing map spawn sprite", idx );
       idx = asn_write_string(
          &h_buffer, idx, t->spawns[i].sprite, RESOURCE_PATH_MAX );
       if( 0 > idx ) {
@@ -940,8 +952,17 @@ int32_t tilemap_asn_save(
          goto cleanup;
       }
 
+      /* ascii */
+      debug_printf( 2, "(offset 0x%02x) writing map spawn ASCII", idx );
+      idx = asn_write_int( &h_buffer, idx, t->spawns[i].ascii );
+      if( 0 > idx ) {
+         error_printf( "error" );
+         idx = -1;
+         goto cleanup;
+      }
+
       /* flags */
-      debug_printf( 3, "(offset 0x%02x) writing map spawn flags", idx );
+      debug_printf( 2, "(offset 0x%02x) writing map spawn flags", idx );
       idx = asn_write_int( &h_buffer, idx, t->spawns[i].flags );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -950,7 +971,7 @@ int32_t tilemap_asn_save(
       }
 
       /* gid */
-      debug_printf( 3, "(offset 0x%02x) writing map spawn gid", idx );
+       debug_printf( 2, "(offset 0x%02x) writing map spawn gid", idx );
       idx = asn_write_int( &h_buffer, idx, t->spawns[i].gid );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -959,7 +980,7 @@ int32_t tilemap_asn_save(
       }
 
       /* script_id */
-      debug_printf( 3, "(offset 0x%02x) writing map spawn script ID", idx );
+       debug_printf( 2, "(offset 0x%02x) writing map spawn script ID", idx );
       idx = asn_write_int( &h_buffer, idx, t->spawns[i].script_id );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1054,7 +1075,7 @@ int32_t tilemap_asn_save(
    }
 
    /* items */
-   debug_printf( 3, "(offset 0x%02x) writing map items", idx );
+    debug_printf( 2, "(offset 0x%02x) writing map items", idx );
    idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -1067,7 +1088,7 @@ int32_t tilemap_asn_save(
          continue;
       }
 
-      debug_printf( 3, "(offset 0x%02x) writing map item", idx );
+       debug_printf( 2, "(offset 0x%02x) writing map item", idx );
       idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_item );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1076,7 +1097,7 @@ int32_t tilemap_asn_save(
       }
 
       /* index */
-      debug_printf( 3, "(offset 0x%02x) writing item index", idx );
+       debug_printf( 2, "(offset 0x%02x) writing item index", idx );
       idx = asn_write_int( &h_buffer, idx, i );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1085,7 +1106,7 @@ int32_t tilemap_asn_save(
       }
 
       /* sprite */
-      debug_printf( 3, "(offset 0x%02x) writing item sprite path", idx );
+       debug_printf( 2, "(offset 0x%02x) writing item sprite path", idx );
       idx = asn_write_string(
          &h_buffer, idx, t->item_defs[i].sprite, RESOURCE_PATH_MAX );
       if( 0 > idx ) {
@@ -1095,7 +1116,7 @@ int32_t tilemap_asn_save(
       }
 
       /* name */
-      debug_printf( 3, "(offset 0x%02x) writing item name", idx );
+       debug_printf( 2, "(offset 0x%02x) writing item name", idx );
       idx = asn_write_string( &h_buffer, idx, t->item_defs[i].name, ITEM_NAME_SZ );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1104,7 +1125,7 @@ int32_t tilemap_asn_save(
       }
 
       /* owner */
-      debug_printf( 3, "(offset 0x%02x) writing item owner", idx );
+       debug_printf( 2, "(offset 0x%02x) writing item owner", idx );
       idx = asn_write_int( &h_buffer, idx, t->item_defs[i].owner );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1113,7 +1134,7 @@ int32_t tilemap_asn_save(
       }
  
       /* gid */
-      debug_printf( 3, "(offset 0x%02x) writing item gid", idx );
+       debug_printf( 2, "(offset 0x%02x) writing item gid", idx );
       idx = asn_write_int( &h_buffer, idx, t->item_defs[i].gid );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1122,7 +1143,7 @@ int32_t tilemap_asn_save(
       }
 
       /* data */
-      debug_printf( 3, "(offset 0x%02x) writing item data", idx );
+       debug_printf( 2, "(offset 0x%02x) writing item data", idx );
       idx = asn_write_int( &h_buffer, idx, t->item_defs[i].data );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1131,7 +1152,7 @@ int32_t tilemap_asn_save(
       }
 
       /* flags */
-      debug_printf( 3, "(offset 0x%02x) writing item flags", idx );
+       debug_printf( 2, "(offset 0x%02x) writing item flags", idx );
       idx = asn_write_int( &h_buffer, idx, t->item_defs[i].flags );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1149,7 +1170,7 @@ int32_t tilemap_asn_save(
    idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
 
    /* crop defs */
-   debug_printf( 3, "(offset 0x%02x) writing map crop defs", idx );
+    debug_printf( 2, "(offset 0x%02x) writing map crop defs", idx );
    idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -1163,7 +1184,7 @@ int32_t tilemap_asn_save(
          continue;
       }
 
-      debug_printf( 3, "(offset 0x%02x) writing map crop def", idx );
+       debug_printf( 2, "(offset 0x%02x) writing map crop def", idx );
       /* Reuse mark_seq_item for crop def since it's not used in this scope. */
       idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_item );
       if( 0 > idx ) {
@@ -1173,7 +1194,7 @@ int32_t tilemap_asn_save(
       }
 
       /* index */
-      debug_printf( 3, "(offset 0x%02x) writing crop def index", idx );
+       debug_printf( 2, "(offset 0x%02x) writing crop def index", idx );
       idx = asn_write_int( &h_buffer, idx, i );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1182,7 +1203,7 @@ int32_t tilemap_asn_save(
       }
 
       /* sprite */
-      debug_printf( 3, "(offset 0x%02x) writing crop def sprite path", idx );
+       debug_printf( 2, "(offset 0x%02x) writing crop def sprite path", idx );
       idx = asn_write_string(
          &h_buffer, idx, t->crop_defs[i].sprite, RESOURCE_PATH_MAX );
       if( 0 > idx ) {
@@ -1192,7 +1213,7 @@ int32_t tilemap_asn_save(
       }
 
       /* name */
-      debug_printf( 3, "(offset 0x%02x) writing crop def name", idx );
+       debug_printf( 2, "(offset 0x%02x) writing crop def name", idx );
       idx = asn_write_string(
          &h_buffer, idx, t->crop_defs[i].name, CROP_NAME_MAX );
       if( 0 > idx ) {
@@ -1202,7 +1223,7 @@ int32_t tilemap_asn_save(
       }
 
       /* gid */
-      debug_printf( 3, "(offset 0x%02x) writing crop def gid", idx );
+       debug_printf( 2, "(offset 0x%02x) writing crop def gid", idx );
       idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].gid );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1211,7 +1232,7 @@ int32_t tilemap_asn_save(
       }
 
       /* flags */
-      debug_printf( 3, "(offset 0x%02x) writing crop def flags", idx );
+       debug_printf( 2, "(offset 0x%02x) writing crop def flags", idx );
       idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].flags );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1220,7 +1241,7 @@ int32_t tilemap_asn_save(
       }
 
       /* cycle */
-      debug_printf( 3, "(offset 0x%02x) writing crop def cycle", idx );
+       debug_printf( 2, "(offset 0x%02x) writing crop def cycle", idx );
       idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].cycle );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1229,7 +1250,7 @@ int32_t tilemap_asn_save(
       }
 
       /* produce gid */
-      debug_printf( 3, "(offset 0x%02x) writing crop produce gid", idx );
+       debug_printf( 2, "(offset 0x%02x) writing crop produce gid", idx );
       idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].produce_gid );
       if( 0 > idx ) {
          error_printf( "error" );

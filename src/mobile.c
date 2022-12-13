@@ -11,8 +11,13 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
 
    m->coords.x += gc_mobile_x_offsets[dir];
    m->coords.y += gc_mobile_y_offsets[dir];
+#ifdef NO_SMOOTH_WALK
+   m->steps_x = 1;
+   m->steps_y = 1;
+#else
    m->steps_x = gc_mobile_step_table_normal_pos[SPRITE_W - 1];
    m->steps_y = gc_mobile_step_table_normal_pos[SPRITE_H - 1];
+#endif /* NO_SMOOTH_WALK */
 
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
@@ -315,10 +320,15 @@ void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
 
+#ifdef NO_SMOOTH_WALK
+   m->steps_x = 0;
+   m->steps_y = 0;
+#else
    /* If the mobile is walking, advance its steps. */
    m->steps_x = gc_mobile_step_table_normal_pos[m->steps_x];
    m->steps_y = gc_mobile_step_table_normal_pos[m->steps_y];
-   
+#endif /* NO_SMOOTH_WALK */
+
    assert( SPRITE_W > m->steps_x );
    assert( SPRITE_H > m->steps_y );
 

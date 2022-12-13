@@ -43,6 +43,19 @@ static int16_t tilemap_json_parse_spawn(
 
    resource_assign_id( spawn->sprite, spawn_buffer );
 
+   /* Parse ASCII */
+   dio_snprintf(
+      iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_ASCII, spawn_idx );
+   spawn_buffer_sz = json_str_from_path(
+      iter_path, JSON_PATH_SZ,
+      &(spawn_buffer[spawn_buffer_sz]),
+      RESOURCE_PATH_MAX - spawn_buffer_sz,
+      tokens, tokens_sz, json_buffer );
+   if( 0 < spawn_buffer_sz ) {
+      spawn->ascii = spawn_buffer[0];
+      debug_printf( 2, "mobile ASCII: %c", spawn->ascii );
+   }
+
    /* Parse Name */
    dio_snprintf(
       iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_NAME, spawn_idx );

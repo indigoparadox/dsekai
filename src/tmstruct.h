@@ -41,6 +41,7 @@ struct TILEMAP_COORDS {
 struct TILESET_TILE {
    /*! \brief Indentifier for graphical asset representing this tile. */
    RESOURCE_ID image;
+   unsigned char ascii;
    /*! \brief Flags indicating behavior for this tile. */
    uint8_t flags;
    /**
@@ -67,6 +68,7 @@ struct TILEMAP_SPAWN {
     * \brief RESOURCE_ID for the MOBILE::sprite on a spawned MOBILE.
     */
    RESOURCE_ID sprite;
+   unsigned char ascii;
    /*! \brief \ref dsekai_mobile_flags to pass to spawned MOBILE::flags. */
    uint16_t flags;
    /**

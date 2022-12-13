@@ -38,6 +38,16 @@
 #define SPRITE_H 16
 #define SPRITE_W 16
 
+#ifndef STATUS_WINDOW_W
+/*! \brief Width in pixels of the status ::WINDOW. */
+#define STATUS_WINDOW_W SCREEN_W
+#endif /* !STATUS_WINDOW_W */
+
+#ifndef STATUS_WINDOW_H
+/*! \brief Height in pixels of the status ::WINDOW. */
+#define STATUS_WINDOW_H 32
+#endif /* !STATUS_WINDOW_H */
+
 #ifndef SCREEN_MAP_W
 /**
  * \brief Width of the overview or viewport area in pixels.
@@ -53,7 +63,7 @@
  * \attention Changing this value may break compatibility with tilemaps!
  *            Please use caution.
  */
-#define SCREEN_MAP_H (160 - 32)
+#define SCREEN_MAP_H (160 - STATUS_WINDOW_H)
 #endif /* !SCREEN_MAP_H */
 
 #ifndef SCREEN_MAP_X
@@ -65,16 +75,6 @@
 /*! \brief Top offset of the overview or viewport area in pixels. */
 #define SCREEN_MAP_Y (0)
 #endif /* !SCREEN_MAP_Y */
-
-#ifndef STATUS_WINDOW_W
-/*! \brief Width in pixels of the status ::WINDOW. */
-#define STATUS_WINDOW_W SCREEN_W
-#endif /* !STATUS_WINDOW_W */
-
-#ifndef STATUS_WINDOW_H
-/*! \brief Height in pixels of the status ::WINDOW. */
-#define STATUS_WINDOW_H 32
-#endif /* !STATUS_WINDOW_H */
 
 #ifndef ANI_SPRITE_COUNTDOWN_MAX
 /*! \brief Number of loops between DSEKAI_STATE::ani_sprite_x changes. */

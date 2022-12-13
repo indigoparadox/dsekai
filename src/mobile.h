@@ -250,6 +250,7 @@ struct MOBILE {
     *        loaded in the \ref unilayer_graphics_cache.
     */
    int16_t sprite_id;
+   unsigned char ascii;
    /*! \brief Current tile on which this mobile is located. */
    struct TILEMAP_COORDS coords;
    /*! \brief Previous tile, if this mobile is currently moving. */
@@ -410,12 +411,14 @@ int8_t mobile_pathfind(
    struct DSEKAI_STATE* state );
 
 #ifdef MOBILE_C
+#  ifndef NO_SMOOTH_WALK
 const int8_t gc_mobile_step_table_normal_pos[16] = {
    0, 0, 0, 0,       /*  0,  1,  2,  3 */
    3, 3, 3, 3,       /*  4,  5,  6,  7 */
    7, 7, 7, 7,       /*  8,  9, 10, 11 */
    11, 11, 11, 11    /* 12, 13, 14, 15 */
 };
+#  endif /* !NO_SMOOTH_WALK */
 
 const int8_t gc_mobile_y_offsets[4] = {
    1, -1, 0, 0
@@ -425,8 +428,10 @@ const int8_t gc_mobile_x_offsets[4] = {
    0, 0, 1, -1
 };
 #else
+#  ifndef NO_SMOOTH_WALK
 /*! \brief Lookup table for next walking offset based on current offset. */
 extern const int8_t gc_mobile_step_table_normal_pos[16];
+#  endif /* !NO_SMOOTH_WALK */
 /*! \brief Lookup table for vertical offset based on mobile_get_dir(). */
 extern const int8_t gc_mobile_y_offsets[4];
 /*! \brief Lookup table for horizontal offset based on mobile_get_dir(). */
