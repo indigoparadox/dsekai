@@ -106,6 +106,14 @@ int mappack_write( const char* map_json_path, FILE* header_file ) {
          fprintf( header_file, "         %s,\n",
             &(t.tileset[i].image[basename_idx]) );
 
+         /* tileset[i].ascii */
+         fprintf( header_file, "         /* ascii */\n" );
+         if( 0 != t.tileset[i].ascii ) {
+            fprintf( header_file, "         '%c',\n", t.tileset[i].ascii );
+         } else {
+            fprintf( header_file, "         '0',\n" );
+         }
+
          /* tileset[i].flags */
          fprintf( header_file, "         /* flags */\n" );
          fprintf( header_file, "         0x%02x,\n", t.tileset[i].flags );

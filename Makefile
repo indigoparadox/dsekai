@@ -10,7 +10,7 @@ endif
 
 # Figure out what packages we can build based on platform limitations.
 
-BUILD_PKG_ALL := pkg_sdl pkg_win16 pkg_win32
+BUILD_PKG_ALL := pkg_sdl pkg_win16 pkg_win32 pkg_curses
 
 # Palm not included by default as it requires MONO and RESOURCE=DEFAULT.
 BUILD_PALM=0
@@ -54,6 +54,7 @@ include Makefile.inc
 include Makefile.sdl
 include Makefile.win16
 include Makefile.win32
+include Makefile.curses
 
 ifeq ($(BUILD_PALM),1)
    include Makefile.palm
