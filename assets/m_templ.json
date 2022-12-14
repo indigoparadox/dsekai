@@ -65,6 +65,11 @@
                  "name":"tfield",
                  "properties":[
                         {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"d"
+                        }, 
+                        {
                          "name":"script",
                          "type":"int",
                          "value":0

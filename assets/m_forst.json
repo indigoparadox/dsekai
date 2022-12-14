@@ -65,6 +65,11 @@
                  "name":"wfield",
                  "properties":[
                         {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"d"
+                        }, 
+                        {
                          "name":"gid",
                          "type":"int",
                          "value":1001
@@ -86,6 +91,11 @@
                  "id":3,
                  "name":"yeti",
                  "properties":[
+                        {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"y"
+                        }, 
                         {
                          "name":"gid",
                          "type":"int",
