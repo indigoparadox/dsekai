@@ -36,7 +36,7 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
 
       window_push(
          WINDOW_ID_MENU_LABEL_ITEM + i, MENU_WINDOW_ID, WINDOW_TYPE_LABEL, 0,
-         10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
+         WINDOW_PADDING_OUTSIDE, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
          0, gc_menu_tokens[i] );
@@ -124,7 +124,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          window_push(
             WINDOW_ID_MENU_LABEL_ITEM_SEL_USE + i, MENU_WINDOW_ITEM_SEL_ID,
             WINDOW_TYPE_LABEL, 0,
-            10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
+            WINDOW_PADDING_OUTSIDE, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
             WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
             color, WINDOW_PREFAB_DEFAULT_BG(), flags,
             0, gc_menu_item_sel_msgs[i] );
@@ -202,7 +202,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       window_push(
          WINDOW_ID_MENU_LABEL_ITEM + i, MENU_WINDOW_ID,
          WINDOW_TYPE_LABEL, 0,
-         10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
+         WINDOW_PADDING_OUTSIDE, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(),
          flags | GRAPHICS_STRING_FLAG_ALL_CAPS,
@@ -226,7 +226,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       control_push(
          0x2320,
          CONTROL_TYPE_LABEL, CONTROL_FLAG_ENABLED | CONTROL_FLAG_TEXT_PTR,
-         10, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
+         WINDOW_PADDING_OUTSIDE, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(),
          GRAPHICS_STRING_FLAG_ALL_CAPS,

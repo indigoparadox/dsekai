@@ -46,8 +46,8 @@ static void title_draw_menu( struct DSEKAI_STATE* state ) {
 
    window_push(
       WINDOW_ID_TITLE_MENU, 0, WINDOW_TYPE_WINDOW, 0,
-      WINDOW_PLACEMENT_CENTER,
-      SCREEN_H - (TILE_H * 5), TILE_H * 6, TILE_W * 3,
+      WINDOW_PLACEMENT_CENTER, SCREEN_H - (TILE_H * 5), /* x, y */
+      WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, /* w, h */
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, NULL );
 
