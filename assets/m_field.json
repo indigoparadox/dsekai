@@ -288,7 +288,7 @@
                  "y":165.5
                 }, 
                 {
-                 "class":"16x16x4\/s_maid.bmp",
+                 "class":"16x16x4\/s_dog.bmp",
                  "height":12,
                  "id":20,
                  "name":"dog",
@@ -639,6 +639,11 @@
          "name":"string_8",
          "type":"string",
          "value":"Do your best!"
+        }, 
+        {
+         "name":"string_9",
+         "type":"string",
+         "value":"Woof! Woof!"
         }, 
         {
          "name":"weather",
