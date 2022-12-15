@@ -329,15 +329,6 @@ void engines_loop_iter( void* state_handle );
 int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
 #endif /* PLATFORM_WASM */
 
-/**
- * \brief Handle generic player movement commmand.
- * \param dir_move
- * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
- * \param map Locked ::MEMORY_PTR for DSEKAI_STATE::map_handle.
- */
-int16_t engines_handle_movement(
-   int8_t dir_move, struct DSEKAI_STATE* state, struct TILEMAP* map );
-
 #ifndef NO_TITLE
 
 void engines_exit_to_title( struct DSEKAI_STATE* state );

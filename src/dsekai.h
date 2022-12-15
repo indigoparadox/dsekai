@@ -84,6 +84,7 @@ struct DSEKAI_STATE;
 #endif /* NETWORK_IRC */
 #include "menu.h"
 #include "crop.h"
+#include "pathfind.h"
 
 #ifdef TILEMAP_FMT_JSON
 #include "tmjson.h"

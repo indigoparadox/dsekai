@@ -23,6 +23,7 @@ DSEKAI_C_FILES_SUPPORT := \
    src/menu.c \
    src/crop.c \
    src/strpool.c \
+   src/pathfind.c \
    unilayer/src/graphics.c \
    unilayer/src/dio.c
 
@@ -219,6 +220,7 @@ HEADPACK_C_FILES := \
    src/tmjson.c \
    src/tilemap.c \
    src/mobile.c \
+   src/pathfind.c \
    src/script.c \
    unilayer/src/json.c \
    src/item.c \

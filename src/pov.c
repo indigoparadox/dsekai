@@ -133,13 +133,20 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
 
    switch( in_char ) {
    case INPUT_KEY_UP:
-      engines_handle_movement( mobile_get_dir( &(state->player) ), state, t );
-      tilemap_refresh_tiles( t );
+      /* TODO: Should this be north, or the facing dir? */
+      if(
+         MOBILE_ERROR_BLOCKED !=
+         pathfind_test_dir(
+            &(state->player), MOBILE_DIR_NORTH, 0, state, t )
+      ) {
+         mobile_walk_start( &(state->player), MOBILE_DIR_NORTH );
+         tilemap_refresh_tiles( t );
+      }
       /* gstate->dirty = 1; */
       break;
 
    case INPUT_KEY_LEFT:
-      /* engines_handle_movement( MOBILE_DIR_WEST, state, t ); */
+      /* pathfind_test_dir( MOBILE_DIR_WEST, state, t ); */
       mobile_set_dir( &(state->player),
          gc_pov_dir_turn_left[mobile_get_dir( &(state->player) )] );
       tilemap_refresh_tiles( t );
@@ -155,13 +162,20 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
       break;
 
    case INPUT_KEY_DOWN:
-      engines_handle_movement( MOBILE_DIR_SOUTH, state, t );
-      tilemap_refresh_tiles( t );
+      /* TODO: Should this be south, or the opposite-facing dir? */
+      if(
+         MOBILE_ERROR_BLOCKED !=
+         pathfind_test_dir(
+            &(state->player), MOBILE_DIR_SOUTH, 0, state, t )
+      ) {
+         mobile_walk_start( &(state->player), MOBILE_DIR_SOUTH );
+         tilemap_refresh_tiles( t );
+      }
       /* gstate->dirty = 1; */
       break;
 
    case INPUT_KEY_RIGHT:
-      /* engines_handle_movement( MOBILE_DIR_EAST, state, t ); */
+      /* pathfind_test_dir( MOBILE_DIR_EAST, state, t ); */
       mobile_set_dir( &(state->player),
          gc_pov_dir_turn_right[mobile_get_dir( &(state->player) )] );
       tilemap_refresh_tiles( t );

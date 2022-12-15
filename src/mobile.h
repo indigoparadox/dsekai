@@ -391,23 +391,6 @@ struct MOBILE* mobile_spawn_single(
 void mobile_spawns(
    struct TILEMAP* t, struct DSEKAI_STATE* state ) SECTION_MOBILE;
 
-/**
- * \brief Find a path from ::MOBILE m to the given tilemap coordinates and
- *        return the \ref dsekai_mobiles_directions to take the next step in
- *        said path.
- * \param m ::MOBILE to start the path from.
- * \param x_tgt Destination target X coordinate tilemap tile.
- * \param y_tgt Destination target Y coordinate tilemap tile.
- * \param t Locked ::MEMORY_PTR to ::TILEMAP on which to pathfind.
- * \param state Locked ::MEMORY_PTR to the current engine ::DSEKAI_STATE.
- * \return \ref dsekai_mobiles_directions to the next step in the path or
- *         ::MOBILE_ERROR_BLOCKED if blocked.
- * \todo This is not yet implemented.
- */
-int8_t mobile_pathfind(
-   struct MOBILE* m, uint8_t x_tgt, uint8_t y_tgt, struct TILEMAP* t,
-   struct DSEKAI_STATE* state );
-
 #ifdef MOBILE_C
 #  ifndef NO_SMOOTH_WALK
 const int8_t gc_mobile_step_table_normal_pos[16] = {

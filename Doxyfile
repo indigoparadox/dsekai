@@ -803,8 +803,10 @@ INPUT                  = \
    unilayer/src/dio.h \
    unilayer/src/asn.h \
    unilayer/src/json.h \
+   unilayer/src/window.h \
    unilayer/tools/unimake.h \
    unilayer/tools/headpack.h \
+   unilayer/src/config.h \
    src \
    README.md
 

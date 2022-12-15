@@ -212,33 +212,6 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
 
 }
 
-int16_t engines_handle_movement(
-   int8_t dir_move, struct DSEKAI_STATE* state, struct TILEMAP* t
-) {
-
-   if( 0 < window_modal() ) {
-      return 1;
-   }
-
-   if(
-      DSEKAI_FLAG_INPUT_BLOCKED == (DSEKAI_FLAG_INPUT_BLOCKED & state->flags)
-   ) {
-      return 1;
-   }
-   
-   mobile_set_dir( &(state->player), dir_move );
-
-   if(
-      !tilemap_collide( &(state->player), dir_move, t ) &&
-      NULL == mobile_get_facing( &(state->player), t, state )
-   ) {
-      /* No blocking tiles or mobiles. */
-      mobile_walk_start( &(state->player), dir_move );
-   }
-
-   return dir_move;
-}
-
 #ifdef PLATFORM_WASM
 void engines_loop_iter( void* state_handle_p ) {
    MEMORY_HANDLE state_handle = (MEMORY_HANDLE)state_handle_p;

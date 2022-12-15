@@ -164,6 +164,21 @@
 /*! \} */ /* dsekai_items */
 
 /**
+ * \addtogroup dsekai_pathfind
+ * \{
+ */
+
+#ifndef PATHFIND_LIST_MAX
+/**
+ * \brief Maximum number of nodes in the pathfinding lists.
+ * \warning This must not exceed 127!
+ */
+#define PATHFIND_LIST_MAX 20
+#endif /* !PATHFIND_LIST_MAX */
+
+/*! \} */ /* dsekai_pathfind */
+
+/**
  * \addtogroup dsekai_tilemaps
  * \{
  */

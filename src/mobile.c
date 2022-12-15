@@ -267,14 +267,14 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
    } else if( SCRIPT_ARG_FOLLOW == step->arg ) {
       /* Pathfinding dir arg. */
-      arg = mobile_pathfind(
-         m, state->player.coords.x, state->player.coords.y, t, state );
-      if( MOBILE_ERROR_BLOCKED == arg ) {
-#ifdef SCRIPT_TRACE
+      arg = pathfind_start(
+         m, state->player.coords.x, state->player.coords.y, state, t );
+      if( 0 > arg ) {
          debug_printf( 1, "mobile %u:%u \"%s\" pathfinding blocked",
             m->map_gid, m->spawner_gid, m->name );
-#endif /* SCRIPT_TRACE */
+         goto cleanup;
       }
+      debug_printf( 1, "follow arg became %d", arg );
    } else {
       /* Literal/immediate arg. */
       arg = step->arg;
@@ -497,13 +497,5 @@ void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
       mobile_iter->sprite_id =
          graphics_cache_load_bitmap( t->spawns[i].sprite );
    }
-}
-
-int8_t mobile_pathfind(
-   struct MOBILE* m, uint8_t x_tgt, uint8_t y_tgt, struct TILEMAP* t,
-   struct DSEKAI_STATE* state
-) {
-   /* TODO: Implement pathfinding. */
-   return MOBILE_ERROR_BLOCKED;
 }
 

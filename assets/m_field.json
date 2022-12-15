@@ -284,8 +284,35 @@
                  "rotation":0,
                  "visible":true,
                  "width":10.5,
-                 "x":117,
-                 "y":164
+                 "x":117.5,
+                 "y":165.5
+                }, 
+                {
+                 "class":"16x16x4\/s_maid.bmp",
+                 "height":12,
+                 "id":20,
+                 "name":"dog",
+                 "properties":[
+                        {
+                         "name":"ascii",
+                         "type":"string",
+                         "value":"w"
+                        }, 
+                        {
+                         "name":"gid",
+                         "type":"int",
+                         "value":1008
+                        }, 
+                        {
+                         "name":"script",
+                         "type":"int",
+                         "value":7
+                        }],
+                 "rotation":0,
+                 "visible":true,
+                 "width":14.5,
+                 "x":127,
+                 "y":37
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -510,7 +537,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":20,
+ "nextobjectid":21,
  "orientation":"orthogonal",
  "properties":[
         {
@@ -562,6 +589,11 @@
          "name":"script_6",
          "type":"string",
          "value":"m_field\/maid.s"
+        }, 
+        {
+         "name":"script_7",
+         "type":"string",
+         "value":"m_field\/dog.s"
         }, 
         {
          "name":"string_0",
