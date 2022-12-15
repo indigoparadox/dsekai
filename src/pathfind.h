@@ -20,6 +20,8 @@ struct PATHFIND_NODE {
    /*! \brief Estimated distance from node to pathfinding target. */
    uint8_t h;
    uint8_t active;
+   /*! \brief Direction of this node from its parent. */
+   int8_t dir;
 };
 
 #define PATHFIND_ERROR_MAX -1
