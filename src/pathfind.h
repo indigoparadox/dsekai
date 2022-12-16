@@ -19,12 +19,9 @@ struct PATHFIND_NODE {
    uint8_t g; 
    /*! \brief Estimated distance from node to pathfinding target. */
    uint8_t h;
-   uint8_t active;
    /*! \brief Direction of this node from its parent. */
    int8_t dir;
 };
-
-#define PATHFIND_ERROR_MAX -1
 
 #define PATHFIND_ERROR_FARTHER -2
 
@@ -51,20 +48,19 @@ int8_t pathfind_start(
    struct DSEKAI_STATE* state, struct TILEMAP* t );
 
 /**
- * \brief Handle generic ::MOBILE movement commmand, checking for blocking
- *        terrain or other ::MOBILE objects.
+ * \brief Check for blocking terrain or other ::MOBILE objects preventing
+ *        movement in dir_move.
  * \param mover Locked ::MEMORY_PTR to ::MOBILE performing the movement.
  * \param dir_move \ref dsekai_mobiles_directions to attempt to move in.
  * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
  * \param force 0 if movement should not be attempted if input is blocked
  *              globally, or 1 if it should.
  * \param t Locked ::MEMORY_PTR for DSEKAI_STATE::map_handle.
- * \return \ref dsekai_mobiles_directions specified by dir_move if successful,
+ * \return 1 if successful,
  *         or ::MOBILE_ERROR_BLOCKED if movement is blocked.
+ * \todo TODO: Determine terrain movement speed.
  */
-int8_t pathfind_test_dir(
-   struct MOBILE* mover, int8_t dir_move, uint8_t force,
-   struct DSEKAI_STATE* state, struct TILEMAP* t );
+#define pathfind_test_dir( mover, dir_move, state, t ) (!tilemap_collide( mover, dir_move, t ) && (NULL == mobile_get_facing( mover, t, state )) ? 1 : MOBILE_ERROR_BLOCKED)
 
 /*! \} */ /* dsekai_pathfind */
 

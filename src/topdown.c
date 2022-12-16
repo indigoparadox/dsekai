@@ -605,9 +605,8 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
       } else {
 #endif /* !NO_ENGINE_EDITOR */
          if(
-            MOBILE_ERROR_BLOCKED !=
-            pathfind_test_dir(
-               &(state->player), MOBILE_DIR_NORTH, 0, state, map )
+            0 <= engines_input_movement(
+               &(state->player), MOBILE_DIR_NORTH, state, map )
          ) {
             mobile_walk_start( &(state->player), MOBILE_DIR_NORTH );
          }
@@ -623,9 +622,8 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
       } else {
 #endif /* !NO_ENGINE_EDITOR */
          if(
-            MOBILE_ERROR_BLOCKED !=
-            pathfind_test_dir(
-               &(state->player), MOBILE_DIR_WEST, 0, state, map )
+            0 <= engines_input_movement(
+               &(state->player), MOBILE_DIR_WEST, state, map )
          ) {
             mobile_walk_start( &(state->player), MOBILE_DIR_WEST );
          }
@@ -641,9 +639,8 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
       } else {
 #endif /* !NO_ENGINE_EDITOR */
          if(
-            MOBILE_ERROR_BLOCKED !=
-            pathfind_test_dir(
-               &(state->player), MOBILE_DIR_SOUTH, 0, state, map )
+            0 <= engines_input_movement(
+               &(state->player), MOBILE_DIR_SOUTH, state, map )
          ) {
             mobile_walk_start( &(state->player), MOBILE_DIR_SOUTH );
          }
@@ -659,9 +656,8 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
       } else {
 #endif /* !NO_ENGINE_EDITOR */
          if(
-            MOBILE_ERROR_BLOCKED !=
-            pathfind_test_dir(
-               &(state->player), MOBILE_DIR_EAST, 0, state, map )
+            0 <= engines_input_movement(
+               &(state->player), MOBILE_DIR_EAST, state, map )
          ) {
             mobile_walk_start( &(state->player), MOBILE_DIR_EAST );
          }

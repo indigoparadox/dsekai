@@ -212,6 +212,30 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
 
 }
 
+int8_t engines_input_movement(
+   struct MOBILE* mover, int8_t dir_move,
+   struct DSEKAI_STATE* state, struct TILEMAP* t
+) {
+   if(
+      ( 0 < window_modal() ) ||
+      (DSEKAI_FLAG_INPUT_BLOCKED ==
+         (DSEKAI_FLAG_INPUT_BLOCKED & state->flags))
+   ) {
+      /* System input is blocked right now. */
+      return -1;
+   }
+
+   /* Face requested dir even if we're blocked. */
+   mobile_set_dir( &(state->player), dir_move );
+
+   if( 0 > pathfind_test_dir( mover, dir_move, state, t ) ) {
+      /* Mobile is blocked. */
+      return -1;
+   }
+
+   return dir_move;
+}
+
 #ifdef PLATFORM_WASM
 void engines_loop_iter( void* state_handle_p ) {
    MEMORY_HANDLE state_handle = (MEMORY_HANDLE)state_handle_p;

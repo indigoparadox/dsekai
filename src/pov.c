@@ -135,9 +135,8 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
    case INPUT_KEY_UP:
       /* TODO: Should this be north, or the facing dir? */
       if(
-         MOBILE_ERROR_BLOCKED !=
-         pathfind_test_dir(
-            &(state->player), MOBILE_DIR_NORTH, 0, state, t )
+         0 < engines_input_movement(
+            &(state->player), MOBILE_DIR_NORTH, state, t )
       ) {
          mobile_walk_start( &(state->player), MOBILE_DIR_NORTH );
          tilemap_refresh_tiles( t );
@@ -164,9 +163,8 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
    case INPUT_KEY_DOWN:
       /* TODO: Should this be south, or the opposite-facing dir? */
       if(
-         MOBILE_ERROR_BLOCKED !=
-         pathfind_test_dir(
-            &(state->player), MOBILE_DIR_SOUTH, 0, state, t )
+         0 < engines_input_movement(
+            &(state->player), MOBILE_DIR_SOUTH, state, t )
       ) {
          mobile_walk_start( &(state->player), MOBILE_DIR_SOUTH );
          tilemap_refresh_tiles( t );
