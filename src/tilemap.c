@@ -108,18 +108,18 @@ void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) {
 }
 
 uint8_t tilemap_collide(
-   struct MOBILE* m, uint8_t dir, struct TILEMAP* t
+   uint8_t x, uint8_t y, uint8_t dir, struct TILEMAP* t
 ) {
    uint8_t tile_id = 0;
-   int16_t x = 0, y = 0;
+   int16_t x_test = 0, y_test = 0;
    uint8_t collide_out = 0;
 
    assert( dir < 4 );
 
-   x = m->coords.x + gc_mobile_x_offsets[dir];
-   y = m->coords.y + gc_mobile_y_offsets[dir];
+   x_test = x + gc_mobile_x_offsets[dir];
+   y_test = y + gc_mobile_y_offsets[dir];
 
-   tile_id = tilemap_get_tile_id( t, x, y );
+   tile_id = tilemap_get_tile_id( t, x_test, y_test );
    if( t->tileset[tile_id].flags & (uint8_t)TILESET_FLAG_BLOCK ) {
       collide_out = 1;
    }

@@ -107,13 +107,12 @@ void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) SECTION_TILEMAP;
 /**
  * \brief Detect potential collision between a MOBILE and TILEMAP tile with
  *        blocking flags.
- * \param m ::MEMORY_PTR to the MOBILE that is moving.
  * \param dir MOBILE::dir in which the MOBILE is moving.
  * \param t ::MEMORY_PTR to the TILEMAP on which the MOBILE is moving.
  * \return 1 if a collision will occur and 0 otherwise.
  */
 uint8_t tilemap_collide( 
-   struct MOBILE* m, uint8_t dir, struct TILEMAP* t );
+   uint8_t x, uint8_t y, uint8_t dir, struct TILEMAP* t );
 
 /**
  * \brief Increment the tile_id on the specified tile coordinates. Useful for

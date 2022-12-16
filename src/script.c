@@ -111,7 +111,7 @@ uint16_t script_handle_WALK(
 
       /* Handle terrain blockage by skipping. */
       if(
-         tilemap_collide( actor, dir, t )
+         tilemap_collide( actor->coords.x, actor->coords.y, dir, t )
       ) {
          /* Actor would collide, so just skip this walk attempt. */
 #ifdef SCRIPT_TRACE
@@ -124,7 +124,11 @@ uint16_t script_handle_WALK(
       /* If actor would collide with a mobile, don't try to walk, but keep
        * the PC the same and push the dir back to retry later.
        */
-      if( NULL == mobile_get_facing( actor, t, state ) ) {
+      if(
+         NULL == mobile_get_facing(
+            actor->coords.x, actor->coords.y, mobile_get_dir( actor ),
+            t, state )
+      ) {
 #ifdef SCRIPT_TRACE
          debug_printf( 1, "mobile %u:%u \"%s\" starting walking in dir %d",
             actor->map_gid, actor->spawner_gid, actor->name, dir );

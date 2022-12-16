@@ -312,12 +312,12 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
 
 /**
  * \brief Get a ::MEMORY_PTR to the mobile m is currently facing.
- * \param m MOBILE to center the check around.
  * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  * \return ::MEMORY_PTR to the colliding mobile in ms.
  */
 struct MOBILE* mobile_get_facing(
-   struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state );
+   uint8_t x, uint8_t y, uint8_t dir,
+   struct TILEMAP* t, struct DSEKAI_STATE* state );
 
 /**
  * \brief Force a ::MOBILE to jump to the SCRIPT_ACTION_INTERACT in its

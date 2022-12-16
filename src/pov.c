@@ -192,7 +192,8 @@ int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
       /* Try to interact with facing mobile. */
       mobile_interact(
          &(state->player),
-         mobile_get_facing( &(state->player), t, state ),
+         mobile_get_facing( state->player.coords.x, state->player.coords.y,
+            mobile_get_dir( &(state->player) ), t, state ),
          t );
 #ifdef POV_DEBUG_INC
       gstate->inc++;

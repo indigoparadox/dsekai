@@ -27,8 +27,6 @@ struct PATHFIND_NODE {
 
 #define PATHFIND_ERROR_CLOSED -3
 
-#define PATHFIND_ERROR_BLOCKED -4
-
 #ifdef PATHFIND_TRACE
 #  define pathfind_trace_printf( lvl, ... ) debug_printf( lvl, __VA_ARGS__ )
 #else
@@ -60,7 +58,7 @@ int8_t pathfind_start(
  *         or ::MOBILE_ERROR_BLOCKED if movement is blocked.
  * \todo TODO: Determine terrain movement speed.
  */
-#define pathfind_test_dir( mover, dir_move, state, t ) (!tilemap_collide( mover, dir_move, t ) && (NULL == mobile_get_facing( mover, t, state )) ? 1 : MOBILE_ERROR_BLOCKED)
+#define pathfind_test_dir( x, y, dir_move, state, t ) (!tilemap_collide( x, y, dir_move, t ) && (NULL == mobile_get_facing( x, y, dir_move, t, state )) ? 1 : MOBILE_ERROR_BLOCKED)
 
 /*! \} */ /* dsekai_pathfind */
 

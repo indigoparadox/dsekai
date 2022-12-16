@@ -228,7 +228,10 @@ int8_t engines_input_movement(
    /* Face requested dir even if we're blocked. */
    mobile_set_dir( &(state->player), dir_move );
 
-   if( 0 > pathfind_test_dir( mover, dir_move, state, t ) ) {
+   if(
+      0 > pathfind_test_dir(
+         mover->coords.x, mover->coords.y, dir_move, state, t )
+   ) {
       /* Mobile is blocked. */
       return -1;
    }

@@ -24,30 +24,22 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
 }
 
 struct MOBILE* mobile_get_facing(
-   struct MOBILE* m, struct TILEMAP* t, struct DSEKAI_STATE* state
+   uint8_t x, uint8_t y, uint8_t dir,
+   struct TILEMAP* t, struct DSEKAI_STATE* state
 ) {
    int16_t i = 0;
 
    /* TODO: Implement resource gathering here, maybe? */
 
-   assert( 4 > mobile_get_dir( m ) );
-
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      if( &(state->mobiles[i]) == m ) {
-         /* Don't compare to self. */
-         continue;
-      }
-
       mobile_break_if_last( state->mobiles, i );
 
       if(
          MOBILE_FLAG_ACTIVE ==
             (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags) &&
          state->mobiles[i].map_gid == t->gid &&
-         state->mobiles[i].coords.x ==
-            m->coords.x + gc_mobile_x_offsets[mobile_get_dir( m )] &&
-         state->mobiles[i].coords.y ==
-            m->coords.y + gc_mobile_y_offsets[mobile_get_dir( m )]
+         state->mobiles[i].coords.x == x + gc_mobile_x_offsets[dir] &&
+         state->mobiles[i].coords.y == y + gc_mobile_y_offsets[dir]
       ) {
          /* Found an active facing mobile on the same tilemap. */
          return &(state->mobiles[i]);
@@ -56,11 +48,8 @@ struct MOBILE* mobile_get_facing(
 
    /* This mobile is facing the player. */
    if(
-      m != &(state->player) &&
-      state->player.coords.x ==
-         m->coords.x + gc_mobile_x_offsets[mobile_get_dir( m )] &&
-      state->player.coords.y ==
-         m->coords.y + gc_mobile_y_offsets[mobile_get_dir( m )]
+      state->player.coords.x == x + gc_mobile_x_offsets[dir] &&
+      state->player.coords.y == y + gc_mobile_y_offsets[dir]
    ) {
       return &(state->player);
    }
