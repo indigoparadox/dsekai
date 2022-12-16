@@ -25,11 +25,12 @@ int8_t pathfind_list_lowest_f( struct PATHFIND_NODE* list, uint8_t list_sz ) {
 }
 
 static int8_t pathfind_list_test_add_child( 
-   struct PATHFIND_NODE* adjacent,
+   struct PATHFIND_NODE* adjacent, uint8_t dir,
    uint8_t iter_closed_idx,
    uint8_t tgt_x, uint8_t tgt_y,
    struct PATHFIND_NODE* open, uint8_t* open_sz,
-   struct PATHFIND_NODE* closed, uint8_t closed_sz
+   struct PATHFIND_NODE* closed, uint8_t closed_sz,
+   struct DSEKAI_STATE* state, struct TILEMAP* t
 ) {
    uint8_t i = 0,
       child_open_idx = 0;
@@ -45,6 +46,22 @@ static int8_t pathfind_list_test_add_child(
          pathfind_trace_printf( 1, ">> tile is already closed!" );
          return PATHFIND_ERROR_CLOSED;
       }
+   }
+
+   /* Don't use occupied tiles. */
+   if(
+      /* Target tile is allowed to be occupied, so skip this check for it. */
+      tgt_x != adjacent->coords.x && tgt_y != adjacent->coords.y &&
+      /* Otherwise check for occupied tile. */
+      0 > pathfind_test_dir(
+         closed[iter_closed_idx].coords.x,
+         closed[iter_closed_idx].coords.y, dir, state, t ) 
+   ) {
+      pathfind_trace_printf( 1,
+         ">> tile %d, %d blocked by mobile or terrain!",
+         closed[iter_closed_idx].coords.x + gc_mobile_x_offsets[dir],
+         closed[iter_closed_idx].coords.y + gc_mobile_y_offsets[dir] );
+      return MOBILE_ERROR_BLOCKED;
    }
 
    /* Calculate adjacent pathfinding properties. */
@@ -72,9 +89,11 @@ static int8_t pathfind_list_test_add_child(
    }
 
    /* Add the child to the list. */
+   pathfind_trace_printf( 1, ">> adding tile to open list" );
    dio_list_append(
       adjacent, open, *open_sz, PATHFIND_LIST_MAX, struct PATHFIND_NODE );
    if( 0 > g_dio_error ) {
+      pathfind_trace_printf( 1, ">> open list full!" );
       return LIST_ERROR_MAX;
    }
 
@@ -93,9 +112,15 @@ static void pathfind_dump_map(
       i = 0;
    char map_char = ' ';
 
-   printf( "---PATHFIND TILES---\n" );
+   printf( "---PATHFIND TILES---\n " );
+
+   for( x = 0 ; x_max > x ; x++ ) {
+      printf( "|%d", x );
+   }
+   printf( "\n" );
 
    for( y = 0 ; y_max > y ; y++ ) {
+      printf( "%d", y );
       for( x = 0 ; x_max > x ; x++ ) {
          map_char = ' ';
 
@@ -193,17 +218,6 @@ int8_t pathfind_start(
             continue;
          }
 
-         /* Don't use occupied tiles. */
-         if(
-            0 > pathfind_test_dir(
-               closed[iter_idx].coords.x,
-               closed[iter_idx].coords.y, i, state, t ) 
-         ) {
-            pathfind_trace_printf( 1, "> tile %d, %d blocked!",
-               closed[iter_idx].coords.x, closed[iter_idx].coords.y );
-            continue;
-         }
-
          /* Setup tentative adjacent tile physical properties. */
          /* Scores will be calculated in pathfind_list_test_add_child(). */
          adjacent.coords.x = closed[iter_idx].coords.x + 
@@ -212,14 +226,15 @@ int8_t pathfind_start(
             gc_mobile_y_offsets[i];
          adjacent.dir = i;
          pathfind_list_test_add_child(
-            &adjacent, iter_idx, tgt_x, tgt_y, open, &open_sz,
-            closed, closed_sz );
+            &adjacent, i, iter_idx, tgt_x, tgt_y, open, &open_sz,
+            closed, closed_sz, state, t );
+
+         pathfind_trace_printf( 1, ">> open list now has %d tiles", open_sz );
 
 #ifdef PATHFIND_TRACE
          pathfind_dump_map( 10, 10, open, open_sz, closed, closed_sz );
 #endif /* PATHFIND_TRACE */
       }
-
    }
 
    if( tgt_reached ) {
