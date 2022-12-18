@@ -145,7 +145,7 @@ static void pathfind_dump_map(
 #endif /* PATHFIND_TRACE */
 
 int8_t pathfind_start(
-   struct MOBILE* mover, uint8_t tgt_x, uint8_t tgt_y,
+   struct MOBILE* mover, uint8_t tgt_x, uint8_t tgt_y, uint8_t steps,
    struct DSEKAI_STATE* state, struct TILEMAP* t
 ) {
    struct PATHFIND_NODE open[PATHFIND_LIST_MAX];
@@ -201,6 +201,12 @@ int8_t pathfind_start(
          closed[iter_idx].coords.y == tgt_y
       ) {
          pathfind_trace_printf( 1, "> target reached!" );
+         tgt_reached = 1;
+         break;
+      }
+
+      /* Limit pathfinding steps to what was requested. */
+      if( closed_sz >= steps ) {
          tgt_reached = 1;
          break;
       }

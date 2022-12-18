@@ -42,7 +42,7 @@ struct PATHFIND_NODE {
 #define pathfind_cmp_eq( a, b ) (((a)->coords.x == (b)->coords.x) && (((a)->coords.y == (b)->coords.y)))
 
 int8_t pathfind_start(
-   struct MOBILE* mover, uint8_t tgt_x, uint8_t tgt_y,
+   struct MOBILE* mover, uint8_t tgt_x, uint8_t tgt_y, uint8_t steps,
    struct DSEKAI_STATE* state, struct TILEMAP* t );
 
 /**
@@ -58,7 +58,7 @@ int8_t pathfind_start(
  *         or ::MOBILE_ERROR_BLOCKED if movement is blocked.
  * \todo TODO: Determine terrain movement speed.
  */
-#define pathfind_test_dir( x, y, dir_move, state, t ) (!tilemap_collide( x, y, dir_move, t ) && (NULL == mobile_get_facing( x, y, dir_move, t, state )) ? 1 : MOBILE_ERROR_BLOCKED)
+#define pathfind_test_dir( x, y, dir_move, state, t ) (TILEMAP_ERROR_BLOCKED != tilemap_collide( x, y, dir_move, t ) && (NULL == mobile_get_facing( x, y, dir_move, t, state )) ? 1 : MOBILE_ERROR_BLOCKED)
 
 /*! \} */ /* dsekai_pathfind */
 

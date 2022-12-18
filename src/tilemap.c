@@ -107,12 +107,12 @@ void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) {
    t->flags |= (TILEMAP_FLAG_WEATHER_MASK & weather);
 }
 
-uint8_t tilemap_collide(
+int8_t tilemap_collide(
    uint8_t x, uint8_t y, uint8_t dir, struct TILEMAP* t
 ) {
    uint8_t tile_id = 0;
    int16_t x_test = 0, y_test = 0;
-   uint8_t collide_out = 0;
+   int8_t retval = 0;
 
    assert( dir < 4 );
 
@@ -121,9 +121,9 @@ uint8_t tilemap_collide(
 
    tile_id = tilemap_get_tile_id( t, x_test, y_test );
    if( t->tileset[tile_id].flags & (uint8_t)TILESET_FLAG_BLOCK ) {
-      collide_out = 1;
+      retval = TILEMAP_ERROR_BLOCKED;
    }
-   return collide_out;
+   return retval;
 }
 
 void tilemap_advance_tile_id( struct TILEMAP* t, uint16_t x, uint16_t y ) {

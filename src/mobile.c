@@ -82,10 +82,8 @@ void mobile_stack_push( struct MOBILE* m, int8_t v ) {
    /* Push the value. */
    m->script_stack[0] = v;
 
-#ifdef SCRIPT_TRACE
-   debug_printf( 1, "mobile %u:%u \"%s\" pushed: %d",
+   script_trace_printf( 1, "mobile %u:%u \"%s\" pushed: %d",
       m->map_gid, m->spawner_gid, m->name, v );
-#endif /* SCRIPT_TRACE */
 }
 
 int8_t mobile_stack_pop( struct MOBILE* m ) {
@@ -101,10 +99,8 @@ int8_t mobile_stack_pop( struct MOBILE* m ) {
    /* Zero out the former deepest stack slot. */
    m->script_stack[SCRIPT_STACK_DEPTH - 1] = 0;
 
-#ifdef SCRIPT_TRACE
-   debug_printf( 1, "mobile %u:%u \"%s\" popped: %d",
+   script_trace_printf( 1, "mobile %u:%u \"%s\" popped: %d",
       m->map_gid, m->spawner_gid, m->name, retval );
-#endif /* SCRIPT_TRACE */
 
    return retval;
 }
@@ -169,11 +165,9 @@ struct MOBILE* mobile_interact(
       return NULL;
    }
 
-#ifdef SCRIPT_TRACE
-   debug_printf( 1, "mobile %u:%u \"%s\" interacted at pc %d, icount %d",
+   script_trace_printf( 1, "mobile %u:%u \"%s\" interacted at pc %d, icount %d",
       actee->map_gid, actee->spawner_gid, actee->name,
       actee->script_pc, mobile_get_icount( actee ) );
-#endif /* SCRIPT_TRACE */
 
    /* Push actee previous PC for return. */
    mobile_stack_push( actee, actee->script_pc );
@@ -187,10 +181,8 @@ struct MOBILE* mobile_interact(
    /* Lock so that the actee can't be double-interacted with. */
    actee->flags |= MOBILE_FLAG_DISABLED;
 
-#ifdef SCRIPT_TRACE
-   debug_printf( 1, "mobile %u:%u \"%s\" interaction disabled",
+   script_trace_printf( 1, "mobile %u:%u \"%s\" interaction disabled",
       actee->map_gid, actee->spawner_gid, actee->name );
-#endif /* SCRIPT_TRACE */
 
    return actee;
 }
@@ -223,11 +215,9 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    /* Check for sleeping. */
    if( 0 < m->script_wait_frames ) {
       m->script_wait_frames--;
-#ifdef SCRIPT_TRACE
-      debug_printf( 1,
+      script_trace_printf( 1,
          "mobile %u:%u \"%s\" sleeping: waiting for %d more frames",
          m->map_gid, m->spawner_gid, m->name, m->script_wait_frames );
-#endif /* SCRIPT_TRACE */
       /* Mobile still sleeping. */
       goto cleanup;
    }
@@ -257,23 +247,22 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    } else if( SCRIPT_ARG_FOLLOW == step->arg ) {
       /* Pathfinding dir arg. */
       arg = pathfind_start(
-         m, state->player.coords.x, state->player.coords.y, state, t );
+         m, state->player.coords.x, state->player.coords.y, 3, state, t );
       if( 0 > arg ) {
-         debug_printf( 1, "mobile %u:%u \"%s\" pathfinding blocked",
+         pathfind_trace_printf( 1, "mobile %u:%u \"%s\" pathfinding blocked",
             m->map_gid, m->spawner_gid, m->name );
          goto cleanup;
       }
-      debug_printf( 1, "follow arg became %d", arg );
+      script_trace_printf( 0, "follow arg became %d", arg );
    } else {
       /* Literal/immediate arg. */
       arg = step->arg;
    }
 
-#ifdef SCRIPT_TRACE
-   debug_printf( 1, "mobile %u:%u \"%s\" script_exec: script %d, step %d (%d)",
+   script_trace_printf(
+      1, "mobile %u:%u \"%s\" script_exec: script %d, step %d (%d)",
       m->map_gid, m->spawner_gid, m->name,
       m->script_id, m->script_pc, step->action );
-#endif /* SCRIPT_TRACE */
 
    /* Execute script action callback. */
    m->script_pc = gc_script_handlers[step->action](

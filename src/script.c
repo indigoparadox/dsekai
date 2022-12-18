@@ -39,7 +39,7 @@ uint16_t script_goto_label(
          label_id == script->steps[i].arg
       ) {
          /* Jump to this START instruction's position. */
-         debug_printf( 0, "jump to type %d, #%d, pc %d",
+         script_trace_printf( 0, "jump to type %d, #%d, pc %d",
             label_type, label_id, i );
          return i;
       }
@@ -76,10 +76,8 @@ uint16_t script_handle_WALK(
       && (0 == gc_mobile_step_table_normal_pos[actor->steps_remaining])
 #endif /* !NO_SMOOTH_WALK */
    ) {
-#ifdef SCRIPT_TRACE
-      debug_printf( 1, "mobile %u:%u \"%s\" done walking",
+      script_trace_printf( 1, "mobile %u:%u \"%s\" done walking",
          actor->map_gid, actor->spawner_gid, actor->name );
-#endif /* SCRIPT_TRACE */
 
       /* Pop the dir, since the walk is complete. */
       mobile_stack_pop( actor );
@@ -94,30 +92,25 @@ uint16_t script_handle_WALK(
       actor->coords.x != actor->coords_prev.x
    ) {
       /* Actor is already walking, don't start or advance PC. */   
-#ifdef SCRIPT_TRACE
-      debug_printf( 1, "mobile %u:%u \"%s\" already walking",
+      script_trace_printf( 1, "mobile %u:%u \"%s\" already walking",
          actor->map_gid, actor->spawner_gid, actor->name );
-#endif /* SCRIPT_TRACE */
 
    } else {
       /* Start trying to walk. */
       dir_raw = mobile_stack_pop( actor );
       dir = dir_raw % 4;
 
-#ifdef SCRIPT_TRACE
-      debug_printf( 1, "mobile %u:%u \"%s\" popped %d, became %d",
+      script_trace_printf( 1, "mobile %u:%u \"%s\" popped %d, became %d",
          actor->map_gid, actor->spawner_gid, actor->name, dir_raw, dir );
-#endif /* SCRIPT_TRACE */
 
       /* Handle terrain blockage by skipping. */
       if(
+         TILEMAP_ERROR_BLOCKED ==
          tilemap_collide( actor->coords.x, actor->coords.y, dir, t )
       ) {
          /* Actor would collide, so just skip this walk attempt. */
-#ifdef SCRIPT_TRACE
-         debug_printf( 1, "mobile %u:%u \"%s\" collided with terrain",
+         script_trace_printf( 1, "mobile %u:%u \"%s\" collided with terrain",
             actor->map_gid, actor->spawner_gid, actor->name );
-#endif /* SCRIPT_TRACE */
          return pc + 1;
       }
 
@@ -129,10 +122,8 @@ uint16_t script_handle_WALK(
             actor->coords.x, actor->coords.y, mobile_get_dir( actor ),
             t, state )
       ) {
-#ifdef SCRIPT_TRACE
-         debug_printf( 1, "mobile %u:%u \"%s\" starting walking in dir %d",
+         script_trace_printf( 1, "mobile %u:%u \"%s\" starting walking in dir %d",
             actor->map_gid, actor->spawner_gid, actor->name, dir );
-#endif /* SCRIPT_TRACE */
          mobile_walk_start( actor, dir );
       }
 
@@ -176,7 +167,7 @@ uint16_t script_handle_RETURN(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    if( 0 <= arg && SCRIPT_STEPS_MAX > arg ) {
-      debug_printf( 1, "mobile %u:%u \"%s\" at pc %d, returning to pc %d",
+      script_trace_printf( 1, "mobile %u:%u \"%s\" at pc %d, returning to pc %d",
          actor->map_gid, actor->spawner_gid, actor->name,
          pc, arg );
       return arg;
@@ -258,10 +249,8 @@ uint16_t script_handle_WARP(
       return pc;
    }
 
-#ifdef SCRIPT_TRACE
-   debug_printf( 0, "mobile %u:%u \"%s\" warp requested to: %s", 
+   script_trace_printf( 0, "mobile %u:%u \"%s\" warp requested to: %s", 
       actor->map_gid, actor->spawner_gid, actor->name, warp_map );
-#endif /* SCRIPT_TRACE */
 
    memory_zero_ptr( (MEMORY_PTR)(state->warp_to), TILEMAP_NAME_MAX );
    memory_strncpy_ptr( state->warp_to, warp_map, TILEMAP_NAME_MAX );
@@ -473,16 +462,12 @@ uint16_t script_handle_DISABLE(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    if( 0 == arg ) {
-#ifdef SCRIPT_TRACE
-      debug_printf( 1, "mobile %u:%u \"%s\" enabling interaction",
+      script_trace_printf( 1, "mobile %u:%u \"%s\" enabling interaction",
          actor->map_gid, actor->spawner_gid, actor->name );
-#endif /* SCRIPT_TRACE */
       actor->flags &= ~MOBILE_FLAG_DISABLED;
    } else {
-#ifdef SCRIPT_TRACE
-      debug_printf( 1, "mobile %u:%u \"%s\" disabling interaction",
+      script_trace_printf( 1, "mobile %u:%u \"%s\" disabling interaction",
          actor->map_gid, actor->spawner_gid, actor->name );
-#endif /* SCRIPT_TRACE */
       actor->flags |= MOBILE_FLAG_DISABLED;
    }
    return pc + 1;
@@ -513,7 +498,7 @@ void script_cmp_action( char* token, size_t token_sz, struct SCRIPT_STEP* s ) {
    while( NULL != gc_sc_tokens[i] ) {
       if( 0 == memory_strncmp_ptr( token, gc_sc_tokens[i], token_sz ) ) {
          s->action = i;
-         debug_printf( 1, " action: %s\n", gc_sc_tokens[i] );
+         script_trace_printf( 1, " action: %s\n", gc_sc_tokens[i] );
          return;
       }
       i++;
@@ -566,7 +551,7 @@ void script_parse_src( char c, struct SCRIPT_COMPILE_STATE* s ) {
       }
       s->steps[s->steps_sz].arg = atoi( s->token_iter );
          
-      debug_printf( 1, " action: %d, l: %d\n",
+      script_trace_printf( 1, " action: %d, l: %d\n",
          s->steps[s->steps_sz].action, s->steps[s->steps_sz].arg );
 
       /* Make sure this is an instruction that can be a label. */
@@ -610,7 +595,7 @@ void script_parse_src( char c, struct SCRIPT_COMPILE_STATE* s ) {
       }
 
       /* Process token. */
-      debug_printf( 1, "token #%d: %s\n", s->steps_sz, s->token_iter );
+      script_trace_printf( 1, "token #%d: %s\n", s->steps_sz, s->token_iter );
       if( 0 < s->steps[s->steps_sz].action ) {
          /* Set arg and advance instruction. */
          
@@ -621,7 +606,7 @@ void script_parse_src( char c, struct SCRIPT_COMPILE_STATE* s ) {
             arg_tmp = atoi( s->token_iter );
          }
          s->steps[s->steps_sz].arg = arg_tmp;
-         debug_printf( 1, " arg: %d\n", s->steps[s->steps_sz].arg );
+         script_trace_printf( 1, " arg: %d\n", s->steps[s->steps_sz].arg );
          s->steps_sz++;
       
       } else {

@@ -31,6 +31,12 @@
 /*! \} */
 
 /**
+ * \brief Return value indicating movement is blocked by terrain.
+ * \warning This should not overlap with ::MOBILE_ERROR_BLOCKED!
+ */
+#define TILEMAP_ERROR_BLOCKED -40
+
+/**
  * \relates ::TILESET_TILE
  * \brief TILESET_TILE::flags bit flag indicating tile will block movement.
  */
@@ -111,7 +117,7 @@ void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) SECTION_TILEMAP;
  * \param t ::MEMORY_PTR to the TILEMAP on which the MOBILE is moving.
  * \return 1 if a collision will occur and 0 otherwise.
  */
-uint8_t tilemap_collide( 
+int8_t tilemap_collide( 
    uint8_t x, uint8_t y, uint8_t dir, struct TILEMAP* t );
 
 /**

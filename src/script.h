@@ -97,6 +97,18 @@ typedef uint16_t (*SCRIPT_CB)(
 
 #endif /* !NO_SCRIPT_PROTOTYPES */
 
+#ifdef SCRIPT_TRACE
+#  define script_trace_printf( lvl, ... ) debug_printf( lvl, __VA_ARGS__ )
+#else
+/**
+ * \brief Alias for debug_printf() enabled when SCRIPT_TRACE is defined.
+ *
+ * This was made its own alias since scripting can get rather chatty when it's
+ * enabled!
+ */
+#  define script_trace_printf( ... )
+#endif /* SCRIPT_TRACE */
+
 #ifndef NO_SCRIPT_STRUCT
 #include "scstruct.h"
 #endif /* !NO_SCRIPT_STRUCT */
