@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PLATFORMS="dos win16 win32 sdl xlib curses wasm mac palm"
+PLATFORMS="dos win386 win16 win32 sdl xlib curses wasm mac palm"
 BUILD=DEBUG
 DEBUG_THRESHOLD=1
 ACTION=BUILD
@@ -14,6 +14,11 @@ build_sdl() {
 
 build_dos() {
    make -f Makefile.dos DTHRESHOLD=$DEBUG_THRESHOLD RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD ARCFMT=ZIP pkg_dos || exit
+   make -f Makefile.dos DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD ARCFMT=ZIP pkg_dos || exit
+}
+
+build_win386() {
+   make -f Makefile.win386 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD ARCFMT=ZIP pkg_win386 || exit
 }
 
 build_win16() {
@@ -64,6 +69,11 @@ do_run() {
          build_win16
       fi
       cd pkgbuild/dsekai-win16-*-vga-*-asn && wine ./dsekai16.exe
+   elif [ "$PLAT_SPEC" = "win386" ]; then
+      if [ ! -d pkgbuild/dsekai-win386-*-vga-*-asn ]; then
+         build_win386
+      fi
+      cd pkgbuild/dsekai-win386-*-vga-*-asn && wine ./dsekaile.exe
    elif [ "$PLAT_SPEC" = "xlib" ]; then
       if [ ! -d pkgbuild/dsekai-xlib-*-cga-*-asn ]; then
          build_xlib
@@ -98,6 +108,10 @@ do_build() {
 
    if [ "$PLAT_SPEC" = "dos" ] || [ -z "$PLAT_SPEC" ]; then
       build_dos
+   fi
+
+   if [ "$PLAT_SPEC" = "win386" ] || [ -z "$PLAT_SPEC" ]; then
+      build_win386
    fi
 
    if [ "$PLAT_SPEC" = "win16" ] || [ -z "$PLAT_SPEC" ]; then
