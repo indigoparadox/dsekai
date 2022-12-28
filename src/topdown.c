@@ -26,6 +26,10 @@ void topdown_draw_tilemap(
 
    profiler_set();
 
+   /* We don't need to lock this since it's called from inside the engine's
+    * graphics_lock loop.
+    */
+
    /* Tile-indexed rectangle of on-screen tiles. */
    viewport_tx2 = gstate->screen_scroll_tx + SCREEN_TW;
    viewport_ty2 = gstate->screen_scroll_ty + SCREEN_TH;

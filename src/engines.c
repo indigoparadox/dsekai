@@ -261,7 +261,9 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 
    if( ENGINE_STATE_OPENING == state->engine_state ) {
       /* Clear the title screen. */
+      graphics_lock();
       graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
+      graphics_release();
 
       retval = gc_engines_setup[state->engine_type]( state );
       if( !retval ) {
@@ -277,6 +279,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    /* === Drawing Phase === */
 
    profiler_set();
+
+   graphics_lock();
 
    /* Blank out canvas if required. */
    if(
@@ -341,7 +345,9 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    in_char = input_poll( &click_x, &click_y );
 #ifndef NO_TRANSITIONS
    if( 0 < (state->transition & DSEKAI_TRANSITION_MASK_FRAME) ) {
+      graphics_lock();
       engines_draw_transition( state );
+      graphics_release();
    } else
 #endif /* !NO_TRANSITIONS */
 
@@ -388,8 +394,6 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    gc_engines_animate[state->engine_type]( state );
    profiler_incr( animate_engine );
 
-   graphics_loop_end();
-
 cleanup:
 
    if( NULL != state && (
@@ -413,7 +417,9 @@ cleanup:
       }
    }
 
-   graphics_flip();
+   graphics_release();
+
+   graphics_loop_end();
 
 #ifndef PLATFORM_WASM
    return retval;

@@ -148,7 +148,9 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[3].sprite_id = graphics_cache_load_bitmap( s_world );
    state->mobiles[3].ascii = '/';
 
+   graphics_lock();
    graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
+   graphics_release();
 
 #else
    
