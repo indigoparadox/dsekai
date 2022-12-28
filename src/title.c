@@ -4,7 +4,13 @@
 #ifdef RESOURCE_FILE
 /* TODO: Detect graphics format, not platform. */
 #ifdef PLATFORM_DOS
-#  define s_world ASSETS_PATH DEPTH_SPEC "/s_world.cga"
+#  if defined( DEPTH_CGA )
+#     define s_world ASSETS_PATH DEPTH_SPEC "/s_world.cga"
+#  elif defined( DEPTH_VGA )
+#     define s_world ASSETS_PATH DEPTH_SPEC "/s_world.vga"
+#  else
+#     error "not implemented"
+#  endif /* DEPTH_CGA || DEPTH_VGA */
 #else
 #  define s_world ASSETS_PATH DEPTH_SPEC "/s_world.bmp"
 #endif /* PLATFORM_DOS */

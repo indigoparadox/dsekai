@@ -5,12 +5,6 @@ ifneq ($(CALLER),MASTER)
    include Makefile.inc
 endif
 
-ifneq ($(DEPTH),CGA)
-ifneq ($(DEPTH),MONO)
-   $(error dos target must be built with CGA DEPTH)
-endif
-endif
-
 # 1. Directories
 
 OBJDIR_DOS := $(OBJDIR)/dos
@@ -159,7 +153,7 @@ $(ASSETDIR)/%.cga: $(ASSETDIR)/%.bmp | $(CONVERT)
 	$(CONVERT) -ic bmp -oc cga -ob 2 -if $< -of $@ -og
 
 $(ASSETDIR)/%.vga: $(ASSETDIR)/%.bmp | $(CONVERT)
-	$(CONVERT) -ic bmp -oc cga -ob 4 -if $< -of $@ -og
+	$(CONVERT) -ic bmp -oc cga -ob 8 -if $< -of $@ -og
 
 $(BINDIR)/assets/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | \
 $(BINDIR)/assets/$(STAMPFILE)
