@@ -169,6 +169,8 @@ typedef uint16_t (*SCRIPT_CB)(
  * \{
  */
 
+#define SCRIPT_CB_TABLE_24( f ) f( 23, SHAKE, 'y' )
+
 /**
  * \brief \b DISABLE: Disable \ref scripting_interactions with the ::MOBILE
  *        running this script, while still executing script instructions.
@@ -176,7 +178,7 @@ typedef uint16_t (*SCRIPT_CB)(
  * \b Arguments
  * - 0 To enable (disable disabled) or 1 to disable interaction.
  */
-#define SCRIPT_CB_TABLE_23( f ) f( 23, DISABLE, 'd' )
+#define SCRIPT_CB_TABLE_23( f ) f( 23, DISABLE, 'd' ) SCRIPT_CB_TABLE_24( f )
 
 /**
  * \brief \b WARP: Warp to a tilemap identified by the string at the arg index

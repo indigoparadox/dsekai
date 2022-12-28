@@ -50,6 +50,17 @@ uint16_t script_goto_label(
    return pc;
 }
 
+uint16_t script_handle_SHAKE(
+   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
+   struct DSEKAI_STATE* state, int16_t arg
+) {
+#ifndef NO_GUI
+   g_screen_flags |= (GRAPHICS_FLAG_SHAKING_MASK & arg);
+#endif /* !NO_GUI */
+   return pc + 1;
+}
+
 uint16_t script_handle_INTERACT(
    uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,

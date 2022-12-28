@@ -467,6 +467,10 @@ void engines_draw_transition( struct DSEKAI_STATE* state ) {
    uint8_t trans_w = TILE_W * (trans_frame - 1);
 
    switch( trans_type ) {
+   case DSEKAI_TRANSITION_TYPE_ZOOM:
+      debug_printf( 3, "trans frame: %d", (trans_frame / 2) );
+      graphics_set_screen_zoom( (trans_frame / 2) );
+      break;
    case DSEKAI_TRANSITION_TYPE_CURTAIN:
       /* TODO: Opening/closing. */
       graphics_draw_block( 0, 0, trans_w, SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
@@ -480,6 +484,9 @@ void engines_draw_transition( struct DSEKAI_STATE* state ) {
    }
 
    (state->transition)--;
+   if( 0 == (state->transition & DSEKAI_TRANSITION_MASK_FRAME) ) {
+      state->transition = 0;
+   }
 
 #endif /* !NO_TRANSITIONS */
 
