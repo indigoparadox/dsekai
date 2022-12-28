@@ -38,7 +38,7 @@ WIN386_RES_FILES := src/winstat.rc
 ifeq ($(RESOURCE),DEFAULT)
    WIN386_RES_FILES += $(GENDIR_WIN386)/win.rc
 endif
-WIN386_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
+#WIN386_RES_FILES += $(ASSETDIR)/$(DSEKAI).ico
 
 # 1a. Packaging Manifest
 
@@ -83,7 +83,7 @@ CFLAGS_WIN386 := -bt=windows -bw $(CFLAGS_OWC_GENERIC) $(DEFINES_WIN386) $(INCLU
 
 LDFLAGS_WIN386 := -l=win386 $(LDFLAGS_OWC_GENERIC)
 
-RCFLAGS_WIN386 := -r $(DEFINES_WIN386) -i=$(INCLUDE)win
+RCFLAGS_WIN386 := $(DEFINES_WIN386) -i=$(INCLUDE)win
 
 ifneq ($(BUILD),RELEASE)
    # Debug build.
@@ -118,17 +118,14 @@ $(BINDIR)/$(DSEKAI)le.img: $(BIN_WIN386)
 	$(MCOPY) -i "$@" $< ::$(DSEKAI)le.exe
 
 $(OBJDIR_WIN386)/$(DSEKAI)le.rex: \
-$(DSEKAI_O_FILES_WIN386) $(OBJDIR_WIN386)/win.res | $(OBJDIR_WIN386)/$(STAMPFILE)
+$(DSEKAI_O_FILES_WIN386) | $(OBJDIR_WIN386)/$(STAMPFILE)
 	$(LD_WIN386) $(LDFLAGS_WIN386) -fe=$@ $^
 
 $(BIN_WIN386): $(OBJDIR_WIN386)/$(DSEKAI)le.rex | $(BINDIR)/$(STAMPFILE)
-	wbind $< -s $(WATCOM)/binw/win386.ext -n
+	wbind $< -s $(WATCOM)/binw/win386.ext -R $(WIN386_RES_FILES) $(RCFLAGS_WIN386) $(OBJDIR_WIN386)/$(DSEKAI)le.exe
 	mv -v $(OBJDIR_WIN386)/$(DSEKAI)le.exe $(BIN_WIN386)
 
-$(OBJDIR_WIN386)/win.res: $(WIN386_RES_FILES) | $(OBJDIR_WIN386)/$(STAMPFILE)
-	$(RC_WIN386) $(RCFLAGS_WIN386) $< -fo=$@
-
-$(OBJDIR_WIN386)/%.o: %.c $(OBJDIR_WIN386)/win.res $(RESEXT_H_WIN386)
+$(OBJDIR_WIN386)/%.o: %.c $(RESEXT_H_WIN386)
 	$(MD) $(dir $@)
 	$(CC_WIN386) $(CFLAGS_WIN386) -fo=$@ $(<:%.c=%)
 
