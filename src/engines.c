@@ -345,9 +345,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    in_char = input_poll( &click_x, &click_y );
 #ifndef NO_TRANSITIONS
    if( 0 < (state->transition & DSEKAI_TRANSITION_MASK_FRAME) ) {
-      graphics_lock();
       engines_draw_transition( state );
-      graphics_release();
    } else
 #endif /* !NO_TRANSITIONS */
 
