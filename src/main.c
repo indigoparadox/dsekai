@@ -35,8 +35,6 @@ unilayer_main() {
 
    error_printf( "error test" );
 
-   engines_draw_loading_screen();
-
    size_printf( 3, "state", sizeof( struct DSEKAI_STATE ) );
    assert( sizeof( struct DSEKAI_STATE ) < 16384 );
    size_printf( 3, "tilemap", sizeof( struct TILEMAP ) );
@@ -68,6 +66,8 @@ unilayer_main() {
       retval = 1;
       goto exit;
    }
+
+   engines_draw_loading_screen();
 
    if( !input_init() ) {
       retval = 1;
