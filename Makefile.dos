@@ -149,11 +149,13 @@ $(eval $(PKG_RULE))
 #	$(DRCPACK) -c -a -af $(BINDIR)/doscga.drc -i 5001 \
 #      -if $(GENDIR_DOS)/*.cga $(DSEKAI_ASSETS_MAPS) -lh $(GENDIR_DOS)/resext.h
 
-$(ASSETDIR)/%.cga: $(ASSETDIR)/%.bmp | $(CONVERT)
-	$(CONVERT) -ic bmp -oc cga -ob 2 -if $< -of $@ -og
+# TODO: Should these ASSETDIR rules be removed?
 
-$(ASSETDIR)/%.vga: $(ASSETDIR)/%.bmp | $(CONVERT)
-	$(CONVERT) -ic bmp -oc cga -ob 8 -if $< -of $@ -og
+#$(ASSETDIR)/%.cga: $(ASSETDIR)/%.bmp | $(CONVERT)
+#	$(CONVERT) -ic bmp -oc cga -ob 2 -if $< -of $@ -og
+#
+#$(ASSETDIR)/%.vga: $(ASSETDIR)/%.bmp | $(CONVERT)
+#	$(CONVERT) -ic bmp -oc cga -ob 8 -if $< -of $@ -og
 
 $(BINDIR)/assets/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | \
 $(BINDIR)/assets/$(STAMPFILE)
@@ -165,11 +167,11 @@ $(BINDIR)/assets/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bmp -oc cga -ob 4 -if $< -of $@ -og
 
-$(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
+$(GENDIR_DOS)/%.cga: $(ASSETDIR)/%.bmp | $(CONVERT) $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bmp -oc cga -ob 2 -if $< -of $@ -og
 
-$(GENDIR_DOS)/%.vga: $(ASSETDIR)/%.bmp $(CONVERT) | $(GENDIR_DOS)/$(STAMPFILE)
+$(GENDIR_DOS)/%.vga: $(ASSETDIR)/%.bmp | $(CONVERT) $(GENDIR_DOS)/$(STAMPFILE)
 	$(MD) $(dir $@)
 	$(CONVERT) -ic bmp -oc cga -ob 4 -if $< -of $@ -og
 

@@ -306,15 +306,16 @@ define RESEXT_H_RULE
 		$(MD) $$(dir $$@)
 		cp $$< $$@
 
-   $(GENDIR)/$(platform)/%.cga: %.cga | \
-   $(GENDIR)/$(platform)/$(STAMPFILE)
+   $(GENDIR)/$(platform)/%.cga: %.bmp | \
+   $(GENDIR)/$(platform)/$(STAMPFILE) $(CONVERT)
 		$(MD) $$(dir $$@)
-		cp $$< $$@
+		$(CONVERT) -ic bmp -oc cga -ob 2 -if $$< -of $$@ -og
 
-   $(GENDIR)/$(platform)/%.vga: %.vga | \
-   $(GENDIR)/$(platform)/$(STAMPFILE)
+   $(GENDIR)/$(platform)/%.vga: %.bmp | \
+   $(GENDIR)/$(platform)/$(STAMPFILE) $(CONVERT)
 		$(MD) $$(dir $$@)
-		cp $$< $$@
+		# TODO: Fix the output bits here!
+		$(CONVERT) -ic bmp -oc cga -ob 4 -if $$< -of $$@ -og
 
    $(GENDIR)/$(platform)/%.md: %.md | \
    $(GENDIR)/$(platform)/$(STAMPFILE)
