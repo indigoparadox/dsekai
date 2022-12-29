@@ -70,7 +70,6 @@ DEFINES_SDL := \
    $(DEFINES_DEPTH) \
    $(DEFINES_RESOURCE) \
    $(DEFINES_DEBUG) \
-   -DPLATFORM_SDL \
    -DUSE_SOFTWARE_TEXT \
    -DSCREEN_SCALE=$(SCREEN_SCALE)
 
@@ -78,12 +77,20 @@ INCLUDES_SDL := \
    $(INCLUDES_UNILAYER) \
    -I $(GENDIR_SDL) 
 
-CFLAGS_SDL := $(shell pkg-config sdl2 --cflags) $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_SDL) $(INCLUDES_SDL) -Werror
+CFLAGS_SDL := $(CFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) $(DEFINES_SDL) $(INCLUDES_SDL) -Werror
 
-LDFLAGS_SDL := $(shell pkg-config sdl2 --libs) $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) -lm
+LDFLAGS_SDL := $(LDFLAGS_GCC_GENERIC) $(FLAGS_GCC_SANITIZE) -lm
 
 ifeq ($(TRACEWIN),TRUE)
    CFLAGS_SDL += -DWINDOW_TRACE
+endif
+
+ifeq ("$(SDL_VER)","1")
+   CFLAGS_SDL += $(shell pkg-config sdl --cflags) -DPLATFORM_SDL1
+   LDFLAGS_SDL += $(shell pkg-config sdl --libs)
+else
+   CFLAGS_SDL += $(shell pkg-config sdl2 --cflags) -DPLATFORM_SDL2
+   LDFLAGS_SDL += $(shell pkg-config sdl2 --libs)
 endif
 
 # 5. Targets
