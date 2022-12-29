@@ -42,7 +42,7 @@ build_mac6() {
 }
 
 build_nds() {
-   make -f Makefile.nds DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA FMT_ASN=TRUE RESOURCE=FILE BUILD=$BUILD pkg_nds || exit
+   make -f Makefile.nds DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA FMT_ASN=TRUE BUILD=$BUILD pkg_nds || exit
 }
 
 do_run() {

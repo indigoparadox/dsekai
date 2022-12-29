@@ -800,6 +800,7 @@ INPUT                  = \
    unilayer/src/graphics/nullg.h \
    unilayer/src/resource.h \
    unilayer/src/resource/nullr.h \
+   unilayer/src/resinc.h \
    unilayer/src/dio.h \
    unilayer/src/asn.h \
    unilayer/src/json.h \
