@@ -111,15 +111,15 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    graphics_clear_cache();
 
    /* Reload player sprite since cache is gone. */
-   state->player.sprite_id =
-      graphics_cache_load_bitmap( state->player_sprite );
+   state->player.sprite_id = graphics_cache_load_bitmap(
+      state->player_sprite, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
 
    /* Reset item sprite IDs since cache is gone. */
    items = (struct ITEM*)memory_lock( state->items_handle );
    assert( NULL != items );
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
       items[i].sprite_id = graphics_cache_load_bitmap(
-         items[i].sprite );
+         items[i].sprite, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    }
    items = (struct ITEM*)memory_unlock( state->items_handle );
 

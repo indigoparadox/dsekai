@@ -112,7 +112,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[0].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[0]), 2 );
    state->mobiles[0].mp_hp = 100;
-   state->mobiles[0].sprite_id = graphics_cache_load_bitmap( s_world );
+   state->mobiles[0].sprite_id = graphics_cache_load_bitmap(
+      s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[0].ascii = '/';
 
    state->mobiles[1].coords.x = 5;
@@ -123,7 +124,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[1].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[1]), 0 );
    state->mobiles[1].mp_hp = 100;
-   state->mobiles[1].sprite_id = graphics_cache_load_bitmap( s_world );
+   state->mobiles[1].sprite_id = graphics_cache_load_bitmap(
+      s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[1].ascii = '\\';
 
    state->mobiles[2].coords.x = 4;
@@ -134,7 +136,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[2].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[2]), 3 );
    state->mobiles[2].mp_hp = 100;
-   state->mobiles[2].sprite_id = graphics_cache_load_bitmap( s_world );
+   state->mobiles[2].sprite_id = graphics_cache_load_bitmap(
+      s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[2].ascii = '\\';
 
    state->mobiles[3].coords.x = 5;
@@ -145,7 +148,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[3].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[3]), 1 );
    state->mobiles[3].mp_hp = 100;
-   state->mobiles[3].sprite_id = graphics_cache_load_bitmap( s_world );
+   state->mobiles[3].sprite_id = graphics_cache_load_bitmap(
+      s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[3].ascii = '/';
 
    graphics_lock();
@@ -200,7 +204,7 @@ void title_draw( struct DSEKAI_STATE* state ) {
 
       /* Draw current mobile sprite/frame. */
 #ifdef PLATFORM_CURSES
-      graphics_blit_sprite_at(
+      graphics_cache_blit_at(
          state->mobiles[i].ascii,
          state->ani_sprite_x,
          mobile_get_dir( &(state->mobiles[i]) ) * SPRITE_H,
@@ -208,7 +212,7 @@ void title_draw( struct DSEKAI_STATE* state ) {
          (state->mobiles[i].coords.y * SPRITE_H),
          SPRITE_W, SPRITE_H );
 #else
-      graphics_blit_sprite_at(
+      graphics_cache_blit_at(
          state->mobiles[i].sprite_id,
          state->ani_sprite_x,
          mobile_get_dir( &(state->mobiles[i]) ) * SPRITE_H,

@@ -23,15 +23,15 @@ DSEKAI_C_FILES_NDS_ONLY := \
    unilayer/src/input/ndsi.c \
    unilayer/src/graphics/ndsg.c \
    unilayer/src/memory/fakem.c \
-   unilayer/src/save/file.c
+   unilayer/src/save/file.c \
+   unilayer/src/resource/ndsr.c
 
 DSEKAI_ASSETS_MAPS_NDS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS_JSON)))
 
 DSEKAI_O_FILES_NDS := \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY))) \
-   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
+   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY)))
 
 DSEKAI_BITMAP_HS_NDS := \
    $(addprefix $(GENDIR_NDS)/,$(subst .bmp,.h,$(DSEKAI_ASSETS_BITMAPS)))

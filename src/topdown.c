@@ -121,13 +121,13 @@ void topdown_draw_tilemap(
          
          /* Blit the tile. */
 #ifdef GFX_ASCII
-         graphics_blit_tile_at(
+         graphics_cache_blit_at(
             t->tileset[tile_id].ascii,
             0, 0,
             SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
             TILE_W, TILE_H );
 #else
-         graphics_blit_tile_at(
+         graphics_cache_blit_at(
             t->tileset[tile_id].image_id,
             0, 0,
             SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
@@ -180,14 +180,16 @@ static void topdown_draw_crops(
 
 #ifdef RESOURCE_FILE
       plot_gfx = 
-         graphics_cache_load_bitmap( ASSETS_PATH DEPTH_SPEC "/i_plot.bmp" );
+         graphics_cache_load_bitmap(
+            ASSETS_PATH DEPTH_SPEC "/i_plot.bmp", GRAPHICS_BMP_FLAG_TYPE_TILE );
 #else
-      plot_gfx = graphics_cache_load_bitmap( i_plot );
+      plot_gfx = graphics_cache_load_bitmap(
+         i_plot, GRAPHICS_BMP_FLAG_TYPE_TILE );
 #endif /* RESOURCE_FILE */
 
       assert( 0 < plot_gfx );
 
-      graphics_blit_sprite_at(
+      graphics_cache_blit_at(
          plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
 
       /* Skip drawing crop if it hasn't germinated. */
@@ -201,14 +203,15 @@ static void topdown_draw_crops(
       /* Make sure crop spritesheet is loaded. */
       crop_def = &(t->crop_defs[crop_idx]);
       if( 0 > crop_def->sprite_id ) {
-         crop_def->sprite_id = graphics_cache_load_bitmap( crop_def->sprite );
+         crop_def->sprite_id = graphics_cache_load_bitmap(
+            crop_def->sprite, GRAPHICS_BMP_FLAG_TYPE_TILE );
       }
 
       crop_stage = (plot->flags & CROP_FLAG_STAGE_MASK);
 
       if( 0 < crop_stage ) {
          /* Crop has germinated. */
-         graphics_blit_sprite_at(
+         graphics_cache_blit_at(
             crop_def->sprite_id,
             (crop_stage - 1) * TILE_W, 0,
             plot_px, plot_py, TILE_W, TILE_H );
@@ -217,11 +220,12 @@ static void topdown_draw_crops(
          /* Crop is still seeds. */
 #ifdef RESOURCE_FILE
          plot_gfx = graphics_cache_load_bitmap(
-            ASSETS_PATH DEPTH_SPEC "/i_seed.bmp" );
+            ASSETS_PATH DEPTH_SPEC "/i_seed.bmp", GRAPHICS_BMP_FLAG_TYPE_TILE );
 #else
-         plot_gfx = graphics_cache_load_bitmap( i_seed );
+         plot_gfx = graphics_cache_load_bitmap(
+            i_seed, GRAPHICS_BMP_FLAG_TYPE_TILE );
 #endif /* RESOURCE_FILE */
-         graphics_blit_sprite_at(
+         graphics_cache_blit_at(
             plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
       }
    }
@@ -280,11 +284,11 @@ static void topdown_draw_mobile(
 
    /* Blit the mobile's current sprite/frame. */
 #ifdef GFX_ASCII
-   graphics_blit_sprite_at(
+   graphics_cache_blit_at(
       m->ascii, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
       m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
 #else
-   graphics_blit_sprite_at(
+   graphics_cache_blit_at(
       m->sprite_id, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
       m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
 #endif /* GFX_ASCII */
@@ -335,7 +339,7 @@ void topdown_draw_items(
       item_py = SCREEN_MAP_Y + ((items[i].y * TILE_H) -
             gstate->screen_scroll_y);
 
-      graphics_blit_sprite_at(
+      graphics_cache_blit_at(
          items[i].sprite_id, 0, 0,
          item_px, item_py, SPRITE_W, SPRITE_H );
 

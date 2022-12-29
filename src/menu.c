@@ -175,7 +175,8 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
 
       /* Make sure item sprite is loaded. */
       if( -1 == items[i].sprite_id ) {
-         items[i].sprite_id = graphics_cache_load_bitmap( items[i].sprite );
+         items[i].sprite_id = graphics_cache_load_bitmap(
+            items[i].sprite, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
       }
 
       /* Highlight selected item. */

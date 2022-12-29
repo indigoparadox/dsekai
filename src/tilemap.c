@@ -70,7 +70,7 @@ int16_t tilemap_load( const char* map_name, struct TILEMAP* t ) {
 
       debug_printf( 2, "preloading tile %d image...", i );
       t->tileset[i].image_id = graphics_cache_load_bitmap(
-         t->tileset[i].image );
+         t->tileset[i].image, GRAPHICS_BMP_FLAG_TYPE_TILE );
    }
 
 cleanup:
