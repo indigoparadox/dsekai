@@ -62,7 +62,6 @@ ARCH_NDS := -mlittle-endian
 DEFINES_NDS := \
    $(DEFINES_DSEKAI) \
    $(DEFINES_DEPTH) \
-   $(DEFINES_RESOURCE) \
    -DNO_ENGINE_POV \
    -DPLATFORM_NDS \
    -DUSE_SOFTWARE_TEXT \
@@ -105,13 +104,17 @@ $(eval $(PKG_RULE))
 
 # These are appended to the variables in resext.h. These have commas, so they
 # can't be included directly in the args to subst.
-COMMANEWLINE_NDS := ",\n"
-TILESUFFIX_NDS := "Tiles,\n"
-PALSUFFIX_NDS := "Pal,\n"
+#COMMANEWLINE_NDS := ",\n"
+#TILESUFFIX_NDS := "Tiles,\n"
+#PALSUFFIX_NDS := "Pal,\n"
+
+$(GENDIR_NDS)/resemb.h: $(DSEKAI_ASSETS_MAPS_JSON) | \
+$(GENDIR_NDS)/$(STAMPFILE) $(HEADPACK)
+	$(HEADPACK) $@ $^
 
 # TODO: Replace 16x16x16 with depth specifier variable.
 # TODO: Include the tile/palette lengths.
-$(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS)
+$(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 	$(MD) $(dir $@)
 	echo "#ifndef RESEXT_H\n#define RESEXT_H\n\n" > $@
 	echo "" >> $@
@@ -156,6 +159,8 @@ $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS)
 	for f in $(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,,$^)); do \
 		echo "#define $$f &struct_$$f" >> $@ ; \
 	done
+	echo "" >> $@
+	echo "#include \"resemb.h\"" >> $@
 	echo "" >> $@
 	# Terminate the include file.
 	echo "#endif /* RESEXT_H */" >> $@
