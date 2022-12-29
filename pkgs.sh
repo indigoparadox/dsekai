@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PLATFORMS="dos win386 win16 win32 sdl xlib curses wasm mac palm"
+PLATFORMS="dos win386 win16 win32 sdl xlib curses wasm mac palm nds"
 BUILD=DEBUG
 DEBUG_THRESHOLD=1
 ACTION=BUILD
@@ -8,8 +8,8 @@ PKG_ISO=0
 GIT_HASH="`git rev-parse --short HEAD`"
 
 build_sdl() {
-   make -f Makefile.sdl DTHRESHOLD=$DEBUG_THRESHOLD BUILD=$BUILD pkg_sdl || exit
-   make -f Makefile.sdl DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD pkg_sdl || exit
+   make -f Makefile.sdl SDL_VER=1 DTHRESHOLD=$DEBUG_THRESHOLD BUILD=$BUILD pkg_sdl || exit
+   make -f Makefile.sdl SDL_VER=1 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD pkg_sdl || exit
 }
 
 build_dos() {
@@ -39,6 +39,10 @@ build_curses() {
 
 build_mac6() {
    make -f Makefile.mac6 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=MONO FMT_ASN=TRUE RESOURCE=FILE BUILD=$BUILD pkg_mac6 || exit
+}
+
+build_nds() {
+   make -f Makefile.nds DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA FMT_ASN=TRUE RESOURCE=FILE BUILD=$BUILD pkg_nds || exit
 }
 
 do_run() {
@@ -131,6 +135,10 @@ do_build() {
       build_mac6
    fi
 
+   if [ "$PLAT_SPEC" = "nds" ] || [ -z "$PLAT_SPEC" ]; then
+      build_nds
+   fi
+
    echo "All packages built OK!"
 }
 
@@ -143,6 +151,9 @@ while [ "$1" ]; do
          echo "run      - Command: Run build binary for platspec."
          echo "prof     - Command: Build profile data from run."
          echo "platspec - Platform specifier."
+         echo
+         echo "Current platforms: $PLATFORMS"
+         echo
          exit 1
          ;;
 

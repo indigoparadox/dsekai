@@ -19,11 +19,11 @@ BIN_NDS := $(BINDIR)/$(DSEKAI).nds
 
 DSEKAI_C_FILES_NDS_ONLY := \
    src/main.c \
-   src/pov.c \
    unilayer/src/animate.c \
    unilayer/src/input/ndsi.c \
    unilayer/src/graphics/ndsg.c \
-   unilayer/src/memory/fakem.c
+   unilayer/src/memory/fakem.c \
+   unilayer/src/save/file.c
 
 DSEKAI_ASSETS_MAPS_NDS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS_JSON)))
@@ -50,6 +50,7 @@ DEFINES_NDS := \
    $(DEFINES_DSEKAI) \
    $(DEFINES_DEPTH) \
    $(DEFINES_RESOURCE) \
+   -DNO_ENGINE_POV \
    -DPLATFORM_NDS \
    -DUSE_SOFTWARE_TEXT \
    -DUSE_SOFTWARE_LINES \
@@ -60,6 +61,8 @@ DEFINES_NDS := \
 INCLUDES_NDS := \
    $(INCLUDES_UNILAYER) \
    -I $(GENDIR_NDS) \
+   -I $(DEVKITPRO)/devkitARM/arm-none-eabi/include \
+   -I $(DEVKITPRO)/devkitARM/include \
    -I $(DEVKITPRO)/libnds/include
 
 CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) $(INCLUDES_NDS) $(DEFINES_NDS)
