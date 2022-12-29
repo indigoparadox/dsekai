@@ -122,13 +122,13 @@ void topdown_draw_tilemap(
          /* Blit the tile. */
 #ifdef GFX_ASCII
          graphics_cache_blit_at(
-            t->tileset[tile_id].ascii,
+            t->tileset[tile_id].ascii, GRAPHICS_INSTANCE_TILEMAP,
             0, 0,
             SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
             TILE_W, TILE_H );
 #else
          graphics_cache_blit_at(
-            t->tileset[tile_id].image_id,
+            t->tileset[tile_id].image_id, GRAPHICS_INSTANCE_TILEMAP,
             0, 0,
             SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
             TILE_W, TILE_H );
@@ -190,7 +190,7 @@ static void topdown_draw_crops(
       assert( 0 < plot_gfx );
 
       graphics_cache_blit_at(
-         plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
+         plot_gfx, i, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
 
       /* Skip drawing crop if it hasn't germinated. */
       if(
@@ -212,7 +212,7 @@ static void topdown_draw_crops(
       if( 0 < crop_stage ) {
          /* Crop has germinated. */
          graphics_cache_blit_at(
-            crop_def->sprite_id,
+            crop_def->sprite_id, GRAPHICS_INSTANCE_STATIC2,
             (crop_stage - 1) * TILE_W, 0,
             plot_px, plot_py, TILE_W, TILE_H );
 
@@ -226,14 +226,15 @@ static void topdown_draw_crops(
             i_seed, GRAPHICS_BMP_FLAG_TYPE_TILE );
 #endif /* RESOURCE_FILE */
          graphics_cache_blit_at(
-            plot_gfx, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
+            plot_gfx, GRAPHICS_INSTANCE_STATIC2,
+            0, 0, plot_px, plot_py, TILE_W, TILE_H );
       }
    }
 }
 
 static void topdown_draw_mobile(
    struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate,
-   struct MOBILE* m, struct TILEMAP* t
+   int16_t* p_onscreen_mobs, struct MOBILE* m, struct TILEMAP* t
 ) {
 
    profiler_set();
@@ -285,13 +286,18 @@ static void topdown_draw_mobile(
    /* Blit the mobile's current sprite/frame. */
 #ifdef GFX_ASCII
    graphics_cache_blit_at(
-      m->ascii, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
+      m->ascii,
+      *p_onscreen_mobs, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
       m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
 #else
    graphics_cache_blit_at(
-      m->sprite_id, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
+      m->sprite_id,
+      *p_onscreen_mobs, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
       m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
 #endif /* GFX_ASCII */
+
+   /* Mobile is on-screen. */
+   (*p_onscreen_mobs)++;
 
 cleanup:
    profiler_incr( draw_mobiles );
@@ -340,7 +346,7 @@ void topdown_draw_items(
             gstate->screen_scroll_y);
 
       graphics_cache_blit_at(
-         items[i].sprite_id, 0, 0,
+         items[i].sprite_id, GRAPHICS_INSTANCE_STATIC1, 0, 0,
          item_px, item_py, SPRITE_W, SPRITE_H );
 
    }
@@ -356,7 +362,8 @@ cleanup:
 
 void topdown_draw( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
-   int16_t i = 0;
+   int16_t i = 0,
+      onscreen_mobs = 0;
    struct TILEMAP* t = NULL;
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
@@ -373,9 +380,12 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
 
    /* Draw mobiles. */
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      topdown_draw_mobile( state, gstate, &(state->mobiles[i]), t );
+      topdown_draw_mobile(
+         state, gstate, &onscreen_mobs, &(state->mobiles[i]), t );
    }
-   topdown_draw_mobile( state, gstate, &(state->player), t );
+   /* TODO: Use a macro constant for the player sprite ID. */
+   topdown_draw_mobile(
+      state, gstate, &onscreen_mobs, &(state->player), t );
 
    if( NULL != t ) {
       t = (struct TILEMAP*)memory_unlock( state->map_handle );

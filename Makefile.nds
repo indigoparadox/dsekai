@@ -53,6 +53,7 @@ RESEXT_H_NDS := $(GENDIR_NDS)/resext.h
 CC_NDS := arm-none-eabi-gcc
 LD_NDS := arm-none-eabi-gcc
 NDSTOOL := ndstool
+GRIT := grit
 
 # 4. Arguments
 
@@ -78,6 +79,9 @@ INCLUDES_NDS := \
    -I $(DEVKITPRO)/libnds/include
 
 CFLAGS_NDS := --sysroot $(DEVKITARM)/arm-none-eabi -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math $(ARCH_NDS) $(INCLUDES_NDS) $(DEFINES_NDS)
+
+# The DS uses 8x8 tiles, so use -Mx2 to create 2*8=16px h/w metatiles.
+GRIT_FLAGS := -gB8 -Mh2 -Mw2 -gTff55ff
 
 ifneq ($(BUILD),RELEASE)
    CFLAGS_NDS += -DLOG_TO_FILE
@@ -114,11 +118,10 @@ $(GENDIR_NDS)/$(STAMPFILE) $(HEADPACK)
 
 # TODO: Replace 16x16x16 with depth specifier variable.
 # TODO: Include the tile/palette lengths.
+# TODO: Move the struct def out of this generated header.
 $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 	$(MD) $(dir $@)
 	echo "#ifndef RESEXT_H\n#define RESEXT_H\n\n" > $@
-	echo "" >> $@
-	echo "struct RESOURCE_GRIT_DEF { const unsigned int* tiles; };" >> $@
 	echo "" >> $@
 	echo "#ifdef RESOURCE_C\n" >> $@
 	## Include all the bitmap headers.
@@ -141,8 +144,15 @@ $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 	#echo "" >> $@
 	echo "" >> $@
 	for f in $(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,,$^)); do \
-		echo "const struct RESOURCE_GRIT_DEF struct_$$f =" \
-			"{ $${f}Tiles };" >> $@ ; \
+		echo "struct RESOURCE_GRIT_DEF struct_$$f =\n" \
+			"   { $${f}Tiles," \
+			"$${f}Pal," \
+			"`grep "$${f}TilesLen" \
+				"$(GENDIR_NDS)/$(ASSETDIR)/16x16x16/$${f}.h" | \
+				awk '{print $$3}'`," \
+			"`grep "$${f}PalLen" \
+				"$(GENDIR_NDS)/$(ASSETDIR)/16x16x16/$${f}.h" | \
+				awk '{print $$3}'` };" >> $@ ; \
 	done
 	echo "" >> $@
 	echo "#else" >> $@
@@ -151,13 +161,13 @@ $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 	#echo "extern const unsigned short* gc_resext_bitmap_palettes[];" >> $@
 	#echo "extern const char* gc_resext_bitmap_names[];" >> $@
 	for f in $(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,,$^)); do \
-		echo "extern const struct RESOURCE_GRIT_DEF struct_$$f;" >> $@ ; \
+		echo "extern struct RESOURCE_GRIT_DEF struct_$$f;" >> $@ ; \
 	done
 	echo "#endif /* RESOURCE_C */\n" >> $@
 	echo "" >> $@
 	# Define pointers to structs to call from static maps, etc for all files.
 	for f in $(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,,$^)); do \
-		echo "#define $$f &struct_$$f" >> $@ ; \
+		echo "#define $$f (&struct_$$f)" >> $@ ; \
 	done
 	echo "" >> $@
 	echo "#include \"resemb.h\"" >> $@
@@ -167,7 +177,7 @@ $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 
 $(GENDIR_NDS)/$(ASSETDIR)/%.h $(GENDIR_NDS)/$(ASSETDIR)/%.s: $(ASSETDIR)/%.bmp
 	$(MD) $(dir $@)
-	grit $< -fts -o $@
+	$(GRIT) $< $(GRIT_FLAGS) -fts -o $@
 
 $(BIN_NDS): $(OBJDIR_NDS)/$(DSEKAI).elf $(GENDIR_NDS)/$(DSEKAI)-1.bmp
 	$(NDSTOOL) -c $@ -9 $< -b $(GENDIR_NDS)/$(DSEKAI)-1.bmp "$(DSEKAI);$(DSEKAI);$(DSEKAI)"

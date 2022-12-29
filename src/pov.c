@@ -404,7 +404,7 @@ void pov_draw_wall_x(
       }
 
       graphics_cache_blit_at(
-         t->tileset[ray->tile_id].image_id,
+         t->tileset[ray->tile_id].image_id, GRAPHICS_INSTANCE_NONE,
          tex_x, tex_y,
          x, y,
          1, 1 );

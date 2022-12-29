@@ -103,6 +103,7 @@
  *            saves! Please use caution.
  */
 #  define DSEKAI_MOBILES_MAX 200
+/* TODO: Handle this being larger than onscreen mobiles. */
 #endif /* !MOBILES_MAX */
 
 #ifndef SCRIPT_STACK_DEPTH

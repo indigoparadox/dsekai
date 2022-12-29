@@ -205,7 +205,7 @@ void title_draw( struct DSEKAI_STATE* state ) {
       /* Draw current mobile sprite/frame. */
 #ifdef PLATFORM_CURSES
       graphics_cache_blit_at(
-         state->mobiles[i].ascii,
+         state->mobiles[i].ascii, i,
          state->ani_sprite_x,
          mobile_get_dir( &(state->mobiles[i]) ) * SPRITE_H,
          (state->mobiles[i].coords.x * SPRITE_W),
@@ -213,7 +213,7 @@ void title_draw( struct DSEKAI_STATE* state ) {
          SPRITE_W, SPRITE_H );
 #else
       graphics_cache_blit_at(
-         state->mobiles[i].sprite_id,
+         state->mobiles[i].sprite_id, i,
          state->ani_sprite_x,
          mobile_get_dir( &(state->mobiles[i]) ) * SPRITE_H,
          (state->mobiles[i].coords.x * SPRITE_W),
