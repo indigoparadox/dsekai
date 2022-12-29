@@ -450,6 +450,10 @@ define PKG_RULE
 		$(MD) $$(dir $$@)
 		cp $$< $$@
 
+   $$(PKGBUILD_$(platform_upper))/README.md: README.md
+		$(MD) $$(dir $$@)
+		cp README.md $$@
+
    $$(PKGBUILD_$(platform_upper))/%: $(GENDIR)/$(platform)/%
 		$(MD) $$(dir $$@)
 		cp $$< $$@

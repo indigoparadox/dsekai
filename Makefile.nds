@@ -33,6 +33,15 @@ DSEKAI_O_FILES_NDS := \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY))) \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
+DSEKAI_BITMAP_HS_NDS := \
+   $(addprefix $(GENDIR_NDS)/,$(subst .bmp,.h,$(DSEKAI_ASSETS_BITMAPS)))
+
+DSEKAI_BITMAP_SS_NDS := \
+   $(addprefix $(GENDIR_NDS)/,$(subst .bmp,.s,$(DSEKAI_ASSETS_BITMAPS)))
+
+DSEKAI_BITMAP_OS_NDS := \
+   $(addprefix $(OBJDIR_NDS)/,$(subst .bmp,.o,$(DSEKAI_ASSETS_BITMAPS)))
+
 RESEXT_H_NDS := $(GENDIR_NDS)/resext.h
 
 # 3. Programs
@@ -81,8 +90,8 @@ $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 
 platform := nds
 platform_upper := NDS
-res_gfx := $(DSEKAI_ASSETS_BITMAPS)
-$(eval $(RESEXT_H_RULE))
+#res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+#$(eval $(RESEXT_H_RULE))
 
 pkg_bin := $(BIN_NDS)
 pkg_strip := echo
@@ -90,14 +99,62 @@ pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
 pkg_reqs :=
 $(eval $(PKG_RULE))
 
+# These are appended to the variables in resext.h. These have commas, so they
+# can't be included directly in the args to subst.
+COMMANEWLINE_NDS := ",\n"
+TILESUFFIX_NDS := "Tiles,\n"
+PALSUFFIX_NDS := "Pal,\n"
+
+# TODO: Replace 16x16x16 with depth specifier variable.
+# TODO: Include the tile/palette lengths.
+$(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS)
+	$(MD) $(dir $@)
+	echo "#ifndef RESEXT_H\n#define RESEXT_H\n\n" > $@
+	echo "#ifdef RESEXT_C\n" >> $@
+	# Include all the bitmap headers.
+	echo "$(addprefix #include \",$(addsuffix \"\n,$(subst $(GENDIR_NDS)/,,$^)))" >> $@
+	echo "" >> $@
+	# Create an index of bitmap tiles.
+	echo "const unsigned int* gc_resext_bitmap_tiles[] = {" >> $@
+	echo "$(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,"$(TILESUFFIX_NDS)",$^))" >> $@
+	echo "};" >> $@
+	echo "" >> $@
+	# Create an index of bitmap palettes.
+	echo "const unsigned short* gc_resext_bitmap_palettes[] = {" >> $@
+	echo "$(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,"$(PALSUFFIX_NDS)",$^))" >> $@
+	echo "};" >> $@
+	echo "" >> $@
+	# Create a searchable list of tile name strings.
+	echo "const char* gc_resext_bitmap_names[] = {" >> $@
+	echo "$(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,\",$(subst .h,"\"$(COMMANEWLINE_NDS)",$^))" >> $@
+	echo "};" >> $@
+	echo "" >> $@
+	# Add extern defs for outside of resource.c (or ndsr.c).
+	echo "#else" >> $@
+	echo "extern const unsigned int* gc_resext_bitmap_tiles[];" >> $@
+	echo "extern const unsigned short* gc_resext_bitmap_palettes[];" >> $@
+	echo "extern const char* gc_resext_bitmap_names[];" >> $@
+	echo "#endif /* RESEXT_C */\n" >> $@
+	echo "" >> $@
+	# Terminate the include file.
+	echo "#endif /* RESEXT_H */" >> $@
+
+$(GENDIR_NDS)/$(ASSETDIR)/%.h $(GENDIR_NDS)/$(ASSETDIR)/%.s: $(ASSETDIR)/%.bmp
+	$(MD) $(dir $@)
+	grit $< -fts -o $@
+
 $(BIN_NDS): $(OBJDIR_NDS)/$(DSEKAI).elf $(GENDIR_NDS)/$(DSEKAI)-1.bmp
 	$(NDSTOOL) -c $@ -9 $< -b $(GENDIR_NDS)/$(DSEKAI)-1.bmp "$(DSEKAI);$(DSEKAI);$(DSEKAI)"
 
 $(GENDIR_NDS)/$(DSEKAI)-1.bmp: $(ASSETDIR)/$(DSEKAI).ico
 	$(IMAGEMAGICK) $< -compress none -type palette -colors 16 $(GENDIR_NDS)/$(DSEKAI).bmp
 
-$(OBJDIR_NDS)/$(DSEKAI).elf: $(DSEKAI_O_FILES_NDS)
+$(OBJDIR_NDS)/$(DSEKAI).elf: $(DSEKAI_O_FILES_NDS) $(DSEKAI_BITMAP_OS_NDS)
 	$(LD_NDS) $(LDFLAGS_NDS) $^ $(LIBS_NDS) -o $@
+
+$(OBJDIR_NDS)/$(ASSETDIR)/%.o: $(GENDIR_NDS)/$(ASSETDIR)/%.s
+	$(MD) $(dir $@)
+	$(CC_NDS) $(CFLAGS_NDS) -c -o $@ $<
 
 $(OBJDIR_NDS)/%.o: %.c $(RESEXT_H_NDS) | $(BINDIR)/$(STAMPFILE)
 	$(MD) $(dir $@)
