@@ -30,7 +30,7 @@ static int8_t pathfind_list_test_add_child(
    uint8_t tgt_x, uint8_t tgt_y,
    struct PATHFIND_NODE* open, uint8_t* open_sz,
    struct PATHFIND_NODE* closed, uint8_t closed_sz,
-   struct DSEKAI_STATE* state, struct TILEMAP* t
+   struct DSEKAI_STATE* state, struct TILEMAP* t, uint8_t flags
 ) {
    uint8_t i = 0,
       child_open_idx = 0;
@@ -50,8 +50,12 @@ static int8_t pathfind_list_test_add_child(
 
    /* Don't use occupied tiles. */
    if(
-      /* Target tile is allowed to be occupied, so skip this check for it. */
-      tgt_x != adjacent->coords.x && tgt_y != adjacent->coords.y &&
+      (
+         PATHFIND_FLAGS_TGT_OCCUPIED != (PATHFIND_FLAGS_TGT_OCCUPIED & flags) ||
+         /* Target tile is occupied (e.g. we're pathfinding to another mobile),
+          * so skip this check for it. */
+         (tgt_x != adjacent->coords.x && tgt_y != adjacent->coords.y)
+      ) &&
       /* Otherwise check for occupied tile. */
       0 > pathfind_test_dir(
          closed[iter_closed_idx].coords.x,
@@ -146,7 +150,7 @@ static void pathfind_dump_map(
 
 int8_t pathfind_start(
    struct MOBILE* mover, uint8_t tgt_x, uint8_t tgt_y, uint8_t steps,
-   struct DSEKAI_STATE* state, struct TILEMAP* t
+   struct DSEKAI_STATE* state, struct TILEMAP* t, uint8_t flags
 ) {
    struct PATHFIND_NODE open[PATHFIND_LIST_MAX];
    struct PATHFIND_NODE closed[PATHFIND_LIST_MAX];
@@ -233,7 +237,7 @@ int8_t pathfind_start(
          adjacent.dir = i;
          pathfind_list_test_add_child(
             &adjacent, i, iter_idx, tgt_x, tgt_y, open, &open_sz,
-            closed, closed_sz, state, t );
+            closed, closed_sz, state, t, flags );
 
          pathfind_trace_printf( 1, ">> open list now has %d tiles", open_sz );
 

@@ -27,6 +27,12 @@ struct PATHFIND_NODE {
 
 #define PATHFIND_ERROR_CLOSED -3
 
+/**
+ * \brief Flag for pathfind_start() indicating the target tile is occupied
+ *        (e.g. we're following another mobile), so don't try to land on it.
+ */
+#define PATHFIND_FLAGS_TGT_OCCUPIED 0x01
+
 #ifdef PATHFIND_TRACE
 #  define pathfind_trace_printf( lvl, ... ) debug_printf( lvl, __VA_ARGS__ )
 #else
@@ -43,7 +49,7 @@ struct PATHFIND_NODE {
 
 int8_t pathfind_start(
    struct MOBILE* mover, uint8_t tgt_x, uint8_t tgt_y, uint8_t steps,
-   struct DSEKAI_STATE* state, struct TILEMAP* t );
+   struct DSEKAI_STATE* state, struct TILEMAP* t, uint8_t flags );
 
 /**
  * \brief Check for blocking terrain or other ::MOBILE objects preventing

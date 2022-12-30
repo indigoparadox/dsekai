@@ -610,11 +610,20 @@ int16_t topdown_input(
    struct DSEKAI_STATE* state
 ) {
    int16_t retval = 1;
+   int16_t pathfind_dir = 0;
+   int8_t pathfind_x = 0;
+   int8_t pathfind_y = 0;
    struct CROP_PLOT* plot = NULL;
    struct TILEMAP* map = NULL;
+   struct TOPDOWN_STATE* gstate = NULL;
 
    map = (struct TILEMAP*)memory_lock( state->map_handle );
    if( NULL == map ) {
+      goto cleanup;
+   }
+
+   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
+   if( NULL == gstate ) {
       goto cleanup;
    }
 
@@ -688,6 +697,22 @@ int16_t topdown_input(
       break;
 
    case INPUT_CLICK:
+      debug_printf( 0, "trying to move to %d, %d...", click_x, click_y );
+
+      /* Determine click tile coords. */
+      pathfind_x = (gstate->screen_scroll_x + click_x - SCREEN_MAP_X) / TILE_W;
+      pathfind_y = (gstate->screen_scroll_y + click_y - SCREEN_MAP_Y) / TILE_H;
+
+      /* TODO: If click tile is adjacent, interact. */
+
+      /* Move towards click. */
+      pathfind_dir = pathfind_start(
+         &(state->player), pathfind_x, pathfind_y, 3, state, map, 0 );
+      if( 0 > pathfind_dir ) {
+         debug_printf( 1, "player pathfinding blocked" );
+      } else {
+         mobile_walk_start( &(state->player), pathfind_dir );
+      }
       break;
 
    case INPUT_KEY_OK:
@@ -743,6 +768,11 @@ cleanup:
 
    if( NULL != map ) {
       map = (struct TILEMAP*)memory_unlock( state->map_handle );
+   }
+
+   if( NULL != gstate ) {
+      gstate =
+         (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
    }
 
    return retval;

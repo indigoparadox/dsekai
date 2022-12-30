@@ -262,7 +262,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
    if( ENGINE_STATE_OPENING == state->engine_state ) {
       /* Clear the title screen. */
       graphics_lock();
-      graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
+      graphics_clear_screen();
       graphics_release();
 
       retval = gc_engines_setup[state->engine_type]( state );
@@ -350,7 +350,11 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 #endif /* !NO_TRANSITIONS */
 
    if( INPUT_CLICK == in_char ) {
-      debug_printf( 3, "click x: %d, y: %d", click_x, click_y );
+      debug_printf( 1, "click x: %d, y: %d", click_x, click_y );
+   }
+
+   if( INPUT_KEY_QUIT == in_char ) {
+      retval = 0;
 
    } else if( 0 <= state->menu.menu_id && 0 != in_char ) {
       retval = gc_menu_handlers[state->menu.menu_id](
@@ -361,7 +365,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       *  blocked.
       */
       0 == window_modal() &&
-      INPUT_KEY_QUIT == in_char &&
+      INPUT_KEY_MENU == in_char &&
       DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
    ) {
       if( !state->engine_type ) {

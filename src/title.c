@@ -153,7 +153,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[3].ascii = '/';
 
    graphics_lock();
-   graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK );
+   graphics_clear_screen();
    graphics_release();
 
 #else
@@ -275,7 +275,7 @@ int16_t title_input(
          retval = 0;
 
       } else
-#  endif /* NO_QUIT */
+#  endif /* !NO_QUIT */
       if( 1 == gstate->option_high ) {
          memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
             memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
@@ -289,9 +289,11 @@ int16_t title_input(
       }
       break;
 
+#ifndef NO_QUIT
    case INPUT_KEY_QUIT:
       retval = 0;
       break;
+#endif /*! NO_QUIT */
    }
  
    gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );

@@ -77,29 +77,31 @@ The following platforms are currently supported:
 * **Windows (16-bit/32-bit)**
 * **WebASM**
 
-The following platforms are planned to be supported but not yet functional:
+The following platforms are mostly functional, but still a little wonky:
 
 * **PalmOS >= 3.5**
-* **Mac-OS 6/7**
 * **GNU/Linux with Xlib** (May work with other POSIX platforms.)
 * **GNU/Linux with NCurses** (May work with other POSIX platforms.)
 * **Nintendo DS**
+
+The following platforms are planned to be supported but not yet functional:
+
+* **Mac-OS 6/7**
 
 | Platform | Make Target         | Requirements |
 |----------|---------------------|--------------
 | +MS-DOS  | bin/dsekai.exe   | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | SDL      | bin/dsekai       | SDL2
 | Xlib     | bin/dsekaix      | Xlib
-| \*PalmOS  | bin/dsekai.prc   | [PRCTools](https://github.com/jichu4n/prc-tools-remix)
+| PalmOS  | bin/dsekai.prc   | [PRCTools](https://github.com/jichu4n/prc-tools-remix)
 | +Win16   | bin/dsekai16.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
 | Win32    | bin/dsekai32.exe | [OpenWatcom](https://github.com/open-watcom/open-watcom-v2)
-| \*MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
-| \*NDS     | bin/dsekai.nds   | [DevKitPro](https://devkitpro.org/)
+| MacOS 7 | bin/dsekai16.dsk | [Retro68](https://github.com/autc04/Retro68)
+| NDS     | bin/dsekai.nds   | [DevKitPro](https://devkitpro.org/)
 | WebASM    | bin/dsekai.js    | [emscripten](https://github.com/emscripten-core/emscripten)
-| \*Curses  | bin/dsekait      | NCurses
+| Curses  | bin/dsekait      | NCurses
 
  * + Platforms marked with + do not support JSON tilemaps directly.
- * \* Platforms marked with \* are currently broken.
 
 Just using "make" will attempt to build all currently working targets with OS-level resources and statically compiled maps.
 

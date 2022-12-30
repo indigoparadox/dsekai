@@ -247,7 +247,8 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    } else if( SCRIPT_ARG_FOLLOW == step->arg ) {
       /* Pathfinding dir arg. */
       arg = pathfind_start(
-         m, state->player.coords.x, state->player.coords.y, 3, state, t );
+         m, state->player.coords.x, state->player.coords.y, 3, state, t,
+         PATHFIND_FLAGS_TGT_OCCUPIED );
       if( 0 > arg ) {
          pathfind_trace_printf( 1, "mobile %u:%u \"%s\" pathfinding blocked",
             m->map_gid, m->spawner_gid, m->name );
