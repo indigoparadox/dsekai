@@ -605,7 +605,10 @@ void topdown_shutdown( struct DSEKAI_STATE* state ) {
    profiler_print( "TOPDOWN" );
 }
 
-int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
+int16_t topdown_input(
+   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   struct DSEKAI_STATE* state
+) {
    int16_t retval = 1;
    struct CROP_PLOT* plot = NULL;
    struct TILEMAP* map = NULL;
@@ -682,6 +685,9 @@ int16_t topdown_input( char in_char, struct DSEKAI_STATE* state ) {
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
+      break;
+
+   case INPUT_CLICK:
       break;
 
    case INPUT_KEY_OK:

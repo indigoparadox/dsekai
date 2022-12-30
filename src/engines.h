@@ -391,7 +391,9 @@ typedef int16_t (*ENGINES_SETUP)( struct DSEKAI_STATE* state );
  * \param state Locked ::MEMORY_PTR for current ::DSEKAI_STATE.
  * \return 1 if engine should continue running or 0 to quit.
  */
-typedef int16_t (*ENGINES_INPUT)( char in_char, struct DSEKAI_STATE* state );
+typedef int16_t (*ENGINES_INPUT)(
+   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   struct DSEKAI_STATE* state );
 
 /**
  * \brief Cycles animations and executes scripts relevant to the current engine.
@@ -405,11 +407,11 @@ typedef void (*ENGINES_ANIMATE)( struct DSEKAI_STATE* state );
  */
 typedef void (*ENGINES_DRAW)( struct DSEKAI_STATE* state );
 
-#define ENGINES_SETUP_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _setup( struct DSEKAI_STATE* state );
+#define ENGINES_SETUP_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _setup( struct DSEKAI_STATE* state ) SECTION_SETUP;
 
 ENGINE_TABLE( ENGINES_SETUP_PROTOTYPES )
 
-#define ENGINES_INPUT_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _input( char in_char, struct DSEKAI_STATE* state );
+#define ENGINES_INPUT_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _input( INPUT_VAL in_char, int16_t click_x, int16_t click_y, struct DSEKAI_STATE* state );
 
 ENGINE_TABLE( ENGINES_INPUT_PROTOTYPES )
 
@@ -421,7 +423,7 @@ ENGINE_TABLE( ENGINES_ANIMATE_PROTOTYPES )
 
 ENGINE_TABLE( ENGINES_DRAW_PROTOTYPES )
 
-#define ENGINES_SHUTDOWN_PROTOTYPES( idx, eng, prefix ) void prefix ## _shutdown( struct DSEKAI_STATE* state );
+#define ENGINES_SHUTDOWN_PROTOTYPES( idx, eng, prefix ) void prefix ## _shutdown( struct DSEKAI_STATE* state ) SECTION_SETUP;
 
 ENGINE_TABLE( ENGINES_SHUTDOWN_PROTOTYPES )
 

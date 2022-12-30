@@ -115,7 +115,10 @@ void pov_shutdown( struct DSEKAI_STATE* state ) {
    state->flags &= ~DSEKAI_FLAG_BLANK_FRAME;
 }
 
-int16_t pov_input( char in_char, struct DSEKAI_STATE* state ) {
+int16_t pov_input(
+   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   struct DSEKAI_STATE* state
+) {
    int16_t retval = 1;
    uint8_t recreate_clouds = 0;
    struct TILEMAP* t = NULL;

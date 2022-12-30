@@ -44,7 +44,10 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
    }  
 }
 
-int16_t menu_handler_main( char in_char, struct DSEKAI_STATE* state ) {
+int16_t menu_handler_main(
+   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   struct DSEKAI_STATE* state
+) {
    int16_t retval = 1;
 
    switch( in_char ) {
@@ -257,7 +260,10 @@ static int8_t menu_handler_items_use(
    return use_retval;
 }
 
-int16_t menu_handler_items( char in_char, struct DSEKAI_STATE* state ) {
+int16_t menu_handler_items(
+   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   struct DSEKAI_STATE* state
+) {
    int16_t retval = 1,
       i = 0;
    int16_t selected_item_idx = ITEM_ERROR_NOT_FOUND,
@@ -436,7 +442,10 @@ void menu_renderer_craft( struct DSEKAI_STATE* state ) {
 
 }
 
-int16_t menu_handler_craft( char in_char, struct DSEKAI_STATE* state ) {
+int16_t menu_handler_craft(
+   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   struct DSEKAI_STATE* state
+) {
 
    state->menu.menu_id = 0;
    state->menu.highlight_id = 1;
@@ -456,7 +465,10 @@ void menu_renderer_save( struct DSEKAI_STATE* state ) {
    menu_close( state );
 }
 
-int16_t menu_handler_save( char in_char, struct DSEKAI_STATE* state ) {
+int16_t menu_handler_save(
+   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   struct DSEKAI_STATE* state
+) {
    return 1;
 }
 
@@ -464,7 +476,10 @@ void menu_renderer_quit( struct DSEKAI_STATE* state ) {
    /* Nothing to render. */
 }
 
-int16_t menu_handler_quit( char in_char, struct DSEKAI_STATE* state ) {
+int16_t menu_handler_quit(
+   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   struct DSEKAI_STATE* state
+) {
    return 0;
 }
 

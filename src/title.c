@@ -232,7 +232,10 @@ void title_animate( struct DSEKAI_STATE* state ) {
 
 }
 
-int16_t title_input( char in_char, struct DSEKAI_STATE* state ) {
+int16_t title_input(
+   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   struct DSEKAI_STATE* state
+) {
    int16_t retval = 1;
 
 #ifndef NO_TITLE

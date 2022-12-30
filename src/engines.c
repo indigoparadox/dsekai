@@ -245,7 +245,7 @@ void engines_loop_iter( void* state_handle_p ) {
 #else
 int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
 #endif /* PLATFORM_WASM */
-   uint8_t in_char = 0;
+   INPUT_VAL in_char = 0;
    struct DSEKAI_STATE* state = NULL;
    struct TILEMAP* t = NULL;
    int16_t retval = 1,
@@ -353,7 +353,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       debug_printf( 3, "click x: %d, y: %d", click_x, click_y );
 
    } else if( 0 <= state->menu.menu_id && 0 != in_char ) {
-      retval = gc_menu_handlers[state->menu.menu_id]( in_char, state );
+      retval = gc_menu_handlers[state->menu.menu_id](
+         in_char, click_x, click_y, state );
    
    } else if(
       /* Only open the menu if no modal windows are open and it's not
@@ -370,7 +371,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       }
 
    } else if( 0 == window_modal() && 0 != in_char ) {
-      retval = gc_engines_input[state->engine_type]( in_char, state );
+      retval = gc_engines_input[state->engine_type](
+         in_char, click_x, click_y, state );
 
    } else if( INPUT_KEY_OK == in_char ) {
       /* Try to close any windows that are open. */
