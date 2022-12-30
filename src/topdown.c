@@ -212,7 +212,7 @@ static void topdown_draw_crops(
       if( 0 < crop_stage ) {
          /* Crop has germinated. */
          graphics_cache_blit_at(
-            crop_def->sprite_id, GRAPHICS_INSTANCE_STATIC2,
+            crop_def->sprite_id, GRAPHICS_INSTANCE_STATIC,
             (crop_stage - 1) * TILE_W, 0,
             plot_px, plot_py, TILE_W, TILE_H );
 
@@ -226,7 +226,7 @@ static void topdown_draw_crops(
             i_seed, GRAPHICS_BMP_FLAG_TYPE_TILE );
 #endif /* RESOURCE_FILE */
          graphics_cache_blit_at(
-            plot_gfx, GRAPHICS_INSTANCE_STATIC2,
+            plot_gfx, GRAPHICS_INSTANCE_STATIC,
             0, 0, plot_px, plot_py, TILE_W, TILE_H );
       }
    }
@@ -346,7 +346,7 @@ void topdown_draw_items(
             gstate->screen_scroll_y);
 
       graphics_cache_blit_at(
-         items[i].sprite_id, GRAPHICS_INSTANCE_STATIC1, 0, 0,
+         items[i].sprite_id, GRAPHICS_INSTANCE_STATIC, 0, 0,
          item_px, item_py, SPRITE_W, SPRITE_H );
 
    }

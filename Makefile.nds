@@ -37,14 +37,28 @@ DSEKAI_O_FILES_NDS := \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY)))
 
-DSEKAI_BITMAP_HS_NDS := \
-   $(addprefix $(GENDIR_NDS)/,$(subst .bmp,.h,$(DSEKAI_ASSETS_BITMAPS)))
+# DS-specific concatenated tilesheets.
+# TODO: Change 16x16x16 to depth var.
+DSEKAI_BITMAP_NDS_TILES := $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/bgtiles.bmp
+DSEKAI_BITMAP_NDS_PATTERNS := $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/bgpatterns.bmp
+DSEKAI_BITMAP_NDS_ITEMS := $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/bgitems.bmp
 
-DSEKAI_BITMAP_SS_NDS := \
-   $(addprefix $(GENDIR_NDS)/,$(subst .bmp,.s,$(DSEKAI_ASSETS_BITMAPS)))
+# DS-specific bitmap lists.
+DSEKAI_BITMAP_HS_NDS := \
+   $(addprefix $(GENDIR_NDS)/,$(subst .bmp,.h,$(DSEKAI_ASSETS_SPRITES))) \
+   $(addprefix $(GENDIR_NDS)/,$(subst .bmp,.h,$(DSEKAI_ASSETS_CROPS))) \
+	$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_TILES)) \
+	$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_PATTERNS)) \
+	$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_ITEMS))
+DSEKAI_BITMAP_SS_NDS := $(subst .h,.s,$(DSEKAI_BITMAP_HS_NDS))
 
 DSEKAI_BITMAP_OS_NDS := \
-   $(addprefix $(OBJDIR_NDS)/,$(subst .bmp,.o,$(DSEKAI_ASSETS_BITMAPS)))
+	$(subst $(GENDIR_NDS),$(OBJDIR_NDS),$(subst .h,.o,$(DSEKAI_BITMAP_HS_NDS)))
+
+CONSOLIDATED_NDS := \
+	$(DSEKAI_ASSETS_TILES) \
+	$(DSEKAI_ASSETS_PATTERNS) \
+	$(DSEKAI_ASSETS_ITEMS)
 
 RESEXT_H_NDS := $(GENDIR_NDS)/resext.h
 
@@ -54,11 +68,14 @@ CC_NDS := arm-none-eabi-gcc
 LD_NDS := arm-none-eabi-gcc
 NDSTOOL := ndstool
 GRIT := grit
+IM_CONVERT := convert
 
 # 4. Arguments
 
 #ARCH_NDS := -mthumb -mthumb-interwork
 ARCH_NDS := -mlittle-endian
+
+IM_CONVERT_FLAGS := -type palette -depth 8
 
 DEFINES_NDS := \
    $(DEFINES_DSEKAI) \
@@ -91,6 +108,10 @@ LIBS_NDS := -L$(DEVKITPRO)/libnds/lib -lnds9
 
 LDFLAGS_NDS := -specs=ds_arm9.specs $(ARCH_NDS) -Wl,-Map,$(OBJDIR_NDS)/$(DSEKAI).map
 
+# TODO: Replace 16x16x16 with depth specifier variable.
+GENDIR_NDS_ASSETS := $(GENDIR_NDS)/$(ASSETDIR)/16x16x16
+BGSHEETS_NDS := $(GENDIR_NDS_ASSETS)/bgsheets.idx
+
 $(BIN_NDS): PATH := $(DEVKITPATH)/tools/bin:$(DEVKITPATH)/devkitARM/bin:$(PATH)
 
 # 5. Targets
@@ -116,9 +137,73 @@ $(GENDIR_NDS)/resemb.h: $(DSEKAI_ASSETS_MAPS_JSON) | \
 $(GENDIR_NDS)/$(STAMPFILE) $(HEADPACK)
 	$(HEADPACK) $@ $^
 
-# TODO: Replace 16x16x16 with depth specifier variable.
-# TODO: Include the tile/palette lengths.
-# TODO: Move the struct def out of this generated header.
+# Make a concatenated global tilesheet.
+# These have a side effect of making a "bgsheets.idx" which is grepped for
+# tile offsets in the rule to create resext.h.
+# TODO: Maybe move this out to a shell script?
+$(DSEKAI_BITMAP_NDS_TILES): $(DSEKAI_ASSETS_TILES)
+	F_COUNT=0 ; \
+	for f in $^; do \
+		if [ ! -f "$@" ]; then \
+			cp -v "$(ASSETDIR)/t_trans.bmp" "$@" ; \
+			echo "trans bgtiles $${F_COUNT}" >> "$(BGSHEETS_NDS)" ; \
+			F_COUNT=$$((F_COUNT + 1)) ; \
+		fi; \
+		$(IM_CONVERT) "$@" "$$f" -append $(IM_CONVERT_FLAGS) "$@"; \
+		echo "`echo $$f | sed -e 's/$(ASSETDIR)\/16x16x16\///g' \
+			| sed -e 's/.bmp//g'` bgtiles $${F_COUNT}" >> "$(BGSHEETS_NDS)" ; \
+		F_COUNT=$$((F_COUNT + 1)) ; \
+	done
+
+# Make a concatenated global pattern sheet.
+$(DSEKAI_BITMAP_NDS_PATTERNS): $(DSEKAI_ASSETS_PATTERNS)
+	F_COUNT=0 ; \
+	for f in $^; do \
+		if [ ! -f "$@" ]; then \
+			cp -v "$(ASSETDIR)/t_trans.bmp" "$@" ; \
+			echo "trans bgpatterns $${F_COUNT}" >> "$(BGSHEETS_NDS)" ; \
+			F_COUNT=$$((F_COUNT + 1)) ; \
+		fi; \
+		$(IM_CONVERT) "$@" "$$f" -append $(IM_CONVERT_FLAGS) "$@"; \
+		echo "`echo $$f | sed -e 's/$(ASSETDIR)\/16x16x16\///g' \
+			| sed -e 's/.bmp//g'` bgpatterns $${F_COUNT}" >> "$(BGSHEETS_NDS)" ; \
+		F_COUNT=$$((F_COUNT + 1)) ; \
+	done
+
+# Make a concatenated global items sheet.
+$(DSEKAI_BITMAP_NDS_ITEMS): $(DSEKAI_ASSETS_ITEMS)
+	F_COUNT=0 ; \
+	for f in $^; do \
+		if [ ! -f "$@" ]; then \
+			cp -v "$(ASSETDIR)/t_trans.bmp" "$@" ; \
+			echo "trans bgitems $${F_COUNT}" >> "$(BGSHEETS_NDS)" ; \
+			F_COUNT=$$((F_COUNT + 1)) ; \
+		fi; \
+		$(IM_CONVERT) "$@" "$$f" -append $(IM_CONVERT_FLAGS) "$@"; \
+		echo "`echo $$f | sed -e 's/$(ASSETDIR)\/16x16x16\///g' \
+			| sed -e 's/.bmp//g'` bgitems $${F_COUNT}" >> "$(BGSHEETS_NDS)" ; \
+		F_COUNT=$$((F_COUNT + 1)) ; \
+	done
+
+$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_TILES)) \
+$(subst .bmp,.s,$(DSEKAI_BITMAP_NDS_TILES)): $(DSEKAI_BITMAP_NDS_TILES)
+	$(MD) $(dir $@)
+	$(GRIT) $< $(GRIT_FLAGS) -fts -o $@
+
+$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_PATTERNS)) \
+$(subst .bmp,.s,$(DSEKAI_BITMAP_NDS_PATTERNS)): $(DSEKAI_BITMAP_NDS_PATTERNS)
+	$(MD) $(dir $@)
+	$(GRIT) $< $(GRIT_FLAGS) -fts -o $@
+
+$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_ITEMS)) \
+$(subst .bmp,.s,$(DSEKAI_BITMAP_NDS_ITEMS)): $(DSEKAI_BITMAP_NDS_ITEMS)
+	$(MD) $(dir $@)
+	$(GRIT) $< $(GRIT_FLAGS) -fts -o $@
+
+$(GENDIR_NDS)/$(ASSETDIR)/%.h $(GENDIR_NDS)/$(ASSETDIR)/%.s: $(ASSETDIR)/%.bmp
+	$(MD) $(dir $@)
+	$(GRIT) $< $(GRIT_FLAGS) -fts -o $@
+
 $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 	$(MD) $(dir $@)
 	echo "#ifndef RESEXT_H\n#define RESEXT_H\n\n" > $@
@@ -127,32 +212,35 @@ $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 	## Include all the bitmap headers.
 	echo "$(addprefix #include \",$(addsuffix \"\n,$(subst $(GENDIR_NDS)/,,$^)))" >> $@
 	echo "" >> $@
-	## Create an index of bitmap tiles.
-	#echo "const unsigned int* gc_resext_bitmap_tiles[] = {" >> $@
-	#echo "$(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,"$(TILESUFFIX_NDS)",$^))" >> $@
-	#echo "};" >> $@
-	#echo "" >> $@
-	## Create an index of bitmap palettes.
-	#echo "const unsigned short* gc_resext_bitmap_palettes[] = {" >> $@
-	#echo "$(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,"$(PALSUFFIX_NDS)",$^))" >> $@
-	#echo "};" >> $@
-	#echo "" >> $@
-	## Create a searchable list of tile name strings.
-	#echo "const char* gc_resext_bitmap_names[] = {" >> $@
-	#echo "$(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,\",$(subst .h,"\"$(COMMANEWLINE_NDS)",$^))" >> $@
-	#echo "};" >> $@
-	#echo "" >> $@
-	echo "" >> $@
+	## Create an index of bitmap spritesheets.
+	echo $(GENDIR_NDS_ASSETS) vs $(GENDIR_NDS)/$(ASSETDIR)/16x16x16
+	#for f in $(subst $(GENDIR_NDS_ASSETS)/,,$(subst .h,,$^)); do
 	for f in $(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,,$^)); do \
+		F_TILESLEN="`grep "$${f}TilesLen" "$(GENDIR_NDS_ASSETS)/$${f}.h" | \
+				awk '{print $$3}'`" ; \
+		F_PALLEN="`grep "$${f}PalLen" "$(GENDIR_NDS_ASSETS)/$${f}.h" | \
+			awk '{print $$3}'`" ; \
 		echo "struct RESOURCE_GRIT_DEF struct_$$f =\n" \
 			"   { $${f}Tiles," \
-			"$${f}Pal," \
-			"`grep "$${f}TilesLen" \
-				"$(GENDIR_NDS)/$(ASSETDIR)/16x16x16/$${f}.h" | \
-				awk '{print $$3}'`," \
-			"`grep "$${f}PalLen" \
-				"$(GENDIR_NDS)/$(ASSETDIR)/16x16x16/$${f}.h" | \
-				awk '{print $$3}'` };" >> $@ ; \
+			"$${f}Pal, $${F_TILESLEN}, $${F_PALLEN}, -1 };" >> $@ ; \
+	done
+	echo "" >> $@
+	## Include consolidated tiles. 
+	# Note the ^\s surrounding the grep criteria for F_IDX and F_PALLEN!
+	# TODO: Grab the properties for the tilesets and the offsets from the idx.
+	for f in $(subst $(ASSETDIR)/16x16x16/,,$(subst .bmp,,$(CONSOLIDATED_NDS))); do \
+		F_MASTER="`grep "^$${f}\s" "$(BGSHEETS_NDS)" | awk '{print $$2}'`" \
+		F_IDX="`grep "^$$f\s" "$(BGSHEETS_NDS)" | awk '{print $$3}'`" ; \
+		F_PALLEN="`grep "$${F_MASTER}PalLen" \
+			"$(GENDIR_NDS_ASSETS)/$${F_MASTER}.h" | \
+			awk '{print $$3}'`" ; \
+		F_TILESLEN="`grep "$${F_MASTER}TilesLen" \
+			"$(GENDIR_NDS_ASSETS)/$${F_MASTER}.h" | \
+			awk '{print $$3}'`" ; \
+		echo "struct RESOURCE_GRIT_DEF struct_$$f = \n" \
+			"   { $${F_MASTER}Tiles, $${F_MASTER}Pal," \
+				" $${F_TILESLEN}, $${F_PALLEN}, $${F_IDX} }; " \
+		>> $@ ; \
 	done
 	echo "" >> $@
 	echo "#else" >> $@
@@ -163,10 +251,16 @@ $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 	for f in $(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,,$^)); do \
 		echo "extern struct RESOURCE_GRIT_DEF struct_$$f;" >> $@ ; \
 	done
+	for f in $(subst $(ASSETDIR)/16x16x16/,,$(subst .bmp,,$(CONSOLIDATED_NDS))); do \
+		echo "extern struct RESOURCE_GRIT_DEF struct_$$f;" >> $@ ; \
+	done
 	echo "#endif /* RESOURCE_C */\n" >> $@
 	echo "" >> $@
 	# Define pointers to structs to call from static maps, etc for all files.
 	for f in $(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,,$^)); do \
+		echo "#define $$f (&struct_$$f)" >> $@ ; \
+	done
+	for f in $(subst $(ASSETDIR)/16x16x16/,,$(subst .bmp,,$(CONSOLIDATED_NDS))); do \
 		echo "#define $$f (&struct_$$f)" >> $@ ; \
 	done
 	echo "" >> $@
@@ -174,10 +268,6 @@ $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 	echo "" >> $@
 	# Terminate the include file.
 	echo "#endif /* RESEXT_H */" >> $@
-
-$(GENDIR_NDS)/$(ASSETDIR)/%.h $(GENDIR_NDS)/$(ASSETDIR)/%.s: $(ASSETDIR)/%.bmp
-	$(MD) $(dir $@)
-	$(GRIT) $< $(GRIT_FLAGS) -fts -o $@
 
 $(BIN_NDS): $(OBJDIR_NDS)/$(DSEKAI).elf $(GENDIR_NDS)/$(DSEKAI)-1.bmp
 	$(NDSTOOL) -c $@ -9 $< -b $(GENDIR_NDS)/$(DSEKAI)-1.bmp "$(DSEKAI);$(DSEKAI);$(DSEKAI)"
