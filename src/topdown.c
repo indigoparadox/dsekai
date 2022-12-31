@@ -184,7 +184,8 @@ static void topdown_draw_crops(
       assert( 0 < plot_gfx );
 
       graphics_cache_blit_at(
-         plot_gfx, i, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
+         plot_gfx, DSEKAI_MOBILES_ONSCREEN + i,
+         0, 0, plot_px, plot_py, TILE_W, TILE_H );
 
       /* Skip drawing crop if none planted or it hasn't germinated. */
       if(
