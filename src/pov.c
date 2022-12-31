@@ -134,8 +134,7 @@ int16_t pov_input(
       goto cleanup;
    }
 
-   switch( in_char ) {
-   case INPUT_KEY_UP:
+   if( g_input_key_up == in_char ) {
       /* TODO: Should this be north, or the facing dir? */
       if(
          0 < engines_input_movement(
@@ -145,9 +144,8 @@ int16_t pov_input(
          tilemap_refresh_tiles( t );
       }
       /* gstate->dirty = 1; */
-      break;
 
-   case INPUT_KEY_LEFT:
+   } else if( g_input_key_left == in_char ) {
       /* pathfind_test_dir( MOBILE_DIR_WEST, state, t ); */
       mobile_set_dir( &(state->player),
          gc_pov_dir_turn_left[mobile_get_dir( &(state->player) )] );
@@ -161,9 +159,8 @@ int16_t pov_input(
          recreate_clouds = 2;
       }
       /* gstate->dirty = 1; */
-      break;
 
-   case INPUT_KEY_DOWN:
+   } else if( g_input_key_down == in_char ) {
       /* TODO: Should this be south, or the opposite-facing dir? */
       if(
          0 < engines_input_movement(
@@ -173,9 +170,8 @@ int16_t pov_input(
          tilemap_refresh_tiles( t );
       }
       /* gstate->dirty = 1; */
-      break;
 
-   case INPUT_KEY_RIGHT:
+   } else if( g_input_key_right == in_char ) { 
       /* pathfind_test_dir( MOBILE_DIR_EAST, state, t ); */
       mobile_set_dir( &(state->player),
          gc_pov_dir_turn_right[mobile_get_dir( &(state->player) )] );
@@ -189,9 +185,8 @@ int16_t pov_input(
          recreate_clouds = 2;
       }
       /* gstate->dirty = 1; */
-      break;
 
-   case INPUT_KEY_OK:
+   } else if( g_input_key_ok == in_char ) {
       /* Try to interact with facing mobile. */
       mobile_interact(
          &(state->player),
@@ -202,7 +197,6 @@ int16_t pov_input(
       gstate->inc++;
       debug_printf( 3, "inc: %d", gstate->inc );
 #endif /* POV_DEBUG_INC */
-      break;
    }
    
    if( 1 == recreate_clouds ) {

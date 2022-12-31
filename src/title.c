@@ -245,24 +245,21 @@ int16_t title_input(
 
    gstate = (struct TITLE_STATE*)memory_lock( state->engine_state_handle );
 
-   switch( in_char ) {
-   case INPUT_KEY_UP:
+   if( g_input_key_up == in_char ) {
       if( 0 < gstate->option_high ) {
          gstate->option_high--;
          window_pop( WINDOW_ID_TITLE_MENU );
          redraw_menu = 1;
       }
-      break;
 
-   case INPUT_KEY_DOWN:
+   } else if( g_input_key_down == in_char ) {
       if( TITLE_OPTIONS_COUNT > gstate->option_high + 1 ) {
          gstate->option_high++;
          window_pop( WINDOW_ID_TITLE_MENU );
          redraw_menu = 1;
       }
-      break;
 
-   case INPUT_KEY_OK:
+   } else if( g_input_key_ok == in_char ) {
 
       window_pop( WINDOW_ID_TITLE_MENU );
 
@@ -287,12 +284,10 @@ int16_t title_input(
             memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
          state->engine_type_change = 1 /* ENGINE_TYPE_TOPDOWN */;
       }
-      break;
 
 #ifndef NO_QUIT
-   case INPUT_KEY_QUIT:
+   } else if( g_input_key_quit == in_char ) {
       retval = 0;
-      break;
 #endif /*! NO_QUIT */
    }
  

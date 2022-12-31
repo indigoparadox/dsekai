@@ -164,10 +164,10 @@ int8_t pathfind_start(
 
    /* Zero out lists and nodes. */
    memory_zero_ptr(
-      open, sizeof( struct PATHFIND_NODE ) * PATHFIND_LIST_MAX );
+      (MEMORY_PTR)open, sizeof( struct PATHFIND_NODE ) * PATHFIND_LIST_MAX );
    memory_zero_ptr(
-      closed, sizeof( struct PATHFIND_NODE ) * PATHFIND_LIST_MAX );
-   memory_zero_ptr( &adjacent, sizeof( struct PATHFIND_NODE ) );
+      (MEMORY_PTR)closed, sizeof( struct PATHFIND_NODE ) * PATHFIND_LIST_MAX );
+   memory_zero_ptr( (MEMORY_PTR)&adjacent, sizeof( struct PATHFIND_NODE ) );
    
    /* Add the start node to the open list. */
    adjacent.coords.x = mover->coords.x;
@@ -186,7 +186,7 @@ int8_t pathfind_start(
          "moving %d, %d to closed list idx %d and evaluating...",
          open[iter_idx].coords.x, open[iter_idx].coords.y, closed_sz );
       memory_copy_ptr(
-         &(closed[closed_sz]), &(open[iter_idx]), 
+         (MEMORY_PTR)&(closed[closed_sz]), (MEMORY_PTR)&(open[iter_idx]), 
          sizeof( struct PATHFIND_NODE ) );
       dio_list_remove( iter_idx, open, open_sz, struct PATHFIND_NODE );
       iter_idx = closed_sz;

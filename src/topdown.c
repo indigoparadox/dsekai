@@ -627,8 +627,7 @@ int16_t topdown_input(
       goto cleanup;
    }
 
-   switch( in_char ) {
-   case INPUT_KEY_UP:
+   if( g_input_key_up == in_char ) {
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.y--;
@@ -643,9 +642,8 @@ int16_t topdown_input(
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
-      break;
 
-   case INPUT_KEY_LEFT:
+   } else if( g_input_key_left == in_char ) {
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.x--;
@@ -660,9 +658,8 @@ int16_t topdown_input(
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
-      break;
 
-   case INPUT_KEY_DOWN:
+   } else if( g_input_key_down == in_char ) {
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.y++;
@@ -677,9 +674,8 @@ int16_t topdown_input(
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
-      break;
 
-   case INPUT_KEY_RIGHT:
+   } else if( g_input_key_right == in_char ) {
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.x++;
@@ -694,9 +690,8 @@ int16_t topdown_input(
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
-      break;
 
-   case INPUT_CLICK:
+   } else if( INPUT_CLICK == in_char ) {
       debug_printf( 0, "trying to move to %d, %d...", click_x, click_y );
 
       /* Determine click tile coords. */
@@ -713,9 +708,8 @@ int16_t topdown_input(
       } else {
          mobile_walk_start( &(state->player), pathfind_dir );
       }
-      break;
 
-   case INPUT_KEY_OK:
+   } else if( g_input_key_ok == in_char ) {
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          tilemap_advance_tile_id( map,
@@ -761,7 +755,6 @@ int16_t topdown_input(
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
-      break;
    }
 
 cleanup:

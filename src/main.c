@@ -139,7 +139,7 @@ unilayer_main() {
 #ifdef USE_SOFT_ASSERT
       if( 0 < g_assert_failed_len ) {
          while( g_running ) {
-            if( INPUT_KEY_QUIT == input_poll( NULL, NULL ) ) {
+            if( g_input_key_quit == input_poll( NULL, NULL ) ) {
                g_running = 0;
             }
             WinDrawChars( g_assert_failed, g_assert_failed_len, 10, 20 );

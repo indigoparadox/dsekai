@@ -353,7 +353,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       debug_printf( 1, "click x: %d, y: %d", click_x, click_y );
    }
 
-   if( INPUT_KEY_QUIT == in_char ) {
+   if( g_input_key_quit == in_char ) {
       retval = 0;
 
    } else if( 0 <= state->menu.menu_id && 0 != in_char ) {
@@ -365,7 +365,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       *  blocked.
       */
       0 == window_modal() &&
-      INPUT_KEY_MENU == in_char &&
+      g_input_key_menu == in_char &&
       DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
    ) {
       if( !state->engine_type ) {
@@ -378,7 +378,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       retval = gc_engines_input[state->engine_type](
          in_char, click_x, click_y, state );
 
-   } else if( INPUT_KEY_OK == in_char ) {
+   } else if( g_input_key_ok == in_char ) {
       /* Try to close any windows that are open. */
       debug_printf( 1, "speech window requests closed by user" );
       window_pop( WINDOW_ID_SCRIPT_SPEAK );

@@ -50,20 +50,17 @@ int16_t menu_handler_main(
 ) {
    int16_t retval = 1;
 
-   switch( in_char ) {
-   case INPUT_KEY_UP:
+   if( g_input_key_up == in_char ) {
       if( 1 < state->menu.highlight_id ) {
          state->menu.highlight_id--;
       }
-      break;
 
-   case INPUT_KEY_DOWN:
+   } else if( g_input_key_down == in_char ) {
       if( '\0' != gc_menu_tokens[state->menu.highlight_id + 1][0] ) {
          state->menu.highlight_id++;
       }
-      break;
 
-   case INPUT_KEY_OK:
+   } else if( g_input_key_ok == in_char ) {
       /* TODO: Use quit callback. */
       if( state->menu.highlight_id == gc_menu_idx_quit ) {
 #ifndef NO_TITLE
@@ -76,9 +73,8 @@ int16_t menu_handler_main(
          state->menu.menu_id = state->menu.highlight_id;
          state->menu.highlight_id = 0;
       }
-      break;
 
-   case INPUT_KEY_QUIT:
+   } else if( g_input_key_quit == in_char ) {
       menu_close( state );
       goto skip_refresh;
    }
@@ -294,8 +290,7 @@ int16_t menu_handler_items(
 
    items = (struct ITEM*)memory_unlock( state->items_handle );
 
-   switch( in_char ) {
-   case INPUT_KEY_UP:
+   if( g_input_key_up == in_char ) {
       /* Process the implicity use/craft/drop menu first if that's open. */
       if(
          MENU_FLAG_ITEM_OPEN_SEL_USE ==
@@ -322,9 +317,8 @@ int16_t menu_handler_items(
          /* The use/craft/drop menu isn't open, so iterate items. */
          state->menu.highlight_id--;
       }
-      break;
 
-   case INPUT_KEY_DOWN:
+   } else if( g_input_key_down == in_char ) {
       /* Process the implicity use/craft/drop menu first if that's open. */
       if(
          MENU_FLAG_ITEM_OPEN_SEL_USE ==
@@ -352,12 +346,10 @@ int16_t menu_handler_items(
          state->menu.highlight_id++;
       }
 
-      break;
-
-   case INPUT_KEY_OK:
+   } else if( g_input_key_ok == in_char ) {
       if( ITEM_ERROR_NOT_FOUND == selected_item_idx ) {
          error_printf( "no item selected!" );
-         break;
+         goto not_found;
       }
 
 #if 0
@@ -402,9 +394,7 @@ int16_t menu_handler_items(
          state->menu.flags |= MENU_FLAG_ITEM_OPEN_SEL_USE;
       }
 
-      break;
-
-   case INPUT_KEY_QUIT:
+   } else if( g_input_key_quit == in_char ) {
       if( 0 != (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK) ) {
          /* Close the implicit use/craft/drop menu. */
          state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
@@ -413,8 +403,9 @@ int16_t menu_handler_items(
          state->menu.menu_id = 0;
          state->menu.highlight_id = 1;
       }
-      break;
    }
+
+not_found:
 
    /* Close all item menu windows to and refresh. */
    window_pop( MENU_WINDOW_ID );

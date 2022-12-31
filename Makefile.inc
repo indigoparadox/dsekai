@@ -25,6 +25,7 @@ DSEKAI_C_FILES_SUPPORT := \
    src/strpool.c \
    src/pathfind.c \
    unilayer/src/graphics.c \
+   unilayer/src/input.c \
    unilayer/src/dio.c
 
 DSEKAI_C_FILES := \
