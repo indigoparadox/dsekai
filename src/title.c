@@ -179,8 +179,6 @@ void title_draw( struct DSEKAI_STATE* state ) {
 
    int16_t i = 0;
 
-   /* graphics_draw_block( 0, 0, SCREEN_W, SCREEN_H, GRAPHICS_COLOR_BLACK ); */
-
 #ifdef DEPTH_VGA
    graphics_string_at( "dsekai", 6, 55, TILE_H, GRAPHICS_COLOR_DARKRED, 1 );
 #else

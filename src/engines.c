@@ -287,8 +287,8 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
       0 > state->menu.menu_id &&
       DSEKAI_FLAG_BLANK_FRAME == (state->flags & DSEKAI_FLAG_BLANK_FRAME)
    ) {
-      graphics_draw_block(
-         0, 0, SCREEN_MAP_W, SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
+      graphics_clear_block(
+         0, 0, SCREEN_MAP_W, SCREEN_MAP_H );
    }
 
    /* Draw background animations before anything else. */
@@ -476,7 +476,7 @@ void engines_draw_transition( struct DSEKAI_STATE* state ) {
       graphics_set_screen_zoom( (trans_frame / 2) );
       break;
    case DSEKAI_TRANSITION_TYPE_CURTAIN:
-      /* TODO: Opening/closing. */
+      /* TODO: Draw block or clear block? Needs testing. */
       graphics_draw_block( 0, 0, trans_w, SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
       graphics_draw_block(
          SCREEN_MAP_W - trans_w, 0,

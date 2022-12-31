@@ -61,9 +61,9 @@ void topdown_draw_tilemap(
                (EDITOR_FLAG_FORCE_FRAME & state->editor.flags)
             ) {
                /* Black out the block. */
-               graphics_draw_block(
+               graphics_clear_block(
                   SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
-                  TILE_W, TILE_H, GRAPHICS_COLOR_BLACK );
+                  TILE_W, TILE_H );
                continue;
 
             } else {

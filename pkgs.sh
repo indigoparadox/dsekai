@@ -88,6 +88,11 @@ do_run() {
          build_curses
       fi
       cd pkgbuild/dsekai-curses-* && ./dsekait
+   elif [ "$PLAT_SPEC" = "nds" ]; then
+      if [ ! -d pkgbuild/dsekai-nds-* ]; then
+         build_nds
+      fi
+      desmume pkgbuild/dsekai-nds-*/dsekai.nds
    elif [ "$PLAT_SPEC" = "wasm" ]; then
       cd pkgbuild/dsekai-wasm-*-vga-* && python -m http.server
    fi
