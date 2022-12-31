@@ -41,15 +41,14 @@ DSEKAI_O_FILES_NDS := \
 # TODO: Change 16x16x16 to depth var.
 DSEKAI_BITMAP_NDS_TILES := $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/bgtiles.bmp
 DSEKAI_BITMAP_NDS_PATTERNS := $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/bgpatterns.bmp
-DSEKAI_BITMAP_NDS_ITEMS := $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/bgitems.bmp
 
 # DS-specific bitmap lists.
 DSEKAI_BITMAP_HS_NDS := \
    $(addprefix $(GENDIR_NDS)/,$(subst .bmp,.h,$(DSEKAI_ASSETS_SPRITES))) \
    $(addprefix $(GENDIR_NDS)/,$(subst .bmp,.h,$(DSEKAI_ASSETS_CROPS))) \
+   $(addprefix $(GENDIR_NDS)/,$(subst .bmp,.h,$(DSEKAI_ASSETS_ITEMS))) \
 	$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_TILES)) \
-	$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_PATTERNS)) \
-	$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_ITEMS))
+	$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_PATTERNS))
 DSEKAI_BITMAP_SS_NDS := $(subst .h,.s,$(DSEKAI_BITMAP_HS_NDS))
 
 DSEKAI_BITMAP_OS_NDS := \
@@ -57,8 +56,7 @@ DSEKAI_BITMAP_OS_NDS := \
 
 CONSOLIDATED_NDS := \
 	$(DSEKAI_ASSETS_TILES) \
-	$(DSEKAI_ASSETS_PATTERNS) \
-	$(DSEKAI_ASSETS_ITEMS)
+	$(DSEKAI_ASSETS_PATTERNS)
 
 RESEXT_H_NDS := $(GENDIR_NDS)/resext.h
 
@@ -172,21 +170,6 @@ $(DSEKAI_BITMAP_NDS_PATTERNS): $(DSEKAI_ASSETS_PATTERNS)
 		F_COUNT=$$((F_COUNT + 1)) ; \
 	done
 
-# Make a concatenated global items sheet.
-$(DSEKAI_BITMAP_NDS_ITEMS): $(DSEKAI_ASSETS_ITEMS)
-	F_COUNT=0 ; \
-	for f in $^; do \
-		if [ ! -f "$@" ]; then \
-			cp -v "$(ASSETDIR)/t_trans.bmp" "$@" ; \
-			echo "trans bgitems $${F_COUNT}" >> "$(BGSHEETS_NDS)" ; \
-			F_COUNT=$$((F_COUNT + 1)) ; \
-		fi; \
-		$(IM_CONVERT) "$@" "$$f" -append $(IM_CONVERT_FLAGS) "$@"; \
-		echo "`echo $$f | sed -e 's/$(ASSETDIR)\/16x16x16\///g' \
-			| sed -e 's/.bmp//g'` bgitems $${F_COUNT}" >> "$(BGSHEETS_NDS)" ; \
-		F_COUNT=$$((F_COUNT + 1)) ; \
-	done
-
 $(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_TILES)) \
 $(subst .bmp,.s,$(DSEKAI_BITMAP_NDS_TILES)): $(DSEKAI_BITMAP_NDS_TILES)
 	$(MD) $(dir $@)
@@ -194,11 +177,6 @@ $(subst .bmp,.s,$(DSEKAI_BITMAP_NDS_TILES)): $(DSEKAI_BITMAP_NDS_TILES)
 
 $(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_PATTERNS)) \
 $(subst .bmp,.s,$(DSEKAI_BITMAP_NDS_PATTERNS)): $(DSEKAI_BITMAP_NDS_PATTERNS)
-	$(MD) $(dir $@)
-	$(GRIT) $< $(GRIT_FLAGS) -fts -o $@
-
-$(subst .bmp,.h,$(DSEKAI_BITMAP_NDS_ITEMS)) \
-$(subst .bmp,.s,$(DSEKAI_BITMAP_NDS_ITEMS)): $(DSEKAI_BITMAP_NDS_ITEMS)
 	$(MD) $(dir $@)
 	$(GRIT) $< $(GRIT_FLAGS) -fts -o $@
 

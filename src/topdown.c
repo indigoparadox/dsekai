@@ -178,21 +178,15 @@ static void topdown_draw_crops(
       plot_py =
          SCREEN_MAP_Y + ((plot->coords.y * TILE_H) - gstate->screen_scroll_y);
 
-#ifdef RESOURCE_FILE
-      plot_gfx = 
-         graphics_cache_load_bitmap(
-            ASSETS_PATH DEPTH_SPEC "/i_plot.bmp", GRAPHICS_BMP_FLAG_TYPE_TILE );
-#else
       plot_gfx = graphics_cache_load_bitmap(
-         i_plot, GRAPHICS_BMP_FLAG_TYPE_TILE );
-#endif /* RESOURCE_FILE */
+         CROP_STATIC_SPRITE_PLOT, GRAPHICS_BMP_FLAG_TYPE_TILE );
 
       assert( 0 < plot_gfx );
 
       graphics_cache_blit_at(
          plot_gfx, i, 0, 0, plot_px, plot_py, TILE_W, TILE_H );
 
-      /* Skip drawing crop if it hasn't germinated. */
+      /* Skip drawing crop if none planted or it hasn't germinated. */
       if(
          0 == plot->crop_gid ||
          0 > (crop_idx = crop_get_def_idx( plot->crop_gid, t ))
@@ -204,7 +198,7 @@ static void topdown_draw_crops(
       crop_def = &(t->crop_defs[crop_idx]);
       if( 0 > crop_def->sprite_id ) {
          crop_def->sprite_id = graphics_cache_load_bitmap(
-            crop_def->sprite, GRAPHICS_BMP_FLAG_TYPE_TILE );
+            crop_def->sprite, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
       }
 
       crop_stage = (plot->flags & CROP_FLAG_STAGE_MASK);
@@ -212,21 +206,18 @@ static void topdown_draw_crops(
       if( 0 < crop_stage ) {
          /* Crop has germinated. */
          graphics_cache_blit_at(
-            crop_def->sprite_id, GRAPHICS_INSTANCE_STATIC,
+            /* For the instance, crops come after mobiles. */
+            crop_def->sprite_id, DSEKAI_MOBILES_ONSCREEN + i,
             (crop_stage - 1) * TILE_W, 0,
             plot_px, plot_py, TILE_W, TILE_H );
 
       } else {
          /* Crop is still seeds. */
-#ifdef RESOURCE_FILE
          plot_gfx = graphics_cache_load_bitmap(
-            ASSETS_PATH DEPTH_SPEC "/i_seed.bmp", GRAPHICS_BMP_FLAG_TYPE_TILE );
-#else
-         plot_gfx = graphics_cache_load_bitmap(
-            i_seed, GRAPHICS_BMP_FLAG_TYPE_TILE );
-#endif /* RESOURCE_FILE */
+            CROP_STATIC_SPRITE_SEED, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
          graphics_cache_blit_at(
-            plot_gfx, GRAPHICS_INSTANCE_STATIC,
+            /* For the instance, crops come after mobiles. */
+            plot_gfx, DSEKAI_MOBILES_ONSCREEN + i,
             0, 0, plot_px, plot_py, TILE_W, TILE_H );
       }
    }
@@ -346,8 +337,10 @@ void topdown_draw_items(
             gstate->screen_scroll_y);
 
       graphics_cache_blit_at(
-         items[i].sprite_id, GRAPHICS_INSTANCE_STATIC, 0, 0,
-         item_px, item_py, SPRITE_W, SPRITE_H );
+         items[i].sprite_id,
+         /* For the instance, items come after mobiles and crops. */
+         DSEKAI_MOBILES_ONSCREEN + DSEKAI_CROPS_ONSCREEN + i,
+         0, 0, item_px, item_py, SPRITE_W, SPRITE_H );
 
    }
 

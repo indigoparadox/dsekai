@@ -106,6 +106,10 @@
 /* TODO: Handle this being larger than onscreen mobiles. */
 #endif /* !MOBILES_MAX */
 
+#ifndef DSEKAI_MOBILES_ONSCREEN
+#define DSEKAI_MOBILES_ONSCREEN (GRAPHICS_SPRITES_ONSCREEN / 3)
+#endif /* !DSEKAI_MOBILES_ONSCREEN */
+
 #ifndef SCRIPT_STACK_DEPTH
 /**
  * \brief Maximum depth of available local stack for each ::MOBILE executing
@@ -161,6 +165,10 @@
  */
 #  define DSEKAI_ITEMS_MAX 200
 #endif /* !DSEKAI_ITEMS_MAX */
+
+#ifndef DSEKAI_ITEMS_ONSCREEN
+#define DSEKAI_ITEMS_ONSCREEN (GRAPHICS_SPRITES_ONSCREEN / 3)
+#endif /* !DSEKAI_ITEMS_ONSCREEN */
 
 /*! \} */ /* dsekai_items */
 
@@ -263,6 +271,10 @@
 #  define DSEKAI_CROPS_MAX 40
 #endif /* !DSEKAI_CROPS_MAX */
 
+#ifndef DSEKAI_CROPS_ONSCREEN
+#define DSEKAI_CROPS_ONSCREEN (GRAPHICS_SPRITES_ONSCREEN / 3)
+#endif /* !DSEKAI_CROPS_ONSCREEN */
+
 #ifndef CROP_NAME_MAX
 /**
  * \brief Maximum size of CROP_DEF::name.
@@ -272,6 +284,22 @@
  */
 #define CROP_NAME_MAX 8
 #endif /* !CROP_NAME_MAX */
+
+#ifndef CROP_STATIC_SPRITE_PLOT
+#  ifdef RESOURCE_FILE
+#     define CROP_STATIC_SPRITE_PLOT ASSETS_PATH DEPTH_SPEC "/i_plot.bmp"
+#  else
+#     define CROP_STATIC_SPRITE_PLOT i_plot
+#  endif /* RESOURCE_FILE */
+#endif /* !CROP_STATIC_SPRITE_PLOT */
+
+#ifndef CROP_STATIC_SPRITE_SEED
+#  ifdef RESOURCE_FILE
+#     define CROP_STATIC_SPRITE_SEED ASSETS_PATH DEPTH_SPEC "/i_seed.bmp"
+#  else
+#     define CROP_STATIC_SPRITE_SEED i_seed
+#  endif /* RESOURCE_FILE */
+#endif /* !CROP_STATIC_SPRITE_SEED */
 
 /*! \} */ /* dsekai_crops */
 

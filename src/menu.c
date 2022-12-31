@@ -74,7 +74,7 @@ int16_t menu_handler_main(
          state->menu.highlight_id = 0;
       }
 
-   } else if( g_input_key_quit == in_char ) {
+   } else if( g_input_key_menu == in_char ) {
       menu_close( state );
       goto skip_refresh;
    }
@@ -394,7 +394,7 @@ int16_t menu_handler_items(
          state->menu.flags |= MENU_FLAG_ITEM_OPEN_SEL_USE;
       }
 
-   } else if( g_input_key_quit == in_char ) {
+   } else if( g_input_key_menu == in_char ) {
       if( 0 != (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK) ) {
          /* Close the implicit use/craft/drop menu. */
          state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
