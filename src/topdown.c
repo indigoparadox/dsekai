@@ -196,6 +196,7 @@ static void topdown_draw_crops(
       }
 
       /* Make sure crop spritesheet is loaded. */
+      /* TODO: Handle curses/ascii. */
       crop_def = &(t->crop_defs[crop_idx]);
       if( 0 > crop_def->sprite_id ) {
          crop_def->sprite_id = graphics_cache_load_bitmap(
@@ -273,20 +274,11 @@ static void topdown_draw_mobile(
       m->screen_py -= SPRITE_H - m->steps_remaining;
    }
 
-   assert( 0 <= m->sprite_id );
-
    /* Blit the mobile's current sprite/frame. */
-#ifdef GFX_ASCII
    graphics_cache_blit_at(
-      m->ascii,
+      mobile_get_sprite( m ),
       *p_onscreen_mobs, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
       m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
-#else
-   graphics_cache_blit_at(
-      m->sprite_id,
-      *p_onscreen_mobs, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
-      m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
-#endif /* GFX_ASCII */
 
    /* Mobile is on-screen. */
    (*p_onscreen_mobs)++;
@@ -338,6 +330,7 @@ void topdown_draw_items(
             gstate->screen_scroll_y);
 
       graphics_cache_blit_at(
+      /* TODO: Handle curses/ascii. */
          items[i].sprite_id,
          /* For the instance, items come after mobiles and crops. */
          DSEKAI_MOBILES_ONSCREEN + DSEKAI_CROPS_ONSCREEN + i,

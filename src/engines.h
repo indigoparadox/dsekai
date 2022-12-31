@@ -51,6 +51,18 @@
 
 /*! \} */ /* dsekai_engines_transitions */
 
+#if defined( DEPTH_VGA )
+#  define DSEKAI_TITLE_TEXT_COLOR GRAPHICS_COLOR_DARKRED
+#elif defined( DEPTH_CGA )
+#  define DSEKAI_TITLE_TEXT_COLOR GRAPHICS_COLOR_MAGENTA
+#else
+#  define DSEKAI_TITLE_TEXT_COLOR GRAPHICS_COLOR_WHITE
+#endif /* DEPTH_VGA || DEPTH_CGA */
+
+#define DSEKAI_TITLE_TEXT "dsekai"
+
+#define DSEKAI_TITLE_TEXT_SZ 6
+
 #ifndef ENGINES_TOKENS_ONLY
 
 /**

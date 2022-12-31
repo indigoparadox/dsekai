@@ -104,8 +104,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
 
    /* Create the spinning globe animation. */
    /* (It's actually just four mobiles.) */
-   state->mobiles[0].coords.x = 4;
-   state->mobiles[0].coords.y = 2;
+   state->mobiles[0].coords.x = 0;
+   state->mobiles[0].coords.y = 0;
    state->mobiles[0].coords_prev.x = 3;
    state->mobiles[0].coords_prev.y = 2;
    state->mobiles[0].script_id = -1;
@@ -116,8 +116,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
       s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[0].ascii = '/';
 
-   state->mobiles[1].coords.x = 5;
-   state->mobiles[1].coords.y = 2;
+   state->mobiles[1].coords.x = 1;
+   state->mobiles[1].coords.y = 0;
    state->mobiles[1].coords_prev.x = 3;
    state->mobiles[1].coords_prev.y = 2;
    state->mobiles[1].script_id = -1;
@@ -128,8 +128,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
       s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[1].ascii = '\\';
 
-   state->mobiles[2].coords.x = 4;
-   state->mobiles[2].coords.y = 3;
+   state->mobiles[2].coords.x = 0;
+   state->mobiles[2].coords.y = 1;
    state->mobiles[2].coords_prev.x = 4;
    state->mobiles[2].coords_prev.y = 3;
    state->mobiles[2].script_id = -1;
@@ -140,8 +140,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
       s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[2].ascii = '\\';
 
-   state->mobiles[3].coords.x = 5;
-   state->mobiles[3].coords.y = 3;
+   state->mobiles[3].coords.x = 1;
+   state->mobiles[3].coords.y = 1;
    state->mobiles[3].coords_prev.x = 5;
    state->mobiles[3].coords_prev.y = 3;
    state->mobiles[3].script_id = -1;
@@ -174,16 +174,21 @@ void title_shutdown( struct DSEKAI_STATE* state ) {
 }
 
 void title_draw( struct DSEKAI_STATE* state ) {
+   struct GRAPHICS_RECT title_str_sz;
 
 #ifndef NO_TITLE
 
    int16_t i = 0;
 
-#ifdef DEPTH_VGA
-   graphics_string_at( "dsekai", 6, 55, TILE_H, GRAPHICS_COLOR_DARKRED, 1 );
-#else
-   graphics_string_at( "dsekai", 6, 55, TILE_H, GRAPHICS_COLOR_MAGENTA, 1 );
-#endif
+   graphics_string_sz(
+      DSEKAI_TITLE_TEXT, DSEKAI_TITLE_TEXT_SZ, 0, &title_str_sz );
+   graphics_string_at(
+      DSEKAI_TITLE_TEXT,
+      DSEKAI_TITLE_TEXT_SZ,
+      (SCREEN_W / 2) - (title_str_sz.w / 2), /* Center horizontally. */
+      TILE_H,
+      DSEKAI_TITLE_TEXT_COLOR, /* Varies by depth, set in engines.h. */
+      1 );
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
       if(
@@ -201,23 +206,13 @@ void title_draw( struct DSEKAI_STATE* state ) {
       assert( 0 <= state->mobiles[i].sprite_id );
 
       /* Draw current mobile sprite/frame. */
-#ifdef PLATFORM_CURSES
       graphics_cache_blit_at(
-         state->mobiles[i].ascii, i,
+         mobile_get_sprite( &(state->mobiles[i]) ), i,
          state->ani_sprite_x,
          mobile_get_dir( &(state->mobiles[i]) ) * SPRITE_H,
-         (state->mobiles[i].coords.x * SPRITE_W),
-         (state->mobiles[i].coords.y * SPRITE_H),
+         ((SCREEN_W / 2) - SPRITE_W) + (state->mobiles[i].coords.x * SPRITE_W),
+         (2 * SPRITE_H) + (state->mobiles[i].coords.y * SPRITE_H),
          SPRITE_W, SPRITE_H );
-#else
-      graphics_cache_blit_at(
-         state->mobiles[i].sprite_id, i,
-         state->ani_sprite_x,
-         mobile_get_dir( &(state->mobiles[i]) ) * SPRITE_H,
-         (state->mobiles[i].coords.x * SPRITE_W),
-         (state->mobiles[i].coords.y * SPRITE_H),
-         SPRITE_W, SPRITE_H );
-#endif /* PLATFORM_CURSES */
    }
 
    window_refresh( WINDOW_ID_TITLE_MENU );

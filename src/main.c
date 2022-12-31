@@ -75,7 +75,9 @@ unilayer_main() {
       goto exit;
    }
 
-   if( !window_init( SCREEN_MAP_W, SCREEN_MAP_H ) ) {
+   if( !window_init(
+      SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H )
+   ) {
       retval = 1;
       error_printf( "unable to initialize GUI" );
       goto exit;

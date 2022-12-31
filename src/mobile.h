@@ -192,7 +192,15 @@
  */
 #define MOBILE_MAP_GID_ALL 65535
 
-#define mobile_get_sprite( m ) ((m)->sprite_id)
+#ifdef PLATFORM_CURSES
+#  define mobile_get_sprite( m ) ((m)->ascii)
+#else
+/**
+ * \relates MOBILE
+ * \brief Get the pointer to the sprite graphic to use for a ::MOBILE.
+ */
+#  define mobile_get_sprite( m ) ((m)->sprite_id)
+#endif /* PLATFORM_CURSES */
 
 #define mobile_break_if_last( mobiles, i ) if( MOBILE_FLAG_NOT_LAST != (MOBILE_FLAG_NOT_LAST & mobiles[i].flags) ) { debug_printf( 0, "breaking early on mobile %d!", i ); break; }
 
