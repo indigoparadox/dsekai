@@ -1,82 +1,113 @@
 
 #include "dsekai.h"
 
-#ifdef RESOURCE_FILE
-/* TODO: Detect graphics format, not platform. */
-#ifdef PLATFORM_DOS
-#  if defined( DEPTH_CGA )
-#     define s_world ASSETS_PATH DEPTH_SPEC "/s_world.cga"
-#  elif defined( DEPTH_VGA )
-#     define s_world ASSETS_PATH DEPTH_SPEC "/s_world.vga"
-#  else
-#     error "not implemented"
-#  endif /* DEPTH_CGA || DEPTH_VGA */
-#else
-#  define s_world ASSETS_PATH DEPTH_SPEC "/s_world.bmp"
-#endif /* PLATFORM_DOS */
-#endif /* RESOURCE_FILE */
+#define DSEKAI_TITLE_TEXT "dsekai"
 
-#ifndef NO_ENGINE_POV
-#  ifndef NO_QUIT
-#     define TITLE_OPTIONS_COUNT 3
-#  else
-#     define TITLE_OPTIONS_COUNT 2
-#  endif /* !NO_QUIT */
-#else
-#  ifndef NO_QUIT
-#     define TITLE_OPTIONS_COUNT 2
-#  else
-#     define TITLE_OPTIONS_COUNT 1
-#  endif /* !NO_QUIT */
-#endif /* !NO_ENGINE_POV */
-
-RES_CONST char* gc_title_options[] = {
-   "topdown"
-#ifndef NO_ENGINE_POV
-   , "pov"
-#endif /* !NO_ENGINE_POV */
-#ifndef NO_QUIT
-   , "quit"
-#endif /* NO_QUIT */
-};
+#define DSEKAI_TITLE_TEXT_SZ 6
 
 #ifndef NO_TITLE
 
-static void title_draw_menu( struct DSEKAI_STATE* state ) {
+static void title_draw_menu(
+   struct DSEKAI_STATE* state, int16_t opt_start, RES_CONST char* tokens[],
+   title_option_cb* callbacks
+) {
    int16_t i = 0;
    struct TITLE_STATE* gstate = NULL;
    GRAPHICS_COLOR color;
    uint8_t flags = 0;
 
    gstate = (struct TITLE_STATE*)memory_lock( state->engine_state_handle );
+   assert( NULL != gstate );
+
+   /* If no new tokens provided, use the old ones. */
+   if( NULL != tokens ) {
+      gstate->option_min = opt_start;
+      gstate->option_idx = opt_start;
+      gstate->option_tokens = tokens;
+      gstate->option_callbacks = callbacks;
+   }
+   gstate->option_max = gstate->option_min;
+   i = gstate->option_min;
 
    window_push(
       WINDOW_ID_TITLE_MENU, 0, WINDOW_TYPE_WINDOW, 0,
-      WINDOW_PLACEMENT_CENTER, SCREEN_H - (TILE_H * 5), /* x, y */
+      WINDOW_PLACEMENT_CENTER, TILE_H * 5, /* x, y */
       WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO, /* w, h */
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, NULL );
 
-   for( i = 0 ; TITLE_OPTIONS_COUNT > i ; i++ ) {
-      if( gstate->option_high == i ) {
+   assert( NULL != gstate->option_tokens );
+
+   /* Iterate through the string list until the NULL string. */
+   while( NULL != gstate->option_tokens[i] ) {
+      if( gstate->option_idx == i ) {
          debug_printf( 1, "title option selected for draw: %d", i );
          color = WINDOW_PREFAB_DEFAULT_HL();
          flags = GRAPHICS_STRING_FLAG_ALL_CAPS | GRAPHICS_STRING_FLAG_OUTLINE;
       } else {
+         debug_printf( 1, "title option not selected: %d", i );
          color = WINDOW_PREFAB_DEFAULT_FG();
          flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
       }
 
+      /* Add the string to the window. */
       window_push(
          WINDOW_ID_TITLE_MENU + 1 + i, WINDOW_ID_TITLE_MENU, WINDOW_TYPE_LABEL,
          WINDOW_FLAG_TEXT_PTR,
          WINDOW_PLACEMENT_GRID, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
-         0, gc_title_options[i] );
+         0, gstate->option_tokens[i] );
+
+      (gstate->option_max)++;
+      i++;
    }
 
    gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
+}
+
+#define TITLE_ENGINES_LIST_CALLBACKS( idx, eng, prefix ) \
+   static void title_callback_eng_ ## prefix ( struct DSEKAI_STATE* state ) { \
+      memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ), \
+         memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) ); \
+         state->engine_type_change = idx; \
+   }
+
+ENGINE_TABLE( TITLE_ENGINES_LIST_CALLBACKS )
+      
+#define TITLE_ENGINES_LIST_CALLBACKS_LIST( idx, eng, prefix ) \
+   title_callback_eng_ ## prefix,
+
+static title_option_cb gc_title_menu_new_callbacks[] = {
+   ENGINE_TABLE( TITLE_ENGINES_LIST_CALLBACKS_LIST )
+   NULL
+};
+
+/* Menu callback: List of available engines. */
+static void title_menu_new( struct DSEKAI_STATE* state ) {
+   title_draw_menu( state, 1, gc_engines_tokens,
+      gc_title_menu_new_callbacks );
+}
+
+/* First menu callbacks defined here as they call static functions. */
+#define TITLE_MENU_FIRST( f ) f( "new", title_menu_new )
+
+#define TITLE_MENU_FIRST_STR( str, cb ) str,
+static RES_CONST char* gc_title_menu_first_tokens[] = {
+   TITLE_MENU_FIRST( TITLE_MENU_FIRST_STR )
+   NULL
+};
+
+#define TITLE_MENU_FIRST_CBS( str, cb ) cb,
+static title_option_cb gc_title_menu_first_callbacks[] = {
+   TITLE_MENU_FIRST( TITLE_MENU_FIRST_CBS )
+   NULL
+};
+
+/* Menu callback: First menu that opens (new/load/options/etc). */
+static void title_menu_first( struct DSEKAI_STATE* state ) {
+   title_draw_menu(
+      state, 0, gc_title_menu_first_tokens, gc_title_menu_first_callbacks );
 }
 
 #endif /* !NO_TITLE */
@@ -100,7 +131,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
       ANIMATE_TYPE_SNOW, ANIMATE_FLAG_CLEANUP | ANIMATE_FLAG_BG,
       0, 0, SCREEN_W, SCREEN_H - ANIMATE_TILE_H );
 
-   title_draw_menu( state );
+   title_menu_first( state );
 
    /* Create the spinning globe animation. */
    /* (It's actually just four mobiles.) */
@@ -113,7 +144,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    mobile_set_dir( &(state->mobiles[0]), 2 );
    state->mobiles[0].mp_hp = 100;
    state->mobiles[0].sprite_id = graphics_cache_load_bitmap(
-      s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+      TITLE_STATIC_SPRITE_WORLD, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[0].ascii = '/';
 
    state->mobiles[1].coords.x = 1;
@@ -125,7 +156,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    mobile_set_dir( &(state->mobiles[1]), 0 );
    state->mobiles[1].mp_hp = 100;
    state->mobiles[1].sprite_id = graphics_cache_load_bitmap(
-      s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+      TITLE_STATIC_SPRITE_WORLD, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[1].ascii = '\\';
 
    state->mobiles[2].coords.x = 0;
@@ -137,7 +168,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    mobile_set_dir( &(state->mobiles[2]), 3 );
    state->mobiles[2].mp_hp = 100;
    state->mobiles[2].sprite_id = graphics_cache_load_bitmap(
-      s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+      TITLE_STATIC_SPRITE_WORLD, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[2].ascii = '\\';
 
    state->mobiles[3].coords.x = 1;
@@ -149,7 +180,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    mobile_set_dir( &(state->mobiles[3]), 1 );
    state->mobiles[3].mp_hp = 100;
    state->mobiles[3].sprite_id = graphics_cache_load_bitmap(
-      s_world, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+      TITLE_STATIC_SPRITE_WORLD, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[3].ascii = '/';
 
    graphics_lock();
@@ -235,48 +266,59 @@ int16_t title_input(
 
    struct TITLE_STATE* gstate = NULL;
    uint8_t redraw_menu = 0;
+   title_option_cb cb = NULL;
 
    gstate = (struct TITLE_STATE*)memory_lock( state->engine_state_handle );
 
    if( g_input_key_up == in_char ) {
-      if( 0 < gstate->option_high ) {
-         gstate->option_high--;
+      if( gstate->option_min < gstate->option_idx ) {
+         gstate->option_idx--;
          window_pop( WINDOW_ID_TITLE_MENU );
          redraw_menu = 1;
       }
 
    } else if( g_input_key_down == in_char ) {
-      if( TITLE_OPTIONS_COUNT > gstate->option_high + 1 ) {
-         gstate->option_high++;
+      if( gstate->option_max - 1 > gstate->option_idx ) {
+         gstate->option_idx++;
          window_pop( WINDOW_ID_TITLE_MENU );
          redraw_menu = 1;
       }
 
    } else if( g_input_key_ok == in_char ) {
 
-      window_pop( WINDOW_ID_TITLE_MENU );
+      cb = gstate->option_callbacks[gstate->option_idx];
 
+      /* Pop the window and unlock gstate for the callback! */
+      window_pop( WINDOW_ID_TITLE_MENU );
+      gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
+
+      cb( state );
+
+      /* Don't set redraw, as the callback might redraw on its own. */
+
+#if 0
 #ifdef NO_ENGINE_POV
-      if( 1 == gstate->option_high ) {
+      if( 1 == gstate->option_idx ) {
          retval = 0;
 #else
 #  ifndef NO_QUIT
-      if( 2 == gstate->option_high ) {
+      if( 2 == gstate->option_idx ) {
          retval = 0;
 
       } else
 #  endif /* !NO_QUIT */
-      if( 1 == gstate->option_high ) {
+      if( 1 == gstate->option_idx ) {
          memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
             memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
          state->engine_type_change = 2 /* ENGINE_TYPE_POV */;
 
 #endif /* NO_ENGINE_POV */
-      } else if( 0 == gstate->option_high ) {
+      } else if( 0 == gstate->option_idx ) {
          memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
             memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
          state->engine_type_change = 1 /* ENGINE_TYPE_TOPDOWN */;
       }
+#endif
 
 #ifndef NO_QUIT
    } else if( g_input_key_quit == in_char ) {
@@ -284,11 +326,13 @@ int16_t title_input(
 #endif /*! NO_QUIT */
    }
  
-   gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
+   if( NULL != gstate ) {
+      gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
+   }
 
    /* Redraw menu here after gstate freed. */
    if( redraw_menu ) {
-      title_draw_menu( state );
+      title_draw_menu( state, -1, NULL, NULL );
    }
 
 #endif /* !NO_TITLE */

@@ -303,5 +303,13 @@
 
 /*! \} */ /* dsekai_crops */
 
+#ifndef TITLE_STATIC_SPRITE_WORLD
+#  ifdef RESOURCE_FILE
+#     define TITLE_STATIC_SPRITE_WORLD ASSETS_PATH DEPTH_SPEC "/s_world.bmp"
+#  else
+#     define TITLE_STATIC_SPRITE_WORLD s_world
+#  endif /* RESOURCE_FILE */
+#endif /* !TITLE_STATIC_SPRITE_WORLD */
+
 #endif /* !DSEKAI_CONFIG_H */
 

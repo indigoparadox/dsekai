@@ -59,10 +59,6 @@
 #  define DSEKAI_TITLE_TEXT_COLOR GRAPHICS_COLOR_WHITE
 #endif /* DEPTH_VGA || DEPTH_CGA */
 
-#define DSEKAI_TITLE_TEXT "dsekai"
-
-#define DSEKAI_TITLE_TEXT_SZ 6
-
 #ifndef ENGINES_TOKENS_ONLY
 
 /**
@@ -76,12 +72,18 @@
  * \{
  */
 
+typedef void (*title_option_cb)( struct DSEKAI_STATE* state );
+
 /**
  * \brief State for ::ENGINE_TYPE_NONE. A simple title screen engine.
  */
 struct TITLE_STATE {
+   RES_CONST char** option_tokens;
+   title_option_cb* option_callbacks;
    /*! \brief Index of the currently highlighted option. */
-   uint8_t option_high;
+   uint8_t option_idx;
+   uint8_t option_min;
+   uint8_t option_max;
 };
 
 /**
@@ -447,7 +449,7 @@ ENGINE_TABLE( ENGINES_SHUTDOWN_PROTOTYPES )
 
 RES_CONST char* gc_engines_tokens[] = {
    ENGINE_TABLE( ENGINES_LIST_TOKENS )
-   ""
+   NULL
 };
 
 #ifndef ENGINES_TOKENS_ONLY
