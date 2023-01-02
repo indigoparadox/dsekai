@@ -9,11 +9,9 @@ MEMORY_HANDLE g_state_handle = (MEMORY_HANDLE)NULL;
 #include "winstat.h"
 #endif /* PLATFORM_WIN */
 
-
-
 /* === Main Class Definition === */
 
-unilayer_main() {
+int unilayer_main( int argc, char* argv[] ) {
 
 /* === Main Preamble === */
 
@@ -180,10 +178,8 @@ unilayer_main() {
 
 exit:
 
-#ifdef DISABLE_MAIN_PARMS
-   return;
-#else
    return retval;
-#endif /* !DISABLE_MAIN_PARMS */
 }
+
+after_unilayer_main()
 

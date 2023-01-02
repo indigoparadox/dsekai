@@ -67,7 +67,7 @@ static void title_draw_menu(
 }
 
 #define TITLE_ENGINES_LIST_CALLBACKS( idx, eng, prefix ) \
-   static void title_callback_eng_ ## prefix ( struct DSEKAI_STATE* state ) { \
+   void title_callback_eng_ ## prefix ( struct DSEKAI_STATE* state ) { \
       memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ), \
          memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) ); \
          state->engine_type_change = idx; \
@@ -84,7 +84,7 @@ static title_option_cb gc_title_menu_new_callbacks[] = {
 };
 
 /* Menu callback: List of available engines. */
-static void title_menu_new( struct DSEKAI_STATE* state ) {
+void title_menu_new( struct DSEKAI_STATE* state ) {
    title_draw_menu( state, 1, gc_engines_tokens,
       gc_title_menu_new_callbacks );
 }
