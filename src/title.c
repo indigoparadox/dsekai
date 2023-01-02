@@ -116,6 +116,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
 
 #ifndef NO_TITLE
+   RESOURCE_ID mobile_sprite_id;
 
    debug_printf( 2, "allocating engine-specific state" );
    assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
@@ -133,6 +134,10 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
 
    title_menu_first( state );
 
+   /* The mobiles have the same graphic, so just get the ID once. */
+   resource_id_from_name( &mobile_sprite_id, TITLE_STATIC_SPRITE_WORLD,
+      RESOURCE_EXT_GRAPHICS );
+
    /* Create the spinning globe animation. */
    /* (It's actually just four mobiles.) */
    state->mobiles[0].coords.x = 0;
@@ -143,8 +148,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[0].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[0]), 2 );
    state->mobiles[0].mp_hp = 100;
-   state->mobiles[0].sprite_id = graphics_cache_load_bitmap(
-      TITLE_STATIC_SPRITE_WORLD, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+   state->mobiles[0].sprite_cache_id = graphics_cache_load_bitmap(
+      mobile_sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[0].ascii = '/';
 
    state->mobiles[1].coords.x = 1;
@@ -155,8 +160,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[1].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[1]), 0 );
    state->mobiles[1].mp_hp = 100;
-   state->mobiles[1].sprite_id = graphics_cache_load_bitmap(
-      TITLE_STATIC_SPRITE_WORLD, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+   state->mobiles[1].sprite_cache_id = graphics_cache_load_bitmap(
+      mobile_sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[1].ascii = '\\';
 
    state->mobiles[2].coords.x = 0;
@@ -167,8 +172,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[2].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[2]), 3 );
    state->mobiles[2].mp_hp = 100;
-   state->mobiles[2].sprite_id = graphics_cache_load_bitmap(
-      TITLE_STATIC_SPRITE_WORLD, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+   state->mobiles[2].sprite_cache_id = graphics_cache_load_bitmap(
+      mobile_sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[2].ascii = '\\';
 
    state->mobiles[3].coords.x = 1;
@@ -179,8 +184,8 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    state->mobiles[3].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_set_dir( &(state->mobiles[3]), 1 );
    state->mobiles[3].mp_hp = 100;
-   state->mobiles[3].sprite_id = graphics_cache_load_bitmap(
-      TITLE_STATIC_SPRITE_WORLD, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+   state->mobiles[3].sprite_cache_id = graphics_cache_load_bitmap(
+      mobile_sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    state->mobiles[3].ascii = '/';
 
    graphics_lock();
@@ -234,7 +239,7 @@ void title_draw( struct DSEKAI_STATE* state ) {
          break;
       }
 
-      assert( 0 <= state->mobiles[i].sprite_id );
+      assert( 0 <= state->mobiles[i].sprite_cache_id );
 
       /* Draw current mobile sprite/frame. */
       graphics_cache_blit_at(

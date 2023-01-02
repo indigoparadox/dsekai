@@ -120,19 +120,12 @@ void topdown_draw_tilemap(
          /* debug_printf( 3, "redraw tile %d, %d", tile_px, tile_py ); */
          
          /* Blit the tile. */
-#ifdef GFX_ASCII
          graphics_cache_blit_at(
-            t->tileset[tile_id].ascii, GRAPHICS_INSTANCE_TILEMAP,
+            tilemap_tile_get_image( &(t->tileset[tile_id]) ),
+            GRAPHICS_INSTANCE_TILEMAP,
             0, 0,
             SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
             TILE_W, TILE_H );
-#else
-         graphics_cache_blit_at(
-            t->tileset[tile_id].image_id, GRAPHICS_INSTANCE_TILEMAP,
-            0, 0,
-            SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
-            TILE_W, TILE_H );
-#endif /* GFX_ASCII */
       }
    }
 
@@ -151,6 +144,7 @@ static void topdown_draw_crops(
       plot_py = 0;
    uint8_t crop_stage = 0;
    struct CROP_DEF* crop_def = NULL;
+   RESOURCE_ID plot_res_id;
 
    /* TODO: Use tile dirty bit to avoid redraw unless crop sprite changes. */
 
@@ -178,8 +172,10 @@ static void topdown_draw_crops(
       plot_py =
          SCREEN_MAP_Y + ((plot->coords.y * TILE_H) - gstate->screen_scroll_y);
 
+      resource_id_from_name( &plot_res_id, CROP_STATIC_SPRITE_PLOT,
+         RESOURCE_EXT_GRAPHICS );
       plot_gfx = graphics_cache_load_bitmap(
-         CROP_STATIC_SPRITE_PLOT, GRAPHICS_BMP_FLAG_TYPE_TILE );
+         plot_res_id, GRAPHICS_BMP_FLAG_TYPE_TILE );
 
       assert( 0 < plot_gfx );
 
@@ -198,9 +194,11 @@ static void topdown_draw_crops(
       /* Make sure crop spritesheet is loaded. */
       /* TODO: Handle curses/ascii. */
       crop_def = &(t->crop_defs[crop_idx]);
-      if( 0 > crop_def->sprite_id ) {
-         crop_def->sprite_id = graphics_cache_load_bitmap(
-            crop_def->sprite, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+      if( 0 > crop_def->sprite_cache_id ) {
+         resource_id_from_name( &plot_res_id, crop_def->sprite_name,
+            RESOURCE_EXT_GRAPHICS );
+         crop_def->sprite_cache_id = graphics_cache_load_bitmap(
+            plot_res_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
       }
 
       crop_stage = (plot->flags & CROP_FLAG_STAGE_MASK);
@@ -209,14 +207,16 @@ static void topdown_draw_crops(
          /* Crop has germinated. */
          graphics_cache_blit_at(
             /* For the instance, crops come after mobiles. */
-            crop_def->sprite_id, DSEKAI_MOBILES_ONSCREEN + i,
+            crop_def->sprite_cache_id, DSEKAI_MOBILES_ONSCREEN + i,
             (crop_stage - 1) * TILE_W, 0,
             plot_px, plot_py, TILE_W, TILE_H );
 
       } else {
          /* Crop is still seeds. */
+         resource_id_from_name( &plot_res_id, CROP_STATIC_SPRITE_SEED,
+            RESOURCE_EXT_GRAPHICS );
          plot_gfx = graphics_cache_load_bitmap(
-            CROP_STATIC_SPRITE_SEED, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+            plot_res_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
          graphics_cache_blit_at(
             /* For the instance, crops come after mobiles. */
             plot_gfx, DSEKAI_MOBILES_ONSCREEN + i,
@@ -330,8 +330,8 @@ void topdown_draw_items(
             gstate->screen_scroll_y);
 
       graphics_cache_blit_at(
-      /* TODO: Handle curses/ascii. */
-         items[i].sprite_id,
+         /* TODO: Handle curses/ascii. */
+         items[i].sprite_cache_id,
          /* For the instance, items come after mobiles and crops. */
          DSEKAI_MOBILES_ONSCREEN + DSEKAI_CROPS_ONSCREEN + i,
          0, 0, item_px, item_py, SPRITE_W, SPRITE_H );

@@ -116,7 +116,6 @@ int8_t item_use_food(
 
    dio_snprintf( num_str, 10, "+%d", food_val );
 
-#if defined( DEPTH_VGA ) || defined( DEPTH_CGA )
 #ifndef NO_ANIMATE
    anim_idx = animate_create(
       ANIMATE_TYPE_STRING, ANIMATE_FLAG_FG, user->screen_px, user->screen_py,
@@ -130,7 +129,6 @@ int8_t item_use_food(
 #  endif /* DEPTH_VGA */
    );
 #endif /* !NO_ANIMATE */
-#endif /* DEPTH_VGA || DEPTH_CGA */
 
    return ITEM_USED_SUCCESSFUL;
 }
@@ -398,7 +396,7 @@ int16_t item_stack_or_add(
             sizeof( struct ITEM ) );
 
          items[i].owner = owner_id;
-         items[i].sprite_id = -1;
+         items[i].sprite_cache_id = -1;
          e_idx = i;
 
          /* Found and created the item, so quit. */

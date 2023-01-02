@@ -40,7 +40,7 @@ struct TILEMAP_COORDS {
 /*! \brief Tile prototype stored in TILEMAP::tileset. */
 struct TILESET_TILE {
    /*! \brief Indentifier for graphical asset representing this tile. */
-   RESOURCE_ID image;
+   RESOURCE_NAME image_name;
    unsigned char ascii;
    /*! \brief Flags indicating behavior for this tile. */
    uint8_t flags;
@@ -48,7 +48,7 @@ struct TILESET_TILE {
     * \brief Index of the tile image loaded in the
     *        \ref unilayer_graphics_cache.
     */
-   uint16_t image_id;
+   uint16_t image_cache_id;
 };
 
 /* TODO: Move spawner to mostruct.h for consistency. */
@@ -65,9 +65,9 @@ struct TILEMAP_SPAWN {
    /*! \brief Tile-based coordinates at which to spawn. */
    struct TILEMAP_COORDS coords;
    /**
-    * \brief RESOURCE_ID for the MOBILE::sprite on a spawned MOBILE.
+    * \brief RESOURCE_NAME for the MOBILE::sprite on a spawned MOBILE.
     */
-   RESOURCE_ID sprite;
+   RESOURCE_NAME sprite_name;
    unsigned char ascii;
    /*! \brief \ref dsekai_mobile_flags to pass to spawned MOBILE::flags. */
    uint16_t flags;

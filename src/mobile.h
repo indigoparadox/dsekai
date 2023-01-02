@@ -199,7 +199,7 @@
  * \relates MOBILE
  * \brief Get the pointer to the sprite graphic to use for a ::MOBILE.
  */
-#  define mobile_get_sprite( m ) ((m)->sprite_id)
+#  define mobile_get_sprite( m ) ((m)->sprite_cache_id)
 #endif /* PLATFORM_CURSES */
 
 #define mobile_break_if_last( mobiles, i ) if( MOBILE_FLAG_NOT_LAST != (MOBILE_FLAG_NOT_LAST & mobiles[i].flags) ) { debug_printf( 0, "breaking early on mobile %d!", i ); break; }
@@ -255,7 +255,7 @@ struct MOBILE {
     * \brief Index of the mobile's \ref dsekai_mobiles_spritesheets_sect
     *        loaded in the \ref unilayer_graphics_cache.
     */
-   int16_t sprite_id;
+   int16_t sprite_cache_id;
    unsigned char ascii;
    /*! \brief Current tile on which this mobile is located. */
    struct TILEMAP_COORDS coords;

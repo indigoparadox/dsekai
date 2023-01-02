@@ -286,29 +286,21 @@
 #endif /* !CROP_NAME_MAX */
 
 #ifndef CROP_STATIC_SPRITE_PLOT
-#  ifdef RESOURCE_FILE
-#     define CROP_STATIC_SPRITE_PLOT ASSETS_PATH DEPTH_SPEC "/i_plot.bmp"
-#  else
-#     define CROP_STATIC_SPRITE_PLOT i_plot
-#  endif /* RESOURCE_FILE */
+#  define CROP_STATIC_SPRITE_PLOT "i_plot"
 #endif /* !CROP_STATIC_SPRITE_PLOT */
 
 #ifndef CROP_STATIC_SPRITE_SEED
-#  ifdef RESOURCE_FILE
-#     define CROP_STATIC_SPRITE_SEED ASSETS_PATH DEPTH_SPEC "/i_seed.bmp"
-#  else
-#     define CROP_STATIC_SPRITE_SEED i_seed
-#  endif /* RESOURCE_FILE */
+#  define CROP_STATIC_SPRITE_SEED "i_seed"
 #endif /* !CROP_STATIC_SPRITE_SEED */
+
+#ifndef RESOURCE_EXT_GRAPHICS
+#  define RESOURCE_EXT_GRAPHICS "bmp"
+#endif /* !RESOURCE_EXT_GRAPHICS */
 
 /*! \} */ /* dsekai_crops */
 
 #ifndef TITLE_STATIC_SPRITE_WORLD
-#  ifdef RESOURCE_FILE
-#     define TITLE_STATIC_SPRITE_WORLD ASSETS_PATH DEPTH_SPEC "/s_world.bmp"
-#  else
-#     define TITLE_STATIC_SPRITE_WORLD s_world
-#  endif /* RESOURCE_FILE */
+#  define TITLE_STATIC_SPRITE_WORLD "s_world"
 #endif /* !TITLE_STATIC_SPRITE_WORLD */
 
 #endif /* !DSEKAI_CONFIG_H */

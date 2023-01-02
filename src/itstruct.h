@@ -89,12 +89,12 @@
  * in that's tilemap's TILEMAP::item_defs.
  */
 struct ITEM {
-   RESOURCE_ID sprite;
+   RESOURCE_NAME sprite_name;
    /**
     * \brief Index of the item's sprite loaded in the
     *        \ref unilayer_graphics_cache.
     */
-   int16_t sprite_id;
+   int16_t sprite_cache_id;
    /*! \brief Meaningful name of this item displayed in menus, etc. */
    char name[ITEM_NAME_SZ + 1]; /* +1 for NULL. */
    /**

@@ -93,6 +93,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
    GRAPHICS_COLOR color;
    uint8_t flags = 0;
    struct ITEM* items = NULL;
+   RESOURCE_ID sprite_id;
 
    items = (struct ITEM*)memory_lock( state->items_handle );
    assert( NULL != items );
@@ -173,9 +174,11 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       }
 
       /* Make sure item sprite is loaded. */
-      if( -1 == items[i].sprite_id ) {
-         items[i].sprite_id = graphics_cache_load_bitmap(
-            items[i].sprite, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+      if( -1 == items[i].sprite_cache_id ) {
+         resource_id_from_name( &sprite_id, items[i].sprite_name,
+            RESOURCE_EXT_GRAPHICS );
+         items[i].sprite_cache_id = graphics_cache_load_bitmap(
+            sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
       }
 
       /* Highlight selected item. */
@@ -183,7 +186,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          color = WINDOW_PREFAB_DEFAULT_HL();
          flags = GRAPHICS_STRING_FLAG_OUTLINE;
 
-         assert( 0 <= items[i].sprite_id );
+         assert( 0 <= items[i].sprite_cache_id );
 
          /* Show item icon in info window. */
          window_push(
@@ -192,7 +195,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
             WINDOW_PLACEMENT_CENTER, 6,
             WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
             WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(),
-            0, items[i].sprite_id, NULL );
+            0, items[i].sprite_cache_id, NULL );
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
          flags = 0;

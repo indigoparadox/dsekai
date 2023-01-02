@@ -5,45 +5,90 @@
 #error Loading maps from JSON requires file resources!
 #endif /* !RESOURCE_FILE */
 
+/**
+ * \brief Given a relative path (e.g. assets/16x16x16/s_mob.bmp), write the
+ *        extracted resource name (s_mob, in this case) into a buffer.
+ */
+static int16_t tilemap_json_parse_resource_name(
+   RESOURCE_NAME name_buffer, const char* json_path,
+   struct jsmntok* tokens, int16_t tokens_sz,
+   char* json_buffer, uint16_t json_buffer_sz,
+   const RESOURCE_NAME map_path
+) {
+   char file_path_buffer[RESOURCE_PATH_MAX + 1] = { 0 };
+   int16_t name_idx = 0,
+      file_path_buffer_sz = 0,
+      name_sz = 0,
+      i = 0,
+      retval = 1;
+
+#ifndef NO_FIX_ASSET_PATH
+   /* Prepend asset path. */
+   /* file_path_buffer_sz = tilemap_fix_asset_path(
+      file_path_buffer, RESOURCE_PATH_MAX, map_path ); */
+#endif /* NO_FIX_ASSET_PATH */
+
+   debug_printf( 3, "parsing path from: %s", json_path );
+
+   /* Parse the sprite into the path buffer after any potential fixes. */
+   file_path_buffer_sz = json_str_from_path(
+      json_path, JSON_PATH_SZ,
+      &(file_path_buffer[file_path_buffer_sz]),
+      RESOURCE_PATH_MAX - file_path_buffer_sz,
+      tokens, tokens_sz, json_buffer );
+
+   if( 0 >= file_path_buffer_sz ) {
+      error_printf( "could not parse string from: %s", json_path );
+      retval = 0;
+      goto cleanup;
+   }
+
+   /* Get the position/size of the name in the path. */
+   while( '\0' != file_path_buffer[i] ) {
+      /* TODO: Check for various separators? */
+      if( '/' == file_path_buffer[i] ) {
+         name_idx = i + 1;
+      } else if( '.' == file_path_buffer[i] ) {
+         name_sz = i - name_idx;
+      }
+      i++;
+   }
+
+   memory_zero_ptr( name_buffer, RESOURCE_NAME_MAX );
+   memory_strncpy_ptr( name_buffer, &(file_path_buffer[name_idx]), name_sz );
+
+   debug_printf( 3, "parsed resource name: %s", name_buffer );
+
+cleanup:
+
+   return retval;
+}
+
 static int16_t tilemap_json_parse_spawn(
    struct TILEMAP* t, int16_t spawn_idx,
    struct jsmntok* tokens, int16_t tokens_sz,
    char* json_buffer, uint16_t json_buffer_sz,
-   const RESOURCE_ID map_path
+   const RESOURCE_NAME map_path
 ) {
    struct TILEMAP_SPAWN* spawn = (struct TILEMAP_SPAWN*)&(t->spawns[spawn_idx]);
-   char spawn_buffer[RESOURCE_PATH_MAX + 1] = { 0 };
    char iter_path[JSON_PATH_SZ] = { 0 };
-   int16_t spawn_buffer_sz = 0,
-      ascii_buffer_sz = 0,
+   int16_t ascii_buffer_sz = 0,
       x_px_in = 0,
       y_px_in = 0;
    uint8_t mobile_flag = 0;
    char ascii_buffer[2] = { 0 };
 
-   /* Prepend asset path. */
-
-#ifndef NO_FIX_ASSET_PATH
-   spawn_buffer_sz = tilemap_fix_asset_path(
-      spawn_buffer, RESOURCE_PATH_MAX, map_path );
-#endif /* NO_FIX_ASSET_PATH */
-
-   /* Parse Sprite */
 
    dio_snprintf(
       iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_SPRITE, spawn_idx );
-   spawn_buffer_sz = json_str_from_path(
-      iter_path, JSON_PATH_SZ,
-      &(spawn_buffer[spawn_buffer_sz]),
-      RESOURCE_PATH_MAX - spawn_buffer_sz,
-      tokens, tokens_sz, json_buffer );
 
-   if( 0 >= spawn_buffer_sz ) {
-      error_printf( "could not parse mobile: %d", spawn_idx );
+   if(
+      !tilemap_json_parse_resource_name(
+         spawn->sprite_name, iter_path, tokens, tokens_sz,
+         json_buffer, json_buffer_sz, map_path )
+   ) {
       return 0;
    }
-
-   resource_assign_id( spawn->sprite, spawn_buffer );
 
    /* Parse ASCII */
    dio_snprintf(
@@ -123,7 +168,55 @@ static int16_t tilemap_json_parse_spawn(
    }
 
    debug_printf( 2, "%s spawn at %d, %d (script %d)",
-      spawn->sprite, spawn->coords.x, spawn->coords.y, spawn->script_id );
+      spawn->sprite_name, spawn->coords.x, spawn->coords.y, spawn->script_id );
+
+   return 1;
+}
+
+static int16_t tilemap_json_parse_tileset_tile(
+   struct TILEMAP* t, int tile_idx,
+   struct jsmntok* tokens, int16_t tokens_sz,
+   char* json_buffer, uint16_t json_buffer_sz,
+   const RESOURCE_NAME map_path
+) {
+   char tile_json_path[JSON_PATH_SZ] = { 0 };
+   char tile_ascii[2] = { 0 };
+   int16_t tile_ascii_sz = 0;
+
+   /* Load each tile bitmap. */
+   dio_snprintf(
+      tile_json_path, JSON_PATH_SZ, TILEMAP_JPATH_TS_TILE, tile_idx );
+
+   if(
+      !tilemap_json_parse_resource_name(
+         t->tileset[tile_idx].image_name, tile_json_path, tokens, tokens_sz,
+         json_buffer, json_buffer_sz, map_path )
+   ) {
+      return 0;
+   }
+
+   t->tileset[tile_idx].image_cache_id = -1;
+
+   /* Parse ASCII */
+   dio_snprintf(
+      tile_json_path, JSON_PATH_SZ, TILEMAP_JPATH_TS_ASCII, tile_idx );
+   tile_ascii_sz = json_str_from_path(
+      tile_json_path, JSON_PATH_SZ, tile_ascii, 2,
+      tokens, tokens_sz, json_buffer );
+   if( 0 < tile_ascii_sz ) {
+      t->tileset[tile_idx].ascii = tile_ascii[0];
+      debug_printf( 2, "tile ASCII: %c", t->tileset[tile_idx].ascii );
+   }
+
+   /* Load tile flags. */
+   dio_snprintf(
+      tile_json_path, JSON_PATH_SZ, TILEMAP_JPATH_TS_FLAGS, tile_idx );
+   t->tileset[tile_idx].flags = json_int_from_path(
+      tile_json_path, JSON_PATH_SZ, tokens, tokens_sz, json_buffer );
+   debug_printf(
+      2, "tile flags: %s, %d\n", tile_json_path, t->tileset[tile_idx].flags );
+
+   t->tileset[tile_idx].flags |= TILESET_FLAG_ACTIVE;
 
    return 1;
 }
@@ -135,59 +228,13 @@ static int16_t tilemap_json_parse_tileset(
    const RESOURCE_ID map_path
 ) {
    int16_t i = 0,
-      tile_filename_sz = 0,
-      tile_ascii_sz = 0;
-   char tile_filename[RESOURCE_PATH_MAX + 1] = { 0 },
-      tile_json_path[JSON_PATH_SZ] = { 0 },
-      tile_ascii[2] = { 0 };
+      tile_retval = 0;
 
    do {
-#ifndef NO_FIX_ASSET_PATH
-      /* Prepend asset path. */
-      tile_filename_sz = tilemap_fix_asset_path(
-         tile_filename, RESOURCE_PATH_MAX, map_path );
-#endif /* NO_FIX_ASSET_PATH */
-
-      /* Load each tile bitmap. */
-      dio_snprintf( tile_json_path, JSON_PATH_SZ, TILEMAP_JPATH_TS_TILE, i );
-      tile_filename_sz = json_str_from_path(
-         tile_json_path, JSON_PATH_SZ,
-         &(tile_filename[tile_filename_sz]),
-         RESOURCE_PATH_MAX - tile_filename_sz,
-         tokens, tokens_sz, json_buffer );
-
-      if( 0 < tile_filename_sz ) {
-         debug_printf(
-            2, "assigning tile path: %s, %s\n",
-            tile_json_path, tile_filename );
-         resource_assign_id( t->tileset[i].image, tile_filename );
-         t->tileset[i].image_id = -1;
-
-         /* Parse ASCII */
-         dio_snprintf(
-            tile_json_path, JSON_PATH_SZ, TILEMAP_JPATH_TS_ASCII, i );
-         tile_ascii_sz = json_str_from_path(
-            tile_json_path, JSON_PATH_SZ, tile_ascii, 2,
-            tokens, tokens_sz, json_buffer );
-         if( 0 < tile_ascii_sz ) {
-            t->tileset[i].ascii = tile_ascii[0];
-            debug_printf( 2, "tile ASCII: %c", t->tileset[i].ascii );
-         }
-
-         /* Load tile flags. */
-         dio_snprintf(
-            tile_json_path, JSON_PATH_SZ, TILEMAP_JPATH_TS_FLAGS, i );
-         t->tileset[i].flags = json_int_from_path(
-            tile_json_path, JSON_PATH_SZ, tokens, tokens_sz, json_buffer );
-         debug_printf(
-            2, "tile flags: %s, %d\n", tile_json_path, t->tileset[i].flags );
-            resource_assign_id( t->tileset[i].image, tile_filename );
-
-         t->tileset[i].flags |= TILESET_FLAG_ACTIVE;
-      }
-
+      tile_retval = tilemap_json_parse_tileset_tile(
+         t, i, tokens, tokens_sz, json_buffer, json_buffer_sz, map_path );
       i++;
-   } while( 0 < tile_filename_sz );
+   } while( tile_retval );
 
    return 1;
 }
@@ -202,9 +249,8 @@ static int8_t tilemap_json_tile(
 
    /* Load tile data into the grid. */
    dio_snprintf( iter_path, JSON_PATH_SZ, tile_path, tile_idx );
-   tile_id_in = 
-      json_int_from_path(
-         iter_path, JSON_PATH_SZ, tokens, tokens_sz, json_buffer );
+   tile_id_in = json_int_from_path(
+      iter_path, JSON_PATH_SZ, tokens, tokens_sz, json_buffer );
    if( 0 > tile_id_in ) {
       error_printf( "invalid tile ID received" );
       return tile_id_in;
@@ -504,23 +550,17 @@ int16_t tilemap_json_parse_items(
       
       debug_printf( 1, "found item: %s", t->item_defs[i].name );
 
-#ifndef NO_FIX_ASSET_PATH
-      sprite_buffer_sz = tilemap_fix_asset_path(
-         sprite_buffer, RESOURCE_PATH_MAX, map_path );
-#endif /* NO_FIX_ASSET_PATH */
-
       /* sprite */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_SPRITE, i );
-      sprite_buffer_sz = json_str_from_path(
-         iter_path, JSON_PATH_SZ,
-         &(sprite_buffer[sprite_buffer_sz]),
-         RESOURCE_PATH_MAX - sprite_buffer_sz,
-         &(tokens[0]), tokens_sz, json_buffer );
-      if( 0 >= sprite_buffer_sz ) {
+      if(
+         !tilemap_json_parse_resource_name(
+            t->item_defs[i].sprite_name, iter_path, tokens, tokens_sz,
+            json_buffer, json_buffer_sz, map_path )
+      ) {
          error_printf( "invalid item sprite returned (loaded %d)", i );
          break;
       }
-      resource_assign_id( t->item_defs[i].sprite, sprite_buffer );
+      t->item_defs[i].sprite_cache_id = -1;
 
       /* gid */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_ITEM_GID, i );
@@ -571,10 +611,6 @@ int16_t tilemap_json_parse_crop_defs(
       
       /* name */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_NAME, i );
-      name_buffer_sz = json_str_from_path(
-         iter_path, JSON_PATH_SZ,
-         t->crop_defs[i].name, CROP_NAME_MAX,
-         &(tokens[0]), tokens_sz, json_buffer );
       if( 0 >= name_buffer_sz ) {
          error_printf( "invalid crop definition returned (loaded %d)", i );
          break;
@@ -583,25 +619,17 @@ int16_t tilemap_json_parse_crop_defs(
       debug_printf( 1, "found crop definition: %s", t->crop_defs[i].name );
 
       /* sprite */
-
-#ifndef NO_FIX_ASSET_PATH
-      sprite_buffer_sz = tilemap_fix_asset_path(
-         sprite_buffer, RESOURCE_PATH_MAX, map_path );
-#endif /* NO_FIX_ASSET_PATH */
-
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_SPRITE, i );
-      sprite_buffer_sz = json_str_from_path(
-         iter_path, JSON_PATH_SZ,
-         &(sprite_buffer[sprite_buffer_sz]),
-         RESOURCE_PATH_MAX - sprite_buffer_sz,
-         &(tokens[0]), tokens_sz, json_buffer );
-      if( 0 >= sprite_buffer_sz ) {
+      if(
+         !tilemap_json_parse_resource_name(
+            t->crop_defs[i].sprite_name, iter_path, tokens, tokens_sz,
+            json_buffer, json_buffer_sz, map_path )
+      ) {
          error_printf(
             "invalid crop definition sprite returned (loaded %d)", i );
          break;
       }
-      resource_assign_id( t->crop_defs[i].sprite, sprite_buffer );
-      t->crop_defs[i].sprite_id = -1;
+      t->crop_defs[i].sprite_cache_id = -1;
 
       /* gid */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_GID, i );

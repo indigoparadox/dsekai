@@ -69,6 +69,18 @@
  */
 #define tilemap_get_tile_id( t, x, y ) (((t)->tiles[((y * TILEMAP_TW) + x) / 2] >> (0 == x % 2 ? 4 : 0)) & 0x0f)
 
+#ifdef PLATFORM_CURSES
+#  define tilemap_tile_get_image( tt ) ((tt)->ascii)
+#else
+/**
+ * \relates TILEMAP_TILE
+ * \brief Get the pointer to the sprite graphic to use for a ::TILEMAP_TILE.
+ */
+#  define tilemap_tile_get_image( tt ) ((tt)->image_cache_id)
+#endif /* PLATFORM_CURSES */
+
+#define mobile_break_if_last( mobiles, i ) if( MOBILE_FLAG_NOT_LAST != (MOBILE_FLAG_NOT_LAST & mobiles[i].flags) ) { debug_printf( 0, "breaking early on mobile %d!", i ); break; }
+
 #ifndef IGNORE_DIRTY
 
 #define tilemap_is_dirty( x, y, map ) (((map)->tiles_flags[((y) * TILEMAP_TW) + (x)] & TILEMAP_TILE_FLAG_DIRTY))

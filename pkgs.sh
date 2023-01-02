@@ -8,7 +8,7 @@ PKG_ISO=0
 GIT_HASH="`git rev-parse --short HEAD`"
 
 build_sdl() {
-   make -f Makefile.sdl SDL_VER=2 DTHRESHOLD=$DEBUG_THRESHOLD BUILD=$BUILD pkg_sdl || exit
+   make -f Makefile.sdl SDL_VER=2 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=CGA BUILD=$BUILD pkg_sdl || exit
    make -f Makefile.sdl SDL_VER=2 DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA RESOURCE=FILE FMT_ASN=TRUE BUILD=$BUILD pkg_sdl || exit
 }
 

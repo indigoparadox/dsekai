@@ -296,7 +296,7 @@ struct DSEKAI_STATE {
     * This is necessary since the player is spawned in the first map, but
     * travels to other maps (unlike other mobiles).
     */
-   RESOURCE_ID player_sprite;
+   RESOURCE_NAME player_sprite_name;
 
    /**
     * \brief Array of all crops growing on all maps.

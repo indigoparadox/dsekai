@@ -44,15 +44,15 @@ static int16_t tilemap_asn_parse_tileset(
       }
       total_read_sz += 2; /* tile sequence type, size */
       
-      /* image */
-      read_sz = asn_read_string( t->tileset[tile_idx].image,
-         RESOURCE_PATH_MAX, asn_buffer, total_read_sz );
+      /* image name */
+      read_sz = asn_read_string( t->tileset[tile_idx].image_name,
+         RESOURCE_NAME_MAX, asn_buffer, total_read_sz );
       if( 0 == read_sz ) {
          goto cleanup;
       }
-      debug_printf( 2, "tile resource: %s (%d)",
-         t->tileset[tile_idx].image, read_sz );
-      t->tileset[tile_idx].image_id = -1;
+      debug_printf( 2, "tile image name: %s (%d)",
+         t->tileset[tile_idx].image_name, read_sz );
+      t->tileset[tile_idx].image_cache_id = -1;
       total_read_sz += read_sz; /* tile image and header */
 
       /* ascii */
@@ -209,16 +209,16 @@ static int16_t tilemap_asn_parse_spawns(
       debug_printf( 2, "spawn Y: %d", t->spawns[spawn_idx].coords.y );
       total_read_sz += read_sz;
 
-      /* sprite */
-      read_sz = asn_read_string( t->spawns[spawn_idx].sprite,
-            RESOURCE_PATH_MAX, asn_buffer, total_read_sz );
+      /* sprite name */
+      read_sz = asn_read_string( t->spawns[spawn_idx].sprite_name,
+            RESOURCE_NAME_MAX, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          error_printf( "error reading spawn type" );
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
-      debug_printf( 2, "spawn sprite: %s (%d)",
-         t->spawns[spawn_idx].sprite, read_sz );
+      debug_printf( 2, "spawn sprite name: %s (%d)",
+         t->spawns[spawn_idx].sprite_name, read_sz );
       total_read_sz += read_sz; /* spawn name and header */
 
       /* ascii */
@@ -302,15 +302,15 @@ static int16_t tilemap_asn_parse_items(
          (uint8_t*)&item_idx, 2, 0, asn_buffer, total_read_sz );
       total_read_sz += read_sz;
 
-      /* sprite */
-      read_sz = asn_read_string( t->item_defs[item_idx].sprite,
-         RESOURCE_PATH_MAX, asn_buffer, total_read_sz );
+      /* sprite name */
+      read_sz = asn_read_string( t->item_defs[item_idx].sprite_name,
+         RESOURCE_NAME_MAX, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
-      debug_printf( 2, "item %d sprite: %s (%d)",
-         item_idx, t->item_defs[item_idx].sprite, read_sz );
+      debug_printf( 2, "item %d sprite name: %s (%d)",
+         item_idx, t->item_defs[item_idx].sprite_name, read_sz );
       total_read_sz += read_sz; /* item sprite and header */
 
       /* name */
@@ -409,17 +409,17 @@ static int16_t tilemap_asn_parse_crop_defs(
          (uint8_t*)&crop_idx, 2, 0, asn_buffer, total_read_sz );
       total_read_sz += read_sz;
 
-      /* sprite */
-      read_sz = asn_read_string( t->crop_defs[crop_idx].sprite,
+      /* sprite name */
+      read_sz = asn_read_string( t->crop_defs[crop_idx].sprite_name,
          RESOURCE_PATH_MAX, asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
       }
       debug_printf( 2, "crop def %d sprite: %s (%d)",
-         crop_idx, t->crop_defs[crop_idx].sprite, read_sz );
+         crop_idx, t->crop_defs[crop_idx].sprite_name, read_sz );
       total_read_sz += read_sz; /* crop def sprite and header */
-      t->crop_defs[crop_idx].sprite_id = -1;
+      t->crop_defs[crop_idx].sprite_cache_id = -1;
 
       /* name */
       read_sz = asn_read_string( t->crop_defs[crop_idx].name,
@@ -798,7 +798,7 @@ int32_t tilemap_asn_save(
    }
    for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
       if( 0 == memory_strnlen_ptr(
-         t->tileset[i].image, sizeof( RESOURCE_ID ) )
+         t->tileset[i].image_name, sizeof( RESOURCE_NAME ) )
       ) {
          continue;
       }
@@ -811,9 +811,9 @@ int32_t tilemap_asn_save(
       }
    
       /* image */
-       debug_printf( 2, "(offset 0x%02x) writing map tileset image", idx );
+       debug_printf( 2, "(offset 0x%02x) writing map tileset image name", idx );
       idx = asn_write_string(
-         &h_buffer, idx, t->tileset[i].image, RESOURCE_PATH_MAX );
+         &h_buffer, idx, t->tileset[i].image_name, RESOURCE_NAME_MAX );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;
@@ -934,10 +934,10 @@ int32_t tilemap_asn_save(
 
       idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_spawn_coords );
 
-      /* sprite */
-      debug_printf( 2, "(offset 0x%02x) writing map spawn sprite", idx );
+      /* sprite name */
+      debug_printf( 2, "(offset 0x%02x) writing map spawn sprite name", idx );
       idx = asn_write_string(
-         &h_buffer, idx, t->spawns[i].sprite, RESOURCE_PATH_MAX );
+         &h_buffer, idx, t->spawns[i].sprite_name, RESOURCE_NAME_MAX );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;
@@ -1097,10 +1097,10 @@ int32_t tilemap_asn_save(
          goto cleanup;
       }
 
-      /* sprite */
-       debug_printf( 2, "(offset 0x%02x) writing item sprite path", idx );
+      /* sprite name */
+       debug_printf( 2, "(offset 0x%02x) writing item sprite name", idx );
       idx = asn_write_string(
-         &h_buffer, idx, t->item_defs[i].sprite, RESOURCE_PATH_MAX );
+         &h_buffer, idx, t->item_defs[i].sprite_name, RESOURCE_NAME_MAX );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;
@@ -1194,10 +1194,10 @@ int32_t tilemap_asn_save(
          goto cleanup;
       }
 
-      /* sprite */
-       debug_printf( 2, "(offset 0x%02x) writing crop def sprite path", idx );
+      /* sprite name */
+       debug_printf( 2, "(offset 0x%02x) writing crop def sprite name", idx );
       idx = asn_write_string(
-         &h_buffer, idx, t->crop_defs[i].sprite, RESOURCE_PATH_MAX );
+         &h_buffer, idx, t->crop_defs[i].sprite_name, RESOURCE_NAME_MAX );
       if( 0 > idx ) {
          error_printf( "error" );
          idx = -1;

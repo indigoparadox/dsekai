@@ -18,6 +18,7 @@ int16_t tilemap_load( const char* map_name, struct TILEMAP* t ) {
 #else
    int8_t map_name_sz = 0;
 #endif /* RESOURCE_FILE */
+   RESOURCE_ID ts_id;
 
 #ifdef RESOURCE_FILE
 #  ifdef TILEMAP_FMT_JSON
@@ -69,8 +70,10 @@ int16_t tilemap_load( const char* map_name, struct TILEMAP* t ) {
       }
 
       debug_printf( 2, "preloading tile %d image...", i );
-      t->tileset[i].image_id = graphics_cache_load_bitmap(
-         t->tileset[i].image, GRAPHICS_BMP_FLAG_TYPE_TILE );
+      resource_id_from_name( &ts_id, t->tileset[i].image_name,
+         RESOURCE_EXT_GRAPHICS );
+      t->tileset[i].image_cache_id = graphics_cache_load_bitmap(
+         ts_id, GRAPHICS_BMP_FLAG_TYPE_TILE );
    }
 
 cleanup:

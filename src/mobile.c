@@ -388,6 +388,7 @@ int16_t mobile_spawner_match(
    struct TILEMAP_SPAWN* spawner, struct TILEMAP* t, struct MOBILE* mobiles
 ) {
    int16_t i = 0;
+   RESOURCE_ID ss_id;
 
    /* See if the mobile was spawned on a previous visit to this tilemap. */
    debug_printf( 1, "search tilemap %d, spawner %d", t->gid, spawner->gid );
@@ -410,8 +411,10 @@ int16_t mobile_spawner_match(
          /* This mobile was spawned already, so update volatile stuff
             * and move on.
             */
-         mobiles[i].sprite_id = graphics_cache_load_bitmap(
-            spawner->sprite, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+         resource_id_from_name( &ss_id, spawner->sprite_name,
+            RESOURCE_EXT_GRAPHICS );
+         mobiles[i].sprite_cache_id = graphics_cache_load_bitmap(
+            ss_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
          mobiles[i].name = spawner->name;
          goto cleanup;
       }
@@ -428,6 +431,7 @@ void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
    int16_t i = 0,
       match = 0;
    struct MOBILE* mobile_iter = NULL;
+   RESOURCE_ID sprite_id;
 
    for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
       /* If the spawner has no name, skip it. */
@@ -472,10 +476,14 @@ void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
          mobile_iter->map_gid = t->gid;
       } else {
          /* Save player sprite for tilemap transitions. */
-         resource_assign_id( state->player_sprite, t->spawns[i].sprite );
+         memory_strncpy_ptr(
+            state->player_sprite_name, t->spawns[i].sprite_name,
+            RESOURCE_NAME_MAX );
       }
-      mobile_iter->sprite_id = graphics_cache_load_bitmap( 
-         t->spawns[i].sprite, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+      resource_id_from_name( &sprite_id, t->spawns[i].sprite_name,
+         RESOURCE_EXT_GRAPHICS );
+      mobile_iter->sprite_cache_id = graphics_cache_load_bitmap( 
+         sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    }
 }
 

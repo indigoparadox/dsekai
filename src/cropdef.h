@@ -38,8 +38,8 @@
  */
 struct CROP_DEF {
    /*! \brief Sprite sheet for this crop as it's growing. */
-   RESOURCE_ID sprite;
-   int16_t sprite_id;
+   RESOURCE_NAME sprite_name;
+   int16_t sprite_cache_id;
    char name[CROP_NAME_MAX];
    /*! \brief System identifier for this crop. Unique among all ::CROP_DEF. */
    uint8_t gid;
