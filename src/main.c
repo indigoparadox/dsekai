@@ -117,17 +117,7 @@ int unilayer_main( int argc, char* argv[] ) {
    }
    unilayer_loop_set( engines_loop_iter, g_state_handle );
 
-   /*
-   state->warp_to[0] = 'f';
-   state->warp_to[1] = 'i';
-   state->warp_to[2] = 'e';
-   state->warp_to[3] = 'l';
-   state->warp_to[4] = 'd';
-   */
-
    state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
-
-
 
 /* === Main Loop === */
 
@@ -147,8 +137,6 @@ int unilayer_main( int argc, char* argv[] ) {
       }
 #endif /* USE_SOFT_ASSERT */
    }
-
-
 
 /* === Shutdown === */
 
