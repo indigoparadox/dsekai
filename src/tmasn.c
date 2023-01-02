@@ -7,8 +7,23 @@
 
 #include "tmasn.h"
 
+#define tmasn_read_meta_buffer( \
+read_sz, asn_buf, asn_buf_sz, type_buf_p, seq_sz_p, desc, cleanup ) \
+   read_sz = asn_read_meta_ptr( asn_buf, read_sz, type_buf_p, seq_sz_p ); \
+   if( ASN_SEQUENCE != *(type_buf_p) ) { \
+      error_printf( "invalid " desc " sequence type: 0x%02x", *(type_buf_p) ); \
+      read_sz = TILEMAP_ASN_ERROR_READ; \
+      goto cleanup; \
+   } \
+   if( asn_buf_sz - read_sz < *(seq_sz_p) ) { \
+      error_printf( "invalid " desc " sequence size: %d (max %d)", \
+         *(seq_sz_p), asn_buf_sz - read_sz ); \
+   } \
+   debug_printf( 2, desc " sequence size: %d bytes (max %d)", \
+      *(seq_sz_p), asn_buf_sz - read_sz );
+
 static int16_t tilemap_asn_parse_tileset(
-   struct TILEMAP* t, const uint8_t* asn_buffer
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    int32_t ts_seq_sz = 0;
    uint8_t type_buf = 0;
@@ -16,13 +31,9 @@ static int16_t tilemap_asn_parse_tileset(
       read_sz = 0,
       tile_idx = 0;
 
-   total_read_sz = asn_read_meta_ptr(
-      asn_buffer, total_read_sz, &type_buf, &ts_seq_sz );
-   if( ASN_SEQUENCE != type_buf ) {
-      error_printf( "invalid tileset sequence type: 0x%02x", type_buf );
-      goto cleanup;
-   }
-   debug_printf( 2, "tileset sequence size: %d bytes", ts_seq_sz );
+   tmasn_read_meta_buffer(
+      total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &ts_seq_sz,
+      "tileset", cleanup )
 
    while( total_read_sz - 4 < ts_seq_sz ) {
       if( 0x30 != asn_buffer[total_read_sz] ) {
@@ -74,7 +85,7 @@ cleanup:
 }
 
 static int16_t tilemap_asn_parse_tiles(
-   struct TILEMAP* t, const uint8_t* asn_buffer
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    int16_t total_read_sz = 0,
       t_seq_sz = 0;
@@ -105,7 +116,7 @@ cleanup:
 }
 
 static int16_t tilemap_asn_parse_strings(
-   struct TILEMAP* t, const uint8_t* asn_buffer
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    int16_t total_read_sz = 0,
       strpool_sz = 0;
@@ -137,7 +148,7 @@ cleanup:
 }
 
 static int16_t tilemap_asn_parse_spawns(
-   struct TILEMAP* t, const uint8_t* asn_buffer
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    uint8_t type_buf = 0;
    int32_t total_read_sz = 0,
@@ -148,26 +159,16 @@ static int16_t tilemap_asn_parse_spawns(
       coords_seq_sz = 0,
       spawn_idx = 0;
 
-   total_read_sz = asn_read_meta_ptr(
-      asn_buffer, total_read_sz, &type_buf, &all_spawns_seq_sz );
-   if( ASN_SEQUENCE != type_buf ) {
-      error_printf(
-         "invalid spawn sequence type byte: 0x%02x", type_buf );
-      goto cleanup;
-   }
-   debug_printf( 1, "spawn seq is %d bytes...", all_spawns_seq_sz );
+   tmasn_read_meta_buffer(
+      total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &all_spawns_seq_sz,
+      "all spawns", cleanup )
 
    all_spawns_seq_start = total_read_sz;
 
    while( total_read_sz - all_spawns_seq_start < all_spawns_seq_sz ) {
-      total_read_sz = asn_read_meta_ptr(
-         asn_buffer, total_read_sz, &type_buf, &spawn_def_seq_sz );
-      if( ASN_SEQUENCE != type_buf ) {
-         error_printf(
-            "invalid spawndef sequence type byte: 0x%02x", type_buf );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
+      tmasn_read_meta_buffer(
+         total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &spawn_def_seq_sz,
+         "spawn def", cleanup )
       
       /* image */
       read_sz =
@@ -182,14 +183,9 @@ static int16_t tilemap_asn_parse_spawns(
       total_read_sz += read_sz; /* spawn name and header */
 
       /* coords header */
-      total_read_sz = asn_read_meta_ptr(
-         asn_buffer, total_read_sz, &type_buf, &coords_seq_sz );
-      if( ASN_SEQUENCE != type_buf ) {
-         error_printf(
-            "invalid spawn coords sequence type byte: 0x%02x", type_buf );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
+      tmasn_read_meta_buffer(
+         total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &coords_seq_sz,
+         "coords", cleanup )
 
       /* coords.x */
       read_sz = asn_read_int(
@@ -280,7 +276,7 @@ cleanup:
 }
 
 static int16_t tilemap_asn_parse_items(
-   struct TILEMAP* t, const uint8_t* asn_buffer
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    uint8_t type_buf = 0;
    int32_t total_read_sz = 0,
@@ -290,26 +286,16 @@ static int16_t tilemap_asn_parse_items(
       item_def_seq_sz = 0;
    int16_t item_idx = 0;
 
-   total_read_sz = asn_read_meta_ptr(
-      asn_buffer, total_read_sz, &type_buf, &all_items_seq_sz );
-   if( ASN_SEQUENCE != type_buf ) {
-      error_printf(
-         "invalid item sequence type byte: 0x%02x", type_buf );
-      goto cleanup;
-   }
-   debug_printf( 1, "item seq is %d bytes...", all_items_seq_sz );
+   tmasn_read_meta_buffer(
+      total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &all_items_seq_sz,
+      "all items", cleanup )
 
    all_items_seq_start = total_read_sz;
 
    while( total_read_sz - all_items_seq_start < all_items_seq_sz ) {
-      total_read_sz = asn_read_meta_ptr(
-         asn_buffer, total_read_sz, &type_buf, &item_def_seq_sz );
-      if( ASN_SEQUENCE != type_buf ) {
-         error_printf(
-            "invalid item def sequence type byte: 0x%02x", type_buf );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
+      tmasn_read_meta_buffer(
+         total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &item_def_seq_sz,
+         "item def", cleanup )
       
       /* index */
       read_sz = asn_read_int(
@@ -397,7 +383,7 @@ cleanup:
 }
 
 static int16_t tilemap_asn_parse_crop_defs(
-   struct TILEMAP* t, const uint8_t* asn_buffer
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    uint8_t type_buf = 0;
    int32_t total_read_sz = 0,
@@ -407,26 +393,16 @@ static int16_t tilemap_asn_parse_crop_defs(
       crop_def_seq_sz = 0;
    int16_t crop_idx = 0;
 
-   total_read_sz = asn_read_meta_ptr(
-      asn_buffer, total_read_sz, &type_buf, &all_crops_seq_sz );
-   if( ASN_SEQUENCE != type_buf ) {
-      error_printf(
-         "invalid crop def sequence type byte: 0x%02x", type_buf );
-      goto cleanup;
-   }
-   debug_printf( 1, "crop def seq is %d bytes...", all_crops_seq_sz );
+   tmasn_read_meta_buffer(
+      total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &all_crops_seq_sz,
+      "all crops", cleanup )
 
    all_crops_seq_start = total_read_sz;
 
    while( total_read_sz - all_crops_seq_start < all_crops_seq_sz ) {
-      total_read_sz = asn_read_meta_ptr(
-         asn_buffer, total_read_sz, &type_buf, &crop_def_seq_sz );
-      if( ASN_SEQUENCE != type_buf ) {
-         error_printf(
-            "invalid crop def sequence type byte: 0x%02x", type_buf );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
+      tmasn_read_meta_buffer(
+         total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &crop_def_seq_sz,
+         "crop def", cleanup )
       
       /* index */
       read_sz = asn_read_int(
@@ -515,7 +491,7 @@ cleanup:
 }
 
 static int32_t tilemap_asn_parse_scripts(
-   struct TILEMAP* t, const uint8_t* asn_buffer
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    uint8_t type_buf = 0,
       step_idx = 0,
@@ -528,15 +504,9 @@ static int32_t tilemap_asn_parse_scripts(
       read_sz = 0;
 
    /* Read scripts sequence header. */
-   total_read_sz = asn_read_meta_ptr(
-      asn_buffer, total_read_sz, &type_buf, &all_scripts_seq_sz );
-   if( ASN_SEQUENCE != type_buf ) {
-      error_printf(
-         "invalid all scripts sequence type byte: 0x%02x", type_buf );
-      goto cleanup;
-   }
-   debug_printf(
-      1, "all scripts sequence is %d bytes long", all_scripts_seq_sz );
+   tmasn_read_meta_buffer(
+      total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &all_scripts_seq_sz,
+      "all scripts", cleanup )
 
    while( total_read_sz < all_scripts_seq_sz ) {
       debug_printf( 1, "script idx: %d", script_idx );
@@ -545,27 +515,15 @@ static int32_t tilemap_asn_parse_scripts(
       script_seq_start = total_read_sz;
 
       /* Read a script's step sequence header. */
-      total_read_sz = asn_read_meta_ptr(
-         asn_buffer, total_read_sz, &type_buf, &script_seq_sz );
-      if( ASN_SEQUENCE != type_buf ) {
-         error_printf( "invalid script sequence type byte: 0x%02x", type_buf );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
-
-      debug_printf( 1, "script seq is %d bytes...", script_seq_sz );
+      tmasn_read_meta_buffer(
+         total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &script_seq_sz,
+         "script", cleanup )
 
       while( total_read_sz - script_seq_start < script_seq_sz ) {
 
-         total_read_sz = asn_read_meta_ptr(
-            asn_buffer, total_read_sz, &type_buf, &step_seq_sz );
-         if( ASN_SEQUENCE != type_buf ) {
-            error_printf( "invalid step sequence type byte: 0x%02x", type_buf );
-            total_read_sz = TILEMAP_ASN_ERROR_READ;
-            goto cleanup;
-         }
-
-         debug_printf( 1, "step seq is %d bytes...", step_seq_sz );
+         tmasn_read_meta_buffer(
+            total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &step_seq_sz,
+            "step", cleanup )
 
          /* step.action */
          read_sz = asn_read_int(
@@ -613,7 +571,8 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    int16_t retval = 1,
       idx = 0;
    int32_t read_sz = 0,
-      tm_sz = 0;
+      tm_sz = 0,
+      asn_buffer_sz = 0;
    RESOURCE_HANDLE asn_handle = (RESOURCE_HANDLE)0;
 
    memory_zero_ptr( (MEMORY_PTR)t, sizeof( struct TILEMAP ) );
@@ -622,6 +581,13 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    asn_handle = resource_get_handle( id );
    if( (RESOURCE_HANDLE)0 == asn_handle ) {
       error_printf( "could not get tilemap resource handle" );
+      retval = 0;
+      goto cleanup;
+   }
+
+   asn_buffer_sz = resource_sz_handle( asn_handle );
+   if( 0 > asn_buffer_sz ) {
+      error_printf( "invalid asn buffer size: %d", asn_buffer_sz );
       retval = 0;
       goto cleanup;
    }
@@ -680,7 +646,8 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    idx += read_sz;
 
    /* tileset */
-   read_sz = tilemap_asn_parse_tileset( t, &(asn_buffer[idx]) );
+   read_sz = tilemap_asn_parse_tileset( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
    if( 0 >= read_sz ) {
       retval = read_sz;
       goto cleanup;
@@ -688,7 +655,8 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    idx += read_sz;
 
    /* tiles */
-   read_sz = tilemap_asn_parse_tiles( t, &(asn_buffer[idx]) );
+   read_sz = tilemap_asn_parse_tiles( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
    if( 0 >= read_sz ) {
       retval = read_sz;
       goto cleanup;
@@ -696,7 +664,8 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    idx += read_sz;
 
    /* strings */
-   read_sz = tilemap_asn_parse_strings( t, &(asn_buffer[idx]) );
+   read_sz = tilemap_asn_parse_strings( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
    if( 0 >= read_sz ) {
       retval = read_sz;
       goto cleanup;
@@ -704,7 +673,8 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    idx += read_sz;
 
    /* spawns */
-   read_sz = tilemap_asn_parse_spawns( t, &(asn_buffer[idx]) );
+   read_sz = tilemap_asn_parse_spawns( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
    if( 0 >= read_sz ) {
       retval = read_sz;
       goto cleanup;
@@ -713,7 +683,8 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
 
    /* scripts */
    debug_printf( 1, "scripts sequence at %d", idx );
-   read_sz = tilemap_asn_parse_scripts( t, &(asn_buffer[idx]) );
+   read_sz = tilemap_asn_parse_scripts( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
    if( 0 >= read_sz ) {
       retval = read_sz;
       goto cleanup;
@@ -721,7 +692,8 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    idx += read_sz;
 
    /* items */
-   read_sz = tilemap_asn_parse_items( t, &(asn_buffer[idx]) );
+   read_sz = tilemap_asn_parse_items( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
    if( 0 >= read_sz ) {
       retval = read_sz;
       goto cleanup;
@@ -729,7 +701,8 @@ int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
    idx += read_sz;
 
    /* crop defs */
-   read_sz = tilemap_asn_parse_crop_defs( t, &(asn_buffer[idx]) );
+   read_sz = tilemap_asn_parse_crop_defs( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
    if( 0 >= read_sz ) {
       retval = read_sz;
       goto cleanup;
