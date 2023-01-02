@@ -135,12 +135,13 @@ int16_t pov_input(
    }
 
    if( g_input_key_up == in_char ) {
-      /* TODO: Should this be north, or the facing dir? */
+      /* Tank controls: move in the direction we're facing. */
       if(
          0 < engines_input_movement(
-            &(state->player), MOBILE_DIR_NORTH, state, t )
+            &(state->player), mobile_get_dir( &(state->player) ), state, t )
       ) {
-         mobile_walk_start( &(state->player), MOBILE_DIR_NORTH );
+         mobile_walk_start( &(state->player),
+            mobile_get_dir( &(state->player) ) );
          tilemap_refresh_tiles( t );
       }
       /* gstate->dirty = 1; */
