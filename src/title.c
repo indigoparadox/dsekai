@@ -296,30 +296,6 @@ int16_t title_input(
 
       /* Don't set redraw, as the callback might redraw on its own. */
 
-#if 0
-#ifdef NO_ENGINE_POV
-      if( 1 == gstate->option_idx ) {
-         retval = 0;
-#else
-#  ifndef NO_QUIT
-      if( 2 == gstate->option_idx ) {
-         retval = 0;
-
-      } else
-#  endif /* !NO_QUIT */
-      if( 1 == gstate->option_idx ) {
-         memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
-            memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
-         state->engine_type_change = 2 /* ENGINE_TYPE_POV */;
-
-#endif /* NO_ENGINE_POV */
-      } else if( 0 == gstate->option_idx ) {
-         memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ),
-            memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) );
-         state->engine_type_change = 1 /* ENGINE_TYPE_TOPDOWN */;
-      }
-#endif
-
 #ifndef NO_QUIT
    } else if( g_input_key_quit == in_char ) {
       retval = 0;
