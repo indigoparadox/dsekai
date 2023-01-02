@@ -92,12 +92,13 @@ struct DSEKAI_STATE;
 
 #ifdef TILEMAP_FMT_ASN
 #include "tmasn.h"
-#include "engasn.h"
 #endif /* TILEMAP_FMT_ASN */
 
 #ifdef TILEMAP_FMT_BIN
 #include "tmbin.h"
 #endif /* TILEMAP_FMT_BIN */
+
+#include "serial.h"
 
 #include "engines.h"
 

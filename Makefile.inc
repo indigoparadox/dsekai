@@ -194,7 +194,7 @@ ifeq ($(RESOURCE),FILE)
    ifeq ($(FMT_ASN),TRUE)
       DEFINES_DSEKAI += -DTILEMAP_FMT_ASN
       TILEMAP_FMTS += BIN
-      DSEKAI_C_FILES_RES += src/tmasn.c src/engasn.c unilayer/src/asn.c
+      DSEKAI_C_FILES_RES += src/tmasn.c src/serial/asn.c unilayer/src/asn.c
       PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-asn
    endif
 

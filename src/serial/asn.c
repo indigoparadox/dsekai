@@ -1,8 +1,8 @@
 
-#define ENGASN_C
-#include "dsekai.h"
+#define SERIAL_C
+#include "../dsekai.h"
 
-int32_t engines_asn_save( const char* save_name, struct DSEKAI_STATE* state ) {
+int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state ) {
    MEMORY_HANDLE h_buffer = (MEMORY_HANDLE)NULL;
    int32_t idx = 0;
    uint8_t* buffer = NULL;

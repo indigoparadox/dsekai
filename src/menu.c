@@ -449,7 +449,7 @@ void menu_renderer_save( struct DSEKAI_STATE* state ) {
 #ifdef TILEMAP_FMT_ASN
 
    /* TODO: Enter name for save. */
-   engines_asn_save( "save.asn", state );
+   serial_save( "save.asn", state );
 
 #endif /* TILEMAP_FMT_ASN */
 
