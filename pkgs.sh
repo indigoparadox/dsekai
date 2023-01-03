@@ -45,6 +45,11 @@ build_nds() {
    make -f Makefile.nds DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA FMT_ASN=TRUE BUILD=$BUILD pkg_nds || exit
 }
 
+build_wasm() {
+   make -f Makefile.wasm DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA BUILD=$BUILD ARCFMT=ZIP pkg_wasm || exit
+   make -f Makefile.wasm DTHRESHOLD=$DEBUG_THRESHOLD BUILD=$BUILD ARCFMT=ZIP pkg_wasm || exit
+}
+
 do_run() {
    if [ "$PLAT_SPEC" = "sdl" ]; then
       if [ ! -d pkgbuild/dsekai-sdl-*-vga-*-asn ]; then
@@ -132,8 +137,7 @@ do_build() {
    fi
 
    if [ "$PLAT_SPEC" = "wasm" ] || [ -z "$PLAT_SPEC" ]; then
-      make -f Makefile.wasm DTHRESHOLD=$DEBUG_THRESHOLD DEPTH=VGA BUILD=$BUILD ARCFMT=ZIP pkg_wasm || exit
-      make -f Makefile.wasm DTHRESHOLD=$DEBUG_THRESHOLD BUILD=$BUILD ARCFMT=ZIP pkg_wasm || exit
+      build_wasm
    fi
 
    if [ "$PLAT_SPEC" = "mac" ] || [ -z "$PLAT_SPEC" ]; then

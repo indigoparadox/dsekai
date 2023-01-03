@@ -5,10 +5,6 @@ ifneq ($(CALLER),MASTER)
    include Makefile.inc
 endif
 
-ifneq ($(RESOURCE),DEFAULT)
-$(error wasm target must be built with DEFAULT RESOURCE)
-endif
-
 # 1. Directories
 
 OBJDIR_WASM := $(OBJDIR)/wasm
@@ -19,13 +15,19 @@ GENDIR_WASM := $(GENDIR)/wasm
 
 BIN_WASM := $(BINDIR)/$(DSEKAI).html
 
+ifeq ("$(RESOURCE)","DEFAULT")
+   DEFINES_RESOURCE := -DRESOURCE_WASM
+   DSEKAI_C_FILES_RES := unilayer/src/resource/webr.c
+endif
+
 DSEKAI_C_FILES_WASM_ONLY := \
    src/main.c \
    src/pov.c \
    unilayer/src/animate.c \
    unilayer/src/input/sdli.c \
    unilayer/src/graphics/sdlg.c \
-   unilayer/src/memory/fakem.c
+   unilayer/src/memory/fakem.c \
+   unilayer/src/resource/webr.c
 
 DSEKAI_O_FILES_WASM := \
    $(addprefix $(OBJDIR_WASM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
@@ -57,7 +59,7 @@ INCLUDES_WASM := \
 
 CFLAGS_WASM := $(CFLAGS_GCC_GENERIC) $(DEFINES_WASM) $(INCLUDES_WASM) -s USE_SDL=2
 
-LDFLAGS_WASM := $(LDFLAGS_GCC_GENERIC) -s USE_SDL=2
+LDFLAGS_WASM := $(LDFLAGS_GCC_GENERIC) -s USE_SDL=2 -s FETCH
 
 ifneq ($(BUILD),RELEASE)
    LDFLAGS_WASM += -s ASSERTIONS=1
@@ -70,7 +72,17 @@ endif
 platform := wasm
 platform_upper := WASM
 res_gfx := $(DSEKAI_ASSETS_BITMAPS)
+
+ifneq ("$(RESOURCE)", "DEFAULT")
 $(eval $(RESEXT_H_RULE))
+else
+
+$(RESEXT_H_WASM):
+	# TODO
+	$(MD) $(dir $@)
+	touch $@
+
+endif
 
 pkg_bin := $(BIN_WASM) \
    $(BINDIR)/$(DSEKAI).wasm \
@@ -79,7 +91,6 @@ pkg_strip := echo
 pkg_name := $(DSEKAI)-$(platform)-$(GIT_HASH)
 pkg_reqs := 
 $(eval $(PKG_RULE))
-
 
 # 5b. Binaries
 

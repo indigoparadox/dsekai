@@ -355,6 +355,7 @@ define RESEXT_H_RULE
 
    res_maps := $(addprefix $(GENDIR)/$(platform)/,$(DSEKAI_ASSETS_MAPS_JSON))
 
+   # TODO: This should be worked into the individual makefiles. See NDS.
    ifeq ($$(RESOURCE),HEADER)
 
       # Header was specified explicitly.

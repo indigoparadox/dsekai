@@ -5,6 +5,7 @@ ifneq ($(CALLER),MASTER)
    include Makefile.inc
 endif
 
+# TODO: Make it compatible.
 ifeq ("$(RESOURCE)","FILE")
 $(error nds target not compatible with RESOURCE=FILE)
 endif
@@ -21,21 +22,26 @@ DEVKITPATH := $(shell echo "$(DEVKITPRO)" | sed -e 's/^\([a-zA-Z]\):/\/\1/')
 
 BIN_NDS := $(BINDIR)/$(DSEKAI).nds
 
+ifeq ("$(RESOURCE)","DEFAULT")
+   DEFINES_RESOURCE := -DRESOURCE_NDS
+   DSEKAI_C_FILES_RES := unilayer/src/resource/ndsr.c
+endif
+
 DSEKAI_C_FILES_NDS_ONLY := \
    src/main.c \
    unilayer/src/animate.c \
    unilayer/src/input/ndsi.c \
    unilayer/src/graphics/ndsg.c \
    unilayer/src/memory/fakem.c \
-   unilayer/src/save/file.c \
-   unilayer/src/resource/ndsr.c
+   unilayer/src/save/file.c
 
 DSEKAI_ASSETS_MAPS_NDS := \
    $(subst .json,.h,$(subst $(ASSETDIR)/,$(GENDIR_NDS)/,$(DSEKAI_ASSETS_MAPS_JSON)))
 
 DSEKAI_O_FILES_NDS := \
    $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY)))
+   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_NDS_ONLY))) \
+   $(addprefix $(OBJDIR_NDS)/,$(subst .c,.o,$(DSEKAI_C_FILES_RES)))
 
 # DS-specific concatenated tilesheets.
 # TODO: Change 16x16x16 to depth var.
@@ -78,6 +84,7 @@ IM_CONVERT_FLAGS := -type palette -depth 8
 DEFINES_NDS := \
    $(DEFINES_DSEKAI) \
    $(DEFINES_DEPTH) \
+	$(DEFINES_RESOURCE) \
    -DNO_ENGINE_POV \
    -DPLATFORM_NDS \
 	-DNO_QUIT \

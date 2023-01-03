@@ -20,7 +20,8 @@ int16_t tilemap_load( const char* map_name, struct TILEMAP* t ) {
 #endif /* RESOURCE_FILE */
    RESOURCE_ID ts_id;
 
-#ifdef RESOURCE_FILE
+   /* TODO: Work this into resource API in a modular fashion. */
+#if defined( RESOURCE_FILE ) || defined( RESOURCE_WASM )
 #  ifdef TILEMAP_FMT_JSON
    memory_zero_ptr( (MEMORY_PTR)map_load_path, TILEMAP_NAME_MAX );
    dio_snprintf(
