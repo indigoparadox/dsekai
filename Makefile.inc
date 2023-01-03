@@ -414,6 +414,7 @@ define RESEXT_H_RULE
 			$(MKRESH) -f palm -i 5001 \
             -if $$^ \
             -oh $(GENDIR)/$(platform)/residx.h \
+            -oa $(GENDIR)/$(platform)/resarr.h \
             -or $(GENDIR)/$(platform)/palmd.rcp
 
       # Embed maps in preparsed structs.
