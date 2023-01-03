@@ -293,10 +293,6 @@
 #  define CROP_STATIC_SPRITE_SEED "i_seed"
 #endif /* !CROP_STATIC_SPRITE_SEED */
 
-#ifndef RESOURCE_EXT_GRAPHICS
-#  define RESOURCE_EXT_GRAPHICS "bmp"
-#endif /* !RESOURCE_EXT_GRAPHICS */
-
 /*! \} */ /* dsekai_crops */
 
 #ifndef TITLE_STATIC_SPRITE_WORLD

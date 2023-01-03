@@ -192,20 +192,18 @@ $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 	echo "" >> $@
 	## Create an index of bitmap spritesheets.
 	echo $(GENDIR_NDS_ASSETS) vs $(GENDIR_NDS)/$(ASSETDIR)/16x16x16
-	#for f in $(subst $(GENDIR_NDS_ASSETS)/,,$(subst .h,,$^)); do
+	echo "const struct RESOURCE_GRIT_DEF gsc_nds_resources[] = {" >> $@
+	echo "   { \"\", NULL, NULL, 0, 0, 0 }," >> $@
 	for f in $(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,,$^)); do \
 		F_TILESLEN="`grep "$${f}TilesLen" "$(GENDIR_NDS_ASSETS)/$${f}.h" | \
 				awk '{print $$3}'`" ; \
 		F_PALLEN="`grep "$${f}PalLen" "$(GENDIR_NDS_ASSETS)/$${f}.h" | \
 			awk '{print $$3}'`" ; \
-		echo "struct RESOURCE_GRIT_DEF struct_$$f =\n" \
-			"   { $${f}Tiles," \
-			"$${f}Pal, $${F_TILESLEN}, $${F_PALLEN}, -1 };" >> $@ ; \
+		echo "   { \"$${f}\", $${f}Tiles," \
+			"$${f}Pal, $${F_TILESLEN}, $${F_PALLEN}, -1 }," >> $@ ; \
 	done
-	echo "" >> $@
 	## Include consolidated tiles. 
 	# Note the ^\s surrounding the grep criteria for F_IDX and F_PALLEN!
-	# TODO: Grab the properties for the tilesets and the offsets from the idx.
 	for f in $(subst $(ASSETDIR)/16x16x16/,,$(subst .bmp,,$(CONSOLIDATED_NDS))); do \
 		F_MASTER="`grep "^$${f}\s" "$(BGSHEETS_NDS)" | awk '{print $$2}'`" \
 		F_IDX="`grep "^$$f\s" "$(BGSHEETS_NDS)" | awk '{print $$3}'`" ; \
@@ -215,32 +213,17 @@ $(RESEXT_H_NDS): $(DSEKAI_BITMAP_HS_NDS) | $(GENDIR_NDS)/resemb.h
 		F_TILESLEN="`grep "$${F_MASTER}TilesLen" \
 			"$(GENDIR_NDS_ASSETS)/$${F_MASTER}.h" | \
 			awk '{print $$3}'`" ; \
-		echo "struct RESOURCE_GRIT_DEF struct_$$f = \n" \
-			"   { $${F_MASTER}Tiles, $${F_MASTER}Pal," \
-				" $${F_TILESLEN}, $${F_PALLEN}, $${F_IDX} }; " \
+		echo "   { \"$${f}\", $${F_MASTER}Tiles, $${F_MASTER}Pal," \
+				" $${F_TILESLEN}, $${F_PALLEN}, $${F_IDX} }," \
 		>> $@ ; \
 	done
+	echo "   { \"\", NULL, NULL, 0, 0, 0 }" >> $@
+	echo "};" >> $@
 	echo "" >> $@
 	echo "#else" >> $@
 	# Add extern defs for outside of resource.c (or ndsr.c).
-	#echo "extern const unsigned int* gc_resext_bitmap_tiles[];" >> $@
-	#echo "extern const unsigned short* gc_resext_bitmap_palettes[];" >> $@
-	#echo "extern const char* gc_resext_bitmap_names[];" >> $@
-	for f in $(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,,$^)); do \
-		echo "extern struct RESOURCE_GRIT_DEF struct_$$f;" >> $@ ; \
-	done
-	for f in $(subst $(ASSETDIR)/16x16x16/,,$(subst .bmp,,$(CONSOLIDATED_NDS))); do \
-		echo "extern struct RESOURCE_GRIT_DEF struct_$$f;" >> $@ ; \
-	done
+	echo "extern const struct RESOURCE_GRIT_DEF gsc_nds_resources[];" >> $@
 	echo "#endif /* RESOURCE_C */\n" >> $@
-	echo "" >> $@
-	# Define pointers to structs to call from static maps, etc for all files.
-	for f in $(subst $(GENDIR_NDS)/$(ASSETDIR)/16x16x16/,,$(subst .h,,$^)); do \
-		echo "#define $$f (&struct_$$f)" >> $@ ; \
-	done
-	for f in $(subst $(ASSETDIR)/16x16x16/,,$(subst .bmp,,$(CONSOLIDATED_NDS))); do \
-		echo "#define $$f (&struct_$$f)" >> $@ ; \
-	done
 	echo "" >> $@
 	echo "#include \"resemb.h\"" >> $@
 	echo "" >> $@
