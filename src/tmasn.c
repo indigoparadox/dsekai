@@ -1,28 +1,37 @@
 
 #include "dsekai.h"
 
-#ifndef RESOURCE_FILE
-#error Loading maps from ASN requires file resources!
-#endif /* !RESOURCE_FILE */
-
 #include "tmasn.h"
 
-#define tmasn_read_meta_buffer( \
-read_sz, asn_buf, asn_buf_sz, type_buf_p, seq_sz_p, desc, cleanup ) \
-   read_sz = asn_read_meta_ptr( asn_buf, read_sz, type_buf_p, seq_sz_p ); \
-   if( ASN_SEQUENCE != *(type_buf_p) ) { \
-      error_printf( "invalid " desc " sequence type: 0x%02x", *(type_buf_p) ); \
-      read_sz = TILEMAP_ASN_ERROR_READ; \
-      goto cleanup; \
-   } \
-   if( asn_buf_sz - read_sz < *(seq_sz_p) ) { \
-      error_printf( "invalid " desc " sequence size: %d (max %d)", \
-         *(seq_sz_p), asn_buf_sz - read_sz ); \
-   } \
-   debug_printf( 2, desc " sequence size: %d bytes (max %d)", \
-      *(seq_sz_p), asn_buf_sz - read_sz );
+#define tmasn_read_meta_buffer( read_sz, asn_buf, asn_buf_sz, type_buf_p, seq_sz_p, desc, cleanup ) read_sz = asn_read_meta_ptr( asn_buf, read_sz, type_buf_p, seq_sz_p ); if( ASN_SEQUENCE != *(type_buf_p) ) { error_printf( "invalid " desc " sequence type: 0x%02x", *(type_buf_p) ); read_sz = TILEMAP_ASN_ERROR_READ; goto cleanup; } if( asn_buf_sz - read_sz < *(seq_sz_p) ) { error_printf( "invalid " desc " sequence size: %d (max %d)", *(seq_sz_p), asn_buf_sz - read_sz ); } debug_printf( 2, desc " sequence size: %d bytes (max %d)", *(seq_sz_p), asn_buf_sz - read_sz );
 
-static int16_t tilemap_asn_parse_tileset(
+/* Private Prototypes w/ Sections */
+
+int16_t tilemap_asn_parse_tileset(
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
+) SECTION_ASN;
+int16_t tilemap_asn_parse_tiles(
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
+) SECTION_ASN;
+int16_t tilemap_asn_parse_strings(
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
+) SECTION_ASN;
+int16_t tilemap_asn_parse_spawns(
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
+) SECTION_ASN;
+int16_t tilemap_asn_parse_items(
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
+) SECTION_ASN;
+int16_t tilemap_asn_parse_crop_defs(
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
+) SECTION_ASN;
+int32_t tilemap_asn_parse_scripts(
+   struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
+) SECTION_ASN;
+
+/* Function Definitions */
+
+int16_t tilemap_asn_parse_tileset(
    struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    int32_t ts_seq_sz = 0;
@@ -84,7 +93,7 @@ cleanup:
    return total_read_sz;
 }
 
-static int16_t tilemap_asn_parse_tiles(
+int16_t tilemap_asn_parse_tiles(
    struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    int16_t total_read_sz = 0,
@@ -115,7 +124,7 @@ cleanup:
    return total_read_sz;
 }
 
-static int16_t tilemap_asn_parse_strings(
+int16_t tilemap_asn_parse_strings(
    struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    int16_t total_read_sz = 0,
@@ -147,7 +156,7 @@ cleanup:
    return total_read_sz;
 }
 
-static int16_t tilemap_asn_parse_spawns(
+int16_t tilemap_asn_parse_spawns(
    struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    uint8_t type_buf = 0;
@@ -275,7 +284,7 @@ cleanup:
    return total_read_sz;
 }
 
-static int16_t tilemap_asn_parse_items(
+int16_t tilemap_asn_parse_items(
    struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    uint8_t type_buf = 0;
@@ -382,7 +391,7 @@ cleanup:
    return total_read_sz;
 }
 
-static int16_t tilemap_asn_parse_crop_defs(
+int16_t tilemap_asn_parse_crop_defs(
    struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    uint8_t type_buf = 0;
@@ -490,7 +499,7 @@ cleanup:
    return total_read_sz;
 }
 
-static int32_t tilemap_asn_parse_scripts(
+int32_t tilemap_asn_parse_scripts(
    struct TILEMAP* t, const uint8_t* asn_buffer, int32_t asn_buffer_sz
 ) {
    uint8_t type_buf = 0,

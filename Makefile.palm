@@ -23,16 +23,26 @@ GENDIR_PALM := $(GENDIR)/palm
 
 BIN_PALM := $(BINDIR)/$(DSEKAI).prc
 
-DSEKAI_C_FILES_PALM_ONLY := \
-   src/main.c \
+# Break up translation units so they can be positioned to avoid the dreaded
+# "relocation truncated to fit" errors by putting things that call each other
+# close.
+
+DSEKAI_C_FILES_PALM_ONLY_1 := \
+   src/main.c
+
+DSEKAI_C_FILES_PALM_ONLY_2 := \
    unilayer/src/input/palmi.c \
    unilayer/src/memory/palmm.c \
    unilayer/src/resource/palmr.c \
+   unilayer/src/save/palm.c \
    unilayer/src/graphics/palmg.c
 
 DSEKAI_O_FILES_PALM := \
-   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES))) \
-   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_PALM_ONLY)))
+   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_PALM_ONLY_1))) \
+   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_ENGINES))) \
+   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_SUPPORT_1))) \
+   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_PALM_ONLY_2))) \
+   $(addprefix $(OBJDIR_PALM)/,$(subst .c,.o,$(DSEKAI_C_FILES_SUPPORT_2)))
 
 RESEXT_H_PALM := $(GENDIR_PALM)/resext.h
 

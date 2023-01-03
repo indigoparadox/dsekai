@@ -449,12 +449,8 @@ int16_t menu_handler_craft(
 
 void menu_renderer_save( struct DSEKAI_STATE* state ) {
 
-#ifdef TILEMAP_FMT_ASN
-
    /* TODO: Enter name for save. */
    serial_save( "save.asn", state );
-
-#endif /* TILEMAP_FMT_ASN */
 
    menu_close( state );
 }

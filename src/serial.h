@@ -20,7 +20,8 @@
  * \brief Serialize the engine struct to a save state.
  * \return Number of bytes written or error code.
  */
-int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state );
+int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state
+   ) SECTION_ASN; /* Stuff it in ASN section even if it's a different fmt. */
 
 /*! \} */ /* dsekai_engines */
 

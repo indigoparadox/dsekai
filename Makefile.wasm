@@ -26,6 +26,7 @@ DSEKAI_C_FILES_WASM_ONLY := \
    unilayer/src/animate.c \
    unilayer/src/input/sdli.c \
    unilayer/src/graphics/sdlg.c \
+   unilayer/src/save/web.c \
    unilayer/src/memory/fakem.c \
    unilayer/src/resource/webr.c
 

@@ -90,9 +90,7 @@ struct DSEKAI_STATE;
 #include "tmjson.h"
 #endif /* TILEMAP_FMT_JSON */
 
-#ifdef TILEMAP_FMT_ASN
 #include "tmasn.h"
-#endif /* TILEMAP_FMT_ASN */
 
 #ifdef TILEMAP_FMT_BIN
 #include "tmbin.h"

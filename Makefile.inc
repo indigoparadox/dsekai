@@ -13,20 +13,32 @@ DSEKAI_C_FILES_ENGINES := \
    src/topdown.c \
    src/title.c
 
-DSEKAI_C_FILES_SUPPORT := \
+# Some platforms (e.g. Palm) care about common object files being close to all
+# constituents that might use them, so this allows us to optionally insert them
+# in the middle in the platform-specifict Makefiles.
+
+DSEKAI_C_FILES_SUPPORT_1 := \
    src/tilemap.c \
    src/mobile.c \
    src/item.c \
-   unilayer/src/window.c \
    src/script.c \
    src/engines.c \
+   unilayer/src/window.c \
+   unilayer/src/dio.c
+DSEKAI_C_FILES_SUPPORT_2 := \
+   unilayer/src/graphics.c \
+   unilayer/src/input.c \
    src/menu.c \
    src/crop.c \
    src/strpool.c \
    src/pathfind.c \
-   unilayer/src/graphics.c \
-   unilayer/src/input.c \
-   unilayer/src/dio.c
+   src/tmasn.c \
+   src/serial/asn.c \
+   unilayer/src/asn.c
+
+DSEKAI_C_FILES_SUPPORT := \
+   $(DSEKAI_C_FILES_SUPPORT_1) \
+   $(DSEKAI_C_FILES_SUPPORT_2)
 
 DSEKAI_C_FILES := \
    $(DSEKAI_C_FILES_ENGINES) \
@@ -194,7 +206,7 @@ ifeq ($(RESOURCE),FILE)
    ifeq ($(FMT_ASN),TRUE)
       DEFINES_DSEKAI += -DTILEMAP_FMT_ASN
       TILEMAP_FMTS += BIN
-      DSEKAI_C_FILES_RES += src/tmasn.c src/serial/asn.c unilayer/src/asn.c
+      DSEKAI_C_FILES_RES +=
       PKG_OUT_FLAGS := $(PKG_OUT_FLAGS)-asn
    endif
 
