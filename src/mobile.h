@@ -219,7 +219,6 @@
 
 /*! \brief A moving/interactive object in the world. */
 struct MOBILE {
-   char* name;
    /**
     * \brief \ref dsekai_mobiles_flags affecting this mobile's display and
     *        behavior.
@@ -254,6 +253,8 @@ struct MOBILE {
    /**
     * \brief Index of the mobile's \ref dsekai_mobiles_spritesheets_sect
     *        loaded in the \ref unilayer_graphics_cache.
+    *
+    * \warning This should not be serialized!
     */
    int16_t sprite_cache_id;
    unsigned char ascii;
@@ -281,7 +282,12 @@ struct MOBILE {
     * Values stored on the stack can go up to ::SCRIPT_STACK_MAX.
     */
    int8_t script_stack[SCRIPT_STACK_DEPTH];
-   /*! \brief Delay script for this many frames. */
+   /**
+    * \brief Delay script for this many frames.
+    *
+    * This is an absolute value of frames to count down and may be safely
+    * serialized.
+    */
    uint16_t script_wait_frames;
 };
 

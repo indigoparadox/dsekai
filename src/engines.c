@@ -58,7 +58,6 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
          debug_printf( 1, "preserving tilemap %u special mobile %u",
             state->mobiles[i].map_gid, state->mobiles[i].spawner_gid );
          state->mobiles[i].sprite_cache_id = -1;
-         state->mobiles[i].name = NULL;
          continue;
       }
 

@@ -110,9 +110,11 @@ int8_t item_use_food(
    item_decr_or_delete( e_idx, state );
 
    /* TODO: Different types of food for different stats? */
-   debug_printf( 1, "mobile %s mp/hp was: %d", user->name, user->mp_hp );
+   debug_printf( 1, "mobile %d:%d mp/hp was: %d",
+      user->map_gid, user->spawner_gid, user->mp_hp );
    mobile_incr_hp( user, food_val );
-   debug_printf( 1, "mobile %s mp/hp now: %d", user->name, user->mp_hp );
+   debug_printf( 1, "mobile %d:%d mp/hp now: %d",
+      user->map_gid, user->spawner_gid, user->mp_hp );
 
    dio_snprintf( num_str, 10, "+%d", food_val );
 

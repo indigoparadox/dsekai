@@ -82,8 +82,8 @@ void mobile_stack_push( struct MOBILE* m, int8_t v ) {
    /* Push the value. */
    m->script_stack[0] = v;
 
-   script_trace_printf( 1, "mobile %u:%u \"%s\" pushed: %d",
-      m->map_gid, m->spawner_gid, m->name, v );
+   script_trace_printf( 1, "mobile %u:%u pushed: %d",
+      m->map_gid, m->spawner_gid, v );
 }
 
 int8_t mobile_stack_pop( struct MOBILE* m ) {
@@ -415,7 +415,6 @@ int16_t mobile_spawner_match(
             RESOURCE_EXT_GRAPHICS );
          mobiles[i].sprite_cache_id = graphics_cache_load_bitmap(
             ss_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
-         mobiles[i].name = spawner->name;
          goto cleanup;
       }
    }
@@ -462,7 +461,6 @@ void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
          t->gid, t->spawns[i].gid );
 
       /* Assign the rest of the properties from the spawner. */
-      mobile_iter->name = t->spawns[i].name;
       mobile_iter->coords.x = t->spawns[i].coords.x;
       mobile_iter->coords.y = t->spawns[i].coords.y;
       mobile_iter->coords_prev.x = t->spawns[i].coords.x;

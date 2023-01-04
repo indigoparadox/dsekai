@@ -34,7 +34,7 @@ int16_t tilemap_load( const char* map_name, struct TILEMAP* t ) {
       map_load_path,
       RESOURCE_PATH_MAX,
       ASSETS_PATH "m_%s.asn", map_name );
-   map_retval = tilemap_asn_load( map_load_path, t );
+   map_retval = tilemap_asn_load_res( map_load_path, t );
 #  else
    /* Can't load a map for the engine; we're probably in map2asn. */
    map_retval = 0;

@@ -7,6 +7,8 @@
 
 #ifndef NO_TITLE
 
+void title_menu_first( struct DSEKAI_STATE* state );
+
 static void title_draw_menu(
    struct DSEKAI_STATE* state, int16_t opt_start, RES_CONST char* tokens[],
    title_option_cb* callbacks
@@ -89,8 +91,21 @@ void title_menu_new( struct DSEKAI_STATE* state ) {
       gc_title_menu_new_callbacks );
 }
 
+void title_menu_load( struct DSEKAI_STATE* state ) {
+   int32_t load_res = 0;
+
+   /* TODO: Pick filename. */
+   load_res = serial_load( "save.asn", state );
+
+   if( 0 > load_res ) {
+      /* TODO: Show error. */
+      title_menu_first( state );
+   }
+   debug_printf( 3, "save loaded successfully! (%d bytes)", load_res );
+}
+
 /* First menu callbacks defined here as they call static functions. */
-#define TITLE_MENU_FIRST( f ) f( "new", title_menu_new )
+#define TITLE_MENU_FIRST( f ) f( "new", title_menu_new ) f( "load", title_menu_load )
 
 #define TITLE_MENU_FIRST_STR( str, cb ) str,
 static RES_CONST char* gc_title_menu_first_tokens[] = {
@@ -105,7 +120,7 @@ static title_option_cb gc_title_menu_first_callbacks[] = {
 };
 
 /* Menu callback: First menu that opens (new/load/options/etc). */
-static void title_menu_first( struct DSEKAI_STATE* state ) {
+void title_menu_first( struct DSEKAI_STATE* state ) {
    title_draw_menu(
       state, 0, gc_title_menu_first_tokens, gc_title_menu_first_callbacks );
 }

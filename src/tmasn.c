@@ -3,6 +3,12 @@
 
 #include "tmasn.h"
 
+/* TODO: Use semantic variable names from serial/asn.c (e.g. p_asn_buffer_h). */
+
+/* TODO: Convert to use new serial_* macros. */
+
+/* TODO: Merge into new serial/asn.c. */
+
 #define tmasn_read_meta_buffer( read_sz, asn_buf, asn_buf_sz, type_buf_p, seq_sz_p, desc, cleanup ) read_sz = asn_read_meta_ptr( asn_buf, read_sz, type_buf_p, seq_sz_p ); if( ASN_SEQUENCE != *(type_buf_p) ) { error_printf( "invalid " desc " sequence type: 0x%02x", *(type_buf_p) ); read_sz = TILEMAP_ASN_ERROR_READ; goto cleanup; } if( asn_buf_sz - read_sz < *(seq_sz_p) ) { error_printf( "invalid " desc " sequence size: %d (max %d)", *(seq_sz_p), asn_buf_sz - read_sz ); } debug_printf( 2, desc " sequence size: %d bytes (max %d)", *(seq_sz_p), asn_buf_sz - read_sz );
 
 /* Private Prototypes w/ Sections */
@@ -573,150 +579,35 @@ cleanup:
    return total_read_sz;
 }
 
-int16_t tilemap_asn_load( RESOURCE_ID id, struct TILEMAP* t ) {
+int32_t tilemap_asn_load_res( RESOURCE_ID id, struct TILEMAP* t ) {
    const uint8_t* asn_buffer = NULL;
-   uint8_t tm_type = 0;
-   uint16_t tm_version = 0;
-   int16_t retval = 1,
-      idx = 0;
-   int32_t read_sz = 0,
-      tm_sz = 0,
-      asn_buffer_sz = 0;
+   int32_t asn_buffer_sz = 0,
+      read_sz = 0;
    RESOURCE_HANDLE asn_handle = (RESOURCE_HANDLE)0;
-
-   memory_zero_ptr( (MEMORY_PTR)t, sizeof( struct TILEMAP ) );
 
    /* Allocate buffers for parsing ASN.1. */
    asn_handle = resource_get_handle( id );
    if( (RESOURCE_HANDLE)0 == asn_handle ) {
       error_printf( "could not get tilemap resource handle" );
-      retval = 0;
+      read_sz = 0;
       goto cleanup;
    }
 
    asn_buffer_sz = resource_sz_handle( asn_handle );
    if( 0 > asn_buffer_sz ) {
       error_printf( "invalid asn buffer size: %d", asn_buffer_sz );
-      retval = 0;
+      read_sz = 0;
       goto cleanup;
    }
 
    asn_buffer = resource_lock_handle( asn_handle );
    if( NULL == asn_buffer ) {
       error_printf( "could not get tilemap resource pointer" );
-      retval = 0;
+      read_sz = 0;
       goto cleanup;
    }
 
-   read_sz = asn_read_meta_ptr( asn_buffer, idx, &tm_type, &tm_sz );
-   idx += read_sz;
-   if( 0x30 == tm_type ) {
-       debug_printf( 2, "tilemap sequence found in resource" );
-   } else {
-      error_printf( "no tilemap sequence found! (found %d instead)",
-         tm_type );
-      goto cleanup;
-   }
-
-   /* version */
-   read_sz = asn_read_int( (uint8_t*)&tm_version, 2, 0, asn_buffer, idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-    debug_printf( 2, "tilemap version %d", tm_version );
-   idx += read_sz;
-
-   /* gid */
-   read_sz = asn_read_int( (uint8_t*)&(t->gid), 2, 0, asn_buffer, idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-    debug_printf( 2, "tilemap gid %d", t->gid );
-   idx += read_sz;
-
-   /* name */
-   read_sz =
-      asn_read_string( t->name, TILEMAP_NAME_MAX, asn_buffer, idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-    debug_printf( 2, "tilemap name: %s (%d)", t->name, read_sz );
-   idx += read_sz;
-
-   /* flags */
-   read_sz = asn_read_int( &t->flags, 1, 0, asn_buffer, idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-   idx += read_sz;
-
-   /* tileset */
-   read_sz = tilemap_asn_parse_tileset( t, &(asn_buffer[idx]),
-      asn_buffer_sz - idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-   idx += read_sz;
-
-   /* tiles */
-   read_sz = tilemap_asn_parse_tiles( t, &(asn_buffer[idx]),
-      asn_buffer_sz - idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-   idx += read_sz;
-
-   /* strings */
-   read_sz = tilemap_asn_parse_strings( t, &(asn_buffer[idx]),
-      asn_buffer_sz - idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-   idx += read_sz;
-
-   /* spawns */
-   read_sz = tilemap_asn_parse_spawns( t, &(asn_buffer[idx]),
-      asn_buffer_sz - idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-   idx += read_sz;
-
-   /* scripts */
-   debug_printf( 1, "scripts sequence at %d", idx );
-   read_sz = tilemap_asn_parse_scripts( t, &(asn_buffer[idx]),
-      asn_buffer_sz - idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-   idx += read_sz;
-
-   /* items */
-   read_sz = tilemap_asn_parse_items( t, &(asn_buffer[idx]),
-      asn_buffer_sz - idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-   idx += read_sz;
-
-   /* crop defs */
-   read_sz = tilemap_asn_parse_crop_defs( t, &(asn_buffer[idx]),
-      asn_buffer_sz - idx );
-   if( 0 >= read_sz ) {
-      retval = read_sz;
-      goto cleanup;
-   }
-   idx += read_sz;
+   read_sz = tilemap_asn_load( asn_buffer, asn_buffer_sz, t );
 
 cleanup:
 
@@ -728,7 +619,134 @@ cleanup:
       resource_free_handle( asn_handle );
    }
 
-   return retval;
+   return read_sz;
+}
+
+int32_t tilemap_asn_load(
+   const uint8_t* asn_buffer, int32_t asn_buffer_sz, struct TILEMAP* t
+) {
+   uint8_t tm_type = 0;
+   uint16_t tm_version = 0;
+   int32_t idx = 0;
+   int32_t read_sz = 0,
+      tm_sz = 0;
+
+   memory_zero_ptr( (MEMORY_PTR)t, sizeof( struct TILEMAP ) );
+
+   read_sz = asn_read_meta_ptr( asn_buffer, idx, &tm_type, &tm_sz );
+   idx += read_sz;
+   if( 0x30 == tm_type ) {
+       debug_printf( 2, "tilemap sequence found in resource" );
+   } else {
+      idx = -1;
+      error_printf( "no tilemap sequence found! (found %d instead)",
+         tm_type );
+      goto cleanup;
+   }
+
+   /* version */
+   read_sz = asn_read_int( (uint8_t*)&tm_version, 2, 0, asn_buffer, idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+   debug_printf( 2, "tilemap version %d", tm_version );
+   idx += read_sz;
+
+   /* gid */
+   read_sz = asn_read_int( (uint8_t*)&(t->gid), 2, 0, asn_buffer, idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+    debug_printf( 2, "tilemap gid %d", t->gid );
+   idx += read_sz;
+
+   /* name */
+   read_sz =
+      asn_read_string( t->name, TILEMAP_NAME_MAX, asn_buffer, idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+    debug_printf( 2, "tilemap name: %s (%d)", t->name, read_sz );
+   idx += read_sz;
+
+   /* flags */
+   read_sz = asn_read_int( &t->flags, 1, 0, asn_buffer, idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+   idx += read_sz;
+
+   /* tileset */
+   read_sz = tilemap_asn_parse_tileset( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+   idx += read_sz;
+
+   /* tiles */
+   read_sz = tilemap_asn_parse_tiles( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+   idx += read_sz;
+
+   /* strings */
+   read_sz = tilemap_asn_parse_strings( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+   idx += read_sz;
+
+   /* spawns */
+   read_sz = tilemap_asn_parse_spawns( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+   idx += read_sz;
+
+   /* scripts */
+   debug_printf( 1, "scripts sequence at %d", idx );
+   read_sz = tilemap_asn_parse_scripts( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+   idx += read_sz;
+
+   /* items */
+   read_sz = tilemap_asn_parse_items( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+   idx += read_sz;
+
+   /* crop defs */
+   read_sz = tilemap_asn_parse_crop_defs( t, &(asn_buffer[idx]),
+      asn_buffer_sz - idx );
+   if( 0 >= read_sz ) {
+      idx = read_sz;
+      goto cleanup;
+   }
+   idx += read_sz;
+
+cleanup:
+
+   return idx;
 }
 
 int32_t tilemap_asn_save(
@@ -755,7 +773,7 @@ int32_t tilemap_asn_save(
    }
    
    /* version */
-    debug_printf( 2, "(offset 0x%02x) writing map version", idx );
+   debug_printf( 2, "(offset 0x%02x) writing map version", idx );
    idx = asn_write_int( &h_buffer, idx, 1 );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -763,8 +781,8 @@ int32_t tilemap_asn_save(
       goto cleanup;
    }
 
-   /* version */
-    debug_printf( 2, "(offset 0x%02x) writing map gid", idx );
+   /* gid */
+   debug_printf( 2, "(offset 0x%02x) writing map gid", idx );
    idx = asn_write_int( &h_buffer, idx, t->gid );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -1171,7 +1189,7 @@ int32_t tilemap_asn_save(
    idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
 
    /* crop defs */
-    debug_printf( 2, "(offset 0x%02x) writing map crop defs", idx );
+   debug_printf( 2, "(offset 0x%02x) writing map crop defs", idx );
    idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
    if( 0 > idx ) {
       error_printf( "error" );
@@ -1204,7 +1222,7 @@ int32_t tilemap_asn_save(
       }
 
       /* sprite name */
-       debug_printf( 2, "(offset 0x%02x) writing crop def sprite name", idx );
+      debug_printf( 2, "(offset 0x%02x) writing crop def sprite name", idx );
       idx = asn_write_string(
          &h_buffer, idx, t->crop_defs[i].sprite_name, RESOURCE_NAME_MAX );
       if( 0 > idx ) {
@@ -1214,7 +1232,7 @@ int32_t tilemap_asn_save(
       }
 
       /* name */
-       debug_printf( 2, "(offset 0x%02x) writing crop def name", idx );
+      debug_printf( 2, "(offset 0x%02x) writing crop def name", idx );
       idx = asn_write_string(
          &h_buffer, idx, t->crop_defs[i].name, CROP_NAME_MAX );
       if( 0 > idx ) {
@@ -1224,7 +1242,7 @@ int32_t tilemap_asn_save(
       }
 
       /* gid */
-       debug_printf( 2, "(offset 0x%02x) writing crop def gid", idx );
+      debug_printf( 2, "(offset 0x%02x) writing crop def gid", idx );
       idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].gid );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1233,7 +1251,7 @@ int32_t tilemap_asn_save(
       }
 
       /* flags */
-       debug_printf( 2, "(offset 0x%02x) writing crop def flags", idx );
+      debug_printf( 2, "(offset 0x%02x) writing crop def flags", idx );
       idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].flags );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1242,7 +1260,7 @@ int32_t tilemap_asn_save(
       }
 
       /* cycle */
-       debug_printf( 2, "(offset 0x%02x) writing crop def cycle", idx );
+      debug_printf( 2, "(offset 0x%02x) writing crop def cycle", idx );
       idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].cycle );
       if( 0 > idx ) {
          error_printf( "error" );
@@ -1251,7 +1269,7 @@ int32_t tilemap_asn_save(
       }
 
       /* produce gid */
-       debug_printf( 2, "(offset 0x%02x) writing crop produce gid", idx );
+      debug_printf( 2, "(offset 0x%02x) writing crop produce gid", idx );
       idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].produce_gid );
       if( 0 > idx ) {
          error_printf( "error" );

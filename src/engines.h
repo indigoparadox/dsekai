@@ -225,8 +225,12 @@ struct DSEKAI_STATE {
     *
     * Mobiles in this array are considered to "exist" when
     * ::MOBILE_FLAG_ACTIVE is enabled in their MOBILE::flags.
+    *
+    * \warning Index in this array is persistant and unique in the world!
+    *          Be sure to preserve it (including empty spots) during serialize!
     */
    struct MOBILE mobiles[DSEKAI_MOBILES_MAX];
+
    /**
     * \brief Currently active player MOBILE. Stays between maps.
     *

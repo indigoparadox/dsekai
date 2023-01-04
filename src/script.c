@@ -87,8 +87,8 @@ uint16_t script_handle_WALK(
       && (0 == gc_mobile_step_table_normal_pos[actor->steps_remaining])
 #endif /* !NO_SMOOTH_WALK */
    ) {
-      script_trace_printf( 1, "mobile %u:%u \"%s\" done walking",
-         actor->map_gid, actor->spawner_gid, actor->name );
+      script_trace_printf( 1, "mobile %u:%u done walking",
+         actor->map_gid, actor->spawner_gid );
 
       /* Pop the dir, since the walk is complete. */
       mobile_stack_pop( actor );
@@ -103,16 +103,16 @@ uint16_t script_handle_WALK(
       actor->coords.x != actor->coords_prev.x
    ) {
       /* Actor is already walking, don't start or advance PC. */   
-      script_trace_printf( 1, "mobile %u:%u \"%s\" already walking",
-         actor->map_gid, actor->spawner_gid, actor->name );
+      script_trace_printf( 1, "mobile %u:%u already walking",
+         actor->map_gid, actor->spawner_gid );
 
    } else {
       /* Start trying to walk. */
       dir_raw = mobile_stack_pop( actor );
       dir = dir_raw % 4;
 
-      script_trace_printf( 1, "mobile %u:%u \"%s\" popped %d, became %d",
-         actor->map_gid, actor->spawner_gid, actor->name, dir_raw, dir );
+      script_trace_printf( 1, "mobile %u:%u popped %d, became %d",
+         actor->map_gid, actor->spawner_gid, dir_raw, dir );
 
       /* Handle terrain blockage by skipping. */
       if(
@@ -120,8 +120,8 @@ uint16_t script_handle_WALK(
          tilemap_collide( actor->coords.x, actor->coords.y, dir, t )
       ) {
          /* Actor would collide, so just skip this walk attempt. */
-         script_trace_printf( 1, "mobile %u:%u \"%s\" collided with terrain",
-            actor->map_gid, actor->spawner_gid, actor->name );
+         script_trace_printf( 1, "mobile %u:%u collided with terrain",
+            actor->map_gid, actor->spawner_gid );
          return pc + 1;
       }
 
@@ -133,8 +133,8 @@ uint16_t script_handle_WALK(
             actor->coords.x, actor->coords.y, mobile_get_dir( actor ),
             t, state )
       ) {
-         script_trace_printf( 1, "mobile %u:%u \"%s\" starting walking in dir %d",
-            actor->map_gid, actor->spawner_gid, actor->name, dir );
+         script_trace_printf( 1, "mobile %u:%u starting walking in dir %d",
+            actor->map_gid, actor->spawner_gid, dir );
          mobile_walk_start( actor, dir );
       }
 
@@ -178,15 +178,14 @@ uint16_t script_handle_RETURN(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    if( 0 <= arg && SCRIPT_STEPS_MAX > arg ) {
-      script_trace_printf( 1, "mobile %u:%u \"%s\" at pc %d, returning to pc %d",
-         actor->map_gid, actor->spawner_gid, actor->name,
-         pc, arg );
+      script_trace_printf( 1, "mobile %u:%u at pc %d, returning to pc %d",
+         actor->map_gid, actor->spawner_gid, pc, arg );
       return arg;
    }
    /* Freeze. */
    error_printf(
-      "mobile %u:%u \"%s\" script frozen at pc %d: invalid return pc %d",
-      actor->map_gid, actor->spawner_gid, actor->name,
+      "mobile %u:%u script frozen at pc %d: invalid return pc %d",
+      actor->map_gid, actor->spawner_gid,
       pc, arg );
    return pc;
 }
@@ -260,8 +259,8 @@ uint16_t script_handle_WARP(
       return pc;
    }
 
-   script_trace_printf( 0, "mobile %u:%u \"%s\" warp requested to: %s", 
-      actor->map_gid, actor->spawner_gid, actor->name, warp_map );
+   script_trace_printf( 0, "mobile %u:%u warp requested to: %s", 
+      actor->map_gid, actor->spawner_gid, warp_map );
 
    memory_zero_ptr( (MEMORY_PTR)(state->warp_to), TILEMAP_NAME_MAX );
    memory_strncpy_ptr( state->warp_to, warp_map, TILEMAP_NAME_MAX );
@@ -473,12 +472,12 @@ uint16_t script_handle_DISABLE(
    struct DSEKAI_STATE* state, int16_t arg
 ) {
    if( 0 == arg ) {
-      script_trace_printf( 1, "mobile %u:%u \"%s\" enabling interaction",
-         actor->map_gid, actor->spawner_gid, actor->name );
+      script_trace_printf( 1, "mobile %u:%u enabling interaction",
+         actor->map_gid, actor->spawner_gid );
       actor->flags &= ~MOBILE_FLAG_DISABLED;
    } else {
-      script_trace_printf( 1, "mobile %u:%u \"%s\" disabling interaction",
-         actor->map_gid, actor->spawner_gid, actor->name );
+      script_trace_printf( 1, "mobile %u:%u disabling interaction",
+         actor->map_gid, actor->spawner_gid );
       actor->flags |= MOBILE_FLAG_DISABLED;
    }
    return pc + 1;

@@ -62,10 +62,8 @@ int main( int argc, char* argv[] ) {
       goto cleanup;
    }
 
-   buffer = memory_lock( h_buffer );
-
    /* Write the ASN map file to disk. */
-   save_write( argv[2], buffer, idx );
+   save_write( argv[2], h_buffer, idx );
 
    debug_printf( 3, "%d bytes written", idx );
 
