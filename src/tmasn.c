@@ -46,9 +46,8 @@ int16_t tilemap_asn_parse_tileset(
       read_sz = 0,
       tile_idx = 0;
 
-   tmasn_read_meta_buffer(
-      total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &ts_seq_sz,
-      "tileset", cleanup )
+   serial_asn_read_seq( asn_buffer, &type_buf, &ts_seq_sz,
+      "tilemap tileset", total_read_sz, read_sz, cleanup )
 
    while( total_read_sz - 4 < ts_seq_sz ) {
       if( 0x30 != asn_buffer[total_read_sz] ) {
@@ -174,17 +173,18 @@ int16_t tilemap_asn_parse_spawns(
       coords_seq_sz = 0,
       spawn_idx = 0;
 
-   tmasn_read_meta_buffer(
-      total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &all_spawns_seq_sz,
-      "all spawns", cleanup )
+   serial_asn_read_seq( asn_buffer, &type_buf, &all_spawns_seq_sz,
+      "tilemap spawns", total_read_sz, read_sz, cleanup )
 
    all_spawns_seq_start = total_read_sz;
 
    while( total_read_sz - all_spawns_seq_start < all_spawns_seq_sz ) {
-      tmasn_read_meta_buffer(
+      serial_asn_read_seq( asn_buffer, &type_buf, &spawn_def_seq_sz,
+         "spawn def", total_read_sz, read_sz, cleanup )
+      /* tmasn_read_meta_buffer(
          total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &spawn_def_seq_sz,
-         "spawn def", cleanup )
-      
+         "spawn def", cleanup ) */
+
       /* image */
       read_sz =
          asn_read_string( t->spawns[spawn_idx].name,
@@ -633,52 +633,21 @@ int32_t tilemap_asn_load(
 
    memory_zero_ptr( (MEMORY_PTR)t, sizeof( struct TILEMAP ) );
 
-   read_sz = asn_read_meta_ptr( asn_buffer, idx, &tm_type, &tm_sz );
-   idx += read_sz;
-   if( 0x30 == tm_type ) {
-       debug_printf( 2, "tilemap sequence found in resource" );
-   } else {
-      idx = -1;
-      error_printf( "no tilemap sequence found! (found %d instead)",
-         tm_type );
-      goto cleanup;
-   }
+   serial_asn_read_seq(
+      asn_buffer, &tm_type, &tm_sz, "tilemap", idx, read_sz, cleanup )
 
-   /* version */
-   read_sz = asn_read_int( (uint8_t*)&tm_version, 2, 0, asn_buffer, idx );
-   if( 0 >= read_sz ) {
-      idx = read_sz;
-      goto cleanup;
-   }
-   debug_printf( 2, "tilemap version %d", tm_version );
-   idx += read_sz;
+   serial_asn_read_int(
+      asn_buffer, &tm_version, 2, 0, "tilemap version", idx, read_sz, cleanup )
 
-   /* gid */
-   read_sz = asn_read_int( (uint8_t*)&(t->gid), 2, 0, asn_buffer, idx );
-   if( 0 >= read_sz ) {
-      idx = read_sz;
-      goto cleanup;
-   }
-    debug_printf( 2, "tilemap gid %d", t->gid );
-   idx += read_sz;
+   serial_asn_read_int(
+      asn_buffer, &(t->gid), 2, 0, "tilemap GID", idx, read_sz, cleanup )
 
-   /* name */
-   read_sz =
-      asn_read_string( t->name, TILEMAP_NAME_MAX, asn_buffer, idx );
-   if( 0 >= read_sz ) {
-      idx = read_sz;
-      goto cleanup;
-   }
-    debug_printf( 2, "tilemap name: %s (%d)", t->name, read_sz );
-   idx += read_sz;
+   serial_asn_read_string(
+      asn_buffer, t->name, TILEMAP_NAME_MAX,
+      "tilemap name", idx, read_sz, cleanup )
 
-   /* flags */
-   read_sz = asn_read_int( &t->flags, 1, 0, asn_buffer, idx );
-   if( 0 >= read_sz ) {
-      idx = read_sz;
-      goto cleanup;
-   }
-   idx += read_sz;
+   serial_asn_read_int(
+      asn_buffer, &(t->flags), 1, 0, "tilemap flags", idx, read_sz, cleanup )
 
    /* tileset */
    read_sz = tilemap_asn_parse_tileset( t, &(asn_buffer[idx]),
@@ -765,64 +734,22 @@ int32_t tilemap_asn_save(
       script_sz_idx = 0,
       step_sz_idx = 0;
 
-   idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_main );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_seq_start(
+      &h_buffer, &mark_seq_main, "tilemap", idx, cleanup );
    
-   /* version */
-   debug_printf( 2, "(offset 0x%02x) writing map version", idx );
-   idx = asn_write_int( &h_buffer, idx, 1 );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_int( &h_buffer, 1, x, "tilemap version", idx, cleanup );
 
-   /* gid */
-   debug_printf( 2, "(offset 0x%02x) writing map gid", idx );
-   idx = asn_write_int( &h_buffer, idx, t->gid );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_int( &h_buffer, t->gid, x, "tilemap GID", idx, cleanup );
 
-   /* name */
-    debug_printf( 2, "(offset 0x%02x) writing map name", idx );
-   idx = asn_write_string( &h_buffer, idx, t->name, TILEMAP_NAME_MAX );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_string(
+      &h_buffer, t->name, TILEMAP_NAME_MAX, "tilemap name", idx, cleanup );
 
-#if 0
-   /* engine_type */
-    debug_printf( 2, "(offset 0x%02x) writing map engine type", idx );
-   idx = asn_write_int( &h_buffer, idx, t->engine_type );
-   assert( 0 <= idx );
-#endif
-
-   /* flags */
-   debug_printf( 2, "(offset 0x%02x) writing map flags", idx );
-   idx = asn_write_int( &h_buffer, idx, t->flags );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_int(
+      &h_buffer, t->flags, x, "tilemap flags", idx, cleanup );
 
    /* tileset */
-   debug_printf( 2, "(offset 0x%02x) writing map tilesets", idx );
-   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_seq_start(
+      &h_buffer, &sz_idx, "tilemap tilesets", idx, cleanup )
    for( i = 0 ; TILEMAP_TILESETS_MAX > i ; i++ ) {
       if( 0 == memory_strnlen_ptr(
          t->tileset[i].image_name, sizeof( RESOURCE_NAME ) )
@@ -830,84 +757,39 @@ int32_t tilemap_asn_save(
          continue;
       }
 
-      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_ts );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_seq_start(
+         &h_buffer, &mark_seq_ts, "tileset", idx, cleanup )
    
-      /* image */
-       debug_printf( 2, "(offset 0x%02x) writing map tileset image name", idx );
-      idx = asn_write_string(
-         &h_buffer, idx, t->tileset[i].image_name, RESOURCE_NAME_MAX );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_string(
+         &h_buffer, t->tileset[i].image_name, RESOURCE_NAME_MAX,
+         "tileset image name", idx, cleanup );
 
-      /* ascii */
-      debug_printf( 2, "(offset 0x%02x) writing map tileset ASCII", idx );
-      idx = asn_write_int( &h_buffer, idx, t->tileset[i].ascii );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->tileset[i].ascii, x, "tileset ASCII", idx, cleanup );
 
-      /* flags */
-      debug_printf( 2, "(offset 0x%02x) writing map tileset flags", idx );
-      idx = asn_write_int( &h_buffer, idx, t->tileset[i].flags );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->tileset[i].flags, x, "tileset flags", idx, cleanup );
 
-      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_ts );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_seq_end(
+         &h_buffer, &mark_seq_ts, "tileset", idx, cleanup )
    }
-   idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_seq_end(
+      &h_buffer, &sz_idx, "tilemap tilesets", idx, cleanup )
 
    /* tiles */
    debug_printf( 2, "(offset 0x%02x) writing map tiles", idx );
    idx = asn_write_blob(
       &h_buffer, idx, t->tiles, ((TILEMAP_TH * TILEMAP_TW) / 2) );
+   /* TODO: Error checking! */
 
    /* strings */
    idx = asn_write_blob( &h_buffer, idx,
       (unsigned char*)t->strpool, TILEMAP_STRPOOL_SZ );
-#if 0
-   for( i = 0 ; TILEMAP_STRINGS_MAX > i ; i++ ) {
-      if( 0 == strlen( t->strings[i] ) ) {
-         continue;
-      }
-
-       debug_printf( 2, "(offset 0x%02x) writing map string", idx );
-      idx = asn_write_string( &h_buffer, idx,
-         t->strings[i], DIALOG_TEXT_SZ );
-      assert( 0 <= idx );
-   }
-#endif
+   /* TODO: Error checking! */
 
    /* spawns */
-   debug_printf( 2, "(offset 0x%02x) writing map spawns", idx );
-   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_seq_start(
+      &h_buffer, &sz_idx, "tilemap spawns", idx, cleanup )
    for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
       if( 0 == memory_strnlen_ptr(
          t->spawns[i].name, TILEMAP_SPAWN_NAME_SZ
@@ -915,108 +797,51 @@ int32_t tilemap_asn_save(
          continue;
       }
 
-      debug_printf( 2, "(offset 0x%02x) writing map spawn", idx );
-      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_spawn );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_seq_start(
+         &h_buffer, &mark_seq_spawn, "spawn", idx, cleanup )
 
-      /* name */
-      debug_printf( 2, "(offset 0x%02x) writing map spawn name", idx );
-      idx = asn_write_string(
-         &h_buffer, idx, t->spawns[i].name, TILEMAP_SPAWN_NAME_SZ );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_string(
+         &h_buffer, t->spawns[i].name, TILEMAP_SPAWN_NAME_SZ,
+         "spawn name", idx, cleanup );
 
-      /* coords */
-      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_spawn_coords );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      /* TODO: Don't make this a seq! */
+      serial_asn_write_seq_start(
+         &h_buffer, &mark_seq_spawn_coords, "spawn coords", idx, cleanup )
 
-      /* coords.x */
-      debug_printf( 2, "(offset 0x%02x) writing map spawn coords x", idx );
-      idx = asn_write_int( &h_buffer, idx, t->spawns[i].coords.x );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->spawns[i].coords.x, x, "spawn coords X", idx, cleanup );
 
-      /* coords.y */
-      debug_printf( 2, "(offset 0x%02x) writing map spawn coords y", idx );
-      idx = asn_write_int( &h_buffer, idx, t->spawns[i].coords.y );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->spawns[i].coords.y, x, "spawn coords Y", idx, cleanup );
 
-      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_spawn_coords );
+      serial_asn_write_seq_end(
+         &h_buffer, &mark_seq_spawn_coords, "spawn coords end", idx, cleanup )
 
-      /* sprite name */
-      debug_printf( 2, "(offset 0x%02x) writing map spawn sprite name", idx );
-      idx = asn_write_string(
-         &h_buffer, idx, t->spawns[i].sprite_name, RESOURCE_NAME_MAX );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_string(
+         &h_buffer, t->spawns[i].sprite_name, RESOURCE_NAME_MAX,
+         "spawn sprite name", idx, cleanup );
 
-      /* ascii */
-      debug_printf( 2, "(offset 0x%02x) writing map spawn ASCII", idx );
-      idx = asn_write_int( &h_buffer, idx, t->spawns[i].ascii );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->spawns[i].ascii, x, "spawn ASCII", idx, cleanup );
 
-      /* flags */
-      debug_printf( 2, "(offset 0x%02x) writing map spawn flags", idx );
-      idx = asn_write_int( &h_buffer, idx, t->spawns[i].flags );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->spawns[i].flags, x, "spawn flags", idx, cleanup );
 
-      /* gid */
-       debug_printf( 2, "(offset 0x%02x) writing map spawn gid", idx );
-      idx = asn_write_int( &h_buffer, idx, t->spawns[i].gid );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->spawns[i].gid, x, "spawn GID", idx, cleanup );
 
-      /* script_id */
-       debug_printf( 2, "(offset 0x%02x) writing map spawn script ID", idx );
-      idx = asn_write_int( &h_buffer, idx, t->spawns[i].script_id );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->spawns[i].script_id, x,
+         "spawn script ID", idx, cleanup );
 
-      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_spawn );
+      serial_asn_write_seq_end(
+         &h_buffer, &mark_seq_spawn, "spawn", idx, cleanup )
    }
-   idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_seq_end(
+      &h_buffer, &sz_idx, "tilemap spawns", idx, cleanup )
 
    /* scripts */
+   /* TODO: Serialize ALL script slots to preserve indexes. */
    for(
       scripts_count = 0 ; TILEMAP_SCRIPTS_MAX > scripts_count ; scripts_count++
    ) {
@@ -1025,177 +850,84 @@ int32_t tilemap_asn_save(
       }
    }
 
-   idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_scripts );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_seq_start(
+      &h_buffer, &mark_seq_scripts, "tilemap scripts", idx, cleanup )
    for( i = 0 ; scripts_count > i ; i++ ) {
-      idx = asn_write_seq_start( &h_buffer, idx, &script_sz_idx );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_seq_start(
+         &h_buffer, &script_sz_idx, "scripts", idx, cleanup )
 
       /* steps */
       for( j = 0 ; SCRIPT_STEPS_MAX > j ; j++ ) {
+         /* TODO: Serialize ALL steps. */
          if( 0 == t->scripts[i].steps[j].action ) {
             break;
          }
 
-         idx = asn_write_seq_start( &h_buffer, idx, &step_sz_idx );
-         if( 0 > idx ) {
-            error_printf( "error" );
-            idx = -1;
-            goto cleanup;
-         }
+         serial_asn_write_seq_start(
+            &h_buffer, &step_sz_idx, "script steps", idx, cleanup )
 
-         /* action */
-         debug_printf(
-            3, "(offset 0x%02x) writing map spawn script step action", idx );
-         idx = asn_write_int( &h_buffer, idx, t->scripts[i].steps[j].action );
-         if( 0 > idx ) {
-            error_printf( "error" );
-            idx = -1;
-            goto cleanup;
-         }
+         serial_asn_write_int(
+            &h_buffer, t->scripts[i].steps[j].action, x,
+            "script step action", idx, cleanup );
 
-         /* arg */
-         debug_printf(
-            3, "(offset 0x%02x) writing map spawn script step arg", idx );
-         idx = asn_write_int( &h_buffer, idx, t->scripts[i].steps[j].arg );
-         if( 0 > idx ) {
-            error_printf( "error" );
-            idx = -1;
-            goto cleanup;
-         }
+         serial_asn_write_int(
+            &h_buffer, t->scripts[i].steps[j].arg, x,
+            "script step action", idx, cleanup );
 
-         idx = asn_write_seq_end( &h_buffer, idx, &step_sz_idx );
-         if( 0 > idx ) {
-            error_printf( "error" );
-            idx = -1;
-            goto cleanup;
-         }
+         serial_asn_write_seq_end(
+            &h_buffer, &step_sz_idx, "script steps", idx, cleanup )
       }
-      idx = asn_write_seq_end( &h_buffer, idx, &script_sz_idx );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
-   }
-   idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_scripts );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
 
-   /* items */
-    debug_printf( 2, "(offset 0x%02x) writing map items", idx );
-   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
+      serial_asn_write_seq_end(
+         &h_buffer, &script_sz_idx, "scripts", idx, cleanup )
    }
+   serial_asn_write_seq_end(
+      &h_buffer, &mark_seq_scripts, "tilemap scripts", idx, cleanup )
+
+   serial_asn_write_seq_start(
+      &h_buffer, &sz_idx, "tilemap item defs", idx, cleanup )
    for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
+      /* TODO: Serialize ALL items, or copy smart active-item-only code to
+       *       scripts above? */
       item_break_if_last( t->item_defs, i );
       if( ITEM_FLAG_ACTIVE != (t->item_defs[i].flags & ITEM_FLAG_ACTIVE) ) {
          continue;
       }
 
-       debug_printf( 2, "(offset 0x%02x) writing map item", idx );
-      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_item );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_seq_start(
+         &h_buffer, &mark_seq_item, "item def", idx, cleanup )
 
-      /* index */
-       debug_printf( 2, "(offset 0x%02x) writing item index", idx );
-      idx = asn_write_int( &h_buffer, idx, i );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int( &h_buffer, i, x, "item def index", idx, cleanup );
 
-      /* sprite name */
-       debug_printf( 2, "(offset 0x%02x) writing item sprite name", idx );
-      idx = asn_write_string(
-         &h_buffer, idx, t->item_defs[i].sprite_name, RESOURCE_NAME_MAX );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_string(
+         &h_buffer, t->item_defs[i].sprite_name, RESOURCE_NAME_MAX,
+         "item def sprite name", idx, cleanup );
 
-      /* name */
-       debug_printf( 2, "(offset 0x%02x) writing item name", idx );
-      idx = asn_write_string( &h_buffer, idx, t->item_defs[i].name, ITEM_NAME_SZ );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_string(
+         &h_buffer, t->item_defs[i].name, RESOURCE_NAME_MAX,
+         "item def name", idx, cleanup );
 
-      /* owner */
-       debug_printf( 2, "(offset 0x%02x) writing item owner", idx );
-      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].owner );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->item_defs[i].owner, x, "item def owner", idx, cleanup );
  
-      /* gid */
-       debug_printf( 2, "(offset 0x%02x) writing item gid", idx );
-      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].gid );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->item_defs[i].gid, x, "item def GID", idx, cleanup );
 
-      /* data */
-       debug_printf( 2, "(offset 0x%02x) writing item data", idx );
-      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].data );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->item_defs[i].data, x, "item def data", idx, cleanup );
 
-      /* flags */
-       debug_printf( 2, "(offset 0x%02x) writing item flags", idx );
-      idx = asn_write_int( &h_buffer, idx, t->item_defs[i].flags );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->item_defs[i].flags, x, "item def flags", idx, cleanup );
 
-      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_item );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_seq_end(
+         &h_buffer, &mark_seq_item, "item def", idx, cleanup )
    }
-   idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
+   serial_asn_write_seq_end(
+      &h_buffer, &sz_idx, "tilemap item defs", idx, cleanup )
 
    /* crop defs */
-   debug_printf( 2, "(offset 0x%02x) writing map crop defs", idx );
-   idx = asn_write_seq_start( &h_buffer, idx, &sz_idx );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_seq_start(
+      &h_buffer, &sz_idx, "tilemap crop defs", idx, cleanup )
    for( i = 0 ; TILEMAP_CROP_DEFS_MAX > i ; i++ ) {
       if(
          CROP_DEF_FLAG_ACTIVE != (t->crop_defs[i].flags & CROP_DEF_FLAG_ACTIVE)
@@ -1203,96 +935,42 @@ int32_t tilemap_asn_save(
          continue;
       }
 
-       debug_printf( 2, "(offset 0x%02x) writing map crop def", idx );
       /* Reuse mark_seq_item for crop def since it's not used in this scope. */
-      idx = asn_write_seq_start( &h_buffer, idx, &mark_seq_item );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_seq_start(
+         &h_buffer, &mark_seq_item, "crop def", idx, cleanup )
 
-      /* index */
-       debug_printf( 2, "(offset 0x%02x) writing crop def index", idx );
-      idx = asn_write_int( &h_buffer, idx, i );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int( &h_buffer, i, x, "crop def index", idx, cleanup );
 
-      /* sprite name */
-      debug_printf( 2, "(offset 0x%02x) writing crop def sprite name", idx );
-      idx = asn_write_string(
-         &h_buffer, idx, t->crop_defs[i].sprite_name, RESOURCE_NAME_MAX );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_string(
+         &h_buffer, t->crop_defs[i].sprite_name, RESOURCE_NAME_MAX,
+         "crop def sprite name", idx, cleanup );
 
-      /* name */
-      debug_printf( 2, "(offset 0x%02x) writing crop def name", idx );
-      idx = asn_write_string(
-         &h_buffer, idx, t->crop_defs[i].name, CROP_NAME_MAX );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_string(
+         &h_buffer, t->crop_defs[i].name, CROP_NAME_MAX,
+         "crop def name", idx, cleanup );
 
-      /* gid */
-      debug_printf( 2, "(offset 0x%02x) writing crop def gid", idx );
-      idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].gid );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->crop_defs[i].gid, x, "crop def GID", idx, cleanup );
 
-      /* flags */
-      debug_printf( 2, "(offset 0x%02x) writing crop def flags", idx );
-      idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].flags );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->crop_defs[i].flags, x, "crop def flags", idx, cleanup );
 
-      /* cycle */
-      debug_printf( 2, "(offset 0x%02x) writing crop def cycle", idx );
-      idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].cycle );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->crop_defs[i].cycle, x, "crop def cycle", idx, cleanup );
 
-      /* produce gid */
-      debug_printf( 2, "(offset 0x%02x) writing crop produce gid", idx );
-      idx = asn_write_int( &h_buffer, idx, t->crop_defs[i].produce_gid );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_int(
+         &h_buffer, t->crop_defs[i].produce_gid, x,
+         "crop def produce GID", idx, cleanup );
 
-      idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_item );
-      if( 0 > idx ) {
-         error_printf( "error" );
-         idx = -1;
-         goto cleanup;
-      }
+      serial_asn_write_seq_end(
+         &h_buffer, &mark_seq_item, "crop def", idx, cleanup )
    }
-   idx = asn_write_seq_end( &h_buffer, idx, &sz_idx );
+   serial_asn_write_seq_end(
+      &h_buffer, &sz_idx, "tilemap crop defs", idx, cleanup )
 
    /* End the main sequence. */
-   idx = asn_write_seq_end( &h_buffer, idx, &mark_seq_main );
-   if( 0 > idx ) {
-      error_printf( "error" );
-      idx = -1;
-      goto cleanup;
-   }
+   serial_asn_write_seq_end(
+      &h_buffer, &mark_seq_main, "tilemap", idx, cleanup )
 
 cleanup:
 

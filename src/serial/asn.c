@@ -22,41 +22,43 @@ int32_t serial_write_mobile(
       p_save_buffer_h, &mark_seq_mob, "mobile", idx, cleanup );
 
    serial_asn_write_int(
-      p_save_buffer_h, m->flags, "mobile flags", idx, cleanup );
+      p_save_buffer_h, m->flags, x, "mobile flags", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->spawner_gid, "mobile spawner GID", idx, cleanup );
+      p_save_buffer_h, m->spawner_gid, x, "mobile spawner GID", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->map_gid, "mobile tilemap GID", idx, cleanup );
+      p_save_buffer_h, m->map_gid, x, "mobile tilemap GID", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->mp_hp, "mobile MP/HP", idx, cleanup );
+      p_save_buffer_h, m->mp_hp, x, "mobile MP/HP", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->screen_px, "mobile screen pixel X", idx, cleanup );
+      p_save_buffer_h, m->screen_px, x, "mobile screen pixel X", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->screen_py, "mobile screen pixel Y", idx, cleanup );
+      p_save_buffer_h, m->screen_py, x, "mobile screen pixel Y", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->ascii, "mobile ASCII", idx, cleanup );
+      p_save_buffer_h, m->ascii, x, "mobile ASCII", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->coords.x, "mobile tile X", idx, cleanup );
+      p_save_buffer_h, m->coords.x, x, "mobile tile X", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->coords.y, "mobile tile Y", idx, cleanup );
+      p_save_buffer_h, m->coords.y, x, "mobile tile Y", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->coords_prev.x, "mobile previous tile X", idx, cleanup );
+      p_save_buffer_h, m->coords_prev.x, x,
+      "mobile previous tile X", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->coords_prev.y, "mobile previous tile Y", idx, cleanup );
+      p_save_buffer_h, m->coords_prev.y, x,
+      "mobile previous tile Y", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->steps_remaining,
+      p_save_buffer_h, m->steps_remaining, x,
       "mobile steps remaining", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->script_id, "mobile script ID", idx, cleanup );
+      p_save_buffer_h, m->script_id, x, "mobile script ID", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->script_pc, "mobile script PC", idx, cleanup );
+      p_save_buffer_h, m->script_pc, x, "mobile script PC", idx, cleanup );
    for( i = 0 ; SCRIPT_STACK_DEPTH > i ; i++ ) {
       serial_asn_write_int(
-         p_save_buffer_h, m->script_stack[i],
+         p_save_buffer_h, m->script_stack[i], x,
          "mobile script stack", idx, cleanup );
    }
    serial_asn_write_int(
-      p_save_buffer_h, m->script_wait_frames,
+      p_save_buffer_h, m->script_wait_frames, x,
       "mobile script wait frames", idx, cleanup );
 
    serial_asn_write_seq_end(
@@ -87,9 +89,9 @@ int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state ) {
       &save_buffer_h, &mark_seq_main, "main", idx, cleanup );
 
    serial_asn_write_int(
-      &save_buffer_h, state->version, "engine version", idx, cleanup );
+      &save_buffer_h, state->version, x, "engine version", idx, cleanup );
    serial_asn_write_int(
-      &save_buffer_h, state->engine_type, "engine type", idx, cleanup );
+      &save_buffer_h, state->engine_type, x, "engine type", idx, cleanup );
 
    serial_asn_write_seq_start(
       &save_buffer_h, &mark_seq_mobs, "mobiles", idx, cleanup );
@@ -146,14 +148,8 @@ int32_t serial_read_mobile(
       goto cleanup;
    }
 
-   read_sz = asn_read_meta_ptr( save_buffer, idx, &type_buf, &mob_seq_sz );
-   if( ASN_SEQUENCE != type_buf ) {
-      error_printf( "invalid mobile sequence type: 0x%02x", type_buf );
-      idx = SERIAL_ERROR;
-      goto cleanup;
-   }
-   idx += read_sz;
-   assert( 0 < mob_seq_sz );
+   serial_asn_read_seq(
+      save_buffer, &type_buf, &mob_seq_sz, "mobile", idx, read_sz, cleanup )
 
    serial_asn_read_int(
       save_buffer, &(m->flags), 2, 0, "mobile flags", idx, read_sz, cleanup );
@@ -286,6 +282,12 @@ int32_t serial_load( const char* save_name, struct DSEKAI_STATE* state ) {
       memory_strnlen_ptr( stringize( ENTRY_MAP ), TILEMAP_NAME_MAX ) ); \
       state->engine_type_change = idx;
    */
+
+   /* By loading until the end, this save has been converted to the current
+    * version.
+    */
+   /* TODO: Current version macro. */
+   state->version = 1;
 
 cleanup:
 
