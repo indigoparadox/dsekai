@@ -9,8 +9,6 @@
 
 /* TODO: Merge into new serial/asn.c. */
 
-#define tmasn_read_meta_buffer( read_sz, asn_buf, asn_buf_sz, type_buf_p, seq_sz_p, desc, cleanup ) read_sz = asn_read_meta_ptr( asn_buf, read_sz, type_buf_p, seq_sz_p ); if( ASN_SEQUENCE != *(type_buf_p) ) { error_printf( "invalid " desc " sequence type: 0x%02x", *(type_buf_p) ); read_sz = TILEMAP_ASN_ERROR_READ; goto cleanup; } if( asn_buf_sz - read_sz < *(seq_sz_p) ) { error_printf( "invalid " desc " sequence size: %d (max %d)", *(seq_sz_p), asn_buf_sz - read_sz ); } debug_printf( 2, desc " sequence size: %d bytes (max %d)", *(seq_sz_p), asn_buf_sz - read_sz );
-
 /* Private Prototypes w/ Sections */
 
 int16_t tilemap_asn_parse_tileset(
@@ -174,113 +172,48 @@ int16_t tilemap_asn_parse_spawns(
       spawn_idx = 0;
 
    serial_asn_read_seq( asn_buffer, &type_buf, &all_spawns_seq_sz,
-      "tilemap spawns", total_read_sz, read_sz, cleanup )
+      "tilemap spawn defs", total_read_sz, read_sz, cleanup )
 
    all_spawns_seq_start = total_read_sz;
 
    while( total_read_sz - all_spawns_seq_start < all_spawns_seq_sz ) {
       serial_asn_read_seq( asn_buffer, &type_buf, &spawn_def_seq_sz,
          "spawn def", total_read_sz, read_sz, cleanup )
-      /* tmasn_read_meta_buffer(
-         total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &spawn_def_seq_sz,
-         "spawn def", cleanup ) */
 
-      /* image */
-      read_sz =
-         asn_read_string( t->spawns[spawn_idx].name,
-            TILEMAP_SPAWN_NAME_SZ, asn_buffer, total_read_sz );
-      if( 0 >= read_sz ) {
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
-      debug_printf( 2, "spawn name: %s (%d)",
-         t->spawns[spawn_idx].name, read_sz );
-      total_read_sz += read_sz; /* spawn name and header */
+      serial_asn_read_string(
+         asn_buffer, t->spawns[spawn_idx].name, TILEMAP_SPAWN_NAME_SZ,
+         "spawn def name", total_read_sz, read_sz, cleanup )
 
-      /* coords header */
-      tmasn_read_meta_buffer(
-         total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &coords_seq_sz,
-         "coords", cleanup )
+      serial_asn_read_seq( asn_buffer, &type_buf, &coords_seq_sz,
+         "spawn def coords", total_read_sz, read_sz, cleanup )
 
-      /* coords.x */
-      read_sz = asn_read_int(
-         &(t->spawns[spawn_idx].coords.x), 1, 0, asn_buffer, total_read_sz );
-      if( 0 >= read_sz ) {
-         error_printf( "error reading spawn X coord" );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
-      debug_printf( 2, "spawn X: %d", t->spawns[spawn_idx].coords.x );
-      total_read_sz += read_sz;
+      serial_asn_read_int(
+         asn_buffer, (&t->spawns[spawn_idx].coords.x), 1, 0,
+         "spawn def coords X", total_read_sz, read_sz, cleanup )
 
-      /* coords.y */
-      read_sz = asn_read_int(
-         &(t->spawns[spawn_idx].coords.y), 1, 0, asn_buffer, total_read_sz );
-      if( 0 >= read_sz ) {
-         error_printf( "error reading spawn Y coord" );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
-      debug_printf( 2, "spawn Y: %d", t->spawns[spawn_idx].coords.y );
-      total_read_sz += read_sz;
+      serial_asn_read_int(
+         asn_buffer, (&t->spawns[spawn_idx].coords.y), 1, 0,
+         "spawn def coords Y", total_read_sz, read_sz, cleanup )
 
-      /* sprite name */
-      read_sz = asn_read_string( t->spawns[spawn_idx].sprite_name,
-            RESOURCE_NAME_MAX, asn_buffer, total_read_sz );
-      if( 0 >= read_sz ) {
-         error_printf( "error reading spawn type" );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
-      debug_printf( 2, "spawn sprite name: %s (%d)",
-         t->spawns[spawn_idx].sprite_name, read_sz );
-      total_read_sz += read_sz; /* spawn name and header */
+      serial_asn_read_string(
+         asn_buffer, t->spawns[spawn_idx].sprite_name, RESOURCE_NAME_MAX,
+         "spawn def sprite name", total_read_sz, read_sz, cleanup )
 
-      /* ascii */
-      read_sz = asn_read_int(
-         &(t->spawns[spawn_idx].ascii), 1, 0, asn_buffer, total_read_sz );
-      if( 0 >= read_sz ) {
-         error_printf( "error reading spawn ASCII" );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
-      debug_printf( 2, "spawn ASCII: %c (%d)",
-         t->spawns[spawn_idx].ascii, read_sz );
-      total_read_sz += read_sz;
+      serial_asn_read_int(
+         asn_buffer, (&t->spawns[spawn_idx].flags), 1, 0,
+         "spawn def ASCII", total_read_sz, read_sz, cleanup )
 
-      /* flags */
-      read_sz = asn_read_int(
-         (uint8_t*)&(t->spawns[spawn_idx].flags), 2, 0,
-         asn_buffer, total_read_sz );
-      if( 0 >= read_sz ) {
-         error_printf( "error reading spawn flags" );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
-      debug_printf( 2, "spawn flags: %04x", t->spawns[spawn_idx].flags );
-      total_read_sz += read_sz;
+      serial_asn_read_int(
+         asn_buffer, (&t->spawns[spawn_idx].flags), 2, 0,
+         "spawn flags", total_read_sz, read_sz, cleanup )
 
-      /* gid */
-      read_sz = asn_read_int(
-         (uint8_t*)&(t->spawns[spawn_idx].gid), 2, 0,
-         asn_buffer, total_read_sz );
-      if( 0 >= read_sz ) {
-         error_printf( "error reading spawn gid" );
-         total_read_sz = TILEMAP_ASN_ERROR_READ;
-         goto cleanup;
-      }
-      debug_printf( 2, "spawn gid: %d", t->spawns[spawn_idx].gid );
-      total_read_sz += read_sz;
+      serial_asn_read_int(
+         asn_buffer, (&t->spawns[spawn_idx].gid), 2, 0,
+         "spawn def GID", total_read_sz, read_sz, cleanup )
 
-      /* script_id */
-      total_read_sz += 2; /* script_id header */
-      t->spawns[spawn_idx].script_id = asn_buffer[total_read_sz];
-      if( 0xff == t->spawns[spawn_idx].script_id ) {
-         debug_printf( 1, "script ID is negative" );
-         t->spawns[spawn_idx].script_id = -1;
-      }
-      debug_printf( 1, "script ID: %d", t->spawns[spawn_idx].script_id );
-      total_read_sz++;
+      serial_asn_read_int(
+         asn_buffer, (&t->spawns[spawn_idx].script_id), 2, ASN_FLAG_SIGNED,
+         "spawn def script ID", total_read_sz, read_sz, cleanup )
 
       spawn_idx++;
    }
@@ -301,16 +234,14 @@ int16_t tilemap_asn_parse_items(
       item_def_seq_sz = 0;
    int16_t item_idx = 0;
 
-   tmasn_read_meta_buffer(
-      total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &all_items_seq_sz,
-      "all items", cleanup )
+   serial_asn_read_seq( asn_buffer, &type_buf, &all_items_seq_sz,
+      "tilemap item defs", total_read_sz, read_sz, cleanup )
 
    all_items_seq_start = total_read_sz;
 
    while( total_read_sz - all_items_seq_start < all_items_seq_sz ) {
-      tmasn_read_meta_buffer(
-         total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &item_def_seq_sz,
-         "item def", cleanup )
+      serial_asn_read_seq( asn_buffer, &type_buf, &item_def_seq_sz,
+         "item def", total_read_sz, read_sz, cleanup )
       
       /* index */
       read_sz = asn_read_int(
@@ -408,16 +339,14 @@ int16_t tilemap_asn_parse_crop_defs(
       crop_def_seq_sz = 0;
    int16_t crop_idx = 0;
 
-   tmasn_read_meta_buffer(
-      total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &all_crops_seq_sz,
-      "all crops", cleanup )
+   serial_asn_read_seq( asn_buffer, &type_buf, &all_crops_seq_sz,
+      "tilemap crop defs", total_read_sz, read_sz, cleanup )
 
    all_crops_seq_start = total_read_sz;
 
    while( total_read_sz - all_crops_seq_start < all_crops_seq_sz ) {
-      tmasn_read_meta_buffer(
-         total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &crop_def_seq_sz,
-         "crop def", cleanup )
+      serial_asn_read_seq( asn_buffer, &type_buf, &crop_def_seq_sz,
+         "crop def", total_read_sz, read_sz, cleanup )
       
       /* index */
       read_sz = asn_read_int(
@@ -518,10 +447,8 @@ int32_t tilemap_asn_parse_scripts(
       script_seq_start = 0,
       read_sz = 0;
 
-   /* Read scripts sequence header. */
-   tmasn_read_meta_buffer(
-      total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &all_scripts_seq_sz,
-      "all scripts", cleanup )
+   serial_asn_read_seq( asn_buffer, &type_buf, &all_scripts_seq_sz,
+      "tilemap scripts", total_read_sz, read_sz, cleanup )
 
    while( total_read_sz < all_scripts_seq_sz ) {
       debug_printf( 1, "script idx: %d", script_idx );
@@ -529,16 +456,13 @@ int32_t tilemap_asn_parse_scripts(
       step_idx = 0;
       script_seq_start = total_read_sz;
 
-      /* Read a script's step sequence header. */
-      tmasn_read_meta_buffer(
-         total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &script_seq_sz,
-         "script", cleanup )
+      serial_asn_read_seq( asn_buffer, &type_buf, &script_seq_sz,
+         "script", total_read_sz, read_sz, cleanup )
 
       while( total_read_sz - script_seq_start < script_seq_sz ) {
 
-         tmasn_read_meta_buffer(
-            total_read_sz, asn_buffer, asn_buffer_sz, &type_buf, &step_seq_sz,
-            "step", cleanup )
+         serial_asn_read_seq( asn_buffer, &type_buf, &step_seq_sz,
+            "script step", total_read_sz, read_sz, cleanup )
 
          /* step.action */
          read_sz = asn_read_int(
@@ -864,7 +788,7 @@ int32_t tilemap_asn_save(
          }
 
          serial_asn_write_seq_start(
-            &h_buffer, &step_sz_idx, "script steps", idx, cleanup )
+            &h_buffer, &step_sz_idx, "script step", idx, cleanup )
 
          serial_asn_write_int(
             &h_buffer, t->scripts[i].steps[j].action, x,
@@ -872,10 +796,10 @@ int32_t tilemap_asn_save(
 
          serial_asn_write_int(
             &h_buffer, t->scripts[i].steps[j].arg, x,
-            "script step action", idx, cleanup );
+            "script step arg", idx, cleanup );
 
          serial_asn_write_seq_end(
-            &h_buffer, &step_sz_idx, "script steps", idx, cleanup )
+            &h_buffer, &step_sz_idx, "script step", idx, cleanup )
       }
 
       serial_asn_write_seq_end(

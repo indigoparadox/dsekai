@@ -109,6 +109,12 @@
  */
 #define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | ((mobile_get_icount( m ) + (((v) << 12) & MOBILE_ICOUNT_MASK)) & MOBILE_ICOUNT_MASK))
 
+/* TODO: Use mobile GID macro in scripts.c and elsewhere instead of mobile
+ *       index in state!
+ */
+
+#define mobile_get_gid( m ) (((m)->map_gid << 16) & (m)->spawner_gid)
+
 /**
  * \addtogroup dsekai_mobiles_flags Mobile Object Flags
  * \brief Flags controlling ::MOBILE object behavior.

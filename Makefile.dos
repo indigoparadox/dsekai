@@ -108,7 +108,7 @@ INCLUDES_DOS := \
 CFLAGS_DOS_BASIC := -os -hw -d0 -0 $(CFLAGS_OWC_GENERIC) -wo -we
 
 # If we don't use the large memory model, we can't load assets reliably.
-CFLAGS_DOS := -mm $(CFLAGS_DOS_BASIC) $(DEFINES_DOS) $(INCLUDES_DOS)
+CFLAGS_DOS := -ml -DMEMORY_LARGE $(CFLAGS_DOS_BASIC) $(DEFINES_DOS) $(INCLUDES_DOS)
 
 ifneq ($(BUILD),RELEASE)
    CFLAGS_DOS += -DLOG_TO_FILE

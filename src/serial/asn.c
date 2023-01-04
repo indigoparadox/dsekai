@@ -8,7 +8,7 @@ int32_t serial_write_mobile(
    MEMORY_HANDLE* p_save_buffer_h, int32_t idx, struct MOBILE* m ) SECTION_SETUP;
 
 int32_t serial_read_mobile(
-   MEMORY_HANDLE* p_save_buffer_h, int32_t idx, struct MOBILE* m ) SECTION_SETUP;
+   MEMORY_PTR save_buffer, int32_t idx, struct MOBILE* m ) SECTION_SETUP;
 
 /* Function Definitions */
 
@@ -93,6 +93,8 @@ int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state ) {
    serial_asn_write_int(
       &save_buffer_h, state->engine_type, x, "engine type", idx, cleanup );
 
+   idx = serial_write_mobile( &save_buffer_h, idx, &(state->player) );
+
    serial_asn_write_seq_start(
       &save_buffer_h, &mark_seq_mobs, "mobiles", idx, cleanup );
 
@@ -133,20 +135,12 @@ cleanup:
 }
 
 int32_t serial_read_mobile(
-   MEMORY_HANDLE* p_save_buffer_h, int32_t idx, struct MOBILE* m
+   MEMORY_PTR save_buffer, int32_t idx, struct MOBILE* m
 ) {
    int32_t i = 0;
-   uint8_t* save_buffer = NULL;
    int32_t read_sz = 0,
       mob_seq_sz = 0;
    uint8_t type_buf = 0;
-
-   save_buffer = memory_lock( *p_save_buffer_h );
-   if( NULL == save_buffer ) {
-      error_printf( "could not lock save_buffer!" );
-      idx = SERIAL_ERROR;
-      goto cleanup;
-   }
 
    serial_asn_read_seq(
       save_buffer, &type_buf, &mob_seq_sz, "mobile", idx, read_sz, cleanup )
@@ -202,10 +196,6 @@ int32_t serial_read_mobile(
 
 cleanup:
 
-   if( NULL != save_buffer ) {
-      save_buffer = memory_unlock( *p_save_buffer_h );
-   }
-
    return idx;
 }
 
@@ -255,23 +245,24 @@ int32_t serial_load( const char* save_name, struct DSEKAI_STATE* state ) {
       save_buffer, &(state->engine_type), 1, 0,
       "engine type", idx, read_sz, cleanup );
 
+   idx = serial_read_mobile( save_buffer, idx, &(state->player) );
+
    serial_asn_read_seq( save_buffer, &type_buf, &mobs_seq_sz,
       "mobiles", idx, read_sz, cleanup )
 
-   /* Lock save buffer so serial_read_mobile() can read it. */
-   save_buffer = memory_unlock( save_buffer_h );
-
    /* TODO: Base this on the save mobile count, not the engine mobile count! */
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      idx = serial_read_mobile( &save_buffer_h, idx, &(state->mobiles[i]) );
+      idx = serial_read_mobile( save_buffer, idx, &(state->mobiles[i]) );
       if( 0 > idx ) {
          goto cleanup;
       }
    }
-   debug_printf( 2, "serialized mobiles loaded!" );
+   debug_printf( 2, "(offset 0x%x of 0x%x) serialized mobiles loaded!",
+      idx, save_buffer_sz );
 
    t = (struct TILEMAP*)memory_lock( state->map_handle );
    assert( NULL != t );
+   assert( NULL != save_buffer );
 
    read_sz = tilemap_asn_load( &(save_buffer[idx]), save_buffer_sz - idx, t );
 

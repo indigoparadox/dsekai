@@ -22,7 +22,7 @@
 
 #define serial_asn_write_string( p_asn_buffer_h, str, str_sz, desc, idx, cleanup ) debug_printf( 2, "(offset 0x%02x) writing %s: %s", idx, desc, str ); idx = asn_write_string( p_asn_buffer_h, idx, str, str_sz ); if( 0 > idx ) { error_printf( "error writing %s: %d", desc, idx ); goto cleanup; }
 
-#define serial_asn_read_seq( asn_buffer, p_type, p_sz, desc, idx, read_sz, cleanup ) idx = asn_read_meta_ptr( asn_buffer, idx, p_type, p_sz ); if( ASN_SEQUENCE != *(p_type) ) { error_printf( "invalid %s sequence type: 0x%02x", desc, *(p_type) ); idx = SERIAL_ERROR; goto cleanup; } debug_printf( 2, "(offset 0x%02x) read %s seq start (%d bytes)", idx, desc, *(p_sz) );
+#define serial_asn_read_seq( asn_buffer, p_type, p_sz, desc, idx, read_sz, cleanup ) read_sz = asn_read_meta_ptr( asn_buffer, idx, p_type, p_sz ); if( ASN_SEQUENCE != *(p_type) ) { error_printf( "invalid %s sequence type: 0x%02x", desc, *(p_type) ); idx = SERIAL_ERROR; goto cleanup; } debug_printf( 2, "(offset 0x%02x) read %s seq start (%d bytes)", idx, desc, *(p_sz) ); idx += read_sz;
 
 #define serial_asn_read_int( asn_buffer, p_val, val_sz, flags, desc, idx, read_sz, cleanup ) read_sz = asn_read_int( (uint8_t*)(p_val), val_sz, flags, asn_buffer, idx ); if( 0 >= read_sz ) { error_printf( "error reading %s", desc ); idx = SERIAL_ERROR; goto cleanup; } debug_printf( 2, "(offset 0x%02x) read %s (%d bytes): %d", idx, desc, read_sz, *(p_val) ); idx += read_sz;
 
