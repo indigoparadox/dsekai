@@ -229,7 +229,9 @@ struct DSEKAI_STATE {
     * \warning Index in this array is persistant and unique in the world!
     *          Be sure to preserve it (including empty spots) during serialize!
     */
-   struct MOBILE mobiles[DSEKAI_MOBILES_MAX];
+   MEMORY_HANDLE mobiles_handle;
+
+   uint16_t mobiles_sz;
 
    /**
     * \brief Currently active player MOBILE. Stays between maps.
