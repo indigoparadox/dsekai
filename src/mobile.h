@@ -13,6 +13,18 @@
  *  \brief Structs, functions and macros pertaining to interactive objects.
  */
 
+typedef uint32_t MOBILE_GID;
+
+#define MOBILE_GID_NONE 0
+#define MOBILE_GID_PLAYER 0xffffffff
+
+#define MOBILE_GID_FMT "%04d:%04d"
+
+#define mobile_get_gid_fmt( m ) (m)->map_gid, (m)->spawner_gid
+
+#define MOBILE_IDX_NONE -1
+#define MOBILE_IDX_PLAYER -2
+
 /**
  * \addtogroup dsekai_mobiles_spritesheets_sect Mobile Spritesheets
  * \{
@@ -208,7 +220,9 @@
 #  define mobile_get_sprite( m ) ((m)->sprite_cache_id)
 #endif /* PLATFORM_CURSES */
 
-#define mobile_break_if_last( mobiles, i ) if( MOBILE_FLAG_NOT_LAST != (MOBILE_FLAG_NOT_LAST & mobiles[i].flags) ) { debug_printf( 0, "breaking early on mobile %d!", i ); break; }
+#define mobile_break_if_last( m ) if( MOBILE_FLAG_NOT_LAST != (MOBILE_FLAG_NOT_LAST & (m)->flags) ) { debug_printf( 0, "breaking early on mobile" ); break; }
+
+#define mobile_is_active( m ) (MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & (m)->flags))
 
 /**
  * \addtogroup dsekai_mobiles_errors Mobile-Related Errors
@@ -335,7 +349,7 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
  * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  * \return ::MEMORY_PTR to the colliding mobile in ms.
  */
-struct MOBILE* mobile_get_facing(
+MOBILE_GID mobile_get_facing(
    uint8_t x, uint8_t y, uint8_t dir,
    struct TILEMAP* t, struct DSEKAI_STATE* state );
 
@@ -401,7 +415,12 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state );
  * \param flags \ref dsekai_mobiles_flags applying to the spawned ::MOBILE.
  */
 struct MOBILE* mobile_spawn_single(
-   uint16_t flags, struct DSEKAI_STATE* state ) SECTION_MOBILE;
+   uint16_t flags, struct DSEKAI_STATE* state, struct MOBILE* mobiles,
+   int16_t mobiles_sz ) SECTION_MOBILE;
+
+int16_t mobile_spawner_match(
+   struct TILEMAP_SPAWN* spawner, struct TILEMAP* t, struct MOBILE* mobiles,
+   uint16_t mobiles_sz ) SECTION_MOBILE;
 
 /**
  * \brief Spawn from ::TILEMAP::spawners according to spawner rules.

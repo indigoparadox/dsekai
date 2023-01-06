@@ -3,47 +3,47 @@
 #include "dsekai.h"
 
 int8_t item_use_none(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id,
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct CROP_PLOT* crops, int16_t crops_sz,
+   struct DSEKAI_STATE* state
 ) {
    error_printf( "attempted to use invalid item" );
    return 0;
 }
 
 int8_t item_use_seed(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id,
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct CROP_PLOT* crops, int16_t crops_sz,
+   struct DSEKAI_STATE* state
 ) {
    int8_t retval = -1;
    uint8_t x = 0,
       y = 0,
       crop_gid = 0;
    struct CROP_PLOT* plot = NULL;
-   struct TILEMAP* t = NULL;
    struct MOBILE* user = NULL;
-   struct ITEM* items = NULL;
 
    /* Owner check. */
    if( 0 <= owner_id ) {
-      user = &(state->mobiles[owner_id]);
+      user = &(mobiles[owner_id]);
    } else if( ITEM_OWNER_PLAYER == owner_id ) {
       user = &(state->player);
    }
    assert( NULL != user );
 
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
    crop_gid = items[e_idx].data;
-   items = (struct ITEM*)memory_unlock( state->items_handle );
 
    x = user->coords.x + gc_mobile_x_offsets[mobile_get_dir( user )];
    y = user->coords.y + gc_mobile_y_offsets[mobile_get_dir( user )];
 
    /* Get the plot in front of the user. */
-   t = (struct TILEMAP*)memory_lock( state->map_handle );
-   if( NULL == t ) {
-      error_printf( "could not lock tilemap" );
-      goto cleanup;
-   }
-   plot = crop_find_plot( t, x, y, state );
+   plot = crop_find_plot( t, x, y, crops, crops_sz, state );
    if( NULL == plot ) {
 #ifdef SCREEN_W
 #ifndef NO_GUI
@@ -59,7 +59,7 @@ int8_t item_use_seed(
 
    if( 0 < crop_plant( crop_gid, plot, t ) ) {
       /* Planting was successful. */
-      item_decr_or_delete( e_idx, state );
+      item_decr_or_delete( e_idx, items, items_sz, state );
    } else {
 #ifdef SCREEN_W
 #ifndef NO_GUI
@@ -74,15 +74,16 @@ int8_t item_use_seed(
 
 cleanup:
 
-   if( NULL != t ) {
-      t = (struct TILEMAP*)memory_unlock( state->map_handle );
-   }
-
    return retval;
 }
 
 int8_t item_use_food(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id, 
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct CROP_PLOT* crops, int16_t crops_sz,
+   struct DSEKAI_STATE* state
 ) {
 #if defined( DEPTH_VGA ) || defined( DEPTH_CGA )
 #ifndef NO_ANIMATE
@@ -92,22 +93,18 @@ int8_t item_use_food(
    char num_str[10];
    struct MOBILE* user = NULL;
    uint8_t food_val = 0;
-   struct ITEM* items = NULL;
 
    /* Owner check. */
    if( 0 <= owner_id ) {
-      user = &(state->mobiles[owner_id]);
+      user = &(mobiles[owner_id]);
    } else if( ITEM_OWNER_PLAYER == owner_id ) {
       user = &(state->player);
    }
    assert( NULL != user );
 
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
    food_val = items[e_idx].data;
-   items = (struct ITEM*)memory_unlock( state->items_handle );
 
-   item_decr_or_delete( e_idx, state );
+   item_decr_or_delete( e_idx, items, items_sz, state );
 
    /* TODO: Different types of food for different stats? */
    debug_printf( 1, "mobile %d:%d mp/hp was: %d",
@@ -136,20 +133,26 @@ int8_t item_use_food(
 }
 
 int8_t item_use_shovel(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id,
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct CROP_PLOT* crops, int16_t crops_sz,
+   struct DSEKAI_STATE* state
 ) {
    /* TODO: Implement digging. */
    return ITEM_USED_FAILED;
 }
 
 int8_t item_use_editor(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id,
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct CROP_PLOT* crops, int16_t crops_sz,
+   struct DSEKAI_STATE* state
 ) {
 #ifndef NO_ENGINE_EDITOR
-   struct TILEMAP* t = NULL;
-
-   t = (struct TILEMAP*)memory_lock( state->map_handle );
-   assert( NULL != t );
 
    if( TILEMAP_FLAG_EDITABLE != (TILEMAP_FLAG_EDITABLE & t->flags) ) {
 
@@ -172,39 +175,52 @@ int8_t item_use_editor(
       state->editor.coords.y = state->player.coords.y;
    }
 
-   t = (struct TILEMAP*)memory_unlock( state->map_handle );
 #endif /* !NO_ENGINE_EDITOR */
 
    return -1;
 }
 
 int8_t item_use_material(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id,
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct CROP_PLOT* crops, int16_t crops_sz,
+   struct DSEKAI_STATE* state
 ) {
    /* TODO: Warn that materials cannot be used directly. */
    return 0;
 }
 
 int8_t item_use_watercan(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id,
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct CROP_PLOT* crops, int16_t crops_sz,
+   struct DSEKAI_STATE* state
 ) {
    /* TODO: Check for CROP_PLOTs that can be watered. */
    return 0;
 }
 
 int8_t item_use_hoe(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id,
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct CROP_PLOT* crops, int16_t crops_sz,
+   struct DSEKAI_STATE* state
 ) {
    int8_t retval = ITEM_USED_SUCCESSFUL;
    int16_t x = 0,
       y = 0,
       i = 0,
       crop_idx = -1;
-   struct TILEMAP* t = NULL;
    struct MOBILE* user = NULL;
 
    if( 0 <= owner_id ) {
-      user = &(state->mobiles[owner_id]);
+      user = &(mobiles[owner_id]);
    } else if( ITEM_OWNER_PLAYER == owner_id ) {
       user = &(state->player);
    }
@@ -215,12 +231,9 @@ int8_t item_use_hoe(
 
    /* TODO: Move this to crop.c. */
 
-   t = (struct TILEMAP*)memory_lock( state->map_handle );
-   assert( NULL != t );
-
-   for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
+   for( i = 0 ; crops_sz > i ; i++ ) {
       /* Find an empty CROP_PLOT. */
-      if( CROP_FLAG_ACTIVE != (CROP_FLAG_ACTIVE & state->crops[i].flags) ) {
+      if( CROP_FLAG_ACTIVE != (CROP_FLAG_ACTIVE & crops[i].flags) ) {
          if( 0 > crop_idx ) {
             /* First empty encountered, use this one later. */
             crop_idx = i;
@@ -230,12 +243,12 @@ int8_t item_use_hoe(
 
       /* Crop plot is not empty, but does it collide? */
       if(
-         state->crops[i].map_gid == t->gid &&
-         x == state->crops[i].coords.x && y == state->crops[i].coords.y
+         crops[i].map_gid == t->gid &&
+         x == crops[i].coords.x && y == crops[i].coords.y
       ) {
          retval = ITEM_USED_SUCCESSFUL;
          /* Destroy plot. */
-         state->crops[i].flags &= ~CROP_FLAG_ACTIVE;
+         crops[i].flags &= ~CROP_FLAG_ACTIVE;
          crop_idx = -1;
          debug_printf( 1, "crop plot already exists; destroyed" );
          goto cleanup;
@@ -257,34 +270,30 @@ int8_t item_use_hoe(
 
    /* Create crop plot. */
    memory_zero_ptr(
-      (MEMORY_PTR)&(state->crops[crop_idx]), sizeof( struct CROP_PLOT ) );
-   state->crops[crop_idx].map_gid = t->gid;
-   state->crops[crop_idx].coords.x = x;
-   state->crops[crop_idx].coords.y = y;
-   state->crops[crop_idx].flags |= CROP_FLAG_ACTIVE;
+      (MEMORY_PTR)&(crops[crop_idx]), sizeof( struct CROP_PLOT ) );
+   crops[crop_idx].map_gid = t->gid;
+   crops[crop_idx].coords.x = x;
+   crops[crop_idx].coords.y = y;
+   crops[crop_idx].flags |= CROP_FLAG_ACTIVE;
    debug_printf( 2, "created crop plot %d at %d, %d on map %d",
       crop_idx,
-      state->crops[crop_idx].coords.x, state->crops[crop_idx].coords.y,
-      state->crops[crop_idx].map_gid );
+      crops[crop_idx].coords.x, crops[crop_idx].coords.y,
+      crops[crop_idx].map_gid );
 
 cleanup:
-
-   t = (struct TILEMAP*)memory_unlock( state->map_handle );
 
    return retval;
 }
 
 int16_t item_exists_in_inventory(
-   int16_t template_gid, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t template_gid, int16_t owner_id,
+   struct ITEM* items, int16_t items_sz,
+   struct DSEKAI_STATE* state
 ) {
    int16_t i = 0;
-   struct ITEM* items = NULL;
-
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
 
    /* Determine if the recipient has one of these already. */
-   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+   for( i = 0 ; items_sz > i ; i++ ) {
       item_break_if_last( items, i );
       if(
          ITEM_FLAG_ACTIVE == (items[i].flags & ITEM_FLAG_ACTIVE) &&
@@ -304,18 +313,15 @@ int16_t item_exists_in_inventory(
 
 cleanup:
  
-   if( NULL != items ) {
-      items = (struct ITEM*)memory_unlock( state->items_handle );
-   }
-
    return i;
 }
 
-int16_t item_decr_or_delete( int16_t e_idx, struct DSEKAI_STATE* state ) {
-   struct ITEM* items = NULL;
+int16_t item_decr_or_delete(
+   int16_t e_idx,
+   struct ITEM* items, int16_t items_sz,
+   struct DSEKAI_STATE* state,
+) {
 
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
    assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & items[e_idx].flags) );
 
    if( 1 < item_get_count_flag( &(items[e_idx]) ) ) {
@@ -327,22 +333,21 @@ int16_t item_decr_or_delete( int16_t e_idx, struct DSEKAI_STATE* state ) {
       e_idx = ITEM_ERROR_NOT_FOUND;
    }
 
-   items = (struct ITEM*)memory_unlock( state->items_handle );
-
    return e_idx;
 }
 
 int16_t item_stack_or_add(
    int16_t template_gid, int16_t owner_id,
-   struct TILEMAP* t, struct DSEKAI_STATE* state
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct DSEKAI_STATE* state
 ) {
    int16_t e_idx = 0,
       i = 0;
-   struct ITEM* e_def = NULL,
-      * items = NULL;
+   struct ITEM* e_def = NULL;
 
    /* Find the item definition with the given GID in tilemap item templates. */
-   for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
+   for( i = 0 ; items_sz > i ; i++ ) {
       item_break_if_last( t->item_defs, i );
       if(
          t->item_defs[i].gid == template_gid &&
@@ -362,11 +367,9 @@ int16_t item_stack_or_add(
    }
 
    /* Determine if we're stacking or adding. */
-   e_idx = item_exists_in_inventory( template_gid, owner_id, state );
+   e_idx = item_exists_in_inventory(
+      template_gid, owner_id, items, items_sz, state );
 
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
-   
    if(
       /* Found a dupe (stacking). */
       0 <= e_idx &&
@@ -380,7 +383,7 @@ int16_t item_stack_or_add(
    } else {
       /* Create item from template. */
       /* TODO: Check for full inventory vs ITEM_INVENTORY_MAX. */
-      for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      for( i = 0 ; items_sz > i ; i++ ) {
          /* Do NOT break on last item here, since we're just looking for a
           * free slot!
           */
@@ -411,10 +414,6 @@ int16_t item_stack_or_add(
 
 cleanup:
 
-   if( NULL != items ) {
-      items = (struct ITEM*)memory_unlock( state->items_handle );
-   }
-
    if( 0 > e_idx ) {
       error_printf( "unable to give item!" );
    }
@@ -423,42 +422,41 @@ cleanup:
 }
 
 int16_t item_give_mobile(
-   int16_t e_idx, int16_t owner_id, struct TILEMAP* t, struct DSEKAI_STATE* state
+   int16_t e_idx, int16_t owner_id, struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct DSEKAI_STATE* state
 ) {
    int16_t e_dest_idx = 0;
    int16_t e_gid = 0;
-   struct ITEM* items = NULL;
 
    /* Grab the source item's GID for use later. */
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
    assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & items[e_idx].flags) );
    e_gid = items[e_idx].gid;
-   items = (struct ITEM*)memory_unlock( state->items_handle );
    
    debug_printf( 2, "giving item at index %d with gid %d to owner: %d",
       e_idx, e_gid, owner_id );
 
    /* TODO: Check for full inventory vs ITEM_INVENTORY_MAX. */
 
-   item_stack_or_add( e_gid, owner_id, t, state );
+   item_stack_or_add( e_gid, owner_id, t, items, items_sz, state );
 
    /* Since give was successful, remove former owner's copy. */
-   item_decr_or_delete( e_idx, state );
+   item_decr_or_delete( e_idx, items, items_sz, state );
 
    return e_dest_idx;
 }
 
 int8_t item_drop(
-   int16_t e_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
+   int16_t e_idx,
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct DSEKAI_STATE* state
 ) {
-   struct ITEM* e = NULL,
-      * items = NULL;
+   struct ITEM* e = NULL;
 
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
-
-   assert( DSEKAI_ITEMS_MAX > e_idx );
+   assert( items_sz > e_idx );
    assert( 0 <= e_idx );
    e = &(items[e_idx]);
    assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & e->flags) );
@@ -471,9 +469,9 @@ int8_t item_drop(
    if( ITEM_OWNER_PLAYER == e->owner ) {
       e->x = state->player.coords.x;
       e->y = state->player.coords.y;
-   } else if( 0 <= e->owner && DSEKAI_MOBILES_MAX > e->owner ) {
-      e->x = state->mobiles[e->owner].coords.x;
-      e->y = state->mobiles[e->owner].coords.y;
+   } else if( 0 <= e->owner && mobiles_sz > e->owner ) {
+      e->x = mobiles[e->owner].coords.x;
+      e->y = mobiles[e->owner].coords.y;
    }
 
    debug_printf( 2, "dropped item at %d, %d", e->x, e->y );
@@ -481,6 +479,7 @@ int8_t item_drop(
    e->owner = ITEM_OWNER_NONE;
    e->map_gid = t->gid;
 
+   /* TODO: Set tile as occupied. */
 #if 0
    /* Set tile as dirty. */
    t = (struct TILEMAP*)memory_lock( state->map_handle );
@@ -492,25 +491,18 @@ int8_t item_drop(
 
 cleanup:
 
-   if( NULL != items ) {
-      items = (struct ITEM*)memory_unlock( state->items_handle );
-   }
-
    return e_idx;
 }
 
 int16_t item_pickup_xy(
    uint8_t x, uint8_t y, int16_t owner, struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
    struct DSEKAI_STATE* state
 ) {
    int16_t i = 0;
-   struct ITEM* items = NULL;
 
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
-
-   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
-      item_break_if_last( items, i );
+   for( i = 0 ; items_sz > i ; i++ ) {
+      /* item_break_if_last( items, i ); */
       if(
          /* Skip inactive items. */
          !(ITEM_FLAG_ACTIVE & items[i].flags) ||
@@ -525,6 +517,7 @@ int16_t item_pickup_xy(
       if( x == items[i].x && y == items[i].y ) {
          debug_printf( 2, "assigned owner %d to item %d at %d, %d",
             owner, i, x, y );
+         /* TODO: Switch owner to use GID instead of index. */
          items[i].owner = owner;
 
 #if 0
@@ -540,8 +533,6 @@ int16_t item_pickup_xy(
    }
 
    /* Didn't pick anything up. */
-
-   items = (struct ITEM*)memory_unlock( state->items_handle );
 
    return i;
 }

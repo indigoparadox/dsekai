@@ -23,26 +23,35 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
    return 1;
 }
 
-struct MOBILE* mobile_get_facing(
+MOBILE_GID mobile_get_facing(
    uint8_t x, uint8_t y, uint8_t dir,
    struct TILEMAP* t, struct DSEKAI_STATE* state
 ) {
    int16_t i = 0;
+   struct MOBILE* mobiles = NULL;
+   MOBILE_GID gid_out = MOBILE_GID_NONE;
 
    /* TODO: Implement resource gathering here, maybe? */
 
+   mobiles = memory_lock( state->mobiles_handle );
+   if( NULL == mobiles ) {
+      error_printf( "could not lock mobiles handle" );
+      goto cleanup;
+   }
+
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      mobile_break_if_last( state->mobiles, i );
+      /* TODO: Compact mobiles list, maybe on zone? */
+      /* mobile_break_if_last( state->mobiles, i ); */
 
       if(
-         MOBILE_FLAG_ACTIVE ==
-            (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags) &&
-         state->mobiles[i].map_gid == t->gid &&
-         state->mobiles[i].coords.x == x + gc_mobile_x_offsets[dir] &&
-         state->mobiles[i].coords.y == y + gc_mobile_y_offsets[dir]
+         MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & mobiles[i].flags) &&
+         mobiles[i].map_gid == t->gid &&
+         mobiles[i].coords.x == x + gc_mobile_x_offsets[dir] &&
+         mobiles[i].coords.y == y + gc_mobile_y_offsets[dir]
       ) {
          /* Found an active facing mobile on the same tilemap. */
-         return &(state->mobiles[i]);
+         gid_out = mobile_get_gid( &(mobiles[i]) );
+         goto cleanup;
       }
    }
 
@@ -51,10 +60,16 @@ struct MOBILE* mobile_get_facing(
       state->player.coords.x == x + gc_mobile_x_offsets[dir] &&
       state->player.coords.y == y + gc_mobile_y_offsets[dir]
    ) {
-      return &(state->player);
+      gid_out = MOBILE_GID_PLAYER;
    }
 
-   return NULL;
+cleanup:
+
+   if( NULL != mobiles ) {
+      mobiles = memory_unlock( state->mobiles_handle );
+   }
+
+   return gid_out;
 }
 
 void mobile_state_animate( struct DSEKAI_STATE* state ) {
@@ -337,7 +352,8 @@ void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 }
 
 struct MOBILE* mobile_spawn_single(
-   uint16_t flags, struct DSEKAI_STATE* state
+   uint16_t flags, struct DSEKAI_STATE* state, struct MOBILE* mobiles,
+   int16_t mobiles_sz
 ) {
    int16_t i = 0;
    struct MOBILE* mobile_out = NULL;
@@ -348,26 +364,26 @@ struct MOBILE* mobile_spawn_single(
          MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & state->player.flags)
       ) {
          error_printf( "player mobile already in use!" );
-         return NULL;
+         /* Skip setup. */
+         goto cleanup;
       }
       
       /* Player doesn't exist, so assign it and config below. */
       mobile_out = &(state->player);
    } else {
-      for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-         if(
-            MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & state->mobiles[i].flags)
-         ) {
+      for( i = 0 ; mobiles_sz > i ; i++ ) {
+         if( mobile_is_active( &(mobiles[i]) ) ) {
             continue;
          }
 
-         mobile_out = &(state->mobiles[i]);
+         mobile_out = &(mobiles[i]);
          break;
       }
 
-      if( i >= DSEKAI_MOBILES_MAX ) {
+      if( i >= mobiles_sz ) {
+         /* TODO: Resize mobiles. */
          error_printf( "no available mobiles to spawn!" );
-         return NULL;
+         goto cleanup;
       }
    }
 
@@ -381,11 +397,14 @@ struct MOBILE* mobile_spawn_single(
    mobile_out->flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
    mobile_out->map_gid = MOBILE_MAP_GID_ALL;
    
+cleanup:
+
    return mobile_out;
 }
 
 int16_t mobile_spawner_match(
-   struct TILEMAP_SPAWN* spawner, struct TILEMAP* t, struct MOBILE* mobiles
+   struct TILEMAP_SPAWN* spawner, struct TILEMAP* t, struct MOBILE* mobiles,
+   uint16_t mobiles_sz
 ) {
    int16_t i = 0;
    RESOURCE_ID ss_id;
@@ -393,15 +412,13 @@ int16_t mobile_spawner_match(
    /* See if the mobile was spawned on a previous visit to this tilemap. */
    debug_printf( 1, "search tilemap %d, spawner %d", t->gid, spawner->gid );
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      mobile_break_if_last( mobiles, i );
-      if(
-         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & mobiles[i].flags)
-      ) {
+      /* mobile_break_if_last( mobiles, i ); */
+      if( MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & mobiles[i].flags) ) {
          continue;
       }
-      debug_printf( 1, "sgid m: %u vs s: %u",
+      debug_printf( 0, "sgid m: %u vs s: %u",
          mobiles[i].spawner_gid, spawner->gid );
-      debug_printf( 1, "mgid m: %u vs s: %u",
+      debug_printf( 0, "mgid m: %u vs s: %u",
          mobiles[i].map_gid, t->gid );
       if(
          MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & mobiles[i].flags) &&
@@ -429,8 +446,15 @@ cleanup:
 void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
    int16_t i = 0,
       match = 0;
+   struct MOBILE* mobiles = NULL;
    struct MOBILE* mobile_iter = NULL;
    RESOURCE_ID sprite_id;
+
+   mobiles = memory_lock( state->mobiles_handle );
+   if( NULL == mobiles ) {
+      error_printf( "could not lock mobiles handle" );
+      goto cleanup;
+   }
 
    for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
       /* If the spawner has no name, skip it. */
@@ -441,7 +465,8 @@ void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
       }
 
       /* See if the mobile was spawned on a previous visit to this tilemap. */
-      match = mobile_spawner_match( &(t->spawns[i]), t, state->mobiles );
+      match = mobile_spawner_match(
+         &(t->spawns[i]), t, mobiles, state->mobiles_sz );
       if( 0 <= match ) {
          debug_printf( 1,
             "found existing spawn for tilemap %u spawner %u; skipping",
@@ -450,7 +475,8 @@ void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
       }
 
       /* Select the mobile slot or player slot to spawn to. */
-      mobile_iter = mobile_spawn_single( t->spawns[i].flags, state );
+      mobile_iter = mobile_spawn_single( t->spawns[i].flags, state,
+         mobiles, state->mobiles_sz );
       if( NULL == mobile_iter ) {
          error_printf( "coult not spawn mobile for tilemap %u spawner %u",
             t->gid, t->spawns[i].gid );
@@ -483,5 +509,9 @@ void mobile_spawns( struct TILEMAP* t, struct DSEKAI_STATE* state ) {
       mobile_iter->sprite_cache_id = graphics_cache_load_bitmap( 
          sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
    }
+
+cleanup:
+
+   return;
 }
 

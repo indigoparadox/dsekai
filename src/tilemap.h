@@ -79,7 +79,9 @@
 #  define tilemap_tile_get_image( tt ) ((tt)->image_cache_id)
 #endif /* PLATFORM_CURSES */
 
+/*
 #define mobile_break_if_last( mobiles, i ) if( MOBILE_FLAG_NOT_LAST != (MOBILE_FLAG_NOT_LAST & mobiles[i].flags) ) { debug_printf( 0, "breaking early on mobile %d!", i ); break; }
+*/
 
 #ifndef IGNORE_DIRTY
 

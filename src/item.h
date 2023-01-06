@@ -49,6 +49,8 @@
 
 /*! \} */ /* dsekai_items_errors */
 
+struct CROP_PLOT;
+
 /**
  * \addtogroup dsekai_items_use Item Types and Use
  * \brief Definitions and callbacks pertaining to ::ITEM use in-world.
@@ -83,10 +85,12 @@
  *         ::ITEM_ERROR_NOT_FOUND if not.
  */
 int16_t item_exists_in_inventory(
-   int16_t template_gid, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t template_gid, int16_t owner_id,
+   struct ITEM* items, int16_t items_sz, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
-int16_t item_decr_or_delete( int16_t e_idx, struct DSEKAI_STATE* state );
+int16_t item_decr_or_delete( int16_t e_idx,
+   struct ITEM* items, int16_t items_sz, struct DSEKAI_STATE* state );
 
 /**
  * \brief Create an item in DSEKAI_STATE::items_handle from a template in
@@ -111,7 +115,9 @@ int16_t item_decr_or_delete( int16_t e_idx, struct DSEKAI_STATE* state );
  */
 int16_t item_stack_or_add(
    int16_t template_gid, int16_t owner_id,
-   struct TILEMAP* t, struct DSEKAI_STATE* state
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
 /**
@@ -126,6 +132,8 @@ int16_t item_stack_or_add(
  */
 int16_t item_give_mobile(
    int16_t e_idx, int16_t owner_id, struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
    struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
@@ -139,8 +147,11 @@ int16_t item_give_mobile(
  * \return 1 if give was successful, or error code otherwise.
  */
 int8_t item_drop(
-   int16_t e_idx, struct TILEMAP* t, struct DSEKAI_STATE* state
-) SECTION_ITEM;
+   int16_t e_idx,
+   struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
+   struct MOBILE* mobiles, int16_t mobiles_sz,
+   struct DSEKAI_STATE* state ) SECTION_ITEM;
 
 /**
  * \brief Pick up an item at the given x, y tile coordinates on the given
@@ -154,6 +165,7 @@ int8_t item_drop(
  */
 int16_t item_pickup_xy(
    uint8_t x, uint8_t y, int16_t owner_id, struct TILEMAP* t,
+   struct ITEM* items, int16_t items_sz,
    struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
@@ -177,12 +189,12 @@ int16_t item_pickup_xy(
  *            will create a ::WINDOW, as those might conflict with the menu.
  */
 typedef int8_t (*ITEM_USE_CB)(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state );
+   int16_t e_idx, int16_t owner_id, struct TILEMAP* t, struct ITEM* items, int16_t items_sz, struct MOBILE* mobiles, int16_t mobiles_sz, struct CROP_PLOT* crops, int16_t crops_sz, struct DSEKAI_STATE* state );
 
 /**
  * \brief Macro to define ::ITEM_USE_CB prototypes from ::ITEM_TABLE.
  */
-#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state ) SECTION_ITEM;
+#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( int16_t e_idx, int16_t owner_id, struct TILEMAP* t, struct ITEM* items, int16_t items_sz, struct MOBILE* mobiles, int16_t mobiles_sz, struct CROP_PLOT* crops, int16_t crops_sz, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
 ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
 
@@ -213,7 +225,7 @@ RES_CONST ITEM_USE_CB gc_item_use_cbs[] = {
 
 #  ifdef NO_ITEM_HANDLERS
 
-#     define ITEM_TABLE_USE_CB_STUBS( type, max ) int8_t item_use_ ## type( int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state ) { return 0; }
+#     define ITEM_TABLE_USE_CB_STUBS( type, max ) int8_t item_use_ ## type( int16_t e_idx, int16_t owner_id, struct TILEMAP* t, struct ITEM* items, int16_t items_sz, struct MOBILE* mobiles, int16_t mobiles_sz, struct CROP_PLOT* crops, int16_t crops_sz, struct DSEKAI_STATE* state ) { return 0; }
 
 ITEM_TABLE( ITEM_TABLE_USE_CB_STUBS );
 
