@@ -161,7 +161,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       state, NULL );
    */
    
-   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+   for( i = 0 ; state->items_sz > i ; i++ ) {
       /* Skip non-player-held or deleted items. */
       /* TODO: Maybe consolidate this with the section to breakout in the
        *       items input handler.
@@ -280,7 +280,7 @@ int16_t menu_handler_items(
    /* TODO: Break this first part out into its own function. */
 
    /* Count player-owned items to enforce limits below. */
-   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+   for( i = 0 ; state->items_sz > i ; i++ ) {
       if(
          ITEM_OWNER_PLAYER == state->items[i].owner &&
          ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & state->items[i].flags)

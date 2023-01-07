@@ -527,15 +527,3 @@ cleanup:
    return i;
 }
 
-/*
-void item_cleanup_orphans( struct DSEKAI_STATE* ) {
-   int16_t i = 0;
-
-   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
-      if(
-         ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & state->items[i].flags) &&
-         0 <= state->items[i].owner
-   }
-}
-*/
-

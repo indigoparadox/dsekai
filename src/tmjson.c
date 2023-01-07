@@ -514,6 +514,7 @@ int16_t tilemap_json_parse_items(
    
    /* Load items.*/
    debug_printf( 2, "loading items" ); 
+   /* TODO: Load the number of items in the map, not TILEMAP_ITEMS_MAX! */
    for( i = 0 ; TILEMAP_ITEMS_MAX > i ; i++ ) {
       
       /* type */
@@ -607,10 +608,15 @@ int16_t tilemap_json_parse_crop_defs(
    
    /* Load crop definitions.*/
    debug_printf( 2, "loading crop definitions" ); 
+   /* TODO: Load number of crop defs in the map, not TILEMAP_CROP_DEFS_MAX! */
    for( i = 0 ; TILEMAP_CROP_DEFS_MAX > i ; i++ ) {
       
       /* name */
       dio_snprintf( iter_path, JSON_PATH_SZ, TILEMAP_JPATH_CROP_DEF_NAME, i );
+      name_buffer_sz = json_str_from_path(
+         iter_path, JSON_PATH_SZ,
+         t->crop_defs[i].name, CROP_NAME_MAX,
+         &(tokens[0]), tokens_sz, json_buffer );
       if( 0 >= name_buffer_sz ) {
          error_printf( "invalid crop definition returned (loaded %d)", i );
          break;

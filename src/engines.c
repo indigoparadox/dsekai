@@ -168,7 +168,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
    /* Reset item sprite IDs since cache is gone. */
    debug_printf( 1, "resetting item sprite IDs..." );
-   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+   for( i = 0 ; state->items_sz > i ; i++ ) {
       resource_id_from_name( &sprite_id, state->items[i].sprite_name,
          RESOURCE_EXT_GRAPHICS );
       state->items[i].sprite_cache_id = graphics_cache_load_bitmap(
@@ -200,7 +200,7 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
 
    mobile_state_animate( state );
    profiler_set();
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+   for( i = 0 ; state->mobiles_sz > i ; i++ ) {
       /* mobile_break_if_last( state->mobiles, i ); */
       if( !mobile_is_active( &(state->mobiles[i]) ) ) {
          continue;
@@ -210,7 +210,7 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
    profiler_incr( script_mobiles );
 
    profiler_set();
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+   for( i = 0 ; state->mobiles_sz > i ; i++ ) {
       /* mobile_break_if_last( state->mobiles, i ); */
       if( !mobile_is_active( &(state->mobiles[i]) ) ) {
          continue;

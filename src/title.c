@@ -253,7 +253,7 @@ void title_draw( struct DSEKAI_STATE* state ) {
       DSEKAI_TITLE_TEXT_COLOR, /* Varies by depth, set in engines.h. */
       1 );
 
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+   for( i = 0 ; state->mobiles_sz > i ; i++ ) {
       if( !mobile_is_active( &(state->mobiles[i]) ) ) {
          continue;
       }

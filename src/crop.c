@@ -26,7 +26,7 @@ void crop_grow_all( struct DSEKAI_STATE* state ) {
       goto cleanup;     
    }
 
-   for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
+   for( i = 0 ; state->crops_sz > i ; i++ ) {
       if(
          CROP_FLAG_ACTIVE != (CROP_FLAG_ACTIVE & state->crops[i].flags) ||
          0 == state->crops[i].crop_gid ||
@@ -170,7 +170,7 @@ int8_t crop_get_def_idx( uint8_t gid, struct DSEKAI_STATE* state ) {
    }
 
    if( 0 > retval ) { 
-      error_printf( "unable to find this crop def on the current tilemap" );
+      error_printf( "could not find crop def for: %d", gid );
    }
 
 cleanup:

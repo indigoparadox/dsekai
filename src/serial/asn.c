@@ -98,7 +98,7 @@ int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state ) {
    serial_asn_write_seq_start(
       &save_buffer_h, &mark_seq_mobs, "mobiles", idx, cleanup );
 
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+   for( i = 0 ; state->mobiles_sz > i ; i++ ) {
       idx = serial_write_mobile( &save_buffer_h, idx, &(state->mobiles[i]) );
       if( 0 > idx ) {
          goto cleanup;
@@ -251,7 +251,7 @@ int32_t serial_load( const char* save_name, struct DSEKAI_STATE* state ) {
       "mobiles", idx, read_sz, cleanup )
 
    /* TODO: Base this on the save mobile count, not the engine mobile count! */
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+   for( i = 0 ; state->mobiles_sz > i ; i++ ) {
       idx = serial_read_mobile( save_buffer, idx, &(state->mobiles[i]) );
       if( 0 > idx ) {
          goto cleanup;

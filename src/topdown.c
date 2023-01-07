@@ -157,7 +157,7 @@ static void topdown_draw_crops(
    /* TODO: Use tile dirty bit to avoid redraw unless crop sprite changes. */
 
    /* Draw crops/plots. */
-   for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
+   for( i = 0 ; state->crops_sz > i ; i++ ) {
       plot = &(state->crops[i]);
       if(
          /* Crop plot is inactive. */
