@@ -4,8 +4,13 @@
 #include <assert.h>
 #include <string.h>
 
+#define NO_SCRIPT_HANDLERS
 #define ENGINES_TOKENS_ONLY
 #define ENGINES_C
+#define SCRIPT_C
+#define MOBILE_C
+#define ITEM_C
+#define NO_ITEM_HANDLERS
 #include "../src/dsekai.h"
 
 #include "../src/tmjson.h"

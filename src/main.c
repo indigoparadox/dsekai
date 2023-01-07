@@ -102,12 +102,16 @@ int unilayer_main( int argc, char* argv[] ) {
    state->engine_state = ENGINE_STATE_OPENING;
    state->menu.menu_id = -1;
    state->menu.highlight_id = -1;
+   
    state->map_handle = memory_alloc( 1, sizeof( struct TILEMAP ) );
    if( (MEMORY_HANDLE)NULL == state->map_handle ) {
       error_printf( "unable to allocate tilemap!" );
       retval = 1;
       goto exit;
    }
+   
+   /* TODO: Start small and resize later. */
+   state->items_sz = DSEKAI_ITEMS_MAX;
    state->items_handle =
       memory_alloc( DSEKAI_ITEMS_MAX, sizeof( struct ITEM ) );
    if( (MEMORY_HANDLE)NULL == state->items_handle ) {
@@ -115,6 +119,27 @@ int unilayer_main( int argc, char* argv[] ) {
       retval = 1;
       goto exit;
    }
+
+   /* TODO: Start small and resize later. */
+   state->mobiles_sz = DSEKAI_MOBILES_MAX;
+   state->mobiles_handle =
+      memory_alloc( DSEKAI_MOBILES_MAX, sizeof( struct MOBILE ) );
+   if( (MEMORY_HANDLE)NULL == state->mobiles_handle ) {
+      error_printf( "unable to allocate mobiles!" );
+      retval = 1;
+      goto exit;
+   }
+
+   /* TODO: Start small and resize later. */
+   state->crops_sz = DSEKAI_CROPS_MAX;
+   state->crops_handle =
+      memory_alloc( DSEKAI_CROPS_MAX, sizeof( struct CROP_PLOT ) );
+   if( (MEMORY_HANDLE)NULL == state->crops_handle ) {
+      error_printf( "unable to allocate crops!" );
+      retval = 1;
+      goto exit;
+   }
+
    unilayer_loop_set( engines_loop_iter, g_state_handle );
 
    state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );

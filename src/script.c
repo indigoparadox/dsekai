@@ -10,20 +10,12 @@
 #define SCRIPT_HAS_GFX
 #endif /* SCREEN_W && SCREEN_H */
 
-#ifdef NO_SCRIPT_HANDLERS
-
-/* Create stubs for all handlers. */
-
-#define SCRIPT_CB_TABLE_STUBS( idx, name, c ) uint16_t script_handle_ ## name( uint16_t pc, struct SCRIPT* script, struct TILEMAP* t, struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile, struct DSEKAI_STATE* state, int16_t arg ) { return pc; }
-
-SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_STUBS )
-
-#else
+#ifndef NO_SCRIPT_HANDLERS
 
 uint16_t script_handle_NOOP(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    return pc;
 }
@@ -51,9 +43,9 @@ uint16_t script_goto_label(
 }
 
 uint16_t script_handle_SHAKE(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
 #ifndef NO_GUI
    g_screen_flags |= (GRAPHICS_FLAG_SHAKING_MASK & arg);
@@ -62,21 +54,25 @@ uint16_t script_handle_SHAKE(
 }
 
 uint16_t script_handle_INTERACT(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    /* NOOP: This is just a label to jump to with fancy GOTO mechanism. */
    return pc + 1;
 }
 
 uint16_t script_handle_WALK(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    int8_t dir_raw = 0,
       dir = 0;
+
+   if( !engines_state_lock( state ) ) {
+      goto cleanup;     
+   }
 
    if(
       /* Actor is currently walking. */
@@ -117,7 +113,8 @@ uint16_t script_handle_WALK(
       /* Handle terrain blockage by skipping. */
       if(
          TILEMAP_ERROR_BLOCKED ==
-         tilemap_collide( actor->coords.x, actor->coords.y, dir, t )
+         tilemap_collide(
+            actor->coords.x, actor->coords.y, dir, state->tilemap )
       ) {
          /* Actor would collide, so just skip this walk attempt. */
          script_trace_printf( 1, "mobile %u:%u collided with terrain",
@@ -130,8 +127,7 @@ uint16_t script_handle_WALK(
        */
       if(
          NULL == mobile_get_facing(
-            actor->coords.x, actor->coords.y, mobile_get_dir( actor ),
-            t, state )
+            actor->coords.x, actor->coords.y, mobile_get_dir( actor ), state )
       ) {
          script_trace_printf( 1, "mobile %u:%u starting walking in dir %d",
             actor->map_gid, actor->spawner_gid, dir );
@@ -142,40 +138,42 @@ uint16_t script_handle_WALK(
       mobile_stack_push( actor, dir_raw );
    }
 
+cleanup:
+
    return pc;
 }
 
 uint16_t script_handle_SLEEP(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    actor->script_wait_frames = arg;
    return pc + 1;
 }
 
 uint16_t script_handle_START(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    /* NOOP: This is just a label to jump to with GOTO mechanism. */
    return pc + 1;
 }
 
 uint16_t script_handle_GOTO(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    mobile_stack_push( actor, pc + 1 );
    return script_goto_label( pc, script, SCRIPT_ACTION_START, arg );
 }
 
 uint16_t script_handle_RETURN(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    if( 0 <= arg && SCRIPT_STEPS_MAX > arg ) {
       script_trace_printf( 1, "mobile %u:%u at pc %d, returning to pc %d",
@@ -191,9 +189,9 @@ uint16_t script_handle_RETURN(
 }
 
 uint16_t script_handle_GGET(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    if( arg >= 0 && SCRIPT_GLOBALS_MAX > arg ) {
       mobile_stack_push( actor, g_script_globals[arg] );
@@ -202,9 +200,9 @@ uint16_t script_handle_GGET(
 }
 
 uint16_t script_handle_GSET(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    if( arg >= 0 && SCRIPT_GLOBALS_MAX > arg ) {
       g_script_globals[arg] = mobile_stack_pop( actor );
@@ -213,16 +211,21 @@ uint16_t script_handle_GSET(
 }
 
 uint16_t script_handle_SPEAK(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
+
+   if( !engines_state_lock( state ) ) {
+      goto cleanup;     
+   }
+
 #if defined( DEPTH_VGA ) || defined( DEPTH_CGA ) || defined( DEPTH_MONO )
 #ifndef NO_GUI
    const char* str_ptr = NULL;
    uint8_t dir_flag = 0;
    
-   str_ptr = strpool_get( t->strpool, arg, NULL );
+   str_ptr = strpool_get( state->tilemap->strpool, arg, NULL );
 
    /* Translate mobile dir flag into window dir flag. */
    dir_flag = mobile_get_dir( actor );
@@ -233,26 +236,32 @@ uint16_t script_handle_SPEAK(
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
 #endif /* !NO_GUI */
 #endif /* SCRIPT_HAS_GFX */
+
+cleanup:
    return pc + 1;
 }
 
 uint16_t script_handle_FACE(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    mobile_set_dir( actor, (arg % 4) );
    return pc + 1;
 }
 
 uint16_t script_handle_WARP(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    const char* warp_map = NULL;
 
-   warp_map = strpool_get( t->strpool, arg, NULL );
+   if( !engines_state_lock( state ) ) {
+      goto cleanup;     
+   }
+
+   warp_map = strpool_get( state->tilemap->strpool, arg, NULL );
 
    if( NULL == warp_map ) {
       error_printf( "invalid warp map string index: %d", arg );
@@ -268,14 +277,16 @@ uint16_t script_handle_WARP(
    state->warp_to_y = mobile_stack_pop( actor );
    state->warp_to_x = mobile_stack_pop( actor );
 
+cleanup:
+
    /* Freeze */
    return pc;
 }
 
 uint16_t script_handle_ANIM(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
 #ifdef SCRIPT_HAS_GFX
 #  ifndef NO_ANIMATE
@@ -300,9 +311,9 @@ uint16_t script_handle_ANIM(
 }
 
 uint16_t script_handle_PUSH(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    mobile_stack_push( actor, arg );
 
@@ -310,9 +321,9 @@ uint16_t script_handle_PUSH(
 }
 
 uint16_t script_handle_POP(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    mobile_stack_pop( actor );
 
@@ -320,9 +331,9 @@ uint16_t script_handle_POP(
 }
 
 uint16_t script_handle_EQJMP(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    int8_t val1 = 0,
       val2 = 0;
@@ -341,9 +352,9 @@ uint16_t script_handle_EQJMP(
 }
 
 uint16_t script_handle_GTJMP(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    int8_t val1 = 0,
       val2 = 0;
@@ -364,9 +375,9 @@ uint16_t script_handle_GTJMP(
 }
 
 uint16_t script_handle_ADD(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    int8_t stack_val = 0;
 
@@ -378,9 +389,9 @@ uint16_t script_handle_ADD(
 }
 
 uint16_t script_handle_SUB(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    int8_t stack_val = 0;
 
@@ -392,9 +403,9 @@ uint16_t script_handle_SUB(
 }
 
 uint16_t script_handle_LTJMP(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    int8_t val1 = 0,
       val2 = 0;
@@ -413,9 +424,9 @@ uint16_t script_handle_LTJMP(
 }
 
 uint16_t script_handle_GIVE(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    int16_t e_idx = 0;
    int8_t items_pushed = 1;
@@ -426,13 +437,13 @@ uint16_t script_handle_GIVE(
    /* TODO: Rework hook API to pass actor/actee IDs so we can pass that
       *       as the owner to item_create_from_template().
       */
-   e_idx = item_stack_or_add( arg, 0, t, state );
+   e_idx = item_stack_or_add( arg, 0, state );
    if( 0 > e_idx ) {
       error_printf( "unable to give: invalid item GID: %d", arg );
       items_pushed = 0;
    }
 
-   e_idx = item_give_mobile( e_idx, ITEM_OWNER_PLAYER, t, state );
+   e_idx = item_give_mobile( e_idx, ITEM_OWNER_PLAYER, state );
    if( 0 > e_idx ) {
       error_printf( "unable to give: error %d", e_idx );
       items_pushed = 0;
@@ -445,9 +456,9 @@ uint16_t script_handle_GIVE(
 }
 
 uint16_t script_handle_TAKE(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    /* TODO: Push onto the stack how many taken. */
    mobile_stack_push( actor, 0 );
@@ -456,9 +467,9 @@ uint16_t script_handle_TAKE(
 }
 
 uint16_t script_handle_DIE(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    /* Trigger pre-death blinking effect. */
    actor->mp_hp = -10;
@@ -467,9 +478,9 @@ uint16_t script_handle_DIE(
 }
 
 uint16_t script_handle_DISABLE(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg
+   struct DSEKAI_STATE* state
 ) {
    if( 0 == arg ) {
       script_trace_printf( 1, "mobile %u:%u enabling interaction",
@@ -484,161 +495,6 @@ uint16_t script_handle_DISABLE(
 }
 
 #endif /* NO_SCRIPT_HANDLERS */
-
-#ifndef NO_SCRIPT_COMPILER
-
-void script_cmp_case( char* token, size_t token_sz ) {
-   uint16_t i = 0;
-
-   /* Change token case for compare. */
-   for( i = 0 ; token_sz > i ; i++ ) {
-      if( script_char_alpha( token[i] ) ) {
-         token[i] -= 32;
-      }
-   }
-}
-
-void script_cmp_action( char* token, size_t token_sz, struct SCRIPT_STEP* s ) {
-   uint16_t i = 0;
-
-   script_cmp_case( token, token_sz );
-
-   /* Compare to token table. */
-   i = 0;
-   while( NULL != gc_sc_tokens[i] ) {
-      if( 0 == memory_strncmp_ptr( token, gc_sc_tokens[i], token_sz ) ) {
-         s->action = i;
-         script_trace_printf( 1, " action: %s\n", gc_sc_tokens[i] );
-         return;
-      }
-      i++;
-   }
-
-   s->action = 0;
-}
-
-int16_t script_arg_special( char* token, size_t token_sz ) {
-
-   script_cmp_case( token, token_sz );
-
-   if( 0 == memory_strncmp_ptr(        "SOUTH",   token, 5 ) ) {
-      return 0;
-   } else if( 0 == memory_strncmp_ptr( "NORTH",   token, 5 ) ) {
-      return 1;
-   } else if( 0 == memory_strncmp_ptr( "EAST",    token, 4 ) ) {
-      return 2;
-   } else if( 0 == memory_strncmp_ptr( "WEST",    token, 4 ) ) {
-      return 3;
-   } else if( 0 == memory_strncmp_ptr( "STACK_I", token, 7 ) ) {
-      return SCRIPT_ARG_STACK_I;
-   } else if( 0 == memory_strncmp_ptr( "STACK_P", token, 7 ) ) {
-      return SCRIPT_ARG_STACK_P;
-   } else if( 0 == memory_strncmp_ptr( "STACK",   token, 5 ) ) {
-      return SCRIPT_ARG_STACK;
-   } else if( 0 == memory_strncmp_ptr( "RANDOM",  token, 6 ) ) {
-      return SCRIPT_ARG_RANDOM;
-   } else if( 0 == memory_strncmp_ptr( "FOLLOW",  token, 6 ) ) {
-      return SCRIPT_ARG_FOLLOW;
-   }
-
-   return -1;   
-}
-
-void script_reset_token( struct SCRIPT_COMPILE_STATE* s ) {
-   s->token_iter_sz = 0;
-   s->token_iter[s->token_iter_sz] = '\0';
-}
-
-void script_parse_src( char c, struct SCRIPT_COMPILE_STATE* s ) {
-   int16_t arg_tmp = 0;
-   
-   switch( c ) {
-
-   case ':':
-      if( SCRIPT_CS_COMMENT == (SCRIPT_CS_COMMENT & s->flags) ) {
-         /* Colons happen in comments sometimes. */
-         break;
-      }
-      s->steps[s->steps_sz].arg = atoi( s->token_iter );
-         
-      script_trace_printf( 1, " action: %d, l: %d\n",
-         s->steps[s->steps_sz].action, s->steps[s->steps_sz].arg );
-
-      /* Make sure this is an instruction that can be a label. */
-      assert(
-         SCRIPT_ACTION_START == s->steps[s->steps_sz].action ||
-         SCRIPT_ACTION_INTERACT == s->steps[s->steps_sz].action );
-
-      if( 7 == s->steps[s->steps_sz].action ) {
-         /* Only increment start count if this is a START. */
-         /* (Multiple INTERACTs don't make sense. */
-         s->steps[s->steps_sz].arg = s->last_start++;
-      }
-
-      s->steps_sz++;
-      script_reset_token( s );
-      break;
-
-   case '#':
-   case ';':
-      s->flags |= SCRIPT_CS_COMMENT;
-      break;
-
-   case '\r':
-   case '\n':
-      if( SCRIPT_CS_COMMENT == (SCRIPT_CS_COMMENT & s->flags) ) {
-         /* Get out of comment in new line. */
-         s->flags &= ~SCRIPT_CS_COMMENT;
-         script_reset_token( s );
-         break;
-      }
-
-   case ' ':
-      if( SCRIPT_CS_COMMENT == (SCRIPT_CS_COMMENT & s->flags) ) {
-         script_reset_token( s );
-         break;
-      }
-
-      /* Do nothing if token buffer empty. */
-      if( 0 == s->token_iter_sz ) {
-         break;
-      }
-
-      /* Process token. */
-      script_trace_printf( 1, "token #%d: %s\n", s->steps_sz, s->token_iter );
-      if( 0 < s->steps[s->steps_sz].action ) {
-         /* Set arg and advance instruction. */
-         
-         arg_tmp = script_arg_special( s->token_iter, s->token_iter_sz );
-
-         /* All special args are positive, so negative means failure. */
-         if( 0 > arg_tmp ) {
-            arg_tmp = atoi( s->token_iter );
-         }
-         s->steps[s->steps_sz].arg = arg_tmp;
-         script_trace_printf( 1, " arg: %d\n", s->steps[s->steps_sz].arg );
-         s->steps_sz++;
-      
-      } else {
-         /* Read instruction. */
-         script_cmp_action(
-            s->token_iter, s->token_iter_sz, &(s->steps[s->steps_sz]) );
-      }
-      script_reset_token( s );
-      break;
-
-   default:
-      if( SCRIPT_CS_COMMENT == (SCRIPT_CS_COMMENT & s->flags) ) {
-         break;
-      }
-      /* Reset token buffer. */
-      s->token_iter[s->token_iter_sz++] = c;
-      s->token_iter[s->token_iter_sz] = '\0';
-      break;
-   }
-}
-
-#endif /* !NO_SCRIPT_COMPILER */
 
 #if 0
 

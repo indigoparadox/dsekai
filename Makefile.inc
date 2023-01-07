@@ -50,6 +50,7 @@ LOOKUPS_C_FILES := \
 MAP2ASN_C_FILES := \
    tools/map2asn.c \
    src/script.c \
+   src/scparse.c \
    unilayer/src/json.c \
    src/tmjson.c \
    unilayer/src/asn.c \
@@ -231,13 +232,9 @@ HEADPACK_C_FILES := \
    $(HEADPACK_C_FILES_BASE) \
    tools/mappack.c \
    src/tmjson.c \
+   src/scparse.c \
    src/tilemap.c \
-   src/mobile.c \
-   src/pathfind.c \
-   src/script.c \
    unilayer/src/json.c \
-   src/item.c \
-   src/crop.c \
    src/strpool.c
 
 DSEKAI_ASSETS_SPRITES := \

@@ -171,6 +171,8 @@ struct EDITOR_STATE {
  */
 #define DSEKAI_FLAG_BLANK_FRAME     0x04
 
+#define DSEKAI_FLAG_UNLOCKED        0x08
+
 /**
  * \relates DSEKAI_STATE
  * \brief DSEKAI_STATE::engine_state indicating engine is has not yet
@@ -203,10 +205,16 @@ struct DSEKAI_STATE {
     */
    MEMORY_HANDLE items_handle;
 
+   struct ITEM* items;
+
+   int16_t items_sz;
+
    /**
     * \brief Currently loaded ::TILEMAP.
     */
    MEMORY_HANDLE map_handle;
+
+   struct TILEMAP* tilemap;
 
    /**
     * \brief Engine type tilemap is supposed to be used with.
@@ -230,6 +238,8 @@ struct DSEKAI_STATE {
     *          Be sure to preserve it (including empty spots) during serialize!
     */
    MEMORY_HANDLE mobiles_handle;
+
+   struct MOBILE* mobiles;
 
    uint16_t mobiles_sz;
 
@@ -310,7 +320,11 @@ struct DSEKAI_STATE {
     * This is kept as part of the state so that crops can continue growing in
     * the background.
     */
-   struct CROP_PLOT crops[DSEKAI_CROPS_MAX];
+   MEMORY_HANDLE crops_handle;
+
+   struct CROP_PLOT* crops;
+
+   int16_t crops_sz;
 
 #ifndef NO_ENGINE_EDITOR
 
@@ -356,8 +370,7 @@ int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
  * \param map Locked ::MEMORY_PTR for DSEKAI_STATE::map_handle.
  */
 int8_t engines_input_movement(
-   struct MOBILE* mover, int8_t dir_move,
-   struct DSEKAI_STATE* state, struct TILEMAP* t );
+   struct MOBILE* mover, int8_t dir_move, struct DSEKAI_STATE* state );
 
 #ifndef NO_TITLE
 
@@ -369,6 +382,10 @@ void engines_set_transition(
    struct DSEKAI_STATE* state, uint8_t trans_type, uint8_t trans_open );
 
 void engines_draw_transition( struct DSEKAI_STATE* state );
+
+uint8_t engines_state_lock( struct DSEKAI_STATE* state );
+
+uint8_t engines_state_unlock( struct DSEKAI_STATE* state );
 
 #endif /* !ENGINES_TOKENS_ONLY */
 

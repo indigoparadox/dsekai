@@ -19,6 +19,7 @@ BIN_CURSES := $(BINDIR)/$(DSEKAI)t
 
 DSEKAI_C_FILES_CURSES_ONLY := \
    src/main.c \
+   src/scparse.c \
    unilayer/src/input/cursesi.c \
    unilayer/src/graphics/cursesg.c \
    unilayer/src/memory/fakem.c \

@@ -21,6 +21,7 @@ BIN_WIN32 := $(BINDIR)/$(DSEKAI)32.exe
 DSEKAI_C_FILES_WIN32_ONLY := \
    src/main.c \
    src/pov.c \
+   src/scparse.c \
    unilayer/src/animate.c \
    unilayer/src/input/wini.c \
    unilayer/src/memory/winm.c \

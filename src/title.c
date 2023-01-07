@@ -131,13 +131,16 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    int16_t retval = 1;
 
 #ifndef NO_TITLE
-   struct MOBILE* mobiles = NULL;
    RESOURCE_ID mobile_sprite_id;
 
    debug_printf( 2, "allocating engine-specific state" );
    assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
    state->engine_state_handle =
       memory_alloc( sizeof( struct TITLE_STATE ), 1 );
+
+   if( !engines_state_lock( state ) ) {
+      goto cleanup;     
+   }
 
    /* Create the environmental animations. */
    animate_create(
@@ -155,64 +158,56 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
       RESOURCE_EXT_GRAPHICS );
 
    assert( 4 <= state->mobiles_sz );
-   mobiles = (struct MOBILE*)memory_lock( state->mobiles_handle );
-   if( NULL == mobiles ) {
-      error_printf( "could not lock mobiles handle" );
-      retval = 0;
-      goto cleanup;
-   }
 
    /* Create the spinning globe animation. */
    /* (It's actually just four mobiles.) */
-   mobiles[0].coords.x = 0;
-   mobiles[0].coords.y = 0;
-   mobiles[0].coords_prev.x = 3;
-   mobiles[0].coords_prev.y = 2;
-   mobiles[0].script_id = -1;
-   mobiles[0].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
-   mobile_set_dir( &(mobiles[0]), 2 );
-   mobiles[0].mp_hp = 100;
-   mobiles[0].sprite_cache_id = graphics_cache_load_bitmap(
+   state->mobiles[0].coords.x = 0;
+   state->mobiles[0].coords.y = 0;
+   state->mobiles[0].coords_prev.x = 3;
+   state->mobiles[0].coords_prev.y = 2;
+   state->mobiles[0].script_id = -1;
+   state->mobiles[0].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
+   mobile_set_dir( &(state->mobiles[0]), 2 );
+   state->mobiles[0].mp_hp = 100;
+   state->mobiles[0].sprite_cache_id = graphics_cache_load_bitmap(
       mobile_sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
-   mobiles[0].ascii = '/';
+   state->mobiles[0].ascii = '/';
 
-   mobiles[1].coords.x = 1;
-   mobiles[1].coords.y = 0;
-   mobiles[1].coords_prev.x = 3;
-   mobiles[1].coords_prev.y = 2;
-   mobiles[1].script_id = -1;
-   mobiles[1].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
-   mobile_set_dir( &(mobiles[1]), 0 );
-   mobiles[1].mp_hp = 100;
-   mobiles[1].sprite_cache_id = graphics_cache_load_bitmap(
+   state->mobiles[1].coords.x = 1;
+   state->mobiles[1].coords.y = 0;
+   state->mobiles[1].coords_prev.x = 3;
+   state->mobiles[1].coords_prev.y = 2;
+   state->mobiles[1].script_id = -1;
+   state->mobiles[1].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
+   mobile_set_dir( &(state->mobiles[1]), 0 );
+   state->mobiles[1].mp_hp = 100;
+   state->mobiles[1].sprite_cache_id = graphics_cache_load_bitmap(
       mobile_sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
-   mobiles[1].ascii = '\\';
+   state->mobiles[1].ascii = '\\';
 
-   mobiles[2].coords.x = 0;
-   mobiles[2].coords.y = 1;
-   mobiles[2].coords_prev.x = 4;
-   mobiles[2].coords_prev.y = 3;
-   mobiles[2].script_id = -1;
-   mobiles[2].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
-   mobile_set_dir( &(mobiles[2]), 3 );
-   mobiles[2].mp_hp = 100;
-   mobiles[2].sprite_cache_id = graphics_cache_load_bitmap(
+   state->mobiles[2].coords.x = 0;
+   state->mobiles[2].coords.y = 1;
+   state->mobiles[2].coords_prev.x = 4;
+   state->mobiles[2].coords_prev.y = 3;
+   state->mobiles[2].script_id = -1;
+   state->mobiles[2].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
+   mobile_set_dir( &(state->mobiles[2]), 3 );
+   state->mobiles[2].mp_hp = 100;
+   state->mobiles[2].sprite_cache_id = graphics_cache_load_bitmap(
       mobile_sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
-   mobiles[2].ascii = '\\';
+   state->mobiles[2].ascii = '\\';
 
-   mobiles[3].coords.x = 1;
-   mobiles[3].coords.y = 1;
-   mobiles[3].coords_prev.x = 5;
-   mobiles[3].coords_prev.y = 3;
-   mobiles[3].script_id = -1;
-   mobiles[3].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
-   mobile_set_dir( &(mobiles[3]), 1 );
-   mobiles[3].mp_hp = 100;
-   mobiles[3].sprite_cache_id = graphics_cache_load_bitmap(
+   state->mobiles[3].coords.x = 1;
+   state->mobiles[3].coords.y = 1;
+   state->mobiles[3].coords_prev.x = 5;
+   state->mobiles[3].coords_prev.y = 3;
+   state->mobiles[3].script_id = -1;
+   state->mobiles[3].flags = MOBILE_FLAG_ACTIVE | MOBILE_FLAG_NOT_LAST;
+   mobile_set_dir( &(state->mobiles[3]), 1 );
+   state->mobiles[3].mp_hp = 100;
+   state->mobiles[3].sprite_cache_id = graphics_cache_load_bitmap(
       mobile_sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
-   mobiles[3].ascii = '/';
-
-   mobiles = (struct MOBILE*)memory_unlock( state->mobiles_handle );
+   state->mobiles[3].ascii = '/';
 
    graphics_lock();
    graphics_clear_screen();
@@ -244,6 +239,10 @@ void title_draw( struct DSEKAI_STATE* state ) {
 
    int16_t i = 0;
 
+   if( !engines_state_lock( state ) ) {
+      goto cleanup;     
+   }
+
    graphics_string_sz(
       DSEKAI_TITLE_TEXT, DSEKAI_TITLE_TEXT_SZ, 0, &title_str_sz );
    graphics_string_at(
@@ -255,31 +254,35 @@ void title_draw( struct DSEKAI_STATE* state ) {
       1 );
 
    for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
-      if(
-         MOBILE_FLAG_ACTIVE != (MOBILE_FLAG_ACTIVE & mobiles[i].flags)
-      ) {
+      if( !mobile_is_active( &(state->mobiles[i]) ) ) {
          continue;
       }
+      /*
       if(
          MOBILE_FLAG_NOT_LAST !=
             (MOBILE_FLAG_NOT_LAST & mobiles[i].flags)
       ) {
          break;
       }
+      */
 
-      assert( 0 <= mobiles[i].sprite_cache_id );
+      assert( 0 <= state->mobiles[i].sprite_cache_id );
 
       /* Draw current mobile sprite/frame. */
       graphics_cache_blit_at(
-         mobile_get_sprite( &(mobiles[i]) ), i,
+         mobile_get_sprite( &(state->mobiles[i]) ), i,
          state->ani_sprite_x,
-         mobile_get_dir( &(mobiles[i]) ) * SPRITE_H,
-         ((SCREEN_W / 2) - SPRITE_W) + (mobiles[i].coords.x * SPRITE_W),
-         (2 * SPRITE_H) + (mobiles[i].coords.y * SPRITE_H),
+         mobile_get_dir( &(state->mobiles[i]) ) * SPRITE_H,
+         ((SCREEN_W / 2) - SPRITE_W) + (state->mobiles[i].coords.x * SPRITE_W),
+         (2 * SPRITE_H) + (state->mobiles[i].coords.y * SPRITE_H),
          SPRITE_W, SPRITE_H );
    }
 
    window_refresh( WINDOW_ID_TITLE_MENU );
+
+cleanup:
+
+   return;
 
 #endif /* !NO_TITLE */
 

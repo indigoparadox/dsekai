@@ -76,6 +76,11 @@ struct DSEKAI_STATE;
 #include "strpool.h"
 
 #include "script.h"
+
+#ifndef NO_SCRIPT_COMPILER
+#include "scparse.h"
+#endif /* !NO_SCRIPT_COMPILER */
+
 #include "item.h"
 #include "tilemap.h"
 #include "mobile.h"

@@ -342,16 +342,15 @@ struct MOBILE {
  * This uses MOBILE::steps_remaining and ::gc_mobile_step_table_normal_pos to
  * track walking accross ticks.
  */
-uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir );
+uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) SECTION_MOBILE;
 
 /**
  * \brief Get a ::MEMORY_PTR to the mobile m is currently facing.
  * \param state ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  * \return ::MEMORY_PTR to the colliding mobile in ms.
  */
-MOBILE_GID mobile_get_facing(
-   uint8_t x, uint8_t y, uint8_t dir,
-   struct TILEMAP* t, struct DSEKAI_STATE* state );
+struct MOBILE* mobile_get_facing(
+   uint8_t x, uint8_t y, uint8_t dir, struct DSEKAI_STATE* state );
 
 /**
  * \brief Force a ::MOBILE to jump to the SCRIPT_ACTION_INTERACT in its
@@ -361,7 +360,7 @@ MOBILE_GID mobile_get_facing(
  * \param t ::MEMORY_PTR to the currently loaded TILEMAP.
  */
 struct MOBILE* mobile_interact(
-   struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP* t
+   struct MOBILE* actor, struct MOBILE* actee, struct DSEKAI_STATE* state
 ) SECTION_MOBILE;
 
 /**
@@ -383,8 +382,7 @@ void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state );
  * \param state Locked ::MEMORY_PTR to current engine ::DSEKAI_STATE.
  */
 void mobile_deactivate(
-   struct MOBILE* m, struct DSEKAI_STATE* state
-) SECTION_MOBILE;
+   struct MOBILE* m, struct DSEKAI_STATE* state ) SECTION_MOBILE;
 
 /**
  * \brief Push a value onto MOBILE::script_stack.
@@ -415,20 +413,17 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state );
  * \param flags \ref dsekai_mobiles_flags applying to the spawned ::MOBILE.
  */
 struct MOBILE* mobile_spawn_single(
-   uint16_t flags, struct DSEKAI_STATE* state, struct MOBILE* mobiles,
-   int16_t mobiles_sz ) SECTION_MOBILE;
+   uint16_t flags, struct DSEKAI_STATE* state ) SECTION_MOBILE;
 
 int16_t mobile_spawner_match(
-   struct TILEMAP_SPAWN* spawner, struct TILEMAP* t, struct MOBILE* mobiles,
-   uint16_t mobiles_sz ) SECTION_MOBILE;
+   struct TILEMAP_SPAWN* spawner, struct DSEKAI_STATE* state ) SECTION_MOBILE;
 
 /**
  * \brief Spawn from ::TILEMAP::spawners according to spawner rules.
  * \param state Locked ::MEMORY_PTR to the current engine ::DSEKAI_STATE.
  * \param t Locked ::MEMORY_PTR to ::TILEMAP on which to execute spawners.
  */
-void mobile_spawns(
-   struct TILEMAP* t, struct DSEKAI_STATE* state ) SECTION_MOBILE;
+void mobile_spawns( struct DSEKAI_STATE* state ) SECTION_MOBILE;
 
 #ifdef MOBILE_C
 #  ifndef NO_SMOOTH_WALK

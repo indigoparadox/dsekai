@@ -92,7 +92,7 @@ void tilemap_refresh_tiles( struct TILEMAP* t ) {
    }
 }
 
-void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) {
+void tilemap_set_weather( uint8_t weather, struct TILEMAP* t ) {
 
    if(
       TILEMAP_FLAG_WEATHER_SNOW ==

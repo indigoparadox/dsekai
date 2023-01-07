@@ -388,7 +388,7 @@ int16_t menu_handler_items(
             retval = 0;
             goto cleanup;
          }
-         item_drop( selected_item_idx, t, state );
+         item_drop( selected_item_idx, state );
          t = (struct TILEMAP*)memory_unlock( state->map_handle );
          state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
 

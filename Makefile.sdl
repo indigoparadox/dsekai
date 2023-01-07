@@ -18,6 +18,7 @@ BIN_SDL := $(BINDIR)/$(DSEKAI)
 DSEKAI_C_FILES_SDL_ONLY := \
    src/main.c \
    src/pov.c \
+   src/scparse.c \
    unilayer/src/animate.c \
    unilayer/src/input/sdli.c \
    unilayer/src/graphics/sdlg.c \

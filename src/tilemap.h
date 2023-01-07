@@ -122,7 +122,7 @@ void tilemap_refresh_tiles( struct TILEMAP* t );
  *
  * This will start the relevant animation if necessary.
  */
-void tilemap_set_weather( struct TILEMAP* t, uint8_t weather ) SECTION_TILEMAP;
+void tilemap_set_weather( uint8_t weather, struct TILEMAP* t ) SECTION_TILEMAP;
 
 /**
  * \brief Detect potential collision between a MOBILE and TILEMAP tile with

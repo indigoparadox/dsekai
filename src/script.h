@@ -91,9 +91,9 @@ struct TILEMAP;
  * \return New value for this script's program counter (e.g. MOBILE::script_pc).
  */
 typedef uint16_t (*SCRIPT_CB)(
-   uint16_t pc, struct SCRIPT* script, struct TILEMAP* t,
+   uint16_t pc, int16_t arg, struct SCRIPT* script,
    struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile,
-   struct DSEKAI_STATE* state, int16_t arg );
+   struct DSEKAI_STATE* state );
 
 #endif /* !NO_SCRIPT_PROTOTYPES */
 
@@ -469,49 +469,10 @@ typedef uint16_t (*SCRIPT_CB)(
 
 /*! \} */
 
-#ifndef NO_SCRIPT_COMPILER
-
-#define SCRIPT_CS_NONE      0
-#define SCRIPT_CS_COMMENT   1
-
-#define script_char_alpha( c ) (96 < c && 123 > c)
-
-void script_cmp_case( char* token, size_t token_sz );
-void script_cmp_action( char* token, size_t token_sz, struct SCRIPT_STEP* s );
-int16_t script_arg_special( char* token, size_t token_sz );
-void script_reset_token( struct SCRIPT_COMPILE_STATE* s );
-void script_parse_src( char c, struct SCRIPT_COMPILE_STATE* s );
-
-#ifdef SCRIPT_C
-
-#define SCRIPT_CB_TABLE_TOKEN( idx, name, c ) #name,
-
-/*! \brief List of valid script action tokens. */
-const char* gc_sc_tokens[] = {
-   SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_TOKEN )
-   NULL
-};
-
-#define SCRIPT_CB_TABLE_BYTE( idx, name, c ) c,
-
-const char gc_sc_bytes[] = {
-   SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_BYTE )
-   '\0'
-};
-
-#else
-
-extern const char* gc_sc_tokens[];
-extern const char gc_sc_bytes[];
-
-#endif /* SCRIPT_C */
-
-#endif /* !NO_SCRIPT_COMPILER */
-
 #ifndef NO_SCRIPT_PROTOTYPES
 
 /*! \brief Define prototypes for the script action callbacks. */
-#define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t, struct SCRIPT*, struct TILEMAP*, struct MOBILE*, struct MOBILE*, struct TILEMAP_COORDS*, struct DSEKAI_STATE*, int16_t );
+#define SCRIPT_CB_TABLE_PROTOTYPES( idx, name, c ) uint16_t script_handle_ ## name( uint16_t pc, int16_t arg, struct SCRIPT* script, struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile, struct DSEKAI_STATE* state );
 
 SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_PROTOTYPES )
 
@@ -569,6 +530,14 @@ RES_CONST SCRIPT_CB gc_script_handlers[] = {
 #define SCRIPT_CB_TABLE_CONSTS( idx, name, c ) RES_CONST uint16_t SCRIPT_ACTION_ ## name = idx;
 
 SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_CONSTS );
+
+#  ifdef NO_SCRIPT_HANDLERS
+
+#define SCRIPT_CB_TABLE_STUBS( idx, name, c ) uint16_t script_handle_ ## name( uint16_t pc, int16_t arg, struct SCRIPT* script, struct MOBILE* actor, struct MOBILE* actee, struct TILEMAP_COORDS* tile, struct DSEKAI_STATE* state ) { return 0; }
+
+SCRIPT_CB_TABLE( SCRIPT_CB_TABLE_STUBS )
+
+#  endif /* NO_SCRIPT_HANDLERS */
 
 #else
 

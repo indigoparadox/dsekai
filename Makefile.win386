@@ -18,6 +18,7 @@ BIN_WIN386 := $(BINDIR)/$(DSEKAI)le.exe
 DSEKAI_C_FILES_WIN386_ONLY := \
    src/main.c \
    src/pov.c \
+   src/scparse.c \
    unilayer/src/animate.c \
    unilayer/src/input/wini.c \
    unilayer/src/memory/fakem.c \

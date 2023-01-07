@@ -38,6 +38,8 @@ Features that are planned include:
 * Multi-height raycasting POV support.
 * Compile script source files as part of JSON loading.
 
+### Linking and Compiling Considerations
+
 Ideally, this engine will compile with legacy compilers as a general rule. For this reason, the following rules/limitations should be observed within the codebase:
 
 * C should be limited to C89/ANSI C in general. No C99 features should be used. In some cases, not all ANSI features should be used.
@@ -47,6 +49,12 @@ Ideally, this engine will compile with legacy compilers as a general rule. For t
 In general, these restrictions are relaxed for items in the tools/ and check/ subdirectories (though these should also be limited to C89). For this reason, items in the src/ directory should also avoid depending on items in the tools/ and check/ directories (except for in platform-specific modules that do not have these restrictions that may use the tools/ subdirectory. Nothing should depend on the check/ subdirectory).
 
 Items in the tools/ and check/ subdirectories may depend on the src/ directory freely.
+
+### API Coding Considerations
+
+In an attempt to keep the API consistent, functions should adhere to the following rules:
+
+* Arguments should be in order of state modifiers **first**, followed by a pointer to the object being modified if no global state is modified **or** a pointer to the global state struct which should be auto-unlocked before it is accessed with engines_state_unlock().
 
 ## Documentation
 

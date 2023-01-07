@@ -24,6 +24,7 @@ BIN_MAC6 := $(BINDIR)/$(DSEKAI).bin $(BINDIR)/$(DSEKAI).APPL $(BINDIR)/$(DSEKAI)
 
 DSEKAI_C_FILES_MAC6_ONLY := \
    src/main.c \
+   src/scparse.c \
    unilayer/src/input/mac6i.c \
    unilayer/src/graphics/mac6g.c \
    unilayer/src/memory/mac6m.c \

@@ -138,7 +138,7 @@ int16_t pov_input(
       /* Tank controls: move in the direction we're facing. */
       if(
          0 < engines_input_movement(
-            &(state->player), mobile_get_dir( &(state->player) ), state, t )
+            &(state->player), mobile_get_dir( &(state->player) ), state )
       ) {
          mobile_walk_start( &(state->player),
             mobile_get_dir( &(state->player) ) );
@@ -165,7 +165,7 @@ int16_t pov_input(
       /* TODO: Should this be south, or the opposite-facing dir? */
       if(
          0 < engines_input_movement(
-            &(state->player), MOBILE_DIR_SOUTH, state, t )
+            &(state->player), MOBILE_DIR_SOUTH, state )
       ) {
          mobile_walk_start( &(state->player), MOBILE_DIR_SOUTH );
          tilemap_refresh_tiles( t );
@@ -192,8 +192,7 @@ int16_t pov_input(
       mobile_interact(
          &(state->player),
          mobile_get_facing( state->player.coords.x, state->player.coords.y,
-            mobile_get_dir( &(state->player) ), t, state ),
-         t );
+            mobile_get_dir( &(state->player) ), state ), state );
 #ifdef POV_DEBUG_INC
       gstate->inc++;
       debug_printf( 3, "inc: %d", gstate->inc );

@@ -49,7 +49,7 @@ struct PATHFIND_NODE {
 
 int8_t pathfind_start(
    struct MOBILE* mover, uint8_t tgt_x, uint8_t tgt_y, uint8_t steps,
-   struct DSEKAI_STATE* state, struct TILEMAP* t, uint8_t flags );
+   uint8_t flags, struct DSEKAI_STATE* state );
 
 /**
  * \brief Check for blocking terrain or other ::MOBILE objects preventing
@@ -64,7 +64,7 @@ int8_t pathfind_start(
  *         or ::MOBILE_ERROR_BLOCKED if movement is blocked.
  * \todo TODO: Determine terrain movement speed.
  */
-#define pathfind_test_dir( x, y, dir_move, state, t ) (TILEMAP_ERROR_BLOCKED != tilemap_collide( x, y, dir_move, t ) && (NULL == mobile_get_facing( x, y, dir_move, t, state )) ? 1 : MOBILE_ERROR_BLOCKED)
+#define pathfind_test_dir( x, y, dir_move, state, t ) (TILEMAP_ERROR_BLOCKED != tilemap_collide( x, y, dir_move, t ) && (NULL == mobile_get_facing( x, y, dir_move, state )) ? 1 : MOBILE_ERROR_BLOCKED)
 
 /*! \} */ /* dsekai_pathfind */
 
