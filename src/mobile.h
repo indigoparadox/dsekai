@@ -18,12 +18,23 @@ typedef uint32_t MOBILE_GID;
 #define MOBILE_GID_NONE 0
 #define MOBILE_GID_PLAYER 0xffffffff
 
+/**
+ * \brief Insert into logging format strings when a mobile's GID is needed.
+ */
 #define MOBILE_GID_FMT "%04d:%04d"
 
+/**
+ * \brief Insert into the args provided to a format string using
+ *        ::MOBILE_GID_FMT.
+ * \param m Locked ::MEMORY_PTR to the mobile to examine.
+ */
 #define mobile_get_gid_fmt( m ) (m)->map_gid, (m)->spawner_gid
 
+/* TODO: Get rid of these in favor of GID. */
 #define MOBILE_IDX_NONE -1
 #define MOBILE_IDX_PLAYER -2
+
+#define MOBILE_COORDS_QUEUE_SZ 5
 
 /**
  * \addtogroup dsekai_mobiles_spritesheets_sect Mobile Spritesheets
@@ -239,8 +250,6 @@ typedef uint32_t MOBILE_GID;
 
 /*! \brief A moving/interactive object in the world. */
 struct MOBILE {
-   char name[TILEMAP_SPAWN_NAME_SZ];
-   char sprite_name[RESOURCE_NAME_MAX];
    /**
     * \brief \ref dsekai_mobiles_flags affecting this mobile's display and
     *        behavior.
@@ -254,6 +263,8 @@ struct MOBILE {
     * \brief TILEMAP::gid of the tilemap this mobile was spawned on.
     */
    uint16_t map_gid;
+   char name[TILEMAP_SPAWN_NAME_SZ];
+   char sprite_name[RESOURCE_NAME_MAX];
    /**
     * \brief The combined \ref dsekai_mobiles_mp_hp field.
     */
@@ -280,10 +291,8 @@ struct MOBILE {
     */
    int16_t sprite_cache_id;
    unsigned char ascii;
-   /*! \brief Current tile on which this mobile is located. */
-   struct TILEMAP_COORDS coords;
-   /*! \brief Previous tile, if this mobile is currently moving. */
-   struct TILEMAP_COORDS coords_prev;
+   int8_t coords_sz;
+   struct TILEMAP_COORDS coords[MOBILE_COORDS_QUEUE_SZ];
    /**
     * \brief Number of steps remaining in current walk animation.
     *
@@ -331,7 +340,7 @@ struct MOBILE {
 
 /*! \} */ /* dsekai_mobiles_directions */
 
-#define mobile_is_walking( m ) ((m)->coords.y != (m)->coords_prev.y || (m)->coords.x != (m)->coords_prev.x)
+#define mobile_is_walking( m ) ((m)->coords[1].y != (m)->coords[0].y || (m)->coords[1].x != (m)->coords[0].x)
 
 /**
  * \brief Have the given MOBILE attempt to begin walking movement/animation.

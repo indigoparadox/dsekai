@@ -259,10 +259,10 @@ static void topdown_draw_mobile(
    }
 
    if(
-      m->coords.x < gstate->screen_scroll_tx ||
-      m->coords.y < gstate->screen_scroll_ty ||
-      m->coords.x >= gstate->screen_scroll_tx + SCREEN_TW ||
-      m->coords.y >= gstate->screen_scroll_ty + SCREEN_TH
+      m->coords[1].x < gstate->screen_scroll_tx ||
+      m->coords[1].y < gstate->screen_scroll_ty ||
+      m->coords[1].x >= gstate->screen_scroll_tx + SCREEN_TW ||
+      m->coords[1].y >= gstate->screen_scroll_ty + SCREEN_TH
    ) {
       /* Mobile is off-screen. */
       m->screen_px = -1;
@@ -271,21 +271,21 @@ static void topdown_draw_mobile(
    }
 
    m->screen_px = 
-      SCREEN_MAP_X + (m->coords.x * SPRITE_W) - gstate->screen_scroll_x;
+      SCREEN_MAP_X + (m->coords[1].x * SPRITE_W) - gstate->screen_scroll_x;
    m->screen_py =
-      SCREEN_MAP_Y + (m->coords.y * SPRITE_H) - gstate->screen_scroll_y;
+      SCREEN_MAP_Y + (m->coords[1].y * SPRITE_H) - gstate->screen_scroll_y;
 
    /* Figure out direction to offset steps in. */
-   if( m->coords_prev.x > m->coords.x ) {
+   if( m->coords[0].x > m->coords[1].x ) {
       m->screen_px += SPRITE_W - m->steps_remaining;
    
-   } else if( m->coords_prev.x < m->coords.x ) {
+   } else if( m->coords[0].x < m->coords[1].x ) {
       m->screen_px -= SPRITE_W - m->steps_remaining;
 
-   } else if( m->coords_prev.y > m->coords.y ) {
+   } else if( m->coords[0].y > m->coords[1].y ) {
       m->screen_py += SPRITE_H - m->steps_remaining;
    
-   } else if( m->coords_prev.y < m->coords.y ) {
+   } else if( m->coords[0].y < m->coords[1].y ) {
       m->screen_py -= SPRITE_H - m->steps_remaining;
    }
 
@@ -394,8 +394,8 @@ static void topdown_focus_player(
    int16_t player_x_px = 0,
       player_y_px = 0;
 
-   player_x_px = state->player.coords.x * TILE_W;
-   player_y_px = state->player.coords.y * TILE_H;
+   player_x_px = state->player.coords[1].x * TILE_W;
+   player_y_px = state->player.coords[1].y * TILE_H;
 
    gstate->screen_scroll_x_tgt = (player_x_px / SCREEN_MAP_W) * SCREEN_MAP_W;
    gstate->screen_scroll_x = (player_x_px / SCREEN_MAP_W) * SCREEN_MAP_W;
@@ -406,8 +406,8 @@ static void topdown_focus_player(
    gstate->screen_scroll_ty = gstate->screen_scroll_y / TILE_H;
 
    debug_printf( 2, "player x, y: %d, %d (%d, %d)", 
-      state->player.coords.x,
-      state->player.coords.y,
+      state->player.coords[1].x,
+      state->player.coords[1].y,
       player_x_px, player_y_px );
 }
 
@@ -428,7 +428,7 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
 
    /* Scroll the screen by one if the player goes off-screen. */
    if(
-      state->player.coords.x >=
+      state->player.coords[1].x >=
          gstate->screen_scroll_tx + SCREEN_TW
    ) {
       gstate->screen_scroll_x_tgt = gstate->screen_scroll_x + SCREEN_MAP_W;
@@ -436,7 +436,7 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
          gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
 
    } else if(
-      state->player.coords.y >=
+      state->player.coords[1].y >=
          gstate->screen_scroll_ty + SCREEN_TH
    ) {
       gstate->screen_scroll_y_tgt = gstate->screen_scroll_y + SCREEN_MAP_H;
@@ -444,14 +444,14 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
          gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
 
    } else if(
-      state->player.coords.x < gstate->screen_scroll_tx
+      state->player.coords[1].x < gstate->screen_scroll_tx
    ) {
       gstate->screen_scroll_x_tgt = gstate->screen_scroll_x - SCREEN_MAP_W;
       debug_printf( 2, "scrolling screen left to %d, %d...",
          gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
 
    } else if(
-      state->player.coords.y < gstate->screen_scroll_ty
+      state->player.coords[1].y < gstate->screen_scroll_ty
    ) {
       gstate->screen_scroll_y_tgt = gstate->screen_scroll_y - SCREEN_MAP_H;
       debug_printf( 2, "scrolling screen up to %d, %d...",
@@ -495,10 +495,10 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
          gstate->screen_scroll_x == gstate->screen_scroll_x_tgt
       ) {
          /* Screen scroll finished. */
-         state->player.coords_prev.x =
-            state->player.coords.x;
-         state->player.coords_prev.y =
-            state->player.coords.y;
+         state->player.coords[0].x =
+            state->player.coords[1].x;
+         state->player.coords[0].y =
+            state->player.coords[1].y;
          state->player.steps_remaining = 0;
       }
    } else {
@@ -696,9 +696,9 @@ int16_t topdown_input(
             state->editor.coords.y );
          state->editor.flags |= EDITOR_FLAG_FORCE_FRAME;
       } else if( NULL != (plot = crop_find_plot(
-         state->player.coords.x +
+         state->player.coords[1].x +
             gc_mobile_x_offsets[mobile_get_dir( &(state->player) )],
-         state->player.coords.y +
+         state->player.coords[1].y +
             gc_mobile_y_offsets[mobile_get_dir( &(state->player) )],
          state
       )) ) {
@@ -721,13 +721,13 @@ int16_t topdown_input(
          /* Try to pickup items laying on the ground. */
          /* TODO: Differentiate pickup and interact. */
          item_pickup_xy(
-            state->player.coords.x, state->player.coords.y,
+            state->player.coords[1].x, state->player.coords[1].y,
             ITEM_OWNER_PLAYER, state );
 
          /* Try to interact with facing mobile. */
          mobile_interact(
             &(state->player),
-            mobile_get_facing( state->player.coords.x, state->player.coords.y,
+            mobile_get_facing( state->player.coords[1].x, state->player.coords[1].y,
                mobile_get_dir( &(state->player) ), state ),
             state );
 #ifndef NO_ENGINE_EDITOR

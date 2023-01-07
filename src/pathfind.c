@@ -172,8 +172,8 @@ int8_t pathfind_start(
    memory_zero_ptr( (MEMORY_PTR)&adjacent, sizeof( struct PATHFIND_NODE ) );
    
    /* Add the start node to the open list. */
-   adjacent.coords.x = mover->coords.x;
-   adjacent.coords.y = mover->coords.y;
+   adjacent.coords.x = mover->coords[1].x;
+   adjacent.coords.y = mover->coords[1].y;
    dio_list_append(
       &adjacent, open, open_sz, PATHFIND_LIST_MAX, struct PATHFIND_NODE );
    

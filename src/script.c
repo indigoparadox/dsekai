@@ -76,8 +76,8 @@ uint16_t script_handle_WALK(
 
    if(
       /* Actor is currently walking. */
-      (actor->coords.y != actor->coords_prev.y ||
-         actor->coords.x != actor->coords_prev.x)
+      (actor->coords[1].y != actor->coords[0].y ||
+         actor->coords[1].x != actor->coords[0].x)
 #ifndef NO_SMOOTH_WALK
       /* Actor will be done walking on next tick. */
       && (0 == gc_mobile_step_table_normal_pos[actor->steps_remaining])
@@ -95,8 +95,8 @@ uint16_t script_handle_WALK(
       return pc + 1;
 
    } else if(
-      actor->coords.y != actor->coords_prev.y ||
-      actor->coords.x != actor->coords_prev.x
+      actor->coords[1].y != actor->coords[0].y ||
+      actor->coords[1].x != actor->coords[0].x
    ) {
       /* Actor is already walking, don't start or advance PC. */   
       script_trace_printf( 1, "mobile %u:%u already walking",
@@ -114,7 +114,7 @@ uint16_t script_handle_WALK(
       if(
          TILEMAP_ERROR_BLOCKED ==
          tilemap_collide(
-            actor->coords.x, actor->coords.y, dir, state->tilemap )
+            actor->coords[1].x, actor->coords[1].y, dir, state->tilemap )
       ) {
          /* Actor would collide, so just skip this walk attempt. */
          script_trace_printf( 1, "mobile %u:%u collided with terrain",
@@ -127,7 +127,7 @@ uint16_t script_handle_WALK(
        */
       if(
          NULL == mobile_get_facing(
-            actor->coords.x, actor->coords.y, mobile_get_dir( actor ), state )
+            actor->coords[1].x, actor->coords[1].y, mobile_get_dir( actor ), state )
       ) {
          script_trace_printf( 1, "mobile %u:%u starting walking in dir %d",
             actor->map_gid, actor->spawner_gid, dir );

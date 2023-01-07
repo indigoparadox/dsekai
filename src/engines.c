@@ -85,10 +85,10 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    } */
 
    /* Set the player's new position. */
-   state->player.coords.x = state->warp_to_x;
-   state->player.coords.y = state->warp_to_y;
-   state->player.coords_prev.x = state->warp_to_x;
-   state->player.coords_prev.y = state->warp_to_y;
+   state->player.coords[1].x = state->warp_to_x;
+   state->player.coords[1].y = state->warp_to_y;
+   state->player.coords[0].x = state->warp_to_x;
+   state->player.coords[0].y = state->warp_to_y;
 
    /* TODO: Preserve ownerless items in save for this map. */
 
@@ -250,7 +250,7 @@ int8_t engines_input_movement(
 
    if(
       0 > pathfind_test_dir(
-         mover->coords.x, mover->coords.y, dir_move, state, state->tilemap )
+         mover->coords[1].x, mover->coords[1].y, dir_move, state, state->tilemap )
    ) {
       /* Mobile is blocked. */
       dir_move = -1;

@@ -9,8 +9,8 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) {
       return 0;
    }
 
-   m->coords.x += gc_mobile_x_offsets[dir];
-   m->coords.y += gc_mobile_y_offsets[dir];
+   m->coords[1].x += gc_mobile_x_offsets[dir];
+   m->coords[1].y += gc_mobile_y_offsets[dir];
 #ifdef NO_SMOOTH_WALK
    m->steps_remaining = 0; /* Just take one "step" on next tick. */
 #else
@@ -42,8 +42,8 @@ struct MOBILE* mobile_get_facing(
       if(
          mobile_is_active( &(state->mobiles[i]) ) &&
          state->mobiles[i].map_gid == state->tilemap->gid &&
-         state->mobiles[i].coords.x == x + gc_mobile_x_offsets[dir] &&
-         state->mobiles[i].coords.y == y + gc_mobile_y_offsets[dir]
+         state->mobiles[i].coords[1].x == x + gc_mobile_x_offsets[dir] &&
+         state->mobiles[i].coords[1].y == y + gc_mobile_y_offsets[dir]
       ) {
          /* Found an active facing mobile on the same tilemap. */
          mobile_out = &(state->mobiles[i]);
@@ -53,8 +53,8 @@ struct MOBILE* mobile_get_facing(
 
    /* This mobile is facing the player. */
    if(
-      state->player.coords.x == x + gc_mobile_x_offsets[dir] &&
-      state->player.coords.y == y + gc_mobile_y_offsets[dir]
+      state->player.coords[1].x == x + gc_mobile_x_offsets[dir] &&
+      state->player.coords[1].y == y + gc_mobile_y_offsets[dir]
    ) {
       mobile_out = &(state->player);
    }
@@ -158,9 +158,9 @@ struct MOBILE* mobile_interact(
       /* Special case: Actor is executing a multi-cycle WALK instruction. */
       SCRIPT_ACTION_WALK == step->action ||
       /* Actee is walking. */
-      actor->coords.y != actor->coords_prev.y ||
+      actor->coords[1].y != actor->coords[0].y ||
       /* Actee is walking. */
-      actor->coords.x != actor->coords_prev.x
+      actor->coords[1].x != actor->coords[0].x
    ) {
       actee = NULL;
       goto cleanup;
@@ -261,7 +261,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    } else if( SCRIPT_ARG_FOLLOW == step->arg ) {
       /* Pathfinding dir arg. */
       arg = pathfind_start(
-         m, state->player.coords.x, state->player.coords.y, 3,
+         m, state->player.coords[1].x, state->player.coords[1].y, 3,
          PATHFIND_FLAGS_TGT_OCCUPIED, state );
       if( 0 > arg ) {
          pathfind_trace_printf( 1,
@@ -282,7 +282,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
    /* Execute script action callback. */
    m->script_pc = gc_script_handlers[step->action](
-      m->script_pc, arg, script, m, NULL, &(m->coords), state );
+      m->script_pc, arg, script, m, NULL, &(m->coords[1]), state );
 
    /* Complete stack arg passthrough. */
    if( push_arg_after ) {
@@ -325,19 +325,19 @@ void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    assert( SPRITE_W > m->steps_remaining && SPRITE_H > m->steps_remaining );
 
    /* Leave a trail of dirty tiles. */
-   state->tilemap->tiles_flags[(m->coords.y * TILEMAP_TW) + m->coords.x] |=
+   state->tilemap->tiles_flags[(m->coords[1].y * TILEMAP_TW) + m->coords[1].x] |=
       TILEMAP_TILE_FLAG_DIRTY;
-   state->tilemap->tiles_flags[(m->coords_prev.y * TILEMAP_TW) + m->coords_prev.x] |=
+   state->tilemap->tiles_flags[(m->coords[0].y * TILEMAP_TW) + m->coords[0].x] |=
       TILEMAP_TILE_FLAG_DIRTY;
 
    /* Sync up prev and current coords if no steps left. */
    if(
-      m->coords.x != m->coords_prev.x ||
-      m->coords.y != m->coords_prev.y
+      m->coords[1].x != m->coords[0].x ||
+      m->coords[1].y != m->coords[0].y
    ) {
       if( 0 == m->steps_remaining ) {
-         m->coords_prev.x = m->coords.x;
-         m->coords_prev.y = m->coords.y;
+         m->coords[0].x = m->coords[1].x;
+         m->coords[0].y = m->coords[1].y;
       }
    }
 
@@ -492,10 +492,10 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
          state->tilemap->gid, state->tilemap->spawns[i].gid );
 
       /* Assign the rest of the properties from the spawner. */
-      mobile_iter->coords.x = state->tilemap->spawns[i].coords.x;
-      mobile_iter->coords.y = state->tilemap->spawns[i].coords.y;
-      mobile_iter->coords_prev.x = state->tilemap->spawns[i].coords.x;
-      mobile_iter->coords_prev.y = state->tilemap->spawns[i].coords.y;
+      mobile_iter->coords[1].x = state->tilemap->spawns[i].coords.x;
+      mobile_iter->coords[1].y = state->tilemap->spawns[i].coords.y;
+      mobile_iter->coords[0].x = state->tilemap->spawns[i].coords.x;
+      mobile_iter->coords[0].y = state->tilemap->spawns[i].coords.y;
       mobile_iter->script_id = state->tilemap->spawns[i].script_id;
       mobile_iter->ascii = state->tilemap->spawns[i].ascii;
       mobile_iter->flags |= state->tilemap->spawns[i].flags;

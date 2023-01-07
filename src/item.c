@@ -33,8 +33,8 @@ int8_t item_use_seed(
 
    crop_gid = state->items[e_idx].data;
 
-   x = user->coords.x + gc_mobile_x_offsets[mobile_get_dir( user )];
-   y = user->coords.y + gc_mobile_y_offsets[mobile_get_dir( user )];
+   x = user->coords[1].x + gc_mobile_x_offsets[mobile_get_dir( user )];
+   y = user->coords[1].y + gc_mobile_y_offsets[mobile_get_dir( user )];
 
    /* Get the plot in front of the user. */
    plot = crop_find_plot( x, y, state );
@@ -161,8 +161,8 @@ int8_t item_use_editor(
       state->editor.flags &= ~EDITOR_FLAG_ACTIVE;
    } else {
       state->editor.flags |= EDITOR_FLAG_ACTIVE;
-      state->editor.coords.x = state->player.coords.x;
-      state->editor.coords.y = state->player.coords.y;
+      state->editor.coords.x = state->player.coords[1].x;
+      state->editor.coords.y = state->player.coords[1].y;
    }
 
 cleanup:
@@ -206,8 +206,8 @@ int8_t item_use_hoe(
    }
    assert( NULL != user );
 
-   x = user->coords.x + gc_mobile_x_offsets[mobile_get_dir( user )];
-   y = user->coords.y + gc_mobile_y_offsets[mobile_get_dir( user )];
+   x = user->coords[1].x + gc_mobile_x_offsets[mobile_get_dir( user )];
+   y = user->coords[1].y + gc_mobile_y_offsets[mobile_get_dir( user )];
 
    /* TODO: Move this to crop.c. */
 
@@ -453,11 +453,11 @@ int8_t item_drop( int16_t e_idx, struct DSEKAI_STATE* state ) {
 
    /* Set the item's new map coordinates based on previous owner. */
    if( ITEM_OWNER_PLAYER == e->owner ) {
-      e->x = state->player.coords.x;
-      e->y = state->player.coords.y;
+      e->x = state->player.coords[1].x;
+      e->y = state->player.coords[1].y;
    } else if( 0 <= e->owner && state->mobiles_sz > e->owner ) {
-      e->x = state->mobiles[e->owner].coords.x;
-      e->y = state->mobiles[e->owner].coords.y;
+      e->x = state->mobiles[e->owner].coords[1].x;
+      e->y = state->mobiles[e->owner].coords[1].y;
    }
 
    debug_printf( 2, "dropped item at %d, %d", e->x, e->y );

@@ -36,14 +36,14 @@ int32_t serial_write_mobile(
    serial_asn_write_int(
       p_save_buffer_h, m->ascii, x, "mobile ASCII", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->coords.x, x, "mobile tile X", idx, cleanup );
+      p_save_buffer_h, m->coords[1].x, x, "mobile tile X", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->coords.y, x, "mobile tile Y", idx, cleanup );
+      p_save_buffer_h, m->coords[1].y, x, "mobile tile Y", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->coords_prev.x, x,
+      p_save_buffer_h, m->coords[0].x, x,
       "mobile previous tile X", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->coords_prev.y, x,
+      p_save_buffer_h, m->coords[0].y, x,
       "mobile previous tile Y", idx, cleanup );
    serial_asn_write_int(
       p_save_buffer_h, m->steps_remaining, x,
@@ -165,16 +165,16 @@ int32_t serial_read_mobile(
    serial_asn_read_int(
       save_buffer, &(m->ascii), 1, 0, "mobile ASCII", idx, read_sz, cleanup );
    serial_asn_read_int(
-      save_buffer, &(m->coords.x), 1, 0,
+      save_buffer, &(m->coords[1].x), 1, 0,
       "mobile tile X", idx, read_sz, cleanup );
    serial_asn_read_int(
-      save_buffer, &(m->coords.y), 1, 0,
+      save_buffer, &(m->coords[1].y), 1, 0,
       "mobile tile Y", idx, read_sz, cleanup );
    serial_asn_read_int(
-      save_buffer, &(m->coords_prev.x), 1, 0,
+      save_buffer, &(m->coords[0].x), 1, 0,
       "mobile previous tile X", idx, read_sz, cleanup );
    serial_asn_read_int(
-      save_buffer, &(m->coords_prev.y), 1, 0,
+      save_buffer, &(m->coords[0].y), 1, 0,
       "mobile previous tile X", idx, read_sz, cleanup );
    serial_asn_read_int(
       save_buffer, &(m->steps_remaining), 1, 0,

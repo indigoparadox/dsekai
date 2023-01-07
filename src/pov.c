@@ -191,7 +191,7 @@ int16_t pov_input(
       /* Try to interact with facing mobile. */
       mobile_interact(
          &(state->player),
-         mobile_get_facing( state->player.coords.x, state->player.coords.y,
+         mobile_get_facing( state->player.coords[1].x, state->player.coords[1].y,
             mobile_get_dir( &(state->player) ), state ), state );
 #ifdef POV_DEBUG_INC
       gstate->inc++;
@@ -440,8 +440,8 @@ void pov_draw_minimap( uint8_t* minimap, struct MOBILE* player ) {
       1, GRAPHICS_COLOR_WHITE );
 
    graphics_draw_px(
-      MINIMAP_X + 1 + player->coords.x,
-      MINIMAP_Y + 1 + player->coords.y,
+      MINIMAP_X + 1 + player->coords[1].x,
+      MINIMAP_Y + 1 + player->coords[1].y,
       GRAPHICS_COLOR_MAGENTA );
 
    graphics_char_at(
@@ -472,8 +472,8 @@ void pov_draw( struct DSEKAI_STATE* state ) {
          gc_pov_plane_x[mobile_get_dir( &(state->player) )] * ray.camera_x;
       ray.dir_y = gc_pov_dir_y[mobile_get_dir( &(state->player) )] +
          gc_pov_plane_y[mobile_get_dir( &(state->player) )] * ray.camera_x;
-      ray.map_tx = state->player.coords.x;
-      ray.map_ty = state->player.coords.y;
+      ray.map_tx = state->player.coords[1].x;
+      ray.map_ty = state->player.coords[1].y;
 
       /* Set ray distance to next tile side. */
       ray.delta_dist_x = (0 == ray.dir_x) ? 1e30 : fabs( 1 / ray.dir_x );
@@ -484,27 +484,27 @@ void pov_draw( struct DSEKAI_STATE* state ) {
       if( 0 > ray.dir_x ) {
          ray.step_x = -1;
          ray.side_dist_x =
-            ((double)(state->player.coords.x) - ray.map_tx) * ray.delta_dist_x;
+            ((double)(state->player.coords[1].x) - ray.map_tx) * ray.delta_dist_x;
       } else {
          ray.step_x = 1;
          ray.side_dist_x =
-            (ray.map_tx + 1 - (double)(state->player.coords.x)) * ray.delta_dist_x;
+            (ray.map_tx + 1 - (double)(state->player.coords[1].x)) * ray.delta_dist_x;
       }
 
       if( 0 > ray.dir_y ) {
          ray.step_y = -1;
          ray.side_dist_y =
-            ((double)(state->player.coords.y) - ray.map_ty) * ray.delta_dist_y;
+            ((double)(state->player.coords[1].y) - ray.map_ty) * ray.delta_dist_y;
       } else {
          ray.step_y = 1;
          ray.side_dist_y =
-            (ray.map_ty + 1 - (double)(state->player.coords.y)) * ray.delta_dist_y;
+            (ray.map_ty + 1 - (double)(state->player.coords[1].y)) * ray.delta_dist_y;
       }
 
       /* Launch the ray! */
       tile_id = pov_cast_ray(
-         state->player.coords.x,
-         state->player.coords.y,
+         state->player.coords[1].x,
+         state->player.coords[1].y,
          x, &ray, t, gstate->minimap );
       if( 0 > tile_id ) {
          /* Ray went off the map. */
