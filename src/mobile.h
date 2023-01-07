@@ -231,6 +231,9 @@ typedef uint32_t MOBILE_GID;
 #  define mobile_get_sprite( m ) ((m)->sprite_cache_id)
 #endif /* PLATFORM_CURSES */
 
+#define mobile_get_tx( m ) ((m)->coords[1].x)
+#define mobile_get_ty( m ) ((m)->coords[1].y)
+
 #define mobile_break_if_last( m ) if( MOBILE_FLAG_NOT_LAST != (MOBILE_FLAG_NOT_LAST & (m)->flags) ) { debug_printf( 0, "breaking early on mobile" ); break; }
 
 #define mobile_is_active( m ) (MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & (m)->flags))
@@ -291,7 +294,17 @@ struct MOBILE {
     */
    int16_t sprite_cache_id;
    unsigned char ascii;
+   /*! \brief Number of coordinates in MOBILE::coords. */
    int8_t coords_sz;
+   /**
+    * \brief The mobile's current location (in tiles) as well as queued future
+    *        locations.
+    *
+    * The first two location indexes (0 and 1) should be equal if the mobile
+    * is standing still. Otherwise, 1 contains the location the mobile is
+    * moving to and 0 contains the location it is moving from. This allows 0
+    * to become 1 and if MOBILE::coords_sz > 2, then 2 can be moved down to 1.
+    */
    struct TILEMAP_COORDS coords[MOBILE_COORDS_QUEUE_SZ];
    /**
     * \brief Number of steps remaining in current walk animation.

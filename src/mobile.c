@@ -154,14 +154,8 @@ struct MOBILE* mobile_interact(
    /* TODO: Is this a bit too severe for blocking ALL interaction during
     *       WALK?
     */
-   if(
-      /* Special case: Actor is executing a multi-cycle WALK instruction. */
-      SCRIPT_ACTION_WALK == step->action ||
-      /* Actee is walking. */
-      actor->coords[1].y != actor->coords[0].y ||
-      /* Actee is walking. */
-      actor->coords[1].x != actor->coords[0].x
-   ) {
+   /* Special case: Actor is executing a multi-cycle WALK instruction. */
+   if( SCRIPT_ACTION_WALK == step->action || mobile_is_walking( actor ) ) {
       actee = NULL;
       goto cleanup;
    }
@@ -325,20 +319,18 @@ void mobile_animate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    assert( SPRITE_W > m->steps_remaining && SPRITE_H > m->steps_remaining );
 
    /* Leave a trail of dirty tiles. */
-   state->tilemap->tiles_flags[(m->coords[1].y * TILEMAP_TW) + m->coords[1].x] |=
-      TILEMAP_TILE_FLAG_DIRTY;
-   state->tilemap->tiles_flags[(m->coords[0].y * TILEMAP_TW) + m->coords[0].x] |=
-      TILEMAP_TILE_FLAG_DIRTY;
+   state->tilemap->tiles_flags[
+      (mobile_get_ty( m ) * TILEMAP_TW) + mobile_get_tx( m )] |=
+         TILEMAP_TILE_FLAG_DIRTY;
+   state->tilemap->tiles_flags[
+      (m->coords[0].y * TILEMAP_TW) + m->coords[0].x] |=
+         TILEMAP_TILE_FLAG_DIRTY;
 
    /* Sync up prev and current coords if no steps left. */
-   if(
-      m->coords[1].x != m->coords[0].x ||
-      m->coords[1].y != m->coords[0].y
-   ) {
-      if( 0 == m->steps_remaining ) {
-         m->coords[0].x = m->coords[1].x;
-         m->coords[0].y = m->coords[1].y;
-      }
+   /* TODO: Implement queue, bring down next steps. */
+   if( mobile_is_walking( m ) &&  0 == m->steps_remaining ) {
+      m->coords[0].x = mobile_get_tx( m );
+      m->coords[0].y = mobile_get_ty( m );
    }
 
    /* Use negative HP for blinking effect on death, or remove if we're up to 

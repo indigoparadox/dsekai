@@ -16,6 +16,7 @@ int32_t serial_write_mobile(
    MEMORY_HANDLE* p_save_buffer_h, int32_t idx, struct MOBILE* m
 ) {
    int32_t mark_seq_mob = 0,
+      mark_seq_mob_coords = 0,
       i = 0;
 
    serial_asn_write_seq_start(
@@ -36,15 +37,17 @@ int32_t serial_write_mobile(
    serial_asn_write_int(
       p_save_buffer_h, m->ascii, x, "mobile ASCII", idx, cleanup );
    serial_asn_write_int(
-      p_save_buffer_h, m->coords[1].x, x, "mobile tile X", idx, cleanup );
-   serial_asn_write_int(
-      p_save_buffer_h, m->coords[1].y, x, "mobile tile Y", idx, cleanup );
-   serial_asn_write_int(
-      p_save_buffer_h, m->coords[0].x, x,
-      "mobile previous tile X", idx, cleanup );
-   serial_asn_write_int(
-      p_save_buffer_h, m->coords[0].y, x,
-      "mobile previous tile Y", idx, cleanup );
+      p_save_buffer_h, m->coords_sz, x, "mobile coords sz", idx, cleanup );
+   for( i = 0 ; m->coords_sz > i ; i++ ) {
+      serial_asn_write_seq_start(
+         p_save_buffer_h, &mark_seq_mob_coords, "mobile coords", idx, cleanup );
+      serial_asn_write_int(
+         p_save_buffer_h, m->coords[i].x, x, "mobile coords X", idx, cleanup );
+      serial_asn_write_int(
+         p_save_buffer_h, m->coords[i].y, x, "mobile coords Y", idx, cleanup );
+      serial_asn_write_seq_end(
+         p_save_buffer_h, &mark_seq_mob_coords, "mobile coords", idx, cleanup );
+   }
    serial_asn_write_int(
       p_save_buffer_h, m->steps_remaining, x,
       "mobile steps remaining", idx, cleanup );
@@ -72,10 +75,13 @@ cleanup:
 int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state ) {
    MEMORY_HANDLE save_buffer_h = (MEMORY_HANDLE)NULL;
    int32_t idx = 0;
-   struct TILEMAP* t = NULL;
    uint8_t i = 0;
    int32_t mark_seq_main = 0,
       mark_seq_mobs = 0;
+
+   if( !engines_state_lock( state ) ) {
+      goto cleanup;
+   }
 
    /* Allocate save buffer. */
    save_buffer_h = memory_alloc( TILEMAP_ASN_SAVE_BUFFER_INITIAL_SZ, 1 );
@@ -110,10 +116,7 @@ int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state ) {
 
    /* TODO: Serialize graphics cache index > resource_id mappings. */
    
-   /* map */
-   t = (struct TILEMAP*)memory_lock( state->map_handle );
-   assert( NULL != t );
-   idx = tilemap_asn_save( save_buffer_h, idx, t );
+   idx = tilemap_asn_save( save_buffer_h, idx, state->tilemap );
 
    serial_asn_write_seq_end(
       &save_buffer_h, &mark_seq_main, "main", idx, cleanup );
@@ -122,10 +125,6 @@ int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state ) {
    save_write( save_name, save_buffer_h, idx );
 
 cleanup:
-
-   if( NULL != t ) {
-      t = (struct TILEMAP*)memory_unlock( state->map_handle );
-   }
 
    if( (MEMORY_HANDLE)NULL != save_buffer_h ) {
       memory_free( save_buffer_h );
@@ -139,7 +138,8 @@ int32_t serial_read_mobile(
 ) {
    int32_t i = 0;
    int32_t read_sz = 0,
-      mob_seq_sz = 0;
+      mob_seq_sz = 0,
+      mob_coords_seq_sz = 0;
    uint8_t type_buf = 0;
 
    serial_asn_read_seq(
@@ -165,17 +165,19 @@ int32_t serial_read_mobile(
    serial_asn_read_int(
       save_buffer, &(m->ascii), 1, 0, "mobile ASCII", idx, read_sz, cleanup );
    serial_asn_read_int(
-      save_buffer, &(m->coords[1].x), 1, 0,
-      "mobile tile X", idx, read_sz, cleanup );
-   serial_asn_read_int(
-      save_buffer, &(m->coords[1].y), 1, 0,
-      "mobile tile Y", idx, read_sz, cleanup );
-   serial_asn_read_int(
-      save_buffer, &(m->coords[0].x), 1, 0,
-      "mobile previous tile X", idx, read_sz, cleanup );
-   serial_asn_read_int(
-      save_buffer, &(m->coords[0].y), 1, 0,
-      "mobile previous tile X", idx, read_sz, cleanup );
+      save_buffer, &(m->coords_sz), 1, 0,
+      "mobile coords sz", idx, read_sz, cleanup );
+   for( i = 0 ; m->coords_sz > i ; i++ ) {
+      serial_asn_read_seq(
+         save_buffer, &type_buf, &mob_coords_seq_sz,
+         "mobile coords", idx, read_sz, cleanup )
+      serial_asn_read_int(
+         save_buffer, &(m->coords[i].x), 1, 0,
+         "mobile coords X", idx, read_sz, cleanup );
+      serial_asn_read_int(
+         save_buffer, &(m->coords[i].y), 1, 0,
+         "mobile coords Y", idx, read_sz, cleanup );
+   }
    serial_asn_read_int(
       save_buffer, &(m->steps_remaining), 1, 0,
       "mobile steps remaining", idx, read_sz, cleanup );
@@ -210,9 +212,12 @@ int32_t serial_load( const char* save_name, struct DSEKAI_STATE* state ) {
       save_seq_sz = 0,
       i = 0;
    uint8_t version = 0;
-   struct TILEMAP* t = NULL;
 
    engines_draw_loading_screen();
+
+   if( !engines_state_lock( state ) ) {
+      goto cleanup;
+   }
 
    /* Read the buffer from disk. */
    save_buffer_h = save_read( save_name );
@@ -260,13 +265,10 @@ int32_t serial_load( const char* save_name, struct DSEKAI_STATE* state ) {
    debug_printf( 2, "(offset 0x%x of 0x%x) serialized mobiles loaded!",
       idx, save_buffer_sz );
 
-   t = (struct TILEMAP*)memory_lock( state->map_handle );
-   assert( NULL != t );
    assert( NULL != save_buffer );
 
-   read_sz = tilemap_asn_load( &(save_buffer[idx]), save_buffer_sz - idx, t );
-
-   t = (struct TILEMAP*)memory_unlock( state->map_handle );
+   read_sz = tilemap_asn_load( &(save_buffer[idx]), save_buffer_sz - idx,
+      state->tilemap );
 
    /* TODO
    memory_strncpy_ptr( state->warp_to, stringize( ENTRY_MAP ), \
