@@ -538,19 +538,19 @@ uint8_t engines_state_lock( struct DSEKAI_STATE* state ) {
    }
 
    if( NULL == state->tilemap ) {
-      state->tilemap = memory_lock( state->map_handle );
+      state->tilemap = (struct TILEMAP*)memory_lock( state->map_handle );
    }
 
    if( NULL == state->mobiles ) {
-      state->mobiles = memory_lock( state->mobiles_handle );
+      state->mobiles = (struct MOBILE*)memory_lock( state->mobiles_handle );
    }
 
    if( NULL == state->crops ) {
-      state->crops = memory_lock( state->crops_handle );
+      state->crops = (struct CROP_PLOT*)memory_lock( state->crops_handle );
    }
 
    if( NULL == state->items ) {
-      state->items = memory_lock( state->items_handle );
+      state->items = (struct ITEM*)memory_lock( state->items_handle );
    }
 
    return 1;
@@ -564,19 +564,19 @@ uint8_t engines_state_unlock( struct DSEKAI_STATE* state ) {
    }
 
    if( NULL != state->tilemap ) {
-      state->tilemap = memory_unlock( state->map_handle );
+      state->tilemap = (struct TILEMAP*)memory_unlock( state->map_handle );
    }
 
    if( NULL != state->mobiles ) {
-      state->mobiles = memory_unlock( state->mobiles_handle );
+      state->mobiles = (struct MOBILE*)memory_unlock( state->mobiles_handle );
    }
 
    if( NULL != state->crops ) {
-      state->crops = memory_unlock( state->crops_handle );
+      state->crops = (struct CROP_PLOT*)memory_unlock( state->crops_handle );
    }
 
    if( NULL != state->items ) {
-      state->items = memory_unlock( state->items_handle );
+      state->items = (struct ITEM*)memory_unlock( state->items_handle );
    }
 
    return 1;
