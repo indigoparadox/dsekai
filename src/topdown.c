@@ -303,8 +303,7 @@ cleanup:
 }
 
 void topdown_draw_items(
-   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate,
-   struct TILEMAP* t
+   struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate
 ) {
    int16_t i = 0;
    uint16_t item_px = 0,
@@ -358,7 +357,6 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
    struct TOPDOWN_STATE* gstate = NULL;
    int16_t i = 0,
       onscreen_mobs = 0;
-   struct TILEMAP* t = NULL;
 
    gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
 
@@ -372,10 +370,10 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
    topdown_draw_crops( state, gstate );
 
    /* Draw items without owners. */
-   topdown_draw_items( state, gstate, t );
+   topdown_draw_items( state, gstate );
 
    /* Draw mobiles. */
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+   for( i = 0 ; state->mobiles_sz > i ; i++ ) {
       topdown_draw_mobile(
          state, gstate, &onscreen_mobs, &(state->mobiles[i]) );
    }

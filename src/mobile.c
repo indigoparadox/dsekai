@@ -412,8 +412,7 @@ cleanup:
 int16_t mobile_spawner_match(
    struct TILEMAP_SPAWN* spawner, struct DSEKAI_STATE* state
 ) {
-   int16_t i = 0;
-   RESOURCE_ID ss_id;
+   int16_t i = -1;
 
    if( !engines_state_lock( state ) ) {
       goto cleanup;     
@@ -422,7 +421,7 @@ int16_t mobile_spawner_match(
    /* See if the mobile was spawned on a previous visit to this tilemap. */
    debug_printf( 1, "search tilemap %d, spawner %d",
       state->tilemap->gid, spawner->gid );
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+   for( i = 0 ; state->mobiles_sz > i ; i++ ) {
       /* mobile_break_if_last( mobiles, i ); */
       if( !mobile_is_active( &(state->mobiles[i]) ) ) {
          continue;
@@ -439,14 +438,13 @@ int16_t mobile_spawner_match(
          /* This mobile was spawned already, so update volatile stuff
             * and move on.
             */
-         resource_id_from_name( &ss_id, spawner->sprite_name,
-            RESOURCE_EXT_GRAPHICS );
-         state->mobiles[i].sprite_cache_id = graphics_cache_load_bitmap(
-            ss_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+         debug_printf( 1, "found already spawned mobile " MOBILE_GID_FMT,
+            mobile_get_gid_fmt( &(state->mobiles[i]) ) );
          goto cleanup;
       }
    }
 
+   /* Reset back to not-found condition if cleanup above not triggered. */
    i = -1;
 
 cleanup:
@@ -502,6 +500,12 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
       mobile_iter->ascii = state->tilemap->spawns[i].ascii;
       mobile_iter->flags |= state->tilemap->spawns[i].flags;
       mobile_iter->spawner_gid = state->tilemap->spawns[i].gid;
+      memory_strncpy_ptr(
+         mobile_iter->name, state->tilemap->spawns[i].name,
+         TILEMAP_SPAWN_NAME_SZ );
+      memory_strncpy_ptr(
+         mobile_iter->sprite_name, state->tilemap->spawns[i].sprite_name,
+         RESOURCE_NAME_MAX );
       if( MOBILE_FLAG_PLAYER != (state->tilemap->spawns[i].flags & MOBILE_FLAG_PLAYER) ) {
          /* The player is on all tilemaps, but other mobiles limited to one. */
          mobile_iter->map_gid = state->tilemap->gid;

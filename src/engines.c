@@ -40,7 +40,7 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    }
 
    /* Unload irrelevant mobiles. */
-   for( i = 0 ; DSEKAI_MOBILES_MAX > i ; i++ ) {
+   for( i = 0 ; state->mobiles_sz > i ; i++ ) {
       /* mobile_break_if_last( state->mobiles, i ); */
       if( !mobile_is_active( &(state->mobiles[i]) ) ) {
          continue;
@@ -107,23 +107,6 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
    graphics_clear_cache();
 
-   /* Reload player sprite since cache is gone. */
-   resource_id_from_name( &sprite_id, state->player_sprite_name,
-      RESOURCE_EXT_GRAPHICS );
-   debug_printf( 2, "player sprite ID: " RESOURCE_ID_FMT, sprite_id );
-   if( resource_id_valid( sprite_id ) ) {
-      state->player.sprite_cache_id = graphics_cache_load_bitmap(
-         sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
-   }
-
-   /* Reset item sprite IDs since cache is gone. */
-   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
-      resource_id_from_name( &sprite_id, state->items[i].sprite_name,
-         RESOURCE_EXT_GRAPHICS );
-      state->items[i].sprite_cache_id = graphics_cache_load_bitmap(
-         sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
-   }
-
 #ifndef NO_ENGINE_EDITOR
    /* Disable editor. */
    memory_zero_ptr(
@@ -154,6 +137,43 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
 
    /* Spawn mobiles. */
    mobile_spawns( state );
+
+   /* Refresh volatile stuff, like images. */
+
+   /* Reload player sprite since cache is gone. */
+   resource_id_from_name( &sprite_id, state->player_sprite_name,
+      RESOURCE_EXT_GRAPHICS );
+   debug_printf( 2, "player sprite ID: " RESOURCE_ID_FMT, sprite_id );
+   if( resource_id_valid( sprite_id ) ) {
+      state->player.sprite_cache_id = graphics_cache_load_bitmap(
+         sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+   } else {
+      error_printf( "invalid player sprite ID!" );
+   }
+
+   /* Reload other mobile sprites if they're on this tilemap. */
+   debug_printf( 1, "resetting mobile sprite IDs..." );
+   for( i = 0 ; state->mobiles_sz > i ; i++ ) {
+      if(
+         !mobile_is_active( &(state->mobiles[i]) ) ||
+         state->mobiles[i].map_gid != state->tilemap->gid
+      ) {
+         continue;
+      }
+      resource_id_from_name( &sprite_id, state->mobiles[i].sprite_name,
+         RESOURCE_EXT_GRAPHICS );
+      state->mobiles[i].sprite_cache_id = graphics_cache_load_bitmap(
+         sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+   }
+
+   /* Reset item sprite IDs since cache is gone. */
+   debug_printf( 1, "resetting item sprite IDs..." );
+   for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
+      resource_id_from_name( &sprite_id, state->items[i].sprite_name,
+         RESOURCE_EXT_GRAPHICS );
+      state->items[i].sprite_cache_id = graphics_cache_load_bitmap(
+         sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+   }
 
    memory_debug_dump();
 

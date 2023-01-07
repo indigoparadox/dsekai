@@ -92,11 +92,11 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       player_item_idx = 0;
    GRAPHICS_COLOR color;
    uint8_t flags = 0;
-   struct ITEM* items = NULL;
    RESOURCE_ID sprite_id;
 
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
+   if( !engines_state_lock( state ) ) {
+      goto cleanup;
+   }
 
    if( 0 != (MENU_FLAG_ITEM_OPEN_SEL_MASK & state->menu.flags) ) {
       /* Render the implicit use/craft/drop menu. */
@@ -167,17 +167,17 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
        *       items input handler.
        */
       if(
-         ITEM_FLAG_ACTIVE != (ITEM_FLAG_ACTIVE & items[i].flags) ||
-         ITEM_OWNER_PLAYER != items[i].owner
+         ITEM_FLAG_ACTIVE != (ITEM_FLAG_ACTIVE & state->items[i].flags) ||
+         ITEM_OWNER_PLAYER != state->items[i].owner
       ) {
          continue;
       }
 
       /* Make sure item sprite is loaded. */
-      if( -1 == items[i].sprite_cache_id ) {
-         resource_id_from_name( &sprite_id, items[i].sprite_name,
+      if( -1 == state->items[i].sprite_cache_id ) {
+         resource_id_from_name( &sprite_id, state->items[i].sprite_name,
             RESOURCE_EXT_GRAPHICS );
-         items[i].sprite_cache_id = graphics_cache_load_bitmap(
+         state->items[i].sprite_cache_id = graphics_cache_load_bitmap(
             sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
       }
 
@@ -186,7 +186,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          color = WINDOW_PREFAB_DEFAULT_HL();
          flags = GRAPHICS_STRING_FLAG_OUTLINE;
 
-         assert( 0 <= items[i].sprite_cache_id );
+         assert( 0 <= state->items[i].sprite_cache_id );
 
          /* Show item icon in info window. */
          window_push(
@@ -195,7 +195,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
             WINDOW_PLACEMENT_CENTER, 6,
             WINDOW_SIZE_AUTO, WINDOW_SIZE_AUTO,
             WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(),
-            0, items[i].sprite_cache_id, NULL );
+            0, state->items[i].sprite_cache_id, NULL );
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
          flags = 0;
@@ -209,7 +209,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(),
          flags | GRAPHICS_STRING_FLAG_ALL_CAPS,
-         0, items[i].name );
+         0, state->items[i].name );
 
       /* item count. */
       window_push(
@@ -218,7 +218,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_PLACEMENT_RIGHT_BOTTOM, WINDOW_PLACEMENT_GRID,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(), flags,
-         item_get_count_flag( &(items[i]) ), NULL );
+         item_get_count_flag( &(state->items[i]) ), NULL );
 
       player_item_idx++;
    }  
@@ -236,7 +236,8 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          0, 0, gc_menu_msgs[0], MENU_WINDOW_ID, state ); */
    }
 
-   items = (struct ITEM*)memory_unlock( state->items_handle );
+cleanup:
+   return;
 }
 
 static int8_t menu_handler_items_use(
@@ -244,11 +245,13 @@ static int8_t menu_handler_items_use(
 ) {
    int8_t use_retval = 0;
    uint8_t item_type = 0;
-   struct ITEM* items = NULL;
 
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   item_type = item_get_type_flag( &(items[selected_item_idx]) );
-   items = (struct ITEM*)memory_unlock( state->items_handle );
+   if( !engines_state_lock( state ) ) {
+      /* TODO: Error retval. */
+      goto cleanup;
+   }
+
+   item_type = item_get_type_flag( &(state->items[selected_item_idx]) );
 
    use_retval = gc_item_use_cbs[item_type](
       selected_item_idx, ITEM_OWNER_PLAYER, state );
@@ -256,6 +259,7 @@ static int8_t menu_handler_items_use(
       menu_close( state );
    }
 
+cleanup:
    return use_retval;
 }
 
@@ -267,20 +271,19 @@ int16_t menu_handler_items(
       i = 0;
    int16_t selected_item_idx = ITEM_ERROR_NOT_FOUND,
       player_item_count = 0;
-   struct TILEMAP* t = NULL;
-   struct ITEM* items = NULL;
+
+   if( !engines_state_lock( state ) ) {
+      /* TODO: Error retval. */
+      goto cleanup;
+   }
 
    /* TODO: Break this first part out into its own function. */
-
-   /* Handle locking. */
-   items = (struct ITEM*)memory_lock( state->items_handle );
-   assert( NULL != items );
 
    /* Count player-owned items to enforce limits below. */
    for( i = 0 ; DSEKAI_ITEMS_MAX > i ; i++ ) {
       if(
-         ITEM_OWNER_PLAYER == items[i].owner &&
-         ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & items[i].flags)
+         ITEM_OWNER_PLAYER == state->items[i].owner &&
+         ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & state->items[i].flags)
       ) {
          if( player_item_count == state->menu.highlight_id ) {
             /* This is the currently selected item. */
@@ -290,8 +293,6 @@ int16_t menu_handler_items(
          player_item_count++;
       }
    }
-
-   items = (struct ITEM*)memory_unlock( state->items_handle );
 
    if( g_input_key_up == in_char ) {
       /* Process the implicity use/craft/drop menu first if that's open. */
@@ -382,14 +383,7 @@ int16_t menu_handler_items(
          MENU_FLAG_ITEM_OPEN_SEL_DROP ==
          (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK)
       ) {
-         t = (struct TILEMAP*)memory_lock( state->map_handle );
-         if( NULL == t ) {
-            error_printf( "could not lock tilemap for dropping!" );
-            retval = 0;
-            goto cleanup;
-         }
          item_drop( selected_item_idx, state );
-         t = (struct TILEMAP*)memory_unlock( state->map_handle );
          state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
 
       } else {
@@ -488,22 +482,22 @@ void menu_open( struct DSEKAI_STATE* state ) {
 void menu_close( struct DSEKAI_STATE* state ) {
    int8_t i = 0;
    uint32_t open_ms_diff = 0;
-   struct TILEMAP* map = NULL;
+
+   if( !engines_state_lock( state ) ) {
+      /* TODO: Error retval. */
+      goto cleanup;
+   }
 
    debug_printf( 3, "closing menu..." );
    window_pop( MENU_WINDOW_ID );
    state->menu.menu_id = -1;
    state->menu.highlight_id = -1;
-   map = (struct TILEMAP*)memory_lock( state->map_handle );
-   if( NULL != map ) {
-      tilemap_refresh_tiles( map );
-      map = (struct TILEMAP*)memory_unlock( state->map_handle );
-   }
+   tilemap_refresh_tiles( state->tilemap );
 
    open_ms_diff = graphics_get_ms() - state->menu.open_ms;
 
    /* Bump up all crop cycles to compensate for menu time. */
-   for( i = 0 ; DSEKAI_CROPS_MAX > i ; i++ ) {
+   for( i = 0 ; state->crops_sz > i ; i++ ) {
       if(
          CROP_FLAG_ACTIVE != (CROP_FLAG_ACTIVE & state->crops[i].flags) ||
          0 == state->crops[i].crop_gid
@@ -522,5 +516,8 @@ void menu_close( struct DSEKAI_STATE* state ) {
 
    animate_resume( ANIMATE_FLAG_SCRIPT );
    animate_resume( ANIMATE_FLAG_WEATHER );
+
+cleanup:
+   return;
 }
 

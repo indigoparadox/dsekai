@@ -239,6 +239,8 @@ typedef uint32_t MOBILE_GID;
 
 /*! \brief A moving/interactive object in the world. */
 struct MOBILE {
+   char name[TILEMAP_SPAWN_NAME_SZ];
+   char sprite_name[RESOURCE_NAME_MAX];
    /**
     * \brief \ref dsekai_mobiles_flags affecting this mobile's display and
     *        behavior.
