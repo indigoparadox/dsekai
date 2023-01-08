@@ -168,7 +168,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
        */
       if(
          ITEM_FLAG_ACTIVE != (ITEM_FLAG_ACTIVE & state->items[i].flags) ||
-         ITEM_OWNER_PLAYER != state->items[i].owner
+         MOBILE_GID_PLAYER != state->items[i].owner
       ) {
          continue;
       }
@@ -254,7 +254,7 @@ static int8_t menu_handler_items_use(
    item_type = item_get_type_flag( &(state->items[selected_item_idx]) );
 
    use_retval = gc_item_use_cbs[item_type](
-      selected_item_idx, ITEM_OWNER_PLAYER, state );
+      selected_item_idx, MOBILE_GID_PLAYER, state );
    if( ITEM_USED_SUCCESSFUL_SILENT != use_retval ) {
       menu_close( state );
    }
@@ -282,7 +282,7 @@ int16_t menu_handler_items(
    /* Count player-owned items to enforce limits below. */
    for( i = 0 ; state->items_sz > i ; i++ ) {
       if(
-         ITEM_OWNER_PLAYER == state->items[i].owner &&
+         MOBILE_GID_PLAYER == state->items[i].owner &&
          ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & state->items[i].flags)
       ) {
          if( player_item_count == state->menu.highlight_id ) {

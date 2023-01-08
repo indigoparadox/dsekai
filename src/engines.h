@@ -202,9 +202,15 @@ struct DSEKAI_STATE {
     * Items in this array are considered to "exist" when the ITEM::flags
     * field has the ::ITEM_FLAG_ACTIVE bit set. Inactive items may be replaced
     * by new items.
+    *
+    * \warning The state must be locked with \ref dsekai_engines_locking before
+    *          use!
     */
    MEMORY_HANDLE items_handle;
 
+   /**
+    * \brief Temporary pointer for use during \ref dsekai_engines_locking.
+    */
    struct ITEM* items;
 
    int16_t items_sz;
@@ -214,6 +220,12 @@ struct DSEKAI_STATE {
     */
    MEMORY_HANDLE map_handle;
 
+   /**
+    * \brief Temporary pointer for use during \ref dsekai_engines_locking.
+    *
+    * \warning The state must be locked with \ref dsekai_engines_locking before
+    *          use!
+    */
    struct TILEMAP* tilemap;
 
    /**
@@ -236,9 +248,15 @@ struct DSEKAI_STATE {
     *
     * \warning Index in this array is persistant and unique in the world!
     *          Be sure to preserve it (including empty spots) during serialize!
+    *
+    * \warning The state must be locked with \ref dsekai_engines_locking before
+    *          use!
     */
    MEMORY_HANDLE mobiles_handle;
 
+   /**
+    * \brief Temporary pointer for use during \ref dsekai_engines_locking.
+    */
    struct MOBILE* mobiles;
 
    uint16_t mobiles_sz;
@@ -322,6 +340,9 @@ struct DSEKAI_STATE {
     */
    MEMORY_HANDLE crops_handle;
 
+   /**
+    * \brief Temporary pointer for use during \ref dsekai_engines_locking.
+    */
    struct CROP_PLOT* crops;
 
    int16_t crops_sz;
@@ -383,9 +404,16 @@ void engines_set_transition(
 
 void engines_draw_transition( struct DSEKAI_STATE* state );
 
+/**
+ * \addtogroup dsekai_engines_locking Engine Locking
+ * \{
+ */
+
 uint8_t engines_state_lock( struct DSEKAI_STATE* state );
 
 uint8_t engines_state_unlock( struct DSEKAI_STATE* state );
+
+/*! \} */
 
 #endif /* !ENGINES_TOKENS_ONLY */
 

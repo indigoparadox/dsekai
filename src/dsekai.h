@@ -81,9 +81,9 @@ struct DSEKAI_STATE;
 #include "scparse.h"
 #endif /* !NO_SCRIPT_COMPILER */
 
-#include "item.h"
 #include "tilemap.h"
 #include "mobile.h"
+#include "item.h"
 #ifdef NETWORK_IRC
 #include "irc.h"
 #endif /* NETWORK_IRC */

@@ -106,7 +106,7 @@ cleanup:
 }
 
 int8_t crop_harvest(
-   int8_t harvester_id, struct CROP_PLOT* plot, struct DSEKAI_STATE* state
+   MOBILE_GID harvester_gid, struct CROP_PLOT* plot, struct DSEKAI_STATE* state
 ) {
    int8_t i = 0,
       retval = 1;
@@ -131,7 +131,7 @@ int8_t crop_harvest(
 
    /* Give the harvested crop to the harvester. */
    item_stack_or_add(
-      state->tilemap->crop_defs[i].produce_gid, harvester_id, state );
+      state->tilemap->crop_defs[i].produce_gid, harvester_gid, state );
 
    /* Update the plot status to reflect harvest. */
    plot->flags &= ~CROP_FLAG_STAGE_MASK;

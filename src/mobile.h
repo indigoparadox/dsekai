@@ -15,6 +15,11 @@
 
 typedef uint32_t MOBILE_GID;
 
+/**
+ * \addtogroup dsekai_mobiles_gid Mobile GID
+ * \{
+ */
+
 #define MOBILE_GID_NONE 0
 #define MOBILE_GID_PLAYER 0xffffffff
 
@@ -30,10 +35,12 @@ typedef uint32_t MOBILE_GID;
  */
 #define mobile_get_gid_fmt( m ) (m)->map_gid, (m)->spawner_gid
 
-/* TODO: Get rid of these in favor of GID. */
-#define MOBILE_IDX_NONE -1
-#define MOBILE_IDX_PLAYER -2
+/*! \} */ /* dsekai_mobiles_gid */
 
+/**
+ * \relates MOBILE
+ * \brief Number of positions available in the MOBILE::coords queue.
+ */
 #define MOBILE_COORDS_QUEUE_SZ 5
 
 /**
@@ -139,6 +146,15 @@ typedef uint32_t MOBILE_GID;
 #define mobile_get_gid( m ) (((m)->map_gid << 16) & (m)->spawner_gid)
 
 /**
+ * \brief Get the GID of the ::TILEMAP the given ::MOBILE is \b currently \b on.
+ * \relates MOBILE
+ * \param m Locked ::MEMORY_PTR to ::MOBILE to query.
+ * \warning Engine state must be locked with \ref dsekai_engines_locking 
+ *          before use here!
+ */
+#define mobile_get_map_gid( m, state ) ((MOBILE_GID_PLAYER == mobile_get_gid( m )) ? (state)->tilemap->gid : (m)->map_gid)
+
+/**
  * \addtogroup dsekai_mobiles_flags Mobile Object Flags
  * \brief Flags controlling ::MOBILE object behavior.
  * \{
@@ -238,6 +254,8 @@ typedef uint32_t MOBILE_GID;
 
 #define mobile_is_active( m ) (MOBILE_FLAG_ACTIVE == (MOBILE_FLAG_ACTIVE & (m)->flags))
 
+#define mobile_is_walking( m ) ((m)->coords[1].y != (m)->coords[0].y || (m)->coords[1].x != (m)->coords[0].x)
+
 /**
  * \addtogroup dsekai_mobiles_errors Mobile-Related Errors
  * \brief Error codes for ::MOBILE-related functions.
@@ -260,10 +278,14 @@ struct MOBILE {
    uint16_t flags;
    /**
     * \brief TILEMAP_SPAWN::gid of the spawner that spawned this mobile.
+    *
+    * This is part of the \ref dsekai_mobiles_gid.
     */
    uint16_t spawner_gid;
    /**
     * \brief TILEMAP::gid of the tilemap this mobile was spawned on.
+    *
+    * This is part of the \ref dsekai_mobiles_gid.
     */
    uint16_t map_gid;
    char name[TILEMAP_SPAWN_NAME_SZ];
@@ -353,8 +375,6 @@ struct MOBILE {
 
 /*! \} */ /* dsekai_mobiles_directions */
 
-#define mobile_is_walking( m ) ((m)->coords[1].y != (m)->coords[0].y || (m)->coords[1].x != (m)->coords[0].x)
-
 /**
  * \brief Have the given MOBILE attempt to begin walking movement/animation.
  * \param m ::MEMORY_PTR to MOBILE that should attempt moving.
@@ -375,6 +395,8 @@ uint8_t mobile_walk_start( struct MOBILE* m, uint8_t dir ) SECTION_MOBILE;
  */
 struct MOBILE* mobile_get_facing(
    uint8_t x, uint8_t y, uint8_t dir, struct DSEKAI_STATE* state );
+
+struct MOBILE* mobile_from_gid( MOBILE_GID m_gid, struct DSEKAI_STATE* state );
 
 /**
  * \brief Force a ::MOBILE to jump to the SCRIPT_ACTION_INTERACT in its

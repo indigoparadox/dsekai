@@ -107,10 +107,10 @@ int8_t crop_plant(
 /**
  * \brief Harvest the given ::CROP_PLOT, giving the produce to the specified
  *        \ref dsekai_items_owners.
- * \param harvester_id \ref dsekai_items_owners to give the harvest to.
+ * \param harvester_gid ::MOBILE_GID of the ::MOBILE to give the harvest to.
  */
 int8_t crop_harvest(
-   int8_t harvester_id, struct CROP_PLOT* plot, struct DSEKAI_STATE* state
+   MOBILE_GID harvester_gid, struct CROP_PLOT* plot, struct DSEKAI_STATE* state
 ) SECTION_CROP;
 
 /**

@@ -3,14 +3,14 @@
 #include "dsekai.h"
 
 int8_t item_use_none(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
    error_printf( "attempted to use invalid item" );
    return 0;
 }
 
 int8_t item_use_seed(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
    int8_t retval = -1;
    uint8_t x = 0,
@@ -24,11 +24,7 @@ int8_t item_use_seed(
    }
 
    /* Owner check. */
-   if( 0 <= owner_id ) {
-      user = &(state->mobiles[owner_id]);
-   } else if( ITEM_OWNER_PLAYER == owner_id ) {
-      user = &(state->player);
-   }
+   user = mobile_from_gid( owner_gid, state );
    assert( NULL != user );
 
    crop_gid = state->items[e_idx].data;
@@ -72,7 +68,7 @@ cleanup:
 }
 
 int8_t item_use_food(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
 #if defined( DEPTH_VGA ) || defined( DEPTH_CGA )
 #ifndef NO_ANIMATE
@@ -88,11 +84,7 @@ int8_t item_use_food(
    }
 
    /* Owner check. */
-   if( 0 <= owner_id ) {
-      user = &(state->mobiles[owner_id]);
-   } else if( ITEM_OWNER_PLAYER == owner_id ) {
-      user = &(state->player);
-   }
+   user = mobile_from_gid( owner_gid, state );
    assert( NULL != user );
 
    food_val = state->items[e_idx].data;
@@ -128,14 +120,14 @@ cleanup:
 }
 
 int8_t item_use_shovel(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
    /* TODO: Implement digging. */
    return ITEM_USED_FAILED;
 }
 
 int8_t item_use_editor(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
 #ifndef NO_ENGINE_EDITOR
    if( !engines_state_lock( state ) ) {
@@ -172,21 +164,21 @@ cleanup:
 }
 
 int8_t item_use_material(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
    /* TODO: Warn that materials cannot be used directly. */
    return 0;
 }
 
 int8_t item_use_watercan(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
    /* TODO: Check for CROP_PLOTs that can be watered. */
    return 0;
 }
 
 int8_t item_use_hoe(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
    int8_t retval = ITEM_USED_SUCCESSFUL;
    int16_t x = 0,
@@ -199,11 +191,7 @@ int8_t item_use_hoe(
       goto cleanup;     
    }
 
-   if( 0 <= owner_id ) {
-      user = &(state->mobiles[owner_id]);
-   } else if( ITEM_OWNER_PLAYER == owner_id ) {
-      user = &(state->player);
-   }
+   user = mobile_from_gid( owner_gid, state );
    assert( NULL != user );
 
    x = user->coords[1].x + gc_mobile_x_offsets[mobile_get_dir( user )];
@@ -266,7 +254,7 @@ cleanup:
 }
 
 int16_t item_exists_in_inventory(
-   int16_t template_gid, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t template_gid, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
    int16_t i = 0;
 
@@ -280,17 +268,17 @@ int16_t item_exists_in_inventory(
       if(
          ITEM_FLAG_ACTIVE == (state->items[i].flags & ITEM_FLAG_ACTIVE) &&
          state->items[i].gid == template_gid &&
-         state->items[i].owner == owner_id
+         state->items[i].owner == owner_gid
       ) {
          debug_printf(
             2, "item gid %d exists in owner %d inventory at index: %d",
-            template_gid, owner_id, i );
+            template_gid, owner_gid, i );
          goto cleanup;
       }
    }
 
    debug_printf( 2, "item gid %d does not exist in owner %d inventory!",
-      template_gid, owner_id );
+      template_gid, owner_gid );
    i = ITEM_ERROR_NOT_FOUND;
 
 cleanup:
@@ -321,7 +309,7 @@ cleanup:
 }
 
 int16_t item_stack_or_add(
-   int16_t template_gid, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t template_gid, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
    int16_t e_idx = 0,
       i = 0;
@@ -341,7 +329,7 @@ int16_t item_stack_or_add(
       ) {
          e_def = &(state->tilemap->item_defs[i]);
          debug_printf( 2, "found item with gid %d and owner %d at index: %d",
-            template_gid, owner_id, i );
+            template_gid, owner_gid, i );
          break;
       }
    }
@@ -353,7 +341,7 @@ int16_t item_stack_or_add(
    }
 
    /* Determine if we're stacking or adding. */
-   e_idx = item_exists_in_inventory( template_gid, owner_id, state );
+   e_idx = item_exists_in_inventory( template_gid, owner_gid, state );
 
    if(
       /* Found a dupe (stacking). */
@@ -363,7 +351,7 @@ int16_t item_stack_or_add(
          item_get_count_flag( &(state->items[e_idx]) ) + 1
    ) {
       debug_printf( 2, "adding item %d to mobile %d stack (%d)",
-         template_gid, owner_id,
+         template_gid, owner_gid,
          item_get_count_flag( &(state->items[e_idx]) ) );
 
    } else {
@@ -380,13 +368,13 @@ int16_t item_stack_or_add(
 
          debug_printf(
             2, "creating item with gid %d and owner %d at index: %d",
-            e_def->gid, owner_id, i );
+            e_def->gid, owner_gid, i );
 
          memory_copy_ptr( 
             (MEMORY_PTR)&(state->items[i]), (CONST_MEMORY_PTR)e_def,
             sizeof( struct ITEM ) );
 
-         state->items[i].owner = owner_id;
+         state->items[i].owner = owner_gid;
          state->items[i].sprite_cache_id = -1;
          e_idx = i;
 
@@ -408,7 +396,7 @@ cleanup:
 }
 
 int16_t item_give_mobile(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
    int16_t e_dest_idx = 0;
    int16_t e_gid = 0;
@@ -422,11 +410,11 @@ int16_t item_give_mobile(
    e_gid = state->items[e_idx].gid;
    
    debug_printf( 2, "giving item at index %d with gid %d to owner: %d",
-      e_idx, e_gid, owner_id );
+      e_idx, e_gid, owner_gid );
 
    /* TODO: Check for full inventory vs ITEM_INVENTORY_MAX. */
 
-   item_stack_or_add( e_gid, owner_id, state );
+   item_stack_or_add( e_gid, owner_gid, state );
 
    /* Since give was successful, remove former owner's copy. */
    item_decr_or_delete( e_idx, state );
@@ -437,6 +425,7 @@ cleanup:
 
 int8_t item_drop( int16_t e_idx, struct DSEKAI_STATE* state ) {
    struct ITEM* e = NULL;
+   struct MOBILE* owner = NULL;
 
    if( !engines_state_lock( state ) ) {
       goto cleanup;     
@@ -447,23 +436,17 @@ int8_t item_drop( int16_t e_idx, struct DSEKAI_STATE* state ) {
    e = &(state->items[e_idx]);
    assert( ITEM_FLAG_ACTIVE == (ITEM_FLAG_ACTIVE & e->flags) );
 
-   if( ITEM_OWNER_NONE == e->owner ) {
-      goto cleanup;
-   }
+   owner = mobile_from_gid( e->owner, state );
+   assert( NULL != owner );
 
    /* Set the item's new map coordinates based on previous owner. */
-   if( ITEM_OWNER_PLAYER == e->owner ) {
-      e->x = state->player.coords[1].x;
-      e->y = state->player.coords[1].y;
-   } else if( 0 <= e->owner && state->mobiles_sz > e->owner ) {
-      e->x = state->mobiles[e->owner].coords[1].x;
-      e->y = state->mobiles[e->owner].coords[1].y;
-   }
+   e->x = owner->coords[1].x;
+   e->y = owner->coords[1].y;
+   e->owner = MOBILE_GID_NONE;
+   e->map_gid = mobile_get_map_gid( owner, state );
 
-   debug_printf( 2, "dropped item at %d, %d", e->x, e->y );
-
-   e->owner = ITEM_OWNER_NONE;
-   e->map_gid = state->tilemap->gid;
+   debug_printf( 2, "dropped item at %d, %d on tilemap %d",
+      e->x, e->y, e->map_gid );
 
    /* TODO: Set tile as occupied. */
 #if 0
@@ -481,7 +464,7 @@ cleanup:
 }
 
 int16_t item_pickup_xy(
-   uint8_t x, uint8_t y, int16_t owner, struct DSEKAI_STATE* state
+   uint8_t x, uint8_t y, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
    int16_t i = 0;
 
@@ -495,7 +478,7 @@ int16_t item_pickup_xy(
          /* Skip inactive items. */
          !(ITEM_FLAG_ACTIVE & state->items[i].flags) ||
          /* Skip owned items. */
-         ITEM_OWNER_NONE != state->items[i].owner ||
+         MOBILE_GID_NONE != state->items[i].owner ||
          /* Skip items on other maps. */
          state->items[i].map_gid != state->tilemap->gid
       ) {
@@ -504,9 +487,9 @@ int16_t item_pickup_xy(
 
       if( x == state->items[i].x && y == state->items[i].y ) {
          debug_printf( 2, "assigned owner %d to item %d at %d, %d",
-            owner, i, x, y );
+            owner_gid, i, x, y );
          /* TODO: Switch owner to use GID instead of index. */
-         state->items[i].owner = owner;
+         state->items[i].owner = owner_gid;
 
 #if 0
          /* Set tile as dirty. */

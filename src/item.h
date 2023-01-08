@@ -13,31 +13,6 @@
  */
 
 /**
- * \addtogroup dsekai_items_owners Item Owner ID
- * \brief Item ownership in-world.
- *
- * If an owner ID is not one of the special values on this page, then it is
- * considered to be the index of an owning ::MOBILE in DSEKAI_STATE::mobiles.
- * \{
- */
-
-/**
- * \brief ITEM::owner value indicating no owner.
- *
- * Items with no owner are associated with their ITEM::map_gid to a ::TILEMAP,
- * and are visible in-world at the tile located by their ITEM::x and ITEM::y
- * when the player is on that ::TILEMAP.
- */
-#define ITEM_OWNER_NONE -1
-
-/**
- * \brief ITEM::owner value indicating item is in player inventory.
- */
-#define ITEM_OWNER_PLAYER -2
-
-/*! \} */ /* dsekai_items_owners */
-
-/**
  * \addtogroup dsekai_items_errors Item Errors
  * \{
  */
@@ -79,13 +54,13 @@ struct CROP_PLOT;
  * \brief Determine if/where item with the given ITEM::gid exists in the
  *        inventory of an \ref dsekai_items_owners.
  * \param template_gid ITEM::gid of the definition in TILEMAP::items.
- * \param owner_id \ref dsekai_items_owners of the sought item.
+ * \param owner_gid \ref dsekai_items_owners of the sought item.
  * \param state Locked ::MEMORY_PTR to the current engine ::DSEKAI_STATE.
  * \return Index of the item in DSEKAI_STATE::items_handle if it exists or
  *         ::ITEM_ERROR_NOT_FOUND if not.
  */
 int16_t item_exists_in_inventory(
-   int16_t template_gid, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t template_gid, MOBILE_GID owner_gid , struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
 int16_t item_decr_or_delete(
@@ -106,7 +81,7 @@ int16_t item_decr_or_delete(
  * owner (unless that inventory has reached ::ITEM_INVENTORY_MAX).
  *
  * \param template_gid ITEM::gid of the template in TILEMAP::item_defs to add.
- * \param owner_id \ref dsekai_items_owners to give the item to.
+ * \param owner_gid ::MOBILE_GID of the ::MOBILE to give the item to.
  * \param t Locked ::MEMORY_PTR to the ::TILEMAP containing template_gid in
  *          its TILEMAP::item_defs.
  * \param state Locked ::MEMORY_PTR to the current engine ::DSEKAI_STATE.
@@ -114,13 +89,13 @@ int16_t item_decr_or_delete(
  *         DSEKAI_STATE::items_handle.
  */
 int16_t item_stack_or_add(
-   int16_t template_gid, int16_t owner_id, struct DSEKAI_STATE* state
+   int16_t template_gid, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
 /**
  * \param e_idx Index of the ::ITEM to give in the current
  *        DSEKAI_STATE::items_handle.
- * \param owner_id \ref dsekai_items_owners to give the item to.
+ * \param owner_gid ::MOBILE_GID of the ::MOBILE to give the item to.
  * \param t Locked ::MEMORY_PTR to the ::TILEMAP containing template_gid in
  *          its TILEMAP::item_defs.
  * \param state Locked ::MEMORY_PTR to the current engine ::DSEKAI_STATE.
@@ -128,7 +103,8 @@ int16_t item_stack_or_add(
  *         or error code otherwise.
  */
 int16_t item_give_mobile(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state ) SECTION_ITEM;
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
+) SECTION_ITEM;
 
 /**
  * \brief Drop am item on the map floor where its owner is standing.
@@ -145,7 +121,7 @@ int8_t item_drop( int16_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
 /**
  * \brief Pick up an item at the given x, y tile coordinates on the given
  *        ::TILEMAP.
- * \param owner_id \ref dsekai_items_owners to give the item to if found.
+ * \param owner_gid ::MOBILE_GID of the ::MOBILE to give the item to if found.
  * \param t Locked ::MEMORY_PTR to the ::TILEMAP from which the item is being
  *          picked up.
  * \param state Locked ::MEMORY_PTR to the current engine ::DSEKAI_STATE.
@@ -153,7 +129,7 @@ int8_t item_drop( int16_t e_idx, struct DSEKAI_STATE* state ) SECTION_ITEM;
  *         picked up.
  */
 int16_t item_pickup_xy(
-   uint8_t x, uint8_t y, int16_t owner_id, struct DSEKAI_STATE* state
+   uint8_t x, uint8_t y, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) SECTION_ITEM;
 
 /**
@@ -165,7 +141,7 @@ int16_t item_pickup_xy(
  * \brief Definition for a callback to execute when an ::ITEM is used.
  * \param e_idx Index of the ::ITEM to use in the current
  *        DSEKAI_STATE::items_handle.
- * \param owner_id \ref dsekai_items_owners to use the item.
+ * \param owner_gid ::MOBILE_GID of the ::MOBILE to use the item.
  * \param state Locked ::MEMORY_PTR to the current engine ::DSEKAI_STATE.
  * \return ::ITEM_USED_SUCCESSFUL if the item was used successfully or
  *         ::ITEM_USED_FAILED if not. ::ITEM_USED_SUCCESSFUL_SILENT if the item
@@ -176,12 +152,12 @@ int16_t item_pickup_xy(
  *            will create a ::WINDOW, as those might conflict with the menu.
  */
 typedef int8_t (*ITEM_USE_CB)(
-   int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state );
+   int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state );
 
 /**
  * \brief Macro to define ::ITEM_USE_CB prototypes from ::ITEM_TABLE.
  */
-#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state ) SECTION_ITEM;
+#define ITEM_TABLE_USE_CB_PROTOS( type, max ) int8_t item_use_ ## type( int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state ) SECTION_ITEM;
 
 ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
 
@@ -212,7 +188,7 @@ RES_CONST ITEM_USE_CB gc_item_use_cbs[] = {
 
 #  ifdef NO_ITEM_HANDLERS
 
-#     define ITEM_TABLE_USE_CB_STUBS( type, max ) int8_t item_use_ ## type( int16_t e_idx, int16_t owner_id, struct DSEKAI_STATE* state ) { return 0; }
+#     define ITEM_TABLE_USE_CB_STUBS( type, max ) int8_t item_use_ ## type( int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state ) { return 0; }
 
 ITEM_TABLE( ITEM_TABLE_USE_CB_STUBS );
 

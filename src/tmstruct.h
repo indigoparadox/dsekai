@@ -52,7 +52,6 @@ struct TILESET_TILE {
 };
 
 /* TODO: Move spawner to mostruct.h for consistency. */
-/* TODO: Change name to TILEMAP_SPAWNER. */
 /*! \brief Defines a spawner to create mobiles in the world.
  *
  *  Modifications to this struct should also be reflected in tools/map2h.c.

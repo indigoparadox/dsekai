@@ -64,6 +64,38 @@ cleanup:
    return mobile_out;
 }
 
+struct MOBILE* mobile_from_gid( MOBILE_GID m_gid, struct DSEKAI_STATE* state ) {
+   int16_t i = 0;
+   struct MOBILE* mobile_out = NULL;
+
+   if( !engines_state_lock( state ) ) {
+      goto cleanup;
+   }
+
+   /* Special case: NULL GID */
+   if( MOBILE_GID_NONE == m_gid ) {
+      goto cleanup;
+   }
+
+   /* Special case: Player GID */
+   if( MOBILE_GID_PLAYER == m_gid ) {
+      mobile_out = &(state->player);
+      goto cleanup;
+   }
+
+   /* Hunt for the GID manually. */
+   for( i = 0 ; state->mobiles_sz > i ; i++ ) {
+      if( mobile_get_gid( &(state->mobiles[i]) ) == m_gid ) {
+         mobile_out = &(state->mobiles[i]);
+         goto cleanup;
+      }
+   }
+   
+cleanup:
+
+   return mobile_out;
+}
+
 void mobile_state_animate( struct DSEKAI_STATE* state ) {
    if( ANI_SPRITE_COUNTDOWN_MAX > state->ani_sprite_countdown ) {
       state->ani_sprite_countdown++;

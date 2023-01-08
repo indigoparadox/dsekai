@@ -444,7 +444,7 @@ uint16_t script_handle_GIVE(
       items_pushed = 0;
    }
 
-   e_idx = item_give_mobile( e_idx, ITEM_OWNER_PLAYER, state );
+   e_idx = item_give_mobile( e_idx, MOBILE_GID_PLAYER, state );
    if( 0 > e_idx ) {
       error_printf( "unable to give: error %d", e_idx );
       items_pushed = 0;

@@ -150,6 +150,12 @@ int unilayer_main( int argc, char* argv[] ) {
 
    while( 0 < g_running ) {
       unilayer_loop_iter();
+      /*
+      assert( NULL == state->tilemap );
+      assert( NULL == state->mobiles );
+      assert( NULL == state->items );
+      assert( NULL == state->crops );
+      */
 
 #ifdef USE_SOFT_ASSERT
       if( 0 < g_assert_failed_len ) {

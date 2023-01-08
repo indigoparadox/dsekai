@@ -320,7 +320,7 @@ void topdown_draw_items(
          /* Item is inactive. */
          !(state->items[i].flags & ITEM_FLAG_ACTIVE) ||
          /* Item is owned. */
-         ITEM_OWNER_NONE != state->items[i].owner ||
+         MOBILE_GID_NONE != state->items[i].owner ||
          /* Item is on a different TILEMAP. */
          state->items[i].map_gid != state->tilemap->gid ||
          /* Item tile is not dirty. */
@@ -713,7 +713,7 @@ int16_t topdown_input(
                "This crop is\nnot ready!",
                WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
          } else {
-            crop_harvest( ITEM_OWNER_PLAYER, plot, state );
+            crop_harvest( MOBILE_GID_PLAYER, plot, state );
          }
 
       } else {
@@ -722,7 +722,7 @@ int16_t topdown_input(
          /* TODO: Differentiate pickup and interact. */
          item_pickup_xy(
             state->player.coords[1].x, state->player.coords[1].y,
-            ITEM_OWNER_PLAYER, state );
+            MOBILE_GID_PLAYER, state );
 
          /* Try to interact with facing mobile. */
          mobile_interact(
