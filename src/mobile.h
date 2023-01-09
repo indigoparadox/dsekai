@@ -13,15 +13,12 @@
  *  \brief Structs, functions and macros pertaining to interactive objects.
  */
 
-typedef uint32_t MOBILE_GID;
-
 /**
  * \addtogroup dsekai_mobiles_gid Mobile GID
  * \{
  */
 
 #define MOBILE_GID_NONE 0
-#define MOBILE_GID_PLAYER 0xffffffff
 
 /**
  * \brief Insert into logging format strings when a mobile's GID is needed.
@@ -143,7 +140,7 @@ typedef uint32_t MOBILE_GID;
  *       index in state!
  */
 
-#define mobile_get_gid( m ) (((m)->map_gid << 16) & (m)->spawner_gid)
+#define mobile_get_gid( m ) (MOBILE_GID)((((MOBILE_GID)((m)->map_gid)) << (sizeof( TILEMAP_GID ) * 8)) & (m)->spawner_gid)
 
 /**
  * \brief Get the GID of the ::TILEMAP the given ::MOBILE is \b currently \b on.
@@ -229,14 +226,6 @@ typedef uint32_t MOBILE_GID;
 
 /*! \} */ /* dsekai_mobiles_flags */
 
-/**
- * \related MOBILE
- * \brief MOBILE::map_gid value indicating mobile is present on all tilemaps.
- *
- * This is generally only used for the player.
- */
-#define MOBILE_MAP_GID_ALL 65535
-
 #ifdef PLATFORM_CURSES
 #  define mobile_get_sprite( m ) ((m)->ascii)
 #else
@@ -281,13 +270,13 @@ struct MOBILE {
     *
     * This is part of the \ref dsekai_mobiles_gid.
     */
-   uint16_t spawner_gid;
+   SPAWN_GID spawner_gid;
    /**
     * \brief TILEMAP::gid of the tilemap this mobile was spawned on.
     *
     * This is part of the \ref dsekai_mobiles_gid.
     */
-   uint16_t map_gid;
+   TILEMAP_GID map_gid;
    char name[TILEMAP_SPAWN_NAME_SZ];
    char sprite_name[RESOURCE_NAME_MAX];
    /**

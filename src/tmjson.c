@@ -77,7 +77,7 @@ static int16_t tilemap_json_parse_spawn(
       y_px_in = 0;
    uint8_t mobile_flag = 0;
    char ascii_buffer[2] = { 0 };
-
+   int32_t gid_buffer = 0;
 
    dio_snprintf(
       iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_SPRITE, spawn_idx );
@@ -157,8 +157,18 @@ static int16_t tilemap_json_parse_spawn(
    /* Parse GID */
    dio_snprintf(
       iter_path, JSON_PATH_SZ, TILEMAP_JPATH_MOB_GID, spawn_idx );
-   spawn->gid = json_int_from_path(
+   gid_buffer = json_int_from_path(
       iter_path, JSON_PATH_SZ, &(tokens[0]), tokens_sz, json_buffer );
+
+   if( MOBILE_FLAG_PLAYER == (MOBILE_FLAG_PLAYER & spawn->flags) ) {
+      /* Make sure the player GID is correct, regardless of the map format. */
+      spawn->gid = SPAWN_GID_PLAYER;
+   } else {
+      /* Make sure the GID fits within the system GID size. */
+      spawn->gid = gid_buffer;
+      debug_printf( 1, "%d into %d", gid_buffer, spawn->gid );
+      assert( 0 > gid_buffer || spawn->gid == gid_buffer );
+   }
 
    debug_printf( 1, "spawn %d flags: 0x%04x", spawn->gid, spawn->flags );
 
@@ -689,6 +699,7 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
    char ts_name[JSON_PATH_SZ];
    struct jsmntok* tokens = NULL;
    int8_t spawn_idx = 0;
+   int32_t gid_buffer = 0;
 
    memory_zero_ptr( t, sizeof( struct TILEMAP ) );
 
@@ -726,8 +737,13 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
 
    debug_printf( 1, "getting tilemap name and tileset path" );
 
-   t->gid = json_int_from_path(
+   gid_buffer = json_int_from_path(
       TILEMAP_JPATH_GID, JSON_PATH_SZ, tokens, tok_parsed, json_buffer );
+
+   /* Make sure the GID fits within the system GID size. */
+   t->gid = gid_buffer;
+   debug_printf( 1, "%d into %d", gid_buffer, t->gid );
+   assert( 0 > gid_buffer || t->gid == gid_buffer );
 
    json_str_from_path(
       TILEMAP_JPATH_PROP_NAME, sizeof( TILEMAP_JPATH_PROP_NAME ),

@@ -170,6 +170,8 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          ITEM_FLAG_ACTIVE != (ITEM_FLAG_ACTIVE & state->items[i].flags) ||
          MOBILE_GID_PLAYER != state->items[i].owner
       ) {
+         debug_printf( 0, "skipping item with flags: 0x%02x, owner: %d", 
+            state->items[i].flags, state->items[i].owner );
          continue;
       }
 

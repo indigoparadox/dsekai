@@ -208,7 +208,7 @@ int16_t tilemap_asn_parse_spawns(
          "spawn flags", total_read_sz, read_sz, cleanup )
 
       serial_asn_read_int(
-         asn_buffer, (&t->spawns[spawn_idx].gid), 2, 0,
+         asn_buffer, (&t->spawns[spawn_idx].gid), sizeof( SPAWN_GID ), 0,
          "spawn def GID", total_read_sz, read_sz, cleanup )
 
       serial_asn_read_int(
@@ -564,7 +564,8 @@ int32_t tilemap_asn_load(
       asn_buffer, &tm_version, 2, 0, "tilemap version", idx, read_sz, cleanup )
 
    serial_asn_read_int(
-      asn_buffer, &(t->gid), 2, 0, "tilemap GID", idx, read_sz, cleanup )
+      asn_buffer, &(t->gid), sizeof( TILEMAP_GID ), 0,
+      "tilemap GID", idx, read_sz, cleanup )
 
    serial_asn_read_string(
       asn_buffer, t->name, TILEMAP_NAME_MAX,

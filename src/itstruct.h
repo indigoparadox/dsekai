@@ -131,7 +131,7 @@ struct ITEM {
     * \brief TILEMAP::gid of the tilemap on which this item is sitting. Only
     *        has meaning when ITEM::owner is set to ::ITEM_OWNER_NONE.
     */
-   uint16_t map_gid;
+   TILEMAP_GID map_gid;
 };
 
 /*! \} */ /* dsekai_items */

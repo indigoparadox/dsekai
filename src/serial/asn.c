@@ -148,10 +148,10 @@ int32_t serial_read_mobile(
    serial_asn_read_int(
       save_buffer, &(m->flags), 2, 0, "mobile flags", idx, read_sz, cleanup );
    serial_asn_read_int(
-      save_buffer, &(m->spawner_gid), 2, 0,
+      save_buffer, &(m->spawner_gid), sizeof( SPAWN_GID ), 0,
       "mobile spawner GID", idx, read_sz, cleanup );
    serial_asn_read_int(
-      save_buffer, &(m->map_gid), 2, 0,
+      save_buffer, &(m->map_gid), sizeof( TILEMAP_GID ), 0,
       "mobile tilemap GID", idx, read_sz, cleanup );
    serial_asn_read_int(
       save_buffer, &(m->mp_hp), 2, ASN_FLAG_SIGNED,

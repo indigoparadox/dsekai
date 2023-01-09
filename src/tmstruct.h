@@ -75,7 +75,7 @@ struct TILEMAP_SPAWN {
     *
     * Passed to MOBILE::spawner_gid on spawned ::MOBILE objects.
     */
-   uint16_t gid;
+   SPAWN_GID gid;
    /*! \brief Index of TILEMAP::scripts attached to mobiles spawned. */
    int16_t script_id;
 };
@@ -95,7 +95,7 @@ struct TILEMAP {
     * \attention This should not be set to ::MOBILE_MAP_GID_ALL, or weird
     *            things will happen!
     */
-   uint16_t gid;
+   TILEMAP_GID gid;
    /*! \brief Array of prototype tiles all map tiles are based on. */
    struct TILESET_TILE tileset[TILEMAP_TILESETS_MAX];
    /*! \brief Array of 4-bit numbers representing tiles composing the map. */
@@ -112,6 +112,7 @@ struct TILEMAP {
    struct ITEM item_defs[TILEMAP_ITEMS_MAX];
    /*! \brief Crops able to be grown on this map. */
    struct CROP_DEF crop_defs[TILEMAP_CROP_DEFS_MAX];
+   /* struct WARP warps[TILEMAP_WARPS_MAX]; */
 };
 
 /*! \} */
