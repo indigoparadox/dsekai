@@ -35,28 +35,6 @@
  *  \brief Configuration settings defined at compile time.
  */
 
-/**
- * \addtogroup dsekai_mobiles_gid Mobile GID
- * \{
- */
-
-typedef uint32_t MOBILE_GID;
-typedef uint16_t SPAWN_GID;
-typedef uint16_t TILEMAP_GID;
-
-#define SPAWN_GID_PLAYER 0xffff
-#define MOBILE_GID_PLAYER 0xffffffff
-
-/**
- * \related MOBILE
- * \brief MOBILE::map_gid value indicating mobile is present on all tilemaps.
- *
- * This is generally only used for the player.
- */
-#define MOBILE_MAP_GID_ALL 0xff
-
-/*! \} */
-
 #ifndef SPRITE_H
 #define SPRITE_H 16
 #endif /* !SPRITE_H */

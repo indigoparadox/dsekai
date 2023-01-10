@@ -14,27 +14,6 @@
  */
 
 /**
- * \addtogroup dsekai_mobiles_gid Mobile GID
- * \{
- */
-
-#define MOBILE_GID_NONE 0
-
-/**
- * \brief Insert into logging format strings when a mobile's GID is needed.
- */
-#define MOBILE_GID_FMT "%04d:%04d"
-
-/**
- * \brief Insert into the args provided to a format string using
- *        ::MOBILE_GID_FMT.
- * \param m Locked ::MEMORY_PTR to the mobile to examine.
- */
-#define mobile_get_gid_fmt( m ) (m)->map_gid, (m)->spawner_gid
-
-/*! \} */ /* dsekai_mobiles_gid */
-
-/**
  * \relates MOBILE
  * \brief Number of positions available in the MOBILE::coords queue.
  */
@@ -136,15 +115,22 @@
  */
 #define mobile_incr_icount( m, v ) (m)->flags = (((m)->flags & ~MOBILE_ICOUNT_MASK) | ((mobile_get_icount( m ) + (((v) << 12) & MOBILE_ICOUNT_MASK)) & MOBILE_ICOUNT_MASK))
 
-/* TODO: Use mobile GID macro in scripts.c and elsewhere instead of mobile
- *       index in state!
+/**
+ * \relates MOBILE
+ * \brief Get the globally unique identifier of the given ::MOBILE.
+ *
+ * This identifier is/must be unique among all ::MOBILEs in
+ * DSEKAI_STATE::mobiles_handle and persists between \ref dsekai_engines_locking
+ * cycles.
+ * \param m Locked ::MEMORY_PTR to ::MOBILE to query.
+ * \return ::MOBILE_GID of the mobile m constructed from MOBILE::map_gid and
+ *         MOBILE::spawner_gid.
  */
-
 #define mobile_get_gid( m ) (MOBILE_GID)((((MOBILE_GID)((m)->map_gid)) << (sizeof( TILEMAP_GID ) * 8)) & (m)->spawner_gid)
 
 /**
- * \brief Get the GID of the ::TILEMAP the given ::MOBILE is \b currently \b on.
  * \relates MOBILE
+ * \brief Get the GID of the ::TILEMAP the given ::MOBILE is \b currently \b on.
  * \param m Locked ::MEMORY_PTR to ::MOBILE to query.
  * \warning Engine state must be locked with \ref dsekai_engines_locking 
  *          before use here!
@@ -268,13 +254,13 @@ struct MOBILE {
    /**
     * \brief TILEMAP_SPAWN::gid of the spawner that spawned this mobile.
     *
-    * This is part of the \ref dsekai_mobiles_gid.
+    * This is part of the ::MOBILE_GID.
     */
    SPAWN_GID spawner_gid;
    /**
     * \brief TILEMAP::gid of the tilemap this mobile was spawned on.
     *
-    * This is part of the \ref dsekai_mobiles_gid.
+    * This is part of the ::MOBILE_GID.
     */
    TILEMAP_GID map_gid;
    char name[TILEMAP_SPAWN_NAME_SZ];
