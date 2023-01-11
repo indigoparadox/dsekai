@@ -434,6 +434,11 @@ int main( int argc, char* argv[] ) {
     */
    debug_printf( 3, "registering tilemap handler..." );
    headpack_register( 'm', mappack_write, mappack_index, MAPPACK_TYPE );
+   headpack_register_h( "../../src/config.h" );
+   headpack_register_h( "../../src/gid.h" );
+   headpack_register_h( "../../src/itstruct.h" );
+   headpack_register_h( "../../src/cropdef.h" );
+   headpack_register_h( "../../src/tmstruct.h" );
    return headpack_main( argc, argv );
 }
 

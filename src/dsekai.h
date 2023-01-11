@@ -52,6 +52,7 @@
  /* === Includes === */
 
 #include <unilayer.h>
+#include "gid.h"
 #include "config.h"
 
 /**
