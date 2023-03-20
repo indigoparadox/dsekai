@@ -1,0 +1,60 @@
+
+body {
+   background: black;
+   color: white;
+}
+
+.header {
+   background: black !important;
+}
+
+a, a:visited {
+   color: cyan !important;
+}
+
+h2 {
+   color: magenta !important;
+}
+
+.sm-dox, .sm-dox ul, .sm-dox ul a, .navpath ul {
+   background: black !important;
+   border: white 1px solid;
+}
+
+tr.even {
+   background: transparent !important;
+}
+
+tr {
+}
+
+.doxtable th {
+   background: cyan !important;
+   color: black !important;
+}
+
+.memberdecls td {
+   background: transparent !important;
+}
+
+.mdescRight, .memproto, .memdoc, .memtitle {
+   background: black !important;
+}
+
+.memname {
+   color: white !important;
+}
+
+.paramname {
+   color: magenta !important;
+}
+
+.mdescRight {
+   color: white !important;
+}
+
+.doxtable td {
+   background: transparent !important;
+   border: 1px solid cyan !important;
+}
+

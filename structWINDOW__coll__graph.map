@@ -1,0 +1,5 @@
+<map id="WINDOW" name="WINDOW">
+<area shape="rect" id="node1" title="Struct representing an on&#45;screen graphical window." alt="" coords="57,181,136,207"/>
+<area shape="rect" id="node2" href="$unionCONTROL__DATA.html" title="A piece of data attached to CONTROL::data." alt="" coords="33,93,161,119"/>
+<area shape="rect" id="node3" href="$structFAKE__MEMORY__HANDLE.html" title="An emulated memory handle for modern systems. Overridden on most platforms." alt="" coords="5,5,188,31"/>
+</map>

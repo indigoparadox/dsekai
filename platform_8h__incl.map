@@ -1,0 +1,9 @@
+<map id="platform.h" name="platform.h">
+<area shape="rect" id="node1" title="Contains platform&#45;specific overrides and implementations for engine functionality." alt="" coords="242,5,321,31"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,79,80,104"/>
+<area shape="rect" id="node3" href="$fakem_8h.html" title="Platform&#45;overridden typedefs and macros for handling memory." alt="" coords="105,79,223,104"/>
+<area shape="rect" id="node4" href="$resinc_8h.html" title="Determines which resource&#45;loading system to use at compile." alt="" coords="248,79,315,104"/>
+<area shape="rect" id="node6" title=" " alt="" coords="339,79,426,104"/>
+<area shape="rect" id="node7" href="$nullg_8h.html" title="Platform&#45;overridden typedefs and macros for drawing graphics." alt="" coords="451,79,563,104"/>
+<area shape="rect" id="node5" title=" " alt="" coords="230,152,333,177"/>
+</map>

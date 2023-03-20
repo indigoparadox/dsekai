@@ -1,0 +1,4 @@
+<map id="CROP_PLOT" name="CROP_PLOT">
+<area shape="rect" id="node1" title=" " alt="" coords="26,93,127,119"/>
+<area shape="rect" id="node2" href="$structTILEMAP__COORDS.html" title="X/Y coordinates of a tile on the current map." alt="" coords="5,5,148,31"/>
+</map>

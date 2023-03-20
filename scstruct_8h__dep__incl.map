@@ -1,0 +1,7 @@
+<map id="scstruct.h" name="scstruct.h">
+<area shape="rect" id="node1" title="Structs representing behavior scripts." alt="" coords="46,5,125,31"/>
+<area shape="rect" id="node2" href="$script_8h.html" title="Functions and macros for executing in&#45;world behavior." alt="" coords="5,79,69,104"/>
+<area shape="rect" id="node5" href="$tmstruct_8h.html" title="Structs representing tilemaps and related objects." alt="" coords="93,79,173,104"/>
+<area shape="rect" id="node3" href="$dsekai_8h.html" title="Engine state data and main header, used in every engine file." alt="" coords="50,152,121,177"/>
+<area shape="rect" id="node4" href="$tmjson_8h.html" title="Constants and functions for populating a TILEMAP from json." alt="" coords="50,225,121,251"/>
+</map>

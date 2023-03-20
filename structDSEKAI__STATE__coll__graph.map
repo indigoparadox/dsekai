@@ -1,0 +1,16 @@
+<map id="DSEKAI_STATE" name="DSEKAI_STATE">
+<area shape="rect" id="node1" title="General/shared state of the running engine in memory." alt="" coords="411,343,529,368"/>
+<area shape="rect" id="node2" href="$structFAKE__MEMORY__HANDLE.html" title="An emulated memory handle for modern systems. Overridden on most platforms." alt="" coords="5,194,188,219"/>
+<area shape="rect" id="node3" href="$structITEM.html" title="An instance of an item in the world." alt="" coords="530,93,583,119"/>
+<area shape="rect" id="node4" href="$structTILEMAP.html" title="Information pertaining to in&#45;game world currently loaded." alt="" coords="651,194,729,219"/>
+<area shape="rect" id="node5" href="$structTILESET__TILE.html" title="Tile prototype stored in TILEMAP::tileset." alt="" coords="727,93,837,119"/>
+<area shape="rect" id="node6" href="$structTILEMAP__SPAWN.html" title="Defines a spawner to create mobiles in the world." alt="" coords="861,93,996,119"/>
+<area shape="rect" id="node7" href="$structTILEMAP__COORDS.html" title="X/Y coordinates of a tile on the current map." alt="" coords="351,5,493,31"/>
+<area shape="rect" id="node11" href="$structMOBILE.html" title="A moving/interactive object in the world." alt="" coords="227,143,299,168"/>
+<area shape="rect" id="node12" href="$structCROP__PLOT.html" title=" " alt="" coords="306,143,407,168"/>
+<area shape="rect" id="node13" href="$structEDITOR__STATE.html" title=" " alt="" coords="415,143,533,168"/>
+<area shape="rect" id="node8" href="$structSCRIPT.html" title="Contains immutable state for scripts attached to a TILEMAP." alt="" coords="1020,93,1091,119"/>
+<area shape="rect" id="node9" href="$structSCRIPT__STEP.html" title="Contains a single instruction in a script, in SCRIPT::steps." alt="" coords="1000,5,1111,31"/>
+<area shape="rect" id="node10" href="$structCROP__DEF.html" title="Definition of a crop to be stored with the TILEMAP on which the crop may be grown." alt="" coords="611,93,702,119"/>
+<area shape="rect" id="node14" href="$structMENU__STATE.html" title=" " alt="" coords="753,194,864,219"/>
+</map>

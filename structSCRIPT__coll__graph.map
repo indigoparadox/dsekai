@@ -1,0 +1,4 @@
+<map id="SCRIPT" name="SCRIPT">
+<area shape="rect" id="node1" title="Contains immutable state for scripts attached to a TILEMAP." alt="" coords="25,93,96,119"/>
+<area shape="rect" id="node2" href="$structSCRIPT__STEP.html" title="Contains a single instruction in a script, in SCRIPT::steps." alt="" coords="5,5,116,31"/>
+</map>

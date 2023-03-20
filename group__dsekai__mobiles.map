@@ -1,0 +1,8 @@
+<map id="Mobile Objects" name="Mobile Objects">
+<area shape="rect" id="node1" title="Player&#45; or script&#45;controlled world objects or &quot;mobiles&quot;." alt="" coords="5,104,113,129"/>
+<area shape="rect" id="node2" href="$group__dsekai__mobiles__directions.html" title="Directions in which MOBILE objects may face." alt="" coords="169,5,299,31"/>
+<area shape="rect" id="node3" href="$group__dsekai__mobiles__errors.html" title="Error codes for MOBILE&#45;related functions." alt="" coords="161,55,307,80"/>
+<area shape="rect" id="node4" href="$group__dsekai__mobiles__flags.html" title="Flags controlling MOBILE object behavior." alt="" coords="166,104,302,129"/>
+<area shape="rect" id="node5" href="$group__dsekai__mobiles__mp__hp__sect.html" title="Details of how the MOBILE::mp_hp field works." alt="" coords="181,153,287,179"/>
+<area shape="rect" id="node6" href="$group__dsekai__mobiles__spritesheets__sect.html" title=" " alt="" coords="166,203,302,228"/>
+</map>

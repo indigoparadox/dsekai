@@ -1,0 +1,5 @@
+<map id="tilemap.h" name="tilemap.h">
+<area shape="rect" id="node1" title="Functions and macros pertaining to tilemaps." alt="" coords="5,5,80,31"/>
+<area shape="rect" id="node2" href="$dsekai_8h.html" title="Engine state data and main header, used in every engine file." alt="" coords="7,79,78,104"/>
+<area shape="rect" id="node3" href="$tmjson_8h.html" title="Constants and functions for populating a TILEMAP from json." alt="" coords="7,152,78,177"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="Tilemaps" name="Tilemaps">
+<area shape="rect" id="node1" href="$group__asn__tilemaps.html" title="Extremely specific dialect of ASN.1 used to store tilemaps in a compact and simple binary format." alt="" coords="149,5,265,31"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,80,80,105"/>
+<area shape="rect" id="node3" href="$group__dsekai__tilemaps__flags.html" title=" " alt="" coords="156,55,259,80"/>
+<area shape="rect" id="node4" href="$group__dsekai__tilemaps__json__format__sect.html" title=" " alt="" coords="128,104,287,129"/>
+<area shape="rect" id="node5" href="$group__dsekai__tilemaps__json__paths.html" title="Paths to map properties in a Tiled json file." alt="" coords="132,153,283,179"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="dio.h" name="dio.h">
+<area shape="rect" id="node1" title="General abstractions for common stdlib&#45;related tasks." alt="" coords="19,5,68,31"/>
+<area shape="rect" id="node2" href="$unilayer_8h.html" title="Combines platform&#45;specific functionality and loads enablers in the correct order." alt="" coords="5,79,81,104"/>
+<area shape="rect" id="node3" href="$dsekai_8h.html" title="Engine state data and main header, used in every engine file." alt="" coords="8,152,79,177"/>
+<area shape="rect" id="node4" href="$tmjson_8h.html" title="Constants and functions for populating a TILEMAP from json." alt="" coords="8,225,79,251"/>
+</map>

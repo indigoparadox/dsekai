@@ -1,0 +1,5 @@
+<map id="mobile.h" name="mobile.h">
+<area shape="rect" id="node1" title="Structs, functions and macros pertaining to interactive objects." alt="" coords="5,5,76,31"/>
+<area shape="rect" id="node2" href="$dsekai_8h.html" title="Engine state data and main header, used in every engine file." alt="" coords="5,79,76,104"/>
+<area shape="rect" id="node3" href="$tmjson_8h.html" title="Constants and functions for populating a TILEMAP from json." alt="" coords="5,152,76,177"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="platform.h" name="platform.h">
+<area shape="rect" id="node1" title="Contains platform&#45;specific overrides and implementations for engine functionality." alt="" coords="5,5,84,31"/>
+<area shape="rect" id="node2" href="$unilayer_8h.html" title="Combines platform&#45;specific functionality and loads enablers in the correct order." alt="" coords="7,79,83,104"/>
+<area shape="rect" id="node3" href="$dsekai_8h.html" title="Engine state data and main header, used in every engine file." alt="" coords="9,152,80,177"/>
+<area shape="rect" id="node4" href="$tmjson_8h.html" title="Constants and functions for populating a TILEMAP from json." alt="" coords="9,225,80,251"/>
+</map>

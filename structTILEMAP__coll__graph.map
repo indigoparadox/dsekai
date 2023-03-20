@@ -1,0 +1,10 @@
+<map id="TILEMAP" name="TILEMAP">
+<area shape="rect" id="node1" title="Information pertaining to in&#45;game world currently loaded." alt="" coords="295,181,373,207"/>
+<area shape="rect" id="node2" href="$structTILESET__TILE.html" title="Tile prototype stored in TILEMAP::tileset." alt="" coords="5,93,116,119"/>
+<area shape="rect" id="node3" href="$structTILEMAP__SPAWN.html" title="Defines a spawner to create mobiles in the world." alt="" coords="140,93,275,119"/>
+<area shape="rect" id="node4" href="$structTILEMAP__COORDS.html" title="X/Y coordinates of a tile on the current map." alt="" coords="124,5,267,31"/>
+<area shape="rect" id="node5" href="$structSCRIPT.html" title="Contains immutable state for scripts attached to a TILEMAP." alt="" coords="299,93,369,119"/>
+<area shape="rect" id="node6" href="$structSCRIPT__STEP.html" title="Contains a single instruction in a script, in SCRIPT::steps." alt="" coords="291,5,401,31"/>
+<area shape="rect" id="node7" href="$structITEM.html" title="An instance of an item in the world." alt="" coords="394,93,447,119"/>
+<area shape="rect" id="node8" href="$structCROP__DEF.html" title="Definition of a crop to be stored with the TILEMAP on which the crop may be grown." alt="" coords="471,93,562,119"/>
+</map>
