@@ -171,6 +171,11 @@ while [ "$1" ]; do
          DEBUG_THRESHOLD=
          ;;
 
+      "-d"|"--debug-threshold")
+         shift
+         DEBUG_THRESHOLD=$1
+         ;;
+
       "-i"|"--iso")
          PKG_ISO=1
          ;;
