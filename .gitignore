@@ -33,3 +33,5 @@ packages
 pkgbuild
 rez.output.rsrc
 packages.iso
+log
+exp
