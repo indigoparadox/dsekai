@@ -39,14 +39,14 @@ typedef void (*MENU_RENDERER)( struct DSEKAI_STATE* state );
  * \brief Handle input for a currently active menu.
  */
 typedef int16_t (*MENU_HANDLER)(
-   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   int in_char, int16_t click_x, int16_t click_y,
    struct DSEKAI_STATE* state );
 
 #define MENU_RENDERER_PROTOTYPES( idx, name ) void menu_renderer_ ## name( struct DSEKAI_STATE* state );
 
 MENU_TABLE( MENU_RENDERER_PROTOTYPES )
 
-#define MENU_HANDLER_PROTOTYPES( idx, name ) int16_t menu_handler_ ## name( INPUT_VAL in_char, int16_t click_x, int16_t click_y, struct DSEKAI_STATE* state );
+#define MENU_HANDLER_PROTOTYPES( idx, name ) int16_t menu_handler_ ## name( int in_char, int16_t click_x, int16_t click_y, struct DSEKAI_STATE* state );
 
 MENU_TABLE( MENU_HANDLER_PROTOTYPES )
 
@@ -89,24 +89,24 @@ struct MENU_STATE {
 
 #define MENU_TABLE_RENDERERS( idx, name ) menu_renderer_ ## name,
 
-RES_CONST MENU_RENDERER gc_menu_renderers[] = {
+MAUG_CONST MENU_RENDERER gc_menu_renderers[] = {
    MENU_TABLE( MENU_TABLE_RENDERERS )
 };
 
 #define MENU_TABLE_HANDLERS( idx, name ) menu_handler_ ## name,
 
-RES_CONST MENU_HANDLER gc_menu_handlers[] = {
+MAUG_CONST MENU_HANDLER gc_menu_handlers[] = {
    MENU_TABLE( MENU_TABLE_HANDLERS )
 };
 
 #define MENU_TABLE_TOKENS( idx, name ) #name,
 
-RES_CONST char gc_menu_tokens[][MENU_TEXT_SZ] = {
+MAUG_CONST char gc_menu_tokens[][MENU_TEXT_SZ] = {
    MENU_TABLE( MENU_TABLE_TOKENS )
    ""
 };
 
-#define MENU_TABLE_CONSTS( idx, name ) RES_CONST uint8_t gc_menu_idx_ ## name = idx;
+#define MENU_TABLE_CONSTS( idx, name ) MAUG_CONST uint8_t gc_menu_idx_ ## name = idx;
 
 MENU_TABLE( MENU_TABLE_CONSTS )
 
@@ -117,7 +117,7 @@ MENU_TABLE( MENU_TABLE_CONSTS )
  *
  * These are called once when the menu is opened, and should create a ::WINDOW.
  */
-extern RES_CONST MENU_RENDERER gc_menu_renderers[];
+extern MAUG_CONST MENU_RENDERER gc_menu_renderers[];
 
 /**
  * \brief Table of callacks used to handle menu input.
@@ -125,14 +125,14 @@ extern RES_CONST MENU_RENDERER gc_menu_renderers[];
  * These should close the menu's ::WINDOW and set MENU_FLAG_DIRTY on global
  * MENU_STATE.
  */
-extern RES_CONST MENU_HANDLER gc_menu_handlers[];
+extern MAUG_CONST MENU_HANDLER gc_menu_handlers[];
 
 /**
  * \brief Table of menu item names as strings.
  */
-extern RES_CONST char gc_menu_tokens[][MENU_TEXT_SZ];
+extern MAUG_CONST char gc_menu_tokens[][MENU_TEXT_SZ];
 
-#define MENU_TABLE_CONSTS( idx, name ) extern RES_CONST uint8_t gc_menu_idx_ ## name;
+#define MENU_TABLE_CONSTS( idx, name ) extern MAUG_CONST uint8_t gc_menu_idx_ ## name;
 
 MENU_TABLE( MENU_TABLE_CONSTS )
 

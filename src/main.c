@@ -1,9 +1,12 @@
 
 #define MAIN_C
 
+#define RETROFLT_C
+#define MAUG_C
+
 #include "dsekai.h"
 
-MEMORY_HANDLE g_state_handle = (MEMORY_HANDLE)NULL;
+MAUG_MHANDLE g_state_handle = (MAUG_MHANDLE)NULL;
 
 #ifdef PLATFORM_WIN
 #include "winstat.h"
@@ -91,7 +94,7 @@ int unilayer_main( int argc, char* argv[] ) {
 
    debug_printf( 1, "allocating state..." );
    g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
-   if( (MEMORY_HANDLE)NULL == g_state_handle ) {
+   if( (MAUG_MHANDLE)NULL == g_state_handle ) {
       error_printf( "unable to allocate state!" );
       retval = 1;
       goto exit;
@@ -104,7 +107,7 @@ int unilayer_main( int argc, char* argv[] ) {
    state->menu.highlight_id = -1;
    
    state->map_handle = memory_alloc( 1, sizeof( struct TILEMAP ) );
-   if( (MEMORY_HANDLE)NULL == state->map_handle ) {
+   if( (MAUG_MHANDLE)NULL == state->map_handle ) {
       error_printf( "unable to allocate tilemap!" );
       retval = 1;
       goto exit;
@@ -114,7 +117,7 @@ int unilayer_main( int argc, char* argv[] ) {
    state->items_sz = DSEKAI_ITEMS_MAX;
    state->items_handle =
       memory_alloc( DSEKAI_ITEMS_MAX, sizeof( struct ITEM ) );
-   if( (MEMORY_HANDLE)NULL == state->items_handle ) {
+   if( (MAUG_MHANDLE)NULL == state->items_handle ) {
       error_printf( "unable to allocate items!" );
       retval = 1;
       goto exit;
@@ -124,7 +127,7 @@ int unilayer_main( int argc, char* argv[] ) {
    state->mobiles_sz = DSEKAI_MOBILES_MAX;
    state->mobiles_handle =
       memory_alloc( DSEKAI_MOBILES_MAX, sizeof( struct MOBILE ) );
-   if( (MEMORY_HANDLE)NULL == state->mobiles_handle ) {
+   if( (MAUG_MHANDLE)NULL == state->mobiles_handle ) {
       error_printf( "unable to allocate mobiles!" );
       retval = 1;
       goto exit;
@@ -134,7 +137,7 @@ int unilayer_main( int argc, char* argv[] ) {
    state->crops_sz = DSEKAI_CROPS_MAX;
    state->crops_handle =
       memory_alloc( DSEKAI_CROPS_MAX, sizeof( struct CROP_PLOT ) );
-   if( (MEMORY_HANDLE)NULL == state->crops_handle ) {
+   if( (MAUG_MHANDLE)NULL == state->crops_handle ) {
       error_printf( "unable to allocate crops!" );
       retval = 1;
       goto exit;
@@ -177,7 +180,7 @@ int unilayer_main( int argc, char* argv[] ) {
       retval = 1;
       goto exit;
    }
-   if( (MEMORY_HANDLE)NULL != state->map_handle ) {
+   if( (MAUG_MHANDLE)NULL != state->map_handle ) {
       memory_free( state->map_handle );
    }
    state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );

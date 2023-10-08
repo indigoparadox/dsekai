@@ -78,7 +78,7 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
    struct POV_STATE* gstate = NULL;
    */
 
-   assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
+   assert( (MAUG_MHANDLE)NULL == state->engine_state_handle );
    state->engine_state_handle =
       memory_alloc( sizeof( struct POV_STATE ), 1 );
 

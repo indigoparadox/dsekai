@@ -169,20 +169,20 @@ ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
 
 /* TODO: Custom item types with scripts. */
 
-RES_CONST uint8_t gc_items_max[] = {
+MAUG_CONST uint8_t gc_items_max[] = {
    ITEM_TABLE( ITEM_TABLE_MAX )
 };
 
 #  define ITEM_TABLE_TYPES( type, max ) #type,
 
-RES_CONST char* gc_items_types[] = {
+MAUG_CONST char* gc_items_types[] = {
    ITEM_TABLE( ITEM_TABLE_TYPES )
    ""
 };
 
 #  define ITEM_TABLE_USE_CBS( type, max ) item_use_ ## type,
 
-RES_CONST ITEM_USE_CB gc_item_use_cbs[] = {
+MAUG_CONST ITEM_USE_CB gc_item_use_cbs[] = {
    ITEM_TABLE( ITEM_TABLE_USE_CBS )
 };
 
@@ -204,13 +204,13 @@ ITEM_TABLE( ITEM_TABLE_USE_CB_PROTOS )
  */
 
 /*! \brief Lookup table of maximum of each item type permitted in inventory. */
-extern RES_CONST uint8_t gc_items_max[];
+extern MAUG_CONST uint8_t gc_items_max[];
 
 /*! \brief Lookup table of callbacks to execute for item types. */
-extern RES_CONST ITEM_USE_CB gc_item_use_cbs[];
+extern MAUG_CONST ITEM_USE_CB gc_item_use_cbs[];
 
 /*! \brief Lookup table of text names for item types. */
-extern RES_CONST char* gc_items_types[];
+extern MAUG_CONST char* gc_items_types[];
 
 /*! \} */
 

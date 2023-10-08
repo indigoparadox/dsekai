@@ -644,7 +644,7 @@ cleanup:
 }
 
 int32_t tilemap_asn_save(
-   MEMORY_HANDLE h_buffer, int32_t idx, struct TILEMAP* t
+   MAUG_MHANDLE h_buffer, int32_t idx, struct TILEMAP* t
 ) {
    int16_t scripts_count = 0,
       i = 0,

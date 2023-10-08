@@ -29,12 +29,12 @@
 
 /* Public */
 
-int32_t tilemap_asn_load_res( RESOURCE_ID id, struct TILEMAP* t ) SECTION_ASN;
+int32_t tilemap_asn_load_res( RESOURCE_ID id, struct TILEMAP* t ) CODE_SECTION( "asnfns" );
 int32_t tilemap_asn_load(
    const uint8_t* asn_buffer, int32_t asn_buffer_sz, struct TILEMAP* t
-) SECTION_ASN;
+) CODE_SECTION( "asnfns" );
 int32_t tilemap_asn_save(
-   MEMORY_HANDLE h_buffer, int32_t idx, struct TILEMAP* t ) SECTION_ASN;
+   MAUG_MHANDLE h_buffer, int32_t idx, struct TILEMAP* t ) CODE_SECTION( "asnfns" );
 
 /*! \} */
 

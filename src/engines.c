@@ -20,7 +20,7 @@ void engines_draw_loading_screen() {
       GRAPHICS_COLOR_WHITE, 0 );
 }
 
-int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
+int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
    int16_t retval = 1,
       map_retval = 0,
       i = 0;
@@ -97,10 +97,10 @@ int16_t engines_warp_loop( MEMORY_HANDLE state_handle ) {
    tilemap_deinit( state->tilemap );
 
    /* Clean up existing engine-specific data. */
-   if( (MEMORY_HANDLE)NULL != state->engine_state_handle ) {
+   if( (MAUG_MHANDLE)NULL != state->engine_state_handle ) {
       debug_printf( 2, "cleaning up engine-specific state" );
       memory_free( state->engine_state_handle );
-      state->engine_state_handle = (MEMORY_HANDLE)NULL;
+      state->engine_state_handle = (MAUG_MHANDLE)NULL;
    }
 
    animate_stop_all();
@@ -264,9 +264,9 @@ cleanup:
 
 #ifdef PLATFORM_WASM
 void engines_loop_iter( void* state_handle_p ) {
-   MEMORY_HANDLE state_handle = (MEMORY_HANDLE)state_handle_p;
+   MAUG_MHANDLE state_handle = (MAUG_MHANDLE)state_handle_p;
 #else
-int16_t engines_loop_iter( MEMORY_HANDLE state_handle ) {
+int16_t engines_loop_iter( MAUG_MHANDLE state_handle ) {
 #endif /* PLATFORM_WASM */
    INPUT_VAL in_char = 0;
    struct DSEKAI_STATE* state = NULL;
@@ -460,7 +460,7 @@ void engines_exit_to_title( struct DSEKAI_STATE* state ) {
    memory_free( state->items_handle );
    state->items_handle =
       memory_alloc( DSEKAI_ITEMS_MAX, sizeof( struct ITEM ) );
-   assert( (MEMORY_HANDLE)NULL != state->items_handle );
+   assert( (MAUG_MHANDLE)NULL != state->items_handle );
 
    /* TODO: Start small and resize as needed. */
    memory_free( state->mobiles_handle );

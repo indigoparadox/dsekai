@@ -2,18 +2,20 @@
 #define SERIAL_C
 #include "../dsekai.h"
 
+#include <msect.h>
+
 /* Private Prototypes w/ Sections */
 
 int32_t serial_write_mobile(
-   MEMORY_HANDLE* p_save_buffer_h, int32_t idx, struct MOBILE* m ) SECTION_SETUP;
+   MAUG_MHANDLE* p_save_buffer_h, int32_t idx, struct MOBILE* m ) CODE_SECTION( "setfns" );
 
 int32_t serial_read_mobile(
-   MEMORY_PTR save_buffer, int32_t idx, struct MOBILE* m ) SECTION_SETUP;
+   MEMORY_PTR save_buffer, int32_t idx, struct MOBILE* m ) CODE_SECTION( "setfns" );
 
 /* Function Definitions */
 
 int32_t serial_write_mobile(
-   MEMORY_HANDLE* p_save_buffer_h, int32_t idx, struct MOBILE* m
+   MAUG_MHANDLE* p_save_buffer_h, int32_t idx, struct MOBILE* m
 ) {
    int32_t mark_seq_mob = 0,
       mark_seq_mob_coords = 0,
@@ -73,7 +75,7 @@ cleanup:
 }
 
 int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state ) {
-   MEMORY_HANDLE save_buffer_h = (MEMORY_HANDLE)NULL;
+   MAUG_MHANDLE save_buffer_h = (MAUG_MHANDLE)NULL;
    int32_t idx = 0;
    uint8_t i = 0;
    int32_t mark_seq_main = 0,
@@ -85,7 +87,7 @@ int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state ) {
 
    /* Allocate save buffer. */
    save_buffer_h = memory_alloc( TILEMAP_ASN_SAVE_BUFFER_INITIAL_SZ, 1 );
-   if( (MEMORY_HANDLE)NULL == save_buffer_h ) {
+   if( (MAUG_MHANDLE)NULL == save_buffer_h ) {
       idx = DSEKAI_ERROR_ALLOCATE;
       error_printf( "could not allocate save_buffer_h!" );
       goto cleanup;
@@ -126,7 +128,7 @@ int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state ) {
 
 cleanup:
 
-   if( (MEMORY_HANDLE)NULL != save_buffer_h ) {
+   if( (MAUG_MHANDLE)NULL != save_buffer_h ) {
       memory_free( save_buffer_h );
    }
 
@@ -203,7 +205,7 @@ cleanup:
 
 int32_t serial_load( const char* save_name, struct DSEKAI_STATE* state ) {
    int32_t idx = 0;
-   MEMORY_HANDLE save_buffer_h = (MEMORY_HANDLE)NULL;
+   MAUG_MHANDLE save_buffer_h = (MAUG_MHANDLE)NULL;
    uint8_t* save_buffer = NULL;
    int32_t save_buffer_sz = 0;
    uint8_t type_buf = 0;
@@ -221,7 +223,7 @@ int32_t serial_load( const char* save_name, struct DSEKAI_STATE* state ) {
 
    /* Read the buffer from disk. */
    save_buffer_h = save_read( save_name );
-   if( (MEMORY_HANDLE)NULL == save_buffer_h ) {
+   if( (MAUG_MHANDLE)NULL == save_buffer_h ) {
       error_printf( "unable to load save from save subsystem!" );
       idx = SERIAL_ERROR;
       goto cleanup;
@@ -288,7 +290,7 @@ cleanup:
       save_buffer = memory_unlock( save_buffer_h );
    }
 
-   if( (MEMORY_HANDLE)NULL != save_buffer_h ) {
+   if( (MAUG_MHANDLE)NULL != save_buffer_h ) {
       memory_free( save_buffer_h );
    }
 

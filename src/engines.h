@@ -2,6 +2,8 @@
 #ifndef ENGINES_H
 #define ENGINES_H
 
+#include <msect.h>
+
 /**
  * \addtogroup dsekai_engines Engines
  * \brief Central state and subsystem coordination.
@@ -78,7 +80,7 @@ typedef void (*title_option_cb)( struct DSEKAI_STATE* state );
  * \brief State for ::ENGINE_TYPE_NONE. A simple title screen engine.
  */
 struct TITLE_STATE {
-   RES_CONST char** option_tokens;
+   MAUG_CONST char** option_tokens;
    title_option_cb* option_callbacks;
    /*! \brief Index of the currently highlighted option. */
    uint8_t option_idx;
@@ -206,7 +208,7 @@ struct DSEKAI_STATE {
     * \warning The state must be locked with \ref dsekai_engines_locking before
     *          use!
     */
-   MEMORY_HANDLE items_handle;
+   MAUG_MHANDLE items_handle;
 
    /**
     * \brief Temporary pointer for use during \ref dsekai_engines_locking.
@@ -218,7 +220,7 @@ struct DSEKAI_STATE {
    /**
     * \brief Currently loaded ::TILEMAP.
     */
-   MEMORY_HANDLE map_handle;
+   MAUG_MHANDLE map_handle;
 
    /**
     * \brief Temporary pointer for use during \ref dsekai_engines_locking.
@@ -252,7 +254,7 @@ struct DSEKAI_STATE {
     * \warning The state must be locked with \ref dsekai_engines_locking before
     *          use!
     */
-   MEMORY_HANDLE mobiles_handle;
+   MAUG_MHANDLE mobiles_handle;
 
    /**
     * \brief Temporary pointer for use during \ref dsekai_engines_locking.
@@ -271,7 +273,7 @@ struct DSEKAI_STATE {
    /**
     * \brief Contains the currently loaded \ref dsekai_engines_specific_struct.
     */
-   MEMORY_HANDLE engine_state_handle;
+   MAUG_MHANDLE engine_state_handle;
 
    /** \brief The number of loops until DSEKAI_STATE::ani_sprite_countdown
     *         changes.
@@ -338,7 +340,7 @@ struct DSEKAI_STATE {
     * This is kept as part of the state so that crops can continue growing in
     * the background.
     */
-   MEMORY_HANDLE crops_handle;
+   MAUG_MHANDLE crops_handle;
 
    /**
     * \brief Temporary pointer for use during \ref dsekai_engines_locking.
@@ -363,9 +365,9 @@ void engines_draw_loading_screen();
 
 /**
  * \brief Handle transition to a new ::TILEMAP.
- * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
+ * \param state_handle Unlocked ::MAUG_MHANDLE for current ::DSEKAI_STATE.
  */
-int16_t engines_warp_loop( MEMORY_HANDLE state_handle );
+int16_t engines_warp_loop( MAUG_MHANDLE state_handle );
 
 /**
  * \brief Do generic mobile animation and execute their scripts.
@@ -375,13 +377,13 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state );
 
 /**
  * \brief Central loop iteration handler. Calls engine-specific callbacks.
- * \param state_handle Unlocked ::MEMORY_HANDLE for current ::DSEKAI_STATE.
+ * \param state_handle Unlocked ::MAUG_MHANDLE for current ::DSEKAI_STATE.
  * \return 1 if engine should continue executing or 0 if it should quit.
  */
 #ifdef PLATFORM_WASM
 void engines_loop_iter( void* state_handle );
 #else
-int16_t engines_loop_iter( MEMORY_HANDLE state_handle );
+int16_t engines_loop_iter( MAUG_MHANDLE state_handle );
 #endif /* PLATFORM_WASM */
 
 /**
@@ -457,7 +459,7 @@ typedef int16_t (*ENGINES_SETUP)( struct DSEKAI_STATE* state );
  * \return 1 if engine should continue running or 0 to quit.
  */
 typedef int16_t (*ENGINES_INPUT)(
-   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   int in_char, int16_t click_x, int16_t click_y,
    struct DSEKAI_STATE* state );
 
 /**
@@ -472,11 +474,11 @@ typedef void (*ENGINES_ANIMATE)( struct DSEKAI_STATE* state );
  */
 typedef void (*ENGINES_DRAW)( struct DSEKAI_STATE* state );
 
-#define ENGINES_SETUP_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _setup( struct DSEKAI_STATE* state ) SECTION_SETUP;
+#define ENGINES_SETUP_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _setup( struct DSEKAI_STATE* state ) CODE_SECTION( "setfns" );
 
 ENGINE_TABLE( ENGINES_SETUP_PROTOTYPES )
 
-#define ENGINES_INPUT_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _input( INPUT_VAL in_char, int16_t click_x, int16_t click_y, struct DSEKAI_STATE* state );
+#define ENGINES_INPUT_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _input( int in_char, int16_t click_x, int16_t click_y, struct DSEKAI_STATE* state );
 
 ENGINE_TABLE( ENGINES_INPUT_PROTOTYPES )
 
@@ -488,7 +490,7 @@ ENGINE_TABLE( ENGINES_ANIMATE_PROTOTYPES )
 
 ENGINE_TABLE( ENGINES_DRAW_PROTOTYPES )
 
-#define ENGINES_SHUTDOWN_PROTOTYPES( idx, eng, prefix ) void prefix ## _shutdown( struct DSEKAI_STATE* state ) SECTION_SETUP;
+#define ENGINES_SHUTDOWN_PROTOTYPES( idx, eng, prefix ) void prefix ## _shutdown( struct DSEKAI_STATE* state ) CODE_SECTION( "setfns" );
 
 ENGINE_TABLE( ENGINES_SHUTDOWN_PROTOTYPES )
 
@@ -498,7 +500,7 @@ ENGINE_TABLE( ENGINES_SHUTDOWN_PROTOTYPES )
 
 #define ENGINES_LIST_TOKENS( idx, eng, prefix ) #prefix,
 
-RES_CONST char* gc_engines_tokens[] = {
+MAUG_CONST char* gc_engines_tokens[] = {
    ENGINE_TABLE( ENGINES_LIST_TOKENS )
    NULL
 };
@@ -507,31 +509,31 @@ RES_CONST char* gc_engines_tokens[] = {
 
 #define ENGINES_LIST_SETUP( idx, eng, prefix ) prefix ## _setup,
 
-RES_CONST ENGINES_SETUP gc_engines_setup[] = {
+MAUG_CONST ENGINES_SETUP gc_engines_setup[] = {
    ENGINE_TABLE( ENGINES_LIST_SETUP )
 };
 
 #define ENGINES_LIST_INPUT( idx, eng, prefix ) prefix ## _input,
 
-RES_CONST ENGINES_INPUT gc_engines_input[] = {
+MAUG_CONST ENGINES_INPUT gc_engines_input[] = {
    ENGINE_TABLE( ENGINES_LIST_INPUT )
 };
 
 #define ENGINES_LIST_ANIMATE( idx, eng, prefix ) prefix ## _animate,
 
-RES_CONST ENGINES_ANIMATE gc_engines_animate[] = {
+MAUG_CONST ENGINES_ANIMATE gc_engines_animate[] = {
    ENGINE_TABLE( ENGINES_LIST_ANIMATE )
 };
 
 #define ENGINES_LIST_DRAW( idx, eng, prefix ) prefix ## _draw,
 
-RES_CONST ENGINES_DRAW gc_engines_draw[] = {
+MAUG_CONST ENGINES_DRAW gc_engines_draw[] = {
    ENGINE_TABLE( ENGINES_LIST_DRAW )
 };
 
 #define ENGINES_LIST_SHUTDOWN( idx, eng, prefix ) prefix ## _shutdown,
 
-RES_CONST ENGINES_DRAW gc_engines_shutdown[] = {
+MAUG_CONST ENGINES_DRAW gc_engines_shutdown[] = {
    ENGINE_TABLE( ENGINES_LIST_SHUTDOWN )
 };
 
@@ -539,14 +541,14 @@ RES_CONST ENGINES_DRAW gc_engines_shutdown[] = {
 
 #else
 
-extern RES_CONST char* gc_engines_tokens[];
+extern MAUG_CONST char* gc_engines_tokens[];
 
 #ifndef ENGINES_TOKENS_ONLY
 
-extern RES_CONST ENGINES_SETUP gc_engines_setup[];
-extern RES_CONST ENGINES_INPUT gc_engines_input[];
-extern RES_CONST ENGINES_ANIMATE gc_engines_animate[];
-extern RES_CONST ENGINES_DRAW gc_engines_draw[];
+extern MAUG_CONST ENGINES_SETUP gc_engines_setup[];
+extern MAUG_CONST ENGINES_INPUT gc_engines_input[];
+extern MAUG_CONST ENGINES_ANIMATE gc_engines_animate[];
+extern MAUG_CONST ENGINES_DRAW gc_engines_draw[];
 
 #endif /* !ENGINES_TOKENS_ONLY */
 

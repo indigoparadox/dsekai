@@ -134,7 +134,7 @@ int16_t title_setup( struct DSEKAI_STATE* state ) {
    RESOURCE_ID mobile_sprite_id;
 
    debug_printf( 2, "allocating engine-specific state" );
-   assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
+   assert( (MAUG_MHANDLE)NULL == state->engine_state_handle );
    state->engine_state_handle =
       memory_alloc( sizeof( struct TITLE_STATE ), 1 );
 

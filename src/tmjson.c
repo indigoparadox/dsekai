@@ -692,7 +692,7 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
    char* json_buffer = NULL;
    int16_t retval = 1;
    RESOURCE_HANDLE json_handle = (RESOURCE_HANDLE)0;
-   MEMORY_HANDLE tokens_handle = (MEMORY_HANDLE)0;
+   MAUG_MHANDLE tokens_handle = (MAUG_MHANDLE)0;
    uint32_t json_buffer_sz = 0;
    int16_t ts_name_sz = 0,
       tok_parsed = 0;
@@ -712,7 +712,7 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
    }
 
    tokens_handle = memory_alloc( JSON_TOKENS_MAX, sizeof( struct jsmntok ) );
-   if( (MEMORY_HANDLE)0 == tokens_handle ) {
+   if( (MAUG_MHANDLE)0 == tokens_handle ) {
       error_printf( "could not allocate space for JSON tokens" );
       retval = 0;
       goto cleanup;
@@ -830,7 +830,7 @@ cleanup:
       tokens = memory_unlock( tokens_handle );
    }
 
-   if( (MEMORY_HANDLE)0 != tokens_handle ) {
+   if( (MAUG_MHANDLE)0 != tokens_handle ) {
       memory_free( tokens_handle );
    }
 

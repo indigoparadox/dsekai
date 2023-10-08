@@ -36,7 +36,7 @@
  * \return Number of bytes written or error code.
  */
 int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state
-   ) SECTION_ASN; /* Stuff it in ASN section even if it's a different fmt. */
+   ) CODE_SECTION( "asnfns" ); /* Stuff it in ASN section even if it's a different fmt. */
 
 /**
  * \brief Call the \ref unilayer_save to provide the save state with the
@@ -44,7 +44,7 @@ int32_t serial_save( const char* save_name, struct DSEKAI_STATE* state
  * \return Number of bytes read or error code.
  */
 int32_t serial_load( const char* save_name, struct DSEKAI_STATE* state
-   ) SECTION_ASN; /* Stuff it in ASN section even if it's a different fmt. */
+   ) CODE_SECTION( "asnfns" ); /* Stuff it in ASN section even if it's a different fmt. */
 
 /*! \} */ /* dsekai_engines */
 

@@ -530,10 +530,10 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    profiler_init();
 
    /* Allocate engine-specific state. */
-   assert( (MEMORY_HANDLE)NULL == state->engine_state_handle );
+   assert( (MAUG_MHANDLE)NULL == state->engine_state_handle );
    state->engine_state_handle = memory_alloc(
          sizeof( struct TOPDOWN_STATE ), 1 );
-   if( (MEMORY_HANDLE)NULL == state->engine_state_handle ) {
+   if( (MAUG_MHANDLE)NULL == state->engine_state_handle ) {
       error_printf( "unable to allocate engine state!" );
       retval = DSEKAI_ERROR_ALLOCATE;
       goto cleanup;
