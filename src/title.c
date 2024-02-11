@@ -18,7 +18,7 @@ static void title_draw_menu(
    GRAPHICS_COLOR color;
    uint8_t flags = 0;
 
-   gstate = (struct TITLE_STATE*)memory_lock( state->engine_state_handle );
+   maug_mlock( state->engine_state_handle, gstate );
    assert( NULL != gstate );
 
    /* If no new tokens provided, use the old ones. */
@@ -65,7 +65,7 @@ static void title_draw_menu(
       i++;
    }
 
-   gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
+   maug_munlock( state->engine_state_handle, gstate );
 }
 
 #define TITLE_ENGINES_LIST_CALLBACKS( idx, eng, prefix ) \
@@ -304,7 +304,7 @@ int16_t title_input(
    uint8_t redraw_menu = 0;
    title_option_cb cb = NULL;
 
-   gstate = (struct TITLE_STATE*)memory_lock( state->engine_state_handle );
+   maug_mlock( state->engine_state_handle, gstate );
 
    if( g_input_key_up == in_char ) {
       if( gstate->option_min < gstate->option_idx ) {
@@ -326,7 +326,7 @@ int16_t title_input(
 
       /* Pop the window and unlock gstate for the callback! */
       window_pop( WINDOW_ID_TITLE_MENU );
-      gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
+      maug_munlock( state->engine_state_handle, gstate );
 
       cb( state );
 
@@ -339,7 +339,7 @@ int16_t title_input(
    }
  
    if( NULL != gstate ) {
-      gstate = (struct TITLE_STATE*)memory_unlock( state->engine_state_handle );
+      maug_munlock( state->engine_state_handle, gstate );
    }
 
    /* Redraw menu here after gstate freed. */

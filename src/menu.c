@@ -2,11 +2,11 @@
 #define MENU_C
 #include "dsekai.h"
 
-RES_CONST char* gc_menu_msgs[] = {
+MAUG_CONST char* gc_menu_msgs[] = {
    "no items"
 };
 
-RES_CONST char* gc_menu_item_sel_msgs[] = {
+MAUG_CONST char* gc_menu_item_sel_msgs[] = {
    "use",
    "craft",
    "drop",
@@ -15,13 +15,13 @@ RES_CONST char* gc_menu_item_sel_msgs[] = {
 
 void menu_renderer_main( struct DSEKAI_STATE* state ) {
    int8_t i = 1; /* Entry 0 is the main menu, itself. */
-   GRAPHICS_COLOR color;
+   RETROFLAT_COLOR color;
    uint8_t flags = 0;
 
    window_push(
       MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW,
       0,
-      SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H,
+      SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W(), SCREEN_MAP_H(),
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, NULL );
    
@@ -45,22 +45,22 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
 }
 
 int16_t menu_handler_main(
-   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   RETROFLAT_IN_KEY in_char, struct RETROFLAT_INPUT* input,
    struct DSEKAI_STATE* state
 ) {
    int16_t retval = 1;
 
-   if( g_input_key_up == in_char ) {
+   if( RETROFLAT_KEY_UP == in_char ) {
       if( 1 < state->menu.highlight_id ) {
          state->menu.highlight_id--;
       }
 
-   } else if( g_input_key_down == in_char ) {
+   } else if( RETROFLAT_KEY_DOWN == in_char ) {
       if( '\0' != gc_menu_tokens[state->menu.highlight_id + 1][0] ) {
          state->menu.highlight_id++;
       }
 
-   } else if( g_input_key_ok == in_char ) {
+   } else if( RETROFLAT_KEY_ENTER == in_char ) {
       /* TODO: Use quit callback. */
       if( state->menu.highlight_id == gc_menu_idx_quit ) {
 #ifndef NO_TITLE
@@ -74,7 +74,7 @@ int16_t menu_handler_main(
          state->menu.highlight_id = 0;
       }
 
-   } else if( g_input_key_menu == in_char ) {
+   } else if( RETROFLAT_KEY_SPACE == in_char ) {
       menu_close( state );
       goto skip_refresh;
    }
@@ -90,7 +90,7 @@ skip_refresh:
 void menu_renderer_items( struct DSEKAI_STATE* state ) {
    int16_t i = 0,
       player_item_idx = 0;
-   GRAPHICS_COLOR color;
+   RETROFLAT_COLOR color;
    uint8_t flags = 0;
    RESOURCE_ID sprite_id;
 
@@ -102,10 +102,10 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       /* Render the implicit use/craft/drop menu. */
       window_push(
          MENU_WINDOW_ITEM_SEL_ID, 0, WINDOW_TYPE_WINDOW, 0,
-         SCREEN_MAP_X + (SCREEN_MAP_W / 2) + TILE_W,
-         SCREEN_MAP_Y + (SCREEN_MAP_H / 2),
-         (SCREEN_MAP_W / 2) - TILE_W,
-         SCREEN_MAP_H / 2,
+         SCREEN_MAP_X + (SCREEN_MAP_W() / 2) + TILE_W,
+         SCREEN_MAP_Y + (SCREEN_MAP_H() / 2),
+         (SCREEN_MAP_W() / 2) - TILE_W,
+         SCREEN_MAP_H() / 2,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
          0, NULL );
 
@@ -135,27 +135,27 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW, 0,
       SCREEN_MAP_X,
       SCREEN_MAP_Y,
-      (SCREEN_MAP_W / 2) + TILE_W,
-      SCREEN_MAP_H,
+      (SCREEN_MAP_W() / 2) + TILE_W,
+      SCREEN_MAP_H(),
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, NULL );
 
    window_push(
       MENU_WINDOW_INFO_ID, 0, WINDOW_TYPE_WINDOW, 0,
-      SCREEN_MAP_X + (SCREEN_MAP_W / 2) + TILE_W,
+      SCREEN_MAP_X + (SCREEN_MAP_W() / 2) + TILE_W,
       SCREEN_MAP_Y,
-      (SCREEN_MAP_W / 2) - TILE_W,
-      SCREEN_MAP_H / 2,
+      (SCREEN_MAP_W() / 2) - TILE_W,
+      SCREEN_MAP_H() / 2,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, NULL );
    
    /*
    window_push(
       MENU_WINDOW_STATUS_ID, 0, WINDOW_TYPE_WINDOW, 0,
-      SCREEN_MAP_X + (SCREEN_MAP_W / 2) + TILE_W,
-      SCREEN_MAP_Y + (SCREEN_MAP_H / 2),
-      (SCREEN_MAP_W / 2) - TILE_W,
-      SCREEN_MAP_H / 2,
+      SCREEN_MAP_X + (SCREEN_MAP_W() / 2) + TILE_W,
+      SCREEN_MAP_Y + (SCREEN_MAP_H() / 2),
+      (SCREEN_MAP_W() / 2) - TILE_W,
+      SCREEN_MAP_H() / 2,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, 0, NULL,
       state, NULL );
@@ -266,7 +266,7 @@ cleanup:
 }
 
 int16_t menu_handler_items(
-   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   RETROFLAT_IN_KEY in_char, struct RETROFLAT_INPUT* input,
    struct DSEKAI_STATE* state
 ) {
    int16_t retval = 1,
@@ -296,7 +296,7 @@ int16_t menu_handler_items(
       }
    }
 
-   if( g_input_key_up == in_char ) {
+   if( RETROFLAT_KEY_UP == in_char ) {
       /* Process the implicity use/craft/drop menu first if that's open. */
       if(
          MENU_FLAG_ITEM_OPEN_SEL_USE ==
@@ -324,7 +324,7 @@ int16_t menu_handler_items(
          state->menu.highlight_id--;
       }
 
-   } else if( g_input_key_down == in_char ) {
+   } else if( RETROFLAT_KEY_DOWN == in_char ) {
       /* Process the implicity use/craft/drop menu first if that's open. */
       if(
          MENU_FLAG_ITEM_OPEN_SEL_USE ==
@@ -352,7 +352,7 @@ int16_t menu_handler_items(
          state->menu.highlight_id++;
       }
 
-   } else if( g_input_key_ok == in_char ) {
+   } else if( RETROFLAT_KEY_ENTER == in_char ) {
       if( ITEM_ERROR_NOT_FOUND == selected_item_idx ) {
          error_printf( "no item selected!" );
          goto not_found;
@@ -393,7 +393,7 @@ int16_t menu_handler_items(
          state->menu.flags |= MENU_FLAG_ITEM_OPEN_SEL_USE;
       }
 
-   } else if( g_input_key_menu == in_char ) {
+   } else if( RETROFLAT_KEY_SPACE == in_char ) {
       if( 0 != (state->menu.flags & MENU_FLAG_ITEM_OPEN_SEL_MASK) ) {
          /* Close the implicit use/craft/drop menu. */
          state->menu.flags &= ~MENU_FLAG_ITEM_OPEN_SEL_MASK;
@@ -425,15 +425,15 @@ void menu_renderer_craft( struct DSEKAI_STATE* state ) {
       MENU_WINDOW_CRAFT_ID, 0, WINDOW_TYPE_WINDOW, 0,
       WINDOW_PLACEMENT_CENTER,
       WINDOW_PLACEMENT_CENTER,
-      SCREEN_MAP_W / 2,
-      SCREEN_MAP_H / 2,
+      SCREEN_MAP_W() / 2,
+      SCREEN_MAP_H() / 2,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, NULL );
 
 }
 
 int16_t menu_handler_craft(
-   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   RETROFLAT_IN_KEY in_char, struct RETROFLAT_INPUT* input,
    struct DSEKAI_STATE* state
 ) {
 
@@ -452,7 +452,7 @@ void menu_renderer_save( struct DSEKAI_STATE* state ) {
 }
 
 int16_t menu_handler_save(
-   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   RETROFLAT_IN_KEY in_char, struct RETROFLAT_INPUT* input,
    struct DSEKAI_STATE* state
 ) {
    return 1;
@@ -463,7 +463,7 @@ void menu_renderer_quit( struct DSEKAI_STATE* state ) {
 }
 
 int16_t menu_handler_quit(
-   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   RETROFLAT_IN_KEY in_char, struct RETROFLAT_INPUT* input,
    struct DSEKAI_STATE* state
 ) {
    return 0;

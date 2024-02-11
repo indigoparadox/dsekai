@@ -14,6 +14,8 @@
 
 #define DSEKAI_ERROR_ALLOCATE -128
 
+#define SECTION_WINDOW
+
 /**
  * \relates ANIMATION
  * \brief Indicates that an animation is behind tiles.
@@ -52,6 +54,8 @@
  /* === Includes === */
 
 #include <maug.h>
+#include <retrogxc.h>
+#include <retroani.h>
 #include "gid.h"
 #include "config.h"
 
@@ -68,7 +72,16 @@
 
 struct DSEKAI_STATE;
 
+struct GRAPHICS_RECT {
+   uint16_t x;
+   uint16_t y;
+   uint16_t w;
+   uint16_t h;
+};
+
 #include "winids.h"
+
+#include "window.h"
 
 #include "itstruct.h"
 #include "cropdef.h"

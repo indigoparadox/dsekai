@@ -3,7 +3,7 @@
 
 VDP=1
 #WING=1
-C_FILES := src/crop.c src/engines.c src/irc.c src/iso.c src/item.c src/main.c src/menu.c src/mobile.c src/pathfind.c src/scparse.c src/script.c src/strpool.c src/tilemap.c src/title.c src/tmasn.c src/tmjson.c src/topdown.c
+C_FILES := src/crop.c src/engines.c src/item.c src/main.c src/menu.c src/mobile.c src/pathfind.c src/scparse.c src/script.c src/strpool.c src/tilemap.c src/title.c src/topdown.c src/animate.c
 
 include maug/Makefile.inc
 

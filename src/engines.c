@@ -9,15 +9,15 @@
 #include "profiler.h"
 
 void engines_draw_loading_screen() {
-   struct GRAPHICS_RECT loading_sz = { 0, 0, 0, 0 };
+   size_t str_w = 0;
+   size_t str_h = 0;
 
    /* On-screen loading indicator. */
-   graphics_string_sz( "Loading...", 10, 0, &loading_sz );
-   graphics_string_at(
-      "Loading...", 10, 
-      (SCREEN_MAP_W / 2) - (loading_sz.w / 2),
-      (SCREEN_MAP_H / 2) - (loading_sz.h / 2),
-      GRAPHICS_COLOR_WHITE, 0 );
+   retroflat_string_sz( NULL, "Loading...", 10, NULL, &str_w, &str_h, 0 );
+   retroflat_string(
+      NULL, RETROFLAT_COLOR_WHITE, "Loading...", 10, NULL,
+      (SCREEN_MAP_W() / 2) - (str_w / 2),
+      (SCREEN_MAP_H() / 2) - (str_h / 2), 0 );
 }
 
 int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
@@ -25,7 +25,6 @@ int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
       map_retval = 0,
       i = 0;
    struct DSEKAI_STATE* state = NULL;
-   RESOURCE_ID sprite_id;
 
    profiler_print( "ENGINE" );
 
@@ -33,7 +32,7 @@ int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
 
    engines_draw_loading_screen();
 
-   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
+   maug_mlock( state_handle, state );
 
    if( !engines_state_lock( state ) ) {
       goto cleanup;
@@ -75,7 +74,7 @@ int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
       }
       debug_printf( 1, "unloading item %d owned by %d",
          state->items[i].gid, state->items[i].owner );
-      memory_zero_ptr( (MEMORY_PTR)&(state->items[i]), sizeof( struct ITEM ) );
+      maug_mzero( &(state->items[i]), sizeof( struct ITEM ) );
    }
 
    /* Close any open windows (e.g. player state). */
@@ -99,18 +98,17 @@ int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
    /* Clean up existing engine-specific data. */
    if( (MAUG_MHANDLE)NULL != state->engine_state_handle ) {
       debug_printf( 2, "cleaning up engine-specific state" );
-      memory_free( state->engine_state_handle );
+      maug_mfree( state->engine_state_handle );
       state->engine_state_handle = (MAUG_MHANDLE)NULL;
    }
 
-   animate_stop_all();
+   retroani_stop_all( &(state->animations[0]), DSEKAI_ANIMATIONS_MAX );
 
-   graphics_clear_cache();
+   retrogxc_clear_cache();
 
 #ifndef NO_ENGINE_EDITOR
    /* Disable editor. */
-   memory_zero_ptr(
-      (MEMORY_PTR)&(state->editor), sizeof( struct EDITOR_STATE ) );
+   maug_mzero( &(state->editor), sizeof( struct EDITOR_STATE ) );
 #endif /* !NO_ENGINE_EDITOR */
 
    /* Finished unloading old state, so get ready to load new state if needed. 
@@ -133,7 +131,7 @@ int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
       goto cleanup;
    }
 
-   memory_zero_ptr( state->warp_to, TILEMAP_NAME_MAX );
+   maug_mzero( state->warp_to, TILEMAP_NAME_MAX );
 
    /* Spawn mobiles. */
    mobile_spawns( state );
@@ -141,15 +139,9 @@ int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
    /* Refresh volatile stuff, like images. */
 
    /* Reload player sprite since cache is gone. */
-   resource_id_from_name( &sprite_id, state->player_sprite_name,
-      RESOURCE_EXT_GRAPHICS );
-   debug_printf( 2, "player sprite ID: " RESOURCE_ID_FMT, sprite_id );
-   if( resource_id_valid( sprite_id ) ) {
-      state->player.sprite_cache_id = graphics_cache_load_bitmap(
-         sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
-   } else {
-      error_printf( "invalid player sprite ID!" );
-   }
+   state->player.sprite_cache_id =
+      retrogxc_load_bitmap( state->player_sprite_name );
+   maug_cleanup_if_lt( state->player.sprite_cache_id, 0, "%d", -1 );
 
    /* Reload other mobile sprites if they're on this tilemap. */
    debug_printf( 1, "resetting mobile sprite IDs..." );
@@ -160,22 +152,20 @@ int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
       ) {
          continue;
       }
-      resource_id_from_name( &sprite_id, state->mobiles[i].sprite_name,
-         RESOURCE_EXT_GRAPHICS );
-      state->mobiles[i].sprite_cache_id = graphics_cache_load_bitmap(
-         sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+      state->mobiles[i].sprite_cache_id = retrogxc_load_bitmap(
+         state->mobiles[i].sprite_name );
+      maug_cleanup_if_lt( state->mobiles[i].sprite_cache_id, 0, "%d", -1 );
    }
 
    /* Reset item sprite IDs since cache is gone. */
    debug_printf( 1, "resetting item sprite IDs..." );
    for( i = 0 ; state->items_sz > i ; i++ ) {
-      resource_id_from_name( &sprite_id, state->items[i].sprite_name,
-         RESOURCE_EXT_GRAPHICS );
-      state->items[i].sprite_cache_id = graphics_cache_load_bitmap(
-         sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+      state->items[i].sprite_cache_id = retrogxc_load_bitmap(
+         state->items[i].sprite_name );
+      maug_cleanup_if_lt( state->items[i].sprite_cache_id, 0, "%d", -1 );
    }
 
-   memory_debug_dump();
+   /* memory_debug_dump(); */
 
    debug_printf( 1, "warp complete!" );
 
@@ -185,7 +175,7 @@ cleanup:
 
    if( NULL != state ) {
       engines_state_unlock( state );
-      state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
+      maug_munlock( state_handle, state );
    }
 
    return retval;
@@ -262,19 +252,15 @@ cleanup:
    return dir_move;
 }
 
-#ifdef PLATFORM_WASM
-void engines_loop_iter( void* state_handle_p ) {
-   MAUG_MHANDLE state_handle = (MAUG_MHANDLE)state_handle_p;
-#else
-int16_t engines_loop_iter( MAUG_MHANDLE state_handle ) {
-#endif /* PLATFORM_WASM */
-   INPUT_VAL in_char = 0;
+void engines_loop_iter( MAUG_MHANDLE state_handle ) {
+   int16_t in_char = 0;
    struct DSEKAI_STATE* state = NULL;
-   int16_t retval = 1,
-      click_x = 0,
-      click_y = 0;
+   int16_t retval = 1;
+   struct RETROFLAT_INPUT input;
 
-   state = (struct DSEKAI_STATE*)memory_lock( state_handle );
+   /* TODO: Zero input struct? */
+
+   maug_mlock( state_handle, state );
    if( NULL == state ) {
       error_printf( "unable to lock state" );
       retval = 0;
@@ -287,9 +273,12 @@ int16_t engines_loop_iter( MAUG_MHANDLE state_handle ) {
 
    if( ENGINE_STATE_OPENING == state->engine_state ) {
       /* Clear the title screen. */
-      graphics_lock();
-      graphics_clear_screen();
-      graphics_release();
+      retroflat_draw_lock( NULL );
+      retroflat_rect(
+         NULL, RETROFLAT_COLOR_BLACK, 0, 0,
+         retroflat_screen_w(), retroflat_screen_h(),
+         RETROFLAT_FLAGS_FILL );
+      retroflat_draw_release( NULL );
 
       retval = gc_engines_setup[state->engine_type]( state );
       if( !retval ) {
@@ -300,25 +289,25 @@ int16_t engines_loop_iter( MAUG_MHANDLE state_handle ) {
       /* TODO: Optionally skip title screen. */
    }
 
-   graphics_loop_start();
-
    /* === Drawing Phase === */
 
    profiler_set();
 
-   graphics_lock();
+   retroflat_draw_lock( NULL );
 
    /* Blank out canvas if required. */
    if(
       0 > state->menu.menu_id &&
       DSEKAI_FLAG_BLANK_FRAME == (state->flags & DSEKAI_FLAG_BLANK_FRAME)
    ) {
-      graphics_clear_block(
-         0, 0, SCREEN_MAP_W, SCREEN_MAP_H );
+      retroflat_rect(
+         NULL, RETROFLAT_COLOR_BLACK, 0, 0,
+         SCREEN_MAP_W(), SCREEN_MAP_H(), RETROFLAT_FLAGS_FILL );
    }
 
    /* Draw background animations before anything else. */
-   animate_frame( ANIMATE_FLAG_BG );
+   retroani_frame( &(state->animations[0]), DSEKAI_ANIMATIONS_MAX,
+      ANIMATE_FLAG_BG );
 
    profiler_incr( draw_animate );
    profiler_set();
@@ -358,36 +347,41 @@ int16_t engines_loop_iter( MAUG_MHANDLE state_handle ) {
    profiler_set();
    
    /* Draw foreground animations after anything else. */
-   animate_frame( ANIMATE_FLAG_FG );
+   retroani_frame( &(state->animations[0]), DSEKAI_ANIMATIONS_MAX,
+      ANIMATE_FLAG_FG );
 
    profiler_incr( draw_animate );
 
    /* === Input Phase === */
 
-   in_char = input_poll( &click_x, &click_y );
+   in_char = retroflat_poll_input( &input );
 #ifndef NO_TRANSITIONS
    if( 0 < (state->transition & DSEKAI_TRANSITION_MASK_FRAME) ) {
       engines_draw_transition( state );
    } else
 #endif /* !NO_TRANSITIONS */
 
+   /*
+   TODO: Retroflat mouse input.
    if( INPUT_CLICK == in_char ) {
       debug_printf( 1, "click x: %d, y: %d", click_x, click_y );
    }
+   */
 
-   if( g_input_key_quit == in_char ) {
+   /* TODO: Configurable keys. */
+   if( RETROFLAT_KEY_ESC == in_char ) {
       retval = 0;
 
    } else if( 0 <= state->menu.menu_id && 0 != in_char ) {
       retval = gc_menu_handlers[state->menu.menu_id](
-         in_char, click_x, click_y, state );
+         in_char, &input, state );
    
    } else if(
       /* Only open the menu if no modal windows are open and it's not
       *  blocked.
       */
       0 == window_modal() &&
-      g_input_key_menu == in_char &&
+      RETROFLAT_KEY_TAB == in_char &&
       DSEKAI_FLAG_MENU_BLOCKED != (DSEKAI_FLAG_MENU_BLOCKED & state->flags)
    ) {
       if( !state->engine_type ) {
@@ -398,9 +392,9 @@ int16_t engines_loop_iter( MAUG_MHANDLE state_handle ) {
 
    } else if( 0 == window_modal() && 0 != in_char ) {
       retval = gc_engines_input[state->engine_type](
-         in_char, click_x, click_y, state );
+         in_char, &input, state );
 
-   } else if( g_input_key_ok == in_char ) {
+   } else if( RETROFLAT_KEY_ENTER == in_char ) {
       /* Try to close any windows that are open. */
       debug_printf( 1, "speech window requests closed by user" );
       window_pop( WINDOW_ID_SCRIPT_SPEAK );
@@ -434,43 +428,41 @@ cleanup:
          state->engine_type != state->engine_type_change
       ) {
          /* There's a warp-in map, so unload the current map and load it. */
-         state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
+         maug_munlock( state_handle, state );
          engines_warp_loop( state_handle );
       } else {
-         state = (struct DSEKAI_STATE*)memory_unlock( state_handle );
+         maug_munlock( state_handle, state );
       }
    }
 
-   graphics_release();
+   retroflat_draw_release( NULL );
 
-   graphics_loop_end();
-
-#ifndef PLATFORM_WASM
-   return retval;
-#endif /* !PLATFORM_WASM */
+   if( retval ) {
+      retroflat_quit( retval );
+   }
 }
 
 #ifndef NO_TITLE
 
 void engines_exit_to_title( struct DSEKAI_STATE* state ) {
    state->engine_type_change = 0;
-   memory_zero_ptr( (MEMORY_PTR)&(state->player), sizeof( struct MOBILE ) );
+   maug_mzero( &(state->player), sizeof( struct MOBILE ) );
 
    /* TODO: Start small and resize as needed. */
-   memory_free( state->items_handle );
+   maug_mfree( state->items_handle );
    state->items_handle =
-      memory_alloc( DSEKAI_ITEMS_MAX, sizeof( struct ITEM ) );
+      maug_malloc( DSEKAI_ITEMS_MAX, sizeof( struct ITEM ) );
    assert( (MAUG_MHANDLE)NULL != state->items_handle );
 
    /* TODO: Start small and resize as needed. */
-   memory_free( state->mobiles_handle );
+   maug_mfree( state->mobiles_handle );
    state->mobiles_handle =
-      memory_alloc( DSEKAI_MOBILES_MAX, sizeof( struct MOBILE ) );
+      maug_malloc( DSEKAI_MOBILES_MAX, sizeof( struct MOBILE ) );
 
    /* TODO: Start small and resize as needed. */
-   memory_free( state->crops_handle );
+   maug_mfree( state->crops_handle );
    state->crops_handle =
-      memory_alloc( DSEKAI_MOBILES_MAX, sizeof( struct MOBILE ) );
+      maug_malloc( DSEKAI_MOBILES_MAX, sizeof( struct MOBILE ) );
 
    /* TODO: New tilemap? */
 }
@@ -487,7 +479,7 @@ void engines_set_transition(
     * add a frame for setup/cleanup.
     */
    state->transition =
-      (((SCREEN_MAP_W / TILE_W) / 2 ) & DSEKAI_TRANSITION_MASK_FRAME) + 2;
+      (((SCREEN_MAP_W() / TILE_W) / 2 ) & DSEKAI_TRANSITION_MASK_FRAME) + 2;
 
    state->transition |= (trans_open & DSEKAI_TRANSITION_DIR_OPEN);
    state->transition |= (trans_type & DSEKAI_TRANSITION_MASK_TYPE);
@@ -506,16 +498,22 @@ void engines_draw_transition( struct DSEKAI_STATE* state ) {
 
    switch( trans_type ) {
    case DSEKAI_TRANSITION_TYPE_ZOOM:
+      /*
+      TODO: Zoom in retroflat.
       debug_printf( 3, "trans frame: %d", (trans_frame / 2) );
       graphics_set_screen_zoom( (trans_frame / 2) );
+      */
       break;
    case DSEKAI_TRANSITION_TYPE_CURTAIN:
       /* TODO: Draw block or clear block? Needs testing. */
-      graphics_draw_block( 0, 0, trans_w, SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
-      graphics_draw_block(
-         SCREEN_MAP_W - trans_w, 0,
-         trans_w, 
-         SCREEN_MAP_H, GRAPHICS_COLOR_BLACK );
+      retroflat_rect(
+         NULL, RETROFLAT_COLOR_BLACK, 0, 0,
+         trans_w, SCREEN_MAP_W(),
+         RETROFLAT_FLAGS_FILL );
+      retroflat_rect(
+         NULL, RETROFLAT_COLOR_BLACK, 0, 0,
+         trans_w - SCREEN_MAP_W(), trans_w,
+         RETROFLAT_FLAGS_FILL );
       break;
 
    /* TODO: Other transition types. */
@@ -538,19 +536,19 @@ uint8_t engines_state_lock( struct DSEKAI_STATE* state ) {
    }
 
    if( NULL == state->tilemap ) {
-      state->tilemap = (struct TILEMAP*)memory_lock( state->map_handle );
+      maug_mlock( state->map_handle, state->tilemap );
    }
 
    if( NULL == state->mobiles ) {
-      state->mobiles = (struct MOBILE*)memory_lock( state->mobiles_handle );
+      maug_mlock( state->mobiles_handle, state->mobiles );
    }
 
    if( NULL == state->crops ) {
-      state->crops = (struct CROP_PLOT*)memory_lock( state->crops_handle );
+      maug_mlock( state->crops_handle, state->crops );
    }
 
    if( NULL == state->items ) {
-      state->items = (struct ITEM*)memory_lock( state->items_handle );
+      maug_mlock( state->items_handle, state->items );
    }
 
    return 1;
@@ -564,19 +562,19 @@ uint8_t engines_state_unlock( struct DSEKAI_STATE* state ) {
    }
 
    if( NULL != state->tilemap ) {
-      state->tilemap = (struct TILEMAP*)memory_unlock( state->map_handle );
+      maug_munlock( state->map_handle, state->tilemap );
    }
 
    if( NULL != state->mobiles ) {
-      state->mobiles = (struct MOBILE*)memory_unlock( state->mobiles_handle );
+      maug_munlock( state->mobiles_handle, state->mobiles );
    }
 
    if( NULL != state->crops ) {
-      state->crops = (struct CROP_PLOT*)memory_unlock( state->crops_handle );
+      maug_munlock( state->crops_handle, state->crops );
    }
 
    if( NULL != state->items ) {
-      state->items = (struct ITEM*)memory_unlock( state->items_handle );
+      maug_munlock( state->items_handle, state->items );
    }
 
    return 1;

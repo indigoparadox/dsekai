@@ -231,7 +231,7 @@ int32_t serial_load( const char* save_name, struct DSEKAI_STATE* state ) {
    
    save_buffer_sz = memory_sz( save_buffer_h );
    assert( 0 < save_buffer_sz );
-   save_buffer = memory_lock( save_buffer_h );
+   maug_mlock( save_buffer_h, save_buffer );
 
    serial_asn_read_seq( save_buffer, &type_buf, &save_seq_sz,
       "main", idx, read_sz, cleanup )
@@ -287,7 +287,7 @@ int32_t serial_load( const char* save_name, struct DSEKAI_STATE* state ) {
 cleanup:
 
    if( NULL != save_buffer ) {
-      save_buffer = memory_unlock( save_buffer_h );
+      maug_munlock( save_buffer_h, save_buffer );
    }
 
    if( (MAUG_MHANDLE)NULL != save_buffer_h ) {

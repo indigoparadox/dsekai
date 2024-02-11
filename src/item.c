@@ -70,11 +70,9 @@ cleanup:
 int8_t item_use_food(
    int16_t e_idx, MOBILE_GID owner_gid, struct DSEKAI_STATE* state
 ) {
-#if defined( DEPTH_VGA ) || defined( DEPTH_CGA )
 #ifndef NO_ANIMATE
    int8_t anim_idx = 0;
 #endif /* !NO_ANIMATE */
-#endif /* DEPTH_VGA || DEPTH_CGA */
    char num_str[10];
    struct MOBILE* user = NULL;
    uint8_t food_val = 0;
@@ -98,11 +96,13 @@ int8_t item_use_food(
    debug_printf( 1, "mobile %d:%d mp/hp now: %d",
       user->map_gid, user->spawner_gid, user->mp_hp );
 
-   dio_snprintf( num_str, 10, "+%d", food_val );
+   maug_snprintf( num_str, 10, "+%d", food_val );
 
+#if 0
+   /* TODO: Fix string animation. */
 #ifndef NO_ANIMATE
    anim_idx = animate_create(
-      ANIMATE_TYPE_STRING, ANIMATE_FLAG_FG, user->screen_px, user->screen_py,
+      RETROANI_TYPE_STRING, ANIMATE_FLAG_FG, user->screen_px, user->screen_py,
       SPRITE_W, SPRITE_H );
    animate_set_string(
       anim_idx, num_str, 10,
@@ -113,6 +113,7 @@ int8_t item_use_food(
 #  endif /* DEPTH_VGA */
    );
 #endif /* !NO_ANIMATE */
+#endif
 
 cleanup:
 
@@ -237,8 +238,8 @@ int8_t item_use_hoe(
    }
 
    /* Create crop plot. */
-   memory_zero_ptr(
-      (MEMORY_PTR)&(state->crops[crop_idx]), sizeof( struct CROP_PLOT ) );
+   maug_mzero(
+      &(state->crops[crop_idx]), sizeof( struct CROP_PLOT ) );
    state->crops[crop_idx].map_gid = state->tilemap->gid;
    state->crops[crop_idx].coords.x = x;
    state->crops[crop_idx].coords.y = y;
@@ -370,9 +371,7 @@ int16_t item_stack_or_add(
             2, "creating item with gid %d and owner %d at index: %d",
             e_def->gid, owner_gid, i );
 
-         memory_copy_ptr( 
-            (MEMORY_PTR)&(state->items[i]), (CONST_MEMORY_PTR)e_def,
-            sizeof( struct ITEM ) );
+         maug_mcpy( &(state->items[i]), e_def, sizeof( struct ITEM ) );
 
          state->items[i].owner = owner_gid;
          state->items[i].sprite_cache_id = -1;
@@ -451,10 +450,10 @@ int8_t item_drop( int16_t e_idx, struct DSEKAI_STATE* state ) {
    /* TODO: Set tile as occupied. */
 #if 0
    /* Set tile as dirty. */
-   t = (struct TILEMAP*)memory_lock( state->map_handle );
+   maug_mlock( state->map_handle, t );
    if( NULL != t ) {
       tilemap_set_dirty( item->x, item->y, t );
-      t = (struct TILEMAP*)memory_unlock( state->map_handle );
+      maug_munlock( state->map_handle, t );
    }
 #endif
 
@@ -493,10 +492,10 @@ int16_t item_pickup_xy(
 
 #if 0
          /* Set tile as dirty. */
-         t = (struct TILEMAP*)memory_lock( state->map_handle );
+         maug_mlock( state->map_handle, t );
          if( NULL != t ) {
             tilemap_set_dirty( plot->coords.x, plot->coords.y, t );
-            t = (struct TILEMAP*)memory_unlock( state->map_handle );
+            maug_munlock( state->map_handle, t );
          }
 #endif
          break;

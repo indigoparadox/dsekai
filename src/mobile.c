@@ -317,7 +317,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
 cleanup:
    if( NULL != t ) {
-      t = (struct TILEMAP*)memory_unlock( state->map_handle );
+      maug_munlock( state->map_handle, t );
    }
 }
 

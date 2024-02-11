@@ -59,7 +59,7 @@
  * \attention Changing this value may break compatibility with tilemaps!
  *            Please use caution.
  */
-#define SCREEN_MAP_W (160)
+#define SCREEN_MAP_W() (160)
 #endif /* !SCREEN_MAP_W */
 
 #ifndef SCREEN_MAP_H
@@ -68,17 +68,17 @@
  * \attention Changing this value may break compatibility with tilemaps!
  *            Please use caution.
  */
-#define SCREEN_MAP_H (160 - STATUS_WINDOW_H)
+#define SCREEN_MAP_H() (160 - STATUS_WINDOW_H)
 #endif /* !SCREEN_MAP_H */
 
 #ifndef SCREEN_MAP_X
 /*! \brief Left offset of the overview or viewport area in pixels. */
-#define SCREEN_MAP_X ((SCREEN_W / 2) - (SCREEN_MAP_W / 2))
+#define SCREEN_MAP_X() ((retroflat_screen_w() / 2) - (retroflat_screen_h() / 2))
 #endif /* !SCREEN_MAP_X */
 
 #ifndef SCREEN_MAP_Y
 /*! \brief Top offset of the overview or viewport area in pixels. */
-#define SCREEN_MAP_Y (0)
+#define SCREEN_MAP_Y() (0)
 #endif /* !SCREEN_MAP_Y */
 
 #ifndef ANI_SPRITE_COUNTDOWN_MAX
@@ -89,6 +89,10 @@
 /*! \} */ /* dsekai_engines */
 
 /*! \} */ /* dsekai_engines_config */
+
+#ifndef DSEKAI_ANIMATIONS_MAX
+#  define DSEKAI_ANIMATIONS_MAX 10
+#endif /* !DSEKAI_ANIMATIONS_MAX */
 
 /**
  * \addtogroup dsekai_mobiles

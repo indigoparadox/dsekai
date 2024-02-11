@@ -3,6 +3,7 @@
 
 #define RETROFLT_C
 #define MAUG_C
+#define RETROGXC_C
 
 #include "dsekai.h"
 
@@ -20,8 +21,7 @@ int unilayer_main( int argc, char* argv[] ) {
 
    struct DSEKAI_STATE* state = NULL;
    int16_t retval = 0;
-
-   platform_init( icon_dsekai );
+   struct RETROFLAT_ARGS args;
 
    assert( 0 == TILEMAP_TW % 4 );
    assert( 0 == TILEMAP_TH % 4 );
@@ -30,6 +30,7 @@ int unilayer_main( int argc, char* argv[] ) {
 
    logging_init();
 
+#if 0
    debug_printf( 3, "dsekai compiled " __DATE__ __TIME__ );
    debug_printf( 3, "git hash: " DSEKAI_GIT_HASH );
    debug_printf( 3, "using " RESOURCES " resources" );
@@ -53,155 +54,112 @@ int unilayer_main( int argc, char* argv[] ) {
       sizeof( struct ANIMATION ) * ANIMATE_ANIMATIONS_MAX );
    assert( sizeof( struct ANIMATION ) * ANIMATE_ANIMATIONS_MAX < 16384 );
 #endif /* !NO_ANIMATE */
+#endif
 
    /* Initialize subsystems. */
 
-   if( !memory_init() ) {
-      error_printf( "unable to initialize memory" );
-      retval = 1;
-      goto exit;
-   }
+   args.title = "dsekai";
 
-   if( !graphics_init() ) {
-      error_printf( "unable to initialize graphics" );
-      retval = 1;
-      goto exit;
-   }
+   retval = !retroflat_init( argc, argv, &args );
+   maug_cleanup_if_not_ok();
 
    engines_draw_loading_screen();
 
-   if( !input_init() ) {
-      retval = 1;
-      error_printf( "unable to initialize input" );
-      goto exit;
-   }
-
    if( !window_init(
-      SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H )
+      SCREEN_MAP_X(), SCREEN_MAP_Y(), SCREEN_MAP_W(), SCREEN_MAP_H() )
    ) {
       retval = 1;
       error_printf( "unable to initialize GUI" );
-      goto exit;
+      goto cleanup;
    }
 
    if( !script_init() ) {
       error_printf( "unable to initialize scripts" );
       retval = 1;
-      goto exit;
+      goto cleanup;
    }
 
    /* Setup the engine state. */
 
    debug_printf( 1, "allocating state..." );
-   g_state_handle = memory_alloc( sizeof( struct DSEKAI_STATE ), 1 );
+   g_state_handle = maug_malloc( sizeof( struct DSEKAI_STATE ), 1 );
    if( (MAUG_MHANDLE)NULL == g_state_handle ) {
       error_printf( "unable to allocate state!" );
       retval = 1;
-      goto exit;
+      goto cleanup;
    }
 
-   state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
+   maug_mlock( g_state_handle, state );
    state->version = 1;
    state->engine_state = ENGINE_STATE_OPENING;
    state->menu.menu_id = -1;
    state->menu.highlight_id = -1;
    
-   state->map_handle = memory_alloc( 1, sizeof( struct TILEMAP ) );
+   state->map_handle = maug_malloc( 1, sizeof( struct TILEMAP ) );
    if( (MAUG_MHANDLE)NULL == state->map_handle ) {
       error_printf( "unable to allocate tilemap!" );
       retval = 1;
-      goto exit;
+      goto cleanup;
    }
    
    /* TODO: Start small and resize later. */
    state->items_sz = DSEKAI_ITEMS_MAX;
    state->items_handle =
-      memory_alloc( DSEKAI_ITEMS_MAX, sizeof( struct ITEM ) );
+      maug_malloc( DSEKAI_ITEMS_MAX, sizeof( struct ITEM ) );
    if( (MAUG_MHANDLE)NULL == state->items_handle ) {
       error_printf( "unable to allocate items!" );
       retval = 1;
-      goto exit;
+      goto cleanup;
    }
 
    /* TODO: Start small and resize later. */
    state->mobiles_sz = DSEKAI_MOBILES_MAX;
    state->mobiles_handle =
-      memory_alloc( DSEKAI_MOBILES_MAX, sizeof( struct MOBILE ) );
+      maug_malloc( DSEKAI_MOBILES_MAX, sizeof( struct MOBILE ) );
    if( (MAUG_MHANDLE)NULL == state->mobiles_handle ) {
       error_printf( "unable to allocate mobiles!" );
       retval = 1;
-      goto exit;
+      goto cleanup;
    }
 
    /* TODO: Start small and resize later. */
    state->crops_sz = DSEKAI_CROPS_MAX;
    state->crops_handle =
-      memory_alloc( DSEKAI_CROPS_MAX, sizeof( struct CROP_PLOT ) );
+      maug_malloc( DSEKAI_CROPS_MAX, sizeof( struct CROP_PLOT ) );
    if( (MAUG_MHANDLE)NULL == state->crops_handle ) {
       error_printf( "unable to allocate crops!" );
       retval = 1;
-      goto exit;
+      goto cleanup;
    }
 
-   unilayer_loop_set( engines_loop_iter, g_state_handle );
-
-   state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
-
-/* === Main Loop === */
-
-#ifndef PLATFORM_WASM
-
-   while( 0 < g_running ) {
-      unilayer_loop_iter();
-      /*
-      assert( NULL == state->tilemap );
-      assert( NULL == state->mobiles );
-      assert( NULL == state->items );
-      assert( NULL == state->crops );
-      */
-
-#ifdef USE_SOFT_ASSERT
-      if( 0 < g_assert_failed_len ) {
-         while( g_running ) {
-            if( g_input_key_quit == input_poll( NULL, NULL ) ) {
-               g_running = 0;
-            }
-            WinDrawChars( g_assert_failed, g_assert_failed_len, 10, 20 );
-         }
-      }
-#endif /* USE_SOFT_ASSERT */
-   }
+   retroflat_loop( engines_loop_iter, NULL, g_state_handle );
 
 /* === Shutdown === */
 
-   state = (struct DSEKAI_STATE*)memory_lock( g_state_handle );
+#ifndef RETROFLAT_OS_WASM
+
+   maug_mlock( g_state_handle, state );
    if( NULL == state ) {
       error_printf( "unable to lock state" );
       retval = 1;
-      goto exit;
+      goto cleanup;
    }
    if( (MAUG_MHANDLE)NULL != state->map_handle ) {
-      memory_free( state->map_handle );
+      maug_mfree( state->map_handle );
    }
-   state = (struct DSEKAI_STATE*)memory_unlock( g_state_handle );
+   maug_munlock( g_state_handle, state );
 
-   memory_free( g_state_handle );
+   maug_mfree( g_state_handle );
 
    window_shutdown();
    script_shutdown();
-   input_shutdown();
-   graphics_shutdown();
-
+   retroflat_shutdown( retval );
    logging_shutdown();
  
-   platform_shutdown();
-
 #endif /* !PLATFORM_WASM */
 
-exit:
+cleanup:
 
    return retval;
 }
-
-after_unilayer_main()
 

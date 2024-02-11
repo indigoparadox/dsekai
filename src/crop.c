@@ -8,12 +8,12 @@ void crop_grow( struct CROP_PLOT* plot ) {
    /* TODO: Implement a rolling timer that counts down and compensates for
     *       rollover.
     */
-   if( plot->next_at_ticks <= graphics_get_ms() ) {
+   if( plot->next_at_ticks <= retroflat_get_ms() ) {
       /* TODO: Growth modifiers based on terrain, powerups, etc. */
       crop_stage++;
       plot->flags &= ~CROP_FLAG_STAGE_MASK;
       plot->flags |= crop_stage;
-      plot->next_at_ticks = graphics_get_ms() + plot->cycle;
+      plot->next_at_ticks = retroflat_get_ms() + plot->cycle;
       debug_printf( 1, "crop gid: %d grew to stage: %d, next stage at: %d",
          plot->crop_gid, crop_stage, plot->next_at_ticks );
    }
@@ -93,7 +93,7 @@ int8_t crop_plant(
 
    /* Plant the crop. */
    plot->crop_gid = crop_gid;
-   plot->next_at_ticks = graphics_get_ms() + state->tilemap->crop_defs[i].cycle;
+   plot->next_at_ticks = retroflat_get_ms() + state->tilemap->crop_defs[i].cycle;
    plot->cycle = state->tilemap->crop_defs[i].cycle;
 
    debug_printf( 1, "planted crop: %d at: %d, %d on map %d, next stage at: %d",
@@ -144,7 +144,7 @@ int8_t crop_harvest(
       plot->cycle = 0;
    } else {
       /* Crop does regrow. */
-      plot->next_at_ticks = graphics_get_ms() + plot->cycle;
+      plot->next_at_ticks = retroflat_get_ms() + plot->cycle;
       plot->flags |= (CROP_FLAG_STAGE_MASK & 2);
    }
 

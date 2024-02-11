@@ -54,7 +54,7 @@ static int16_t tilemap_json_parse_resource_name(
       i++;
    }
 
-   memory_zero_ptr( name_buffer, RESOURCE_NAME_MAX );
+   maug_mzero( name_buffer, RESOURCE_NAME_MAX );
    memory_strncpy_ptr( name_buffer, &(file_path_buffer[name_idx]), name_sz );
 
    debug_printf( 3, "parsed resource name: %s", name_buffer );
@@ -302,9 +302,9 @@ static int16_t tilemap_json_parse_scripts(
    /* Load scripts.*/
    debug_printf( 2, "loading scripts" ); 
    for( i = 0 ; TILEMAP_SCRIPTS_MAX > i ; i++ ) {
-      memory_zero_ptr( script_path, RESOURCE_PATH_MAX + 1 );
-      memory_zero_ptr( &s, sizeof( struct SCRIPT_COMPILE_STATE ) );
-      memory_zero_ptr(
+      maug_mzero( script_path, RESOURCE_PATH_MAX + 1 );
+      maug_mzero( &s, sizeof( struct SCRIPT_COMPILE_STATE ) );
+      maug_mzero(
          &(t->scripts[i]), sizeof( struct SCRIPT_STEP ) * SCRIPT_STEPS_MAX );
 
 #ifndef NO_FIX_ASSET_PATH
@@ -335,7 +335,7 @@ static int16_t tilemap_json_parse_scripts(
       debug_printf( 2, "compiling script #%d: %s...", i, script_path );
 
       script_buffer_sz = memory_sz( script_buffer_h );
-      script_buffer = memory_lock( script_buffer_h );
+      script_maug_mlock( script_buffer_h, buffer );
       assert( NULL != script_buffer );
       s.steps = t->scripts[i].steps;
 
@@ -346,8 +346,8 @@ static int16_t tilemap_json_parse_scripts(
       debug_printf( 1, "script #%d is %d steps long", i, s.steps_sz );
       t->scripts[i].steps_count = s.steps_sz;
 
-      script_buffer = memory_unlock( script_buffer_h );
-      memory_free( script_buffer_h );
+      maug_munlock( script_buffer_h, script_buffer );
+      maug_mfree( script_buffer_h );
       script_buffer_h = (RESOURCE_HANDLE)0;
 
       /*
@@ -360,11 +360,11 @@ static int16_t tilemap_json_parse_scripts(
 cleanup:
 
    if( NULL != script_buffer ) {
-      script_buffer = memory_unlock( script_buffer_h );
+      maug_munlock( script_buffer_h, script_buffer );
    }
 
    if( (RESOURCE_HANDLE)0 != script_buffer_h ) {
-      memory_free( script_buffer_h );
+      maug_mfree( script_buffer_h );
    }
 
    return loaded;
@@ -439,7 +439,7 @@ static int16_t tilemap_json_load_file(
    debug_printf( 1, "setting up tokens and parsing..." );
    *json_buffer_sz_p = memory_sz( *json_handle_p );
    *json_buffer_p = resource_lock_handle( *json_handle_p );
-   memory_zero_ptr( tokens, JSON_TOKENS_MAX * sizeof( struct jsmntok ) );
+   maug_mzero( tokens, JSON_TOKENS_MAX * sizeof( struct jsmntok ) );
    *tok_parsed_p = json_load(
       *json_buffer_p, *json_buffer_sz_p, tokens, JSON_TOKENS_MAX );
    if( 0 > *tok_parsed_p ) {
@@ -701,7 +701,7 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
    int8_t spawn_idx = 0;
    int32_t gid_buffer = 0;
 
-   memory_zero_ptr( t, sizeof( struct TILEMAP ) );
+   maug_mzero( t, sizeof( struct TILEMAP ) );
 
    /* Allocate buffers for parsing JSON. */
    json_handle = resource_get_handle( id );
@@ -718,7 +718,7 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
       goto cleanup;
    }
 
-   tokens = memory_lock( tokens_handle );
+   maug_mlock( tokens_handle, tokens );
 
    debug_printf( 1, "JSON token buffer allocated: %lu bytes",
       sizeof( struct jsmntok ) * JSON_TOKENS_MAX );
@@ -827,11 +827,11 @@ int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t ) {
 cleanup:
 
    if( NULL != tokens ) {
-      tokens = memory_unlock( tokens_handle );
+      maug_munlock( tokens_handle, tokens );
    }
 
    if( (MAUG_MHANDLE)0 != tokens_handle ) {
-      memory_free( tokens_handle );
+      maug_mfree( tokens_handle );
    }
 
    if( NULL != json_buffer ) {

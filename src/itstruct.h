@@ -89,7 +89,7 @@
  * in that's tilemap's TILEMAP::item_defs.
  */
 struct ITEM {
-   RESOURCE_NAME sprite_name;
+   retroflat_asset_path sprite_name;
    /**
     * \brief Index of the item's sprite loaded in the
     *        \ref unilayer_graphics_cache.

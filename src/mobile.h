@@ -264,7 +264,7 @@ struct MOBILE {
     */
    TILEMAP_GID map_gid;
    char name[TILEMAP_SPAWN_NAME_SZ];
-   char sprite_name[RESOURCE_NAME_MAX];
+   retroflat_asset_path sprite_name;
    /**
     * \brief The combined \ref dsekai_mobiles_mp_hp field.
     */

@@ -83,9 +83,9 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
       memory_alloc( sizeof( struct POV_STATE ), 1 );
 
    /*
-   gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
+   maug_mlock( state->engine_state_handle, gstate );
 
-   gstate = (struct POV_STATE*)memory_unlock( state->engine_state_handle );
+   maug_munlock( state->engine_state_handle, gstate );
    */
 
    /* Create the environmental animations. */
@@ -97,10 +97,10 @@ int16_t pov_setup( struct DSEKAI_STATE* state ) {
 
    state->flags |= DSEKAI_FLAG_BLANK_FRAME;
 
-   t = (struct TILEMAP*)memory_lock( state->map_handle );
+   maug_mlock( state->map_handle, t );
    if( NULL != t ) {
       tilemap_refresh_tiles( t );
-      t = (struct TILEMAP*)memory_unlock( state->map_handle );
+      maug_munlock( state->map_handle, t );
    }
 
    engines_set_transition(
@@ -125,10 +125,10 @@ int16_t pov_input(
    /*
    struct POV_STATE* gstate = NULL;
 
-   gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
+   maug_mlock( state->engine_state_handle, gstate );
    */
 
-   t = (struct TILEMAP*)memory_lock( state->map_handle );
+   maug_mlock( state->map_handle, t );
    if( NULL == t ) {
       error_printf( "could not lock tilemap" );
       goto cleanup;
@@ -214,13 +214,13 @@ int16_t pov_input(
    }
 
    /*
-   gstate = (struct POV_STATE*)memory_unlock( state->engine_state_handle );
+   maug_munlock( state->engine_state_handle, gstate );
    */
 
 cleanup:
    
    if( NULL != t ) {
-      t = (struct TILEMAP*)memory_unlock( state->map_handle );
+      maug_munlock( state->map_handle, t );
    }
 
    return retval;
@@ -456,16 +456,16 @@ void pov_draw( struct DSEKAI_STATE* state ) {
    struct POV_STATE* gstate = NULL;
    struct TILEMAP* t = NULL;
 
-   gstate = (struct POV_STATE*)memory_lock( state->engine_state_handle );
+   maug_mlock( state->engine_state_handle, gstate );
 
-   t = (struct TILEMAP*)memory_lock( state->map_handle );
+   maug_mlock( state->map_handle, t );
 
-   memory_zero_ptr( gstate->minimap, TILEMAP_TH * TILEMAP_TW );
+   maug_mzero( gstate->minimap, TILEMAP_TH * TILEMAP_TW );
 
    debug_printf( 0, "casting..." );
 
    for( x = 0 ; SCREEN_MAP_W > x ; x++ ) {
-      memory_zero_ptr( &ray, sizeof( struct POV_RAY ) );
+      maug_mzero( &ray, sizeof( struct POV_RAY ) );
       /* Setup ray direction and position. */
       ray.camera_x = 2 * x / (double)SCREEN_MAP_W - 1;
       ray.dir_x = gc_pov_dir_x[mobile_get_dir( &(state->player) )] + 
@@ -515,14 +515,14 @@ void pov_draw( struct DSEKAI_STATE* state ) {
    }
 
    if( NULL != t ) {
-      t = (struct TILEMAP*)memory_unlock( state->map_handle );
+      maug_munlock( state->map_handle, t );
    }
 
    if( NULL != gstate ) {
       /* Minimap needs valid gstate. */
       pov_draw_minimap( gstate->minimap, &(state->player) );
 
-      gstate = memory_unlock( state->engine_state_handle );
+      maug_munlock( state->engine_state_handle, gstate );
    }
 
 }

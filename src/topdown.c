@@ -358,7 +358,7 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
    int16_t i = 0,
       onscreen_mobs = 0;
 
-   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
+   maug_mlock( state->engine_state_handle, gstate );
 
    if( !engines_state_lock( state ) ) {
       goto cleanup;     
@@ -383,8 +383,7 @@ void topdown_draw( struct DSEKAI_STATE* state ) {
 cleanup:
 
    if( NULL != gstate ) {
-      gstate =
-         (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
+      maug_munlock( state->engine_state_handle, gstate );
    }
 }
 
@@ -420,7 +419,7 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
       goto cleanup;     
    }
 
-   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
+   maug_mlock( state->engine_state_handle, gstate );
    if( NULL == gstate ) {
       error_printf( "could not lock gstate" );
       goto cleanup;
@@ -514,8 +513,7 @@ cleanup:
 
    if( NULL != gstate ) {
       assert( NULL != state );
-      gstate = (struct TOPDOWN_STATE*)memory_unlock(
-         state->engine_state_handle );
+      maug_munlock( state->engine_state_handle, gstate );
    }
 
    profiler_incr( animate );
@@ -543,7 +541,7 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
       goto cleanup;     
    }
 
-   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
+   maug_mlock( state->engine_state_handle, gstate );
    assert( NULL != gstate );
 
    /* Make sure the tilemap is drawn at least once behind any initial windows.
@@ -573,8 +571,7 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
 cleanup:
 
    if( NULL != gstate ) {
-      gstate =
-         (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
+      maug_munlock( state->engine_state_handle, gstate );
    }
    
    return retval;
@@ -601,7 +598,7 @@ int16_t topdown_input(
       goto cleanup;     
    }
 
-   gstate = (struct TOPDOWN_STATE*)memory_lock( state->engine_state_handle );
+   maug_mlock( state->engine_state_handle, gstate );
    if( NULL == gstate ) {
       goto cleanup;
    }
@@ -738,8 +735,7 @@ int16_t topdown_input(
 cleanup:
 
    if( NULL != gstate ) {
-      gstate =
-         (struct TOPDOWN_STATE*)memory_unlock( state->engine_state_handle );
+      maug_munlock( state->engine_state_handle, gstate );
    }
 
    return retval;

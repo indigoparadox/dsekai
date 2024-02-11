@@ -29,7 +29,7 @@
 
 /* Public */
 
-int32_t tilemap_asn_load_res( RESOURCE_ID id, struct TILEMAP* t ) CODE_SECTION( "asnfns" );
+int32_t tilemap_asn_load_res( retroflat_asset_path id, struct TILEMAP* t ) CODE_SECTION( "asnfns" );
 int32_t tilemap_asn_load(
    const uint8_t* asn_buffer, int32_t asn_buffer_sz, struct TILEMAP* t
 ) CODE_SECTION( "asnfns" );

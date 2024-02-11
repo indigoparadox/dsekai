@@ -39,14 +39,14 @@ typedef void (*MENU_RENDERER)( struct DSEKAI_STATE* state );
  * \brief Handle input for a currently active menu.
  */
 typedef int16_t (*MENU_HANDLER)(
-   int in_char, int16_t click_x, int16_t click_y,
+   RETROFLAT_IN_KEY in_char, struct RETROFLAT_INPUT* input,
    struct DSEKAI_STATE* state );
 
 #define MENU_RENDERER_PROTOTYPES( idx, name ) void menu_renderer_ ## name( struct DSEKAI_STATE* state );
 
 MENU_TABLE( MENU_RENDERER_PROTOTYPES )
 
-#define MENU_HANDLER_PROTOTYPES( idx, name ) int16_t menu_handler_ ## name( int in_char, int16_t click_x, int16_t click_y, struct DSEKAI_STATE* state );
+#define MENU_HANDLER_PROTOTYPES( idx, name ) int16_t menu_handler_ ## name( RETROFLAT_IN_KEY in_char, struct RETROFLAT_INPUT* input, struct DSEKAI_STATE* state );
 
 MENU_TABLE( MENU_HANDLER_PROTOTYPES )
 

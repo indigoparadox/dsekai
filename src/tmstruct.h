@@ -40,7 +40,7 @@ struct TILEMAP_COORDS {
 /*! \brief Tile prototype stored in TILEMAP::tileset. */
 struct TILESET_TILE {
    /*! \brief Indentifier for graphical asset representing this tile. */
-   RESOURCE_NAME image_name;
+   retroflat_asset_path image_name;
    unsigned char ascii;
    /*! \brief Flags indicating behavior for this tile. */
    uint8_t flags;
@@ -64,9 +64,9 @@ struct TILEMAP_SPAWN {
    /*! \brief Tile-based coordinates at which to spawn. */
    struct TILEMAP_COORDS coords;
    /**
-    * \brief RESOURCE_NAME for the MOBILE::sprite on a spawned MOBILE.
+    * \brief ::retroflat_asset_path for the MOBILE::sprite on a spawned MOBILE.
     */
-   RESOURCE_NAME sprite_name;
+   retroflat_asset_path sprite_name;
    unsigned char ascii;
    /*! \brief \ref dsekai_mobile_flags to pass to spawned MOBILE::flags. */
    uint16_t flags;

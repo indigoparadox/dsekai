@@ -58,7 +58,7 @@ int16_t tilemap_asn_parse_tileset(
       
       /* image name */
       read_sz = asn_read_string( t->tileset[tile_idx].image_name,
-         RESOURCE_NAME_MAX, asn_buffer, total_read_sz );
+         sizeof( retroflat_asset_path ), asn_buffer, total_read_sz );
       if( 0 == read_sz ) {
          goto cleanup;
       }
@@ -196,7 +196,7 @@ int16_t tilemap_asn_parse_spawns(
          "spawn def coords Y", total_read_sz, read_sz, cleanup )
 
       serial_asn_read_string(
-         asn_buffer, t->spawns[spawn_idx].sprite_name, RESOURCE_NAME_MAX,
+         asn_buffer, t->spawns[spawn_idx].sprite_name, sizeof( retroflat_asset_path ),
          "spawn def sprite name", total_read_sz, read_sz, cleanup )
 
       serial_asn_read_int(
@@ -250,7 +250,7 @@ int16_t tilemap_asn_parse_items(
 
       /* sprite name */
       read_sz = asn_read_string( t->item_defs[item_idx].sprite_name,
-         RESOURCE_NAME_MAX, asn_buffer, total_read_sz );
+         sizeof( retroflat_asset_path ), asn_buffer, total_read_sz );
       if( 0 >= read_sz ) {
          total_read_sz = TILEMAP_ASN_ERROR_READ;
          goto cleanup;
@@ -503,7 +503,7 @@ cleanup:
    return total_read_sz;
 }
 
-int32_t tilemap_asn_load_res( RESOURCE_ID id, struct TILEMAP* t ) {
+int32_t tilemap_asn_load_res( retroflat_asset_path id, struct TILEMAP* t ) {
    const uint8_t* asn_buffer = NULL;
    int32_t asn_buffer_sz = 0,
       read_sz = 0;
@@ -686,7 +686,7 @@ int32_t tilemap_asn_save(
          &h_buffer, &mark_seq_ts, "tileset", idx, cleanup )
    
       serial_asn_write_string(
-         &h_buffer, t->tileset[i].image_name, RESOURCE_NAME_MAX,
+         &h_buffer, t->tileset[i].image_name, sizeof( retroflat_asset_path ),
          "tileset image name", idx, cleanup );
 
       serial_asn_write_int(
@@ -743,7 +743,7 @@ int32_t tilemap_asn_save(
          &h_buffer, &mark_seq_spawn_coords, "spawn coords end", idx, cleanup )
 
       serial_asn_write_string(
-         &h_buffer, t->spawns[i].sprite_name, RESOURCE_NAME_MAX,
+         &h_buffer, t->spawns[i].sprite_name, sizeof( retroflat_asset_path ),
          "spawn sprite name", idx, cleanup );
 
       serial_asn_write_int(
@@ -825,11 +825,11 @@ int32_t tilemap_asn_save(
       serial_asn_write_int( &h_buffer, i, x, "item def index", idx, cleanup );
 
       serial_asn_write_string(
-         &h_buffer, t->item_defs[i].sprite_name, RESOURCE_NAME_MAX,
+         &h_buffer, t->item_defs[i].sprite_name, sizeof( retroflat_asset_path ),
          "item def sprite name", idx, cleanup );
 
       serial_asn_write_string(
-         &h_buffer, t->item_defs[i].name, RESOURCE_NAME_MAX,
+         &h_buffer, t->item_defs[i].name, sizeof( retroflat_asset_path ),
          "item def name", idx, cleanup );
 
       serial_asn_write_int(
@@ -867,7 +867,7 @@ int32_t tilemap_asn_save(
       serial_asn_write_int( &h_buffer, i, x, "crop def index", idx, cleanup );
 
       serial_asn_write_string(
-         &h_buffer, t->crop_defs[i].sprite_name, RESOURCE_NAME_MAX,
+         &h_buffer, t->crop_defs[i].sprite_name, sizeof( retroflat_asset_path ),
          "crop def sprite name", idx, cleanup );
 
       serial_asn_write_string(

@@ -107,7 +107,7 @@
  * \param t ::MEMORY_PTR to an empty TILEMAP struct to be loaded into.
  * \return
  */
-int16_t tilemap_json_load( const RESOURCE_ID id, struct TILEMAP* t );
+int16_t tilemap_json_load( retroflat_asset_path id, struct TILEMAP* t );
 
 /*! \} */
 

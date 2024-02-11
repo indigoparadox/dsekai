@@ -332,7 +332,7 @@ struct DSEKAI_STATE {
     * This is necessary since the player is spawned in the first map, but
     * travels to other maps (unlike other mobiles).
     */
-   RESOURCE_NAME player_sprite_name;
+   retroflat_asset_path player_sprite_name;
 
    /**
     * \brief Array of all crops growing on all maps.
@@ -348,6 +348,8 @@ struct DSEKAI_STATE {
    struct CROP_PLOT* crops;
 
    int16_t crops_sz;
+
+   struct RETROANI animations[DSEKAI_ANIMATIONS_MAX];
 
 #ifndef NO_ENGINE_EDITOR
 
@@ -380,11 +382,7 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state );
  * \param state_handle Unlocked ::MAUG_MHANDLE for current ::DSEKAI_STATE.
  * \return 1 if engine should continue executing or 0 if it should quit.
  */
-#ifdef PLATFORM_WASM
-void engines_loop_iter( void* state_handle );
-#else
-int16_t engines_loop_iter( MAUG_MHANDLE state_handle );
-#endif /* PLATFORM_WASM */
+void engines_loop_iter( MAUG_MHANDLE state_handle );
 
 /**
  * \brief Handle generic player movement commmand.
@@ -459,8 +457,7 @@ typedef int16_t (*ENGINES_SETUP)( struct DSEKAI_STATE* state );
  * \return 1 if engine should continue running or 0 to quit.
  */
 typedef int16_t (*ENGINES_INPUT)(
-   int in_char, int16_t click_x, int16_t click_y,
-   struct DSEKAI_STATE* state );
+   int in_char, struct RETROFLAT_INPUT* input, struct DSEKAI_STATE* state );
 
 /**
  * \brief Cycles animations and executes scripts relevant to the current engine.
@@ -478,7 +475,7 @@ typedef void (*ENGINES_DRAW)( struct DSEKAI_STATE* state );
 
 ENGINE_TABLE( ENGINES_SETUP_PROTOTYPES )
 
-#define ENGINES_INPUT_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _input( int in_char, int16_t click_x, int16_t click_y, struct DSEKAI_STATE* state );
+#define ENGINES_INPUT_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _input( int in_char, struct RETROFLAT_INPUT* input, struct DSEKAI_STATE* state );
 
 ENGINE_TABLE( ENGINES_INPUT_PROTOTYPES )
 
