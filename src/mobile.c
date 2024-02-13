@@ -328,7 +328,7 @@ void mobile_deactivate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
    /* Zero out the mobile to avoid weirdness later, but keep
     * MOBILE_FLAG_NOT_LAST flag. */
-   memory_zero_ptr( (MEMORY_PTR)m, sizeof( struct MOBILE ) );
+   memory_zero_ptr( m, sizeof( struct MOBILE ) );
    m->flags |= MOBILE_FLAG_NOT_LAST;
 }
 
@@ -480,7 +480,6 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
    int16_t i = 0,
       match = 0;
    struct MOBILE* mobile_iter = NULL;
-   RESOURCE_ID sprite_id;
 
    if( !engines_state_lock( state ) ) {
       goto cleanup;     
@@ -529,20 +528,19 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
          TILEMAP_SPAWN_NAME_SZ );
       memory_strncpy_ptr(
          mobile_iter->sprite_name, state->tilemap->spawns[i].sprite_name,
-         RESOURCE_NAME_MAX );
+         RETROFLAT_PATH_MAX );
       if( MOBILE_FLAG_PLAYER != (state->tilemap->spawns[i].flags & MOBILE_FLAG_PLAYER) ) {
          /* The player is on all tilemaps, but other mobiles limited to one. */
          mobile_iter->map_gid = state->tilemap->gid;
       } else {
          /* Save player sprite for tilemap transitions. */
          memory_strncpy_ptr(
-            state->player_sprite_name, state->tilemap->spawns[i].sprite_name,
-            RESOURCE_NAME_MAX );
+            state->player_sprite_name,
+            state->tilemap->spawns[i].sprite_name,
+            RETROFLAT_PATH_MAX );
       }
-      resource_id_from_name( &sprite_id, state->tilemap->spawns[i].sprite_name,
-         RESOURCE_EXT_GRAPHICS );
-      mobile_iter->sprite_cache_id = graphics_cache_load_bitmap( 
-         sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+      mobile_iter->sprite_cache_id = retrogxc_load_bitmap(
+         state->tilemap->spawns[i].sprite_name );
    }
 
 cleanup:

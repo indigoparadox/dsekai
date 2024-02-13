@@ -21,17 +21,17 @@ void menu_renderer_main( struct DSEKAI_STATE* state ) {
    window_push(
       MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW,
       0,
-      SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W(), SCREEN_MAP_H(),
+      SCREEN_MAP_X(), SCREEN_MAP_Y(), SCREEN_MAP_W(), SCREEN_MAP_H(),
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
       0, NULL );
    
    while( '\0' != gc_menu_tokens[i][0] ) {
       if( state->menu.highlight_id == i ) {
          color = WINDOW_PREFAB_DEFAULT_HL();
-         flags = GRAPHICS_STRING_FLAG_ALL_CAPS | GRAPHICS_STRING_FLAG_OUTLINE;
+         flags = RETROFLAT_FLAGS_ALL_CAPS | RETROFLAT_FLAGS_OUTLINE;
       } else {
          color = WINDOW_PREFAB_DEFAULT_FG();
-         flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
+         flags = RETROFLAT_FLAGS_ALL_CAPS;
       }
 
       window_push(
@@ -92,7 +92,6 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       player_item_idx = 0;
    RETROFLAT_COLOR color;
    uint8_t flags = 0;
-   RESOURCE_ID sprite_id;
 
    if( !engines_state_lock( state ) ) {
       goto cleanup;
@@ -102,8 +101,8 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       /* Render the implicit use/craft/drop menu. */
       window_push(
          MENU_WINDOW_ITEM_SEL_ID, 0, WINDOW_TYPE_WINDOW, 0,
-         SCREEN_MAP_X + (SCREEN_MAP_W() / 2) + TILE_W,
-         SCREEN_MAP_Y + (SCREEN_MAP_H() / 2),
+         SCREEN_MAP_X() + (SCREEN_MAP_W() / 2) + TILE_W,
+         SCREEN_MAP_Y() + (SCREEN_MAP_H() / 2),
          (SCREEN_MAP_W() / 2) - TILE_W,
          SCREEN_MAP_H() / 2,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
@@ -115,10 +114,10 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          if( i == ((MENU_FLAG_ITEM_OPEN_SEL_MASK & state->menu.flags) - 1) ) {
             color = WINDOW_PREFAB_DEFAULT_HL();
             flags = 
-               GRAPHICS_STRING_FLAG_ALL_CAPS | GRAPHICS_STRING_FLAG_OUTLINE;
+               RETROFLAT_FLAGS_ALL_CAPS | RETROFLAT_FLAGS_OUTLINE;
          } else {
             color = WINDOW_PREFAB_DEFAULT_FG();
-            flags = GRAPHICS_STRING_FLAG_ALL_CAPS;
+            flags = RETROFLAT_FLAGS_ALL_CAPS;
          }
 
          window_push(
@@ -133,8 +132,8 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
 
    window_push(
       MENU_WINDOW_ID, 0, WINDOW_TYPE_WINDOW, 0,
-      SCREEN_MAP_X,
-      SCREEN_MAP_Y,
+      SCREEN_MAP_X(),
+      SCREEN_MAP_Y(),
       (SCREEN_MAP_W() / 2) + TILE_W,
       SCREEN_MAP_H(),
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
@@ -142,8 +141,8 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
 
    window_push(
       MENU_WINDOW_INFO_ID, 0, WINDOW_TYPE_WINDOW, 0,
-      SCREEN_MAP_X + (SCREEN_MAP_W() / 2) + TILE_W,
-      SCREEN_MAP_Y,
+      SCREEN_MAP_X() + (SCREEN_MAP_W() / 2) + TILE_W,
+      SCREEN_MAP_Y(),
       (SCREEN_MAP_W() / 2) - TILE_W,
       SCREEN_MAP_H() / 2,
       WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(), 0,
@@ -177,16 +176,14 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
 
       /* Make sure item sprite is loaded. */
       if( -1 == state->items[i].sprite_cache_id ) {
-         resource_id_from_name( &sprite_id, state->items[i].sprite_name,
-            RESOURCE_EXT_GRAPHICS );
-         state->items[i].sprite_cache_id = graphics_cache_load_bitmap(
-            sprite_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+         state->items[i].sprite_cache_id =
+            retrogxc_load_bitmap( state->items[i].sprite_name );
       }
 
       /* Highlight selected item. */
       if( state->menu.highlight_id == player_item_idx ) {
          color = WINDOW_PREFAB_DEFAULT_HL();
-         flags = GRAPHICS_STRING_FLAG_OUTLINE;
+         flags = RETROFLAT_FLAGS_OUTLINE;
 
          assert( 0 <= state->items[i].sprite_cache_id );
 
@@ -210,7 +207,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_PADDING_OUTSIDE, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          color, WINDOW_PREFAB_DEFAULT_BG(),
-         flags | GRAPHICS_STRING_FLAG_ALL_CAPS,
+         flags | RETROFLAT_FLAGS_ALL_CAPS,
          0, state->items[i].name );
 
       /* item count. */
@@ -234,7 +231,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
          WINDOW_PADDING_OUTSIDE, WINDOW_PLACEMENT_GRID_RIGHT_DOWN,
          WINDOW_PLACEMENT_CENTER, WINDOW_PLACEMENT_CENTER,
          WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG(),
-         GRAPHICS_STRING_FLAG_ALL_CAPS,
+         RETROFLAT_FLAGS_ALL_CAPS,
          0, 0, gc_menu_msgs[0], MENU_WINDOW_ID, state ); */
    }
 
