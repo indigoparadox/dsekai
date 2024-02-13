@@ -140,7 +140,7 @@ int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
 
    /* Reload player sprite since cache is gone. */
    state->player.sprite_cache_id =
-      retrogxc_load_bitmap( state->player_sprite_name );
+      retrogxc_load_bitmap( state->player_sprite_name, 0 );
    maug_cleanup_if_lt( state->player.sprite_cache_id, 0, "%d", -1 );
 
    /* Reload other mobile sprites if they're on this tilemap. */
@@ -153,7 +153,7 @@ int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
          continue;
       }
       state->mobiles[i].sprite_cache_id = retrogxc_load_bitmap(
-         state->mobiles[i].sprite_name );
+         state->mobiles[i].sprite_name, 0 );
       maug_cleanup_if_lt( state->mobiles[i].sprite_cache_id, 0, "%d", -1 );
    }
 
@@ -161,7 +161,7 @@ int16_t engines_warp_loop( MAUG_MHANDLE state_handle ) {
    debug_printf( 1, "resetting item sprite IDs..." );
    for( i = 0 ; state->items_sz > i ; i++ ) {
       state->items[i].sprite_cache_id = retrogxc_load_bitmap(
-         state->items[i].sprite_name );
+         state->items[i].sprite_name, 0 );
       maug_cleanup_if_lt( state->items[i].sprite_cache_id, 0, "%d", -1 );
    }
 

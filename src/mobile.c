@@ -540,7 +540,7 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
             RETROFLAT_PATH_MAX );
       }
       mobile_iter->sprite_cache_id = retrogxc_load_bitmap(
-         state->tilemap->spawns[i].sprite_name );
+         state->tilemap->spawns[i].sprite_name, 0 );
    }
 
 cleanup:

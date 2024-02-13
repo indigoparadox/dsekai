@@ -177,7 +177,7 @@ void menu_renderer_items( struct DSEKAI_STATE* state ) {
       /* Make sure item sprite is loaded. */
       if( -1 == state->items[i].sprite_cache_id ) {
          state->items[i].sprite_cache_id =
-            retrogxc_load_bitmap( state->items[i].sprite_name );
+            retrogxc_load_bitmap( state->items[i].sprite_name, 0 );
       }
 
       /* Highlight selected item. */
