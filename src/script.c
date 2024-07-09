@@ -48,7 +48,8 @@ uint16_t script_handle_SHAKE(
    struct DSEKAI_STATE* state
 ) {
 #ifndef NO_GUI
-   g_screen_flags |= (GRAPHICS_FLAG_SHAKING_MASK & arg);
+   /* TODO */
+   /* g_screen_flags |= (GRAPHICS_FLAG_SHAKING_MASK & arg); */
 #endif /* !NO_GUI */
    return pc + 1;
 }
@@ -272,8 +273,8 @@ uint16_t script_handle_WARP(
    script_trace_printf( 0, "mobile %u:%u warp requested to: %s", 
       actor->map_gid, actor->spawner_gid, warp_map );
 
-   memory_zero_ptr( (MEMORY_PTR)(state->warp_to), TILEMAP_NAME_MAX );
-   memory_strncpy_ptr( state->warp_to, warp_map, TILEMAP_NAME_MAX );
+   maug_mzero( state->warp_to, TILEMAP_NAME_MAX );
+   strncpy( state->warp_to, warp_map, TILEMAP_NAME_MAX );
 
    state->warp_to_y = mobile_stack_pop( actor );
    state->warp_to_x = mobile_stack_pop( actor );
@@ -556,7 +557,7 @@ uint16_t script_parse_str(
 #endif
 
 uint8_t script_init() {
-   memory_zero_ptr( (MEMORY_PTR)&g_script_globals, sizeof( g_script_globals ) );
+   maug_mzero( &g_script_globals, sizeof( g_script_globals ) );
    return 1;
 }
 

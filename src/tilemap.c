@@ -4,9 +4,9 @@
 
 #ifndef RESOURCE_FILE
 
-extern RES_CONST char gc_map_names[][TILEMAP_NAME_MAX];
-extern RES_CONST struct TILEMAP* gc_map_structs[];
-extern RES_CONST uint8_t gc_map_count;
+extern MAUG_CONST char gc_map_names[][TILEMAP_NAME_MAX];
+extern MAUG_CONST struct TILEMAP* gc_map_structs[];
+extern MAUG_CONST uint8_t gc_map_count;
 
 #endif /* !RESOURCE_FILE */
 
@@ -100,9 +100,11 @@ void tilemap_set_weather( uint8_t weather, struct TILEMAP* t ) {
    ) {
       debug_printf( 2, "current weather is snowy" );
 #ifndef DISABLE_WEATHER_EFFECTS
-      animate_create(
-         ANIMATE_TYPE_SNOW, ANIMATE_FLAG_WEATHER | ANIMATE_FLAG_FG,
-         SCREEN_MAP_X, SCREEN_MAP_Y, SCREEN_MAP_W, SCREEN_MAP_H );
+/* TODO
+      retroani_create(
+         RETROANI_TYPE_SNOW, ANIMATE_FLAG_WEATHER | ANIMATE_FLAG_FG,
+         SCREEN_MAP_X(), SCREEN_MAP_Y(), SCREEN_MAP_W(), SCREEN_MAP_H() );
+*/
 #endif /* !DISABLE_WEATHER_EFFECTS */
    } else {
       debug_printf( 2, "current weather is clear" );

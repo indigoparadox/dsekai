@@ -203,19 +203,17 @@ static void topdown_draw_crops(
       /* TODO: Handle curses/ascii. */
       crop_def = &(state->tilemap->crop_defs[crop_idx]);
       if( 0 > crop_def->sprite_cache_id ) {
-         resource_id_from_name( &plot_res_id, crop_def->sprite_name,
-            RESOURCE_EXT_GRAPHICS );
-         crop_def->sprite_cache_id = graphics_cache_load_bitmap(
-            plot_res_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
+         crop_def->sprite_cache_id = retrogxc_load_bitmap(
+            crop_def->sprite_name, 0 );
+         maug_cleanup_if_lt( crop_def->sprite_cache_id, 0, "%d", -1 );
       }
 
       crop_stage = (plot->flags & CROP_FLAG_STAGE_MASK);
 
       if( 0 < crop_stage ) {
          /* Crop has germinated. */
-         graphics_cache_blit_at(
-            /* For the instance, crops come after mobiles. */
-            crop_def->sprite_cache_id, DSEKAI_MOBILES_ONSCREEN + i,
+         retrogxc_blit_at(
+            crop_def->sprite_cache_id, NULL,
             (crop_stage - 1) * TILE_W, 0,
             plot_px, plot_py, TILE_W, TILE_H );
 

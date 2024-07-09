@@ -282,7 +282,7 @@ void mobile_execute( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
    } else if( SCRIPT_ARG_RANDOM == step->arg ) {
       /* Random arg. */
-      arg = graphics_get_random( 0, SCRIPT_STACK_MAX );
+      arg = retroflat_get_rand( 0, SCRIPT_STACK_MAX );
 
    } else if( SCRIPT_ARG_FOLLOW == step->arg ) {
       /* Pathfinding dir arg. */
@@ -328,7 +328,7 @@ void mobile_deactivate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
 
    /* Zero out the mobile to avoid weirdness later, but keep
     * MOBILE_FLAG_NOT_LAST flag. */
-   memory_zero_ptr( m, sizeof( struct MOBILE ) );
+   maug_mzero( m, sizeof( struct MOBILE ) );
    m->flags |= MOBILE_FLAG_NOT_LAST;
 }
 
@@ -487,7 +487,7 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
 
    for( i = 0 ; TILEMAP_SPAWNS_MAX > i ; i++ ) {
       /* If the spawner has no name, skip it. */
-      if( 0 == memory_strnlen_ptr(
+      if( 0 == strnlen(
          state->tilemap->spawns[i].name, TILEMAP_SPAWN_NAME_SZ )
       ) {
          continue;
@@ -523,18 +523,22 @@ void mobile_spawns( struct DSEKAI_STATE* state ) {
       mobile_iter->ascii = state->tilemap->spawns[i].ascii;
       mobile_iter->flags |= state->tilemap->spawns[i].flags;
       mobile_iter->spawner_gid = state->tilemap->spawns[i].gid;
-      memory_strncpy_ptr(
+      strncpy(
          mobile_iter->name, state->tilemap->spawns[i].name,
          TILEMAP_SPAWN_NAME_SZ );
-      memory_strncpy_ptr(
+      strncpy(
          mobile_iter->sprite_name, state->tilemap->spawns[i].sprite_name,
          RETROFLAT_PATH_MAX );
-      if( MOBILE_FLAG_PLAYER != (state->tilemap->spawns[i].flags & MOBILE_FLAG_PLAYER) ) {
-         /* The player is on all tilemaps, but other mobiles limited to one. */
+      if(
+         MOBILE_FLAG_PLAYER !=
+         (state->tilemap->spawns[i].flags & MOBILE_FLAG_PLAYER)
+      ) {
+         /* The player is on all tilemaps, but other mobiles limited to
+          * one. */
          mobile_iter->map_gid = state->tilemap->gid;
       } else {
          /* Save player sprite for tilemap transitions. */
-         memory_strncpy_ptr(
+         strncpy(
             state->player_sprite_name,
             state->tilemap->spawns[i].sprite_name,
             RETROFLAT_PATH_MAX );

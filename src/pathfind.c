@@ -3,6 +3,34 @@
 
 #include <stdlib.h> /* For abs() */
 
+static MERROR_RETVAL pathfind_list_append(
+   struct PATHFIND_NODE* list, size_t* p_list_sz,
+   struct PATHFIND_NODE* node
+) {
+   MERROR_RETVAL retval = MERROR_OK;
+
+   if( *p_list_sz + 1 >= PATHFIND_LIST_MAX ) {
+      retval = MERROR_OVERFLOW;
+   } else {
+      memcpy( &(list[*p_list_sz]), node, sizeof( struct PATHFIND_NODE ) );
+      (*p_list_sz)++;
+   }
+
+   return retval;
+}
+
+static void pathfind_list_remove(
+   struct PATHFIND_NODE* list, size_t* p_list_sz, size_t idx
+) {
+   assert( idx < *p_list_sz );
+   while( idx + 1 < *p_list_sz ) {
+      memcpy(
+         &(list[idx]), &(list[idx + 1]), sizeof( struct PATHFIND_NODE ) );
+      idx++;
+   }
+   (*p_list_sz)--;
+}
+
 /**
  * \return Index of the list node with the lowest total node cost.
  */
@@ -25,24 +53,25 @@ int8_t pathfind_list_lowest_f( struct PATHFIND_NODE* list, uint8_t list_sz ) {
 }
 
 static int8_t pathfind_list_test_add_child( 
-   struct PATHFIND_NODE* adjacent, uint8_t dir,
+   struct PATHFIND_NODE* p_adjacent, uint8_t dir,
    uint8_t iter_closed_idx,
    uint8_t tgt_x, uint8_t tgt_y,
-   struct PATHFIND_NODE* open, uint8_t* open_sz,
+   struct PATHFIND_NODE* open, size_t* p_open_sz,
    struct PATHFIND_NODE* closed, uint8_t closed_sz, uint8_t flags,
    struct DSEKAI_STATE* state
 ) {
    uint8_t i = 0,
       child_open_idx = 0;
-   int16_t a_x = adjacent->coords.x,
-      a_y = adjacent->coords.y;
+   int16_t a_x = p_adjacent->coords.x,
+      a_y = p_adjacent->coords.y;
+   MERROR_RETVAL retval = MERROR_OK;
 
    pathfind_trace_printf( 1, "> testing adjacent tile at %d, %d...",
-      adjacent->coords.x, adjacent->coords.y );
+      p_adjacent->coords.x, p_adjacent->coords.y );
    
    /* Make sure adjacent is not in the closed list. */
    for( i = 0 ; closed_sz > i ; i++ ) {
-      if( pathfind_cmp_eq( adjacent, &(closed[i]) ) ) {
+      if( pathfind_cmp_eq( p_adjacent, &(closed[i]) ) ) {
          pathfind_trace_printf( 1, ">> tile is already closed!" );
          return PATHFIND_ERROR_CLOSED;
       }
@@ -54,7 +83,7 @@ static int8_t pathfind_list_test_add_child(
          PATHFIND_FLAGS_TGT_OCCUPIED != (PATHFIND_FLAGS_TGT_OCCUPIED & flags) ||
          /* Target tile is occupied (e.g. we're pathfinding to another mobile),
           * so skip this check for it. */
-         (tgt_x != adjacent->coords.x && tgt_y != adjacent->coords.y)
+         (tgt_x != p_adjacent->coords.x && tgt_y != p_adjacent->coords.y)
       ) &&
       /* Otherwise check for occupied tile. */
       /* TODO: Make pathfind_test_dir() not need t */
@@ -77,30 +106,29 @@ static int8_t pathfind_list_test_add_child(
       closed[iter_closed_idx].coords.y,
       closed[iter_closed_idx].g );
 
-   adjacent->g = closed[iter_closed_idx].g + 1;
-   pathfind_trace_printf( 1, ">> tile distance is %d", adjacent->g );
+   p_adjacent->g = closed[iter_closed_idx].g + 1;
+   pathfind_trace_printf( 1, ">> tile distance is %d", p_adjacent->g );
    
    /* Use Manhattan heuristic since we can only move in 4 dirs. */
-   adjacent->h = abs( a_x - tgt_x ) + abs( a_y - tgt_y );
-   pathfind_trace_printf( 1, ">> tile heuristic is %d", adjacent->h );
+   p_adjacent->h = abs( a_x - tgt_x ) + abs( a_y - tgt_y );
+   pathfind_trace_printf( 1, ">> tile heuristic is %d", p_adjacent->h );
 
-   adjacent->f = adjacent->g + adjacent->h;
-   pathfind_trace_printf( 1, ">> tile cost is %d", adjacent->f );
+   p_adjacent->f = p_adjacent->g + p_adjacent->h;
+   pathfind_trace_printf( 1, ">> tile cost is %d", p_adjacent->f );
 
-   for( i = 0 ; *open_sz > i ; i++ ) {
+   for( i = 0 ; *p_open_sz > i ; i++ ) {
       /* Make sure adjacent is not already on the open list. */
-      if( pathfind_cmp_eq( adjacent, &(open[i]) ) ) {
+      if( pathfind_cmp_eq( p_adjacent, &(open[i]) ) ) {
          return PATHFIND_ERROR_FARTHER;
       }
    }
 
    /* Add the child to the list. */
    pathfind_trace_printf( 1, ">> adding tile to open list" );
-   dio_list_append(
-      adjacent, open, *open_sz, PATHFIND_LIST_MAX, struct PATHFIND_NODE );
-   if( 0 > g_dio_error ) {
+   retval = pathfind_list_append( open, p_open_sz, p_adjacent );
+   if( MERROR_OK != retval ) {
       pathfind_trace_printf( 1, ">> open list full!" );
-      return LIST_ERROR_MAX;
+      return MERROR_OVERFLOW;
    }
 
    return child_open_idx;
@@ -157,25 +185,24 @@ int8_t pathfind_start(
    struct PATHFIND_NODE open[PATHFIND_LIST_MAX];
    struct PATHFIND_NODE closed[PATHFIND_LIST_MAX];
    struct PATHFIND_NODE adjacent;
+   size_t open_sz = 0;
    uint8_t iter_idx = 0,
       closed_sz = 0,
-      open_sz = 0,
       tgt_reached = 0,
       i = 0;
-   int8_t retval = MOBILE_ERROR_BLOCKED;
+   MERROR_RETVAL retval = MOBILE_ERROR_BLOCKED;
 
    /* Zero out lists and nodes. */
-   memory_zero_ptr(
-      (MEMORY_PTR)open, sizeof( struct PATHFIND_NODE ) * PATHFIND_LIST_MAX );
-   memory_zero_ptr(
-      (MEMORY_PTR)closed, sizeof( struct PATHFIND_NODE ) * PATHFIND_LIST_MAX );
-   memory_zero_ptr( (MEMORY_PTR)&adjacent, sizeof( struct PATHFIND_NODE ) );
+   maug_mzero(
+      open, sizeof( struct PATHFIND_NODE ) * PATHFIND_LIST_MAX );
+   maug_mzero(
+      closed, sizeof( struct PATHFIND_NODE ) * PATHFIND_LIST_MAX );
+   maug_mzero( &adjacent, sizeof( struct PATHFIND_NODE ) );
    
    /* Add the start node to the open list. */
    adjacent.coords.x = mover->coords[1].x;
    adjacent.coords.y = mover->coords[1].y;
-   dio_list_append(
-      &adjacent, open, open_sz, PATHFIND_LIST_MAX, struct PATHFIND_NODE );
+   pathfind_list_append( open, &open_sz, &adjacent );
    
    pathfind_trace_printf( 1, "---BEGIN PATHFIND---" );
    pathfind_trace_printf( 1, "pathfinding to %d, %d...", tgt_x, tgt_y );
@@ -187,17 +214,17 @@ int8_t pathfind_start(
       pathfind_trace_printf( 1,
          "moving %d, %d to closed list idx %d and evaluating...",
          open[iter_idx].coords.x, open[iter_idx].coords.y, closed_sz );
-      memory_copy_ptr(
-         (MEMORY_PTR)&(closed[closed_sz]), (MEMORY_PTR)&(open[iter_idx]), 
+      memcpy(
+         &(closed[closed_sz]), &(open[iter_idx]), 
          sizeof( struct PATHFIND_NODE ) );
-      dio_list_remove( iter_idx, open, open_sz, struct PATHFIND_NODE );
+      pathfind_list_remove( open, &open_sz, iter_idx );
       iter_idx = closed_sz;
       closed_sz++;
       
       /* Validate closed list size. */
       if( closed_sz >= PATHFIND_LIST_MAX ) {
          pathfind_trace_printf( 1, "> pathfind stack exceeded" );
-         retval = LIST_ERROR_MAX;
+         retval = MERROR_OVERFLOW; 
          goto cleanup;
       }
 

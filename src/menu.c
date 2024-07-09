@@ -472,10 +472,12 @@ void menu_open( struct DSEKAI_STATE* state ) {
    state->menu.menu_id = 0;
    state->menu.highlight_id = 1;
    state->menu.flags |= MENU_FLAG_DIRTY;
-   state->menu.open_ms = graphics_get_ms();
+   state->menu.open_ms = retroflat_get_ms();
 
-   animate_pause( ANIMATE_FLAG_SCRIPT );
-   animate_pause( ANIMATE_FLAG_WEATHER );
+   retroani_pause(
+      state->animations, DSEKAI_ANIMATIONS_MAX, ANIMATE_FLAG_SCRIPT );
+   retroani_pause(
+      state->animations, DSEKAI_ANIMATIONS_MAX, ANIMATE_FLAG_WEATHER );
 }
 
 void menu_close( struct DSEKAI_STATE* state ) {
@@ -493,7 +495,7 @@ void menu_close( struct DSEKAI_STATE* state ) {
    state->menu.highlight_id = -1;
    tilemap_refresh_tiles( state->tilemap );
 
-   open_ms_diff = graphics_get_ms() - state->menu.open_ms;
+   open_ms_diff = retroflat_get_ms() - state->menu.open_ms;
 
    /* Bump up all crop cycles to compensate for menu time. */
    for( i = 0 ; state->crops_sz > i ; i++ ) {
@@ -513,8 +515,10 @@ void menu_close( struct DSEKAI_STATE* state ) {
       state->crops[i].next_at_ticks += open_ms_diff;
    }
 
-   animate_resume( ANIMATE_FLAG_SCRIPT );
-   animate_resume( ANIMATE_FLAG_WEATHER );
+   retroani_resume(
+      state->animations, DSEKAI_ANIMATIONS_MAX, ANIMATE_FLAG_SCRIPT );
+   retroani_resume(
+      state->animations, DSEKAI_ANIMATIONS_MAX, ANIMATE_FLAG_WEATHER );
 
 cleanup:
    return;
