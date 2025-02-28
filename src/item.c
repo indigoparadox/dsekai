@@ -100,6 +100,7 @@ int8_t item_use_food(
 
    dio_snprintf( num_str, 10, "+%d", food_val );
 
+#if defined( DEPTH_VGA ) || defined( DEPTH_CGA )
 #ifndef NO_ANIMATE
    anim_idx = animate_create(
       ANIMATE_TYPE_STRING, ANIMATE_FLAG_FG, user->screen_px, user->screen_py,
@@ -113,6 +114,7 @@ int8_t item_use_food(
 #  endif /* DEPTH_VGA */
    );
 #endif /* !NO_ANIMATE */
+#endif /* DEPTH_VGA || DEPTH_CGA */
 
 cleanup:
 
