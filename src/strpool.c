@@ -13,7 +13,7 @@ int16_t strpool_get_sz( const char* str_in ) {
 
 void strpool_init( char* strpool, int16_t strpool_sz ) {
 
-   memory_zero_ptr( strpool, strpool_sz );
+   maug_mzero( strpool, strpool_sz );
    strpool[0] = ((strpool_sz - 2) & 0xff);
    strpool[1] = (((strpool_sz - 2) >> 8) & 0xff);
    debug_printf( 3, "strpool initialized as %d bytes", strpool_sz );
@@ -44,7 +44,7 @@ int16_t strpool_add_string( char* strpool, char* string, int16_t string_sz ) {
    /* Store LSB first so zeros are easier to detect. */
    strpool[i] = ((string_sz + 1) & 0xff);
    strpool[i + 1] = (((string_sz + 1) >> 8) & 0xff);
-   memory_copy_ptr( &(strpool[i + 2]), string, string_sz );
+   memcpy( &(strpool[i + 2]), string, string_sz );
 
    return i;
 }

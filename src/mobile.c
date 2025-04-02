@@ -110,6 +110,7 @@ void mobile_state_animate( struct DSEKAI_STATE* state ) {
    }
 }
 
+#if 0
 void mobile_stack_push( struct MOBILE* m, int8_t v ) {
    int16_t i = 0;
 
@@ -320,6 +321,7 @@ cleanup:
       maug_munlock( state->map_handle, t );
    }
 }
+#endif
 
 void mobile_deactivate( struct MOBILE* m, struct DSEKAI_STATE* state ) {
    

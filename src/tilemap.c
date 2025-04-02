@@ -11,53 +11,28 @@ extern MAUG_CONST uint8_t gc_map_count;
 #endif /* !RESOURCE_FILE */
 
 int16_t tilemap_load( const char* map_name, struct TILEMAP* t ) {
-   int16_t map_retval = 0,
+   int16_t retval = 0,
       i = 0;
-#ifdef RESOURCE_FILE
-   char map_load_path[RESOURCE_PATH_MAX];
-#else
-   int8_t map_name_sz = 0;
-#endif /* RESOURCE_FILE */
-   RESOURCE_ID ts_id;
+   retroflat_asset_path map_load_path;
 
    /* TODO: Work this into resource API in a modular fashion. */
-#if defined( RESOURCE_FILE ) || defined( RESOURCE_WASM )
 #  ifdef TILEMAP_FMT_JSON
-   memory_zero_ptr( (MEMORY_PTR)map_load_path, TILEMAP_NAME_MAX );
-   dio_snprintf(
-      map_load_path,
-      RESOURCE_PATH_MAX,
-      ASSETS_PATH "m_%s.json", map_name );
-   map_retval = tilemap_json_load( map_load_path, t );
+   maug_mzero( map_load_path, RETROFLAT_PATH_MAX );
+   maug_snprintf(
+      map_load_path, RETROFLAT_PATH_MAX,
+      "m_%s.json", map_name );
+   retval = tilemap_json_load( map_load_path, t );
 #  elif defined TILEMAP_FMT_ASN
    dio_snprintf(
-      map_load_path,
-      RESOURCE_PATH_MAX,
-      ASSETS_PATH "m_%s.asn", map_name );
-   map_retval = tilemap_asn_load_res( map_load_path, t );
+      map_load_path, RETROFLAT_PATH_MAX,
+      "m_%s.asn", map_name );
+   retval = tilemap_asn_load_res( map_load_path, t );
 #  else
    /* Can't load a map for the engine; we're probably in map2asn. */
-   map_retval = 0;
+   retval = 0;
 #  endif
 
-#else
-   map_name_sz = memory_strnlen_ptr( map_name, TILEMAP_NAME_MAX );
-   debug_printf( 2, "attempting to open tilemap: %s (%d chars)",
-      map_name, map_name_sz );
-   debug_printf( 1, "looping through %d tilemaps...", gc_map_count );
-   for( i = 0 ; gc_map_count > i ; i++ ) {
-      if( 0 == memory_strncmp_ptr( gc_map_names[i], map_name, map_name_sz ) ) {
-         debug_printf( 1, "gc_map_%s vs %s", gc_map_names[i], map_name );
-         memory_copy_ptr( (MEMORY_PTR)t, (MEMORY_PTR)gc_map_structs[i],
-            sizeof( struct TILEMAP ) );
-         map_retval = 1;
-         break;
-      }
-   }
-
-#endif /* RESOURCE_FILE */
-
-   if( 0 >= map_retval ) {
+   if( 0 >= retval ) {
       goto cleanup;
    }
 
@@ -71,15 +46,14 @@ int16_t tilemap_load( const char* map_name, struct TILEMAP* t ) {
       }
 
       debug_printf( 2, "preloading tile %d image...", i );
-      resource_id_from_name( &ts_id, t->tileset[i].image_name,
-         RESOURCE_EXT_GRAPHICS );
-      t->tileset[i].image_cache_id = graphics_cache_load_bitmap(
-         ts_id, GRAPHICS_BMP_FLAG_TYPE_TILE );
+      t->tileset[i].image_cache_id = retrogxc_load_bitmap(
+         t->tileset[i].image_name, 0 );
+      maug_cleanup_if_lt( t->tileset[i].image_cache_id, 0, "%d", -1 );
    }
 
 cleanup:
 
-   return map_retval;
+   return retval;
 }
 
 void tilemap_refresh_tiles( struct TILEMAP* t ) {

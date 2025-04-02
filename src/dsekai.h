@@ -16,6 +16,10 @@
 
 #define SECTION_WINDOW
 
+#define DSEKAI_MOBILES_INSTANCE 0
+#define DSEKAI_CROPS_INSTANCE 50
+#define DSEKAI_ITEMS_INSTANCE 100
+
 /**
  * \relates ANIMATION
  * \brief Indicates that an animation is behind tiles.
@@ -88,12 +92,6 @@ struct GRAPHICS_RECT {
 #include "tmstruct.h"
 
 #include "strpool.h"
-
-#include "script.h"
-
-#ifndef NO_SCRIPT_COMPILER
-#include "scparse.h"
-#endif /* !NO_SCRIPT_COMPILER */
 
 #include "tilemap.h"
 #include "mobile.h"

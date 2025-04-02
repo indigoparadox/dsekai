@@ -4,6 +4,7 @@
 #define RETROFLT_C
 #define MAUG_C
 #define RETROGXC_C
+#define RETROANI_C
 
 #include "dsekai.h"
 
@@ -65,6 +66,7 @@ int unilayer_main( int argc, char* argv[] ) {
 
    engines_draw_loading_screen();
 
+#if 0
    if( !window_init(
       SCREEN_MAP_X(), SCREEN_MAP_Y(), SCREEN_MAP_W(), SCREEN_MAP_H() )
    ) {
@@ -72,12 +74,15 @@ int unilayer_main( int argc, char* argv[] ) {
       error_printf( "unable to initialize GUI" );
       goto cleanup;
    }
+#endif
 
+#if 0
    if( !script_init() ) {
       error_printf( "unable to initialize scripts" );
       retval = 1;
       goto cleanup;
    }
+#endif
 
    /* Setup the engine state. */
 
@@ -151,8 +156,10 @@ int unilayer_main( int argc, char* argv[] ) {
 
    maug_mfree( g_state_handle );
 
+#if 0
    window_shutdown();
    script_shutdown();
+#endif
    retroflat_shutdown( retval );
    logging_shutdown();
  

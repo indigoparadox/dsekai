@@ -195,7 +195,7 @@ void engines_animate_mobiles( struct DSEKAI_STATE* state ) {
       if( !mobile_is_active( &(state->mobiles[i]) ) ) {
          continue;
       }
-      mobile_execute( &(state->mobiles[i]), state );
+      /* mobile_execute( &(state->mobiles[i]), state ); */
    }
    profiler_incr( script_mobiles );
 
@@ -225,6 +225,7 @@ int8_t engines_input_movement(
       goto cleanup;     
    }
 
+#if 0
    if(
       ( 0 < window_modal() ) ||
       (DSEKAI_FLAG_INPUT_BLOCKED ==
@@ -234,6 +235,7 @@ int8_t engines_input_movement(
       dir_move = -1;
       goto cleanup;
    }
+#endif
 
    /* Face requested dir even if we're blocked. */
    mobile_set_dir( &(state->player), dir_move );
@@ -322,7 +324,7 @@ void engines_loop_iter( MAUG_MHANDLE state_handle ) {
 #endif /* !NO_DRAW_ENGINE_BEHIND_MENU */
 
          /* Show the new menu state. */
-         gc_menu_renderers[state->menu.menu_id]( state );
+         /* gc_menu_renderers[state->menu.menu_id]( state ); */
          state->menu.flags &= ~MENU_FLAG_DIRTY;
       }
 
@@ -331,9 +333,9 @@ void engines_loop_iter( MAUG_MHANDLE state_handle ) {
 
    } else {
       /* Draw the engine. */
-      if( 0 == window_modal() ) {
+      /* if( 0 == window_modal() ) { */
          gc_engines_draw[state->engine_type]( state );
-      }
+      /* } */
 
       profiler_incr( draw_engine );
       profiler_set();
@@ -341,7 +343,7 @@ void engines_loop_iter( MAUG_MHANDLE state_handle ) {
 
    /* TODO: Pause weather animations before drawing dialogs. */
 
-   window_draw_all();
+   /* window_draw_all(); */
 
    profiler_incr( draw_windows );
    profiler_set();
@@ -372,9 +374,10 @@ void engines_loop_iter( MAUG_MHANDLE state_handle ) {
    if( RETROFLAT_KEY_ESC == in_char ) {
       retval = 0;
 
+#if 0
    } else if( 0 <= state->menu.menu_id && 0 != in_char ) {
-      retval = gc_menu_handlers[state->menu.menu_id](
-         in_char, &input, state );
+      /* retval = gc_menu_handlers[state->menu.menu_id](
+         in_char, &input, state ); */
    
    } else if(
       /* Only open the menu if no modal windows are open and it's not
@@ -387,7 +390,7 @@ void engines_loop_iter( MAUG_MHANDLE state_handle ) {
       if( !state->engine_type ) {
          retval = 0;
       } else {
-         menu_open( state );
+         /* menu_open( state ); */
       }
 
    } else if( 0 == window_modal() && 0 != in_char ) {
@@ -399,6 +402,7 @@ void engines_loop_iter( MAUG_MHANDLE state_handle ) {
       debug_printf( 1, "speech window requests closed by user" );
       window_pop( WINDOW_ID_SCRIPT_SPEAK );
       tilemap_refresh_tiles( state->tilemap );
+#endif
    }
 
    /* === Animation Phase === */

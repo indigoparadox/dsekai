@@ -441,7 +441,7 @@ uint8_t engines_state_unlock( struct DSEKAI_STATE* state );
 /* \brief Pause scripts if modal window is pending, screen is scrolling, menu
  *        is open, etc.
  */
-#define engines_active( state ) (0 == window_modal() && DSEKAI_FLAG_INPUT_BLOCKED != (DSEKAI_FLAG_INPUT_BLOCKED & (state)->flags) && 0 > (state)->menu.menu_id)
+#define engines_active( state ) (DSEKAI_FLAG_INPUT_BLOCKED != (DSEKAI_FLAG_INPUT_BLOCKED & (state)->flags) && 0 > (state)->menu.menu_id)
 
 /**
  * \brief Sets up the current engine (allocates specific state, etc).
@@ -475,7 +475,7 @@ typedef void (*ENGINES_DRAW)( struct DSEKAI_STATE* state );
 
 ENGINE_TABLE( ENGINES_SETUP_PROTOTYPES )
 
-#define ENGINES_INPUT_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _input( int in_char, struct RETROFLAT_INPUT* input, struct DSEKAI_STATE* state );
+#define ENGINES_INPUT_PROTOTYPES( idx, eng, prefix ) int16_t prefix ## _input( struct RETROFLAT_INPUT* in_evt, RETROFLAT_IN_KEY in_char, struct DSEKAI_STATE* state );
 
 ENGINE_TABLE( ENGINES_INPUT_PROTOTYPES )
 

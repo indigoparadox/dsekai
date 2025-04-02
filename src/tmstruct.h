@@ -24,9 +24,9 @@
 #define TILEMAP_TILESETS_MAX 12
 #define TILEMAP_SPAWN_NAME_SZ 12
 /*! \brief Screen width in tiles. */
-#define SCREEN_TW (SCREEN_MAP_W / TILE_W)
+#define SCREEN_TW (SCREEN_MAP_W() / TILE_W)
 /*! \brief Screen height in tiles. */
-#define SCREEN_TH (SCREEN_MAP_H / TILE_H)
+#define SCREEN_TH (SCREEN_MAP_H() / TILE_H)
 #define TILEMAP_TS ((TILEMAP_TH * TILEMAP_TW) / 2)
 
 /*! \brief X/Y coordinates of a tile on the current map. */

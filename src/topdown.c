@@ -65,7 +65,7 @@ void topdown_draw_tilemap(
             ) {
                /* Black out the block. */
                graphics_clear_block(
-                  SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
+                  SCREEN_MAP_X() + tile_px, SCREEN_MAP_Y() + tile_py,
                   TILE_W, TILE_H );
                continue;
 
@@ -79,18 +79,18 @@ void topdown_draw_tilemap(
 
 #ifndef NO_ANIMATE
          /* Mark as dirty any on-screen tiles under an animation. */
-         for( i = 0 ; ANIMATE_ANIMATIONS_MAX > i ; i++ ) {
+         for( i = 0 ; DSEKAI_ANIMATIONS_MAX > i ; i++ ) {
 
             if(
-               ANIMATE_FLAG_ACTIVE ==
-                  (g_animations[i].flags & ANIMATE_FLAG_ACTIVE) &&
-               (g_animations[i].x - SCREEN_MAP_X)
+               RETROANI_FLAG_ACTIVE ==
+                  (state->animations[i].flags & RETROANI_FLAG_ACTIVE) &&
+               (state->animations[i].x - SCREEN_MAP_X())
                   <= tile_px &&
-               (g_animations[i].x - SCREEN_MAP_X) + g_animations[i].w
+               (state->animations[i].x - SCREEN_MAP_X()) + state->animations[i].w
                   > tile_px &&
-               (g_animations[i].y - SCREEN_MAP_Y)
+               (state->animations[i].y - SCREEN_MAP_Y())
                   <= tile_py &&
-               (g_animations[i].y - SCREEN_MAP_Y) + g_animations[i].h
+               (state->animations[i].y - SCREEN_MAP_Y()) + state->animations[i].h
                   > tile_py
             ) {
                tilemap_set_dirty( x, y, state->tilemap );
@@ -123,12 +123,12 @@ void topdown_draw_tilemap(
          /* debug_printf( 3, "redraw tile %d, %d", tile_px, tile_py ); */
          
          /* Blit the tile. */
-         graphics_cache_blit_at(
+         retrogxc_blit_bitmap(
+            NULL,
             tilemap_tile_get_image( &(state->tilemap->tileset[tile_id]) ),
-            GRAPHICS_INSTANCE_TILEMAP,
             0, 0,
-            SCREEN_MAP_X + tile_px, SCREEN_MAP_Y + tile_py,
-            TILE_W, TILE_H );
+            SCREEN_MAP_X() + tile_px, SCREEN_MAP_Y() + tile_py,
+            TILE_W, TILE_H, RETROFLAT_INSTANCE_NULL );
       }
    }
 
@@ -140,6 +140,7 @@ cleanup:
 static void topdown_draw_crops(
    struct DSEKAI_STATE* state, struct TOPDOWN_STATE* gstate
 ) {
+   MERROR_RETVAL retval = MERROR_OK;
    int16_t i = 0,
       crop_idx = 0;
    struct CROP_PLOT* plot = NULL;
@@ -148,7 +149,6 @@ static void topdown_draw_crops(
       plot_py = 0;
    uint8_t crop_stage = 0;
    struct CROP_DEF* crop_def = NULL;
-   RESOURCE_ID plot_res_id;
 
    if( !engines_state_lock( state ) ) {
       goto cleanup;     
@@ -176,20 +176,19 @@ static void topdown_draw_crops(
       }
 
       plot_px =
-         SCREEN_MAP_X + ((plot->coords.x * TILE_W) - gstate->screen_scroll_x);
+         SCREEN_MAP_X() + ((plot->coords.x * TILE_W) - gstate->screen_scroll_x);
       plot_py =
-         SCREEN_MAP_Y + ((plot->coords.y * TILE_H) - gstate->screen_scroll_y);
+         SCREEN_MAP_Y() + ((plot->coords.y * TILE_H) - gstate->screen_scroll_y);
 
-      resource_id_from_name( &plot_res_id, CROP_STATIC_SPRITE_PLOT,
-         RESOURCE_EXT_GRAPHICS );
-      plot_gfx = graphics_cache_load_bitmap(
-         plot_res_id, GRAPHICS_BMP_FLAG_TYPE_TILE );
+      plot_gfx = retrogxc_load_bitmap( CROP_STATIC_SPRITE_PLOT, 0 );
+      maug_cleanup_if_lt( plot_gfx, 0, "%d", -1 );
 
       assert( 0 < plot_gfx );
 
-      graphics_cache_blit_at(
-         plot_gfx, DSEKAI_MOBILES_ONSCREEN + i,
-         0, 0, plot_px, plot_py, TILE_W, TILE_H );
+      retrogxc_blit_bitmap(
+         NULL, plot_gfx,
+         0, 0, plot_px, plot_py, TILE_W, TILE_H,
+         DSEKAI_CROPS_INSTANCE + i );
 
       /* Skip drawing crop if none planted or it hasn't germinated. */
       if(
@@ -212,25 +211,31 @@ static void topdown_draw_crops(
 
       if( 0 < crop_stage ) {
          /* Crop has germinated. */
-         retrogxc_blit_at(
-            crop_def->sprite_cache_id, NULL,
+         retrogxc_blit_bitmap(
+            NULL, crop_def->sprite_cache_id,
             (crop_stage - 1) * TILE_W, 0,
-            plot_px, plot_py, TILE_W, TILE_H );
+            plot_px, plot_py, TILE_W, TILE_H,
+            DSEKAI_CROPS_INSTANCE + i );
 
       } else {
          /* Crop is still seeds. */
-         resource_id_from_name( &plot_res_id, CROP_STATIC_SPRITE_SEED,
-            RESOURCE_EXT_GRAPHICS );
-         plot_gfx = graphics_cache_load_bitmap(
-            plot_res_id, GRAPHICS_BMP_FLAG_TYPE_SPRITE );
-         graphics_cache_blit_at(
+         plot_gfx = retrogxc_load_bitmap( CROP_STATIC_SPRITE_SEED, 0 );
+         maug_cleanup_if_lt( plot_gfx, 0, "%d", -1 );
+
+         retrogxc_blit_bitmap(
+            NULL, plot_gfx,
+            0, 0, plot_px, plot_py, TILE_W, TILE_H,
             /* For the instance, crops come after mobiles. */
-            plot_gfx, DSEKAI_MOBILES_ONSCREEN + i,
-            0, 0, plot_px, plot_py, TILE_W, TILE_H );
+            DSEKAI_CROPS_INSTANCE + i );
       }
    }
 
 cleanup:
+
+   if( MERROR_OK != retval ) {
+      /* TODO: Handle! */
+   }
+
    return;
 }
 
@@ -269,9 +274,9 @@ static void topdown_draw_mobile(
    }
 
    m->screen_px = 
-      SCREEN_MAP_X + (m->coords[1].x * SPRITE_W) - gstate->screen_scroll_x;
+      SCREEN_MAP_X() + (m->coords[1].x * SPRITE_W) - gstate->screen_scroll_x;
    m->screen_py =
-      SCREEN_MAP_Y + (m->coords[1].y * SPRITE_H) - gstate->screen_scroll_y;
+      SCREEN_MAP_Y() + (m->coords[1].y * SPRITE_H) - gstate->screen_scroll_y;
 
    /* Figure out direction to offset steps in. */
    if( m->coords[0].x > m->coords[1].x ) {
@@ -288,10 +293,11 @@ static void topdown_draw_mobile(
    }
 
    /* Blit the mobile's current sprite/frame. */
-   graphics_cache_blit_at(
-      mobile_get_sprite( m ),
-      *p_onscreen_mobs, state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
-      m->screen_px, m->screen_py, SPRITE_W, SPRITE_H );
+   retrogxc_blit_bitmap(
+      NULL, mobile_get_sprite( m ),
+      state->ani_sprite_x, mobile_get_dir( m ) * SPRITE_H,
+      m->screen_px, m->screen_py, SPRITE_W, SPRITE_H,
+      DSEKAI_MOBILES_INSTANCE + *p_onscreen_mobs );
 
    /* Mobile is on-screen. */
    (*p_onscreen_mobs)++;
@@ -332,17 +338,16 @@ void topdown_draw_items(
          continue;
       }
 
-      item_px = SCREEN_MAP_X + ((state->items[i].x * TILE_W) -
+      item_px = SCREEN_MAP_X() + ((state->items[i].x * TILE_W) -
             gstate->screen_scroll_x);
-      item_py = SCREEN_MAP_Y + ((state->items[i].y * TILE_H) -
+      item_py = SCREEN_MAP_Y() + ((state->items[i].y * TILE_H) -
             gstate->screen_scroll_y);
 
-      graphics_cache_blit_at(
-         /* TODO: Handle curses/ascii. */
-         state->items[i].sprite_cache_id,
+      retrogxc_blit_bitmap(
+         NULL, state->items[i].sprite_cache_id,
          /* For the instance, items come after mobiles and crops. */
-         DSEKAI_MOBILES_ONSCREEN + DSEKAI_CROPS_ONSCREEN + i,
-         0, 0, item_px, item_py, SPRITE_W, SPRITE_H );
+         0, 0, item_px, item_py, SPRITE_W, SPRITE_H,
+         DSEKAI_ITEMS_INSTANCE + i );
 
    }
 
@@ -394,12 +399,12 @@ static void topdown_focus_player(
    player_x_px = state->player.coords[1].x * TILE_W;
    player_y_px = state->player.coords[1].y * TILE_H;
 
-   gstate->screen_scroll_x_tgt = (player_x_px / SCREEN_MAP_W) * SCREEN_MAP_W;
-   gstate->screen_scroll_x = (player_x_px / SCREEN_MAP_W) * SCREEN_MAP_W;
+   gstate->screen_scroll_x_tgt = (player_x_px / SCREEN_MAP_W()) * SCREEN_MAP_W();
+   gstate->screen_scroll_x = (player_x_px / SCREEN_MAP_W()) * SCREEN_MAP_W();
    gstate->screen_scroll_tx = gstate->screen_scroll_x / TILE_W;
 
-   gstate->screen_scroll_y_tgt = (player_y_px / SCREEN_MAP_H) * SCREEN_MAP_H;
-   gstate->screen_scroll_y = (player_y_px / SCREEN_MAP_H) * SCREEN_MAP_H;
+   gstate->screen_scroll_y_tgt = (player_y_px / SCREEN_MAP_H()) * SCREEN_MAP_H();
+   gstate->screen_scroll_y = (player_y_px / SCREEN_MAP_H()) * SCREEN_MAP_H();
    gstate->screen_scroll_ty = gstate->screen_scroll_y / TILE_H;
 
    debug_printf( 2, "player x, y: %d, %d (%d, %d)", 
@@ -428,7 +433,7 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
       state->player.coords[1].x >=
          gstate->screen_scroll_tx + SCREEN_TW
    ) {
-      gstate->screen_scroll_x_tgt = gstate->screen_scroll_x + SCREEN_MAP_W;
+      gstate->screen_scroll_x_tgt = gstate->screen_scroll_x + SCREEN_MAP_W();
       debug_printf( 2, "scrolling screen right to %d, %d...",
          gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
 
@@ -436,21 +441,21 @@ void topdown_animate( struct DSEKAI_STATE* state ) {
       state->player.coords[1].y >=
          gstate->screen_scroll_ty + SCREEN_TH
    ) {
-      gstate->screen_scroll_y_tgt = gstate->screen_scroll_y + SCREEN_MAP_H;
+      gstate->screen_scroll_y_tgt = gstate->screen_scroll_y + SCREEN_MAP_H();
       debug_printf( 2, "scrolling screen down to %d, %d...",
          gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
 
    } else if(
       state->player.coords[1].x < gstate->screen_scroll_tx
    ) {
-      gstate->screen_scroll_x_tgt = gstate->screen_scroll_x - SCREEN_MAP_W;
+      gstate->screen_scroll_x_tgt = gstate->screen_scroll_x - SCREEN_MAP_W();
       debug_printf( 2, "scrolling screen left to %d, %d...",
          gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
 
    } else if(
       state->player.coords[1].y < gstate->screen_scroll_ty
    ) {
-      gstate->screen_scroll_y_tgt = gstate->screen_scroll_y - SCREEN_MAP_H;
+      gstate->screen_scroll_y_tgt = gstate->screen_scroll_y - SCREEN_MAP_H();
       debug_printf( 2, "scrolling screen up to %d, %d...",
          gstate->screen_scroll_x_tgt, gstate->screen_scroll_y_tgt );
    }
@@ -527,7 +532,7 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
 
    /* Allocate engine-specific state. */
    assert( (MAUG_MHANDLE)NULL == state->engine_state_handle );
-   state->engine_state_handle = memory_alloc(
+   state->engine_state_handle = maug_malloc(
          sizeof( struct TOPDOWN_STATE ), 1 );
    if( (MAUG_MHANDLE)NULL == state->engine_state_handle ) {
       error_printf( "unable to allocate engine state!" );
@@ -548,12 +553,15 @@ int16_t topdown_setup( struct DSEKAI_STATE* state ) {
    tilemap_refresh_tiles( state->tilemap );
    topdown_draw_tilemap( state, gstate );
 
+   /* TODO: Reimplement in maug. */
+#if 0
    /* Show status window. */
    window_push(
       WINDOW_ID_STATUS, 0, WINDOW_TYPE_WINDOW, 0,
       0, SCREEN_MAP_Y + SCREEN_MAP_H, STATUS_WINDOW_W, STATUS_WINDOW_H,
       GRAPHICS_COLOR_WHITE, GRAPHICS_COLOR_BLACK, 0,
       0, NULL );
+#endif
 
    /* Force reset the weather to start the animation. */
    tilemap_set_weather(
@@ -577,12 +585,12 @@ cleanup:
 
 void topdown_shutdown( struct DSEKAI_STATE* state ) {
    debug_printf( 3, "shutting down topdown engine..." );
-   window_pop( WINDOW_ID_STATUS );
+   /* window_pop( WINDOW_ID_STATUS ); */
    profiler_print( "TOPDOWN" );
 }
 
 int16_t topdown_input(
-   INPUT_VAL in_char, int16_t click_x, int16_t click_y,
+   struct RETROFLAT_INPUT* input_evt, RETROFLAT_IN_KEY in_char,
    struct DSEKAI_STATE* state
 ) {
    int16_t retval = 1;
@@ -601,7 +609,7 @@ int16_t topdown_input(
       goto cleanup;
    }
 
-   if( g_input_key_up == in_char ) {
+   if( RETROFLAT_KEY_UP == in_char ) {
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.y--;
@@ -617,7 +625,7 @@ int16_t topdown_input(
       }
 #endif /* !NO_ENGINE_EDITOR */
 
-   } else if( g_input_key_left == in_char ) {
+   } else if( RETROFLAT_KEY_LEFT == in_char ) {
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.x--;
@@ -633,7 +641,7 @@ int16_t topdown_input(
       }
 #endif /* !NO_ENGINE_EDITOR */
 
-   } else if( g_input_key_down == in_char ) {
+   } else if( RETROFLAT_KEY_DOWN == in_char ) {
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.y++;
@@ -649,7 +657,7 @@ int16_t topdown_input(
       }
 #endif /* !NO_ENGINE_EDITOR */
 
-   } else if( g_input_key_right == in_char ) {
+   } else if( RETROFLAT_KEY_RIGHT == in_char ) {
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          state->editor.coords.x++;
@@ -665,6 +673,8 @@ int16_t topdown_input(
       }
 #endif /* !NO_ENGINE_EDITOR */
 
+   /* TODO: Reimplement in maug. */
+#if 0
    } else if( INPUT_CLICK == in_char ) {
       debug_printf( 0, "trying to move to %d, %d...", click_x, click_y );
 
@@ -682,8 +692,9 @@ int16_t topdown_input(
       } else {
          mobile_walk_start( &(state->player), pathfind_dir );
       }
+#endif
 
-   } else if( g_input_key_ok == in_char ) {
+   } else if( RETROFLAT_KEY_ENTER == in_char ) {
 #ifndef NO_ENGINE_EDITOR
       if( EDITOR_FLAG_ACTIVE == (EDITOR_FLAG_ACTIVE & state->editor.flags) ) {
          tilemap_advance_tile_id( state->tilemap,
@@ -700,13 +711,19 @@ int16_t topdown_input(
          /* Try to harvest facing crop plot. */
 
          if( 0 == plot->crop_gid ) {
+         /* TODO: Implement in maug. */
+#if 0
             window_prefab_system_dialog(
                "There is no crop\ngrowing here!",
                WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
+#endif
          } else if( CROP_STAGE_MAX > (CROP_FLAG_STAGE_MASK & plot->flags) ) {
+         /* TODO: Implement in maug. */
+#if 0
             window_prefab_system_dialog(
                "This crop is\nnot ready!",
                WINDOW_PREFAB_DEFAULT_FG(), WINDOW_PREFAB_DEFAULT_BG() );
+#endif
          } else {
             crop_harvest( MOBILE_GID_PLAYER, plot, state );
          }
@@ -720,11 +737,11 @@ int16_t topdown_input(
             MOBILE_GID_PLAYER, state );
 
          /* Try to interact with facing mobile. */
-         mobile_interact(
+         /* mobile_interact(
             &(state->player),
             mobile_get_facing( state->player.coords[1].x, state->player.coords[1].y,
                mobile_get_dir( &(state->player) ), state ),
-            state );
+            state ); */
 #ifndef NO_ENGINE_EDITOR
       }
 #endif /* !NO_ENGINE_EDITOR */
