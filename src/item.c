@@ -322,6 +322,7 @@ int16_t item_stack_or_add(
    }
 
    /* Find the item definition with the given GID in tilemap item templates. */
+   /* TODO: Should we be checking TILEMAP_ITEMS_MAX or something here? */
    for( i = 0 ; state->items_sz > i ; i++ ) {
       item_break_if_last( state->tilemap->item_defs, i );
       if(
