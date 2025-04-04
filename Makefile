@@ -3,7 +3,7 @@
 
 VDP=1
 #WING=1
-C_FILES := src/crop.c src/engines.c src/item.c src/main.c src/mobile.c src/pathfind.c src/strpool.c src/tilemap.c src/title.c src/topdown.c
+C_FILES := src/crop.c src/engines.c src/item.c src/main.c src/mobile.c src/pathfind.c src/strpool.c src/title.c src/topdown.c
 #src/menu.c
 GLOBAL_DEFINES += -DENTRY_MAP=\"field\"
 GLOBAL_DEFINES += -DNO_ENGINE_POV
@@ -41,7 +41,7 @@ $(eval $(call TGTDOSCGA,dsekai))
 
 # Win386
 
-$(eval $(call TGTWINICO,dsekai))
+#$(eval $(call TGTWINICO,dsekai))
 
 $(eval $(call TGTWIN386,dsekai))
 
@@ -60,6 +60,10 @@ $(eval $(call TGTOS2SDL,dsekai))
 # Mac
 
 $(eval $(call TGTMAC6GCC,dsekai))
+
+# Windows CE
+
+$(eval $(call TGT_CECL_WINCE_SH3,dsekai))
 
 # Clean
 
