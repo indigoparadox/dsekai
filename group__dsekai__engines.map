@@ -1,0 +1,8 @@
+<map id="Engines" name="Engines">
+<area shape="rect" id="Node000001" title="Central state and subsystem coordination." alt="" coords="5,104,73,130"/>
+<area shape="rect" id="Node000002" href="$group__dsekai__engines__config.html" title="Compile&#45;time options defining engine behaviors." alt="" coords="121,5,311,31"/>
+<area shape="rect" id="Node000005" href="$group__dsekai__engines__locking.html" title=" " alt="" coords="161,55,270,80"/>
+<area shape="rect" id="Node000004" href="$group__dsekai__engines__specific__struct.html" title="Structs containing information only used by certain engines." alt="" coords="142,104,290,130"/>
+<area shape="rect" id="Node000003" href="$group__dsekai__engines__transitions.html" title="Flags for specifying screen transitions." alt="" coords="152,153,280,179"/>
+<area shape="rect" id="Node000006" href="$group__dsekai__engines__types__sect.html" title=" " alt="" coords="167,203,265,228"/>
+</map>

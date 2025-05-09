@@ -1,0 +1,5 @@
+<map id="Mobile Object Flags" name="Mobile Object Flags">
+<area shape="rect" id="Node000002" href="$group__dsekai__mobiles.html" title="Player&#45; or script&#45;controlled world objects or &quot;mobiles&quot;." alt="" coords="5,13,113,38"/>
+<area shape="rect" id="Node000001" title="Flags controlling MOBILE object behavior." alt="" coords="161,13,296,38"/>
+<area shape="rect" id="Node000003" href="$group__dsekai__mobiles__flags__type.html" title="Types instructing the engine how to handle a MOBILE." alt="" coords="344,5,475,46"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="Crops" name="Crops">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,61,56"/>
+<area shape="rect" id="Node000003" href="$group__dsekai__crops__def__flags.html" title="Flags which affect all crops that share a CROP_DEF universally." alt="" coords="109,5,248,31"/>
+<area shape="rect" id="Node000002" href="$group__dsekai__crops__flags.html" title="Flags which affect an individual CROP_PLOT." alt="" coords="137,55,220,80"/>
+</map>

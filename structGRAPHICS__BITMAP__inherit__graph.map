@@ -1,0 +1,5 @@
+<map id="GRAPHICS_BITMAP" name="GRAPHICS_BITMAP">
+<area shape="rect" id="Node000001" title="Struct representing a bitmap on the current platform." alt="" coords="26,79,174,105"/>
+<area shape="rect" id="Node000002" href="$structGRAPHICS__BITMAP__BASE.html" title="Struct representing a bitmap. Should be overridden by platform." alt="" coords="5,5,195,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,46,103,79,97,79,97,46"/>
+</map>

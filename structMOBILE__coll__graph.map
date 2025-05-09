@@ -1,0 +1,5 @@
+<map id="MOBILE" name="MOBILE">
+<area shape="rect" id="Node000001" title="A moving/interactive object in the world." alt="" coords="40,94,112,120"/>
+<area shape="rect" id="Node000002" href="$structTILEMAP__COORDS.html" title="X/Y coordinates of a tile on the current map." alt="" coords="5,5,147,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,47,79,94,73,94,73,47"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="tmstruct.h" name="tmstruct.h">
+<area shape="rect" id="Node000001" title="Structs representing tilemaps and related objects." alt="" coords="5,5,85,31"/>
+<area shape="rect" id="Node000002" href="$dsekai_8h.html" title="Engine state data and main header, used in every engine file." alt="" coords="10,79,80,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="48,46,48,79,42,79,42,46"/>
+<area shape="rect" id="Node000003" href="$tmjson_8h.html" title="Constants and functions for populating a TILEMAP from json." alt="" coords="10,153,80,178"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="48,120,48,152,42,152,42,120"/>
+</map>

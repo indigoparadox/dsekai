@@ -1,0 +1,4 @@
+<map id="Mobile MP/HP" name="Mobile MP/HP">
+<area shape="rect" id="Node000002" href="$group__dsekai__mobiles.html" title="Player&#45; or script&#45;controlled world objects or &quot;mobiles&quot;." alt="" coords="5,5,113,31"/>
+<area shape="rect" id="Node000001" title="Details of how the MOBILE::mp_hp field works." alt="" coords="161,5,266,31"/>
+</map>

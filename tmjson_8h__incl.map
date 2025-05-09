@@ -1,0 +1,94 @@
+<map id="tmjson.h" name="tmjson.h">
+<area shape="rect" id="Node000001" title="Constants and functions for populating a TILEMAP from json." alt="" coords="1746,5,1816,31"/>
+<area shape="rect" id="Node000002" href="$dsekai_8h.html" title="Engine state data and main header, used in every engine file." alt="" coords="1746,79,1815,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1783,31,1783,63,1778,63,1778,31"/>
+<area shape="rect" id="Node000003" href="$unilayer_8h.html" title="Combines platform&#45;specific functionality and loads enablers in the correct order." alt="" coords="910,153,985,178"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1746,97,1443,110,1226,128,1001,155,1000,150,1226,122,1443,105,1746,91"/>
+<area shape="rect" id="Node000028" href="$gid_8h.html" title="Contains macros and typedefs for globally unique identifiers." alt="" coords="1008,153,1057,178"/>
+<area shape="poly" id="edge27_Node000002_Node000028" title=" " alt="" coords="1746,96,1635,99,1470,108,1275,125,1073,155,1072,150,1275,120,1470,102,1634,94,1745,91"/>
+<area shape="rect" id="Node000029" href="$src_2config_8h.html" title="Configuration settings defined at compile time." alt="" coords="1081,153,1147,178"/>
+<area shape="poly" id="edge28_Node000002_Node000029" title=" " alt="" coords="1746,97,1505,113,1337,130,1162,155,1162,150,1336,125,1505,107,1745,92"/>
+<area shape="rect" id="Node000030" href="$winids_8h_source.html" title=" " alt="" coords="1170,153,1239,178"/>
+<area shape="poly" id="edge29_Node000002_Node000030" title=" " alt="" coords="1746,98,1541,116,1401,132,1255,155,1254,150,1400,127,1541,111,1745,93"/>
+<area shape="rect" id="Node000031" href="$itstruct_8h.html" title="Structs pertaining to inventory objects." alt="" coords="1262,153,1334,178"/>
+<area shape="poly" id="edge30_Node000002_Node000031" title=" " alt="" coords="1746,99,1579,119,1349,155,1349,150,1578,114,1745,94"/>
+<area shape="rect" id="Node000032" href="$cropdef_8h_source.html" title=" " alt="" coords="1358,153,1432,178"/>
+<area shape="poly" id="edge31_Node000002_Node000032" title=" " alt="" coords="1746,101,1448,155,1447,149,1745,96"/>
+<area shape="rect" id="Node000033" href="$tmstruct_8h.html" title="Structs representing tilemaps and related objects." alt="" coords="1457,153,1536,178"/>
+<area shape="poly" id="edge32_Node000002_Node000033" title=" " alt="" coords="1746,104,1552,153,1551,148,1745,99"/>
+<area shape="rect" id="Node000035" href="$strpool_8h.html" title="Flexible storage for strings in small spaces." alt="" coords="1560,153,1630,178"/>
+<area shape="poly" id="edge34_Node000002_Node000035" title=" " alt="" coords="1750,108,1642,149,1640,144,1748,103"/>
+<area shape="rect" id="Node000036" href="$script_8h.html" title="Functions and macros for executing in&#45;world behavior." alt="" coords="1654,153,1718,178"/>
+<area shape="poly" id="edge35_Node000002_Node000036" title=" " alt="" coords="1766,107,1716,145,1712,141,1763,103"/>
+<area shape="rect" id="Node000037" href="$scparse_8h_source.html" title=" " alt="" coords="1742,153,1819,178"/>
+<area shape="poly" id="edge37_Node000002_Node000037" title=" " alt="" coords="1783,105,1783,137,1778,137,1778,105"/>
+<area shape="rect" id="Node000038" href="$tilemap_8h.html" title="Functions and macros pertaining to tilemaps." alt="" coords="1844,153,1917,178"/>
+<area shape="poly" id="edge38_Node000002_Node000038" title=" " alt="" coords="1799,103,1853,141,1850,145,1796,107"/>
+<area shape="rect" id="Node000039" href="$mobile_8h.html" title="Structs, functions and macros pertaining to interactive objects." alt="" coords="1942,153,2011,178"/>
+<area shape="poly" id="edge39_Node000002_Node000039" title=" " alt="" coords="1815,103,1930,144,1928,150,1813,108"/>
+<area shape="rect" id="Node000040" href="$item_8h.html" title="Definitions, functions, and macros pertaining to inventory objects." alt="" coords="2035,153,2092,178"/>
+<area shape="poly" id="edge40_Node000002_Node000040" title=" " alt="" coords="1816,99,2021,149,2019,154,1815,104"/>
+<area shape="rect" id="Node000041" href="$menu_8h_source.html" title=" " alt="" coords="2116,153,2179,178"/>
+<area shape="poly" id="edge41_Node000002_Node000041" title=" " alt="" coords="1816,96,1938,117,2101,150,2100,155,1937,122,1815,101"/>
+<area shape="rect" id="Node000042" href="$crop_8h_source.html" title=" " alt="" coords="2203,153,2260,178"/>
+<area shape="poly" id="edge42_Node000002_Node000042" title=" " alt="" coords="1816,94,1973,113,2079,129,2188,150,2187,155,2078,134,1973,118,1815,99"/>
+<area shape="rect" id="Node000043" href="$pathfind_8h.html" title=" " alt="" coords="2284,153,2360,178"/>
+<area shape="poly" id="edge43_Node000002_Node000043" title=" " alt="" coords="1816,94,2005,113,2134,129,2269,150,2268,155,2133,134,2005,118,1816,99"/>
+<area shape="rect" id="Node000044" href="$tmasn_8h.html" title="Definitions and functions for reading an ASN.1&#45;formatted TILEMAP." alt="" coords="2384,153,2452,178"/>
+<area shape="poly" id="edge44_Node000002_Node000044" title=" " alt="" coords="1816,92,2045,109,2204,126,2369,150,2369,155,2203,131,2045,114,1816,98"/>
+<area shape="rect" id="Node000045" href="$serial_8h.html" title="Functions for (de)serializing engine structs to save states." alt="" coords="2476,153,2538,178"/>
+<area shape="poly" id="edge45_Node000002_Node000045" title=" " alt="" coords="1816,91,2080,106,2267,123,2461,150,2461,155,2266,129,2080,111,1816,97"/>
+<area shape="rect" id="Node000046" href="$engines_8h.html" title="Macros, structs, and prototypes for the various engine types." alt="" coords="2562,153,2639,178"/>
+<area shape="poly" id="edge46_Node000002_Node000046" title=" " alt="" coords="1816,91,2113,106,2326,123,2547,150,2547,155,2325,128,2113,111,1816,97"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="147,226,214,252"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="909,171,630,185,434,202,230,229,229,224,434,197,630,180,909,165"/>
+<area shape="rect" id="Node000005" href="$platform_8h.html" title="Contains platform&#45;specific overrides and implementations for engine functionality." alt="" coords="239,226,317,252"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="909,171,670,189,505,205,333,229,333,223,504,200,670,183,909,166"/>
+<area shape="rect" id="Node000012" href="$unilayer_2src_2config_8h.html" title="Overridable defines to modify Unilayer behavior." alt="" coords="341,226,407,252"/>
+<area shape="poly" id="edge11_Node000003_Node000012" title=" " alt="" coords="909,172,705,190,566,206,422,229,421,223,566,201,704,184,909,167"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="430,226,504,252"/>
+<area shape="poly" id="edge12_Node000003_Node000013" title=" " alt="" coords="909,174,744,194,520,229,519,223,744,188,909,168"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="528,226,596,252"/>
+<area shape="poly" id="edge13_Node000003_Node000014" title=" " alt="" coords="910,175,781,196,611,228,610,223,781,191,909,170"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="620,226,686,252"/>
+<area shape="poly" id="edge14_Node000003_Node000015" title=" " alt="" coords="910,178,702,228,700,223,909,173"/>
+<area shape="rect" id="Node000016" href="$memory_8h.html" title="Functions and prototypes for managing memory." alt="" coords="710,226,787,252"/>
+<area shape="poly" id="edge15_Node000003_Node000016" title=" " alt="" coords="915,181,798,223,796,218,913,176"/>
+<area shape="rect" id="Node000017" href="$resource_8h.html" title="Platform&#45;general function prototypes for loading assets." alt="" coords="812,226,893,252"/>
+<area shape="poly" id="edge16_Node000003_Node000017" title=" " alt="" coords="933,181,882,219,879,215,930,177"/>
+<area shape="rect" id="Node000018" href="$graphics_8h.html" title="Platform&#45;general abstractions for graphics." alt="" coords="918,226,998,252"/>
+<area shape="poly" id="edge17_Node000003_Node000018" title=" " alt="" coords="952,178,957,211,951,211,946,179"/>
+<area shape="rect" id="Node000019" href="$animate_8h.html" title="Tools for making common animations and effects." alt="" coords="1022,226,1099,252"/>
+<area shape="poly" id="edge18_Node000003_Node000019" title=" " alt="" coords="968,177,1030,215,1027,220,965,181"/>
+<area shape="rect" id="Node000020" title=" " alt="" coords="1123,226,1182,252"/>
+<area shape="poly" id="edge19_Node000003_Node000020" title=" " alt="" coords="983,176,1109,220,1107,225,981,181"/>
+<area shape="rect" id="Node000021" href="$dio_8h.html" title="General abstractions for common stdlib&#45;related tasks." alt="" coords="1206,226,1254,252"/>
+<area shape="poly" id="edge20_Node000003_Node000021" title=" " alt="" coords="986,173,1191,223,1190,228,985,178"/>
+<area shape="rect" id="Node000023" href="$json_8h_source.html" title=" " alt="" coords="1278,226,1334,252"/>
+<area shape="poly" id="edge22_Node000003_Node000023" title=" " alt="" coords="986,173,997,176,1129,198,1263,223,1262,229,1128,204,996,181,985,179"/>
+<area shape="rect" id="Node000025" href="$asn_8h.html" title="Functions and macros for dealing with ASN.1 formatted data." alt="" coords="1357,226,1410,252"/>
+<area shape="poly" id="edge24_Node000003_Node000025" title=" " alt="" coords="986,173,997,176,1093,190,1169,198,1245,206,1342,223,1341,228,1244,211,1168,203,1092,195,996,181,985,179"/>
+<area shape="rect" id="Node000026" title=" " alt="" coords="1434,226,1493,252"/>
+<area shape="poly" id="edge25_Node000003_Node000026" title=" " alt="" coords="986,174,997,176,1114,192,1207,198,1300,206,1419,223,1418,229,1300,211,1206,204,1113,197,996,181,985,179"/>
+<area shape="rect" id="Node000027" href="$window_8h.html" title="Tools for drawing and interacting with graphical windows on&#45;screen." alt="" coords="1518,226,1593,252"/>
+<area shape="poly" id="edge26_Node000003_Node000027" title=" " alt="" coords="986,174,997,176,1137,193,1248,200,1360,206,1503,224,1502,229,1359,212,1247,205,1136,199,996,181,985,179"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,300,79,326"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="239,255,95,298,93,293,238,250"/>
+<area shape="rect" id="Node000007" href="$fakem_8h.html" title="Platform&#45;overridden typedefs and macros for handling memory." alt="" coords="103,300,221,326"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="260,255,196,294,193,289,257,250"/>
+<area shape="rect" id="Node000008" href="$resinc_8h.html" title="Determines which resource&#45;loading system to use at compile." alt="" coords="245,300,311,326"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="281,252,281,284,275,284,275,252"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="335,300,421,326"/>
+<area shape="poly" id="edge9_Node000005_Node000010" title=" " alt="" coords="297,250,350,288,347,293,293,255"/>
+<area shape="rect" id="Node000011" href="$nullg_8h.html" title="Platform&#45;overridden typedefs and macros for drawing graphics." alt="" coords="445,300,556,326"/>
+<area shape="poly" id="edge10_Node000005_Node000011" title=" " alt="" coords="317,250,449,292,448,297,315,255"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="227,374,329,399"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="281,326,281,358,275,358,275,326"/>
+<area shape="rect" id="Node000022" title=" " alt="" coords="1196,300,1256,326"/>
+<area shape="poly" id="edge21_Node000021_Node000022" title=" " alt="" coords="1232,252,1230,285,1225,284,1227,252"/>
+<area shape="rect" id="Node000024" title=" " alt="" coords="1280,300,1340,326"/>
+<area shape="poly" id="edge23_Node000023_Node000024" title=" " alt="" coords="1309,252,1311,284,1306,285,1304,252"/>
+<area shape="rect" id="Node000034" href="$scstruct_8h.html" title="Structs representing behavior scripts." alt="" coords="1638,226,1716,252"/>
+<area shape="poly" id="edge33_Node000033_Node000034" title=" " alt="" coords="1528,176,1633,218,1631,223,1526,181"/>
+<area shape="poly" id="edge36_Node000036_Node000034" title=" " alt="" coords="1687,179,1683,211,1678,211,1682,178"/>
+</map>

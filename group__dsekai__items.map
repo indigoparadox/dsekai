@@ -1,0 +1,6 @@
+<map id="Items" name="Items">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,60,80"/>
+<area shape="rect" id="Node000002" href="$group__dsekai__items__errors.html" title=" " alt="" coords="134,5,218,31"/>
+<area shape="rect" id="Node000004" href="$group__dsekai__items__flags.html" title="Flags which affect an individual ITEM." alt="" coords="135,55,217,80"/>
+<area shape="rect" id="Node000003" href="$group__dsekai__items__use.html" title="Definitions and callbacks pertaining to ITEM use in&#45;world." alt="" coords="108,104,244,130"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="platform.h" name="platform.h">
+<area shape="rect" id="Node000001" title="Contains platform&#45;specific overrides and implementations for engine functionality." alt="" coords="239,5,317,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,79,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="239,34,95,77,93,72,238,29"/>
+<area shape="rect" id="Node000003" href="$fakem_8h.html" title="Platform&#45;overridden typedefs and macros for handling memory." alt="" coords="103,79,221,105"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="260,34,196,73,193,68,257,29"/>
+<area shape="rect" id="Node000004" href="$resinc_8h.html" title="Determines which resource&#45;loading system to use at compile." alt="" coords="245,79,311,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="281,31,281,63,275,63,275,31"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="335,79,421,105"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="297,29,350,67,347,72,293,34"/>
+<area shape="rect" id="Node000007" href="$nullg_8h.html" title="Platform&#45;overridden typedefs and macros for drawing graphics." alt="" coords="445,79,556,105"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="317,29,449,71,448,76,315,34"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="227,153,329,178"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="281,105,281,137,275,137,275,105"/>
+</map>

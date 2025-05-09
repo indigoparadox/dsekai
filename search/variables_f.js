@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['screen_5fpx_0',['screen_px',['../structMOBILE.html#aada919171c70df3474135a2f91100ec2',1,'MOBILE']]],
+  ['screen_5fpy_1',['screen_py',['../structMOBILE.html#a1838394003d20aec85fd22511e5e3fca',1,'MOBILE']]],
+  ['screen_5fscroll_5ftx_2',['screen_scroll_tx',['../structTOPDOWN__STATE.html#ae157c6abe3382e01ac4819038d6f5f6d',1,'TOPDOWN_STATE']]],
+  ['screen_5fscroll_5fty_3',['screen_scroll_ty',['../structTOPDOWN__STATE.html#afb2783cfb9d65c4605b8117fc956a541',1,'TOPDOWN_STATE']]],
+  ['screen_5fscroll_5fx_4',['screen_scroll_x',['../structTOPDOWN__STATE.html#adffc25c526e40296a2a0ee7ae73a1eba',1,'TOPDOWN_STATE']]],
+  ['screen_5fscroll_5fx_5ftgt_5',['screen_scroll_x_tgt',['../structTOPDOWN__STATE.html#a2844520e9a307ccefc0ade260c484b01',1,'TOPDOWN_STATE']]],
+  ['screen_5fscroll_5fy_6',['screen_scroll_y',['../structTOPDOWN__STATE.html#a12b696723d1770d0b784a883d38f8529',1,'TOPDOWN_STATE']]],
+  ['screen_5fscroll_5fy_5ftgt_7',['screen_scroll_y_tgt',['../structTOPDOWN__STATE.html#a69cd37e4c30ee96316c7fcc82327a813',1,'TOPDOWN_STATE']]],
+  ['script_5fid_8',['script_id',['../structMOBILE.html#a007bf32467e09635ca467c97101725c5',1,'MOBILE::script_id'],['../structTILEMAP__SPAWN.html#a15c9e5582b1d6985f385981a78e91462',1,'TILEMAP_SPAWN::script_id']]],
+  ['script_5fpc_9',['script_pc',['../structMOBILE.html#a04ab56441265f178bfc42ff77a71029a',1,'MOBILE']]],
+  ['script_5fstack_10',['script_stack',['../structMOBILE.html#a028311ca809b50d9d9cceebe03aabf85',1,'MOBILE']]],
+  ['script_5fwait_5fframes_11',['script_wait_frames',['../structMOBILE.html#af455aafb73a45870dc33bbd3855e4849',1,'MOBILE']]],
+  ['selected_5ftile_12',['selected_tile',['../structEDITOR__STATE.html#a68b9f1b1bd3213eb704af24a2691620b',1,'EDITOR_STATE']]],
+  ['spawner_5fgid_13',['spawner_gid',['../structMOBILE.html#ab5bc2234881e9b8876f01e2731e9688c',1,'MOBILE']]],
+  ['spawns_14',['spawns',['../structTILEMAP.html#aec3e203dfdc28be974de2493dc501195',1,'TILEMAP']]],
+  ['sprite_5fcache_5fid_15',['sprite_cache_id',['../structITEM.html#a3921d43c6182719d356ceffb397425d0',1,'ITEM::sprite_cache_id'],['../structMOBILE.html#a5c048ad64c8505e4ea2c7b64ba14170f',1,'MOBILE::sprite_cache_id']]],
+  ['sprite_5fname_16',['sprite_name',['../group__dsekai__crops.html#ga36959e488205c2af17cc1ba5b51731b6',1,'CROP_DEF::sprite_name'],['../structTILEMAP__SPAWN.html#a3c8ae22357c9d46b3f90d151f92725a0',1,'TILEMAP_SPAWN::sprite_name']]],
+  ['steps_17',['steps',['../structSCRIPT.html#a33991be896923736d9df0d8626737c40',1,'SCRIPT']]],
+  ['steps_5fcount_18',['steps_count',['../structSCRIPT.html#aef91f66346f8c3188d3822508b715822',1,'SCRIPT']]],
+  ['steps_5fremaining_19',['steps_remaining',['../structMOBILE.html#a1573fe1893c29c9f73d63d9d98631da2',1,'MOBILE']]],
+  ['strpool_20',['strpool',['../structTILEMAP.html#a8cef765802fecf60a5fb8c57648f9afa',1,'TILEMAP']]]
+];

@@ -1,0 +1,5 @@
+<map id="PATHFIND_NODE" name="PATHFIND_NODE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="10,94,142,120"/>
+<area shape="rect" id="Node000002" href="$structTILEMAP__COORDS.html" title="X/Y coordinates of a tile on the current map." alt="" coords="5,5,147,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,47,79,94,73,94,73,47"/>
+</map>

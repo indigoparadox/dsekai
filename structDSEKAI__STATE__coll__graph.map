@@ -1,0 +1,34 @@
+<map id="DSEKAI_STATE" name="DSEKAI_STATE">
+<area shape="rect" id="Node000001" title="General/shared state of the running engine in memory." alt="" coords="405,346,523,372"/>
+<area shape="rect" id="Node000002" href="$structFAKE__MEMORY__HANDLE.html" title="An emulated memory handle for modern systems. Overridden on most platforms." alt="" coords="5,196,187,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,236,118,281,131,302,149,320,168,330,194,337,261,348,404,355,404,361,261,353,193,342,166,335,146,324,127,306,113,283,98,237"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="204,200,213,208,205,216,188,220,187,215,203,212,208,208,201,204"/>
+<area shape="rect" id="Node000003" href="$structITEM.html" title="An instance of an item in the world." alt="" coords="523,94,576,120"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="546,135,523,220,486,323,474,347,469,344,482,321,518,219,541,134"/>
+<area shape="rect" id="Node000004" href="$structTILEMAP.html" title="Information pertaining to in&#45;game world currently loaded." alt="" coords="642,196,720,221"/>
+<area shape="poly" id="edge10_Node000004_Node000003" title=" " alt="" coords="566,131,580,150,598,167,620,182,644,193,642,197,618,186,594,171,576,154,562,134"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="664,235,623,280,596,304,567,325,540,338,513,348,511,343,538,333,564,320,592,300,619,276,661,231"/>
+<area shape="rect" id="Node000005" href="$structTILESET__TILE.html" title="Tile prototype stored in TILEMAP::tileset." alt="" coords="717,94,827,120"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="761,135,735,171,703,197,700,193,731,168,757,132"/>
+<area shape="rect" id="Node000006" href="$structTILEMAP__SPAWN.html" title="Defines a spawner to create mobiles in the world." alt="" coords="850,94,984,120"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="884,130,797,172,722,198,720,193,795,167,881,125"/>
+<area shape="rect" id="Node000007" href="$structTILEMAP__COORDS.html" title="X/Y coordinates of a tile on the current map." alt="" coords="345,5,487,31"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="502,32,850,91,849,97,501,37"/>
+<area shape="rect" id="Node000011" href="$structMOBILE.html" title="A moving/interactive object in the world." alt="" coords="224,144,296,169"/>
+<area shape="poly" id="edge13_Node000011_Node000007" title=" " alt="" coords="360,40,330,57,309,78,291,102,267,145,263,142,287,100,305,75,327,53,357,35"/>
+<area shape="rect" id="Node000012" href="$structCROP__PLOT.html" title=" " alt="" coords="302,144,402,169"/>
+<area shape="poly" id="edge15_Node000012_Node000007" title=" " alt="" coords="394,44,386,56,366,104,357,144,351,143,361,102,381,54,390,41"/>
+<area shape="rect" id="Node000013" href="$structEDITOR__STATE.html" title=" " alt="" coords="409,144,527,169"/>
+<area shape="poly" id="edge17_Node000013_Node000007" title=" " alt="" coords="428,45,466,142,461,144,423,46"/>
+<area shape="rect" id="Node000008" href="$structSCRIPT.html" title="Contains immutable state for scripts attached to a TILEMAP." alt="" coords="1008,94,1077,120"/>
+<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="1008,129,960,152,905,172,857,182,819,186,781,189,732,196,722,198,720,193,732,191,780,183,818,181,856,177,903,167,958,147,1006,125"/>
+<area shape="rect" id="Node000009" href="$structSCRIPT__STEP.html" title="Contains a single instruction in a script, in SCRIPT::steps." alt="" coords="988,5,1098,31"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="1045,47,1045,94,1040,94,1040,47"/>
+<area shape="rect" id="Node000010" href="$structCROP__DEF.html" title="Definition of a crop to be stored with the TILEMAP on which the crop may be grown." alt="" coords="603,94,693,120"/>
+<area shape="poly" id="edge11_Node000004_Node000010" title=" " alt="" coords="659,134,680,195,675,196,654,135"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="278,181,328,248,362,286,399,320,437,344,435,348,396,324,358,290,324,251,274,184"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="368,182,460,344,455,347,364,184"/>
+<area shape="poly" id="edge16_Node000001_Node000013" title=" " alt="" coords="470,185,467,346,462,346,465,185"/>
+<area shape="rect" id="Node000014" href="$structMENU__STATE.html" title=" " alt="" coords="744,196,853,221"/>
+<area shape="poly" id="edge18_Node000001_Node000014" title=" " alt="" coords="786,236,751,282,727,306,700,325,668,336,623,345,524,356,524,351,622,339,667,331,697,320,724,302,747,279,782,233"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="Unilayer Graphics Cache" name="Unilayer Graphics Cache">
+<area shape="rect" id="Node000002" href="$group__unilayer__graphics.html" title="Simple abstract unified graphics drawing layer designed for resource&#45;constrained systems." alt="" coords="5,5,164,31"/>
+<area shape="rect" id="Node000001" title="Interface to cache that holds/deduplicates sprites and tiles." alt="" coords="212,5,375,31"/>
+</map>

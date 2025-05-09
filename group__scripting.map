@@ -1,0 +1,7 @@
+<map id="Scripting" name="Scripting">
+<area shape="rect" id="Node000002" href="$group__script__args.html" title="Immediate arguments for script instructions." alt="" coords="138,5,257,46"/>
+<area shape="rect" id="Node000001" title="Control mobile behavior and interaction." alt="" coords="5,96,78,121"/>
+<area shape="rect" id="Node000005" href="$group__scripting__compiler.html" title=" " alt="" coords="143,70,252,96"/>
+<area shape="rect" id="Node000004" href="$group__scripting__instructions__sect.html" title="Overview of the mobile scripting language." alt="" coords="126,120,269,145"/>
+<area shape="rect" id="Node000003" href="$group__scripting__interactions.html" title="Details on scripting interactions with MOBILE actors." alt="" coords="126,169,269,194"/>
+</map>

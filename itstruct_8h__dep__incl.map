@@ -1,0 +1,7 @@
+<map id="itstruct.h" name="itstruct.h">
+<area shape="rect" id="Node000001" title="Structs pertaining to inventory objects." alt="" coords="5,5,77,31"/>
+<area shape="rect" id="Node000002" href="$dsekai_8h.html" title="Engine state data and main header, used in every engine file." alt="" coords="6,79,76,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="44,46,44,79,38,79,38,46"/>
+<area shape="rect" id="Node000003" href="$tmjson_8h.html" title="Constants and functions for populating a TILEMAP from json." alt="" coords="6,153,76,178"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="44,120,44,152,38,152,38,120"/>
+</map>

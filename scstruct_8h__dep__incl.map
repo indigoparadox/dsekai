@@ -1,0 +1,12 @@
+<map id="scstruct.h" name="scstruct.h">
+<area shape="rect" id="Node000001" title="Structs representing behavior scripts." alt="" coords="46,5,124,31"/>
+<area shape="rect" id="Node000002" href="$script_8h.html" title="Functions and macros for executing in&#45;world behavior." alt="" coords="5,79,69,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,45,47,80,43,77,66,42"/>
+<area shape="rect" id="Node000005" href="$tmstruct_8h.html" title="Structs representing tilemaps and related objects." alt="" coords="93,79,173,105"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="104,42,127,77,123,80,99,45"/>
+<area shape="rect" id="Node000003" href="$dsekai_8h.html" title="Engine state data and main header, used in every engine file." alt="" coords="50,153,120,178"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="56,116,79,151,75,154,51,119"/>
+<area shape="rect" id="Node000004" href="$tmjson_8h.html" title="Constants and functions for populating a TILEMAP from json." alt="" coords="50,226,120,252"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="88,194,88,226,82,226,82,194"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="119,119,95,154,91,151,114,116"/>
+</map>

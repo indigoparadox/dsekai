@@ -1,0 +1,17 @@
+<map id="TILEMAP" name="TILEMAP">
+<area shape="rect" id="Node000001" title="Information pertaining to in&#45;game world currently loaded." alt="" coords="292,183,370,208"/>
+<area shape="rect" id="Node000002" href="$structTILESET__TILE.html" title="Tile prototype stored in TILEMAP::tileset." alt="" coords="5,94,115,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,122,215,156,292,180,290,185,213,161,110,128"/>
+<area shape="rect" id="Node000003" href="$structTILEMAP__SPAWN.html" title="Defines a spawner to create mobiles in the world." alt="" coords="138,94,272,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,127,279,156,314,180,311,184,276,161,233,131"/>
+<area shape="rect" id="Node000004" href="$structTILEMAP__COORDS.html" title="X/Y coordinates of a tile on the current map." alt="" coords="123,5,264,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="200,46,206,93,201,94,194,47"/>
+<area shape="rect" id="Node000005" href="$structSCRIPT.html" title="Contains immutable state for scripts attached to a TILEMAP." alt="" coords="296,94,365,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="333,135,333,182,328,182,328,135"/>
+<area shape="rect" id="Node000006" href="$structSCRIPT__STEP.html" title="Contains a single instruction in a script, in SCRIPT::steps." alt="" coords="288,5,398,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="342,47,335,94,330,93,336,46"/>
+<area shape="rect" id="Node000007" href="$structITEM.html" title="An instance of an item in the world." alt="" coords="390,94,442,120"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="402,134,381,161,351,184,348,180,377,157,398,131"/>
+<area shape="rect" id="Node000008" href="$structCROP__DEF.html" title="Definition of a crop to be stored with the TILEMAP on which the crop may be grown." alt="" coords="467,94,557,120"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="493,133,457,161,414,179,371,190,370,185,412,174,455,156,490,129"/>
+</map>
