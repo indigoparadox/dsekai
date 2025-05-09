@@ -21,6 +21,8 @@
 
 ![Overworld Screenshot](screens/overwrld.png)
 
+**dsekai has been superceded by the [numoon](https://codeberg.org/indigoparadox/numoon/) project, which is based on maug. Not all of the features are there yet, but that framework is structured in a way that affords a lot more flexibility and code-sharing between related projects. Please look there for updates!**
+
 dsekai is an extremely minimal world engine, intended to run on very old hardware. It is originally targeted to the 8086/8088 CPU with the intention to make it more portable later. See below for a list of supported platforms.
 
 This project is being built around/in tandem with the unilayer project, in order to create a somewhat-universal framework/library for games on legacy/weird platforms.
